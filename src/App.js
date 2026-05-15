@@ -3,7 +3,10 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+  GoogleAuthProvider,
+signInWithPopup
 } from "firebase/auth";
 import React, { useState } from 'react';
 import './style.css';
@@ -13,6 +16,7 @@ export default function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
+  const provider = new GoogleAuthProvider();
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -41,6 +45,27 @@ export default function App() {
     try {
       await signOut(auth);
       alert("Logged out successfully");
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+  const handleGoogleLogin = async () => {
+    try {
+      await signInWithPopup(auth, provider);
+      alert("Google Login Successful ✅");
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+  const handleForgotPassword = async () => {
+    if (!email) {
+      alert("Please enter your email first");
+      return;
+    }
+  
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert("Password reset email sent 📩");
     } catch (error) {
       alert(error.message);
     }
@@ -471,7 +496,8 @@ export default function App() {
           </div>
         </div>
       </section>
-      <section className="studentDashboard">
+      {user && (
+<section className="studentDashboard">
         <div className="dashboardSidebar">
           <h3>Dashboard</h3>
           {user && <p className="userEmail">Welcome, {user.email}</p>}
@@ -533,6 +559,7 @@ export default function App() {
           </div>
         </div>
       </section>
+      )}
       <section id="notes">
         <h2>Free Notes</h2>
 
@@ -542,6 +569,7 @@ export default function App() {
           <div className="course">📘 Inclusive Education</div>
         </div>
       </section>
+    
       <section id="pricing" className="pricingPro">
         <h2>Choose Your Learning Plan</h2>
 
@@ -625,7 +653,8 @@ export default function App() {
         </div>
       </section>
       {/* <MockTestApp /> */}
-      <section className="dashboard" id="dashboard">
+      {user && (
+<section className="dashboard" id="dashboard">
         <div>
           <span className="badge">Student Dashboard</span>
           <h2>Your Learning Command Center</h2>
@@ -646,6 +675,7 @@ export default function App() {
           <div>🏅 Certificates</div>
         </div>
       </section>
+      )}
       <section className="testimonials">
         <h2>Student Reviews</h2>
 
@@ -731,7 +761,12 @@ export default function App() {
     />
 
     <button onClick={handleLogin}>Login</button>
-
+    <button className="googleBtn" onClick={handleGoogleLogin}>
+  Continue with Google
+</button>
+    <p className="forgotPassword" onClick={handleForgotPassword}>
+  Forgot Password?
+</p>
     <p>
       New student?{" "}
       <span onClick={handleRegister}>Create Account</span>
