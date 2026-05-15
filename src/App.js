@@ -54,6 +54,8 @@ const [enquiries, setEnquiries] = useState([]);
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      setStudents([]);
+setEnquiries([]);
       alert("Logged out successfully");
     } catch (error) {
       alert(error.message);
