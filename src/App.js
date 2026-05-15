@@ -81,19 +81,8 @@ const [enquiries, setEnquiries] = useState([]);
     }
   };
   const handleContactSubmit = async () => {
-    const loadAdminData = async () => {
-      try {
-        const studentsSnap = await getDocs(collection(db, "students"));
-        const enquiriesSnap = await getDocs(collection(db, "enquiries"));
-    
-        setStudents(studentsSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-        setEnquiries(enquiriesSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-    
-        alert("Admin data loaded ✅");
-      } catch (error) {
-        alert(error.message);
-      }
-    };
+   
+   
     if (!fullName || !mobile || !contactEmail) {
       alert("Please fill all contact details");
       return;
@@ -112,6 +101,30 @@ const [enquiries, setEnquiries] = useState([]);
       setFullName("");
       setMobile("");
       setContactEmail("");
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+  const loadAdminData = async () => {
+    try {
+      const studentsSnap = await getDocs(collection(db, "students"));
+      const enquiriesSnap = await getDocs(collection(db, "enquiries"));
+  
+      setStudents(
+        studentsSnap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+      );
+  
+      setEnquiries(
+        enquiriesSnap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+      );
+  
+      alert("Admin data loaded ✅");
     } catch (error) {
       alert(error.message);
     }
