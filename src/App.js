@@ -1,8 +1,31 @@
+import { auth } from "./firebase";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword
+} from "firebase/auth";
 import React, { useState } from 'react';
 import './style.css';
 export default function App() {
   const [selectedCourse, setSelectedCourse] = useState(null);
-
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const handleRegister = async () => {
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      alert("Account Created Successfully 🚀");
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+  
+  const handleLogin = async () => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      alert("Login Successful ✅");
+    } catch (error) {
+      alert(error.message);
+    }
+  };
   const courseDetails = {
     paper1: {
       title: 'CTET Paper I',
@@ -684,7 +707,7 @@ export default function App() {
 
             <p>📞 +91 XXXXX XXXXX</p>
 
-            <p>📧 aspirenestplatform@gmail.com</p>
+            <p>📧 aspirenestacademy@gmail.com</p>
 
             <p>📍 India</p>
           </div>
@@ -694,16 +717,34 @@ export default function App() {
           © 2026 AspireNest Academy • All Rights Reserved
         </div>
         <section id="login" className="loginSection">
-          <h2>Student Login</h2>
+          <h2><input
+  type="email"
+  placeholder="Enter Email"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+/>
+
+<input
+  type="password"
+  placeholder="Enter Password"
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+/>
+
+<button onClick={handleLogin}>Login</button>
+
+<p>
+  New student? <span onClick={handleRegister}>Create Account</span>
+</p></h2>
 
           <div className="loginBox">
             <input type="text" placeholder="Enter Email" />
             <input type="password" placeholder="Enter Password" />
 
-            <button>Login</button>
+            <button onClick={handleLogin}>Login</button>
 
             <p>
-              New student? <span>Create Account</span>
+            New student? <span onClick={handleRegister}>Create Account</span>
             </p>
           </div>
         </section>
