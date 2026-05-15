@@ -1,4 +1,4 @@
-import { auth } from "./firebase";
+import { auth, db } from "./firebase";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -8,6 +8,7 @@ import {
   GoogleAuthProvider,
 signInWithPopup
 } from "firebase/auth";
+import { collection, addDoc } from "firebase/firestore";
 import React, { useState } from 'react';
 import './style.css';
 export default function App() {
@@ -27,6 +28,10 @@ export default function App() {
   const handleRegister = async () => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
+      await addDoc(collection(db, "students"), {
+        email: email,
+        createdAt: new Date()
+      });
       alert("Account Created Successfully 🚀");
     } catch (error) {
       alert(error.message);
