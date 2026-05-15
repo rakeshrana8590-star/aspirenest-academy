@@ -8,7 +8,7 @@ import {
   GoogleAuthProvider,
 signInWithPopup
 } from "firebase/auth";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs } from "firebase/firestore";
 import React, { useState } from 'react';
 import './style.css';
 export default function App() {
@@ -20,6 +20,8 @@ export default function App() {
 const [mobile, setMobile] = useState("");
 const [contactEmail, setContactEmail] = useState("");
   const [user, setUser] = useState(null);
+  const [students, setStudents] = useState([]);
+const [enquiries, setEnquiries] = useState([]);
   const provider = new GoogleAuthProvider();
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -79,6 +81,19 @@ const [contactEmail, setContactEmail] = useState("");
     }
   };
   const handleContactSubmit = async () => {
+    const loadAdminData = async () => {
+      try {
+        const studentsSnap = await getDocs(collection(db, "students"));
+        const enquiriesSnap = await getDocs(collection(db, "enquiries"));
+    
+        setStudents(studentsSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+        setEnquiries(enquiriesSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+    
+        alert("Admin data loaded ✅");
+      } catch (error) {
+        alert(error.message);
+      }
+    };
     if (!fullName || !mobile || !contactEmail) {
       alert("Please fill all contact details");
       return;
@@ -546,6 +561,9 @@ const [contactEmail, setContactEmail] = useState("");
             <button className="logoutBtn" onClick={handleLogout}>
   Logout
 </button>
+<button className="logoutBtn" onClick={loadAdminData}>
+  Load Admin Data
+</button>
           </ul>
         </div>
 
@@ -587,6 +605,15 @@ const [contactEmail, setContactEmail] = useState("");
               <h3>Achievements</h3>
               <p>🔥 7-Day Study Streak Active</p>
             </div>
+            <div className="dashboardCard">
+  <h3>Total Students</h3>
+  <p>{students.length}</p>
+</div>
+
+<div className="dashboardCard">
+  <h3>Total Enquiries</h3>
+  <p>{enquiries.length}</p>
+</div>
           </div>
         </div>
       </section>
