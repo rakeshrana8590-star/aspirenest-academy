@@ -20,6 +20,7 @@ export default function App() {
 const [mobile, setMobile] = useState("");
 const [contactEmail, setContactEmail] = useState("");
   const [user, setUser] = useState(null);
+  const adminEmail = "aspirenestplatform@gmail.com";
   const [students, setStudents] = useState([]);
 const [enquiries, setEnquiries] = useState([]);
   const provider = new GoogleAuthProvider();
@@ -576,9 +577,11 @@ setEnquiries([]);
             <button className="logoutBtn" onClick={handleLogout}>
   Logout
 </button>
-<button className="logoutBtn" onClick={loadAdminData}>
-  Load Admin Data
-</button>
+{user?.email === adminEmail && (
+  <button className="logoutBtn" onClick={loadAdminData}>
+    Load Admin Data
+  </button>
+)}
           </ul>
         </div>
 
@@ -620,15 +623,19 @@ setEnquiries([]);
               <h3>Achievements</h3>
               <p>🔥 7-Day Study Streak Active</p>
             </div>
-            <div className="dashboardCard">
-  <h3>Total Students</h3>
-  <p>{students.length}</p>
-</div>
+            {user?.email === adminEmail && (
+  <>
+    <div className="dashboardCard">
+      <h3>Total Students</h3>
+      <p>{students.length}</p>
+    </div>
 
-<div className="dashboardCard">
-  <h3>Total Enquiries</h3>
-  <p>{enquiries.length}</p>
-</div>
+    <div className="dashboardCard">
+      <h3>Total Enquiries</h3>
+      <p>{enquiries.length}</p>
+    </div>
+  </>
+)}
           </div>
         </div>
       </section>
