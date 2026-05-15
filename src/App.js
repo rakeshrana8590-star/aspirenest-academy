@@ -6,6 +6,7 @@ import {
 import React, { useState } from 'react';
 import './style.css';
 export default function App() {
+  const [darkMode, setDarkMode] = React.useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -52,7 +53,7 @@ export default function App() {
     },
   };
   return (
-    <div className="app">
+    <div className={darkMode ? "app dark" : "app"}>
       {selectedCourse && (
         <div className="coursePopup">
           <div className="popupContent">
@@ -100,6 +101,12 @@ export default function App() {
 
           <a href="#contact">Contact</a>
           <a href="#login">Login</a>
+          <button
+  className="themeBtn"
+  onClick={() => setDarkMode(!darkMode)}
+>
+  {darkMode ? "☀️" : "🌙"}
+</button>
         </nav>
       </header>
       <section className="hero">
@@ -748,6 +755,39 @@ export default function App() {
             </p>
           </div>
         </section>
+        <section className="testimonials">
+
+  <h2>What Students Say</h2>
+
+  <div className="testimonialGrid">
+
+    <div className="testimonialCard">
+      <p>
+        “Best platform for CTET preparation. Visual learning makes concepts super easy.”
+      </p>
+
+      <h4>— Priya Sharma</h4>
+    </div>
+
+    <div className="testimonialCard">
+      <p>
+        “Premium UI and amazing notes. Learning feels modern and engaging.”
+      </p>
+
+      <h4>— Rahul Verma</h4>
+    </div>
+
+    <div className="testimonialCard">
+      <p>
+        “Mock tests and bilingual support helped me improve very fast.”
+      </p>
+
+      <h4>— Neha Patel</h4>
+    </div>
+
+  </div>
+
+</section>
       </footer>
     </div>
   );
