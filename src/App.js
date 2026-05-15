@@ -16,6 +16,9 @@ export default function App() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+const [mobile, setMobile] = useState("");
+const [contactEmail, setContactEmail] = useState("");
   const [user, setUser] = useState(null);
   const provider = new GoogleAuthProvider();
   React.useEffect(() => {
@@ -71,6 +74,29 @@ export default function App() {
     try {
       await sendPasswordResetEmail(auth, email);
       alert("Password reset email sent 📩");
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+  const handleContactSubmit = async () => {
+    if (!fullName || !mobile || !contactEmail) {
+      alert("Please fill all contact details");
+      return;
+    }
+  
+    try {
+      await addDoc(collection(db, "enquiries"), {
+        fullName: fullName,
+        mobile: mobile,
+        email: contactEmail,
+        createdAt: new Date()
+      });
+  
+      alert("Enquiry submitted successfully ✅");
+  
+      setFullName("");
+      setMobile("");
+      setContactEmail("");
     } catch (error) {
       alert(error.message);
     }
@@ -708,10 +734,24 @@ export default function App() {
         <h2>Get Course Details</h2>
 
         <form>
-          <input placeholder="Full Name" />
-          <input placeholder="Mobile Number" />
-          <input placeholder="Email" />
-          <button type="button">Submit Enquiry</button>
+        <input
+  placeholder="Full Name"
+  value={fullName}
+  onChange={(e) => setFullName(e.target.value)}
+/>
+<input
+  placeholder="Mobile Number"
+  value={mobile}
+  onChange={(e) => setMobile(e.target.value)}
+/>
+<input
+  placeholder="Email"
+  value={contactEmail}
+  onChange={(e) => setContactEmail(e.target.value)}
+/>
+<button type="button" onClick={handleContactSubmit}>
+  Submit Enquiry
+</button>
         </form>
 
         <p className="contactHelp">
