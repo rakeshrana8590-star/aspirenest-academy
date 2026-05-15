@@ -1,7 +1,9 @@
 import { auth } from "./firebase";
 import {
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
 } from "firebase/auth";
 import React, { useState } from 'react';
 import './style.css';
@@ -10,6 +12,14 @@ export default function App() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [user, setUser] = useState(null);
+  React.useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+  
+    return () => unsubscribe();
+  }, []);
   const handleRegister = async () => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
@@ -23,6 +33,14 @@ export default function App() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       alert("Login Successful ✅");
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      alert("Logged out successfully");
     } catch (error) {
       alert(error.message);
     }
@@ -456,16 +474,21 @@ export default function App() {
       <section className="studentDashboard">
         <div className="dashboardSidebar">
           <h3>Dashboard</h3>
-
+          {user && <p className="userEmail">Welcome, {user.email}</p>}
           <ul>
             <li>📚 My Courses</li>
+        
             <li>📝 Mock Tests</li>
             <li>📈 Progress</li>
             <li>📥 Download Notes</li>
             <li>🎯 Revision Planner</li>
+
             <li>🏆 Certificates</li>
             <li>📢 Announcements</li>
             <li>💬 Help Support</li>
+            <button className="logoutBtn" onClick={handleLogout}>
+  Logout
+</button>
           </ul>
         </div>
 
@@ -689,106 +712,63 @@ export default function App() {
           </details>
         </div>
       </section>
-      <footer className="footer">
-        <div className="footerTop">
-          <div>
-            <h2>AspireNest Academy</h2>
+      <section id="login" className="loginSection">
+  <h2>Student Login</h2>
 
-            <p>
-              Premium bilingual CTET/TET learning platform for future educators
-              in India.
-            </p>
-          </div>
+  <div className="loginBox">
+    <input
+      type="email"
+      placeholder="Enter Email"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+    />
 
-          <div>
-            <h3>Quick Links</h3>
+    <input
+      type="password"
+      placeholder="Enter Password"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+    />
 
-            <a href="#ctet">Courses</a>
-            <a href="#cdp">CDP Module</a>
-            <a href="#resources">Free Resources</a>
-            <a href="#pricing">Pricing</a>
-          </div>
+    <button onClick={handleLogin}>Login</button>
 
-          <div>
-            <h3>Contact</h3>
+    <p>
+      New student?{" "}
+      <span onClick={handleRegister}>Create Account</span>
+    </p>
+  </div>
+</section>
 
-            <p>📞 +91 XXXXX XXXXX</p>
-
-            <p>📧 aspirenestacademy@gmail.com</p>
-
-            <p>📍 India</p>
-          </div>
-        </div>
-
-        <div className="footerBottom">
-          © 2026 AspireNest Academy • All Rights Reserved
-        </div>
-        <section id="login" className="loginSection">
-          <h2><input
-  type="email"
-  placeholder="Enter Email"
-  value={email}
-  onChange={(e) => setEmail(e.target.value)}
-/>
-
-<input
-  type="password"
-  placeholder="Enter Password"
-  value={password}
-  onChange={(e) => setPassword(e.target.value)}
-/>
-
-<button onClick={handleLogin}>Login</button>
-
-<p>
-  New student? <span onClick={handleRegister}>Create Account</span>
-</p></h2>
-
-          <div className="loginBox">
-            <input type="text" placeholder="Enter Email" />
-            <input type="password" placeholder="Enter Password" />
-
-            <button onClick={handleLogin}>Login</button>
-
-            <p>
-            New student? <span onClick={handleRegister}>Create Account</span>
-            </p>
-          </div>
-        </section>
-        <section className="testimonials">
-
-  <h2>What Students Say</h2>
-
-  <div className="testimonialGrid">
-
-    <div className="testimonialCard">
+<footer className="footer">
+  <div className="footerTop">
+    <div>
+      <h2>AspireNest Academy</h2>
       <p>
-        “Best platform for CTET preparation. Visual learning makes concepts super easy.”
+        Premium bilingual CTET/TET learning platform for future educators
+        in India.
       </p>
-
-      <h4>— Priya Sharma</h4>
     </div>
 
-    <div className="testimonialCard">
-      <p>
-        “Premium UI and amazing notes. Learning feels modern and engaging.”
-      </p>
-
-      <h4>— Rahul Verma</h4>
+    <div>
+      <h3>Quick Links</h3>
+      <a href="#ctet">Courses</a>
+      <a href="#cdp">CDP Module</a>
+      <a href="#resources">Free Resources</a>
+      <a href="#pricing">Pricing</a>
     </div>
 
-    <div className="testimonialCard">
-      <p>
-        “Mock tests and bilingual support helped me improve very fast.”
-      </p>
-
-      <h4>— Neha Patel</h4>
+    <div>
+      <h3>Contact</h3>
+      <p>📞 +91 XXXXX XXXXX</p>
+      <p>📧 aspirenestacademy@gmail.com</p>
+      <p>📍 India</p>
     </div>
-
   </div>
 
-</section>
-      </footer>
+  <div className="footerBottom">
+    © 2026 AspireNest Academy • All Rights Reserved
+  </div>
+</footer>
     </div>
   );
 }

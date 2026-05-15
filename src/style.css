@@ -2008,3 +2008,24 @@ button:hover,
   background: #111827;
   color: white;
 }
+.userEmail {
+  margin: 10px 0 20px;
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+.logoutBtn {
+  margin-top: 14px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.logoutBtn:hover {
+  transform: scale(1.05);
+}
