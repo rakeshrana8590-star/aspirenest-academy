@@ -122,21 +122,6 @@ setEnquiries([]);
   };
 
   const handleContactSubmit = async () => {
-    const handleNoteAccess = (note) => {
-      if (note.type === "PREMIUM" && !isPremiumUser) {
-        alert(
-          "This is premium content. Please upgrade to access this note."
-        );
-        return;
-      }
-    
-      if (note.pdf === "#") {
-        alert("PDF will be uploaded soon.");
-        return;
-      }
-    
-      window.open(note.pdf, "_blank");
-    };
    
     if (!fullName || !mobile || !contactEmail) {
       alert("Please fill all contact details");
@@ -214,18 +199,40 @@ setEnquiries([]);
     }
   };
   const handlePremiumPurchase = async () => {
-    if (!user) {
-      alert("Please login first.");
+    const loaded = await loadRazorpayScript();
+  
+    if (!loaded) {
+      alert("Razorpay SDK failed to load.");
       return;
     }
   
-    const confirmPayment = window.confirm(
-      "Demo payment successful? Click OK to unlock premium access."
-    );
+    const options = {
+      key: "rzp_test_1DP5mmOlF5G5ag",
   
-    if (confirmPayment) {
-      await unlockPremiumAccess();
-    }
+      amount: 19900,
+  
+      currency: "INR",
+  
+      name: "AspireNest Academy",
+  
+      description: "Premium Membership",
+  
+      handler: async function () {
+        await unlockPremiumAccess();
+      },
+  
+      prefill: {
+        email: user?.email || "",
+      },
+  
+      theme: {
+        color: "#ff7b00",
+      },
+    };
+  
+    const paymentObject = new window.Razorpay(options);
+  
+    paymentObject.open();
   };
   const loadAdminData = async () => {
     try {
@@ -572,6 +579,7 @@ setEnquiries([]);
         percentage: Math.round(
           (finalScore / mockQuestions.length) * 100
         ),
+        subject: selectedSubject,
         createdAt: new Date(),
       });
     } catch (error) {
@@ -603,6 +611,82 @@ const motivationalMessage =
     : percentage >= 50
     ? "Good effort! Practice more to improve your score."
     : "Keep practicing daily. Improvement will come with consistency.";
+    const totalMockAttempts = mockResults.length;
+
+const averageAccuracy =
+  mockResults.length > 0
+    ? Math.round(
+        mockResults.reduce(
+          (total, result) => total + result.percentage,
+          0
+        ) / mockResults.length
+      )
+    : 0;
+
+const highestScore =
+  mockResults.length > 0
+    ? Math.max(...mockResults.map((result) => result.percentage))
+    : 0;
+
+const latestScore =
+  mockResults.length > 0
+    ? mockResults[mockResults.length - 1].percentage
+    : 0;
+
+const analyticsMessage =
+  averageAccuracy >= 80
+    ? "Excellent progress. Keep maintaining consistency."
+    : averageAccuracy >= 50
+    ? "Good progress. Focus on weak areas."
+    : "More mock practice needed.";
+    const weakSubjects = {};
+
+mockResults.forEach((result) => {
+  if (!weakSubjects[result.subject]) {
+    weakSubjects[result.subject] = [];
+  }
+
+  weakSubjects[result.subject].push(result.percentage);
+});
+
+let weakestSubject = "No Data";
+
+if (Object.keys(weakSubjects).length > 0) {
+  weakestSubject = Object.entries(weakSubjects)
+    .map(([subject, scores]) => ({
+      subject,
+      average:
+        scores.reduce((a, b) => a + b, 0) / scores.length,
+    }))
+    .sort((a, b) => a.average - b.average)[0].subject;
+}
+const smartRecommendation =
+  weakestSubject === "No Data"
+    ? "Complete at least one mock test to get personalized recommendations."
+    : weakestSubject === "CDP"
+    ? "Focus on child development theories, learning principles, and pedagogy concepts."
+    : weakestSubject === "Maths"
+    ? "Practice calculation speed, basic concepts, and topic-wise maths MCQs."
+    : weakestSubject === "EVS"
+    ? "Revise environmental studies concepts and practice exam-oriented EVS questions."
+    : weakestSubject === "Language"
+    ? "Improve grammar, comprehension, and language pedagogy practice."
+    : `Focus more on ${weakestSubject} practice to improve your performance.`;
+    const uniqueTestDates = [
+      ...new Set(
+        mockResults
+          .filter((result) => result.createdAt)
+          .map((result) => {
+            const date = result.createdAt.toDate
+              ? result.createdAt.toDate()
+              : new Date(result.createdAt);
+    
+            return date.toDateString();
+          })
+      ),
+    ];
+    
+    const dailyStreak = uniqueTestDates.length;
   useEffect(() => {
     if (!mockStarted || showResult) return;
   
@@ -1256,7 +1340,63 @@ const motivationalMessage =
       : "No Tests Yet"}
   </p>
 </div>
+<div className="dashboardCard">
+  <h3>Average Accuracy</h3>
 
+  <p>{averageAccuracy}%</p>
+</div>
+
+<div className="dashboardCard">
+  <h3>Highest Score</h3>
+
+  <p>{highestScore}%</p>
+</div>
+
+<div className="dashboardCard">
+  <h3>Total Attempts</h3>
+
+  <p>{totalMockAttempts}</p>
+</div>
+<div className="dashboardCard">
+  <h3>Daily Study Streak</h3>
+
+  <p>🔥 {dailyStreak} Day Streak</p>
+</div>
+<div className="dashboardCard">
+  <h3>Performance Insight</h3>
+
+  <p>{analyticsMessage}</p>
+</div>
+<div className="dashboardCard">
+  <h3>Weakest Subject</h3>
+
+  <p>{weakestSubject}</p>
+</div>
+<div className="dashboardCard">
+  <h3>Smart Recommendation</h3>
+
+  <p>{smartRecommendation}</p>
+</div>
+<div className="analyticsChartCard">
+  <h3>Accuracy Progress</h3>
+
+  <div className="accuracyBars">
+    {mockResults.slice(-5).map((result, index) => (
+      <div className="accuracyBarItem" key={result.id}>
+        <span>Test {index + 1}</span>
+
+        <div className="accuracyBar">
+          <div
+            className="accuracyFill"
+            style={{ width: `${result.percentage}%` }}
+          ></div>
+        </div>
+
+        <strong>{result.percentage}%</strong>
+      </div>
+    ))}
+  </div>
+</div>
             {user?.email === adminEmail && (
   <>
     <div className="dashboardCard">
@@ -1462,9 +1602,9 @@ const motivationalMessage =
               <li>🏆 Performance Tracking</li>
             </ul>
 
-            <button className="btnLink" onClick={handlePremiumPurchase}>
-  Get Premium
-</button>
+            <a href="#contact" className="btnLink">
+              Get Premium
+            </a>
           </div>
 
           <div className="pricingCard darkPrice">
