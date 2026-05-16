@@ -9,7 +9,7 @@ import {
 signInWithPopup
 } from "firebase/auth";
 import { collection, addDoc, getDocs } from "firebase/firestore";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './style.css';
 import currentAffairsPdf from "./assets/pdfs/CA MARCH 26.pdf";
 export default function App() {
@@ -20,6 +20,8 @@ const [currentQuestion, setCurrentQuestion] = useState(0);
 const [selectedAnswer, setSelectedAnswer] = useState("");
 const [score, setScore] = useState(0);
 const [showResult, setShowResult] = useState(false);
+const [showAnswer, setShowAnswer] = useState(false);
+const [timeLeft, setTimeLeft] = useState(60);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -209,7 +211,9 @@ setEnquiries([]);
       pages: 50,
       pdf: "#",
     },
-  ];const currentAffairsData = [
+  ];
+
+  const currentAffairsData = [
     {
       id: 1,
       title: "March Current Affairs",
@@ -259,13 +263,18 @@ setEnquiries([]);
       return;
     }
   
+    setShowAnswer(true);
+  
     if (selectedAnswer === mockQuestions[currentQuestion].answer) {
       setScore(score + 1);
     }
-  
+  };
+  const handleNextQuestion = () => {
     if (currentQuestion + 1 < mockQuestions.length) {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer("");
+      setShowAnswer(false);
+      setTimeLeft(60);
     } else {
       setShowResult(true);
     }
@@ -277,8 +286,23 @@ setEnquiries([]);
     setSelectedAnswer("");
     setScore(0);
     setShowResult(false);
+    setTimeLeft(60);
+    setShowAnswer(false);
   };
+  useEffect(() => {
+    if (!mockStarted || showResult) return;
   
+    if (timeLeft === 0) {
+      setShowResult(true);
+      return;
+    }
+  
+    const timer = setTimeout(() => {
+      setTimeLeft(timeLeft - 1);
+    }, 1000);
+  
+    return () => clearTimeout(timer);
+  }, [mockStarted, showResult, timeLeft]);
   return (
     <div className={darkMode ? "app dark" : "app"}>
       {selectedCourse && (
@@ -600,11 +624,17 @@ setEnquiries([]);
       </div>
     )}
 
-    {mockStarted && !showResult && (
-      <p className="mockCounter">
-        Score: {score} / {mockQuestions.length}
-      </p>
-    )}
+{mockStarted && !showResult && (
+  <>
+    <p className="mockTimer">
+      ⏱️ Time Left: {timeLeft}s
+    </p>
+
+    <p className="mockCounter">
+      Score: {score} / {mockQuestions.length}
+    </p>
+  </>
+)}
   </div>
 
   <div className="mockBox premiumMockBox">
@@ -612,7 +642,13 @@ setEnquiries([]);
       <>
         <h3>Ready to start?</h3>
         <p>3 demo questions se practice start karo.</p>
-        <button className="btnLink" onClick={() => setMockStarted(true)}>
+        <button
+  className="btnLink"
+  onClick={() => {
+    setMockStarted(true);
+    setTimeLeft(60);
+  }}
+>
           Start Mock Test
         </button>
       </>
@@ -638,11 +674,15 @@ setEnquiries([]);
           {mockQuestions[currentQuestion].options.map((option, index) => (
             <button
               key={index}
-              className={
-                selectedAnswer === option
-                  ? "optionBtn activeOption"
-                  : "optionBtn"
-              }
+              className={`optionBtn ${
+                showAnswer && option === mockQuestions[currentQuestion].answer
+                  ? "correctOption"
+                  : showAnswer && option === selectedAnswer
+                  ? "wrongOption"
+                  : selectedAnswer === option
+                  ? "activeOption"
+                  : ""
+              }`}
               onClick={() => setSelectedAnswer(option)}
             >
               {option}
@@ -650,11 +690,16 @@ setEnquiries([]);
           ))}
         </div>
 
-        <button className="btnLink" onClick={handleAnswerSubmit}>
-          {currentQuestion + 1 === mockQuestions.length
-            ? "Submit Test"
-            : "Next Question"}
-        </button>
+        <button
+  className="btnLink"
+  onClick={showAnswer ? handleNextQuestion : handleAnswerSubmit}
+>
+  {showAnswer
+    ? currentQuestion + 1 === mockQuestions.length
+      ? "View Result"
+      : "Next Question"
+    : "Submit Answer"}
+</button>
       </>
     )}
   </div>
