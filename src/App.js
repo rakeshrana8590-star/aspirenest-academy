@@ -729,6 +729,28 @@ const rankPredictionMessage =
         ),
       })
     );
+    const estimatedStudyMinutes = totalMockAttempts * 15;
+
+const estimatedStudyHours = (
+  estimatedStudyMinutes / 60
+).toFixed(1);
+
+const studyTimeMessage =
+  estimatedStudyMinutes > 0
+    ? `You have completed approximately ${estimatedStudyHours} study hours through mock practice.`
+    : "Start attempting mock tests to track your study time.";
+    const aiStudyPlan =
+  weakestSubject === "No Data"
+    ? [
+        "Attempt one mock test today.",
+        "Review your result analysis.",
+        "Start with CDP and Maths basics.",
+      ]
+    : [
+        `Revise ${weakestSubject} concepts for 30 minutes.`,
+        `Attempt 10 ${weakestSubject} MCQs.`,
+        "Review wrong answers and repeat weak topics.",
+      ];
   useEffect(() => {
     if (!mockStarted || showResult) return;
   
@@ -1415,6 +1437,23 @@ const rankPredictionMessage =
   <p>{estimatedRank}</p>
 
   <small>{rankPredictionMessage}</small>
+</div>
+
+<div className="dashboardCard">
+  <h3>Study Time Tracker</h3>
+
+  <p>{estimatedStudyHours} Hours</p>
+
+  <small>{studyTimeMessage}</small>
+</div>
+<div className="dashboardCard">
+  <h3>AI Study Planner</h3>
+
+  <ul className="studyPlanList">
+    {aiStudyPlan.map((task, index) => (
+      <li key={index}>✅ {task}</li>
+    ))}
+  </ul>
 </div>
 <div className="dashboardCard">
   <h3>Performance Insight</h3>
