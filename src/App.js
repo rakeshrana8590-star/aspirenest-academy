@@ -176,6 +176,57 @@ setEnquiries([]);
   
     window.open(note.pdf, "_blank");
   };
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+  const unlockPremiumAccess = async () => {
+    if (!user) {
+      alert("Please login first.");
+      return;
+    }
+  
+    try {
+      const userRef = doc(db, "users", user.uid);
+  
+      await setDoc(
+        userRef,
+        {
+          email: user.email,
+          isPremium: true,
+          subscriptionType: "PREMIUM",
+          purchasedCourses: ["Premium Notes"],
+          purchaseDate: new Date(),
+        },
+        { merge: true }
+      );
+  
+      setIsPremiumUser(true);
+  
+      alert("Premium access unlocked successfully ✅");
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+  const handlePremiumPurchase = async () => {
+    if (!user) {
+      alert("Please login first.");
+      return;
+    }
+  
+    const confirmPayment = window.confirm(
+      "Demo payment successful? Click OK to unlock premium access."
+    );
+  
+    if (confirmPayment) {
+      await unlockPremiumAccess();
+    }
+  };
   const loadAdminData = async () => {
     try {
       const studentsSnap = await getDocs(collection(db, "students"));
@@ -1411,9 +1462,9 @@ const motivationalMessage =
               <li>🏆 Performance Tracking</li>
             </ul>
 
-            <a href="#contact" className="btnLink">
-              Get Premium
-            </a>
+            <button className="btnLink" onClick={handlePremiumPurchase}>
+  Get Premium
+</button>
           </div>
 
           <div className="pricingCard darkPrice">
