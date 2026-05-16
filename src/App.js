@@ -721,6 +721,14 @@ const rankPredictionMessage =
     : averageAccuracy >= 50
     ? "You are improving. More consistent practice can push you higher."
     : "Attempt more mock tests to improve your predicted rank.";
+    const subjectPerformance = Object.entries(weakSubjects).map(
+      ([subject, scores]) => ({
+        subject,
+        average: Math.round(
+          scores.reduce((a, b) => a + b, 0) / scores.length
+        ),
+      })
+    );
   useEffect(() => {
     if (!mockStarted || showResult) return;
   
@@ -1443,6 +1451,50 @@ const rankPredictionMessage =
     ))}
   </div>
 </div>
+
+<div className="analyticsChartCard">
+  <h3>Subject Comparison</h3>
+
+  <div className="accuracyBars">
+    {subjectPerformance.length > 0 ? (
+      subjectPerformance.map((item) => (
+        <div className="accuracyBarItem" key={item.subject}>
+          <span>{item.subject}</span>
+
+          <div className="accuracyBar">
+            <div
+              className="accuracyFill"
+              style={{ width: `${item.average}%` }}
+            ></div>
+          </div>
+
+          <strong>{item.average}%</strong>
+        </div>
+      ))
+    ) : (
+      <p>No subject data yet.</p>
+    )}
+  </div>
+</div>
+
+<div className="analyticsChartCard">
+  <h3>Accuracy Overview</h3>
+
+  <div className="pieChartBox">
+    <div
+      className="pieChart"
+      style={{
+        background: `conic-gradient(#16a34a 0% ${averageAccuracy}%, #e5e7eb ${averageAccuracy}% 100%)`,
+      }}
+    >
+      <span>{averageAccuracy}%</span>
+    </div>
+
+    <p>
+      Overall accuracy based on your mock test attempts.
+    </p>
+  </div>
+</div>
             {user?.email === adminEmail && (
   <>
     <div className="dashboardCard">
@@ -1648,9 +1700,9 @@ const rankPredictionMessage =
               <li>🏆 Performance Tracking</li>
             </ul>
 
-            <a href="#contact" className="btnLink">
-              Get Premium
-            </a>
+            <button className="btnLink" onClick={handlePremiumPurchase}>
+  Get Premium
+</button>
           </div>
 
           <div className="pricingCard darkPrice">
