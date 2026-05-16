@@ -15,6 +15,11 @@ import currentAffairsPdf from "./assets/pdfs/CA MARCH 26.pdf";
 export default function App() {
   const [darkMode, setDarkMode] = React.useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [mockStarted, setMockStarted] = useState(false);
+const [currentQuestion, setCurrentQuestion] = useState(0);
+const [selectedAnswer, setSelectedAnswer] = useState("");
+const [score, setScore] = useState(0);
+const [showResult, setShowResult] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -204,8 +209,7 @@ setEnquiries([]);
       pages: 50,
       pdf: "#",
     },
-  ];
-  const currentAffairsData = [
+  ];const currentAffairsData = [
     {
       id: 1,
       title: "March Current Affairs",
@@ -215,6 +219,66 @@ setEnquiries([]);
       pdf: currentAffairsPdf,
     },
   ];
+  
+  const mockQuestions = [
+    {
+      question: "Piaget kis development theory ke liye famous hain?",
+      options: [
+        "Moral Development",
+        "Cognitive Development",
+        "Social Learning",
+        "Classical Conditioning",
+      ],
+      answer: "Cognitive Development",
+    },
+    {
+      question: "Vygotsky ki theory me ZPD ka full form kya hai?",
+      options: [
+        "Zone of Personal Development",
+        "Zone of Proximal Development",
+        "Zone of Physical Development",
+        "Zone of Practical Discussion",
+      ],
+      answer: "Zone of Proximal Development",
+    },
+    {
+      question: "Inclusive education ka main aim kya hai?",
+      options: [
+        "Only toppers ko support karna",
+        "All learners ko equal opportunity dena",
+        "Only disabled students ko teach karna",
+        "Separate classroom banana",
+      ],
+      answer: "All learners ko equal opportunity dena",
+    },
+  ];
+  
+  const handleAnswerSubmit = () => {
+    if (!selectedAnswer) {
+      alert("Please select an answer");
+      return;
+    }
+  
+    if (selectedAnswer === mockQuestions[currentQuestion].answer) {
+      setScore(score + 1);
+    }
+  
+    if (currentQuestion + 1 < mockQuestions.length) {
+      setCurrentQuestion(currentQuestion + 1);
+      setSelectedAnswer("");
+    } else {
+      setShowResult(true);
+    }
+  };
+  
+  const restartMockTest = () => {
+    setMockStarted(false);
+    setCurrentQuestion(0);
+    setSelectedAnswer("");
+    setScore(0);
+    setShowResult(false);
+  };
+  
   return (
     <div className={darkMode ? "app dark" : "app"}>
       {selectedCourse && (
@@ -517,23 +581,84 @@ setEnquiries([]);
           </div>
         </div>
       </section>
-      <section className="mockPyq">
-        <div className="mockBox">
-          <h2>Mock Tests</h2>
-          <p>Chapter-wise, full syllabus aur revision-based mock tests.</p>
-          <a href="#mocktest" className="btnLink">
-            Start Free Mock Test
-          </a>
+      <section className="mockPyq premiumMock" id="mocktest">
+  <div className="mockIntro">
+    <span className="badge">Free Practice Test</span>
+    <h2>CTET Mock Test</h2>
+    <p>
+      Exam-style MCQs, instant scoring and smart practice experience.
+    </p>
+
+    {mockStarted && !showResult && (
+      <div className="mockProgress">
+        <div
+          className="mockProgressFill"
+          style={{
+            width: `${((currentQuestion + 1) / mockQuestions.length) * 100}%`,
+          }}
+        ></div>
+      </div>
+    )}
+
+    {mockStarted && !showResult && (
+      <p className="mockCounter">
+        Score: {score} / {mockQuestions.length}
+      </p>
+    )}
+  </div>
+
+  <div className="mockBox premiumMockBox">
+    {!mockStarted ? (
+      <>
+        <h3>Ready to start?</h3>
+        <p>3 demo questions se practice start karo.</p>
+        <button className="btnLink" onClick={() => setMockStarted(true)}>
+          Start Mock Test
+        </button>
+      </>
+    ) : showResult ? (
+      <>
+        <h3>Test Completed 🎉</h3>
+        <p className="resultScore">
+          Your Score: {score} / {mockQuestions.length}
+        </p>
+        <button className="btnLink" onClick={restartMockTest}>
+          Restart Test
+        </button>
+      </>
+    ) : (
+      <>
+        <span className="questionTag">
+          Question {currentQuestion + 1} of {mockQuestions.length}
+        </span>
+
+        <h3>{mockQuestions[currentQuestion].question}</h3>
+
+        <div className="options">
+          {mockQuestions[currentQuestion].options.map((option, index) => (
+            <button
+              key={index}
+              className={
+                selectedAnswer === option
+                  ? "optionBtn activeOption"
+                  : "optionBtn"
+              }
+              onClick={() => setSelectedAnswer(option)}
+            >
+              {option}
+            </button>
+          ))}
         </div>
 
-        <div className="mockBox">
-          <h2>PYQ Practice</h2>
-          <p>Previous year questions ke through exam pattern samjhein.</p>
-          <a href="#cdp" className="btnLink">
-            Explore PYQ
-          </a>
-        </div>
-      </section>
+        <button className="btnLink" onClick={handleAnswerSubmit}>
+          {currentQuestion + 1 === mockQuestions.length
+            ? "Submit Test"
+            : "Next Question"}
+        </button>
+      </>
+    )}
+  </div>
+</section>
       <section className="resources" id="resources">
         <h2>Free Resources</h2>
         <p className="sectionText">
@@ -716,36 +841,43 @@ setEnquiries([]);
     ))}
   </div>
 </section>
-<section id="current-affairs" className="notesSection">
-  <h2>Current Affairs Library</h2>
+<section id="current-affairs" className="currentAffairs">
+  <div className="currentHeader">
+    <span className="badge">Monthly Updates</span>
 
-  <p className="sectionText">
-    Latest current affairs PDFs for CTET/TET preparation.
-  </p>
+    <h2>Current Affairs Library</h2>
 
-  <div className="grid">
+    <p>
+      Latest bilingual current affairs PDFs for CTET/TET preparation.
+    </p>
+  </div>
+
+  <div className="currentGrid">
     {currentAffairsData.map((item) => (
-      <div className="course" key={item.id}>
-        <span className="planTag">{item.type}</span>
+      <div className="currentCard" key={item.id}>
+        <div className="currentTop">
+          <span className="planTag">{item.type}</span>
+          <span className="monthTag">{item.month}</span>
+        </div>
 
         <h3>{item.title}</h3>
 
-        <p>🗓️ Month: {item.month}</p>
-
-        <p>📄 Pages: {item.pages}</p>
+        <div className="currentInfo">
+          <p>📄 {item.pages} Pages</p>
+        </div>
 
         <a
           href={item.pdf}
-          className="btnLink"
           target="_blank"
           rel="noreferrer"
+          className="btnLink"
         >
           Open PDF
         </a>
       </div>
     ))}
   </div>
-</section> 
+</section>
       <section id="pricing" className="pricingPro">
         <h2>Choose Your Learning Plan</h2>
 
