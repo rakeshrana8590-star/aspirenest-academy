@@ -19,6 +19,17 @@ import {
   setDoc,
 } from "firebase/firestore";
 import React, { useState, useEffect } from 'react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 import './style.css';
 import currentAffairsPdf from "./assets/pdfs/CA MARCH 26.pdf";
 export default function App() {
@@ -751,6 +762,24 @@ const studyTimeMessage =
         `Attempt 10 ${weakestSubject} MCQs.`,
         "Review wrong answers and repeat weak topics.",
       ];
+      const accuracyChartData = mockResults.map(
+        (result, index) => ({
+          test: `Test ${index + 1}`,
+          accuracy: result.percentage,
+        })
+      );
+      const pieChartData = [
+        {
+          name: "Correct",
+          value: averageAccuracy,
+        },
+        {
+          name: "Remaining",
+          value: 100 - averageAccuracy,
+        },
+      ];
+      
+      const pieColors = ["#16a34a", "#e5e7eb"];
   useEffect(() => {
     if (!mockStarted || showResult) return;
   
@@ -1473,22 +1502,20 @@ const studyTimeMessage =
 <div className="analyticsChartCard">
   <h3>Accuracy Progress</h3>
 
-  <div className="accuracyBars">
-    {mockResults.slice(-5).map((result, index) => (
-      <div className="accuracyBarItem" key={result.id}>
-        <span>Test {index + 1}</span>
+  <ResponsiveContainer width="100%" height={260}>
+  <LineChart data={accuracyChartData}>
+    <XAxis dataKey="test" />
+    <YAxis />
+    <Tooltip />
 
-        <div className="accuracyBar">
-          <div
-            className="accuracyFill"
-            style={{ width: `${result.percentage}%` }}
-          ></div>
-        </div>
-
-        <strong>{result.percentage}%</strong>
-      </div>
-    ))}
-  </div>
+    <Line
+      type="monotone"
+      dataKey="accuracy"
+      stroke="#16a34a"
+      strokeWidth={3}
+    />
+  </LineChart>
+</ResponsiveContainer>
 </div>
 
 <div className="analyticsChartCard">
@@ -1520,19 +1547,29 @@ const studyTimeMessage =
   <h3>Accuracy Overview</h3>
 
   <div className="pieChartBox">
-    <div
-      className="pieChart"
-      style={{
-        background: `conic-gradient(#16a34a 0% ${averageAccuracy}%, #e5e7eb ${averageAccuracy}% 100%)`,
-      }}
-    >
-      <span>{averageAccuracy}%</span>
-    </div>
+  <ResponsiveContainer width="100%" height={260}>
+    <PieChart>
+      <Pie
+        data={pieChartData}
+        dataKey="value"
+        nameKey="name"
+        innerRadius={60}
+        outerRadius={90}
+        paddingAngle={4}
+      >
+        {pieChartData.map((entry, index) => (
+          <Cell key={entry.name} fill={pieColors[index]} />
+        ))}
+      </Pie>
 
-    <p>
-      Overall accuracy based on your mock test attempts.
-    </p>
-  </div>
+      <Tooltip />
+    </PieChart>
+  </ResponsiveContainer>
+
+  <p>
+    Overall accuracy based on your mock test attempts.
+  </p>
+</div>
 </div>
             {user?.email === adminEmail && (
   <>
