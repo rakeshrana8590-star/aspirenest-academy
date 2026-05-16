@@ -8,7 +8,13 @@ import {
   GoogleAuthProvider,
 signInWithPopup
 } from "firebase/auth";
-import { collection, addDoc, getDocs } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import React, { useState, useEffect } from 'react';
 import './style.css';
 import currentAffairsPdf from "./assets/pdfs/CA MARCH 26.pdf";
@@ -31,10 +37,14 @@ const [contactEmail, setContactEmail] = useState("");
   const adminEmail = "aspirenestplatform@gmail.com";
   const [students, setStudents] = useState([]);
 const [enquiries, setEnquiries] = useState([]);
+const [mockResults, setMockResults] = useState([]);
   const provider = new GoogleAuthProvider();
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        loadUserMockResults(currentUser.email);
+      }
     });
   
     return () => unsubscribe();
@@ -140,6 +150,26 @@ setEnquiries([]);
       alert(error.message);
     }
   };
+  const loadUserMockResults = async (email) => {
+    try {
+      const q = query(
+        collection(db, "mockResults"),
+        where("email", "==", email)
+      );
+  
+      const querySnapshot = await getDocs(q);
+  
+      setMockResults(
+        querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+      );
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
   const courses = [
     {
       id: "ctet-paper-1",
@@ -256,7 +286,26 @@ setEnquiries([]);
       answer: "All learners ko equal opportunity dena",
     },
   ];
-  
+  const leaderboardData = [
+    {
+      rank: 1,
+      name: "Priya Sharma",
+      score: "98%",
+      badge: "Topper",
+    },
+    {
+      rank: 2,
+      name: "Amit Patel",
+      score: "92%",
+      badge: "Excellent",
+    },
+    {
+      rank: 3,
+      name: "Neha Verma",
+      score: "88%",
+      badge: "Great",
+    },
+  ];
   const handleAnswerSubmit = () => {
     if (!selectedAnswer) {
       alert("Please select an answer");
@@ -268,7 +317,10 @@ setEnquiries([]);
     if (selectedAnswer === mockQuestions[currentQuestion].answer) {
       setScore(score + 1);
     }
-  
+    const finalScore =
+    selectedAnswer === mockQuestions[currentQuestion].answer
+      ? score + 1
+      : score;
     setTimeout(() => {
       if (currentQuestion + 1 < mockQuestions.length) {
         setCurrentQuestion(currentQuestion + 1);
@@ -276,11 +328,28 @@ setEnquiries([]);
         setShowAnswer(false);
         setTimeLeft(60);
       } else {
+        saveMockResult(finalScore);
         setShowResult(true);
       }
     }, 2000);
   };
-
+  const saveMockResult = async (finalScore) => {
+    if (!user) return;
+  
+    try {
+      await addDoc(collection(db, "mockResults"), {
+        email: user.email,
+        score: finalScore,
+        totalQuestions: mockQuestions.length,
+        percentage: Math.round(
+          (finalScore / mockQuestions.length) * 100
+        ),
+        createdAt: new Date(),
+      });
+    } catch (error) {
+      alert(error.message);
+    }
+  };
   
   const restartMockTest = () => {
     setMockStarted(false);
@@ -728,6 +797,37 @@ const motivationalMessage =
     )}
   </div>
 </section>
+<section className="leaderboardSection">
+  <div className="leaderboardHeader">
+    <span className="badge">Top Performers</span>
+
+    <h2>Mock Test Leaderboard</h2>
+
+    <p>
+      Highest scoring students from recent CTET/TET mock practice.
+    </p>
+  </div>
+
+  <div className="leaderboardGrid">
+    {leaderboardData.map((student) => (
+      <div className="leaderCard" key={student.rank}>
+        <div className="rankBadge">
+          #{student.rank}
+        </div>
+
+        <h3>{student.name}</h3>
+
+        <p className="leaderScore">
+          {student.score}
+        </p>
+
+        <span className="leaderTag">
+          {student.badge}
+        </span>
+      </div>
+    ))}
+  </div>
+</section>
       <section className="resources" id="resources">
         <h2>Free Resources</h2>
         <p className="sectionText">
@@ -868,6 +968,22 @@ const motivationalMessage =
               <h3>Achievements</h3>
               <p>🔥 7-Day Study Streak Active</p>
             </div>
+            <div className="dashboardCard">
+  <h3>Mock Tests Attempted</h3>
+
+  <p>{mockResults.length}</p>
+</div>
+
+<div className="dashboardCard">
+  <h3>Latest Accuracy</h3>
+
+  <p>
+    {mockResults.length > 0
+      ? `${mockResults[mockResults.length - 1].percentage}%`
+      : "No Tests Yet"}
+  </p>
+</div>
+
             {user?.email === adminEmail && (
   <>
     <div className="dashboardCard">

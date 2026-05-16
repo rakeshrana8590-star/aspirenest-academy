@@ -2536,3 +2536,83 @@ button:hover,
   text-align: center;
   line-height: 1.7;
 }
+.leaderboardSection {
+  padding: 100px 8%;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: white;
+}
+
+.leaderboardHeader {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.leaderboardHeader h2 {
+  font-size: 52px;
+  margin: 20px 0;
+}
+
+.leaderboardHeader p {
+  color: #cbd5e1;
+  font-size: 18px;
+}
+
+.leaderboardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 30px;
+}
+
+.leaderCard {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 28px;
+  padding: 35px;
+  text-align: center;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+  transition: 0.4s ease;
+}
+
+.leaderCard:hover {
+  transform: translateY(-10px);
+}
+
+.rankBadge {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 20px;
+}
+
+.leaderCard h3 {
+  font-size: 26px;
+  margin-bottom: 12px;
+}
+
+.leaderScore {
+  font-size: 36px;
+  font-weight: 900;
+  color: #fbbf24;
+}
+
+.leaderTag {
+  display: inline-block;
+  margin-top: 10px;
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+@media (max-width: 768px) {
+  .leaderboardHeader h2 {
+    font-size: 38px;
+  }
+}
