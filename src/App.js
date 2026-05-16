@@ -132,31 +132,44 @@ setEnquiries([]);
       alert(error.message);
     }
   };
-  const courseDetails = {
-    paper1: {
-      title: 'CTET Paper I',
-      desc: 'Class 1 to 5 teaching aspirants ke liye complete foundation course.',
-      points: ['CDP', 'Language I & II', 'Mathematics', 'EVS', 'Mock Tests'],
+  const courses = [
+    {
+      id: "ctet-paper-1",
+      title: "CTET Paper I",
+      level: "Foundation",
+      price: "Free",
+      category: "CTET",
+      desc: "Class 1 to 5 teaching aspirants ke liye complete foundation course.",
+      lessons: 24,
+      tests: 10,
+      badge: "FREE",
+      points: ["CDP", "Language I & II", "Mathematics", "EVS", "Mock Tests"],
     },
-
-    paper2: {
-      title: 'CTET Paper II',
-      desc: 'Class 6 to 8 aspirants ke liye subject-wise preparation.',
-      points: [
-        'CDP',
-        'Language I & II',
-        'Maths/Science',
-        'Social Science',
-        'PYQ',
-      ],
+    {
+      id: "ctet-paper-2",
+      title: "CTET Paper II",
+      level: "Intermediate",
+      price: "₹499",
+      category: "CTET",
+      desc: "Class 6 to 8 aspirants ke liye subject-wise exam preparation.",
+      lessons: 32,
+      tests: 15,
+      badge: "BASIC",
+      points: ["CDP", "Language I & II", "Maths/Science", "Social Science", "PYQ"],
     },
-
-    state: {
-      title: 'MAHA TET / State TET',
-      desc: 'State TET exam pattern aur practice preparation.',
-      points: ['State Pattern', 'Syllabus', 'Practice Sets', 'PYQ', 'Strategy'],
+    {
+      id: "state-tet",
+      title: "State TET / MAHA TET",
+      level: "Exam Focused",
+      price: "₹1499",
+      category: "State TET",
+      desc: "State TET pattern, syllabus, PYQ aur mock test preparation.",
+      lessons: 40,
+      tests: 20,
+      badge: "PREMIUM",
+      points: ["State Pattern", "Syllabus", "Practice Sets", "PYQ", "Strategy"],
     },
-  };
+  ];
   return (
     <div className={darkMode ? "app dark" : "app"}>
       {selectedCourse && (
@@ -290,43 +303,36 @@ setEnquiries([]);
         </div>
       </section>
       <section className="coursePages" id="ctet">
-        <h2>CTET/TET Course Pages</h2>
+  <h2>CTET/TET Course Pages</h2>
 
-        <div className="grid">
-          <div className="course">
-            <h3>CTET Paper I</h3>
-            <p>
-              Class 1 to 5 teaching aspirants ke liye complete foundation
-              course.
-            </p>
+  <p className="sectionText">
+    Structured courses with lessons, mock tests and exam-focused preparation.
+  </p>
 
-            <button onClick={() => setSelectedCourse(courseDetails.paper1)}>
-              View Details
-            </button>
-          </div>
+  <div className="grid">
+    {courses.map((course) => (
+      <div className="course" key={course.id}>
+        <span className="planTag">{course.badge}</span>
 
-          <div className="course">
-            <h3>CTET Paper II</h3>
-            <p>Class 6 to 8 aspirants ke liye subject-wise exam preparation.</p>
+        <h3>{course.title}</h3>
 
-            <button onClick={() => setSelectedCourse(courseDetails.paper2)}>
-              View Details
-            </button>
-          </div>
+        <p>{course.desc}</p>
 
-          <div className="course">
-            <h3>MAHA TET / State TET</h3>
-            <p>
-              State TET exam pattern, syllabus aur practice ke liye special
-              section.
-            </p>
+        <p><strong>Level:</strong> {course.level}</p>
 
-            <button onClick={() => setSelectedCourse(courseDetails.state)}>
-              View Details
-            </button>
-          </div>
-        </div>
-      </section>
+        <p><strong>Lessons:</strong> {course.lessons}</p>
+
+        <p><strong>Mock Tests:</strong> {course.tests}</p>
+
+        <p><strong>Price:</strong> {course.price}</p>
+
+        <button onClick={() => setSelectedCourse(course)}>
+          View Details
+        </button>
+      </div>
+    ))}
+  </div>
+</section>
       <section className="plansSection">
         <h2>Learning Paths</h2>
 
