@@ -39,6 +39,7 @@ const [contactEmail, setContactEmail] = useState("");
 const [enquiries, setEnquiries] = useState([]);
 const [mockResults, setMockResults] = useState([]);
 const [leaderboard, setLeaderboard] = useState([]);
+const [mockQuestions, setMockQuestions] = useState([]);
   const provider = new GoogleAuthProvider();
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -46,6 +47,7 @@ const [leaderboard, setLeaderboard] = useState([]);
       if (currentUser) {
         loadUserMockResults(currentUser.email);
         loadLeaderboard();
+        loadMockQuestions();
       }
     });
   
@@ -191,6 +193,32 @@ setEnquiries([]);
       alert(error.message);
     }
   };
+  const loadMockQuestions = async () => {
+    try {
+      const querySnapshot = await getDocs(
+        collection(db, "mockQuestions")
+      );
+  
+      const questions = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        question: doc.data().question,
+        options: [
+          doc.data().option1,
+          doc.data().option2,
+          doc.data().option3,
+          doc.data().option4,
+        ],
+        answer: doc.data().answer,
+        subject: doc.data().subject,
+        level: doc.data().level,
+        language: doc.data().language,
+      }));
+  
+      setMockQuestions(questions);
+    } catch (error) {
+      alert(error.message);
+    }
+  };
   const courses = [
     {
       id: "ctet-paper-1",
@@ -275,7 +303,7 @@ setEnquiries([]);
     },
   ];
   
-  const mockQuestions = [
+  const sampleMockQuestions = [
     {
       question: "Piaget kis development theory ke liye famous hain?",
       options: [
@@ -743,7 +771,11 @@ const motivationalMessage =
   </>
 )}
   </div>
-
+  {mockQuestions.length === 0 && (
+  <p className="sectionText">
+    Loading mock questions...
+  </p>
+)}
   <div className="mockBox premiumMockBox">
     {!mockStarted ? (
       <>
