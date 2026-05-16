@@ -170,6 +170,40 @@ setEnquiries([]);
       points: ["State Pattern", "Syllabus", "Practice Sets", "PYQ", "Strategy"],
     },
   ];
+  const notesData = [
+    {
+      id: 1,
+      title: "Child Development Notes",
+      category: "CDP",
+      type: "FREE",
+      pages: 42,
+      pdf: "#",
+    },
+    {
+      id: 2,
+      title: "Learning Theories PDF",
+      category: "Psychology",
+      type: "FREE",
+      pages: 28,
+      pdf: "#",
+    },
+    {
+      id: 3,
+      title: "Inclusive Education",
+      category: "Pedagogy",
+      type: "PREMIUM",
+      pages: 35,
+      pdf: "#",
+    },
+    {
+      id: 4,
+      title: "CTET PYQ Notes",
+      category: "PYQ",
+      type: "PREMIUM",
+      pages: 50,
+      pdf: "#",
+    },
+  ];
   return (
     <div className={darkMode ? "app dark" : "app"}>
       {selectedCourse && (
@@ -646,15 +680,31 @@ setEnquiries([]);
         </div>
       </section>
       )}
-      <section id="notes">
-        <h2>Free Notes</h2>
+     <section id="notes" className="notesSection">
+  <h2>Premium Notes Library</h2>
 
-        <div className="grid">
-          <div className="course">📘 Child Development</div>
-          <div className="course">📘 Learning Theories</div>
-          <div className="course">📘 Inclusive Education</div>
-        </div>
-      </section>
+  <p className="sectionText">
+    Smart bilingual notes with visual learning and quick revision support.
+  </p>
+
+  <div className="grid">
+    {notesData.map((note) => (
+      <div className="course" key={note.id}>
+        <span className="planTag">{note.type}</span>
+
+        <h3>{note.title}</h3>
+
+        <p>📂 Category: {note.category}</p>
+
+        <p>📄 Pages: {note.pages}</p>
+
+        <a href={note.pdf} className="btnLink">
+          Download PDF
+        </a>
+      </div>
+    ))}
+  </div>
+</section>
     
       <section id="pricing" className="pricingPro">
         <h2>Choose Your Learning Plan</h2>
