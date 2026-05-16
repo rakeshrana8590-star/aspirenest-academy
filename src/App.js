@@ -40,6 +40,15 @@ const [enquiries, setEnquiries] = useState([]);
 const [mockResults, setMockResults] = useState([]);
 const [leaderboard, setLeaderboard] = useState([]);
 const [mockQuestions, setMockQuestions] = useState([]);
+const [selectedSubject, setSelectedSubject] = useState("CDP");
+const [adminQuestion, setAdminQuestion] = useState("");
+const [adminOption1, setAdminOption1] = useState("");
+const [adminOption2, setAdminOption2] = useState("");
+const [adminOption3, setAdminOption3] = useState("");
+const [adminOption4, setAdminOption4] = useState("");
+const [adminAnswer, setAdminAnswer] = useState("");
+const [adminSubject, setAdminSubject] = useState("CDP");
+const [adminLevel, setAdminLevel] = useState("Easy");
   const provider = new GoogleAuthProvider();
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -193,11 +202,14 @@ setEnquiries([]);
       alert(error.message);
     }
   };
-  const loadMockQuestions = async () => {
+  const loadMockQuestions = async (subject = selectedSubject) => {
     try {
-      const querySnapshot = await getDocs(
-        collection(db, "mockQuestions")
+      const q = query(
+        collection(db, "mockQuestions"),
+        where("subject", "==", subject)
       );
+  
+      const querySnapshot = await getDocs(q);
   
       const questions = querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -215,6 +227,53 @@ setEnquiries([]);
       }));
   
       setMockQuestions(questions);
+      setCurrentQuestion(0);
+      setSelectedAnswer("");
+      setScore(0);
+      setShowResult(false);
+      setShowAnswer(false);
+      setTimeLeft(60);
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+  const handleAddMockQuestion = async () => {
+    if (
+      !adminQuestion ||
+      !adminOption1 ||
+      !adminOption2 ||
+      !adminOption3 ||
+      !adminOption4 ||
+      !adminAnswer
+    ) {
+      alert("Please fill all question details");
+      return;
+    }
+  
+    try {
+      await addDoc(collection(db, "mockQuestions"), {
+        question: adminQuestion,
+        option1: adminOption1,
+        option2: adminOption2,
+        option3: adminOption3,
+        option4: adminOption4,
+        answer: adminAnswer,
+        subject: adminSubject,
+        level: adminLevel,
+        language: "English",
+        createdAt: new Date(),
+      });
+  
+      alert("Question added successfully ✅");
+  
+      setAdminQuestion("");
+      setAdminOption1("");
+      setAdminOption2("");
+      setAdminOption3("");
+      setAdminOption4("");
+      setAdminAnswer("");
+  
+      loadMockQuestions(adminSubject);
     } catch (error) {
       alert(error.message);
     }
@@ -776,6 +835,47 @@ const motivationalMessage =
     Loading mock questions...
   </p>
 )}
+<div className="subjectFilters">
+  <button
+    className="subjectBtn"
+    onClick={() => {
+      setSelectedSubject("CDP");
+      loadMockQuestions("CDP");
+    }}
+  >
+    CDP
+  </button>
+
+  <button
+    className="subjectBtn"
+    onClick={() => {
+      setSelectedSubject("Maths");
+      loadMockQuestions("Maths");
+    }}
+  >
+    Maths
+  </button>
+
+  <button
+    className="subjectBtn"
+    onClick={() => {
+      setSelectedSubject("EVS");
+      loadMockQuestions("EVS");
+    }}
+  >
+    EVS
+  </button>
+
+  <button
+    className="subjectBtn"
+    onClick={() => {
+      setSelectedSubject("Language");
+      loadMockQuestions("Language");
+    }}
+  >
+    Language
+  </button>
+</div>
   <div className="mockBox premiumMockBox">
     {!mockStarted ? (
       <>
@@ -1048,6 +1148,70 @@ const motivationalMessage =
       <h3>Total Enquiries</h3>
       <p>{enquiries.length}</p>
     </div>
+    <div className="adminQuestionForm">
+  <h3>Add Mock Question</h3>
+
+  <input
+    placeholder="Question"
+    value={adminQuestion}
+    onChange={(e) => setAdminQuestion(e.target.value)}
+  />
+
+  <input
+    placeholder="Option 1"
+    value={adminOption1}
+    onChange={(e) => setAdminOption1(e.target.value)}
+  />
+
+  <input
+    placeholder="Option 2"
+    value={adminOption2}
+    onChange={(e) => setAdminOption2(e.target.value)}
+  />
+
+  <input
+    placeholder="Option 3"
+    value={adminOption3}
+    onChange={(e) => setAdminOption3(e.target.value)}
+  />
+
+  <input
+    placeholder="Option 4"
+    value={adminOption4}
+    onChange={(e) => setAdminOption4(e.target.value)}
+  />
+
+  <input
+    placeholder="Correct Answer"
+    value={adminAnswer}
+    onChange={(e) => setAdminAnswer(e.target.value)}
+  />
+
+  <select
+    value={adminSubject}
+    onChange={(e) => setAdminSubject(e.target.value)}
+  >
+    <option>CDP</option>
+    <option>Maths</option>
+    <option>EVS</option>
+    <option>Language</option>
+    <option>Pedagogy</option>
+    <option>State TET</option>
+  </select>
+
+  <select
+    value={adminLevel}
+    onChange={(e) => setAdminLevel(e.target.value)}
+  >
+    <option>Easy</option>
+    <option>Medium</option>
+    <option>Hard</option>
+  </select>
+
+  <button className="btnLink" onClick={handleAddMockQuestion}>
+    Add Question
+  </button>
+</div>
   </>
 )}
           </div>
