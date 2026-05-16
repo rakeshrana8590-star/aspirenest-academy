@@ -14,6 +14,9 @@ import {
   getDocs,
   query,
   where,
+  doc,
+  getDoc,
+  setDoc,
 } from "firebase/firestore";
 import React, { useState, useEffect } from 'react';
 import './style.css';
@@ -34,6 +37,7 @@ const [timeLeft, setTimeLeft] = useState(60);
 const [mobile, setMobile] = useState("");
 const [contactEmail, setContactEmail] = useState("");
   const [user, setUser] = useState(null);
+  const [isPremiumUser, setIsPremiumUser] = useState(false);
   const adminEmail = "aspirenestplatform@gmail.com";
   const [students, setStudents] = useState([]);
 const [enquiries, setEnquiries] = useState([]);
@@ -53,7 +57,9 @@ const [adminLevel, setAdminLevel] = useState("Easy");
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+    
       if (currentUser) {
+        checkPremiumAccess(currentUser);
         loadUserMockResults(currentUser.email);
         loadLeaderboard();
         loadMockQuestions();
@@ -114,8 +120,23 @@ setEnquiries([]);
       alert(error.message);
     }
   };
+
   const handleContactSubmit = async () => {
-   
+    const handleNoteAccess = (note) => {
+      if (note.type === "PREMIUM" && !isPremiumUser) {
+        alert(
+          "This is premium content. Please upgrade to access this note."
+        );
+        return;
+      }
+    
+      if (note.pdf === "#") {
+        alert("PDF will be uploaded soon.");
+        return;
+      }
+    
+      window.open(note.pdf, "_blank");
+    };
    
     if (!fullName || !mobile || !contactEmail) {
       alert("Please fill all contact details");
@@ -139,6 +160,22 @@ setEnquiries([]);
       alert(error.message);
     }
   };
+  
+  const handleNoteAccess = (note) => {
+    if (note.type === "PREMIUM" && !isPremiumUser) {
+      alert(
+        "This is premium content. Please upgrade to access this note."
+      );
+      return;
+    }
+  
+    if (note.pdf === "#") {
+      alert("PDF will be uploaded soon.");
+      return;
+    }
+  
+    window.open(note.pdf, "_blank");
+  };
   const loadAdminData = async () => {
     try {
       const studentsSnap = await getDocs(collection(db, "students"));
@@ -161,6 +198,38 @@ setEnquiries([]);
       alert("Admin data loaded ✅");
     } catch (error) {
       alert(error.message);
+    }
+  };
+  const checkPremiumAccess = async (currentUser) => {
+    if (!currentUser) return;
+  
+    if (currentUser.email === adminEmail) {
+      setIsPremiumUser(true);
+      return;
+    }
+  
+    try {
+      const userRef = doc(db, "users", currentUser.uid);
+      const userSnap = await getDoc(userRef);
+  
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          email: currentUser.email,
+          isPremium: false,
+          purchasedCourses: [],
+          subscriptionType: "FREE",
+          purchaseDate: null,
+          createdAt: new Date(),
+        });
+  
+        setIsPremiumUser(false);
+        return;
+      }
+  
+      setIsPremiumUser(userSnap.data().isPremium === true);
+    } catch (error) {
+      alert(error.message);
+      setIsPremiumUser(false);
     }
   };
   const loadUserMockResults = async (email) => {
@@ -540,7 +609,7 @@ const motivationalMessage =
         <nav>
           <a href="#ctet">Courses</a>
 
-          <a href="#resources">Notes</a>
+          <a href="#notes">Notes</a>
 
           <a href="#pricing">Pricing</a>
 
@@ -1236,9 +1305,14 @@ const motivationalMessage =
 
         <p>📄 Pages: {note.pages}</p>
 
-        <a href={note.pdf} className="btnLink">
-          Download PDF
-        </a>
+        <button
+  className="btnLink"
+  onClick={() => handleNoteAccess(note)}
+>
+  {note.type === "PREMIUM" && !isPremiumUser
+    ? "🔒 Locked"
+    : "Download PDF"}
+</button>
       </div>
     ))}
   </div>
