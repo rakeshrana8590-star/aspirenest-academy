@@ -268,17 +268,19 @@ setEnquiries([]);
     if (selectedAnswer === mockQuestions[currentQuestion].answer) {
       setScore(score + 1);
     }
+  
+    setTimeout(() => {
+      if (currentQuestion + 1 < mockQuestions.length) {
+        setCurrentQuestion(currentQuestion + 1);
+        setSelectedAnswer("");
+        setShowAnswer(false);
+        setTimeLeft(60);
+      } else {
+        setShowResult(true);
+      }
+    }, 2000);
   };
-  const handleNextQuestion = () => {
-    if (currentQuestion + 1 < mockQuestions.length) {
-      setCurrentQuestion(currentQuestion + 1);
-      setSelectedAnswer("");
-      setShowAnswer(false);
-      setTimeLeft(60);
-    } else {
-      setShowResult(true);
-    }
-  };
+
   
   const restartMockTest = () => {
     setMockStarted(false);
@@ -289,6 +291,21 @@ setEnquiries([]);
     setTimeLeft(60);
     setShowAnswer(false);
   };
+  const percentage = Math.round((score / mockQuestions.length) * 100);
+
+const performanceLevel =
+  percentage >= 80
+    ? "Excellent Performance 🏆"
+    : percentage >= 50
+    ? "Good Attempt 👍"
+    : "Needs More Practice 📚";
+
+const motivationalMessage =
+  percentage >= 80
+    ? "Outstanding work! Your concepts are very strong."
+    : percentage >= 50
+    ? "Good effort! Practice more to improve your score."
+    : "Keep practicing daily. Improvement will come with consistency.";
   useEffect(() => {
     if (!mockStarted || showResult) return;
   
@@ -654,14 +671,28 @@ setEnquiries([]);
       </>
     ) : showResult ? (
       <>
-        <h3>Test Completed 🎉</h3>
-        <p className="resultScore">
-          Your Score: {score} / {mockQuestions.length}
-        </p>
-        <button className="btnLink" onClick={restartMockTest}>
-          Restart Test
-        </button>
-      </>
+      <h3>Test Completed 🎉</h3>
+    
+      <div className="resultCircle">
+        <span>{percentage}%</span>
+      </div>
+    
+      <p className="resultScore">
+        Score: {score} / {mockQuestions.length}
+      </p>
+    
+      <h4 className="performanceLevel">
+        {performanceLevel}
+      </h4>
+    
+      <p className="motivationalMessage">
+        {motivationalMessage}
+      </p>
+    
+      <button className="btnLink" onClick={restartMockTest}>
+        Restart Test
+      </button>
+    </>
     ) : (
       <>
         <span className="questionTag">
@@ -690,15 +721,8 @@ setEnquiries([]);
           ))}
         </div>
 
-        <button
-  className="btnLink"
-  onClick={showAnswer ? handleNextQuestion : handleAnswerSubmit}
->
-  {showAnswer
-    ? currentQuestion + 1 === mockQuestions.length
-      ? "View Result"
-      : "Next Question"
-    : "Submit Answer"}
+        <button className="btnLink" onClick={handleAnswerSubmit}>
+  Submit Answer
 </button>
       </>
     )}

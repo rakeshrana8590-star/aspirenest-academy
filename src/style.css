@@ -2497,3 +2497,42 @@ button:hover,
   color: #fff !important;
   border-color: #dc2626 !important;
 }
+.resultCircle {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  margin: 25px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: conic-gradient(#c45a1c 0deg, #ffb37a 360deg);
+  box-shadow: 0 25px 60px rgba(196, 90, 28, 0.25);
+}
+
+.resultCircle span {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 900;
+  color: #c45a1c;
+}
+
+.performanceLevel {
+  font-size: 24px;
+  margin: 16px 0 8px;
+  color: #111827;
+  text-align: center;
+}
+
+.motivationalMessage {
+  font-size: 17px;
+  color: #555;
+  margin-bottom: 25px;
+  text-align: center;
+  line-height: 1.7;
+}
