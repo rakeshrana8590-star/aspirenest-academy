@@ -11,6 +11,7 @@ signInWithPopup
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import React, { useState } from 'react';
 import './style.css';
+import currentAffairsPdf from "./assets/pdfs/CA MARCH 26.pdf";
 export default function App() {
   const [darkMode, setDarkMode] = React.useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
@@ -202,6 +203,16 @@ setEnquiries([]);
       type: "PREMIUM",
       pages: 50,
       pdf: "#",
+    },
+  ];
+  const currentAffairsData = [
+    {
+      id: 1,
+      title: "March Current Affairs",
+      month: "March 2026",
+      type: "FREE",
+      pages: 11,
+      pdf: currentAffairsPdf,
     },
   ];
   return (
@@ -705,7 +716,36 @@ setEnquiries([]);
     ))}
   </div>
 </section>
-    
+<section id="current-affairs" className="notesSection">
+  <h2>Current Affairs Library</h2>
+
+  <p className="sectionText">
+    Latest current affairs PDFs for CTET/TET preparation.
+  </p>
+
+  <div className="grid">
+    {currentAffairsData.map((item) => (
+      <div className="course" key={item.id}>
+        <span className="planTag">{item.type}</span>
+
+        <h3>{item.title}</h3>
+
+        <p>🗓️ Month: {item.month}</p>
+
+        <p>📄 Pages: {item.pages}</p>
+
+        <a
+          href={item.pdf}
+          className="btnLink"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Open PDF
+        </a>
+      </div>
+    ))}
+  </div>
+</section> 
       <section id="pricing" className="pricingPro">
         <h2>Choose Your Learning Plan</h2>
 
