@@ -687,6 +687,40 @@ const smartRecommendation =
     ];
     
     const dailyStreak = uniqueTestDates.length;
+    const recentScores = mockResults
+  .slice(-5)
+  .map((result) => result.percentage);
+
+const weeklyGrowth =
+  recentScores.length >= 2
+    ? recentScores[recentScores.length - 1] - recentScores[0]
+    : 0;
+
+const weeklyGrowthMessage =
+  weeklyGrowth > 0
+    ? `Your performance improved by ${weeklyGrowth}% recently.`
+    : weeklyGrowth < 0
+    ? `Your performance dropped by ${Math.abs(
+        weeklyGrowth
+      )}%. Focus on revision.`
+    : "Complete more mock tests to track weekly growth.";
+    const estimatedRank =
+  averageAccuracy >= 90
+    ? "Top 5%"
+    : averageAccuracy >= 80
+    ? "Top 10%"
+    : averageAccuracy >= 60
+    ? "Top 25%"
+    : averageAccuracy >= 40
+    ? "Needs Improvement"
+    : "Start Practice";
+
+const rankPredictionMessage =
+  averageAccuracy >= 80
+    ? "You are performing at a strong competitive level."
+    : averageAccuracy >= 50
+    ? "You are improving. More consistent practice can push you higher."
+    : "Attempt more mock tests to improve your predicted rank.";
   useEffect(() => {
     if (!mockStarted || showResult) return;
   
@@ -1361,6 +1395,18 @@ const smartRecommendation =
   <h3>Daily Study Streak</h3>
 
   <p>🔥 {dailyStreak} Day Streak</p>
+</div>
+<div className="dashboardCard">
+  <h3>Weekly Growth</h3>
+
+  <p>{weeklyGrowthMessage}</p>
+</div>
+<div className="dashboardCard">
+  <h3>Predicted Rank</h3>
+
+  <p>{estimatedRank}</p>
+
+  <small>{rankPredictionMessage}</small>
 </div>
 <div className="dashboardCard">
   <h3>Performance Insight</h3>
