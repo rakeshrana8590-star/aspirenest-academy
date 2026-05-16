@@ -38,12 +38,14 @@ const [contactEmail, setContactEmail] = useState("");
   const [students, setStudents] = useState([]);
 const [enquiries, setEnquiries] = useState([]);
 const [mockResults, setMockResults] = useState([]);
+const [leaderboard, setLeaderboard] = useState([]);
   const provider = new GoogleAuthProvider();
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
         loadUserMockResults(currentUser.email);
+        loadLeaderboard();
       }
     });
   
@@ -169,7 +171,26 @@ setEnquiries([]);
       alert(error.message);
     }
   };
-
+  const loadLeaderboard = async () => {
+    try {
+      const querySnapshot = await getDocs(
+        collection(db, "mockResults")
+      );
+  
+      const results = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+  
+      const sortedResults = results
+        .sort((a, b) => b.percentage - a.percentage)
+        .slice(0, 5);
+  
+      setLeaderboard(sortedResults);
+    } catch (error) {
+      alert(error.message);
+    }
+  };
   const courses = [
     {
       id: "ctet-paper-1",
@@ -809,22 +830,22 @@ const motivationalMessage =
   </div>
 
   <div className="leaderboardGrid">
-    {leaderboardData.map((student) => (
-      <div className="leaderCard" key={student.rank}>
-        <div className="rankBadge">
-          #{student.rank}
-        </div>
-
-        <h3>{student.name}</h3>
-
-        <p className="leaderScore">
-          {student.score}
-        </p>
-
-        <span className="leaderTag">
-          {student.badge}
-        </span>
-      </div>
+  {leaderboard.map((student, index) => (
+   <div className="leaderCard" key={student.id}>
+   <div className="rankBadge">
+     #{index + 1}
+   </div>
+ 
+   <h3>{student.email}</h3>
+ 
+   <p className="leaderScore">
+     {student.percentage}%
+   </p>
+ 
+   <span className="leaderTag">
+     Top Score
+   </span>
+ </div>
     ))}
   </div>
 </section>
