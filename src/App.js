@@ -1,4 +1,5 @@
 import { auth, db } from "./firebase";
+import { storage } from "./firebase";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -19,6 +20,11 @@ import {
   setDoc,
 deleteDoc,
 } from "firebase/firestore";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
 import React, { useState, useEffect } from 'react';
 import {
   LineChart,
@@ -71,10 +77,12 @@ const [adminNoteCategory, setAdminNoteCategory] = useState("");
 const [adminNoteType, setAdminNoteType] = useState("FREE");
 const [adminNotePages, setAdminNotePages] = useState("");
 const [adminNotePdf, setAdminNotePdf] = useState("");
+const [uploadingPdf, setUploadingPdf] = useState(false);
 const [firebaseNotes, setFirebaseNotes] = useState([]);
 const [announcementTitle, setAnnouncementTitle] = useState("");
 const [announcementMessage, setAnnouncementMessage] = useState("");
 const [announcements, setAnnouncements] = useState([]);
+const [paymentHistory, setPaymentHistory] = useState([]);
   const provider = new GoogleAuthProvider();
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -83,10 +91,14 @@ const [announcements, setAnnouncements] = useState([]);
       if (currentUser) {
         checkPremiumAccess(currentUser);
         loadUserMockResults(currentUser.email);
+        setTimeout(() => {
+          checkPremiumAccess(currentUser);
+        }, 1000);
         loadLeaderboard();
         loadMockQuestions();
         loadFirebaseNotes();
         loadAnnouncements();
+        loadPaymentHistory();
       }
     });
   
@@ -94,17 +106,31 @@ const [announcements, setAnnouncements] = useState([]);
   }, []);
   const handleRegister = async () => {
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+  
       await addDoc(collection(db, "students"), {
         email: email,
-        createdAt: new Date()
+        isPremium: false,
+        createdAt: new Date(),
       });
+  
+      await setDoc(doc(db, "users", userCredential.user.uid), {
+        email: email,
+        isPremium: false,
+        subscriptionType: "FREE",
+        purchasedCourses: [],
+        createdAt: new Date(),
+      });
+  
       alert("Account Created Successfully 🚀");
     } catch (error) {
       alert(error.message);
     }
   };
-  
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
@@ -185,6 +211,19 @@ setEnquiries([]);
   
     window.open(note.pdf, "_blank");
   };
+  const handlePremiumSectionAccess = () => {
+    if (!user) {
+      alert("Please login first to access premium content.");
+      return;
+    }
+  
+    if (!isPremiumUser) {
+      alert("This section is only for premium members. Please upgrade.");
+      return;
+    }
+  
+    alert("Premium access verified ✅");
+  };
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
       const script = document.createElement("script");
@@ -193,6 +232,35 @@ setEnquiries([]);
       script.onerror = () => resolve(false);
       document.body.appendChild(script);
     });
+  };
+  const savePaymentRecord = async (paymentResponse) => {
+    if (!user) return;
+  
+    try {
+      const purchaseDate = new Date();
+
+const expiryDate = new Date();
+expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+      await addDoc(collection(db, "payments"), {
+        userId: user.uid,
+        email: user.email,
+        amount: 199,
+        currency: "INR",
+        plan: "Premium Membership",
+        status: "SUCCESS",
+        paymentId: paymentResponse?.razorpay_payment_id || "DEMO_PAYMENT",
+        orderId: paymentResponse?.razorpay_order_id || "DEMO_ORDER",
+        signature: paymentResponse?.razorpay_signature || "DEMO_SIGNATURE",
+        purchaseDate: purchaseDate,
+expiryDate: expiryDate,
+premiumStatus: "ACTIVE",
+        createdAt: new Date(),
+      });
+  
+      loadPaymentHistory();
+    } catch (error) {
+      alert(error.message);
+    }
   };
   const unlockPremiumAccess = async () => {
     if (!user) {
@@ -203,6 +271,11 @@ setEnquiries([]);
     try {
       const userRef = doc(db, "users", user.uid);
   
+      const purchaseDate = new Date();
+
+      const expiryDate = new Date();
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+      
       await setDoc(
         userRef,
         {
@@ -210,7 +283,9 @@ setEnquiries([]);
           isPremium: true,
           subscriptionType: "PREMIUM",
           purchasedCourses: ["Premium Notes"],
-          purchaseDate: new Date(),
+          purchaseDate: purchaseDate,
+          expiryDate: expiryDate,
+          premiumStatus: "ACTIVE",
         },
         { merge: true }
       );
@@ -223,6 +298,15 @@ setEnquiries([]);
     }
   };
   const handlePremiumPurchase = async () => {
+    if (!user) {
+      alert("Please login first.");
+      return;
+    }
+    
+    if (isPremiumUser) {
+      alert("You already have premium access ✅");
+      return;
+    }
     const loaded = await loadRazorpayScript();
   
     if (!loaded) {
@@ -241,8 +325,12 @@ setEnquiries([]);
   
       description: "Premium Membership",
   
-      handler: async function () {
+      handler: async function (response) {
+        await savePaymentRecord(response);
+      
         await unlockPremiumAccess();
+      
+        alert("Payment successful ✅");
       },
   
       prefill: {
@@ -261,13 +349,31 @@ setEnquiries([]);
   const loadAdminData = async () => {
     try {
       const studentsSnap = await getDocs(collection(db, "students"));
+      const usersSnap = await getDocs(collection(db, "users"));
+
+const usersData = usersSnap.docs.map((doc) => ({
+  id: doc.id,
+  ...doc.data(),
+}));
       const enquiriesSnap = await getDocs(collection(db, "enquiries"));
   
       setStudents(
-        studentsSnap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
+        studentsSnap.docs.map((doc) => {
+          const student = {
+            id: doc.id,
+            ...doc.data(),
+          };
+      
+          const userRecord = usersData.find(
+            (u) => u.email === student.email
+          );
+      
+          return {
+            ...student,
+            isPremium: userRecord?.isPremium || false,
+            subscriptionType: userRecord?.subscriptionType || "FREE",
+          };
+        })
       );
   
       setEnquiries(
@@ -418,6 +524,22 @@ setEnquiries([]);
       alert(error.message);
     }
   };
+  const loadPaymentHistory = async () => {
+    try {
+      const querySnapshot = await getDocs(
+        collection(db, "payments")
+      );
+  
+      const data = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+  
+      setPaymentHistory(data);
+    } catch (error) {
+      alert(error.message);
+    }
+  };
   const handleAddMockQuestion = async () => {
     if (
       !adminQuestion ||
@@ -487,13 +609,41 @@ setEnquiries([]);
   
     // Future: Firebase notes collection delete yaha add hoga
   };
+  const handleUploadPdf = async (file) => {
+    if (!file) return "";
+  
+    try {
+      setUploadingPdf(true);
+  
+      const storageRef = ref(
+        storage,
+        `notes/${Date.now()}-${file.name}`
+      );
+  
+      await uploadBytes(storageRef, file);
+  
+      const downloadURL = await getDownloadURL(storageRef);
+  
+      setUploadingPdf(false);
+  
+      return downloadURL;
+    } catch (error) {
+      setUploadingPdf(false);
+      alert(error.message);
+      return "";
+    }
+  };
   const handleSaveNote = async () => {
-    if (!adminNoteTitle || !adminNoteCategory || !adminNotePages || !adminNotePdf) {
-      alert("Please fill all note details");
+    if (!adminNoteTitle || !adminNoteCategory || !adminNotePages) {
+      alert("Please fill title, category and pages");
       return;
     }
   
     try {
+      if (!adminNotePdf) {
+        alert("Please upload PDF first");
+        return;
+      }
       await addDoc(collection(db, "notes"), {
         title: adminNoteTitle,
         category: adminNoteCategory,
@@ -551,6 +701,30 @@ setEnquiries([]);
   };
   const handlePremiumControl = async (studentEmail, makePremium) => {
     try {
+      const q = query(
+        collection(db, "users"),
+        where("email", "==", studentEmail)
+      );
+  
+      const querySnapshot = await getDocs(q);
+  
+      if (querySnapshot.empty) {
+        alert("User record not found in premium database.");
+        return;
+      }
+  
+      const userDoc = querySnapshot.docs[0];
+  
+      await setDoc(
+        doc(db, "users", userDoc.id),
+        {
+          isPremium: makePremium,
+          subscriptionType: makePremium ? "PREMIUM" : "FREE",
+          updatedAt: new Date(),
+        },
+        { merge: true }
+      );
+  
       alert(
         `${studentEmail} marked as ${
           makePremium ? "Premium" : "Free"
@@ -1469,7 +1643,9 @@ const studyTimeMessage =
             <div className="feature">✅ Hindi + English Support</div>
           </div>
 
-          <button>Explore Premium</button>
+          <button onClick={handlePremiumSectionAccess}>
+  Explore Premium
+</button>
         </div>
 
         <div className="premiumCard">
@@ -1501,14 +1677,51 @@ const studyTimeMessage =
 <section className="studentDashboard">
         <div className="dashboardSidebar">
           <h3>Dashboard</h3>
-          {user && <p className="userEmail">Welcome, {user.email}</p>}
+          <div className="userEmail">
+  <p>Welcome, {user.email}</p>
+
+  <span
+    style={{
+      display: "inline-block",
+      marginTop: "8px",
+      padding: "6px 12px",
+      borderRadius: "20px",
+      background: isPremiumUser
+        ? "#16a34a"
+        : "#6b7280",
+      color: "#fff",
+      fontSize: "12px",
+      fontWeight: "bold",
+    }}
+  >
+    {isPremiumUser
+      ? "🌟 PREMIUM MEMBER"
+      : "FREE MEMBER"}
+  </span>
+  {isPremiumUser && (
+  <p
+    style={{
+      marginTop: "8px",
+      fontSize: "12px",
+      color: "#16a34a",
+      fontWeight: "bold",
+    }}
+  >
+    Premium Access Active ✅
+  </p>
+)}
+</div>
           <ul>
             <li>📚 My Courses</li>
         
             <li>📝 Mock Tests</li>
             <li>📈 Progress</li>
-            <li>📥 Download Notes</li>
-            <li>🎯 Revision Planner</li>
+            <li onClick={handlePremiumSectionAccess}>
+  📥 Download Notes {isPremiumUser ? "✅" : "🔒"}
+</li>
+<li onClick={handlePremiumSectionAccess}>
+  🎯 Revision Planner {isPremiumUser ? "✅" : "🔒"}
+</li>
 
             <li>🏆 Certificates</li>
             <li>📢 Announcements</li>
@@ -1614,7 +1827,23 @@ const studyTimeMessage =
 
 <div className="dashboardCard">
   <h3>Study Time Tracker</h3>
+  <div className="dashboardCard">
+  <h3>Purchase History</h3>
 
+  {paymentHistory.filter((payment) => payment.email === user.email).length > 0 ? (
+    paymentHistory
+      .filter((payment) => payment.email === user.email)
+      .map((payment) => (
+        <div key={payment.id}>
+          <p>✅ {payment.plan}</p>
+          <p>💰 ₹{payment.amount}</p>
+          <p>🧾 {payment.status}</p>
+        </div>
+      ))
+  ) : (
+    <p>No purchases yet.</p>
+  )}
+</div>
   <p>{estimatedStudyHours} Hours</p>
 
   <small>{studyTimeMessage}</small>
@@ -1947,11 +2176,33 @@ const studyTimeMessage =
       onChange={(e) => setAdminNotePages(e.target.value)}
     />
 
-    <input
-      placeholder="PDF Link"
-      value={adminNotePdf}
-      onChange={(e) => setAdminNotePdf(e.target.value)}
-    />
+<div className="pdfUploadBox">
+  <input
+    type="file"
+    accept="application/pdf"
+    onChange={async (e) => {
+      const file = e.target.files[0];
+
+      if (!file) return;
+
+      const uploadedUrl = await handleUploadPdf(file);
+
+      if (uploadedUrl) {
+        setAdminNotePdf(uploadedUrl);
+      }
+    }}
+  />
+
+  {uploadingPdf && (
+    <p>Uploading PDF...</p>
+  )}
+
+  {adminNotePdf && (
+    <p style={{ color: "#16a34a" }}>
+      PDF uploaded successfully ✅
+    </p>
+  )}
+</div>
 
     <select
       value={adminNoteType}
@@ -1961,8 +2212,12 @@ const studyTimeMessage =
       <option>PREMIUM</option>
     </select>
 
-    <button className="btnLink" onClick={handleSaveNote}>
-  Save Note
+    <button
+  className="btnLink"
+  onClick={handleSaveNote}
+  disabled={uploadingPdf}
+>
+  {uploadingPdf ? "Uploading PDF..." : "Save Note"}
 </button>
     <div className="adminStudentsSection">
   <h3>Current Notes</h3>
@@ -2022,10 +2277,14 @@ const studyTimeMessage =
     <div className="adminOverviewGrid">
       <div className="dashboardCard">
         <h3>Revenue Mode</h3>
-        <p>Demo Active</p>
+        <p>Live Tracking Active</p>
       </div>
 
       <div className="dashboardCard">
+      <div className="dashboardCard">
+  <h3>Total Payments</h3>
+  <p>{paymentHistory.length}</p>
+</div>
         <h3>Premium System</h3>
         <p>Enabled</p>
       </div>
@@ -2040,6 +2299,29 @@ const studyTimeMessage =
         <p>Premium Notes</p>
       </div>
     </div>
+    <div className="adminStudentsSection">
+  <h3>Recent Payment History</h3>
+
+  <div className="adminStudentsGrid">
+    {paymentHistory.length > 0 ? (
+      paymentHistory.map((payment) => (
+        <div className="studentCard" key={payment.id}>
+          <h4>{payment.plan}</h4>
+
+          <p>📧 {payment.email}</p>
+
+          <p>💰 ₹{payment.amount}</p>
+
+          <p>✅ {payment.status}</p>
+
+          <p>🧾 {payment.paymentId}</p>
+        </div>
+      ))
+    ) : (
+      <p>No payment history found.</p>
+    )}
+  </div>
+</div>
   </div>
 )}
 {activeAdminTab === "Announcements" && (
@@ -2113,9 +2395,11 @@ const studyTimeMessage =
   className="btnLink"
   onClick={() => handleNoteAccess(note)}
 >
-  {note.type === "PREMIUM" && !isPremiumUser
-    ? "🔒 Locked"
-    : "Download PDF"}
+{note.type === "PREMIUM" && !isPremiumUser
+  ? "🔒 Premium Only"
+  : note.type === "PREMIUM"
+  ? "🌟 Open Premium PDF"
+  : "📥 Download PDF"}
 </button>
       </div>
     ))}
