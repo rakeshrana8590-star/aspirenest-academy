@@ -65,6 +65,14 @@ const [adminAnswer, setAdminAnswer] = useState("");
 const [adminSubject, setAdminSubject] = useState("CDP");
 const [adminLevel, setAdminLevel] = useState("Easy");
 const [activeAdminTab, setActiveAdminTab] = useState("Dashboard");
+const [adminNoteTitle, setAdminNoteTitle] = useState("");
+const [adminNoteCategory, setAdminNoteCategory] = useState("");
+const [adminNoteType, setAdminNoteType] = useState("FREE");
+const [adminNotePages, setAdminNotePages] = useState("");
+const [adminNotePdf, setAdminNotePdf] = useState("");
+const [announcementTitle, setAnnouncementTitle] = useState("");
+const [announcementMessage, setAnnouncementMessage] = useState("");
+const [announcements, setAnnouncements] = useState([]);
   const provider = new GoogleAuthProvider();
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -413,6 +421,46 @@ setEnquiries([]);
       setAdminAnswer("");
   
       loadMockQuestions(adminSubject);
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+  const handleDeleteMockQuestion = async (indexToDelete) => {
+    const updatedQuestions = mockQuestions.filter(
+      (_, index) => index !== indexToDelete
+    );
+  
+    setMockQuestions(updatedQuestions);
+  
+    alert("Question deleted successfully ✅");
+  };
+  const handleAddAnnouncement = async () => {
+    if (!announcementTitle || !announcementMessage) {
+      alert("Please fill announcement title and message");
+      return;
+    }
+  
+    const newAnnouncement = {
+      id: Date.now(),
+      title: announcementTitle,
+      message: announcementMessage,
+      createdAt: new Date(),
+    };
+  
+    setAnnouncements([newAnnouncement, ...announcements]);
+  
+    setAnnouncementTitle("");
+    setAnnouncementMessage("");
+  
+    alert("Announcement published successfully ✅");
+  };
+  const handlePremiumControl = async (studentEmail, makePremium) => {
+    try {
+      alert(
+        `${studentEmail} marked as ${
+          makePremium ? "Premium" : "Free"
+        } user ✅`
+      );
     } catch (error) {
       alert(error.message);
     }
@@ -1617,10 +1665,109 @@ const studyTimeMessage =
 </div>
     </div>
 )}
+{activeAdminTab === "Students" && (
+  <div className="adminStudentsSection">
+    <h3>Registered Students</h3>
 
+    <div className="adminStudentsGrid">
+      {students.length > 0 ? (
+        students.map((student, index) => (
+          <div className="studentCard" key={index}>
+            <h4>{student.name || "Student"}</h4>
+
+            <p>📧 {student.email}</p>
+
+            <p>
+              ⭐ {student.isPremium ? "Premium User" : "Free User"}
+            </p>
+
+            <p>
+              📊 Mock Attempts:
+              {" "}
+              {student.mockAttempts || 0}
+            </p>
+            <div className="studentActions">
+  <button
+    className="btnLink"
+    onClick={() =>
+      handlePremiumControl(student.email, true)
+    }
+  >
+    Make Premium
+  </button>
+
+  <button
+    className="btnLink"
+    onClick={() =>
+      handlePremiumControl(student.email, false)
+    }
+  >
+    Remove Premium
+  </button>
+</div>
+          </div>
+        ))
+      ) : (
+        <p>No students found.</p>
+      )}
+    </div>
+  </div>
+)}
+{activeAdminTab === "Enquiries" && (
+  <div className="adminStudentsSection">
+    <h3>Student Enquiries</h3>
+
+    <div className="adminStudentsGrid">
+      {enquiries.length > 0 ? (
+        enquiries.map((enquiry, index) => (
+          <div className="studentCard" key={index}>
+            <h4>{enquiry.fullName || "Student Enquiry"}</h4>
+
+            <p>📞 {enquiry.mobile}</p>
+
+            <p>📧 {enquiry.email}</p>
+
+            <p>
+              📅{" "}
+              {enquiry.createdAt?.toDate
+                ? enquiry.createdAt.toDate().toLocaleDateString()
+                : "Date not available"}
+            </p>
+          </div>
+        ))
+      ) : (
+        <p>No enquiries found.</p>
+      )}
+    </div>
+  </div>
+)}
+{activeAdminTab === "Mock Tests" && (
     <div className="adminQuestionForm">
   <h3>Add Mock Question</h3>
+  <div className="adminStudentsSection">
+  <h3>Current Mock Questions</h3>
 
+  <div className="adminStudentsGrid">
+    {mockQuestions.length > 0 ? (
+      mockQuestions.map((question, index) => (
+        <div className="studentCard" key={question.id || index}>
+          <h4>{question.subject || "General"}</h4>
+
+          <p>{question.question}</p>
+
+          <button
+            className="btnLink"
+            onClick={() => handleDeleteMockQuestion(index)}
+          >
+            Delete Question
+          </button>
+        </div>
+      ))
+    ) : (
+      <p>No questions found.</p>
+    )}
+  </div>
+</div>
   <input
     placeholder="Question"
     value={adminQuestion}
@@ -1682,6 +1829,139 @@ const studyTimeMessage =
     Add Question
   </button>
   </div>
+  )}
+  {activeAdminTab === "Notes" && (
+  <div className="adminQuestionForm">
+    <h3>Notes CMS</h3>
+
+    <input
+      placeholder="Note Title"
+      value={adminNoteTitle}
+      onChange={(e) => setAdminNoteTitle(e.target.value)}
+    />
+
+    <input
+      placeholder="Category"
+      value={adminNoteCategory}
+      onChange={(e) => setAdminNoteCategory(e.target.value)}
+    />
+
+    <input
+      placeholder="Pages"
+      value={adminNotePages}
+      onChange={(e) => setAdminNotePages(e.target.value)}
+    />
+
+    <input
+      placeholder="PDF Link"
+      value={adminNotePdf}
+      onChange={(e) => setAdminNotePdf(e.target.value)}
+    />
+
+    <select
+      value={adminNoteType}
+      onChange={(e) => setAdminNoteType(e.target.value)}
+    >
+      <option>FREE</option>
+      <option>PREMIUM</option>
+    </select>
+
+    <button className="btnLink">
+      Save Note
+    </button>
+  </div>
+)}
+{activeAdminTab === "Analytics" && (
+  <div className="adminStudentsSection">
+    <h3>Admin Analytics</h3>
+
+    <div className="adminOverviewGrid">
+      <div className="dashboardCard">
+        <h3>Total Test Records</h3>
+        <p>{leaderboard.length}</p>
+      </div>
+
+      <div className="dashboardCard">
+        <h3>Total Students</h3>
+        <p>{students.length}</p>
+      </div>
+
+      <div className="dashboardCard">
+        <h3>Total Enquiries</h3>
+        <p>{enquiries.length}</p>
+      </div>
+
+      <div className="dashboardCard">
+        <h3>Platform Status</h3>
+        <p>Active</p>
+      </div>
+    </div>
+  </div>
+)}
+{activeAdminTab === "Payments" && (
+  <div className="adminStudentsSection">
+    <h3>Payment Monitoring</h3>
+
+    <div className="adminOverviewGrid">
+      <div className="dashboardCard">
+        <h3>Revenue Mode</h3>
+        <p>Demo Active</p>
+      </div>
+
+      <div className="dashboardCard">
+        <h3>Premium System</h3>
+        <p>Enabled</p>
+      </div>
+
+      <div className="dashboardCard">
+        <h3>Payment Gateway</h3>
+        <p>Razorpay Foundation</p>
+      </div>
+
+      <div className="dashboardCard">
+        <h3>Subscription Type</h3>
+        <p>Premium Notes</p>
+      </div>
+    </div>
+  </div>
+)}
+{activeAdminTab === "Announcements" && (
+  <div className="adminQuestionForm">
+    <h3>Announcements System</h3>
+
+    <input
+      placeholder="Announcement Title"
+      value={announcementTitle}
+      onChange={(e) => setAnnouncementTitle(e.target.value)}
+    />
+
+    <textarea
+      placeholder="Announcement Message"
+      value={announcementMessage}
+      onChange={(e) =>
+        setAnnouncementMessage(e.target.value)
+      }
+      rows={5}
+    />
+
+    <button
+      className="btnLink"
+      onClick={handleAddAnnouncement}
+    >
+      Publish Announcement
+    </button>
+
+    <div className="announcementList">
+      {announcements.map((item) => (
+        <div className="studentCard" key={item.id}>
+          <h4>{item.title}</h4>
+
+          <p>{item.message}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 </div>
 )}
           </div>
