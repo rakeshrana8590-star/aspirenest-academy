@@ -1339,16 +1339,14 @@ const studyTimeMessage =
           </div>
         </div>
       )}
-      <header>
-      <div className="brand">
-  <img
-    src="/logo192.png"
-    alt="AspireNest Logo"
-    className="brand-logo"
-  />
-
-  <h1>AspireNest Academy</h1>
-</div>
+<header>
+  <div className="brand">
+    <img
+      src="/logo-header.png"
+      alt="AspireNest Academy"
+      className="header-logo"
+    />
+  </div>
 
         <nav>
           <a href="#ctet">Courses</a>
@@ -1422,26 +1420,99 @@ const studyTimeMessage =
         </div>
       </section>{' '}
       <section className="mentor" id="about">
-        <div>
-          <span className="badge">About Mentor</span>
-          <h2>Learn from an Experienced Educator</h2>
-          <p>
-            CTET/TET aspirants ke liye exam-focused, bilingual aur practical
-            teaching approach. Concept clarity, pedagogy understanding, mock
-            practice aur revision system par focus.
-          </p>
-        </div>
 
-        <div className="mentorCard">
-          <h3>Teaching Approach</h3>
-          <ul>
-            <li>✅ Simple Hindi + English explanation</li>
-            <li>✅ CTET/TET syllabus-aligned content</li>
-            <li>✅ Visual notes and quick revision</li>
-            <li>✅ Practice-based preparation</li>
-          </ul>
-        </div>
-      </section>
+<div className="mentorLeft">
+
+  <span className="badge">Meet Your Expert Educator</span>
+
+  <h2>Dr. Varsha D. Maru</h2>
+
+  <p className="mentorIntro">
+    Learn from a Ph.D. qualified educator, I/C Principal,
+    Assistant Professor, researcher, and CTET/TET mentor
+    with strong expertise in Education, Psychology,
+    Pedagogy, Teacher Training, and Digital Learning.
+  </p>
+
+  <div className="mentorStats">
+
+    <div className="mentorStat">
+      <h3>Ph.D.</h3>
+      <span>Education</span>
+    </div>
+
+    <div className="mentorStat">
+      <h3>UGC-NET</h3>
+      <span>Education Qualified</span>
+    </div>
+
+    <div className="mentorStat">
+      <h3>CTET</h3>
+      <span>Paper II Qualified</span>
+    </div>
+
+  </div>
+
+  <div className="mentorQuote">
+    “Concept clarity, practical pedagogy, bilingual explanation,
+    and exam-focused preparation are at the heart of our teaching.”
+  </div>
+
+  <div className="buttons">
+    <a href="#courses" className="btnLink">Explore Courses</a>
+    <a href="#contact" className="btnLink outline">Contact Mentor</a>
+  </div>
+
+</div>
+
+<div className="mentorCard premiumMentorCard">
+
+  <div className="mentorCardTop">
+    <div className="mentorAvatar">VM</div>
+
+    <div>
+      <h3>Academic Profile</h3>
+      <p>Educator • Researcher • Academic Leader</p>
+    </div>
+  </div>
+
+  <div className="mentorHighlights">
+
+    <div className="mentorHighlight">
+      <strong>🏫 Current Role</strong>
+      <span>I/C Principal & Assistant Professor</span>
+    </div>
+
+    <div className="mentorHighlight">
+      <strong>🎓 Qualification</strong>
+      <span>Ph.D. in Education, M.Ed., M.A. Psychology</span>
+    </div>
+
+    <div className="mentorHighlight">
+      <strong>📚 Exam Expertise</strong>
+      <span>CTET Paper II Qualified, TAIT Qualified</span>
+    </div>
+
+    <div className="mentorHighlight">
+      <strong>🧠 Research Area</strong>
+      <span>Cyberbullying, Mental Health, Education & Psychology</span>
+    </div>
+
+    <div className="mentorHighlight">
+      <strong>🏆 Recognition</strong>
+      <span>Best Excellence Teacher Award</span>
+    </div>
+
+    <div className="mentorHighlight">
+      <strong>💻 Digital Learning</strong>
+      <span>Google Certified Educator, AI & NEP 2020 Training</span>
+    </div>
+
+  </div>
+
+</div>
+
+</section>
       <section className="coursePages" id="ctet">
   <h2>CTET/TET Course Pages</h2>
 
