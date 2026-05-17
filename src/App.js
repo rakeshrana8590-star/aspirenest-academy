@@ -39,7 +39,7 @@ import {
   Cell,
 } from "recharts";
 import './style.css';
-import currentAffairsPdf from "./assets/pdfs/CA MARCH 26.pdf";
+
 export default function App() {
   const [darkMode, setDarkMode] = React.useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
@@ -643,12 +643,22 @@ const usersData = usersSnap.docs.map((doc) => ({
       behavior: "smooth",
     });
   };
-  const handleDeleteNote = (noteId) => {
-    const updatedNotes = notesData.filter((note) => note.id !== noteId);
+  const handleDeleteNote = async (noteId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this note?"
+    );
   
-    alert("Note deleted from UI successfully ✅");
+    if (!confirmDelete) return;
   
-    // Future: Firebase notes collection delete yaha add hoga
+    try {
+      await deleteDoc(doc(db, "notes", noteId));
+  
+      alert("Note deleted successfully ✅");
+  
+      loadFirebaseNotes();
+    } catch (error) {
+      alert(error.message);
+    }
   };
   const handleUploadPdf = async (file) => {
     if (!file) return "";
@@ -760,6 +770,23 @@ const usersData = usersSnap.docs.map((doc) => ({
       behavior: "smooth",
     });
   };
+  const handleDeleteCurrentAffairs = async (itemId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this current affairs PDF?"
+    );
+  
+    if (!confirmDelete) return;
+  
+    try {
+      await deleteDoc(doc(db, "currentAffairs", itemId));
+  
+      alert("Current affairs deleted successfully ✅");
+  
+      loadCurrentAffairs();
+    } catch (error) {
+      alert(error.message);
+    }
+  };
   const handleSaveCurrentAffairs = async () => {
     if (!currentTitle || !currentMonth || !currentPages) {
       alert("Please fill title, month and pages");
@@ -802,6 +829,7 @@ const usersData = usersSnap.docs.map((doc) => ({
       setCurrentMonth("");
       setCurrentPages("");
       setCurrentPdf("");
+      setCurrentType("FREE");
       setEditingCurrentId(null);
   
       loadCurrentAffairs();
@@ -950,16 +978,7 @@ const usersData = usersSnap.docs.map((doc) => ({
     },
   ];
 
-  const currentAffairsData = [
-    {
-      id: 1,
-      title: "March Current Affairs",
-      month: "March 2026",
-      type: "FREE",
-      pages: 11,
-      pdf: currentAffairsPdf,
-    },
-  ];
+
   
   const sampleMockQuestions = [
     {
@@ -2098,7 +2117,7 @@ const studyTimeMessage =
   </div>
 
   <div className="adminTabs">
-  ["Dashboard", "Students", "Enquiries", "Notes", "Current Affairs", "Mock Tests", "Analytics", "Payments", "Announcements"].map((tab) => (
+  {["Dashboard", "Students", "Enquiries", "Notes", "Current Affairs", "Mock Tests", "Analytics", "Payments", "Announcements"].map((tab) => (
       <button
         key={tab}
         className={activeAdminTab === tab ? "adminTab activeAdminTab" : "adminTab"}
@@ -2336,109 +2355,7 @@ const studyTimeMessage =
     }}
     
   />
-  {activeAdminTab === "Current Affairs" && (
-  <div className="adminQuestionForm">
-    <h3>Current Affairs CMS</h3>
-
-    <input
-      placeholder="Current Affairs Title"
-      value={currentTitle}
-      onChange={(e) => setCurrentTitle(e.target.value)}
-    />
-
-    <input
-      placeholder="Month"
-      value={currentMonth}
-      onChange={(e) => setCurrentMonth(e.target.value)}
-    />
-
-    <input
-      placeholder="Pages"
-      value={currentPages}
-      onChange={(e) => setCurrentPages(e.target.value)}
-    />
-
-    <div className="pdfUploadBox">
-      <input
-        type="file"
-        accept="application/pdf"
-        onChange={async (e) => {
-          const file = e.target.files[0];
-
-          if (!file) return;
-
-          const uploadedUrl =
-            await handleUploadCurrentPdf(file);
-
-          if (uploadedUrl) {
-            setCurrentPdf(uploadedUrl);
-          }
-        }}
-      />
-
-      {uploadingCurrentPdf && (
-        <p>Uploading PDF...</p>
-      )}
-
-      {currentPdf && (
-        <p style={{ color: "#16a34a" }}>
-          Current Affairs PDF uploaded ✅
-        </p>
-      )}
-    </div>
-
-    <select
-      value={currentType}
-      onChange={(e) => setCurrentType(e.target.value)}
-    >
-      <option>FREE</option>
-      <option>PREMIUM</option>
-    </select>
-
-    <button
-      className="btnLink"
-      onClick={handleSaveCurrentAffairs}
-      disabled={uploadingCurrentPdf}
-    >
-      {uploadingCurrentPdf
-  ? "Uploading PDF..."
-  : editingCurrentId
-  ? "Update Current Affairs"
-  : "Save Current Affairs"}
-    </button>
-
-    <div className="adminStudentsSection">
-      <h3>Current Affairs Library</h3>
-
-      <div className="adminStudentsGrid">
-        {currentAffairsList.length > 0 ? (
-          currentAffairsList.map((item) => (
-            <div
-              className="studentCard"
-              key={item.id}
-            >
-              <h4>{item.title}</h4>
-
-              <p>📅 {item.month}</p>
-
-              <p>📄 {item.pages} Pages</p>
-
-              <p>⭐ {item.type}</p>
-              <button
-  className="btnLink"
-  onClick={() => handleEditCurrentAffairs(item)}
->
-  Edit Current Affairs
-</button>
-            </div>
-          ))
-        ) : (
-          <p>No current affairs found.</p>
-        )}
-      </div>
-    </div>
-  </div>
-)}
+ 
 
   {uploadingPdf && (
     <p>Uploading PDF...</p>
@@ -2500,6 +2417,116 @@ const studyTimeMessage =
 </div>
   </div>
 )}
+{activeAdminTab === "Current Affairs" && (
+<div className="adminQuestionForm">
+<h3>Current Affairs CMS</h3>
+
+<input
+placeholder="Current Affairs Title"
+value={currentTitle}
+onChange={(e) => setCurrentTitle(e.target.value)}
+/>
+
+<input
+placeholder="Month"
+value={currentMonth}
+onChange={(e) => setCurrentMonth(e.target.value)}
+/>
+
+<input
+placeholder="Pages"
+value={currentPages}
+onChange={(e) => setCurrentPages(e.target.value)}
+/>
+
+<div className="pdfUploadBox">
+<input
+type="file"
+accept="application/pdf"
+onChange={async (e) => {
+const file = e.target.files[0];
+
+if (!file) return;
+
+const uploadedUrl =
+await handleUploadCurrentPdf(file);
+
+if (uploadedUrl) {
+setCurrentPdf(uploadedUrl);
+}
+}}
+/>
+
+{uploadingCurrentPdf && (
+<p>Uploading PDF...</p>
+)}
+
+{currentPdf && (
+<p style={{ color: "#16a34a" }}>
+Current Affairs PDF uploaded ✅
+</p>
+)}
+</div>
+
+<select
+value={currentType}
+onChange={(e) => setCurrentType(e.target.value)}
+>
+<option>FREE</option>
+<option>PREMIUM</option>
+</select>
+
+<button
+className="btnLink"
+onClick={handleSaveCurrentAffairs}
+disabled={uploadingCurrentPdf}
+>
+{uploadingCurrentPdf
+? "Uploading PDF..."
+: editingCurrentId
+? "Update Current Affairs"
+: "Save Current Affairs"}
+</button>
+
+<div className="adminStudentsSection">
+<h3>Current Affairs Library</h3>
+
+<div className="adminStudentsGrid">
+{currentAffairsList.length > 0 ? (
+currentAffairsList.map((item) => (
+<div
+className="studentCard"
+key={item.id}
+>
+<h4>{item.title}</h4>
+
+<p>📅 {item.month}</p>
+
+<p>📄 {item.pages} Pages</p>
+
+<p>⭐ {item.type}</p>
+<button
+className="btnLink"
+onClick={() => handleEditCurrentAffairs(item)}
+>
+Edit Current Affairs
+</button>
+<button
+  className="btnLink"
+  onClick={() => handleDeleteCurrentAffairs(item.id)}
+>
+  Delete Current Affairs
+</button>
+</div>
+))
+) : (
+<p>No current affairs found.</p>
+)}
+</div>
+</div>
+</div>
+)}
+
 {activeAdminTab === "Analytics" && (
   <div className="adminStudentsSection">
     <h3>Admin Analytics</h3>
