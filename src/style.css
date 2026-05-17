@@ -2952,3 +2952,174 @@ button:hover,
   color: rgba(255,255,255,0.82);
   margin: 8px 0;
 }
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    gap: 16px;
+    padding: 22px 18px;
+    text-align: center;
+  }
+
+  header h1 {
+    font-size: 28px;
+    line-height: 1.2;
+  }
+
+  nav {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
+  }
+
+  nav a {
+    font-size: 15px;
+  }
+
+  .themeBtn {
+    width: 46px;
+    height: 46px;
+  }
+}
+@media (max-width: 768px) {
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 70px 20px;
+    text-align: center;
+  }
+
+  .hero h2 {
+    font-size: 42px;
+    line-height: 1.1;
+  }
+
+  .hero p {
+    font-size: 17px;
+  }
+
+  .buttons {
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .buttons .btnLink {
+    width: 100%;
+    max-width: 280px;
+    text-align: center;
+  }
+
+  .card {
+    width: 100%;
+    margin-top: 20px;
+  }
+}
+@media (max-width: 768px) {
+  .grid,
+  .lessonGrid,
+  .pricingGrid,
+  .leaderboardGrid,
+  .currentGrid,
+  .adminStudentsGrid,
+  .adminOverviewGrid {
+    grid-template-columns: 1fr !important;
+    gap: 20px;
+  }
+
+  .course,
+  .lessonCard,
+  .pricingCard,
+  .leaderCard,
+  .currentCard,
+  .studentCard,
+  .dashboardCard {
+    width: 100%;
+    padding: 24px;
+  }
+
+  .btnLink {
+    width: 100%;
+    text-align: center;
+  }
+}
+@media (max-width: 768px) {
+  .studentDashboard {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+
+  .dashboardSidebar {
+    width: 100%;
+    position: relative;
+    top: 0;
+  }
+
+  .dashboardContent {
+    width: 100%;
+  }
+
+  .dashboardTop,
+  .dashboardCards {
+    grid-template-columns: 1fr;
+  }
+
+  .adminTabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 10px;
+  }
+
+  .adminTab {
+    min-width: max-content;
+    white-space: nowrap;
+  }
+
+  .adminQuestionForm input,
+  .adminQuestionForm select,
+  .adminQuestionForm textarea {
+    width: 100%;
+  }
+
+  .analyticsChartCard {
+    overflow-x: auto;
+  }
+}
+@media (max-width: 768px) {
+  footer {
+    padding: 40px 20px;
+    text-align: center;
+  }
+
+  footer .grid {
+    grid-template-columns: 1fr;
+  }
+
+  footer a,
+  footer p {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .whatsapp {
+    right: 16px;
+    bottom: 16px;
+    padding: 14px 18px;
+    border-radius: 999px;
+    font-size: 15px;
+    width: auto;
+    height: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  body,
+  html {
+    overflow-x: hidden;
+  }
+
+  img,
+  video,
+  iframe {
+    max-width: 100%;
+  }
+}

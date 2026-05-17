@@ -59,6 +59,8 @@ const [contactEmail, setContactEmail] = useState("");
   const [user, setUser] = useState(null);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
   const adminEmail = "aspirenestplatform@gmail.com";
+  const isAdmin = (currentUser = user) =>
+  currentUser?.email === adminEmail;
   const [students, setStudents] = useState([]);
 const [enquiries, setEnquiries] = useState([]);
 const [mockResults, setMockResults] = useState([]);
@@ -1799,7 +1801,7 @@ const studyTimeMessage =
       </section>
       <a
         className="whatsapp"
-        href="https://wa.me/917304256002?text=Hello%20Smart%20TET%20Academy,%20I%20want%20details%20about%20CTET/TET%20courses."
+        href="https://wa.me/917304256002?text=Hello%20AspireNest%20Academy,%20I%20want%20details%20about%20your%20CTET/TET%20courses%20and%20premium%20study%20materials.,%20I%20want%20details%20about%20CTET/TET%20courses."
         target="_blank"
       >
         💬 WhatsApp Enquiry
@@ -1915,7 +1917,7 @@ const studyTimeMessage =
             <button className="logoutBtn" onClick={handleLogout}>
   Logout
 </button>
-{user?.email === adminEmail && (
+{isAdmin() && (
   <button className="logoutBtn" onClick={loadAdminData}>
     Load Admin Data
   </button>
@@ -2130,7 +2132,7 @@ const studyTimeMessage =
   </p>
 </div>
 </div>
-            {user?.email === adminEmail && (
+{isAdmin() && (
               <div className="adminProPanel">
   <div className="adminProHeader">
     <div>
