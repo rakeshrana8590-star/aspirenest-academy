@@ -1340,7 +1340,15 @@ const studyTimeMessage =
         </div>
       )}
       <header>
-        <h1>AspireNest Academy</h1>
+      <div className="brand">
+  <img
+    src="/logo192.png"
+    alt="AspireNest Logo"
+    className="brand-logo"
+  />
+
+  <h1>AspireNest Academy</h1>
+</div>
 
         <nav>
           <a href="#ctet">Courses</a>

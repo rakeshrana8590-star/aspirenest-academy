@@ -3123,3 +3123,14 @@ button:hover,
     max-width: 100%;
   }
 }
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+}
