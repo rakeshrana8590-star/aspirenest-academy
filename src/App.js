@@ -64,6 +64,7 @@ const [adminOption4, setAdminOption4] = useState("");
 const [adminAnswer, setAdminAnswer] = useState("");
 const [adminSubject, setAdminSubject] = useState("CDP");
 const [adminLevel, setAdminLevel] = useState("Easy");
+const [activeAdminTab, setActiveAdminTab] = useState("Dashboard");
   const provider = new GoogleAuthProvider();
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -1572,7 +1573,28 @@ const studyTimeMessage =
 </div>
 </div>
             {user?.email === adminEmail && (
-  <>
+              <div className="adminProPanel">
+  <div className="adminProHeader">
+    <div>
+      <span className="badge">Admin Panel PRO</span>
+      <h2>Platform Control Center</h2>
+      <p>Manage students, content, mock tests, payments and announcements.</p>
+    </div>
+  </div>
+
+  <div className="adminTabs">
+    {["Dashboard", "Students", "Enquiries", "Notes", "Mock Tests", "Analytics", "Payments", "Announcements"].map((tab) => (
+      <button
+        key={tab}
+        className={activeAdminTab === tab ? "adminTab activeAdminTab" : "adminTab"}
+        onClick={() => setActiveAdminTab(tab)}
+      >
+        {tab}
+      </button>
+    ))}
+  </div>
+  {activeAdminTab === "Dashboard" && (
+  <div className="adminOverviewGrid">
     <div className="dashboardCard">
       <h3>Total Students</h3>
       <p>{students.length}</p>
@@ -1582,6 +1604,20 @@ const studyTimeMessage =
       <h3>Total Enquiries</h3>
       <p>{enquiries.length}</p>
     </div>
+    <div className="dashboardCard">
+  <h3>Total Mock Results</h3>
+
+  <p>{leaderboard.length}</p>
+</div>
+
+<div className="dashboardCard">
+  <h3>Admin Mode</h3>
+
+  <p>Active</p>
+</div>
+    </div>
+)}
+
     <div className="adminQuestionForm">
   <h3>Add Mock Question</h3>
 
@@ -1645,8 +1681,8 @@ const studyTimeMessage =
   <button className="btnLink" onClick={handleAddMockQuestion}>
     Add Question
   </button>
+  </div>
 </div>
-  </>
 )}
           </div>
         </div>

@@ -2735,3 +2735,186 @@ button:hover,
   font-weight: 900;
   font-size: 26px;
 }
+.app.dark {
+  background: #071028;
+  color: white;
+}
+
+.app.dark section,
+.app.dark .mentor,
+.app.dark .coursePages,
+.app.dark .plansSection,
+.app.dark .cdp,
+.app.dark .resources,
+.app.dark .notesSection,
+.app.dark .currentAffairs,
+.app.dark .pricingPro,
+.app.dark .studentDashboard,
+.app.dark .dashboard,
+.app.dark .testimonials,
+.app.dark #contact,
+.app.dark .faq,
+.app.dark .loginSection {
+  background: #071028;
+  color: white;
+}
+
+.app.dark .course,
+.app.dark .planCard,
+.app.dark .lessonCard,
+.app.dark .mentorCard,
+.app.dark .dashboardCard,
+.app.dark .dashboardStat,
+.app.dark .analyticsChartCard,
+.app.dark .currentCard,
+.app.dark .pricingCard,
+.app.dark .review,
+.app.dark .loginBox,
+.app.dark .faqBox {
+  background: #101b36;
+  color: white;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.app.dark h1,
+.app.dark h2,
+.app.dark h3,
+.app.dark h4,
+.app.dark p,
+.app.dark li,
+.app.dark span,
+.app.dark small,
+.app.dark strong {
+  color: white;
+}
+
+.app.dark .sectionText {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.app.dark .accuracyBar {
+  background: rgba(255, 255, 255, 0.14);
+}
+.app.dark {
+  background: #071028;
+  color: white;
+}
+
+.app.dark section,
+.app.dark .mentor,
+.app.dark .coursePages,
+.app.dark .plansSection,
+.app.dark .cdp,
+.app.dark .resources,
+.app.dark .notesSection,
+.app.dark .currentAffairs,
+.app.dark .pricingPro,
+.app.dark .studentDashboard,
+.app.dark .dashboard,
+.app.dark .testimonials,
+.app.dark #contact,
+.app.dark .faq,
+.app.dark .loginSection {
+  background: #071028;
+  color: white;
+}
+
+.app.dark .course,
+.app.dark .planCard,
+.app.dark .lessonCard,
+.app.dark .mentorCard,
+.app.dark .dashboardCard,
+.app.dark .dashboardStat,
+.app.dark .analyticsChartCard,
+.app.dark .currentCard,
+.app.dark .pricingCard,
+.app.dark .review,
+.app.dark .loginBox,
+.app.dark .faqBox {
+  background: #101b36;
+  color: white;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.app.dark h1,
+.app.dark h2,
+.app.dark h3,
+.app.dark h4,
+.app.dark p,
+.app.dark li,
+.app.dark span,
+.app.dark small,
+.app.dark strong {
+  color: white;
+}
+
+.app.dark .sectionText {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.app.dark .accuracyBar {
+  background: rgba(255, 255, 255, 0.14);
+}
+.adminProPanel {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, #071028, #101b36);
+  color: white;
+  border-radius: 28px;
+  padding: 32px;
+  margin-top: 20px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.18);
+}
+
+.adminProHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 26px;
+}
+
+.adminProHeader h2 {
+  font-size: 34px;
+  margin: 14px 0 8px;
+  color: white;
+}
+
+.adminProHeader p {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.adminTabs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 26px;
+}
+
+.adminTab {
+  border: none;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.activeAdminTab {
+  background: linear-gradient(90deg, #ffb347, #ff7b00);
+  color: #111827;
+}
+
+.adminOverviewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 18px;
+}
+
+.adminQuestionForm {
+  grid-column: 1 / -1;
+  background: #ffffff;
+  color: #111827;
+  border-radius: 24px;
+  padding: 28px;
+  margin-top: 24px;
+}
