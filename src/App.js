@@ -17,6 +17,7 @@ import {
   doc,
   getDoc,
   setDoc,
+deleteDoc,
 } from "firebase/firestore";
 import React, { useState, useEffect } from 'react';
 import {
@@ -70,6 +71,7 @@ const [adminNoteCategory, setAdminNoteCategory] = useState("");
 const [adminNoteType, setAdminNoteType] = useState("FREE");
 const [adminNotePages, setAdminNotePages] = useState("");
 const [adminNotePdf, setAdminNotePdf] = useState("");
+const [firebaseNotes, setFirebaseNotes] = useState([]);
 const [announcementTitle, setAnnouncementTitle] = useState("");
 const [announcementMessage, setAnnouncementMessage] = useState("");
 const [announcements, setAnnouncements] = useState([]);
@@ -83,6 +85,8 @@ const [announcements, setAnnouncements] = useState([]);
         loadUserMockResults(currentUser.email);
         loadLeaderboard();
         loadMockQuestions();
+        loadFirebaseNotes();
+        loadAnnouncements();
       }
     });
   
@@ -384,6 +388,36 @@ setEnquiries([]);
       alert(error.message);
     }
   };
+  const loadFirebaseNotes = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "notes"));
+  
+      const notes = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+  
+      setFirebaseNotes(notes);
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+  const loadAnnouncements = async () => {
+    try {
+      const querySnapshot = await getDocs(
+        collection(db, "announcements")
+      );
+  
+      const data = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+  
+      setAnnouncements(data);
+    } catch (error) {
+      alert(error.message);
+    }
+  };
   const handleAddMockQuestion = async () => {
     if (
       !adminQuestion ||
@@ -429,10 +463,58 @@ setEnquiries([]);
     const updatedQuestions = mockQuestions.filter(
       (_, index) => index !== indexToDelete
     );
-  
+    try {
+      if (mockQuestions[indexToDelete]?.id) {
+        await deleteDoc(
+          doc(
+            db,
+            "mockQuestions",
+            mockQuestions[indexToDelete].id
+          )
+        );
+      }
+    } catch (error) {
+      console.log(error);
+    }
     setMockQuestions(updatedQuestions);
   
     alert("Question deleted successfully ✅");
+  };
+  const handleDeleteNote = (noteId) => {
+    const updatedNotes = notesData.filter((note) => note.id !== noteId);
+  
+    alert("Note deleted from UI successfully ✅");
+  
+    // Future: Firebase notes collection delete yaha add hoga
+  };
+  const handleSaveNote = async () => {
+    if (!adminNoteTitle || !adminNoteCategory || !adminNotePages || !adminNotePdf) {
+      alert("Please fill all note details");
+      return;
+    }
+  
+    try {
+      await addDoc(collection(db, "notes"), {
+        title: adminNoteTitle,
+        category: adminNoteCategory,
+        type: adminNoteType,
+        pages: Number(adminNotePages),
+        pdf: adminNotePdf,
+        createdAt: new Date(),
+      });
+  
+      alert("Note saved successfully ✅");
+  
+      setAdminNoteTitle("");
+      setAdminNoteCategory("");
+      setAdminNotePages("");
+      setAdminNotePdf("");
+      setAdminNoteType("FREE");
+  
+      loadFirebaseNotes();
+    } catch (error) {
+      alert(error.message);
+    }
   };
   const handleAddAnnouncement = async () => {
     if (!announcementTitle || !announcementMessage) {
@@ -446,13 +528,26 @@ setEnquiries([]);
       message: announcementMessage,
       createdAt: new Date(),
     };
-  
+    await addDoc(collection(db, "announcements"), {
+      title: announcementTitle,
+      message: announcementMessage,
+      createdAt: new Date(),
+    });
     setAnnouncements([newAnnouncement, ...announcements]);
   
     setAnnouncementTitle("");
     setAnnouncementMessage("");
   
     alert("Announcement published successfully ✅");
+  };
+  const handleDeleteAnnouncement = (announcementId) => {
+    const updatedAnnouncements = announcements.filter(
+      (item) => item.id !== announcementId
+    );
+  
+    setAnnouncements(updatedAnnouncements);
+  
+    alert("Announcement deleted successfully ✅");
   };
   const handlePremiumControl = async (studentEmail, makePremium) => {
     try {
@@ -1866,9 +1961,31 @@ const studyTimeMessage =
       <option>PREMIUM</option>
     </select>
 
-    <button className="btnLink">
-      Save Note
-    </button>
+    <button className="btnLink" onClick={handleSaveNote}>
+  Save Note
+</button>
+    <div className="adminStudentsSection">
+  <h3>Current Notes</h3>
+
+  <div className="adminStudentsGrid">
+  {[...notesData, ...firebaseNotes].map((note) => (
+      <div className="studentCard" key={note.id}>
+        <h4>{note.title}</h4>
+
+        <p>📂 {note.category}</p>
+
+        <p>⭐ {note.type}</p>
+
+        <button
+          className="btnLink"
+          onClick={() => handleDeleteNote(note.id)}
+        >
+          Delete Note
+        </button>
+      </div>
+    ))}
+  </div>
+</div>
   </div>
 )}
 {activeAdminTab === "Analytics" && (
@@ -1957,6 +2074,12 @@ const studyTimeMessage =
           <h4>{item.title}</h4>
 
           <p>{item.message}</p>
+          <button
+  className="btnLink"
+  onClick={() => handleDeleteAnnouncement(item.id)}
+>
+  Delete Announcement
+</button>
         </div>
       ))}
     </div>
@@ -1976,7 +2099,7 @@ const studyTimeMessage =
   </p>
 
   <div className="grid">
-    {notesData.map((note) => (
+  {[...notesData, ...firebaseNotes].map((note) => (
       <div className="course" key={note.id}>
         <span className="planTag">{note.type}</span>
 
