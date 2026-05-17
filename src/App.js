@@ -3008,7 +3008,7 @@ Edit Current Affairs
     <div>
       <h3>Contact</h3>
       <a href="tel:+917304256002">
-  📞 +914304256002
+  📞 +917304256002
 </a>
       <p>📧 aspirenestacademy@gmail.com</p>
       <p>📍 India</p>
