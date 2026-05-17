@@ -19,6 +19,7 @@ import {
   getDoc,
   setDoc,
 deleteDoc,
+updateDoc,
 } from "firebase/firestore";
 import {
   ref,
@@ -86,6 +87,8 @@ const [currentType, setCurrentType] = useState("FREE");
 const [currentPages, setCurrentPages] = useState("");
 const [currentPdf, setCurrentPdf] = useState("");
 const [uploadingCurrentPdf, setUploadingCurrentPdf] = useState(false);
+const [editingNoteId, setEditingNoteId] = useState(null);
+const [editingCurrentId, setEditingCurrentId] = useState(null);
 const [announcementTitle, setAnnouncementTitle] = useState("");
 const [announcementMessage, setAnnouncementMessage] = useState("");
 const [announcements, setAnnouncements] = useState([]);
@@ -626,6 +629,20 @@ const usersData = usersSnap.docs.map((doc) => ({
   
     alert("Question deleted successfully ✅");
   };
+  const handleEditNote = (note) => {
+    setEditingNoteId(note.id);
+  
+    setAdminNoteTitle(note.title || "");
+    setAdminNoteCategory(note.category || "");
+    setAdminNotePages(note.pages || "");
+    setAdminNoteType(note.type || "FREE");
+    setAdminNotePdf(note.pdf || "");
+  
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
   const handleDeleteNote = (noteId) => {
     const updatedNotes = notesData.filter((note) => note.id !== noteId);
   
@@ -692,27 +709,56 @@ const usersData = usersSnap.docs.map((doc) => ({
         alert("Please upload PDF first");
         return;
       }
-      await addDoc(collection(db, "notes"), {
-        title: adminNoteTitle,
-        category: adminNoteCategory,
-        type: adminNoteType,
-        pages: Number(adminNotePages),
-        pdf: adminNotePdf,
-        createdAt: new Date(),
-      });
+      if (editingNoteId) {
+        await updateDoc(doc(db, "notes", editingNoteId), {
+          title: adminNoteTitle,
+          category: adminNoteCategory,
+          type: adminNoteType,
+          pages: Number(adminNotePages),
+          pdf: adminNotePdf,
+          updatedAt: new Date(),
+        });
+      
+        alert("Note updated successfully ✅");
+      } else {
+        await addDoc(collection(db, "notes"), {
+          title: adminNoteTitle,
+          category: adminNoteCategory,
+          type: adminNoteType,
+          pages: Number(adminNotePages),
+          pdf: adminNotePdf,
+          createdAt: new Date(),
+        });
+      
+        alert("Note saved successfully ✅");
+      }
   
-      alert("Note saved successfully ✅");
+     
   
       setAdminNoteTitle("");
       setAdminNoteCategory("");
       setAdminNotePages("");
       setAdminNotePdf("");
       setAdminNoteType("FREE");
-  
+      setEditingNoteId(null);
       loadFirebaseNotes();
     } catch (error) {
       alert(error.message);
     }
+  };
+  const handleEditCurrentAffairs = (item) => {
+    setEditingCurrentId(item.id);
+  
+    setCurrentTitle(item.title || "");
+    setCurrentMonth(item.month || "");
+    setCurrentPages(item.pages || "");
+    setCurrentType(item.type || "FREE");
+    setCurrentPdf(item.pdf || "");
+  
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
   const handleSaveCurrentAffairs = async () => {
     if (!currentTitle || !currentMonth || !currentPages) {
@@ -726,22 +772,37 @@ const usersData = usersSnap.docs.map((doc) => ({
         return;
       }
   
-      await addDoc(collection(db, "currentAffairs"), {
-        title: currentTitle,
-        month: currentMonth,
-        type: currentType,
-        pages: Number(currentPages),
-        pdf: currentPdf,
-        createdAt: new Date(),
-      });
+      if (editingCurrentId) {
+        await updateDoc(doc(db, "currentAffairs", editingCurrentId), {
+          title: currentTitle,
+          month: currentMonth,
+          type: currentType,
+          pages: Number(currentPages),
+          pdf: currentPdf,
+          updatedAt: new Date(),
+        });
+      
+        alert("Current affairs updated successfully ✅");
+      } else {
+        await addDoc(collection(db, "currentAffairs"), {
+          title: currentTitle,
+          month: currentMonth,
+          type: currentType,
+          pages: Number(currentPages),
+          pdf: currentPdf,
+          createdAt: new Date(),
+        });
+      
+        alert("Current affairs saved successfully ✅");
+      }
   
-      alert("Current affairs saved successfully ✅");
+      
   
       setCurrentTitle("");
       setCurrentMonth("");
       setCurrentPages("");
       setCurrentPdf("");
-      setCurrentType("FREE");
+      setEditingCurrentId(null);
   
       loadCurrentAffairs();
     } catch (error) {
@@ -2340,8 +2401,10 @@ const studyTimeMessage =
       disabled={uploadingCurrentPdf}
     >
       {uploadingCurrentPdf
-        ? "Uploading PDF..."
-        : "Save Current Affairs"}
+  ? "Uploading PDF..."
+  : editingCurrentId
+  ? "Update Current Affairs"
+  : "Save Current Affairs"}
     </button>
 
     <div className="adminStudentsSection">
@@ -2361,6 +2424,12 @@ const studyTimeMessage =
               <p>📄 {item.pages} Pages</p>
 
               <p>⭐ {item.type}</p>
+              <button
+  className="btnLink"
+  onClick={() => handleEditCurrentAffairs(item)}
+>
+  Edit Current Affairs
+</button>
             </div>
           ))
         ) : (
@@ -2395,7 +2464,11 @@ const studyTimeMessage =
   onClick={handleSaveNote}
   disabled={uploadingPdf}
 >
-  {uploadingPdf ? "Uploading PDF..." : "Save Note"}
+{uploadingPdf
+  ? "Uploading PDF..."
+  : editingNoteId
+  ? "Update Note"
+  : "Save Note"}
 </button>
     <div className="adminStudentsSection">
   <h3>Current Notes</h3>
@@ -2415,6 +2488,12 @@ const studyTimeMessage =
         >
           Delete Note
         </button>
+        <button
+  className="btnLink"
+  onClick={() => handleEditNote(note)}
+>
+  Edit Note
+</button>
       </div>
     ))}
   </div>
