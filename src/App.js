@@ -119,7 +119,9 @@ const [paymentHistory, setPaymentHistory] = useState([]);
         setTimeout(() => {
           checkPremiumAccess(currentUser);
         }, 1000);
-        loadLeaderboard();
+        if (isAdmin(currentUser)) {
+          loadLeaderboard();
+        }
         loadMockQuestions();
         loadFirebaseNotes();
         loadCurrentAffairs();
