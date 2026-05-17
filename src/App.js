@@ -79,6 +79,13 @@ const [adminNotePages, setAdminNotePages] = useState("");
 const [adminNotePdf, setAdminNotePdf] = useState("");
 const [uploadingPdf, setUploadingPdf] = useState(false);
 const [firebaseNotes, setFirebaseNotes] = useState([]);
+const [currentAffairsList, setCurrentAffairsList] = useState([]);
+const [currentTitle, setCurrentTitle] = useState("");
+const [currentMonth, setCurrentMonth] = useState("");
+const [currentType, setCurrentType] = useState("FREE");
+const [currentPages, setCurrentPages] = useState("");
+const [currentPdf, setCurrentPdf] = useState("");
+const [uploadingCurrentPdf, setUploadingCurrentPdf] = useState(false);
 const [announcementTitle, setAnnouncementTitle] = useState("");
 const [announcementMessage, setAnnouncementMessage] = useState("");
 const [announcements, setAnnouncements] = useState([]);
@@ -97,6 +104,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
         loadLeaderboard();
         loadMockQuestions();
         loadFirebaseNotes();
+        loadCurrentAffairs();
         loadAnnouncements();
         loadPaymentHistory();
       }
@@ -508,6 +516,22 @@ const usersData = usersSnap.docs.map((doc) => ({
       alert(error.message);
     }
   };
+  const loadCurrentAffairs = async () => {
+    try {
+      const querySnapshot = await getDocs(
+        collection(db, "currentAffairs")
+      );
+  
+      const data = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+  
+      setCurrentAffairsList(data);
+    } catch (error) {
+      alert(error.message);
+    }
+  };
   const loadAnnouncements = async () => {
     try {
       const querySnapshot = await getDocs(
@@ -633,6 +657,30 @@ const usersData = usersSnap.docs.map((doc) => ({
       return "";
     }
   };
+  const handleUploadCurrentPdf = async (file) => {
+    if (!file) return "";
+  
+    try {
+      setUploadingCurrentPdf(true);
+  
+      const storageRef = ref(
+        storage,
+        `current-affairs/${Date.now()}-${file.name}`
+      );
+  
+      await uploadBytes(storageRef, file);
+  
+      const downloadURL = await getDownloadURL(storageRef);
+  
+      setUploadingCurrentPdf(false);
+  
+      return downloadURL;
+    } catch (error) {
+      setUploadingCurrentPdf(false);
+      alert(error.message);
+      return "";
+    }
+  };
   const handleSaveNote = async () => {
     if (!adminNoteTitle || !adminNoteCategory || !adminNotePages) {
       alert("Please fill title, category and pages");
@@ -662,6 +710,40 @@ const usersData = usersSnap.docs.map((doc) => ({
       setAdminNoteType("FREE");
   
       loadFirebaseNotes();
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+  const handleSaveCurrentAffairs = async () => {
+    if (!currentTitle || !currentMonth || !currentPages) {
+      alert("Please fill title, month and pages");
+      return;
+    }
+  
+    try {
+      if (!currentPdf) {
+        alert("Please upload current affairs PDF first");
+        return;
+      }
+  
+      await addDoc(collection(db, "currentAffairs"), {
+        title: currentTitle,
+        month: currentMonth,
+        type: currentType,
+        pages: Number(currentPages),
+        pdf: currentPdf,
+        createdAt: new Date(),
+      });
+  
+      alert("Current affairs saved successfully ✅");
+  
+      setCurrentTitle("");
+      setCurrentMonth("");
+      setCurrentPages("");
+      setCurrentPdf("");
+      setCurrentType("FREE");
+  
+      loadCurrentAffairs();
     } catch (error) {
       alert(error.message);
     }
@@ -1955,7 +2037,7 @@ const studyTimeMessage =
   </div>
 
   <div className="adminTabs">
-    {["Dashboard", "Students", "Enquiries", "Notes", "Mock Tests", "Analytics", "Payments", "Announcements"].map((tab) => (
+  ["Dashboard", "Students", "Enquiries", "Notes", "Current Affairs", "Mock Tests", "Analytics", "Payments", "Announcements"].map((tab) => (
       <button
         key={tab}
         className={activeAdminTab === tab ? "adminTab activeAdminTab" : "adminTab"}
@@ -2191,7 +2273,103 @@ const studyTimeMessage =
         setAdminNotePdf(uploadedUrl);
       }
     }}
+    
   />
+  {activeAdminTab === "Current Affairs" && (
+  <div className="adminQuestionForm">
+    <h3>Current Affairs CMS</h3>
+
+    <input
+      placeholder="Current Affairs Title"
+      value={currentTitle}
+      onChange={(e) => setCurrentTitle(e.target.value)}
+    />
+
+    <input
+      placeholder="Month"
+      value={currentMonth}
+      onChange={(e) => setCurrentMonth(e.target.value)}
+    />
+
+    <input
+      placeholder="Pages"
+      value={currentPages}
+      onChange={(e) => setCurrentPages(e.target.value)}
+    />
+
+    <div className="pdfUploadBox">
+      <input
+        type="file"
+        accept="application/pdf"
+        onChange={async (e) => {
+          const file = e.target.files[0];
+
+          if (!file) return;
+
+          const uploadedUrl =
+            await handleUploadCurrentPdf(file);
+
+          if (uploadedUrl) {
+            setCurrentPdf(uploadedUrl);
+          }
+        }}
+      />
+
+      {uploadingCurrentPdf && (
+        <p>Uploading PDF...</p>
+      )}
+
+      {currentPdf && (
+        <p style={{ color: "#16a34a" }}>
+          Current Affairs PDF uploaded ✅
+        </p>
+      )}
+    </div>
+
+    <select
+      value={currentType}
+      onChange={(e) => setCurrentType(e.target.value)}
+    >
+      <option>FREE</option>
+      <option>PREMIUM</option>
+    </select>
+
+    <button
+      className="btnLink"
+      onClick={handleSaveCurrentAffairs}
+      disabled={uploadingCurrentPdf}
+    >
+      {uploadingCurrentPdf
+        ? "Uploading PDF..."
+        : "Save Current Affairs"}
+    </button>
+
+    <div className="adminStudentsSection">
+      <h3>Current Affairs Library</h3>
+
+      <div className="adminStudentsGrid">
+        {currentAffairsList.length > 0 ? (
+          currentAffairsList.map((item) => (
+            <div
+              className="studentCard"
+              key={item.id}
+            >
+              <h4>{item.title}</h4>
+
+              <p>📅 {item.month}</p>
+
+              <p>📄 {item.pages} Pages</p>
+
+              <p>⭐ {item.type}</p>
+            </div>
+          ))
+        ) : (
+          <p>No current affairs found.</p>
+        )}
+      </div>
+    </div>
+  </div>
+)}
 
   {uploadingPdf && (
     <p>Uploading PDF...</p>
@@ -2417,7 +2595,12 @@ const studyTimeMessage =
   </div>
 
   <div className="currentGrid">
-    {currentAffairsData.map((item) => (
+  {currentAffairsList.length === 0 && (
+  <p className="sectionText">
+    No current affairs uploaded yet.
+  </p>
+)}
+  {currentAffairsList.map((item) => (
       <div className="currentCard" key={item.id}>
         <div className="currentTop">
           <span className="planTag">{item.type}</span>
