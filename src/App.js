@@ -39,6 +39,7 @@ import {
   Cell,
 } from "recharts";
 import './style.css';
+import currentAffairsPdf from "./assets/pdfs/CA MARCH 26.pdf";
 
 export default function App() {
   const [darkMode, setDarkMode] = React.useState(false);
@@ -78,14 +79,26 @@ const [adminNoteCategory, setAdminNoteCategory] = useState("");
 const [adminNoteType, setAdminNoteType] = useState("FREE");
 const [adminNotePages, setAdminNotePages] = useState("");
 const [adminNotePdf, setAdminNotePdf] = useState("");
+const [manualNotePdfUrl, setManualNotePdfUrl] = useState("");
 const [uploadingPdf, setUploadingPdf] = useState(false);
 const [firebaseNotes, setFirebaseNotes] = useState([]);
 const [currentAffairsList, setCurrentAffairsList] = useState([]);
+const fallbackCurrentAffairs = [
+  {
+    id: "fallback-ca",
+    title: "March Current Affairs",
+    month: "March 2026",
+    type: "FREE",
+    pages: 11,
+    pdf: currentAffairsPdf,
+  },
+];
 const [currentTitle, setCurrentTitle] = useState("");
 const [currentMonth, setCurrentMonth] = useState("");
 const [currentType, setCurrentType] = useState("FREE");
 const [currentPages, setCurrentPages] = useState("");
 const [currentPdf, setCurrentPdf] = useState("");
+const [manualCurrentPdfUrl, setManualCurrentPdfUrl] = useState("");
 const [uploadingCurrentPdf, setUploadingCurrentPdf] = useState(false);
 const [editingNoteId, setEditingNoteId] = useState(null);
 const [editingCurrentId, setEditingCurrentId] = useState(null);
@@ -109,7 +122,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
         loadFirebaseNotes();
         loadCurrentAffairs();
         loadAnnouncements();
-        loadPaymentHistory();
+        loadPaymentHistory(currentUser);
       }
     });
   
@@ -551,11 +564,22 @@ const usersData = usersSnap.docs.map((doc) => ({
       alert(error.message);
     }
   };
-  const loadPaymentHistory = async () => {
+  const loadPaymentHistory = async (currentUser = user) => {
+    if (!currentUser) return;
+  
     try {
-      const querySnapshot = await getDocs(
-        collection(db, "payments")
-      );
+      let querySnapshot;
+  
+      if (currentUser.email === adminEmail) {
+        querySnapshot = await getDocs(collection(db, "payments"));
+      } else {
+        const q = query(
+          collection(db, "payments"),
+          where("userId", "==", currentUser.uid)
+        );
+  
+        querySnapshot = await getDocs(q);
+      }
   
       const data = querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -1301,7 +1325,7 @@ const studyTimeMessage =
               </a>
 
               <a
-                href="https://wa.me/919999999999"
+                href="https://wa.me/917304256002"
                 target="_blank"
                 className="btnLink outline"
               >
@@ -1775,7 +1799,7 @@ const studyTimeMessage =
       </section>
       <a
         className="whatsapp"
-        href="https://wa.me/919999999999?text=Hello%20Smart%20TET%20Academy,%20I%20want%20details%20about%20CTET/TET%20courses."
+        href="https://wa.me/917304256002?text=Hello%20Smart%20TET%20Academy,%20I%20want%20details%20about%20CTET/TET%20courses."
         target="_blank"
       >
         💬 WhatsApp Enquiry
@@ -2337,6 +2361,14 @@ const studyTimeMessage =
       value={adminNotePages}
       onChange={(e) => setAdminNotePages(e.target.value)}
     />
+    <input
+  placeholder="Paste PDF URL / Google Drive Link"
+  value={manualNotePdfUrl}
+  onChange={(e) => {
+    setManualNotePdfUrl(e.target.value);
+    setAdminNotePdf(e.target.value);
+  }}
+/>
 
 <div className="pdfUploadBox">
   <input
@@ -2438,7 +2470,14 @@ placeholder="Pages"
 value={currentPages}
 onChange={(e) => setCurrentPages(e.target.value)}
 />
-
+<input
+  placeholder="Paste Current Affairs PDF URL"
+  value={manualCurrentPdfUrl}
+  onChange={(e) => {
+    setManualCurrentPdfUrl(e.target.value);
+    setCurrentPdf(e.target.value);
+  }}
+/>
 <div className="pdfUploadBox">
 <input
 type="file"
@@ -2701,12 +2740,11 @@ Edit Current Affairs
   </div>
 
   <div className="currentGrid">
-  {currentAffairsList.length === 0 && (
-  <p className="sectionText">
-    No current affairs uploaded yet.
-  </p>
-)}
-  {currentAffairsList.map((item) => (
+  No current affairs uploaded yet.
+  {(currentAffairsList.length > 0
+  ? currentAffairsList
+  : fallbackCurrentAffairs
+).map((item) => (
       <div className="currentCard" key={item.id}>
         <div className="currentTop">
           <span className="planTag">{item.type}</span>
@@ -2969,7 +3007,9 @@ Edit Current Affairs
 
     <div>
       <h3>Contact</h3>
-      <p>📞 +91 XXXXX XXXXX</p>
+      <a href="tel:+917304256002">
+  📞 +914304256002
+</a>
       <p>📧 aspirenestacademy@gmail.com</p>
       <p>📍 India</p>
     </div>
