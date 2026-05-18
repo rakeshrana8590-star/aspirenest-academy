@@ -1202,6 +1202,29 @@ const smartRecommendation =
     : weakestSubject === "Language"
     ? "Improve grammar, comprehension, and language pedagogy practice."
     : `Focus more on ${weakestSubject} practice to improve your performance.`;
+    const performanceChartData = [
+      { day: "Mon", score: 45 },
+      { day: "Tue", score: 52 },
+      { day: "Wed", score: 61 },
+      { day: "Thu", score: 58 },
+      { day: "Fri", score: 70 },
+      { day: "Sat", score: 82 },
+      { day: "Sun", score: 90 },
+    ];
+    
+    const subjectChartData = [
+      { name: "CDP", value: 80 },
+      { name: "Maths", value: 65 },
+      { name: "EVS", value: 72 },
+      { name: "Language", value: 88 },
+    ];
+    
+    const chartColors = [
+      "#f97316",
+      "#3b82f6",
+      "#10b981",
+      "#8b5cf6",
+    ];
     const uniqueTestDates = [
       ...new Set(
         mockResults
@@ -1852,6 +1875,9 @@ isPremiumUser={isPremiumUser}
   analyticsMessage={analyticsMessage}
   weakestSubject={weakestSubject}
   smartRecommendation={smartRecommendation}
+  performanceChartData={performanceChartData}
+subjectChartData={subjectChartData}
+chartColors={chartColors}
 />
 <AdminPanel
   isAdmin={isAdmin}
@@ -1932,6 +1958,7 @@ setAnnouncementMessage={setAnnouncementMessage}
   handleAddAnnouncement={handleAddAnnouncement}
   handleDeleteAnnouncement={handleDeleteAnnouncement}
 />
+<Announcements announcements={announcements} />
   <section className="testimonials">
         <h2>Student Reviews</h2>
 
