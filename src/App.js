@@ -1861,6 +1861,7 @@ isPremiumUser={isPremiumUser}
   enquiries={enquiries}
   leaderboard={leaderboard}
   handlePremiumControl={handlePremiumControl}
+
   adminNoteTitle={adminNoteTitle}
   setAdminNoteTitle={setAdminNoteTitle}
   adminNoteCategory={adminNoteCategory}
@@ -1870,7 +1871,6 @@ isPremiumUser={isPremiumUser}
   manualNotePdfUrl={manualNotePdfUrl}
   setManualNotePdfUrl={setManualNotePdfUrl}
   setAdminNotePdf={setAdminNotePdf}
-  adminNotePdf={adminNotePdf}
   uploadingPdf={uploadingPdf}
   handleUploadPdf={handleUploadPdf}
   adminNoteType={adminNoteType}
@@ -1881,6 +1881,7 @@ isPremiumUser={isPremiumUser}
   firebaseNotes={firebaseNotes}
   handleDeleteNote={handleDeleteNote}
   handleEditNote={handleEditNote}
+
   currentTitle={currentTitle}
   setCurrentTitle={setCurrentTitle}
   currentMonth={currentMonth}
@@ -1890,7 +1891,6 @@ isPremiumUser={isPremiumUser}
   manualCurrentPdfUrl={manualCurrentPdfUrl}
   setManualCurrentPdfUrl={setManualCurrentPdfUrl}
   setCurrentPdf={setCurrentPdf}
-  currentPdf={currentPdf}
   uploadingCurrentPdf={uploadingCurrentPdf}
   handleUploadCurrentPdf={handleUploadCurrentPdf}
   currentType={currentType}
@@ -1901,6 +1901,7 @@ isPremiumUser={isPremiumUser}
   fallbackCurrentAffairs={fallbackCurrentAffairs}
   handleDeleteCurrentAffairs={handleDeleteCurrentAffairs}
   handleEditCurrentAffairs={handleEditCurrentAffairs}
+
   adminQuestion={adminQuestion}
   setAdminQuestion={setAdminQuestion}
   adminOption1={adminOption1}
@@ -1920,6 +1921,16 @@ isPremiumUser={isPremiumUser}
   handleAddMockQuestion={handleAddMockQuestion}
   mockQuestions={mockQuestions}
   handleDeleteMockQuestion={handleDeleteMockQuestion}
+
+  paymentHistory={paymentHistory}
+
+  announcementTitle={announcementTitle}
+setAnnouncementTitle={setAnnouncementTitle}
+announcementMessage={announcementMessage}
+setAnnouncementMessage={setAnnouncementMessage}
+  announcements={announcements}
+  handleAddAnnouncement={handleAddAnnouncement}
+  handleDeleteAnnouncement={handleDeleteAnnouncement}
 />
   <section className="testimonials">
         <h2>Student Reviews</h2>

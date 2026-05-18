@@ -66,10 +66,21 @@ export default function AdminPanel({
   handleAddMockQuestion,
   mockQuestions,
   handleDeleteMockQuestion,
+
+  paymentHistory,
+
+  announcementTitle,
+  setAnnouncementTitle,
+  announcementMessage,
+  setAnnouncementMessage,
+  announcements,
+  handleAddAnnouncement,
+  handleDeleteAnnouncement,
 }) {
   if (!isAdmin()) return null;
 
-  const allNotes = firebaseNotes.length > 0 ? firebaseNotes : notesData;
+  const allNotes =
+    firebaseNotes.length > 0 ? firebaseNotes : notesData;
 
   const allCurrentAffairs =
     currentAffairsList.length > 0
@@ -85,8 +96,8 @@ export default function AdminPanel({
           <h2>Platform Control Center</h2>
 
           <p>
-            Manage students, enquiries, notes, current affairs, mock tests,
-            payments and announcements.
+            Manage students, enquiries, notes, current affairs,
+            mock tests, payments and announcements.
           </p>
         </div>
       </div>
@@ -150,21 +161,42 @@ export default function AdminPanel({
               students.map((student, index) => (
                 <div className="studentCard" key={student.id || index}>
                   <h4>{student.name || "Student"}</h4>
+
                   <p>📧 {student.email}</p>
-                  <p>⭐ {student.isPremium ? "Premium User" : "Free User"}</p>
-                  <p>📊 Mock Attempts: {student.mockAttempts || 0}</p>
+
+                  <p>
+                    ⭐{" "}
+                    {student.isPremium
+                      ? "Premium User"
+                      : "Free User"}
+                  </p>
+
+                  <p>
+                    📊 Mock Attempts:{" "}
+                    {student.mockAttempts || 0}
+                  </p>
 
                   <div className="studentActions">
                     <button
                       className="btnLink"
-                      onClick={() => handlePremiumControl(student.email, true)}
+                      onClick={() =>
+                        handlePremiumControl(
+                          student.email,
+                          true
+                        )
+                      }
                     >
                       Make Premium
                     </button>
 
                     <button
                       className="btnLink"
-                      onClick={() => handlePremiumControl(student.email, false)}
+                      onClick={() =>
+                        handlePremiumControl(
+                          student.email,
+                          false
+                        )
+                      }
                     >
                       Remove Premium
                     </button>
@@ -186,13 +218,20 @@ export default function AdminPanel({
             {enquiries.length > 0 ? (
               enquiries.map((enquiry, index) => (
                 <div className="studentCard" key={enquiry.id || index}>
-                  <h4>{enquiry.fullName || "New Enquiry"}</h4>
+                  <h4>
+                    {enquiry.fullName || "New Enquiry"}
+                  </h4>
+
                   <p>📞 {enquiry.mobile}</p>
+
                   <p>📧 {enquiry.email}</p>
+
                   <p>
                     🕒{" "}
                     {enquiry.createdAt?.toDate
-                      ? enquiry.createdAt.toDate().toLocaleString()
+                      ? enquiry.createdAt
+                          .toDate()
+                          .toLocaleString()
                       : "Recently"}
                   </p>
                 </div>
@@ -213,50 +252,72 @@ export default function AdminPanel({
               type="text"
               placeholder="Note Title"
               value={adminNoteTitle}
-              onChange={(e) => setAdminNoteTitle(e.target.value)}
+              onChange={(e) =>
+                setAdminNoteTitle(e.target.value)
+              }
             />
 
             <input
               type="text"
               placeholder="Category"
               value={adminNoteCategory}
-              onChange={(e) => setAdminNoteCategory(e.target.value)}
+              onChange={(e) =>
+                setAdminNoteCategory(e.target.value)
+              }
             />
 
             <input
               type="number"
               placeholder="Pages"
               value={adminNotePages}
-              onChange={(e) => setAdminNotePages(e.target.value)}
+              onChange={(e) =>
+                setAdminNotePages(e.target.value)
+              }
             />
 
             <input
               type="text"
               placeholder="PDF URL"
               value={manualNotePdfUrl}
-              onChange={(e) => setManualNotePdfUrl(e.target.value)}
+              onChange={(e) =>
+                setManualNotePdfUrl(e.target.value)
+              }
             />
 
             <input
               type="file"
               accept="application/pdf"
-              onChange={(e) => setAdminNotePdf(e.target.files[0])}
+              onChange={(e) =>
+                setAdminNotePdf(e.target.files[0])
+              }
             />
 
             <select
               value={adminNoteType}
-              onChange={(e) => setAdminNoteType(e.target.value)}
+              onChange={(e) =>
+                setAdminNoteType(e.target.value)
+              }
             >
               <option value="FREE">FREE</option>
               <option value="PREMIUM">PREMIUM</option>
             </select>
 
-            <button className="btnLink" onClick={handleUploadPdf}>
-              {uploadingPdf ? "Uploading..." : "Upload PDF"}
+            <button
+              className="btnLink"
+              onClick={handleUploadPdf}
+            >
+              {uploadingPdf
+                ? "Uploading..."
+                : "Upload PDF"}
             </button>
 
-            <button className="btnLink" onClick={handleSaveNote}>
-              {editingNoteId ? "Update Note" : "Save Note"}
+            <button
+              className="btnLink"
+              onClick={handleSaveNote}
+            >
+              {editingNoteId
+                ? "Update Note"
+                : "Save Note"}
             </button>
           </div>
 
@@ -264,18 +325,26 @@ export default function AdminPanel({
             {allNotes.map((note, index) => (
               <div className="studentCard" key={note.id || index}>
                 <h4>{note.title}</h4>
+
                 <p>📚 {note.category}</p>
+
                 <p>📄 {note.pages} Pages</p>
+
                 <p>⭐ {note.type}</p>
 
                 <div className="studentActions">
-                  <button className="btnLink" onClick={() => handleEditNote(note)}>
+                  <button
+                    className="btnLink"
+                    onClick={() => handleEditNote(note)}
+                  >
                     Edit
                   </button>
 
                   <button
                     className="btnLink"
-                    onClick={() => handleDeleteNote(note.id)}
+                    onClick={() =>
+                      handleDeleteNote(note.id)
+                    }
                   >
                     Delete
                   </button>
@@ -295,49 +364,69 @@ export default function AdminPanel({
               type="text"
               placeholder="Current Affairs Title"
               value={currentTitle}
-              onChange={(e) => setCurrentTitle(e.target.value)}
+              onChange={(e) =>
+                setCurrentTitle(e.target.value)
+              }
             />
 
             <input
               type="text"
               placeholder="Month"
               value={currentMonth}
-              onChange={(e) => setCurrentMonth(e.target.value)}
+              onChange={(e) =>
+                setCurrentMonth(e.target.value)
+              }
             />
 
             <input
               type="number"
               placeholder="Pages"
               value={currentPages}
-              onChange={(e) => setCurrentPages(e.target.value)}
+              onChange={(e) =>
+                setCurrentPages(e.target.value)
+              }
             />
 
             <input
               type="text"
               placeholder="PDF URL"
               value={manualCurrentPdfUrl}
-              onChange={(e) => setManualCurrentPdfUrl(e.target.value)}
+              onChange={(e) =>
+                setManualCurrentPdfUrl(e.target.value)
+              }
             />
 
             <input
               type="file"
               accept="application/pdf"
-              onChange={(e) => setCurrentPdf(e.target.files[0])}
+              onChange={(e) =>
+                setCurrentPdf(e.target.files[0])
+              }
             />
 
             <select
               value={currentType}
-              onChange={(e) => setCurrentType(e.target.value)}
+              onChange={(e) =>
+                setCurrentType(e.target.value)
+              }
             >
               <option value="FREE">FREE</option>
               <option value="PREMIUM">PREMIUM</option>
             </select>
 
-            <button className="btnLink" onClick={handleUploadCurrentPdf}>
-              {uploadingCurrentPdf ? "Uploading..." : "Upload PDF"}
+            <button
+              className="btnLink"
+              onClick={handleUploadCurrentPdf}
+            >
+              {uploadingCurrentPdf
+                ? "Uploading..."
+                : "Upload PDF"}
             </button>
 
-            <button className="btnLink" onClick={handleSaveCurrentAffairs}>
+            <button
+              className="btnLink"
+              onClick={handleSaveCurrentAffairs}
+            >
               {editingCurrentId
                 ? "Update Current Affairs"
                 : "Save Current Affairs"}
@@ -348,21 +437,28 @@ export default function AdminPanel({
             {allCurrentAffairs.map((item, index) => (
               <div className="studentCard" key={item.id || index}>
                 <h4>{item.title}</h4>
+
                 <p>📅 {item.month}</p>
+
                 <p>📄 {item.pages} Pages</p>
+
                 <p>⭐ {item.type}</p>
 
                 <div className="studentActions">
                   <button
                     className="btnLink"
-                    onClick={() => handleEditCurrentAffairs(item)}
+                    onClick={() =>
+                      handleEditCurrentAffairs(item)
+                    }
                   >
                     Edit
                   </button>
 
                   <button
                     className="btnLink"
-                    onClick={() => handleDeleteCurrentAffairs(item.id)}
+                    onClick={() =>
+                      handleDeleteCurrentAffairs(item.id)
+                    }
                   >
                     Delete
                   </button>
@@ -382,47 +478,61 @@ export default function AdminPanel({
               type="text"
               placeholder="Question"
               value={adminQuestion}
-              onChange={(e) => setAdminQuestion(e.target.value)}
+              onChange={(e) =>
+                setAdminQuestion(e.target.value)
+              }
             />
 
             <input
               type="text"
               placeholder="Option 1"
               value={adminOption1}
-              onChange={(e) => setAdminOption1(e.target.value)}
+              onChange={(e) =>
+                setAdminOption1(e.target.value)
+              }
             />
 
             <input
               type="text"
               placeholder="Option 2"
               value={adminOption2}
-              onChange={(e) => setAdminOption2(e.target.value)}
+              onChange={(e) =>
+                setAdminOption2(e.target.value)
+              }
             />
 
             <input
               type="text"
               placeholder="Option 3"
               value={adminOption3}
-              onChange={(e) => setAdminOption3(e.target.value)}
+              onChange={(e) =>
+                setAdminOption3(e.target.value)
+              }
             />
 
             <input
               type="text"
               placeholder="Option 4"
               value={adminOption4}
-              onChange={(e) => setAdminOption4(e.target.value)}
+              onChange={(e) =>
+                setAdminOption4(e.target.value)
+              }
             />
 
             <input
               type="text"
               placeholder="Correct Answer"
               value={adminAnswer}
-              onChange={(e) => setAdminAnswer(e.target.value)}
+              onChange={(e) =>
+                setAdminAnswer(e.target.value)
+              }
             />
 
             <select
               value={adminSubject}
-              onChange={(e) => setAdminSubject(e.target.value)}
+              onChange={(e) =>
+                setAdminSubject(e.target.value)
+              }
             >
               <option value="CDP">CDP</option>
               <option value="Maths">Maths</option>
@@ -432,14 +542,19 @@ export default function AdminPanel({
 
             <select
               value={adminLevel}
-              onChange={(e) => setAdminLevel(e.target.value)}
+              onChange={(e) =>
+                setAdminLevel(e.target.value)
+              }
             >
               <option value="Easy">Easy</option>
               <option value="Medium">Medium</option>
               <option value="Hard">Hard</option>
             </select>
 
-            <button className="btnLink" onClick={handleAddMockQuestion}>
+            <button
+              className="btnLink"
+              onClick={handleAddMockQuestion}
+            >
               Add Question
             </button>
           </div>
@@ -447,19 +562,29 @@ export default function AdminPanel({
           <div className="adminStudentsGrid">
             {mockQuestions.length > 0 ? (
               mockQuestions.map((question, index) => (
-                <div className="studentCard" key={question.id || index}>
-                  <h4>{question.subject || "Mock Question"}</h4>
+                <div
+                  className="studentCard"
+                  key={question.id || index}
+                >
+                  <h4>
+                    {question.subject || "Mock Question"}
+                  </h4>
 
                   <p>{question.question}</p>
 
                   <p>✅ Answer: {question.answer}</p>
 
-                  <p>🎚️ Level: {question.level || "Easy"}</p>
+                  <p>
+                    🎚️ Level:{" "}
+                    {question.level || "Easy"}
+                  </p>
 
                   <div className="studentActions">
                     <button
                       className="btnLink"
-                      onClick={() => handleDeleteMockQuestion(index)}
+                      onClick={() =>
+                        handleDeleteMockQuestion(index)
+                      }
                     >
                       Delete Question
                     </button>
@@ -472,6 +597,98 @@ export default function AdminPanel({
           </div>
         </div>
       )}
+
+      {activeAdminTab === "Payments" && (
+        <div className="adminStudentsSection">
+          <h3>Payment History</h3>
+
+          <div className="adminStudentsGrid">
+            {paymentHistory.length > 0 ? (
+              paymentHistory.map((payment, index) => (
+                <div
+                  className="studentCard"
+                  key={payment.id || index}
+                >
+                  <h4>{payment.email}</h4>
+
+                  <p>💰 ₹{payment.amount}</p>
+
+                  <p>⭐ {payment.plan}</p>
+
+                  <p>
+                    🕒{" "}
+                    {payment.createdAt?.toDate
+                      ? payment.createdAt
+                          .toDate()
+                          .toLocaleString()
+                      : "Recently"}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p>No payments found.</p>
+            )}
+          </div>
+        </div>
+      )}
+
+{activeAdminTab === "Announcements" && (
+  <div className="adminStudentsSection">
+    <h3>Announcements CMS</h3>
+
+    <div className="dashboardCard">
+      <input
+        type="text"
+        placeholder="Announcement Title"
+        value={announcementTitle}
+        onChange={(e) =>
+          setAnnouncementTitle(e.target.value)
+        }
+      />
+
+      <textarea
+        placeholder="Write announcement message..."
+        value={announcementMessage}
+        onChange={(e) =>
+          setAnnouncementMessage(e.target.value)
+        }
+      />
+
+      <button
+        className="btnLink"
+        onClick={handleAddAnnouncement}
+      >
+        Publish Announcement
+      </button>
+    </div>
+
+    <div className="adminStudentsGrid">
+      {announcements.length > 0 ? (
+        announcements.map((item, index) => (
+          <div
+            className="studentCard"
+            key={item.id || index}
+          >
+            <h4>{item.title}</h4>
+
+            <p>{item.message}</p>
+
+            <button
+              className="btnLink"
+              onClick={() =>
+                handleDeleteAnnouncement(item.id)
+              }
+            >
+              Delete
+            </button>
+          </div>
+        ))
+      ) : (
+        <p>No announcements yet.</p>
+      )}
+    </div>
+  </div>
+)}
     </div>
   );
 }
