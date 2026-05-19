@@ -38,7 +38,7 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import React, { useState, useEffect } from 'react';
-
+import AspireNestLogo from "./components/AspireNestLogo.jsx";
 import './style.css';
 import currentAffairsPdf from "./assets/pdfs/CA MARCH 26.pdf";
 
@@ -1361,7 +1361,7 @@ const studyTimeMessage =
       <React.Suspense
         fallback={
           <div className="premium-loader">
-  <img
+<img
   src="/logo-header.png"
   alt="AspireNest Academy"
   className="premium-loader-logo"
@@ -1380,13 +1380,7 @@ const studyTimeMessage =
         <div className={darkMode ? "app dark" : "app"}>
         <header>
           <div className="brand">
-          <img
-  src="/logo-header.png"
-  alt="AspireNest Academy"
-  className="header-logo"
-  loading="eager"
-  decoding="async"
-/>
+          <AspireNestLogo />
           </div>
         </header>
   
