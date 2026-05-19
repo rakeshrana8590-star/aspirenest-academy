@@ -5082,3 +5082,40 @@ button,
 a {
   user-select: none;
 }
+/* ===== EMERGENCY FIX: HEADER + SCROLL ===== */
+
+html,
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: auto;
+}
+
+body {
+  overscroll-behavior-y: auto;
+}
+
+.app {
+  min-height: 100vh;
+  overflow: visible;
+}
+
+header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 9999 !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 90px;
+  }
+
+  header {
+    position: sticky !important;
+    top: 0 !important;
+  }
+}
