@@ -12,14 +12,14 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 
-import AuthSection from "./components/AuthSection.jsx";
-import AdminPanel from "./components/AdminPanel.jsx";
-import StudentDashboard from "./components/StudentDashboard.jsx";
-import MockTest from "./components/MockTest.jsx";
-import NotesCMS from "./components/NotesCMS.jsx";
-import CurrentAffairs from "./components/CurrentAffairs.jsx";
-import Pricing from "./components/Pricing.jsx";
-import Announcements from "./components/Announcements.jsx";
+const AuthSection = React.lazy(() => import("./components/AuthSection.jsx"));
+const AdminPanel = React.lazy(() => import("./components/AdminPanel.jsx"));
+const StudentDashboard = React.lazy(() => import("./components/StudentDashboard.jsx"));
+const MockTest = React.lazy(() => import("./components/MockTest.jsx"));
+const NotesCMS = React.lazy(() => import("./components/NotesCMS.jsx"));
+const CurrentAffairs = React.lazy(() => import("./components/CurrentAffairs.jsx"));
+const Pricing = React.lazy(() => import("./components/Pricing.jsx"));
+const Announcements = React.lazy(() => import("./components/Announcements.jsx"));
 import {
   collection,
   addDoc,
@@ -38,17 +38,7 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import React, { useState, useEffect } from 'react';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
+
 import './style.css';
 import currentAffairsPdf from "./assets/pdfs/CA MARCH 26.pdf";
 
@@ -129,31 +119,35 @@ const [paymentHistory, setPaymentHistory] = useState([]);
     
       setUser(verifiedUser);
     
-      if (verifiedUser) {
-        checkPremiumAccess(verifiedUser);
-        loadUserMockResults(verifiedUser.email);
-      
-        setTimeout(() => {
-          checkPremiumAccess(verifiedUser);
-        }, 1000);
-      
-        if (isAdmin(verifiedUser)) {
-          loadLeaderboard();
-        }
-      
+      if (!verifiedUser) {
+        setIsPremiumUser(false);
+        setAuthLoading(false);
+        return;
+      }
+    
+      // Fast first load
+      checkPremiumAccess(verifiedUser);
+      loadUserMockResults(verifiedUser.email);
+    
+      // Main content delay se load hoga
+      setTimeout(() => {
         loadMockQuestions();
         loadFirebaseNotes();
         loadCurrentAffairs();
         loadAnnouncements();
-      
-        if (isAdmin(verifiedUser)) {
+      }, 300);
+    
+      // Admin heavy data sirf admin ke liye
+      if (isAdmin(verifiedUser)) {
+        setTimeout(() => {
+          loadLeaderboard();
           loadPaymentHistory(verifiedUser);
-        }
+        }, 600);
       }
-      
+    
       setAuthLoading(false);
-      });
-  
+    });
+    
     return () => unsubscribe();
   }, []);
   const handleRegister = async () => {
@@ -1080,26 +1074,7 @@ const usersData = usersSnap.docs.map((doc) => ({
       answer: "All learners ko equal opportunity dena",
     },
   ];
-  const leaderboardData = [
-    {
-      rank: 1,
-      name: "Priya Sharma",
-      score: "98%",
-      badge: "Topper",
-    },
-    {
-      rank: 2,
-      name: "Amit Patel",
-      score: "92%",
-      badge: "Excellent",
-    },
-    {
-      rank: 3,
-      name: "Neha Verma",
-      score: "88%",
-      badge: "Great",
-    },
-  ];
+  
   const handleAnswerSubmit = () => {
     if (!selectedAnswer) {
       alert("Please select an answer");
@@ -1350,7 +1325,7 @@ const studyTimeMessage =
         },
       ];
       
-      const pieColors = ["#16a34a", "#e5e7eb"];
+     
   useEffect(() => {
     if (!mockStarted || showResult) return;
   
@@ -1383,7 +1358,24 @@ const studyTimeMessage =
   }
   if (!user) {
     return (
-      <div className={darkMode ? "app dark" : "app"}>
+      <React.Suspense
+        fallback={
+          <div className="premium-loader">
+          <img
+            src="/logo-header.png"
+            alt="AspireNest Academy"
+            className="premium-loader-logo"
+          />
+        
+          <div className="premium-loader-ring"></div>
+        
+          <h2>Loading AspireNest Academy</h2>
+        
+          <p>Preparing your smart learning experience...</p>
+        </div>
+        }
+      >
+        <div className={darkMode ? "app dark" : "app"}>
         <header>
           <div className="brand">
             <img
@@ -1415,10 +1407,28 @@ const studyTimeMessage =
             handleRegister={handleRegister}
           />
         </div>
-      </div>
-    );
-  }
-  return (
+        </div>
+    </React.Suspense>
+  );
+}
+return (
+  <React.Suspense
+    fallback={
+      <div className="premium-loader">
+      <img
+        src="/logo-header.png"
+        alt="AspireNest Academy"
+        className="premium-loader-logo"
+      />
+    
+      <div className="premium-loader-ring"></div>
+    
+      <h2>Loading AspireNest Academy</h2>
+    
+      <p>Preparing your smart learning experience...</p>
+    </div>
+    }
+  >
     <div className={darkMode ? "app dark" : "app"}>
       {selectedCourse && (
         <div className="coursePopup">
@@ -2165,6 +2175,7 @@ setAnnouncementMessage={setAnnouncementMessage}
     © 2026 AspireNest Academy • All Rights Reserved
   </div>
 </footer>
-    </div>
-  );
+</div>
+</React.Suspense>
+);
 }

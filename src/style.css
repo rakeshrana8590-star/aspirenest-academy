@@ -3751,3 +3751,49 @@ html {
     bottom: 95px;
   }
 }
+.premium-loader {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  background: radial-gradient(circle at top, #fff7ed, #ffffff 45%, #f8fafc);
+  color: #111827;
+  text-align: center;
+  padding: 24px;
+}
+
+.premium-loader-logo {
+  width: 170px;
+  height: auto;
+  object-fit: contain;
+  margin-bottom: 4px;
+}
+
+.premium-loader-ring {
+  width: 54px;
+  height: 54px;
+  border: 4px solid rgba(249, 115, 22, 0.18);
+  border-top-color: #f97316;
+  border-radius: 50%;
+  animation: premiumSpin 0.9s linear infinite;
+}
+
+.premium-loader h2 {
+  font-size: 26px;
+  font-weight: 900;
+  margin: 0;
+}
+
+.premium-loader p {
+  font-size: 15px;
+  color: #6b7280;
+  margin: 0;
+}
+
+@keyframes premiumSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
