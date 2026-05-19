@@ -123,28 +123,31 @@ const [paymentHistory, setPaymentHistory] = useState([]);
   const provider = new GoogleAuthProvider();
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(
-        currentUser && currentUser.emailVerified
-          ? currentUser
-          : null
-      );
-      setAuthLoading(false);
+      const verifiedUser =
+        currentUser && currentUser.emailVerified ? currentUser : null;
     
-      if (currentUser) {
-        checkPremiumAccess(currentUser);
-        loadUserMockResults(currentUser.email);
+      setUser(verifiedUser);
+    
+      if (verifiedUser) {
+        checkPremiumAccess(verifiedUser);
+        loadUserMockResults(verifiedUser.email);
+    
         setTimeout(() => {
-          checkPremiumAccess(currentUser);
+          checkPremiumAccess(verifiedUser);
         }, 1000);
-        if (isAdmin(currentUser)) {
+    
+        if (isAdmin(verifiedUser)) {
           loadLeaderboard();
         }
+    
         loadMockQuestions();
         loadFirebaseNotes();
         loadCurrentAffairs();
         loadAnnouncements();
-        loadPaymentHistory(currentUser);
+        loadPaymentHistory(verifiedUser);
       }
+    
+      setAuthLoading(false);
     });
   
     return () => unsubscribe();
