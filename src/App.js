@@ -132,24 +132,27 @@ const [paymentHistory, setPaymentHistory] = useState([]);
       if (verifiedUser) {
         checkPremiumAccess(verifiedUser);
         loadUserMockResults(verifiedUser.email);
-    
+      
         setTimeout(() => {
           checkPremiumAccess(verifiedUser);
         }, 1000);
-    
+      
         if (isAdmin(verifiedUser)) {
           loadLeaderboard();
         }
-    
+      
         loadMockQuestions();
         loadFirebaseNotes();
         loadCurrentAffairs();
         loadAnnouncements();
-        loadPaymentHistory(verifiedUser);
+      
+        if (isAdmin(verifiedUser)) {
+          loadPaymentHistory(verifiedUser);
+        }
       }
-    
+      
       setAuthLoading(false);
-    });
+      });
   
     return () => unsubscribe();
   }, []);
