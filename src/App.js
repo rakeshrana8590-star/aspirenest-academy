@@ -1460,7 +1460,7 @@ const studyTimeMessage =
     />
   </div>
 
-        <nav>
+        <nav className={mobileMenuOpen ? "nav mobile-open" : "nav"}>
           <a href="#ctet">Courses</a>
 
           <a href="#notes">Notes</a>
@@ -1469,7 +1469,13 @@ const studyTimeMessage =
 
           <a href="#contact">Contact</a>
           <a href="#login">Login</a>
-        
+          <button
+  className="mobile-menu-btn"
+  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+>
+  ☰
+</button>
+
         </nav>
       </header>
       <section className="hero">
