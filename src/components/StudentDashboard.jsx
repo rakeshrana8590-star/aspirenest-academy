@@ -39,29 +39,35 @@ export default function StudentDashboard({
 
   return (
     <section className="studentDashboard">
-      <div className="dashboardSidebar">
+      <aside className="dashboardSidebar">
         <h3>Dashboard</h3>
 
         <div className="userEmail">
-          <p>Welcome, {user.email}</p>
-
-          <span>
-            {isPremiumUser ? "🌟 PREMIUM MEMBER" : "FREE MEMBER"}
-          </span>
+          <p>Welcome,</p>
+          <strong>{user.email}</strong>
+          <span>{isPremiumUser ? "🌟 PREMIUM MEMBER" : "FREE MEMBER"}</span>
         </div>
+
+        <div className="dashboardMenu">
+          <button>📚 My Courses</button>
+          <button>📝 Mock Tests</button>
+          <button>📈 Progress</button>
+          <button>📥 Download Notes</button>
+          <button>🎯 Revision Planner</button>
+        </div>
+
+        {isAdmin() && (
+          <button className="logoutBtn" onClick={loadAdminData}>
+            👑 Load Admin Data
+          </button>
+        )}
 
         <button className="logoutBtn" onClick={handleLogout}>
           Logout
         </button>
+      </aside>
 
-        {isAdmin() && (
-          <button className="logoutBtn" onClick={loadAdminData}>
-            Load Admin Data
-          </button>
-        )}
-      </div>
-
-      <div className="dashboardContent">
+      <main className="dashboardContent">
         <span className="badge">Student Analytics</span>
 
         <h2>Your Learning Command Center</h2>
@@ -182,7 +188,8 @@ export default function StudentDashboard({
             Attempt your first mock test to unlock personalized analytics.
           </p>
         )}
-      </div>
+      </main>
     </section>
   );
 }
+
