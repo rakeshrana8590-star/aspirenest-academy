@@ -7,6 +7,7 @@ import {
   signOut,
   onAuthStateChanged,
   sendPasswordResetEmail,
+  sendEmailVerification,
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
@@ -20,7 +21,6 @@ import CurrentAffairs from "./components/CurrentAffairs.jsx";
 import Pricing from "./components/Pricing.jsx";
 import Announcements from "./components/Announcements.jsx";
 import {
-  
   collection,
   addDoc,
   getDocs,
@@ -68,6 +68,7 @@ const [timeLeft, setTimeLeft] = useState(60);
 const [mobile, setMobile] = useState("");
 const [contactEmail, setContactEmail] = useState("");
   const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
   const adminEmail = "aspirenestplatform@gmail.com";
   const isAdmin = (currentUser = user) =>
@@ -122,7 +123,12 @@ const [paymentHistory, setPaymentHistory] = useState([]);
   const provider = new GoogleAuthProvider();
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+      setUser(
+        currentUser && currentUser.emailVerified
+          ? currentUser
+          : null
+      );
+      setAuthLoading(false);
     
       if (currentUser) {
         checkPremiumAccess(currentUser);
@@ -157,6 +163,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
         createdAt: new Date(),
       });
   
+      await sendEmailVerification(userCredential.user);
       await setDoc(doc(db, "users", userCredential.user.uid), {
         email: email,
         isPremium: false,
@@ -172,7 +179,22 @@ const [paymentHistory, setPaymentHistory] = useState([]);
   };
   const handleLogin = async () => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential =
+      await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+    
+    if (!userCredential.user.emailVerified) {
+      alert(
+        "Please verify your email before login 📩"
+      );
+    
+      await signOut(auth);
+    
+      return;
+    }
       alert("Login Successful ✅");
     } catch (error) {
       alert(error.message);
@@ -1336,6 +1358,51 @@ const studyTimeMessage =
   
     return () => clearTimeout(timer);
   }, [mockStarted, showResult, timeLeft]);
+  if (authLoading) {
+    return null;
+  }
+  if (!user) {
+    return (
+      <div className={darkMode ? "app dark" : "app"}>
+        <header>
+          <div className="brand">
+            <img
+              src="/logo-header.png"
+              alt="AspireNest Academy"
+              className="header-logo"
+            />
+          </div>
+  
+          <nav>
+         
+          </nav>
+        </header>
+  
+        <div
+style={{
+  height: "calc(100vh - 90px)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  padding: "0 20px",
+  overflow: "hidden",
+}}
+>
+        >
+          <AuthSection
+            email={email}
+            setEmail={setEmail}
+            password={password}
+            setPassword={setPassword}
+            handleLogin={handleLogin}
+            handleGoogleLogin={handleGoogleLogin}
+            handleForgotPassword={handleForgotPassword}
+            handleRegister={handleRegister}
+          />
+        </div>
+      </div>
+    );
+  }
   return (
     <div className={darkMode ? "app dark" : "app"}>
       {selectedCourse && (
@@ -1391,12 +1458,7 @@ const studyTimeMessage =
 
           <a href="#contact">Contact</a>
           <a href="#login">Login</a>
-          <button
-  className="themeBtn"
-  onClick={() => setDarkMode(!darkMode)}
->
-  {darkMode ? "☀️" : "🌙"}
-</button>
+        
         </nav>
       </header>
       <section className="hero">
