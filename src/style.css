@@ -5050,3 +5050,35 @@ button,
   opacity: 1 !important;
   visibility: visible !important;
 }
+html,
+body,
+#root,
+.app {
+  min-height: 100%;
+}
+
+body {
+  overscroll-behavior-y: none;
+}
+
+.app {
+  isolation: isolate;
+}
+@supports (height: 100dvh) {
+  .app,
+  .premium-loader {
+    min-height: 100dvh;
+  }
+}
+input,
+button,
+a,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a {
+  user-select: none;
+}
