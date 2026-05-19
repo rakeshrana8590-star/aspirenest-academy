@@ -3797,3 +3797,219 @@ html {
     transform: rotate(360deg);
   }
 }
+html {
+  scroll-behavior: smooth;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+.btnLink {
+  touch-action: manipulation;
+}
+
+section,
+.course,
+.planCard,
+.lessonCard,
+.review,
+.statBox,
+.premiumCard,
+.mentorCard,
+.leaderCard {
+  scroll-margin-top: 90px;
+}
+.course,
+.planCard,
+.lessonCard,
+.review,
+.statBox,
+.premiumCard,
+.mentorCard,
+.leaderCard {
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.course:hover,
+.planCard:hover,
+.lessonCard:hover,
+.review:hover,
+.statBox:hover,
+.premiumCard:hover,
+.mentorCard:hover,
+.leaderCard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+}
+header {
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.course,
+.planCard,
+.lessonCard,
+.review,
+.statBox,
+.premiumCard,
+.mentorCard,
+.leaderCard,
+.faqBox {
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.premium,
+.mentor,
+.plansSection,
+.coursePages,
+.resources,
+.testimonials,
+.faq {
+  position: relative;
+  overflow: hidden;
+}
+
+.premium::before,
+.mentor::before,
+.plansSection::before {
+  content: "";
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: rgba(249, 115, 22, 0.12);
+  filter: blur(60px);
+  top: -80px;
+  right: -80px;
+  pointer-events: none;
+}
+.mobileBottomNav {
+  position: fixed;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  z-index: 999;
+  border-radius: 24px;
+  padding: 10px 8px;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+}
+
+.mobileBottomNav a {
+  border-radius: 18px;
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease;
+}
+
+.mobileBottomNav a:active {
+  transform: scale(0.94);
+  background: rgba(249, 115, 22, 0.12);
+}
+
+@media (min-width: 769px) {
+  .mobileBottomNav {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 86px;
+  }
+}
+.hero,
+.stats,
+.coursePages,
+.plansSection,
+.cdp,
+.resources,
+.premium,
+.testimonials,
+.faq,
+.footer,
+.mentor {
+  animation: fadePremium 0.7s ease;
+}
+
+@keyframes fadePremium {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.course,
+.planCard,
+.lessonCard,
+.review,
+.statBox,
+.premiumCard,
+.mentorCard,
+.leaderCard {
+  animation: cardFade 0.5s ease;
+}
+
+@keyframes cardFade {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@media (max-width: 768px) {
+  .hero,
+  .stats,
+  .coursePages,
+  .plansSection,
+  .cdp,
+  .resources,
+  .premium,
+  .testimonials,
+  .faq,
+  .footer,
+  .mentor {
+    animation-duration: 0.45s;
+  }
+
+  .course,
+  .planCard,
+  .lessonCard,
+  .review,
+  .statBox,
+  .premiumCard,
+  .mentorCard,
+  .leaderCard {
+    animation-duration: 0.35s;
+  }
+
+  .course:hover,
+  .planCard:hover,
+  .lessonCard:hover,
+  .review:hover,
+  .statBox:hover,
+  .premiumCard:hover,
+  .mentorCard:hover,
+  .leaderCard:hover {
+    transform: none;
+  }
+}

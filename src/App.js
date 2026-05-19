@@ -1361,11 +1361,13 @@ const studyTimeMessage =
       <React.Suspense
         fallback={
           <div className="premium-loader">
-          <img
-            src="/logo-header.png"
-            alt="AspireNest Academy"
-            className="premium-loader-logo"
-          />
+  <img
+  src="/logo-header.png"
+  alt="AspireNest Academy"
+  className="premium-loader-logo"
+  loading="eager"
+  decoding="async"
+/>
         
           <div className="premium-loader-ring"></div>
         
@@ -1378,11 +1380,13 @@ const studyTimeMessage =
         <div className={darkMode ? "app dark" : "app"}>
         <header>
           <div className="brand">
-            <img
-              src="/logo-header.png"
-              alt="AspireNest Academy"
-              className="header-logo"
-            />
+          <img
+  src="/logo-header.png"
+  alt="AspireNest Academy"
+  className="header-logo"
+  loading="eager"
+  decoding="async"
+/>
           </div>
         </header>
   
@@ -1415,11 +1419,13 @@ return (
   <React.Suspense
     fallback={
       <div className="premium-loader">
-      <img
-        src="/logo-header.png"
-        alt="AspireNest Academy"
-        className="premium-loader-logo"
-      />
+    <img
+  src="/logo-header.png"
+  alt="AspireNest Academy"
+  className="header-logo"
+  loading="eager"
+  decoding="async"
+/>
     
       <div className="premium-loader-ring"></div>
     
@@ -1467,11 +1473,13 @@ return (
       )}
 <header>
   <div className="brand">
-    <img
-      src="/logo-header.png"
-      alt="AspireNest Academy"
-      className="header-logo"
-    />
+  <img
+  src="/logo-header.png"
+  alt="AspireNest Academy"
+  className="header-logo"
+  loading="eager"
+  decoding="async"
+/>
   </div>
 
         <nav className={mobileMenuOpen ? "nav mobile-open" : "nav"}>
