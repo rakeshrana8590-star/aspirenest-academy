@@ -1871,13 +1871,22 @@ isPremiumUser={isPremiumUser}
           <div className="course">✅ Revision Checklist</div>
         </div>
       </section>
-      <a
-        className="whatsapp"
-        href="https://wa.me/917304256002?text=Hello%20AspireNest%20Academy,%20I%20want%20details%20about%20your%20CTET/TET%20courses%20and%20premium%20study%20materials.,%20I%20want%20details%20about%20CTET/TET%20courses."
-        target="_blank"
-      >
-        💬 WhatsApp Enquiry
-      </a>
+      <div className="mobileBottomNav">
+  <a href="#ctet">🏠<span>Home</span></a>
+  <a href="#resources">📘<span>Notes</span></a>
+  <a href="#mock">📝<span>Mock</span></a>
+  <a href="#pricing">⭐<span>Premium</span></a>
+  <a href="#login">👤<span>Profile</span></a>
+</div>
+
+<a
+  className="whatsapp"
+  href="https://wa.me/917304256002?text=Hello%20AspireNest%20Academy,%20I%20want%20details%20about%20your%20CTET/TET%20courses%20and%20premium%20study%20materials."
+  target="_blank"
+  rel="noreferrer"
+>
+  💬 WhatsApp Enquiry
+</a>
       <section className="premium">
         <div className="premiumLeft">
           <span className="premiumBadge">PREMIUM LEARNING EXPERIENCE</span>

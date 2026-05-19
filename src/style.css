@@ -3687,3 +3687,46 @@ html {
     font-size: 18px;
   }
 }
+.mobileBottomNav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobileBottomNav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: #ffffff;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.12);
+    z-index: 9999;
+    border-top: 1px solid #eeeeee;
+  }
+
+  .mobileBottomNav a {
+    text-decoration: none;
+    color: #111827;
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .mobileBottomNav span {
+    font-size: 11px;
+  }
+
+  body {
+    padding-bottom: 70px;
+  }
+
+  .whatsapp {
+    bottom: 82px;
+  }
+}
