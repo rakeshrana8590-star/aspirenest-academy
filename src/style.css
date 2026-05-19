@@ -7,6 +7,7 @@ html {
   scroll-behavior: smooth;
   }
   body {
+    animation: appFade 0.5s ease;
     margin: 0;
     font-family: Arial;
     background: #fff7ed;
@@ -4051,4 +4052,688 @@ header {
   .leaderCard:hover {
     transform: none;
   }
+}
+@keyframes appFade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+button,
+.btnLink,
+.mobileBottomNav a {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+button:active,
+.btnLink:active,
+.mobileBottomNav a:active {
+  transform: scale(0.96);
+}
+.courseCard,
+.noteCard,
+.mockCard,
+.premiumCard,
+.dashboardCard {
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.courseCard:hover,
+.noteCard:hover,
+.mockCard:hover,
+.premiumCard:hover,
+.dashboardCard:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 14px 40px rgba(0,0,0,0.12);
+}
+.hero,
+.courseCard,
+.noteCard,
+.mockCard,
+.premiumCard,
+.dashboardCard,
+.pricingCard {
+  animation: fadeUp 0.7s ease;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.hero::before,
+.premium::before,
+.pricing::before,
+.dashboard::before {
+  content: "";
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(
+    circle,
+    rgba(249,115,22,0.18),
+    transparent 70%
+  );
+  filter: blur(30px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero,
+.premium,
+.pricing,
+.dashboard {
+  position: relative;
+  overflow: hidden;
+}
+.premiumCard,
+.dashboardCard,
+.pricingCard {
+  animation: floatingCard 4s ease-in-out infinite;
+}
+
+@keyframes floatingCard {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+.mobileBottomNav a.active,
+.mobileBottomNav a:focus,
+.mobileBottomNav a:hover {
+  color: #f97316;
+}
+
+.mobileBottomNav a.active .navIcon,
+.mobileBottomNav a:focus .navIcon,
+.mobileBottomNav a:hover .navIcon {
+  background: linear-gradient(
+    135deg,
+    #f97316,
+    #fb923c
+  );
+
+  color: white;
+
+  box-shadow:
+    0 10px 25px rgba(249,115,22,0.35);
+}
+button,
+.btnLink,
+.planButton,
+.ctaButton {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+button:hover,
+.btnLink:hover,
+.planButton:hover,
+.ctaButton:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 12px 30px rgba(249,115,22,0.28);
+}
+
+button::before,
+.btnLink::before,
+.planButton::before,
+.ctaButton::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.25),
+    transparent
+  );
+
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+button:hover::before,
+.btnLink:hover::before,
+.planButton:hover::before,
+.ctaButton:hover::before {
+  transform: translateX(100%);
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(251,146,60,0.18),
+    transparent 70%
+  );
+
+  top: -120px;
+  left: -120px;
+
+  filter: blur(40px);
+
+  animation: heroGlow 6s ease-in-out infinite;
+
+  pointer-events: none;
+}
+
+@keyframes heroGlow {
+  0% {
+    transform: scale(1) translateY(0px);
+    opacity: 0.7;
+  }
+
+  50% {
+    transform: scale(1.08) translateY(12px);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1) translateY(0px);
+    opacity: 0.7;
+  }
+}
+.hero,
+.courseCard,
+.noteCard,
+.mockCard,
+.premiumCard,
+.dashboardCard,
+.pricingCard,
+.review,
+.statBox,
+.lessonCard {
+  animation:
+    revealSmooth 0.8s ease;
+}
+
+@keyframes revealSmooth {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.courseCard,
+.noteCard,
+.mockCard,
+.premiumCard,
+.dashboardCard,
+.pricingCard {
+  background: rgba(255,255,255,0.72);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  border: 1px solid rgba(255,255,255,0.35);
+
+  box-shadow:
+    0 10px 35px rgba(15,23,42,0.08);
+
+  border-radius: 24px;
+}
+.app::before {
+  content: "";
+
+  position: fixed;
+
+  inset: 0;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(249,115,22,0.10),
+      transparent 30%
+    ),
+
+    radial-gradient(
+      circle at bottom right,
+      rgba(251,146,60,0.10),
+      transparent 30%
+    );
+
+  pointer-events: none;
+
+  z-index: -1;
+}
+.premiumCard,
+.pricingCard,
+.dashboardCard {
+  position: relative;
+}
+
+.premiumCard::before,
+.pricingCard::before,
+.dashboardCard::before {
+  content: "";
+
+  position: absolute;
+
+  inset: -1px;
+
+  border-radius: inherit;
+
+  padding: 1px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(249,115,22,0.55),
+      rgba(251,146,60,0.18),
+      rgba(255,255,255,0.35)
+    );
+
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+
+  -webkit-mask-composite: xor;
+
+  mask-composite: exclude;
+
+  pointer-events: none;
+}
+.mobileBottomNav {
+  background:
+    rgba(255,255,255,0.72);
+
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+
+  border:
+    1px solid rgba(255,255,255,0.4);
+
+  box-shadow:
+    0 12px 40px rgba(15,23,42,0.14),
+    inset 0 1px 0 rgba(255,255,255,0.5);
+}
+
+.mobileBottomNav::before {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(249,115,22,0.08),
+      transparent 50%
+    );
+
+  pointer-events: none;
+}
+.app::after {
+  content: "";
+
+  position: fixed;
+
+  width: 520px;
+  height: 520px;
+
+  right: -180px;
+  top: 20%;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(249,115,22,0.10),
+      transparent 70%
+    );
+
+  filter: blur(50px);
+
+  animation:
+    floatingBg 12s ease-in-out infinite;
+
+  pointer-events: none;
+
+  z-index: -1;
+}
+
+@keyframes floatingBg {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-24px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+.planButton,
+.ctaButton,
+button {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0% {
+    box-shadow:
+      0 0 0 rgba(249,115,22,0);
+  }
+
+  50% {
+    box-shadow:
+      0 0 24px rgba(249,115,22,0.22);
+  }
+
+  100% {
+    box-shadow:
+      0 0 0 rgba(249,115,22,0);
+  }
+}
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  transform: translateX(-100%);
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,0.35),
+      transparent
+    );
+
+  animation:
+    shimmerMove 2s infinite;
+}
+
+@keyframes shimmerMove {
+  100% {
+    transform: translateX(100%);
+  }
+}
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background:
+    rgba(255,255,255,0.45);
+}
+
+::-webkit-scrollbar-thumb {
+  background:
+    linear-gradient(
+      180deg,
+      #f97316,
+      #fb923c
+    );
+
+  border-radius: 999px;
+
+  border: 2px solid rgba(255,255,255,0.4);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background:
+    linear-gradient(
+      180deg,
+      #ea580c,
+      #f97316
+    );
+}
+.hero,
+.premium,
+.dashboard,
+.pricing,
+.resources,
+.testimonials,
+.faq {
+  position: relative;
+
+  box-shadow:
+    0 10px 40px rgba(15,23,42,0.04);
+}
+.hero h1,
+.hero h2 {
+  background:
+    linear-gradient(
+      135deg,
+      #111827,
+      #f97316
+    );
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  text-shadow:
+    0 4px 18px rgba(249,115,22,0.12);
+}
+body {
+  background:
+    linear-gradient(
+      135deg,
+      #fff7ed,
+      #ffffff,
+      #fffaf5
+    );
+
+  background-size: 200% 200%;
+
+  animation:
+    bgMove 18s ease infinite;
+}
+
+@keyframes bgMove {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+.hero button,
+.hero .btnLink,
+.hero .ctaButton {
+  position: relative;
+
+  overflow: hidden;
+
+  isolation: isolate;
+}
+
+.hero button::after,
+.hero .btnLink::after,
+.hero .ctaButton::after {
+  content: "";
+
+  position: absolute;
+
+  inset: -2px;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(249,115,22,0.22),
+      rgba(251,146,60,0.08),
+      transparent
+    );
+
+  z-index: -1;
+
+  opacity: 0;
+
+  transition:
+    opacity 0.35s ease;
+}
+
+.hero button:hover::after,
+.hero .btnLink:hover::after,
+.hero .ctaButton:hover::after {
+  opacity: 1;
+}
+.badge,
+.heroBadge {
+  animation:
+    floatingBadge 4s ease-in-out infinite;
+
+  box-shadow:
+    0 10px 24px rgba(249,115,22,0.16);
+}
+
+@keyframes floatingBadge {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+section {
+  position: relative;
+}
+
+section::after {
+  content: "";
+
+  position: absolute;
+
+  left: 50%;
+  bottom: -1px;
+
+  transform: translateX(-50%);
+
+  width: 72%;
+
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(249,115,22,0.18),
+      transparent
+    );
+}
+button,
+.btnLink,
+.courseCard,
+.noteCard,
+.mockCard,
+.premiumCard,
+.dashboardCard,
+.pricingCard {
+  cursor: pointer;
+}
+
+button:hover,
+.btnLink:hover,
+.courseCard:hover,
+.noteCard:hover,
+.mockCard:hover,
+.premiumCard:hover,
+.dashboardCard:hover,
+.pricingCard:hover {
+  filter: brightness(1.02);
+}
+html,
+body,
+#root {
+  overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button,
+a,
+input,
+textarea {
+  outline: none;
+}
+
+::selection {
+  background: rgba(249,115,22,0.22);
+  color: #111827;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+.hero,
+.courseCard,
+.noteCard,
+.mockCard,
+.premiumCard,
+.dashboardCard,
+.pricingCard,
+.mobileBottomNav,
+button,
+.btnLink {
+  transform: translateZ(0);
+
+  backface-visibility: hidden;
+
+  will-change:
+    transform,
+    opacity;
 }
