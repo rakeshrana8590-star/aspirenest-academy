@@ -1362,7 +1362,20 @@ const studyTimeMessage =
     return () => clearTimeout(timer);
   }, [mockStarted, showResult, timeLeft]);
   if (authLoading) {
-    return null;
+    return (
+      <div
+        style={{
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          fontSize: "24px",
+          fontWeight: "bold",
+        }}
+      >
+        Loading...
+      </div>
+    );
   }
   if (!user) {
     return (
