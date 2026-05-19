@@ -1388,22 +1388,17 @@ const studyTimeMessage =
               className="header-logo"
             />
           </div>
-  
-          <nav>
-         
-          </nav>
         </header>
   
         <div
-style={{
-  height: "calc(100vh - 90px)",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  padding: "0 20px",
-  overflow: "hidden",
-}}
->
+          style={{
+            height: "calc(100vh - 90px)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: "0 20px",
+            overflow: "hidden",
+          }}
         >
           <AuthSection
             email={email}
@@ -2117,16 +2112,7 @@ setAnnouncementMessage={setAnnouncementMessage}
           </details>
         </div>
       </section>
-      <AuthSection
-  email={email}
-  setEmail={setEmail}
-  password={password}
-  setPassword={setPassword}
-  handleLogin={handleLogin}
-  handleGoogleLogin={handleGoogleLogin}
-  handleForgotPassword={handleForgotPassword}
-  handleRegister={handleRegister}
-/>
+    
 
 <footer className="footer">
   <div className="footerTop">
