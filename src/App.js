@@ -54,6 +54,7 @@ import currentAffairsPdf from "./assets/pdfs/CA MARCH 26.pdf";
 
 export default function App() {
   const [darkMode, setDarkMode] = React.useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [mockStarted, setMockStarted] = useState(false);
 const [currentQuestion, setCurrentQuestion] = useState(0);
