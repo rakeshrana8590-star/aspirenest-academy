@@ -1,27 +1,21 @@
-const CACHE_NAME = "aspirenest-cache-v1";
-
-const urlsToCache = [
-  "/",
-  "/index.html",
-  "/manifest.json",
-  "/logo192.png",
-  "/logo512.png",
-];
+const CACHE_NAME = "aspirenest-cache-v2";
 
 self.addEventListener("install", (event) => {
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache);
-    })
+    caches.keys().then((cacheNames) =>
+      Promise.all(
+        cacheNames.map((cacheName) => caches.delete(cacheName))
+      )
+    )
   );
 
-  console.log("Service Worker Installed ✅");
+  self.clients.claim();
 });
 
 self.addEventListener("fetch", (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
-  );
+  event.respondWith(fetch(event.request));
 });
