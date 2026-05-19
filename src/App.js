@@ -40,7 +40,10 @@ import {
 import React, { useState, useEffect } from 'react';
 import AspireNestLogo from "./components/AspireNestLogo.jsx";
 import './style.css';
-import currentAffairsPdf from "./assets/pdfs/CA MARCH 26.pdf";
+import januaryCurrentAffairsPdf from "./assets/pdfs/CA JANUARY 26.pdf";
+import februaryCurrentAffairsPdf from "./assets/pdfs/CA FEBRUARY 26.pdf";
+import marchCurrentAffairsPdf from "./assets/pdfs/CA MARCH 26.pdf";
+import aprilCurrentAffairsPdf from "./assets/pdfs/CA APRIL 26.pdf";
 
 export default function App() {
   const [darkMode, setDarkMode] = React.useState(false);
@@ -90,12 +93,39 @@ const [firebaseNotes, setFirebaseNotes] = useState([]);
 const [currentAffairsList, setCurrentAffairsList] = useState([]);
 const fallbackCurrentAffairs = [
   {
-    id: "fallback-ca",
+    id: "ca-january-2026",
+    title: "January Current Affairs",
+    month: "January 2026",
+    type: "FREE",
+    pages: 8,
+    pdf: januaryCurrentAffairsPdf,
+  },
+
+  {
+    id: "ca-february-2026",
+    title: "February Current Affairs",
+    month: "February 2026",
+    type: "FREE",
+    pages: 10,
+    pdf: februaryCurrentAffairsPdf,
+  },
+
+  {
+    id: "ca-march-2026",
     title: "March Current Affairs",
     month: "March 2026",
     type: "FREE",
     pages: 11,
-    pdf: currentAffairsPdf,
+    pdf: marchCurrentAffairsPdf,
+  },
+
+  {
+    id: "ca-april-2026",
+    title: "April Current Affairs",
+    month: "April 2026",
+    type: "FREE",
+    pages: 12,
+    pdf: aprilCurrentAffairsPdf,
   },
 ];
 const [currentTitle, setCurrentTitle] = useState("");
@@ -2086,6 +2116,12 @@ setAnnouncementMessage={setAnnouncementMessage}
   handleDeleteAnnouncement={handleDeleteAnnouncement}
 />
 )}
+<CurrentAffairs
+  currentAffairsList={currentAffairsList}
+  fallbackCurrentAffairs={fallbackCurrentAffairs}
+  handleNoteAccess={handleNoteAccess}
+  isPremiumUser={isPremiumUser}
+/>
 
 {announcements.length > 0 && (
   <Announcements announcements={announcements} />

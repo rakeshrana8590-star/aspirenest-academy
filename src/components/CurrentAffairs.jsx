@@ -1,44 +1,57 @@
 export default function CurrentAffairs({
-    currentAffairsList,
-    fallbackCurrentAffairs,
-    handleNoteAccess,
-    isPremiumUser,
-  }) {
-    const finalCurrentAffairs =
-      currentAffairsList.length > 0
-        ? currentAffairsList
-        : fallbackCurrentAffairs;
-  
-    return (
-      <section id="current-affairs" className="currentAffairs">
-        <h2>Current Affairs</h2>
-  
+  currentAffairsList,
+  fallbackCurrentAffairs,
+  handleNoteAccess,
+  isPremiumUser,
+}) {
+  const finalCurrentAffairs =
+    currentAffairsList.length > 0
+      ? currentAffairsList
+      : fallbackCurrentAffairs;
+
+  return (
+    <section id="current-affairs" className="currentAffairs">
+      <div className="sectionHeader">
+        <span className="sectionBadge">
+          📚 Monthly Updates
+        </span>
+
+        <h2>Current Affairs Hub</h2>
+
         <p className="sectionText">
-          Monthly current affairs PDFs for CTET/TET and teaching exams.
+          Premium monthly current affairs PDFs for
+          CTET/TET and teaching exams preparation.
         </p>
-  
-        <div className="grid">
-          {finalCurrentAffairs.map((item) => (
-            <div className="course" key={item.id}>
-              <span className="planTag">{item.type}</span>
-  
-              <h3>{item.title}</h3>
-  
-              <p>📅 Month: {item.month}</p>
-  
-              <p>📄 Pages: {item.pages}</p>
-  
-              <button
-                className="btnLink"
-                onClick={() => handleNoteAccess(item)}
-              >
-                {item.type === "PREMIUM" && !isPremiumUser
-                  ? "🔒 Premium Only"
-                  : "📥 Download PDF"}
-              </button>
+      </div>
+
+      <div className="currentAffairsGrid">
+        {finalCurrentAffairs.map((item) => (
+          <div className="currentAffairCard" key={item.id}>
+            <div className="currentAffairTop">
+              <span className="planTag">
+                {item.type}
+              </span>
             </div>
-          ))}
-        </div>
-      </section>
-    );
-  }
+
+            <h3>{item.title}</h3>
+
+            <div className="currentAffairMeta">
+              <p>📅 {item.month}</p>
+
+              <p>📄 {item.pages} Pages</p>
+            </div>
+
+            <button
+              className="currentAffairBtn"
+              onClick={() => handleNoteAccess(item)}
+            >
+              {item.type === "PREMIUM" && !isPremiumUser
+                ? "🔒 Open Premium PDF"
+                : "📥 Download PDF"}
+            </button>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
