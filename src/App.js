@@ -1810,6 +1810,7 @@ return (
           </div>
         </div>
       </section>
+      {mockQuestions.length > 0 && (
       <MockTest
   mockStarted={mockStarted}
   setMockStarted={setMockStarted}
@@ -1830,7 +1831,8 @@ return (
   setSelectedAnswer={setSelectedAnswer}
   showAnswer={showAnswer}
   handleAnswerSubmit={handleAnswerSubmit}
-/>
+  />
+)}
 
       <NotesCMS
 notesData={notesData}
@@ -1981,6 +1983,8 @@ isPremiumUser={isPremiumUser}
 subjectChartData={subjectChartData}
 chartColors={chartColors}
 />
+
+{isAdmin(user) && (
 <AdminPanel
   isAdmin={isAdmin}
   activeAdminTab={activeAdminTab}
@@ -2060,7 +2064,11 @@ setAnnouncementMessage={setAnnouncementMessage}
   handleAddAnnouncement={handleAddAnnouncement}
   handleDeleteAnnouncement={handleDeleteAnnouncement}
 />
-<Announcements announcements={announcements} />
+)}
+
+{announcements.length > 0 && (
+  <Announcements announcements={announcements} />
+)}
   <section className="testimonials">
         <h2>Student Reviews</h2>
 
