@@ -3705,6 +3705,45 @@ html {
   display: none;
 }
 
+.mobileBottomNav a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-decoration: none;
+  color: #111827;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.mobileBottomNav a:hover {
+  transform: translateY(-2px);
+}
+
+.navIcon {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(10px);
+  box-shadow:
+    0 4px 14px rgba(0,0,0,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+  font-size: 20px;
+  transition: all 0.3s ease;
+}
+
+.mobileBottomNav a:hover .navIcon {
+  transform: scale(1.08);
+  box-shadow:
+    0 8px 22px rgba(0,0,0,0.14);
+}
+
 @media (max-width: 768px) {
   .mobileBottomNav {
     position: fixed;

@@ -1896,11 +1896,30 @@ isPremiumUser={isPremiumUser}
         </div>
       </section>
       <div className="mobileBottomNav">
-  <a href="#ctet">🏠<span>Home</span></a>
-  <a href="#resources">📘<span>Notes</span></a>
-  <a href="#mock">📝<span>Mock</span></a>
-  <a href="#pricing">⭐<span>Premium</span></a>
-  <a href="#login">👤<span>Profile</span></a>
+  <a href="#ctet">
+    <span className="navIcon">🏠</span>
+    <span>Home</span>
+  </a>
+
+  <a href="#resources">
+    <span className="navIcon">📘</span>
+    <span>Notes</span>
+  </a>
+
+  <a href="#cdp">
+    <span className="navIcon">📝</span>
+    <span>Mock</span>
+  </a>
+
+  <a href="#premium-section">
+    <span className="navIcon">⭐</span>
+    <span>Premium</span>
+  </a>
+
+  <a href="#student-profile">
+    <span className="navIcon">👤</span>
+    <span>Profile</span>
+  </a>
 </div>
 
 <a
