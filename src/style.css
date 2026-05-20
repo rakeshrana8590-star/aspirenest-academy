@@ -6863,3 +6863,271 @@ nav a {
     0 18px 40px rgba(249, 115, 22, 0.14) !important;
   border-color: rgba(249, 115, 22, 0.35) !important;
 }
+.adminDashboardPro {
+  margin-top: 30px;
+}
+
+.adminStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 22px;
+}
+
+.proStatCard {
+  position: relative;
+  overflow: hidden;
+  padding: 28px;
+  border-radius: 24px;
+  background: linear-gradient(
+    145deg,
+    rgba(15, 23, 42, 0.95),
+    rgba(30, 41, 59, 0.92)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: all 0.35s ease;
+}
+
+.proStatCard:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: rgba(255, 170, 0, 0.4);
+  box-shadow:
+    0 20px 60px rgba(255, 170, 0, 0.18),
+    0 10px 30px rgba(0,0,0,0.4);
+}
+
+.statIcon {
+  font-size: 2.2rem;
+  margin-bottom: 14px;
+  display: inline-block;
+}
+
+.proStatCard h3 {
+  font-size: 1rem;
+  color: #cbd5e1;
+  margin-bottom: 10px;
+}
+
+.proStatCard p {
+  font-size: 2.3rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+}
+
+.proStatCard small {
+  display: block;
+  margin-top: 10px;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.adminInsightPanel {
+  margin-top: 28px;
+  padding: 30px;
+  border-radius: 24px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 170, 0, 0.12),
+    rgba(15, 23, 42, 0.92)
+  );
+  border: 1px solid rgba(255, 170, 0, 0.18);
+  box-shadow:
+    0 10px 40px rgba(0,0,0,0.3);
+}
+
+.adminInsightPanel h3 {
+  color: #ffffff;
+  margin-bottom: 12px;
+  font-size: 1.4rem;
+}
+
+.adminInsightPanel p {
+  color: #cbd5e1;
+  line-height: 1.7;
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .adminStatsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .proStatCard {
+    padding: 22px;
+  }
+
+  .proStatCard p {
+    font-size: 2rem;
+  }
+}
+/* STUDENT DASHBOARD COMPACT PRO FIX */
+.studentDashboard,
+.studentDashboardPro,
+.dashboardLayout {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.studentDashboardContent,
+.dashboardMain,
+.analyticsPanel {
+  padding: 24px !important;
+}
+
+.analyticsHeader,
+.studentAnalyticsHeader {
+  margin-bottom: 18px !important;
+}
+
+.analyticsCards,
+.statsGrid,
+.dashboardStats {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(140px, 1fr)) !important;
+  gap: 16px !important;
+  margin: 22px 0 !important;
+}
+
+.analyticsCards .card,
+.statsGrid .card,
+.dashboardStats .card,
+.analyticsCard {
+  min-height: 130px !important;
+  padding: 22px !important;
+}
+
+.insightGrid,
+.progressInsightGrid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 18px !important;
+  margin: 18px 0 !important;
+}
+
+.insightCard,
+.progressCard {
+  min-height: 170px !important;
+  padding: 24px !important;
+}
+
+.chartsGrid,
+.analyticsChartsGrid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 18px !important;
+  margin-top: 22px !important;
+}
+
+.chartCard {
+  min-height: 300px !important;
+  padding: 22px !important;
+}
+
+.aiStudyPlan,
+.studyPlanCard {
+  margin-top: 20px !important;
+  padding: 24px !important;
+  border-radius: 22px !important;
+}
+
+@media (max-width: 900px) {
+  .analyticsCards,
+  .statsGrid,
+  .dashboardStats {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .insightGrid,
+  .progressInsightGrid,
+  .chartsGrid,
+  .analyticsChartsGrid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .analyticsCards,
+  .statsGrid,
+  .dashboardStats {
+    grid-template-columns: 1fr !important;
+  }
+}
+/* ADMIN ANALYTICS COMPACT PRO */
+.adminStudentsSection .adminOverviewGrid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(150px, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.adminStudentsSection .adminOverviewGrid .dashboardCard {
+  min-height: 160px;
+  padding: 28px;
+  border-radius: 24px;
+}
+
+.adminStudentsSection .adminOverviewGrid .dashboardCard h3 {
+  font-size: 1.35rem;
+  line-height: 1.25;
+  margin-bottom: 18px;
+}
+
+.adminStudentsSection .adminOverviewGrid .dashboardCard p {
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+@media (max-width: 1200px) {
+  .adminStudentsSection .adminOverviewGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .adminStudentsSection .adminOverviewGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .adminStudentsSection .adminOverviewGrid .dashboardCard {
+    min-height: 130px;
+    padding: 20px;
+  }
+}
+/* PREMIUM ANALYTICS CARDS */
+.dashboardCard {
+  background: linear-gradient(
+    145deg,
+    #f8f2ea,
+    #fffdf9
+  );
+  
+  border: 1px solid rgba(255, 170, 0, 0.15);
+
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.12),
+    0 0 30px rgba(255, 140, 0, 0.08);
+
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.dashboardCard:hover {
+  transform: translateY(-8px);
+
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.18),
+    0 0 40px rgba(255, 140, 0, 0.16);
+}
+
+.dashboardCard h3 {
+  color: #ff6b00;
+  font-weight: 800;
+}
+
+.dashboardCard p {
+  color: #1d2a44;
+}

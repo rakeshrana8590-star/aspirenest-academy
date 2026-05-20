@@ -11,7 +11,15 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
-
+import {
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer
+} from "recharts";
 const AuthSection = React.lazy(() => import("./components/AuthSection.jsx"));
 const AdminPanel = React.lazy(() => import("./components/AdminPanel.jsx"));
 const StudentDashboard = React.lazy(() => import("./components/StudentDashboard.jsx"));
@@ -995,6 +1003,8 @@ const usersData = usersSnap.docs.map((doc) => ({
           makePremium ? "Premium" : "Free"
         } user ✅`
       );
+      
+      await loadAdminData();
     } catch (error) {
       alert(error.message);
     }
@@ -1177,6 +1187,22 @@ const averageAccuracy =
         ) / mockResults.length
       )
     : 0;
+    const weeklyPerformanceData = [
+      { day: "Mon", score: 45 },
+      { day: "Tue", score: 52 },
+      { day: "Wed", score: 61 },
+      { day: "Thu", score: 58 },
+      { day: "Fri", score: 70 },
+      { day: "Sat", score: 82 },
+      { day: "Sun", score: 90 },
+    ];
+    
+    const subjectPerformanceData = [
+      { name: "CDP", value: 80 },
+      { name: "Maths", value: 65 },
+      { name: "EVS", value: 72 },
+      { name: "Language", value: 88 },
+    ];
 
 const highestScore =
   mockResults.length > 0
@@ -2169,6 +2195,8 @@ isPremiumUser={isPremiumUser}
   loadAdminData={loadAdminData}
   mockResults={mockResults}
   averageAccuracy={averageAccuracy}
+  weeklyPerformanceData={weeklyPerformanceData}
+subjectPerformanceData={subjectPerformanceData}
   highestScore={highestScore}
   totalMockAttempts={totalMockAttempts}
   dailyStreak={dailyStreak}

@@ -1,3 +1,13 @@
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 export default function AdminPanel({
   isAdmin,
   activeAdminTab,
@@ -79,6 +89,19 @@ export default function AdminPanel({
 }) {
   if (!isAdmin()) return null;
 
+  const uniqueStudents = students.filter(
+    (student, index, self) =>
+      index ===
+      self.findIndex((s) => s.email === student.email)
+  );
+  const analyticsChartData = [
+    { name: "Mon", students: 2, enquiries: 1 },
+    { name: "Tue", students: 4, enquiries: 2 },
+    { name: "Wed", students: 5, enquiries: 2 },
+    { name: "Thu", students: 7, enquiries: 3 },
+    { name: "Fri", students: 9, enquiries: 5 },
+    { name: "Sat", students: 12, enquiries: 6 },
+  ];
   const allNotes =
     firebaseNotes.length > 0 ? firebaseNotes : notesData;
 
@@ -129,36 +152,102 @@ export default function AdminPanel({
       </div>
 
       {activeAdminTab === "Dashboard" && (
-        <div className="adminOverviewGrid">
-          <div className="dashboardCard">
-            <h3>Total Students</h3>
-            <p>{students.length}</p>
-          </div>
+  <div className="adminDashboardPro">
 
-          <div className="dashboardCard">
-            <h3>Total Enquiries</h3>
-            <p>{enquiries.length}</p>
-          </div>
+    <div className="adminStatsGrid">
 
-          <div className="dashboardCard">
-            <h3>Total Mock Results</h3>
-            <p>{leaderboard.length}</p>
-          </div>
+      <div className="dashboardCard proStatCard">
+        <span className="statIcon">👨‍🎓</span>
 
-          <div className="dashboardCard">
-            <h3>Admin Mode</h3>
-            <p>Active</p>
-          </div>
-        </div>
-      )}
+        <h3>Total Students</h3>
+
+        <p>{uniqueStudents.length}</p>
+
+        <small>Registered learners</small>
+      </div>
+
+      <div className="dashboardCard proStatCard">
+        <span className="statIcon">📩</span>
+
+        <h3>Total Enquiries</h3>
+
+        <p>{enquiries.length}</p>
+
+        <small>Course interest leads</small>
+      </div>
+
+      <div className="dashboardCard proStatCard">
+        <span className="statIcon">📝</span>
+
+        <h3>Mock Results</h3>
+
+        <p>{leaderboard.length}</p>
+
+        <small>Practice activity</small>
+      </div>
+
+      <div className="dashboardCard proStatCard">
+        <span className="statIcon">⭐</span>
+
+        <h3>Premium Users</h3>
+
+        <p>
+          {
+          uniqueStudents.filter(
+            (student) => student.isPremium
+          ).length
+          }
+        </p>
+
+        <small>Paid access enabled</small>
+      </div>
+
+      <div className="dashboardCard proStatCard">
+        <span className="statIcon">📚</span>
+
+        <h3>Total Notes</h3>
+
+        <p>{allNotes.length}</p>
+
+        <small>Learning resources</small>
+      </div>
+
+      <div className="dashboardCard proStatCard">
+        <span className="statIcon">📢</span>
+
+        <h3>Announcements</h3>
+
+        <p>{announcements.length}</p>
+
+        <small>Live updates</small>
+      </div>
+
+    </div>
+
+    <div className="adminInsightPanel">
+
+      <h3>Platform Health</h3>
+
+      <p>
+        AspireNest Academy admin system is active.
+        You can manage students, premium access,
+        notes, current affairs, mock tests,
+        payments and announcements from this
+        control center.
+      </p>
+
+    </div>
+
+  </div>
+)}
 
       {activeAdminTab === "Students" && (
         <div className="adminStudentsSection">
           <h3>Registered Students</h3>
 
           <div className="adminStudentsGrid">
-            {students.length > 0 ? (
-              students.map((student, index) => (
+            {uniqueStudents.length > 0 ? (
+              uniqueStudents.map((student, index) => (
                 <div className="studentCard" key={student.id || index}>
                   <h4>{student.name || "Student"}</h4>
 
@@ -209,7 +298,88 @@ export default function AdminPanel({
           </div>
         </div>
       )}
+{activeAdminTab === "Analytics" && (
+  <div className="adminStudentsSection">
+    <h3>Platform Analytics</h3>
 
+    <div className="adminOverviewGrid">
+
+      <div className="dashboardCard">
+        <h3>Total Students</h3>
+        <p>{uniqueStudents.length}</p>
+      </div>
+
+      <div className="dashboardCard">
+        <h3>Premium Users</h3>
+        <p>
+          {
+            uniqueStudents.filter(
+              (student) => student.isPremium
+            ).length
+          }
+        </p>
+      </div>
+
+      <div className="dashboardCard">
+        <h3>Total Enquiries</h3>
+        <p>{enquiries.length}</p>
+      </div>
+
+      <div className="dashboardCard">
+        <h3>Mock Questions</h3>
+        <p>{mockQuestions.length}</p>
+      </div>
+
+      <div className="dashboardCard">
+        <h3>Total Notes</h3>
+        <p>{allNotes.length}</p>
+      </div>
+
+      <div className="dashboardCard">
+        <h3>Current Affairs</h3>
+        <p>{allCurrentAffairs.length}</p>
+      </div>
+
+    </div>
+
+    <div className="adminChartsGrid">
+      <div className="dashboardCard">
+        <h3>Student Growth</h3>
+
+        <ResponsiveContainer width="100%" height={260}>
+          <LineChart data={analyticsChartData}>
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Line
+              type="monotone"
+              dataKey="students"
+              stroke="#ff8800"
+              strokeWidth={4}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="dashboardCard">
+        <h3>Enquiries Analytics</h3>
+
+        <ResponsiveContainer width="100%" height={260}>
+          <BarChart data={analyticsChartData}>
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Bar
+              dataKey="enquiries"
+              fill="#ff8800"
+              radius={[10, 10, 0, 0]}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  </div>
+)}
       {activeAdminTab === "Enquiries" && (
         <div className="adminStudentsSection">
           <h3>Student Enquiries</h3>
