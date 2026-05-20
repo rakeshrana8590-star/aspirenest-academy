@@ -52,6 +52,46 @@ html {
   font-weight: 700;
   font-size: 17px;
   }
+
+  .stickySectionNav {
+    position: fixed;
+    top: 50%;
+    left: -220px;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    z-index: 999;
+    background: rgba(10, 15, 30, 0.82);
+    backdrop-filter: blur(14px);
+    padding: 18px 12px;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+  }
+  
+  .stickySectionNav a {
+    color: #ffffffcc;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    padding: 10px 14px;
+    border-radius: 10px;
+    white-space: nowrap;
+  }
+  
+  .stickySectionNav a:hover {
+    background: linear-gradient(135deg, #ff9f1c, #ff6b00);
+    color: white;
+    transform: translateX(4px);
+  }
+  
+  @media (max-width: 768px) {
+    .stickySectionNav {
+      display: none;
+    }
+  }
   .hero {
     padding: 80px 8%;
     display: grid;

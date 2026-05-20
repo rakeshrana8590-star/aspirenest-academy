@@ -1507,7 +1507,7 @@ return (
   </div>
 
         <nav className={mobileMenuOpen ? "nav mobile-open" : "nav"}>
-          <a href="#ctet">Courses</a>
+        <a href="#courses">Courses</a>
 
           <a href="#notes">Notes</a>
 
@@ -1524,6 +1524,14 @@ return (
 
         </nav>
       </header>
+      <div className="stickySectionNav">
+  <a href="#courses">Courses</a>
+  <a href="#notes">Notes</a>
+  <a href="#current-affairs">Current Affairs</a>
+  <a href="#mock-tests">Mock Tests</a>
+  <a href="#premium-section">Premium</a>
+  <a href="#contact">Contact</a>
+</div>
       <section className="hero">
         <div>
           <span className="badge">CTET • TET • B.Ed • D.El.Ed</span>
@@ -1672,7 +1680,7 @@ return (
 </div>
 
 </section>
-      <section className="coursePages" id="ctet">
+      <section className="coursePages" id="courses">
   <h2>CTET/TET Course Pages</h2>
 
   <p className="sectionText">
@@ -1843,6 +1851,7 @@ return (
         </div>
       </section>
       {mockQuestions.length > 0 && (
+        <section id="mock-tests">
       <MockTest
   mockStarted={mockStarted}
   setMockStarted={setMockStarted}
@@ -1864,14 +1873,16 @@ return (
   showAnswer={showAnswer}
   handleAnswerSubmit={handleAnswerSubmit}
   />
+  </section>
 )}
-
+<section id="notes">
       <NotesCMS
 notesData={notesData}
 firebaseNotes={firebaseNotes}
 handleNoteAccess={handleNoteAccess}
 isPremiumUser={isPremiumUser}
 />
+</section>
 
 <section className="leaderboardSection">
   <div className="leaderboardHeader">
@@ -1954,7 +1965,7 @@ isPremiumUser={isPremiumUser}
 >
   💬 WhatsApp Enquiry
 </a>
-      <section className="premium">
+<section className="premium" id="premium-section">
         <div className="premiumLeft">
           <span className="premiumBadge">PREMIUM LEARNING EXPERIENCE</span>
 
@@ -2220,7 +2231,7 @@ setAnnouncementMessage={setAnnouncementMessage}
 
     <div>
       <h3>Quick Links</h3>
-      <a href="#ctet">Courses</a>
+      <a href="#courses">Courses</a>
       <a href="#cdp">CDP Module</a>
       <a href="#resources">Free Resources</a>
       <a href="#pricing">Pricing</a>
