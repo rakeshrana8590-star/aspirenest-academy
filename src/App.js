@@ -1507,14 +1507,14 @@ return (
   </div>
 
         <nav className={mobileMenuOpen ? "nav mobile-open" : "nav"}>
-          <a href="#ctet">Courses</a>
+          <a href="#courses">Courses</a>
 
           <a href="#notes">Notes</a>
 
           <a href="#pricing">Pricing</a>
 
           <a href="#contact">Contact</a>
-          <a href="#login">Login</a>
+          <a href="#student-profile">Login</a>
           <button
   className="mobile-menu-btn"
   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -1537,7 +1537,7 @@ return (
           <p>Bilingual preparation platform for Indian students.</p>
 
           <div className="buttons">
-            <a href="#ctet" className="btnLink">
+            <a href="#courses" className="btnLink">
               Start Learning
             </a>
             <a href="#resources" className="btnLink outline">
@@ -1672,7 +1672,7 @@ return (
 </div>
 
 </section>
-      <section className="coursePages" id="ctet">
+<section className="coursePages" id="courses">
   <h2>CTET/TET Course Pages</h2>
 
   <p className="sectionText">
@@ -1738,7 +1738,7 @@ return (
               <li>🎯 PYQ Practice</li>
             </ul>
 
-            <a href="#ctet" className="btnLink">
+            <a href="#courses" className="btnLink">
               Explore Courses
             </a>
           </div>
@@ -1843,6 +1843,7 @@ return (
         </div>
       </section>
       {mockQuestions.length > 0 && (
+        <section id="mock-tests">
       <MockTest
   mockStarted={mockStarted}
   setMockStarted={setMockStarted}
@@ -1864,14 +1865,16 @@ return (
   showAnswer={showAnswer}
   handleAnswerSubmit={handleAnswerSubmit}
   />
+  </section>
 )}
-
+<section id="notes">
       <NotesCMS
 notesData={notesData}
 firebaseNotes={firebaseNotes}
 handleNoteAccess={handleNoteAccess}
 isPremiumUser={isPremiumUser}
 />
+</section>
 
 <section className="leaderboardSection">
   <div className="leaderboardHeader">
@@ -1920,7 +1923,7 @@ isPremiumUser={isPremiumUser}
         </div>
       </section>
       <div className="mobileBottomNav">
-  <a href="#ctet">
+  <a href="#courses">
     <span className="navIcon">🏠</span>
     <span>Home</span>
   </a>
@@ -1935,7 +1938,7 @@ isPremiumUser={isPremiumUser}
     <span>Mock</span>
   </a>
 
-  <a href="#premium-section">
+  <a href="#pricing">
     <span className="navIcon">⭐</span>
     <span>Premium</span>
   </a>
@@ -1954,7 +1957,7 @@ isPremiumUser={isPremiumUser}
 >
   💬 WhatsApp Enquiry
 </a>
-      <section className="premium">
+<section className="premium" id="premium-section">
         <div className="premiumLeft">
           <span className="premiumBadge">PREMIUM LEARNING EXPERIENCE</span>
 
@@ -2009,6 +2012,15 @@ isPremiumUser={isPremiumUser}
           </div>
         </div>
       </section>
+      <section id="pricing">
+
+
+  <Pricing
+    handlePremiumPurchase={handlePremiumPurchase}
+    isPremiumUser={isPremiumUser}
+  />
+</section>
+<section id="student-profile">
       <StudentDashboard
   user={user}
   isPremiumUser={isPremiumUser}
@@ -2034,7 +2046,7 @@ isPremiumUser={isPremiumUser}
 subjectChartData={subjectChartData}
 chartColors={chartColors}
 />
-
+</section>
 {isAdmin(user) && (
 <AdminPanel
   isAdmin={isAdmin}
@@ -2150,7 +2162,7 @@ setAnnouncementMessage={setAnnouncementMessage}
         </div>
       </section>
       <section id="contact">
-        <h2>Get Course Details</h2>
+        <h2>Get In Touch</h2>
 
         <form>
         <input
@@ -2220,7 +2232,7 @@ setAnnouncementMessage={setAnnouncementMessage}
 
     <div>
       <h3>Quick Links</h3>
-      <a href="#ctet">Courses</a>
+      <a href="#courses">Courses</a>
       <a href="#cdp">CDP Module</a>
       <a href="#resources">Free Resources</a>
       <a href="#pricing">Pricing</a>
