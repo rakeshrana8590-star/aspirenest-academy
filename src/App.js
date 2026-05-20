@@ -1400,9 +1400,10 @@ const studyTimeMessage =
       >
         <div className={darkMode ? "app dark" : "app"}>
         <header>
-          <div className="brand">
-          <AspireNestLogo />
-          </div>
+        <div className="brand">
+  <AspireNestLogo />
+
+</div>
         </header>
   
         <div
@@ -1450,7 +1451,10 @@ return (
     </div>
     }
   >
-    <div className={darkMode ? "app dark" : "app"}>
+   <div
+  className={darkMode ? "app dark" : "app"}
+  id="login"
+>
       {selectedCourse && (
         <div className="coursePopup">
           <div className="popupContent">
@@ -1505,7 +1509,7 @@ return (
           <a href="#pricing">Pricing</a>
 
           <a href="#contact">Contact</a>
-          <a href="#login">Login</a>
+          <a href="#student-profile">Login</a>
           <button
   className="mobile-menu-btn"
   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -1873,7 +1877,7 @@ return (
               <li>🎯 PYQ Practice</li>
             </ul>
 
-            <a href="#ctet" className="btnLink">
+            <a href="#courses" className="btnLink">
               Explore Courses
             </a>
           </div>
@@ -2058,7 +2062,7 @@ isPremiumUser={isPremiumUser}
         </div>
       </section>
       <div className="mobileBottomNav">
-  <a href="#ctet">
+  <a href="#courses">
     <span className="navIcon">🏠</span>
     <span>Home</span>
   </a>
@@ -2073,7 +2077,7 @@ isPremiumUser={isPremiumUser}
     <span>Mock</span>
   </a>
 
-  <a href="#premium-section">
+  <a href="#pricing">
     <span className="navIcon">⭐</span>
     <span>Premium</span>
   </a>
@@ -2147,6 +2151,15 @@ isPremiumUser={isPremiumUser}
           </div>
         </div>
       </section>
+      <section id="pricing">
+
+
+  <Pricing
+    handlePremiumPurchase={handlePremiumPurchase}
+    isPremiumUser={isPremiumUser}
+  />
+</section>
+<section id="student-profile">
       <StudentDashboard
   user={user}
   isPremiumUser={isPremiumUser}
@@ -2172,7 +2185,7 @@ isPremiumUser={isPremiumUser}
 subjectChartData={subjectChartData}
 chartColors={chartColors}
 />
-
+</section>
 {isAdmin(user) && (
 <AdminPanel
   isAdmin={isAdmin}
@@ -2312,7 +2325,7 @@ setAnnouncementMessage={setAnnouncementMessage}
         </div>
       </section>
       <section id="contact">
-        <h2>Get Course Details</h2>
+        <h2>Get In Touch</h2>
 
         <form>
         <input
