@@ -1024,7 +1024,7 @@ const usersData = usersSnap.docs.map((doc) => ({
     },
     {
       id: "state-tet",
-      title: "State TET / MAHA TET",
+      title: "CTET Paper II",
       level: "Exam Focused",
       price: "₹1499",
       category: "State TET",
