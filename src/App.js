@@ -54,6 +54,8 @@ const [currentQuestion, setCurrentQuestion] = useState(0);
 const [selectedAnswer, setSelectedAnswer] = useState("");
 const [score, setScore] = useState(0);
 const [showResult, setShowResult] = useState(false);
+const [showMentorProfile, setShowMentorProfile] = useState(false);
+const [showProfile, setShowProfile] = useState(false);
 const [showAnswer, setShowAnswer] = useState(false);
 const [timeLeft, setTimeLeft] = useState(60);
   const [email, setEmail] = useState("");
@@ -998,39 +1000,28 @@ const usersData = usersSnap.docs.map((doc) => ({
     }
   };
   const courses = [
-    {
-      id: "ctet-paper-1",
-      title: "CTET Paper I",
-      level: "Foundation",
-      price: "Free",
-      category: "CTET",
-      desc: "Class 1 to 5 teaching aspirants ke liye complete foundation course.",
-      lessons: 24,
-      tests: 10,
-      badge: "FREE",
-      points: ["CDP", "Language I & II", "Mathematics", "EVS", "Mock Tests"],
-    },
+    
     {
       id: "ctet-paper-2",
       title: "CTET Paper II",
       level: "Intermediate",
-      price: "₹499",
+      price: "₹1499",
       category: "CTET",
-      desc: "Class 6 to 8 aspirants ke liye subject-wise exam preparation.",
-      lessons: 32,
-      tests: 15,
+      desc: "Comprehensive preparation covering Child Development & Pedagogy, Mathematics, Science, Social Science, and Language I & II, along with concept clarity, practice sessions, and strategic guidance for upper primary teaching aspirants.",
+      lessons: "All",
+      tests: 10,
       badge: "BASIC",
       points: ["CDP", "Language I & II", "Maths/Science", "Social Science", "PYQ"],
     },
     {
-      id: "state-tet",
+      id: "ctet-paper-2",
       title: "CTET Paper II",
       level: "Exam Focused",
-      price: "₹1499",
+      price: "₹2499",
       category: "State TET",
-      desc: "State TET pattern, syllabus, PYQ aur mock test preparation.",
-      lessons: 40,
-      tests: 20,
+      desc: "Complete guidance on State TET exam pattern, updated syllabus, previous year question papers (PYQs), practice tests, and full-length mock tests designed to improve accuracy, confidence, and time management skills.",
+      lessons: "All",
+      tests: 50,
       badge: "PREMIUM",
       points: ["State Pattern", "Syllabus", "Practice Sets", "PYQ", "Strategy"],
     },
@@ -1511,7 +1502,7 @@ return (
   </div>
 
         <nav className={mobileMenuOpen ? "nav mobile-open" : "nav"}>
-          <a href="#courses">Courses</a>
+        <a href="#courses">Courses</a>
 
           <a href="#notes">Notes</a>
 
@@ -1528,71 +1519,63 @@ return (
 
         </nav>
       </header>
-      <section className="hero">
-      <div className="taglineCard">
-  <div className="taglineIcon">🏆</div>
-
-  <div>
-    <h3>Where Aspirations Turn Into Selections</h3>
-
-    <p>
-      Empowering students with the right guidance,
-      resources and practice.
-    </p>
-  </div>
+      <div className="stickySectionNav">
+  <a href="#courses">Courses</a>
+  <a href="#notes">Notes</a>
+  <a href="#current-affairs">Current Affairs</a>
+  <a href="#mock-tests">Mock Tests</a>
+  <a href="#premium-section">Premium</a>
+  <a href="#contact">Contact</a>
 </div>
-        <div>
-   
-          <span className="badge">CTET • TETs</span>
+<section className="hero">
+  <div className="heroContent">
+    <div className="taglineCard">
+      <div className="taglineIcon">🏆</div>
 
-          <h2>
-          Crack CTET/TETs
-            <br />
-            with Smart Learning
-          </h2>
+      <div>
+        <h3>Where Aspirations Turn Into Selections</h3>
+        <p>
+          Empowering students with the right guidance,
+          resources and practice.
+        </p>
+      </div>
+    </div>
 
-          <p>Bilingual preparation platform for Indian students.</p>
+    <span className="badge">CTET • TETs</span>
 
-          <div className="buttons">
-            <a href="#courses" className="btnLink">
-              Start Learning
-            </a>
-           
-          </div>
-        </div>
+    <h2>
+      Crack CTET/TETs
+      <br />
+      with Smart Learning
+    </h2>
 
-        <div className="card">
-          <h3>Today's Goal</h3>
-          <p>Child Development Practice</p>
+    <p>Bilingual preparation platform for Indian students.</p>
 
-          <div className="progress">
-            <div className="fill"></div>
-          </div>
+    <div className="buttons">
+      <a href="#courses" className="btnLink">
+        Start Learning →
+      </a>
+    </div>
+  </div>
 
-          <span>75% Completed</span>
-        </div>
-      </section>
-      <section className="stats">
-        <div className="statBox">
-          <h1>10K+</h1>
-          <p>Students</p>
-        </div>
+  <div className="card heroGoalCard">
+    <div className="goalTop">
+      <div className="goalIcon">🎯</div>
+      <div>
+        <h3>Today's Goal</h3>
+        <p>Child Development Practice</p>
+      </div>
+    </div>
 
-        <div className="statBox">
-          <h1>150+</h1>
-          <p>Visual Notes</p>
-        </div>
+    <div className="progress">
+      <div className="fill"></div>
+    </div>
 
-        <div className="statBox">
-          <h1>50+</h1>
-          <p>Mock Tests</p>
-        </div>
+    <span><strong>75%</strong> Completed</span>
+  </div>
+</section>
+    
 
-        <div className="statBox">
-          <h1>95%</h1>
-          <p>Success Rate</p>
-        </div>
-      </section>{' '}
       <section className="mentor" id="about">
 
 <div className="mentorLeft">
@@ -1616,9 +1599,9 @@ return (
     </div>
 
     <div className="mentorStat">
-      <h3>UGC-NET</h3>
-      <span>Education Qualified</span>
-    </div>
+  <h3>UGC-NET</h3>
+  <p>Education Qualified</p>
+</div>
 
     <div className="mentorStat">
       <h3>CTET</h3>
@@ -1634,7 +1617,19 @@ return (
 
   <div className="buttons">
     <a href="#courses" className="btnLink">Explore Courses</a>
-    <a href="#contact" className="btnLink outline">Contact Mentor</a>
+    <button
+  className="secondaryBtn"
+  onClick={() => setShowMentorProfile(true)}
+>
+  Contact Mentor
+</button>
+<button
+  className="secondaryBtn"
+  onClick={() => setShowProfile(true)}
+>
+  View Full Profile
+</button>
+
   </div>
 
 </div>
@@ -1687,35 +1682,141 @@ return (
 </div>
 
 </section>
-<section className="visionMissionSection">
-  <div className="visionBox">
-    <span className="sectionBadge">Our Vision</span>
-    <h2>Vision</h2>
-    <p>
-      To establish AspireNest Academy as a center of excellence for empowering
-      aspirants to achieve success, confidence, and lifelong growth.
-    </p>
-  </div>
+{showMentorProfile && (
+  <div className="mentorProfileOverlay">
+    <div className="mentorProfileModal">
+      <button
+        className="closeMentorProfile"
+        onClick={() => setShowMentorProfile(false)}
+      >
+        ×
+      </button>
 
-  <div className="missionBox">
-    <span className="sectionBadge">Our Mission</span>
-    <h2>Mission</h2>
+      <h2>Connect with your mentor</h2>
 
-    <div className="missionGrid">
-      <div>1. To provide high-quality and student-centered learning for teaching aspirants.</div>
-      <div>2. To build conceptual clarity, confidence, and problem-solving skills through smart preparation strategies.</div>
-      <div>3. To inspire discipline, dedication, and continuous self-improvement among learners.</div>
-      <div>4. To create a motivating and supportive environment guided by expert mentorship.</div>
-      <div>5. To nurture future educators who can positively impact society through knowledge and values.</div>
+      <h3>Dr. Varsha Dalpat Maru</h3>
+
+      <p>
+        <strong>
+          Founder & Academic Mentor
+        </strong>{" "}
+        — AspireNest Academy
+      </p>
+
+      <p>
+        “Guiding future educators with
+        knowledge, confidence, and the right
+        mentorship to transform aspirations
+        into success.”
+      </p>
+
+      <p>
+        <strong>📍 Location:</strong>
+        {" "}Mumbai, Maharashtra, India
+      </p>
+
+      <p>
+        <strong>📧 Email:</strong>
+        {" "}dr.varshamaru@gmail.com
+      </p>
+
+      <p>
+        <strong>📞 Phone:</strong>
+        {" "}+91 97736 92578
+      </p>
+
+      <p>
+        <strong>🔗 LinkedIn:</strong>
+        <br />
+        linkedin.com/in/dr-varsha-maru-4a71b614b
+      </p>
+
+      <p>
+        <strong>
+          🌐 Professional Portfolio:
+        </strong>
+        <br />
+        bold.pro/my/drvarshadalpatmaru
+      </p>
     </div>
   </div>
-</section>
-<section className="coursePages" id="courses">
-  <h2>CTET/TET Course Pages</h2>
+)}
 
-  <p className="sectionText">
-    Structured courses with lessons, mock tests and exam-focused preparation.
-  </p>
+{showProfile && (
+  <div
+  className="mentorProfileOverlay"
+    onClick={() => setShowProfile(false)}
+  >
+    <div
+     className="mentorProfileModal profileModal"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button
+       className="closeMentorProfile"
+        onClick={() => setShowProfile(false)}
+      >
+        ✕
+      </button>
+
+      <h2>Professional Academic Profile</h2>
+
+      <h3>Dr. Varsha Dalpat Maru</h3>
+
+      <p className="profileTag">
+        Founder & Academic Mentor — AspireNest Academy
+      </p>
+
+      <p>
+        “Where Aspirations Turn Into Selections”
+      </p>
+
+      <div className="profileContent">
+
+        <h4>Professional Profile</h4>
+
+        <p>
+          Dr. Varsha Dalpat Maru is an accomplished educator,
+          academic leader, researcher, and mentor with
+          extensive experience in teacher education,
+          psychology, educational research, and academic leadership.
+        </p>
+
+        <p>
+          Currently serving as I/C Principal and Assistant
+          Professor at Humera Khan College of Education, Mumbai.
+        </p>
+
+        <h4>Academic Qualifications</h4>
+
+        <ul>
+          <li>Ph.D. in Education</li>
+          <li>UGC-NET Qualified – Education & Psychology</li>
+          <li>CTET Paper-II Qualified</li>
+          <li>TAIT Qualified</li>
+          <li>M.Ed. – Education</li>
+          <li>M.A. Psychology</li>
+          <li>Google Certified Educator</li>
+        </ul>
+
+        <h4>Research Areas</h4>
+
+        <p>
+          Cyberbullying, Mental Health, Educational Psychology,
+          Digital Education & Teacher Training.
+        </p>
+
+      </div>
+    </div>
+  </div>
+)}
+
+      <section className="coursePages" id="courses">
+      <h2>CTET/TET</h2>
+
+      <p>
+  Structured learning programs designed for concept clarity,
+  mock practice, and exam success.
+</p>
 
   <div className="grid">
     {courses.map((course) => (
@@ -2172,6 +2273,30 @@ setAnnouncementMessage={setAnnouncementMessage}
   handleNoteAccess={handleNoteAccess}
   isPremiumUser={isPremiumUser}
 />
+
+
+
+<section className="stats">
+  <div className="statBox">
+    <h1>10K+</h1>
+    <p>Students</p>
+  </div>
+
+  <div className="statBox">
+    <h1>150+</h1>
+    <p>Visual Notes</p>
+  </div>
+
+  <div className="statBox">
+    <h1>50+</h1>
+    <p>Mock Tests</p>
+  </div>
+
+  <div className="statBox">
+    <h1>95%</h1>
+    <p>Success Rate</p>
+  </div>
+</section>
 
 {announcements.length > 0 && (
   <Announcements announcements={announcements} />
