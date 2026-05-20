@@ -1529,10 +1529,13 @@ return (
       </header>
       <section className="hero">
         <div>
-          <span className="badge">CTET • TET • B.Ed • D.El.Ed</span>
+        <p className="heroPunchline">
+  “Where Aspirations Turn Into Selections”
+</p>
+          <span className="badge">CTET • TETs</span>
 
           <h2>
-            Crack CTET & TET
+          Crack CTET/TETs
             <br />
             with Smart Learning
           </h2>
@@ -1543,9 +1546,7 @@ return (
             <a href="#courses" className="btnLink">
               Start Learning
             </a>
-            <a href="#resources" className="btnLink outline">
-              Free Notes
-            </a>
+           
           </div>
         </div>
 
@@ -1674,6 +1675,29 @@ return (
 
 </div>
 
+</section>
+<section className="visionMissionSection">
+  <div className="visionBox">
+    <span className="sectionBadge">Our Vision</span>
+    <h2>Vision</h2>
+    <p>
+      To establish AspireNest Academy as a center of excellence for empowering
+      aspirants to achieve success, confidence, and lifelong growth.
+    </p>
+  </div>
+
+  <div className="missionBox">
+    <span className="sectionBadge">Our Mission</span>
+    <h2>Mission</h2>
+
+    <div className="missionGrid">
+      <div>1. To provide high-quality and student-centered learning for teaching aspirants.</div>
+      <div>2. To build conceptual clarity, confidence, and problem-solving skills through smart preparation strategies.</div>
+      <div>3. To inspire discipline, dedication, and continuous self-improvement among learners.</div>
+      <div>4. To create a motivating and supportive environment guided by expert mentorship.</div>
+      <div>5. To nurture future educators who can positively impact society through knowledge and values.</div>
+    </div>
+  </div>
 </section>
 <section className="coursePages" id="courses">
   <h2>CTET/TET Course Pages</h2>
