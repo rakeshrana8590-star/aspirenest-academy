@@ -924,7 +924,8 @@ font-size: 0;
   .mentorLeft {
     max-width: 680px;
   }
-  
+
+
   .mentor h2 {
     font-size: clamp(48px, 4.6vw, 76px);
     line-height: 1;
@@ -937,133 +938,51 @@ font-size: 0;
       #111827,
       #7c2d12,
       #ea580c
-    );
+    );.closeMentorProfile {
+      position: absolute;
+    
+      top: 18px;
+      right: 22px;
+    
+      width: 42px;
+      height: 42px;
+    
+      border: none;
+      border-radius: 50%;
+    
+      background: linear-gradient(135deg, #f97316, #ea580c);
+    
+      color: white;
+    
+      font-size: 26px;
+      font-weight: 800;
+    
+      cursor: pointer;
+    
+      z-index: 10;
+    
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    
+      transition: 0.3s ease;
+    }
+    
+    .closeMentorProfile:hover {
+      background: #0f172a;
+    
+      color: white;
+    
+      transform: rotate(90deg);
+    }
   
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  
-  .mentorIntro {
-    font-size: 17px;
-    line-height: 1.75;
-    color: #475569;
-    max-width: 620px;
-    margin-bottom: 26px;
-  }
-  
-  .mentorStats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-  
-  .mentorStat {
-    background:
-      linear-gradient(
-        135deg,
-        rgba(255,255,255,0.96),
-        rgba(255,247,237,0.92)
-      );
-  
-    border: 1px solid rgba(249,115,22,0.12);
-  
-    border-radius: 24px;
-  
-    padding: 22px 18px;
-  
-    box-shadow:
-      0 16px 40px rgba(15,23,42,0.06);
-  
-    transition: 0.3s ease;
-  }
-  
-  .mentorStat:hover {
-    transform: translateY(-6px);
-  }
-  
-  .mentorStat h3 {
-    margin: 0 0 10px;
-    font-size: 26px;
-    color: #ea580c;
-  }
-  
-  .mentorStat p {
-    font-size: 15px;
-    font-weight: 700;
-    line-height: 1.45;
-    color: #475569;
-    margin: 0;
-  }
-  
-  .mentorQuote {
-    margin-bottom: 24px;
-    padding: 20px 24px;
-    border-left: 5px solid #f97316;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.78);
-    color: #334155;
-    font-size: 16px;
-    line-height: 1.65;
-    font-weight: 700;
-    box-shadow:
-      0 18px 45px rgba(15, 23, 42, 0.06);
-  }
-  .mentorProfileOverlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.55);
-    backdrop-filter: blur(10px);
-    z-index: 99999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  
-  .mentorProfileModal {
-    width: 100%;
-    max-width: 720px;
-    background: rgba(255, 255, 255, 0.96);
-    border-radius: 30px;
-    padding: 38px;
-    position: relative;
-    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.22);
-  }
-  
-  .closeMentorProfile {
-    position: absolute;
-    top: 18px;
-    right: 22px;
-  
-    width: 42px;
-    height: 42px;
-  
-    border: none;
-  
-    border-radius: 50%;
-  
-    background: #f1f5f9;
-  
-    color: #0f172a;
-  
-    font-size: 26px;
-    font-weight: 800;
-  
-    cursor: pointer;
-  
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  
-    transition: 0.3s ease;
-  }
-  
+
   .closeMentorProfile:hover {
     background: #ea580c;
     color: white;
     transform: rotate(90deg);
   }
+}
   
   .premiumMentorCard {
     position: relative;
@@ -6495,8 +6414,99 @@ nav a {
 
 .profileModal {
   max-width: 850px;
+  width: 100%;
   max-height: 88vh;
   overflow-y: auto;
+
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.98),
+    rgba(255,248,240,0.96)
+  );
+
+  border-radius: 36px;
+
+  padding: 56px;
+
+  position: relative;
+
+  box-shadow:
+    0 40px 120px rgba(15,23,42,0.18);
+
+  border: 1px solid rgba(249,115,22,0.12);
+
+  margin-top: 40px;
+}
+.mentorProfileOverlay {
+  position: fixed;
+  inset: 0;
+
+  background: rgba(15, 23, 42, 0.55);
+
+  backdrop-filter: blur(8px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 30px;
+
+  z-index: 99999;
+}
+
+.profileModal {
+  position: relative;
+
+  width: min(900px, 100%);
+
+  max-height: 90vh;
+
+  overflow-y: auto;
+
+  background: rgba(255,255,255,0.96);
+
+  border-radius: 34px;
+
+  padding: 48px;
+
+  box-shadow:
+    0 30px 80px rgba(15,23,42,0.28);
+
+  border: 1px solid rgba(255,255,255,0.7);
+}
+
+.closeMentorProfile {
+  position: absolute;
+
+  top: 20px;
+  right: 20px;
+
+  width: 54px;
+  height: 54px;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: #f1f5f9;
+
+  font-size: 32px;
+
+  font-weight: 900;
+
+  cursor: pointer;
+
+  color: #0f172a;
+
+  transition: 0.3s ease;
+}
+
+.closeMentorProfile:hover {
+  transform: rotate(90deg);
+
+  background: #ea580c;
+
+  color: white;
 }
 
 .profileTag {
@@ -6512,9 +6522,211 @@ nav a {
   font-size: 22px;
 }
 
+
+
+.mentorProfileOverlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99999 !important;
+  padding: 24px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  background: rgba(15, 23, 42, 0.55) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.mentorProfileModal {
+  position: relative !important;
+  width: min(900px, 90vw) !important;
+  max-height: 82vh !important;
+  overflow-y: auto !important;
+
+  background: rgba(255, 255, 255, 0.97) !important;
+  border-radius: 32px !important;
+  padding: 48px !important;
+
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.25) !important;
+}
+
+.closeMentorProfile {
+  position: absolute !important;
+  top: 22px !important;
+  right: 26px !important;
+
+  width: 56px !important;
+  height: 56px !important;
+
+  border: none !important;
+  border-radius: 50% !important;
+
+  background: linear-gradient(135deg, #f97316, #ea580c) !important;
+  color: white !important;
+
+  font-size: 34px !important;
+  font-weight: 900 !important;
+
+  cursor: pointer !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.mentorProfileOverlay {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(15, 23, 42, 0.55) !important;
+  backdrop-filter: blur(10px) !important;
+  z-index: 99999 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 24px !important;
+}
+
+.mentorProfileModal {
+  position: relative !important;
+
+  width: 100% !important;
+  max-width: 920px !important;
+  max-height: 86vh !important;
+
+  overflow-y: auto !important;
+
+  background: rgba(255, 255, 255, 0.97) !important;
+  border-radius: 34px !important;
+
+  padding: 48px !important;
+
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.24) !important;
+}
+
+.closeMentorProfile {
+  position: absolute !important;
+  top: 24px !important;
+  right: 28px !important;
+
+  width: 58px !important;
+  height: 58px !important;
+
+  border: none !important;
+  border-radius: 50% !important;
+
+  background: linear-gradient(135deg, #f97316, #ea580c) !important;
+  color: white !important;
+
+  font-size: 34px !important;
+  font-weight: 900 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  cursor: pointer !important;
+  z-index: 20 !important;
+}
+
+.closeMentorProfile:hover {
+  transform: rotate(90deg) !important;
+}
+.profileModal {
+  margin-top: 70px !important;
+  max-height: calc(100vh - 120px) !important;
+  padding: 42px 48px !important;
+  border-radius: 32px !important;
+}
+
+.profileModal h2 {
+  font-size: 30px !important;
+  margin-top: 0 !important;
+  margin-bottom: 14px !important;
+}
+
+.profileModal h3 {
+  font-size: 22px !important;
+  margin-bottom: 12px !important;
+}
+
+.profileContent h4 {
+  font-size: 22px !important;
+  margin-top: 22px !important;
+}
+
 .profileContent p,
 .profileContent li {
-  line-height: 1.8;
-  color: #475569;
-  font-size: 17px;
+  font-size: 16px !important;
+  line-height: 1.65 !important;
+}
+
+.closeMentorProfile {
+  top: 18px !important;
+  right: 22px !important;
+}
+.profileContent {
+  display: grid;
+  gap: 28px;
+}
+
+.profileCards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+@media (max-width: 768px) {
+  .profileCards {
+    grid-template-columns: 1fr;
+  }
+
+  .profileModal {
+    padding: 34px 24px;
+  }
+}
+.mentorStats {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 18px !important;
+  margin: 28px 0 !important;
+}
+
+.mentorStat {
+  padding: 24px 20px !important;
+  border-radius: 24px !important;
+  background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(255,247,237,0.92)) !important;
+  border: 1px solid rgba(249,115,22,0.16) !important;
+  box-shadow: 0 16px 40px rgba(15,23,42,0.06) !important;
+}
+
+.mentorStat h3 {
+  margin: 0 0 10px !important;
+  font-size: 28px !important;
+  color: #ea580c !important;
+}
+
+.mentorStat p {
+  margin: 0 !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #475569 !important;
+}
+
+.mentor h2 {
+  background: linear-gradient(90deg, #111827, #7c2d12, #ea580c) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.mentor h2::selection,
+.mentor h2 *::selection {
+  background: transparent !important;
+}
+
+@media (max-width: 900px) {
+  .mentorStats {
+    grid-template-columns: 1fr !important;
+  }
 }

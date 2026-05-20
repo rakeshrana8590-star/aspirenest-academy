@@ -54,6 +54,7 @@ const [currentQuestion, setCurrentQuestion] = useState(0);
 const [selectedAnswer, setSelectedAnswer] = useState("");
 const [score, setScore] = useState(0);
 const [showResult, setShowResult] = useState(false);
+const [showMentorProfile, setShowMentorProfile] = useState(false);
 const [showProfile, setShowProfile] = useState(false);
 const [showAnswer, setShowAnswer] = useState(false);
 const [timeLeft, setTimeLeft] = useState(60);
@@ -1619,17 +1620,12 @@ return (
   Contact Mentor
 </button>
 <button
-  className="mentorBtn profileBtn"
+  className="secondaryBtn"
   onClick={() => setShowProfile(true)}
 >
   View Full Profile
 </button>
-<button
-  className="mentorBtn profileBtn"
-  onClick={() => setShowProfile(true)}
->
-  View Full Profile
-</button>
+
   </div>
 
 </div>
@@ -1744,15 +1740,15 @@ return (
 
 {showProfile && (
   <div
-    className="mentorOverlay"
+  className="mentorProfileOverlay"
     onClick={() => setShowProfile(false)}
   >
     <div
-      className="mentorModal profileModal"
+     className="mentorProfileModal profileModal"
       onClick={(e) => e.stopPropagation()}
     >
       <button
-        className="closeMentor"
+       className="closeMentorProfile"
         onClick={() => setShowProfile(false)}
       >
         ✕
