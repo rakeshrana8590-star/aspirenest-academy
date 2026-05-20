@@ -1459,7 +1459,10 @@ return (
     </div>
     }
   >
-    <div className={darkMode ? "app dark" : "app"}>
+   <div
+  className={darkMode ? "app dark" : "app"}
+  id="login"
+>
       {selectedCourse && (
         <div className="coursePopup">
           <div className="popupContent">
