@@ -6110,3 +6110,44 @@ nav a {
   text-transform: uppercase;
   opacity: 0.9;
 }
+#mock-tests {
+  padding: 70px 8% !important;
+  background:
+    radial-gradient(circle at top left, rgba(255, 153, 0, 0.16), transparent 34%),
+    linear-gradient(135deg, #fffaf3 0%, #eef9ff 100%);
+}
+
+#mock-tests h2 {
+  font-size: clamp(44px, 5vw, 72px) !important;
+  line-height: 1.05 !important;
+  margin-bottom: 18px !important;
+  background: linear-gradient(135deg, #1b1514, #7a3b12, #ff8500);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+#mock-tests .badge,
+#mock-tests .planTag {
+  background: linear-gradient(135deg, #ffcc33, #ff7b00) !important;
+  color: #111 !important;
+  box-shadow: 0 14px 35px rgba(255, 132, 0, 0.22);
+}
+
+#mock-tests button {
+  border-radius: 16px !important;
+  padding: 14px 24px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 18px 40px rgba(255, 132, 0, 0.16);
+}
+
+#mock-tests .card,
+#mock-tests .mockCard,
+#mock-tests .testCard {
+  background: rgba(255,255,255,0.78) !important;
+  border: 1px solid rgba(255,255,255,0.65) !important;
+  backdrop-filter: blur(18px);
+  border-radius: 32px !important;
+  box-shadow:
+    0 28px 70px rgba(0,0,0,0.06),
+    0 10px 35px rgba(255, 132, 0, 0.12) !important;
+}
