@@ -1409,9 +1409,10 @@ const studyTimeMessage =
       >
         <div className={darkMode ? "app dark" : "app"}>
         <header>
-          <div className="brand">
-          <AspireNestLogo />
-          </div>
+        <div className="brand">
+  <AspireNestLogo />
+
+</div>
         </header>
   
         <div
@@ -1528,10 +1529,20 @@ return (
         </nav>
       </header>
       <section className="hero">
+      <div className="taglineCard">
+  <div className="taglineIcon">🏆</div>
+
+  <div>
+    <h3>Where Aspirations Turn Into Selections</h3>
+
+    <p>
+      Empowering students with the right guidance,
+      resources and practice.
+    </p>
+  </div>
+</div>
         <div>
-        <p className="heroPunchline">
-  “Where Aspirations Turn Into Selections”
-</p>
+   
           <span className="badge">CTET • TETs</span>
 
           <h2>
