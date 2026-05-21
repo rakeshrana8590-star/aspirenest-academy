@@ -5543,8 +5543,11 @@ nav a {
 
 .currentAffairsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 34px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  max-width: 1500px;
+  margin: 40px auto 0;
+  padding: 0 28px;
 }
 
 .currentAffairCard {
@@ -5702,9 +5705,96 @@ nav a {
 
 .currentAffairsGrid {
   display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
-  gap: 28px !important;
-  margin-top: 48px !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 18px !important;
+  margin-top: 30px !important;
+  max-width: 1500px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 0 24px !important;
+}
+@media (max-width: 1100px) {
+  .currentAffairsGrid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .currentAffairsGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+    padding: 0 14px !important;
+  }
+}
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
+}
+
+#root,
+.App {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
+}
+
+@media (max-width: 768px) {
+  section,
+  .hero,
+  .studentDashboard,
+  .dashboard,
+  .dashboardWrapper,
+  .analyticsSection,
+  .currentAffairs,
+  .coursePages {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  .heroContent,
+  .heroGrid,
+  .studentDashboard,
+  .dashboardCard,
+  .analyticsCard,
+  .chartCard {
+    width: 100% !important;
+    max-width: calc(100vw - 28px) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  .studentDashboard {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .studentDashboard * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .dashboardTabs,
+  .studentTabs {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+  }
+
+  .dashboardTabs button,
+  .studentTabs button {
+    flex: 1 1 45% !important;
+    white-space: normal !important;
+  }
+
+  .recharts-wrapper,
+  .recharts-surface {
+    max-width: 100% !important;
+  }
 }
 
 .currentAffairCard {
@@ -7130,4 +7220,70 @@ nav a {
 
 .dashboardCard p {
   color: #1d2a44;
+}
+
+@media (max-width: 768px) {
+
+  .coursePages,
+  #notes,
+  #mock-tests,
+  #pricing,
+  #student-profile,
+  .currentAffairs,
+  .hero,
+  .studentDashboard {
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  .courseCard,
+  .resourceCard,
+  .mockCard,
+  .pricingCard,
+  .dashboardCard,
+  .analyticsCard,
+  .chartCard,
+  .studentDashboardPanel {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  .hero h1,
+  .sectionTitle,
+  .dashboardTitle {
+    font-size: 2.2rem !important;
+    line-height: 1.15 !important;
+  }
+
+  .studentDashboard button,
+  .dashboardActions button {
+    width: 100% !important;
+  }
+
+  .dashboardActions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  .mobileBottomNav {
+    width: calc(100% - 24px) !important;
+    left: 12px !important;
+    right: 12px !important;
+    bottom: 12px !important;
+  }
+
+  .whatsappFloat,
+  .whatsappButton {
+    bottom: 110px !important;
+    right: 16px !important;
+    transform: scale(0.92);
+  }
 }

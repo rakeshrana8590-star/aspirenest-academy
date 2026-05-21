@@ -2093,12 +2093,12 @@ isPremiumUser={isPremiumUser}
     <span>Home</span>
   </a>
 
-  <a href="#resources">
+  <a href="#notes">
     <span className="navIcon">📘</span>
     <span>Notes</span>
   </a>
 
-  <a href="#cdp">
+  <a href="#mock-tests">
     <span className="navIcon">📝</span>
     <span>Mock</span>
   </a>
