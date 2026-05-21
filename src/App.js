@@ -46,7 +46,9 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import AspireNestLogo from "./components/AspireNestLogo.jsx";
+import AppDashboard from "./components/AppDashboard.jsx";
 import './style.css';
 import januaryCurrentAffairsPdf from "./assets/pdfs/CA JANUARY 26.pdf";
 import februaryCurrentAffairsPdf from "./assets/pdfs/CA FEBRUARY 26.pdf";
@@ -57,6 +59,7 @@ export default function App() {
   const [darkMode, setDarkMode] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [activeSection, setActiveSection] = useState(null);
   const [mockStarted, setMockStarted] = useState(false);
 const [currentQuestion, setCurrentQuestion] = useState(0);
 const [selectedAnswer, setSelectedAnswer] = useState("");
@@ -1458,7 +1461,9 @@ const studyTimeMessage =
   );
 }
 return (
+  <BrowserRouter>
   <React.Suspense
+
     fallback={
       <div className="premium-loader">
     <img
@@ -1477,83 +1482,36 @@ return (
     </div>
     }
   >
-   <div
-  className={darkMode ? "app dark" : "app"}
-  id="login"
->
-      {selectedCourse && (
-        <div className="coursePopup">
-          <div className="popupContent">
-            <button
-              className="closeBtn"
-              onClick={() => setSelectedCourse(null)}
-            >
-              ✕
-            </button>
 
-            <h2>{selectedCourse.title}</h2>
-
-            <p>{selectedCourse.desc}</p>
-
-            <ul>
-              {selectedCourse.points.map((point, index) => (
-                <li key={index}>{point}</li>
-              ))}
-            </ul>
-            <div className="popupButtons">
-              <a href="#pricing" className="btnLink">
-                Join Course
-              </a>
-
-              <a
-                href="https://wa.me/917304256002"
-                target="_blank"
-                className="btnLink outline"
-              >
-                WhatsApp Enquiry
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
-<header>
+<header className="mainHeader">
   <div className="brand">
-  <img
-  src="/logo-header.png"
-  alt="AspireNest Academy"
-  className="header-logo"
-  loading="eager"
-  decoding="async"
-/>
+    <AspireNestLogo />
   </div>
 
-        <nav className={mobileMenuOpen ? "nav mobile-open" : "nav"}>
-        <a href="#courses">Courses</a>
-
-          <a href="#notes">Notes</a>
-
-          <a href="#pricing">Pricing</a>
-
-          <a href="#contact">Contact</a>
-          <a href="#student-profile">Login</a>
-          <button
-  className="mobile-menu-btn"
-  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
->
-  ☰
+  <nav className={mobileMenuOpen ? "nav mobile-open" : "nav"}>
+    <button onClick={() => setActiveSection("courses")}>Courses</button>
+    <button onClick={() => setActiveSection("notes")}>Notes</button>
+    <button onClick={() => setActiveSection("pricing")}>Pricing</button>
+    <button onClick={() => setActiveSection("contact")}>
+  Contact
 </button>
+    <button onClick={() => setActiveSection("student-profile")}>Login</button>
+    <button onClick={() => setActiveSection(null)}>
+  Home
+</button>
+  </nav>
 
-        </nav>
-      </header>
-      <div className="stickySectionNav">
-  <a href="#courses">Courses</a>
-  <a href="#notes">Notes</a>
-  <a href="#current-affairs">Current Affairs</a>
-  <a href="#mock-tests">Mock Tests</a>
-  <a href="#premium-section">Premium</a>
-  <a href="#contact">Contact</a>
-</div>
-<section className="hero">
+  <button
+    className="mobile-menu-btn"
+    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+  >
+    ☰
+  </button>
+</header>
+
+ {!activeSection && (
+  <>
+  <section className="hero">
   <div className="heroContent">
     <div className="taglineCard">
       <div className="taglineIcon">🏆</div>
@@ -1576,17 +1534,43 @@ return (
     </h2>
 
     <p>Bilingual preparation platform for Indian students.</p>
+    <div className="heroButtons">
+  <button onClick={() => setActiveSection("courses")}>
+    Start Learning
+  </button>
 
-    <div className="buttons">
-      <a href="#courses" className="btnLink">
-        Start Learning →
-      </a>
-    </div>
+  <button onClick={() => setActiveSection("notes")}>
+    Free Notes
+  </button>
+</div>
+
+<div className="heroStats">
+  <div className="statCard">
+    <h3>5K+</h3>
+    <p>Students</p>
+  </div>
+
+  <div className="statCard">
+    <h3>120+</h3>
+    <p>Visual Notes</p>
+  </div>
+
+  <div className="statCard">
+    <h3>50+</h3>
+    <p>Mock Tests</p>
+  </div>
+
+  <div className="statCard">
+    <h3>92%</h3>
+    <p>Success Rate</p>
+  </div>
+</div>
   </div>
 
   <div className="card heroGoalCard">
     <div className="goalTop">
       <div className="goalIcon">🎯</div>
+
       <div>
         <h3>Today's Goal</h3>
         <p>Child Development Practice</p>
@@ -1597,12 +1581,13 @@ return (
       <div className="fill"></div>
     </div>
 
-    <span><strong>75%</strong> Completed</span>
+    <span>
+      <strong>75%</strong> Completed
+    </span>
   </div>
 </section>
-    
 
-      <section className="mentor" id="about">
+<section className="mentor" id="about">
 
 <div className="mentorLeft">
 
@@ -1835,6 +1820,660 @@ return (
     </div>
   </div>
 )}
+    <AppDashboard
+  setActiveSection={setActiveSection}
+  user={user}
+  isAdmin={isAdmin}
+/>
+
+<section className="leaderboardSection">
+  <div className="leaderboardHeader">
+    <span className="badge">Top Performers</span>
+
+    <h2>Mock Test Leaderboard</h2>
+
+    <p>
+      Highest scoring students from recent CTET/TET mock practice.
+    </p>
+  </div>
+
+  <div className="leaderboardGrid">
+    {(leaderboard || []).map((student, index) => (
+      <div className="leaderCard" key={student.id || index}>
+        <div className="rankBadge">#{index + 1}</div>
+
+        <h3>{student.email || "Student"}</h3>
+
+        <p className="leaderScore">
+          {student.percentage || 0}%
+        </p>
+
+        <span className="leaderTag">Top Score</span>
+      </div>
+    ))}
+  </div>
+</section>
+
+<section className="freeResources">
+  <div className="container">
+
+    <h2>Free Resources</h2>
+
+    <p>
+      Free notes aur study tools se preparation start karein.
+    </p>
+
+    <div className="freeGrid">
+
+      <div
+        className="freeCard"
+        onClick={() => setActiveSection("notes")}
+      >
+        📘 Free CDP Notes
+      </div>
+
+      <div className="freeCard">
+        🗓️ 7-Day Study Plan
+      </div>
+
+      <div
+        className="freeCard"
+        onClick={() => setActiveSection("mock-tests")}
+      >
+        📝 Free Mock Test
+      </div>
+
+      <div className="freeCard">
+        📄 PYQ Starter Pack
+      </div>
+
+      <div className="freeCard">
+        🎯 Exam Strategy Guide
+      </div>
+
+      <div className="freeCard">
+        ✅ Revision Checklist
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section className="premium" id="premium-section">
+        <div className="premiumLeft">
+          <span className="premiumBadge">PREMIUM LEARNING EXPERIENCE</span>
+
+          <h2>
+            India’s Smartest
+            <br />
+            CTET/TET Preparation Platform
+          </h2>
+
+          <p>
+            AI-powered visual learning, bilingual notes, premium mock tests,
+            revision systems and mentor guidance for serious aspirants.
+          </p>
+
+          <div className="premiumFeatures">
+            <div className="feature">✅ Visual Learning Notes</div>
+
+            <div className="feature">✅ Full Mock Test Series</div>
+
+            <div className="feature">✅ Smart Revision System</div>
+
+            <div className="feature">✅ Hindi + English Support</div>
+          </div>
+
+          <button onClick={handlePremiumSectionAccess}>
+  Explore Premium
+</button>
+        </div>
+
+        <div className="premiumCard">
+          <div className="glow"></div>
+
+          <h3>CTET Master Dashboard</h3>
+
+          <div className="dashboardStat">
+            <span>Course Progress</span>
+            <strong>82%</strong>
+          </div>
+
+          <div className="dashboardBar">
+            <div className="dashboardFill"></div>
+          </div>
+
+          <div className="dashboardGrid">
+            <div className="miniCard">📘 150+ Notes</div>
+
+            <div className="miniCard">🎯 50+ Tests</div>
+
+            <div className="miniCard">🧠 AI Revision</div>
+
+            <div className="miniCard">🏆 Top Scores</div>
+          </div>
+        </div>
+      </section>
+
+      <section className="footerPanels" id="contact">
+  <div className="footerPanelCard">
+    <span>STUDENT REVIEWS</span>
+    <h3>Trusted by CTET/TET learners.</h3>
+    <p className="stars">⭐⭐⭐⭐⭐</p>
+    <p>Visual notes se revision bahut fast ho gaya.</p>
+    <strong>Priya Sharma</strong>
+  </div>
+
+  <div className="footerPanelCard enquiryPanel">
+    <span>GET IN TOUCH</span>
+    <h3>Need guidance? Send enquiry.</h3>
+
+    <input
+      value={fullName}
+      onChange={(e) => setFullName(e.target.value)}
+      placeholder="Full Name"
+    />
+
+    <input
+      value={mobile}
+      onChange={(e) => setMobile(e.target.value)}
+      placeholder="Mobile Number"
+    />
+
+    <input
+      value={contactEmail}
+      onChange={(e) => setContactEmail(e.target.value)}
+      placeholder="Email"
+    />
+
+    <button type="button" onClick={handleContactSubmit}>
+      Submit Enquiry
+    </button>
+  </div>
+
+  <div className="footerPanelCard">
+    <span>FAQ</span>
+    <h3>Quick answers before joining.</h3>
+    <p>▶ Is this course bilingual?</p>
+    <p>▶ Are mock tests included?</p>
+    <p>▶ Can I use this on mobile?</p>
+    <p>▶ Is pricing in INR?</p>
+  </div>
+</section>
+
+    <footer className="premiumFooter">
+  <div className="footerGrid">
+    <div className="footerBrand">
+      <h2>AspireNest Academy</h2>
+
+      <p>
+        Premium bilingual CTET/TET learning platform
+        for future educators in India.
+      </p>
+    </div>
+
+    <div className="footerLinks">
+      <h3>Quick Links</h3>
+      <a href="#courses">Courses</a>
+      <a href="#cdp">CDP Module</a>
+      <a href="#resources">Free Resources</a>
+      <a href="#pricing">Pricing</a>
+    </div>
+
+    <div className="footerContact">
+      <h3>Contact</h3>
+      <p>📞 +917304256002</p>
+      <p>📧 aspirenestacademy@gmail.com</p>
+      <p>📍 India</p>
+    </div>
+  </div>
+
+  <div className="footerBottom">
+    © 2026 AspireNest Academy • All Rights Reserved
+  </div>
+</footer>
+
+  </>
+)}
+   {activeSection && (
+  <div className="activeSectionScreen">
+    <button
+      className="backToDashboardBtn"
+      onClick={() => setActiveSection(null)}
+    >
+      ← Back to Dashboard
+    </button>
+    {activeSection === "learning-paths" && (
+  <section className="plansSection" id="learning-paths">
+    <h2>Learning Paths</h2>
+
+    <p className="sectionText">
+      Beginner se advanced mentorship tak structured learning programs.
+    </p>
+
+    <div className="grid">
+      <div className="planCard">
+        <span className="planTag">FREE</span>
+
+        <h3>Free Resources</h3>
+
+        <ul>
+          <li>📘 Sample Notes</li>
+          <li>📝 Free Mock Test</li>
+          <li>📅 7-Day Study Plan</li>
+        </ul>
+
+        <button onClick={() => setActiveSection("notes")}>
+          Start Free
+        </button>
+      </div>
+
+      <div className="planCard">
+        <span className="planTag orange">MINI COURSE</span>
+
+        <h3>Topic-wise Courses</h3>
+
+        <ul>
+          <li>🧠 CDP Concepts</li>
+          <li>📚 Pedagogy Lessons</li>
+          <li>🎯 PYQ Practice</li>
+        </ul>
+
+        <button onClick={() => setActiveSection("courses")}>
+          Explore Courses
+        </button>
+      </div>
+
+      <div className="planCard premiumCard2">
+        <span className="planTag darkTag">PREMIUM</span>
+
+        <h3>Crash Course + Full Batch</h3>
+
+        <ul>
+          <li>🎥 Live Classes</li>
+          <li>📝 Mock Tests</li>
+          <li>📥 Notes & Revision</li>
+          <li>🏆 Mentorship Support</li>
+        </ul>
+
+        <button onClick={() => setActiveSection("pricing")}>
+          Join Premium
+        </button>
+      </div>
+    </div>
+  </section>
+)}
+    {activeSection === "courses" && (
+  <section className="coursePages" id="courses">
+    <h2>CTET/TET Courses</h2>
+
+    <p>
+      Structured learning programs designed for concept clarity,
+      mock practice, and exam success.
+    </p>
+
+    <div className="grid">
+      {courses.map((course) => (
+        <div className="course" key={course.id}>
+          <span className="planTag">{course.badge}</span>
+
+          <h3>{course.title}</h3>
+
+          <p>{course.desc}</p>
+
+          <p><strong>Level:</strong> {course.level}</p>
+
+          <p><strong>Lessons:</strong> {course.lessons}</p>
+
+          <p><strong>Mock Tests:</strong> {course.tests}</p>
+
+          <p><strong>Price:</strong> {course.price}</p>
+
+          <button onClick={() => setSelectedCourse(course)}>
+            View Details
+          </button>
+        </div>
+      ))}
+    </div>
+  </section>
+)}
+{activeSection === "notes" && (
+  <section id="notes">
+    <NotesCMS
+      notesData={notesData}
+      firebaseNotes={firebaseNotes}
+      handleNoteAccess={handleNoteAccess}
+      isPremiumUser={isPremiumUser}
+    />
+  </section>
+)}
+
+{activeSection === "mock-tests" && (
+  <section id="mock-tests">
+    <MockTest
+      mockStarted={mockStarted}
+      setMockStarted={setMockStarted}
+      showResult={showResult}
+      currentQuestion={currentQuestion}
+      mockQuestions={mockQuestions || []}
+      timeLeft={timeLeft}
+      setTimeLeft={setTimeLeft}
+      score={score}
+      selectedSubject={selectedSubject}
+      setSelectedSubject={setSelectedSubject}
+      loadMockQuestions={loadMockQuestions}
+      percentage={percentage}
+      performanceLevel={performanceLevel}
+      motivationalMessage={motivationalMessage}
+      restartMockTest={restartMockTest}
+      selectedAnswer={selectedAnswer}
+      setSelectedAnswer={setSelectedAnswer}
+      showAnswer={showAnswer}
+      handleAnswerSubmit={handleAnswerSubmit}
+    />
+  </section>
+)}
+{activeSection === "pricing" && (
+  <section id="pricing">
+    <Pricing
+      handlePremiumPurchase={handlePremiumPurchase}
+      isPremiumUser={isPremiumUser}
+    />
+  </section>
+)}
+
+{activeSection === "contact" && (
+  <section className="footerPanels contactScreen">
+
+    <div className="footerPanelCard">
+      <span>STUDENT REVIEWS</span>
+
+      <h3>Trusted by CTET/TET learners.</h3>
+
+      <p className="stars">⭐⭐⭐⭐⭐</p>
+
+      <p>
+        Visual notes se revision bahut fast ho gaya.
+      </p>
+
+      <strong>Priya Sharma</strong>
+    </div>
+
+    <div className="footerPanelCard enquiryPanel">
+      <span>GET IN TOUCH</span>
+
+      <h3>Need guidance? Send enquiry.</h3>
+
+      <input
+        value={fullName}
+        onChange={(e) => setFullName(e.target.value)}
+        placeholder="Full Name"
+      />
+
+      <input
+        value={mobile}
+        onChange={(e) => setMobile(e.target.value)}
+        placeholder="Mobile Number"
+      />
+
+      <input
+        value={contactEmail}
+        onChange={(e) => setContactEmail(e.target.value)}
+        placeholder="Email"
+      />
+
+      <button type="button">
+        Submit Enquiry
+      </button>
+    </div>
+
+    <div className="footerPanelCard">
+      <span>FAQ</span>
+
+      <h3>Quick answers before joining.</h3>
+
+      <p>▶ Is this course bilingual?</p>
+
+      <p>▶ Are mock tests included?</p>
+
+      <p>▶ Can I use this on mobile?</p>
+
+      <p>▶ Is pricing in INR?</p>
+    </div>
+
+  </section>
+)}
+)}
+
+{activeSection === "admin-panel" && (
+  <section id="admin-panel">
+    <AdminPanel
+      user={user}
+      isAdmin={isAdmin}
+
+      activeAdminTab={activeAdminTab}
+      setActiveAdminTab={setActiveAdminTab}
+
+      students={students || []}
+      enquiries={enquiries || []}
+      mockResults={mockResults || []}
+      leaderboard={leaderboard || []}
+      mockQuestions={mockQuestions || []}
+
+      notesData={notesData || []}
+      firebaseNotes={firebaseNotes || []}
+
+      currentAffairs={currentAffairsList || []}
+      currentAffairsList={currentAffairsList || []}
+      fallbackCurrentAffairs={currentAffairsList || []}
+
+      announcements={announcements || []}
+      paymentHistory={paymentHistory || []}
+
+      loadAdminData={loadAdminData}
+      loadLeaderboard={loadLeaderboard}
+      loadPaymentHistory={loadPaymentHistory}
+
+      handlePremiumControl={handlePremiumControl}
+
+      handleDeleteMockQuestion={handleDeleteMockQuestion}
+      handleAddMockQuestion={handleAddMockQuestion}
+
+      handleSaveNote={handleSaveNote}
+      handleEditNote={handleEditNote}
+      handleDeleteNote={handleDeleteNote}
+
+      handleSaveCurrentAffairs={handleSaveCurrentAffairs}
+      handleEditCurrentAffairs={handleEditCurrentAffairs}
+      handleDeleteCurrentAffairs={handleDeleteCurrentAffairs}
+
+      handleAddAnnouncement={handleAddAnnouncement}
+      handleDeleteAnnouncement={handleDeleteAnnouncement}
+    />
+  </section>
+)}
+
+{activeSection === "login" && (
+  <section id="login">
+    <AuthSection
+      user={user}
+      setUser={setUser}
+      isPremiumUser={isPremiumUser}
+    />
+  </section>
+)}
+{activeSection === "student-profile" && (
+  <section id="student-profile">
+    <StudentDashboard
+      user={user}
+      isPremiumUser={isPremiumUser}
+      isAdmin={isAdmin}
+      handlePremiumSectionAccess={handlePremiumSectionAccess}
+      handleLogout={handleLogout}
+      loadAdminData={loadAdminData}
+      mockResults={mockResults}
+      averageAccuracy={averageAccuracy}
+      weeklyPerformanceData={weeklyPerformanceData}
+      subjectPerformanceData={subjectPerformanceData}
+      highestScore={highestScore}
+      totalMockAttempts={totalMockAttempts}
+      dailyStreak={dailyStreak}
+      weeklyGrowthMessage={weeklyGrowthMessage}
+      estimatedRank={estimatedRank}
+      rankPredictionMessage={rankPredictionMessage}
+      estimatedStudyHours={estimatedStudyHours}
+      studyTimeMessage={studyTimeMessage}
+      aiStudyPlan={aiStudyPlan}
+      analyticsMessage={analyticsMessage}
+      weakestSubject={weakestSubject}
+      smartRecommendation={smartRecommendation}
+      performanceChartData={performanceChartData}
+      subjectChartData={subjectChartData}
+      chartColors={chartColors}
+    />
+  </section>
+)}
+  </div>
+)}
+{false && (
+   <div
+  className={darkMode ? "app dark" : "app"}
+  id="login"
+>
+      {selectedCourse && (
+        <div className="coursePopup">
+          <div className="popupContent">
+            <button
+              className="closeBtn"
+              onClick={() => setSelectedCourse(null)}
+            >
+              ✕
+            </button>
+
+            <h2>{selectedCourse.title}</h2>
+
+            <p>{selectedCourse.desc}</p>
+
+            <ul>
+              {selectedCourse.points.map((point, index) => (
+                <li key={index}>{point}</li>
+              ))}
+            </ul>
+            <div className="popupButtons">
+              <a href="#pricing" className="btnLink">
+                Join Course
+              </a>
+
+              <a
+                href="https://wa.me/917304256002"
+                target="_blank"
+                className="btnLink outline"
+              >
+                WhatsApp Enquiry
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+<header>
+  <div className="brand">
+  <img
+  src="/logo-header.png"
+  alt="AspireNest Academy"
+  className="header-logo"
+  loading="eager"
+  decoding="async"
+/>
+  </div>
+
+        <nav className={mobileMenuOpen ? "nav mobile-open" : "nav"}>
+        <a href="#courses">Courses</a>
+
+          <a href="#notes">Notes</a>
+
+          <a href="#pricing">Pricing</a>
+
+          <button
+  onClick={() => {
+    setActiveSection(null);
+
+    setTimeout(() => {
+      document
+        .getElementById("contact")
+        ?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  }}
+>
+  Contact
+</button>
+          <a href="#student-profile">Login</a>
+          <button
+  className="mobile-menu-btn"
+  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+>
+  ☰
+</button>
+
+        </nav>
+      </header>
+      <div className="stickySectionNav">
+  <a href="#courses">Courses</a>
+  <a href="#notes">Notes</a>
+  <a href="#current-affairs">Current Affairs</a>
+  <a href="#mock-tests">Mock Tests</a>
+  <a href="#premium-section">Premium</a>
+  <a href="#contact">Contact</a>
+</div>
+<section className="hero">
+  <div className="heroContent">
+    <div className="taglineCard">
+      <div className="taglineIcon">🏆</div>
+
+      <div>
+        <h3>Where Aspirations Turn Into Selections</h3>
+        <p>
+          Empowering students with the right guidance,
+          resources and practice.
+        </p>
+      </div>
+    </div>
+
+    <span className="badge">CTET • TETs</span>
+
+    <h2>
+      Crack CTET/TETs
+      <br />
+      with Smart Learning
+    </h2>
+
+    <p>Bilingual preparation platform for Indian students.</p>
+
+    <div className="buttons">
+      <a href="#courses" className="btnLink">
+        Start Learning →
+      </a>
+    </div>
+  </div>
+
+  <div className="card heroGoalCard">
+    <div className="goalTop">
+      <div className="goalIcon">🎯</div>
+      <div>
+        <h3>Today's Goal</h3>
+        <p>Child Development Practice</p>
+      </div>
+    </div>
+
+    <div className="progress">
+      <div className="fill"></div>
+    </div>
+
+    <span><strong>75%</strong> Completed</span>
+  </div>
+</section>
+    
+
+
 
       <section className="coursePages" id="courses">
       <h2>CTET/TET</h2>
@@ -2326,114 +2965,76 @@ setAnnouncementMessage={setAnnouncementMessage}
   </div>
 </section>
 
-{announcements.length > 0 && (
-  <Announcements announcements={announcements} />
-)}
-  <section className="testimonials">
-        <h2>Student Reviews</h2>
+<section className="footerPanels">
+  <div className="footerPanelCard">
+    <span>STUDENT REVIEWS</span>
+    <h3>Trusted by CTET/TET learners.</h3>
+    <p className="stars">⭐⭐⭐⭐⭐</p>
+    <p>Visual notes se revision bahut fast ho gaya.</p>
+    <strong>Priya Sharma</strong>
+  </div>
 
-        <div className="grid">
-          <div className="review">
-            <p>⭐️⭐️⭐️⭐️⭐️</p>
-            <h3>Priya Sharma</h3>
-            <p>Visual notes se revision bahut fast ho gaya.</p>
-          </div>
+  <div className="footerPanelCard enquiryPanel">
+    <span>GET IN TOUCH</span>
+    <h3>Need guidance? Send enquiry.</h3>
 
-          <div className="review">
-            <p>⭐️⭐️⭐️⭐️⭐️</p>
-            <h3>Amit Patel</h3>
-            <p>Mock tests exam level ke according hain.</p>
-          </div>
+    <input
+      value={fullName}
+      onChange={(e) => setFullName(e.target.value)}
+      placeholder="Full Name"
+    />
 
-          <div className="review">
-            <p>⭐️⭐️⭐️⭐️⭐️</p>
-            <h3>Neha Verma</h3>
-            <p>Hindi-English explanation very easy hai.</p>
-          </div>
-        </div>
-      </section>
-      <section id="contact">
-        <h2>Get In Touch</h2>
+    <input
+      value={mobile}
+      onChange={(e) => setMobile(e.target.value)}
+      placeholder="Mobile Number"
+    />
 
-        <form>
-        <input
-  placeholder="Full Name"
-  value={fullName}
-  onChange={(e) => setFullName(e.target.value)}
-/>
-<input
-  placeholder="Mobile Number"
-  value={mobile}
-  onChange={(e) => setMobile(e.target.value)}
-/>
-<input
-  placeholder="Email"
-  value={contactEmail}
-  onChange={(e) => setContactEmail(e.target.value)}
-/>
-<button type="button" onClick={handleContactSubmit}>
-  Submit Enquiry
-</button>
-        </form>
+    <input
+      value={contactEmail}
+      onChange={(e) => setContactEmail(e.target.value)}
+      placeholder="Email"
+    />
 
-        <p className="contactHelp">
-          📞 Get instant demo class details on WhatsApp.
-        </p>
-      </section>
-      <section className="faq">
-        <h2>Frequently Asked Questions</h2>
+    <button type="button" onClick={handleContactSubmit}>
+      Submit Enquiry
+    </button>
+  </div>
 
-        <div className="faqBox">
-          <details>
-            <summary>Is this course bilingual?</summary>
+  <div className="footerPanelCard">
+    <span>FAQ</span>
+    <h3>Quick answers before joining.</h3>
+    <p>▶ Is this course bilingual?</p>
+    <p>▶ Are mock tests included?</p>
+    <p>▶ Can I use this on mobile?</p>
+    <p>▶ Is pricing in INR?</p>
+  </div>
+</section>
 
-            <p>Yes, Hindi + English dono language me content available hai.</p>
-          </details>
-
-          <details>
-            <summary>Are mock tests included?</summary>
-
-            <p>Yes, chapter-wise aur full syllabus mock tests included hain.</p>
-          </details>
-
-          <details>
-            <summary>Can I use this on mobile?</summary>
-
-            <p>Yes, platform fully mobile responsive hai.</p>
-          </details>
-
-          <details>
-            <summary>Is pricing in INR?</summary>
-
-            <p>Yes, sabhi plans Indian Rupees me hain.</p>
-          </details>
-        </div>
-      </section>
-    
-
-<footer className="footer">
-  <div className="footerTop">
-    <div>
+<footer className="premiumFooter">
+  <div className="footerGrid">
+    <div className="footerBrand">
       <h2>AspireNest Academy</h2>
+
       <p>
-        Premium bilingual CTET/TET learning platform for future educators
-        in India.
+        Premium bilingual CTET/TET learning platform
+        for future educators in India.
       </p>
     </div>
 
-    <div>
+    <div className="footerLinks">
       <h3>Quick Links</h3>
+
       <a href="#courses">Courses</a>
       <a href="#cdp">CDP Module</a>
       <a href="#resources">Free Resources</a>
       <a href="#pricing">Pricing</a>
     </div>
 
-    <div>
+    <div className="footerContact">
       <h3>Contact</h3>
-      <a href="tel:+917304256002">
-  📞 +917304256002
-</a>
+
+      <p>📞 +917304256002</p>
       <p>📧 aspirenestacademy@gmail.com</p>
       <p>📍 India</p>
     </div>
@@ -2444,6 +3045,8 @@ setAnnouncementMessage={setAnnouncementMessage}
   </div>
 </footer>
 </div>
+)}
 </React.Suspense>
+</BrowserRouter>
 );
 }
