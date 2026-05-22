@@ -1,4 +1,4 @@
-export default function Announcements({ announcements }) {
+export default function Announcements({ announcements = [] }) {
   return (
     <section className="announcementsSection">
       <div className="announcementHeader">
@@ -17,7 +17,7 @@ export default function Announcements({ announcements }) {
             <div className="studentCard" key={item.id || index}>
               <h4>{item.title || "Announcement"}</h4>
 
-              <p>{item.message}</p>
+              <p>{item.message || "No message available."}</p>
 
               <p>
                 🕒{" "}

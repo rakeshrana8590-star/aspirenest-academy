@@ -10353,3 +10353,1633 @@ footer {
 .heroStats {
   margin-top: 26px !important;
 }
+/* FINAL HERO APPLE COMPACT OVERRIDE */
+.hero {
+  min-height: auto !important;
+  padding: 22px 7% 34px !important;
+  gap: 30px !important;
+}
+
+.taglineCard {
+  max-width: 650px !important;
+  padding: 16px 22px !important;
+  margin-bottom: 18px !important;
+}
+
+.hero h2 {
+  font-size: clamp(42px, 4.1vw, 64px) !important;
+  line-height: 0.98 !important;
+  margin: 0 0 12px !important;
+}
+
+.heroContent > p {
+  font-size: 15px !important;
+  margin-bottom: 14px !important;
+}
+
+.heroButtons button {
+  height: 48px !important;
+  padding: 0 26px !important;
+  border-radius: 15px !important;
+}
+
+.heroGoalCard {
+  max-width: 520px !important;
+  min-height: 220px !important;
+  padding: 26px !important;
+  border-radius: 30px !important;
+  transform: translateY(0) !important;
+}
+
+.heroStats {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 12px !important;
+  margin-top: 18px !important;
+}
+
+.heroStats .statCard {
+  min-height: 95px !important;
+  padding: 14px !important;
+  border-radius: 20px !important;
+}
+/* FINAL HERO VIEWPORT SAFE FIX */
+
+.hero {
+  padding: 115px 7% 32px !important;
+  min-height: calc(100vh - 92px) !important;
+  display: grid !important;
+  grid-template-columns: 1fr 0.95fr !important;
+  gap: 32px !important;
+  align-items: center !important;
+  overflow: hidden !important;
+}
+
+.taglineCard {
+  max-width: 680px !important;
+  padding: 16px 22px !important;
+  margin: 0 0 18px !important;
+}
+
+.taglineIcon {
+  width: 54px !important;
+  height: 54px !important;
+  font-size: 24px !important;
+}
+
+.taglineCard h3 {
+  font-size: 22px !important;
+  line-height: 1.05 !important;
+}
+
+.taglineCard p {
+  font-size: 14px !important;
+}
+
+.hero h2 {
+  font-size: clamp(42px, 4vw, 62px) !important;
+  line-height: 0.98 !important;
+  margin: 0 0 12px !important;
+}
+
+.heroContent > p {
+  font-size: 15px !important;
+  margin-bottom: 14px !important;
+}
+
+.heroButtons {
+  margin-bottom: 14px !important;
+}
+
+.heroStats {
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 12px !important;
+  margin-top: 12px !important;
+}
+
+.heroStats .statCard {
+  min-height: 88px !important;
+  padding: 12px !important;
+}
+
+.heroStats .statCard h3 {
+  font-size: 28px !important;
+}
+
+.heroGoalCard {
+  max-width: 540px !important;
+  min-height: 220px !important;
+  padding: 26px !important;
+}
+/* FINAL HERO TRUE APPLE COMPACT FIT */
+
+.hero {
+  min-height: calc(100vh - 92px) !important;
+  padding: 26px 7% 22px !important;
+  align-items: center !important;
+  overflow: hidden !important;
+}
+
+.taglineCard {
+  max-width: 640px !important;
+  padding: 14px 20px !important;
+  margin-bottom: 14px !important;
+}
+
+.hero h2 {
+  font-size: clamp(38px, 3.7vw, 58px) !important;
+  line-height: 0.96 !important;
+  margin-bottom: 10px !important;
+}
+
+.heroContent > p {
+  font-size: 14px !important;
+  margin-bottom: 10px !important;
+}
+
+.heroButtons {
+  margin-bottom: 10px !important;
+}
+
+.heroButtons button {
+  height: 44px !important;
+  padding: 0 22px !important;
+  font-size: 15px !important;
+}
+
+.heroStats {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 10px !important;
+  margin-top: 10px !important;
+}
+
+.heroStats .statCard {
+  min-height: 72px !important;
+  padding: 10px 12px !important;
+  border-radius: 18px !important;
+}
+
+.heroStats .statCard h3 {
+  font-size: 24px !important;
+  margin: 0 0 4px !important;
+}
+
+.heroStats .statCard p {
+  font-size: 12px !important;
+  margin: 0 !important;
+}
+
+.heroGoalCard {
+  max-width: 520px !important;
+  min-height: 205px !important;
+  padding: 24px !important;
+}
+/* HERO TAGLINE SAFE TOP FIX */
+
+.hero {
+  padding-top: 105px !important;
+}
+
+.taglineCard {
+  margin-top: 0 !important;
+  transform: none !important;
+}
+
+.heroContent {
+  transform: none !important;
+}
+/* HEADER PREMIUM BALANCE FIX */
+
+.logo img,
+.navLogo img,
+.brandLogo img {
+  height: 64px !important;
+  width: auto !important;
+}
+
+.navbar,
+.topNavbar,
+.header {
+  min-height: 86px !important;
+  padding: 10px 5% !important;
+}
+
+.navLinks a,
+.navButtons button,
+.topNavbar a {
+  padding: 12px 24px !important;
+  font-size: 16px !important;
+  border-radius: 18px !important;
+  min-width: 110px !important;
+}
+
+.navLinks {
+  gap: 14px !important;
+}
+/* FINAL APPLE HEADER COMPACT FIX */
+
+.navbar,
+.topNavbar,
+.header {
+  min-height: 74px !important;
+  padding: 8px 4.5% !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+.logo img,
+.navLogo img,
+.brandLogo img {
+  height: 82px !important;
+  width: auto !important;
+  object-fit: contain !important;
+}
+
+.navLinks {
+  gap: 10px !important;
+}
+
+.navLinks a,
+.navButtons button,
+.topNavbar a {
+  min-width: 88px !important;
+  padding: 10px 18px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  border-radius: 16px !important;
+
+  background: #000 !important;
+  color: white !important;
+
+  transition: all 0.25s ease !important;
+  box-shadow:
+    0 8px 22px rgba(0,0,0,0.16),
+    inset 0 1px 0 rgba(255,255,255,0.08) !important;
+}
+
+.navLinks a:hover,
+.navButtons button:hover,
+.topNavbar a:hover {
+  transform: translateY(-2px) scale(1.02) !important;
+
+  box-shadow:
+    0 12px 28px rgba(0,0,0,0.22),
+    0 0 18px rgba(255,140,0,0.18) !important;
+}
+/* FINAL REAL HEADER FIX */
+
+.mainHeader {
+  height: 76px !important;
+  min-height: 76px !important;
+  padding: 8px 7% !important;
+}
+
+.mainHeader .brand,
+.mainHeader .brand * {
+  transform: scale(1.18) !important;
+  transform-origin: left center !important;
+}
+
+.mainHeader .brand img,
+.mainHeader .brand svg {
+  max-height: 72px !important;
+  width: auto !important;
+}
+
+.mainHeader .nav {
+  gap: 12px !important;
+}
+
+.mainHeader .nav button,
+.mainHeader .nav a {
+  height: 42px !important;
+  min-width: 82px !important;
+  padding: 0 16px !important;
+  border-radius: 14px !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+}
+/* FINAL MOCK TEST APPLE COMPACT SCREEN */
+
+.activeSectionScreen #mock-tests {
+  padding: 38px 7% 55px !important;
+  background: #ffffff !important;
+}
+
+.activeSectionScreen #mock-tests .mockTest,
+.activeSectionScreen #mock-tests .mockSection,
+.activeSectionScreen #mock-tests .mockTestSection {
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+  padding: 34px !important;
+  border-radius: 34px !important;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(255, 122, 0, 0.08), transparent 32%),
+    radial-gradient(circle at 85% 35%, rgba(14, 165, 233, 0.08), transparent 34%),
+    rgba(255,255,255,0.9) !important;
+  box-shadow: 0 24px 70px rgba(15,23,42,0.10) !important;
+}
+
+.activeSectionScreen #mock-tests h1,
+.activeSectionScreen #mock-tests h2 {
+  font-size: clamp(38px, 5vw, 64px) !important;
+  line-height: 0.95 !important;
+  margin: 0 0 16px !important;
+  letter-spacing: -0.04em !important;
+}
+
+.activeSectionScreen #mock-tests p {
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+  margin-bottom: 18px !important;
+}
+
+.activeSectionScreen #mock-tests .subjectTabs,
+.activeSectionScreen #mock-tests .mockTabs,
+.activeSectionScreen #mock-tests .tabButtons {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  margin: 18px 0 26px !important;
+}
+
+.activeSectionScreen #mock-tests button {
+  min-height: 44px !important;
+  padding: 0 22px !important;
+  border-radius: 15px !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+}
+
+.activeSectionScreen #mock-tests .card,
+.activeSectionScreen #mock-tests .mockCard,
+.activeSectionScreen #mock-tests .questionCard {
+  max-width: 760px !important;
+  min-height: auto !important;
+  padding: 28px !important;
+  border-radius: 30px !important;
+  background: rgba(255,255,255,0.86) !important;
+  border: 1px solid rgba(255,122,0,0.16) !important;
+  box-shadow:
+    0 20px 55px rgba(15,23,42,0.09),
+    inset 0 1px 0 rgba(255,255,255,0.9) !important;
+}
+/* FINAL HARD NOTES COMPACT APPLE CARDS */
+
+.activeSectionScreen #notes {
+  padding: 26px 7% 45px !important;
+  background: #fff !important;
+}
+
+.activeSectionScreen #notes h2 {
+  font-size: 28px !important;
+  margin: 0 0 8px !important;
+  text-align: left !important;
+}
+
+.activeSectionScreen #notes .sectionText,
+.activeSectionScreen #notes > p {
+  font-size: 14px !important;
+  margin: 0 0 18px !important;
+}
+
+.activeSectionScreen #notes .notesGrid,
+.activeSectionScreen #notes .grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(210px, 1fr)) !important;
+  gap: 18px !important;
+  align-items: stretch !important;
+}
+
+.activeSectionScreen #notes .noteCard,
+.activeSectionScreen #notes .course,
+.activeSectionScreen #notes .card {
+  min-height: 235px !important;
+  max-height: 260px !important;
+  padding: 22px !important;
+  border-radius: 26px !important;
+  overflow: hidden !important;
+  background: rgba(255,255,255,0.86) !important;
+  border: 1px solid rgba(255,122,0,0.16) !important;
+  box-shadow: 0 18px 45px rgba(15,23,42,0.08) !important;
+}
+
+.activeSectionScreen #notes .noteCard h3,
+.activeSectionScreen #notes .course h3,
+.activeSectionScreen #notes .card h3 {
+  font-size: 20px !important;
+  line-height: 1.15 !important;
+  margin: 12px 0 10px !important;
+}
+
+.activeSectionScreen #notes .noteCard p,
+.activeSectionScreen #notes .course p,
+.activeSectionScreen #notes .card p {
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  margin: 7px 0 !important;
+}
+
+.activeSectionScreen #notes button {
+  height: 40px !important;
+  padding: 0 16px !important;
+  border-radius: 12px !important;
+  font-size: 12px !important;
+  margin-top: 10px !important;
+}
+
+.activeSectionScreen #notes .planTag,
+.activeSectionScreen #notes .noteTag {
+  padding: 7px 15px !important;
+  font-size: 12px !important;
+}
+/* FINAL MOCK TEST APPLE COMPACT FIX */
+
+.activeSectionScreen #mock-tests {
+  padding: 24px 7% 48px !important;
+  background: #ffffff !important;
+}
+
+.activeSectionScreen #mock-tests .mockHero,
+.activeSectionScreen #mock-tests .mockTestHero,
+.activeSectionScreen #mock-tests .mockSection {
+  max-width: 1180px !important;
+  margin: 0 auto !important;
+}
+
+.activeSectionScreen #mock-tests h1,
+.activeSectionScreen #mock-tests h2 {
+  font-size: clamp(44px, 5vw, 78px) !important;
+  line-height: 0.92 !important;
+  letter-spacing: -0.05em !important;
+  margin-bottom: 14px !important;
+}
+
+.activeSectionScreen #mock-tests p {
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+  margin-bottom: 18px !important;
+}
+
+.activeSectionScreen #mock-tests .mockTabs,
+.activeSectionScreen #mock-tests .subjectTabs,
+.activeSectionScreen #mock-tests .tabButtons {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  margin: 14px 0 22px !important;
+}
+
+.activeSectionScreen #mock-tests .mockTabs button,
+.activeSectionScreen #mock-tests .subjectTabs button,
+.activeSectionScreen #mock-tests .tabButtons button {
+  height: 44px !important;
+  padding: 0 20px !important;
+  border-radius: 15px !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+}
+
+.activeSectionScreen #mock-tests .readyCard,
+.activeSectionScreen #mock-tests .mockCard,
+.activeSectionScreen #mock-tests .questionCard,
+.activeSectionScreen #mock-tests .card {
+  width: 100% !important;
+  max-width: 520px !important;
+  min-height: 220px !important;
+  padding: 28px !important;
+  border-radius: 30px !important;
+  background: rgba(255,255,255,0.88) !important;
+  border: 1px solid rgba(255,122,0,0.15) !important;
+  box-shadow:
+    0 20px 55px rgba(15,23,42,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.9) !important;
+}
+
+.activeSectionScreen #mock-tests .readyCard h3,
+.activeSectionScreen #mock-tests .mockCard h3,
+.activeSectionScreen #mock-tests .questionCard h3 {
+  font-size: 18px !important;
+  margin-bottom: 12px !important;
+}
+
+.activeSectionScreen #mock-tests .readyCard p,
+.activeSectionScreen #mock-tests .mockCard p {
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+}
+
+.activeSectionScreen #mock-tests .readyCard button,
+.activeSectionScreen #mock-tests .mockCard button {
+  height: 42px !important;
+  padding: 0 18px !important;
+  border-radius: 14px !important;
+  font-size: 13px !important;
+  margin-top: 12px !important;
+}
+/* FINAL MOCK TEST TITLE FIX */
+
+.activeSectionScreen #mock-tests h1,
+.activeSectionScreen #mock-tests .mockTitle,
+.activeSectionScreen #mock-tests .heroTitle {
+  font-size: clamp(34px, 4vw, 64px) !important;
+  line-height: 0.95 !important;
+  letter-spacing: -0.05em !important;
+  max-width: 620px !important;
+  margin-bottom: 14px !important;
+}
+
+.activeSectionScreen #mock-tests .mockHero,
+.activeSectionScreen #mock-tests .heroContent {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 40px !important;
+}
+
+.activeSectionScreen #mock-tests .heroContentLeft {
+  max-width: 620px !important;
+}
+
+.activeSectionScreen #mock-tests .heroContentRight {
+  transform: scale(0.88) !important;
+  transform-origin: center right !important;
+}
+/* FINAL HARD MOCK TEST COMPACT APPLE OVERRIDE */
+
+.activeSectionScreen #mock-tests {
+  padding: 26px 7% 45px !important;
+  background: #fff !important;
+}
+
+.activeSectionScreen #mock-tests .mockTest,
+.activeSectionScreen #mock-tests .mockTestSection,
+.activeSectionScreen #mock-tests .mockSection {
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.activeSectionScreen #mock-tests h1,
+.activeSectionScreen #mock-tests h2 {
+  font-size: 36px !important;
+  line-height: 1.05 !important;
+  margin: 0 0 10px !important;
+  letter-spacing: -0.03em !important;
+  text-align: left !important;
+}
+
+.activeSectionScreen #mock-tests p {
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  margin: 0 0 18px !important;
+}
+
+.activeSectionScreen #mock-tests .mockTabs,
+.activeSectionScreen #mock-tests .subjectTabs,
+.activeSectionScreen #mock-tests .tabButtons {
+  display: flex !important;
+  gap: 10px !important;
+  margin: 0 0 20px !important;
+}
+
+.activeSectionScreen #mock-tests .mockTabs button,
+.activeSectionScreen #mock-tests .subjectTabs button,
+.activeSectionScreen #mock-tests .tabButtons button {
+  height: 40px !important;
+  padding: 0 18px !important;
+  border-radius: 13px !important;
+  font-size: 13px !important;
+}
+
+.activeSectionScreen #mock-tests .readyCard,
+.activeSectionScreen #mock-tests .mockCard,
+.activeSectionScreen #mock-tests .questionCard,
+.activeSectionScreen #mock-tests .card {
+  width: 100% !important;
+  max-width: 420px !important;
+  min-height: 210px !important;
+  padding: 24px !important;
+  border-radius: 26px !important;
+  background: rgba(255,255,255,0.86) !important;
+  border: 1px solid rgba(255,122,0,0.16) !important;
+  box-shadow: 0 18px 45px rgba(15,23,42,0.08) !important;
+}
+
+.activeSectionScreen #mock-tests .readyCard button,
+.activeSectionScreen #mock-tests .mockCard button {
+  height: 40px !important;
+  padding: 0 16px !important;
+  border-radius: 12px !important;
+  font-size: 12px !important;
+}
+/* MOCK TEST FLOATING CARD */
+
+.activeSectionScreen #mock-tests .readyCard,
+.activeSectionScreen #mock-tests .mockCard,
+.activeSectionScreen #mock-tests .questionCard,
+.activeSectionScreen #mock-tests .card {
+  position: relative !important;
+  overflow: hidden !important;
+  backdrop-filter: blur(22px) !important;
+  -webkit-backdrop-filter: blur(22px) !important;
+
+  background: rgba(255,255,255,0.78) !important;
+
+  box-shadow:
+    0 10px 30px rgba(15,23,42,0.06),
+    0 24px 60px rgba(255,140,0,0.10),
+    inset 0 1px 0 rgba(255,255,255,0.9) !important;
+
+  transform: translateY(0px) scale(1) !important;
+  transition: all 0.35s ease !important;
+}
+
+.activeSectionScreen #mock-tests .readyCard:hover,
+.activeSectionScreen #mock-tests .mockCard:hover,
+.activeSectionScreen #mock-tests .questionCard:hover,
+.activeSectionScreen #mock-tests .card:hover {
+  transform: translateY(-6px) scale(1.01) !important;
+
+  box-shadow:
+    0 16px 40px rgba(15,23,42,0.10),
+    0 30px 80px rgba(255,140,0,0.16),
+    inset 0 1px 0 rgba(255,255,255,1) !important;
+}
+/* READY TO START FLOATING CARD */
+
+.activeSectionScreen #mock-tests .readyCard,
+.activeSectionScreen #mock-tests .startCard,
+.activeSectionScreen #mock-tests .mockStartCard {
+  position: relative !important;
+  overflow: hidden !important;
+
+  background: rgba(255,255,255,0.78) !important;
+
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+
+  border-radius: 34px !important;
+
+  border: 1px solid rgba(255,255,255,0.7) !important;
+
+  box-shadow:
+    0 10px 30px rgba(15,23,42,0.06),
+    0 30px 80px rgba(255,140,0,0.10),
+    inset 0 1px 0 rgba(255,255,255,0.9) !important;
+
+  transform: translateY(0px) !important;
+  transition: all 0.35s ease !important;
+}
+
+.activeSectionScreen #mock-tests .readyCard:hover,
+.activeSectionScreen #mock-tests .startCard:hover,
+.activeSectionScreen #mock-tests .mockStartCard:hover {
+  transform: translateY(-8px) scale(1.01) !important;
+
+  box-shadow:
+    0 18px 40px rgba(15,23,42,0.10),
+    0 35px 90px rgba(255,140,0,0.16),
+    inset 0 1px 0 rgba(255,255,255,1) !important;
+}
+/* FINAL HARD PRICING COMPACT APPLE CARDS */
+
+.activeSectionScreen #pricing {
+  padding: 26px 7% 45px !important;
+  background: #fff !important;
+  overflow: hidden !important;
+}
+
+.activeSectionScreen #pricing h1,
+.activeSectionScreen #pricing h2 {
+  font-size: 34px !important;
+  line-height: 1.05 !important;
+  margin: 0 0 10px !important;
+}
+
+.activeSectionScreen #pricing > p {
+  font-size: 14px !important;
+  margin: 0 0 18px !important;
+}
+
+.activeSectionScreen #pricing .pricingGrid,
+.activeSectionScreen #pricing .grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(210px, 1fr)) !important;
+  gap: 18px !important;
+  align-items: stretch !important;
+}
+
+.activeSectionScreen #pricing .pricingCard,
+.activeSectionScreen #pricing .planCard,
+.activeSectionScreen #pricing .card {
+  min-height: 310px !important;
+  max-height: 340px !important;
+  padding: 22px !important;
+  border-radius: 26px !important;
+  overflow: hidden !important;
+  background: rgba(255,255,255,0.86) !important;
+  border: 1px solid rgba(255,122,0,0.16) !important;
+  box-shadow: 0 18px 45px rgba(15,23,42,0.08) !important;
+}
+
+.activeSectionScreen #pricing .pricingCard h3,
+.activeSectionScreen #pricing .planCard h3,
+.activeSectionScreen #pricing .card h3 {
+  font-size: 18px !important;
+  margin: 12px 0 10px !important;
+}
+
+.activeSectionScreen #pricing .price,
+.activeSectionScreen #pricing .pricingCard h2,
+.activeSectionScreen #pricing .planCard h2 {
+  font-size: 38px !important;
+  line-height: 1 !important;
+  margin: 10px 0 16px !important;
+}
+
+.activeSectionScreen #pricing li {
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  margin: 7px 0 !important;
+}
+
+.activeSectionScreen #pricing button {
+  height: 40px !important;
+  padding: 0 16px !important;
+  border-radius: 12px !important;
+  font-size: 12px !important;
+  margin-top: 10px !important;
+}
+/* FINAL PRICING READABLE APPLE CARD FIX */
+
+.activeSectionScreen #pricing {
+  padding: 24px 6% 50px !important;
+  background: #fff !important;
+  overflow: visible !important;
+}
+
+.activeSectionScreen #pricing h1,
+.activeSectionScreen #pricing h2 {
+  font-size: 34px !important;
+  margin: 0 0 8px !important;
+}
+
+.activeSectionScreen #pricing > p {
+  font-size: 14px !important;
+  margin-bottom: 18px !important;
+}
+
+.activeSectionScreen #pricing .pricingGrid,
+.activeSectionScreen #pricing .grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(210px, 1fr)) !important;
+  gap: 18px !important;
+  align-items: stretch !important;
+}
+
+.activeSectionScreen #pricing .pricingCard,
+.activeSectionScreen #pricing .planCard,
+.activeSectionScreen #pricing .card {
+  min-height: 390px !important;
+  max-height: none !important;
+  height: auto !important;
+  padding: 22px !important;
+  border-radius: 26px !important;
+  overflow: visible !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+
+  background: rgba(255,255,255,0.88) !important;
+  border: 1px solid rgba(255,122,0,0.16) !important;
+  box-shadow: 0 18px 45px rgba(15,23,42,0.08) !important;
+}
+
+.activeSectionScreen #pricing .price,
+.activeSectionScreen #pricing .pricingCard h2,
+.activeSectionScreen #pricing .planCard h2 {
+  font-size: 36px !important;
+  margin: 8px 0 14px !important;
+}
+
+.activeSectionScreen #pricing li {
+  font-size: 13px !important;
+  line-height: 1.3 !important;
+  margin: 6px 0 !important;
+}
+
+.activeSectionScreen #pricing button {
+  height: 40px !important;
+  margin-top: auto !important;
+  border-radius: 12px !important;
+  font-size: 12px !important;
+}
+/* PRICING BUTTON SAME LINE FIX */
+
+.activeSectionScreen #pricing .pricingCard,
+.activeSectionScreen #pricing .planCard,
+.activeSectionScreen #pricing .card {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.activeSectionScreen #pricing .pricingCard button,
+.activeSectionScreen #pricing .planCard button,
+.activeSectionScreen #pricing .card button {
+  margin-top: auto !important;
+}
+
+.activeSectionScreen #pricing .pricingCard ul,
+.activeSectionScreen #pricing .planCard ul,
+.activeSectionScreen #pricing .card ul {
+  flex-grow: 1 !important;
+}
+/* MENTORSHIP CARD CONTENT FIX */
+
+.activeSectionScreen #pricing .pricingCard:last-child,
+.activeSectionScreen #pricing .planCard:last-child,
+.activeSectionScreen #pricing .card:last-child {
+  justify-content: flex-start !important;
+}
+
+.activeSectionScreen #pricing .pricingCard:last-child li,
+.activeSectionScreen #pricing .planCard:last-child li,
+.activeSectionScreen #pricing .card:last-child li,
+.activeSectionScreen #pricing .pricingCard:last-child p,
+.activeSectionScreen #pricing .planCard:last-child p,
+.activeSectionScreen #pricing .card:last-child p,
+.activeSectionScreen #pricing .pricingCard:last-child span,
+.activeSectionScreen #pricing .planCard:last-child span,
+.activeSectionScreen #pricing .card:last-child span {
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: #1e293b !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  margin: 10px 0 !important;
+}
+
+.activeSectionScreen #pricing .pricingCard:last-child button,
+.activeSectionScreen #pricing .planCard:last-child button,
+.activeSectionScreen #pricing .card:last-child button {
+  margin-top: auto !important;
+}
+/* FINAL ADMIN PANEL APPLE COMPACT FIX */
+
+.activeSectionScreen #admin-panel {
+  padding: 24px 6% 50px !important;
+  background: #ffffff !important;
+  overflow: visible !important;
+}
+
+.activeSectionScreen #admin-panel .adminPanel,
+.activeSectionScreen #admin-panel .admin-panel {
+  max-width: 1250px !important;
+  margin: 0 auto !important;
+  padding: 28px !important;
+  border-radius: 34px !important;
+  background: #0f172a !important;
+  overflow: visible !important;
+}
+
+.activeSectionScreen #admin-panel h1,
+.activeSectionScreen #admin-panel h2 {
+  font-size: 34px !important;
+  margin: 0 0 10px !important;
+}
+
+.activeSectionScreen #admin-panel p {
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+}
+
+.activeSectionScreen #admin-panel .adminTabs,
+.activeSectionScreen #admin-panel .tabs {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  margin: 20px 0 24px !important;
+}
+
+.activeSectionScreen #admin-panel .adminTabs button,
+.activeSectionScreen #admin-panel .tabs button {
+  height: 40px !important;
+  padding: 0 18px !important;
+  border-radius: 999px !important;
+  font-size: 13px !important;
+}
+
+.activeSectionScreen #admin-panel .adminStats,
+.activeSectionScreen #admin-panel .statsGrid,
+.activeSectionScreen #admin-panel .dashboardGrid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(190px, 1fr)) !important;
+  gap: 18px !important;
+}
+
+.activeSectionScreen #admin-panel .statCard,
+.activeSectionScreen #admin-panel .adminCard,
+.activeSectionScreen #admin-panel .dashboardCard {
+  min-height: 190px !important;
+  max-height: none !important;
+  padding: 22px !important;
+  border-radius: 26px !important;
+  overflow: visible !important;
+  background: rgba(255,255,255,0.92) !important;
+  box-shadow: 0 18px 45px rgba(0,0,0,0.16) !important;
+}
+
+.activeSectionScreen #admin-panel .statCard h3,
+.activeSectionScreen #admin-panel .adminCard h3,
+.activeSectionScreen #admin-panel .dashboardCard h3 {
+  font-size: 22px !important;
+  line-height: 1.15 !important;
+  margin: 10px 0 !important;
+  word-break: break-word !important;
+}
+
+.activeSectionScreen #admin-panel .statCard p,
+.activeSectionScreen #admin-panel .adminCard p,
+.activeSectionScreen #admin-panel .dashboardCard p {
+  font-size: 13px !important;
+}
+
+@media (max-width: 1000px) {
+  .activeSectionScreen #admin-panel .adminStats,
+  .activeSectionScreen #admin-panel .statsGrid,
+  .activeSectionScreen #admin-panel .dashboardGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+/* FINAL ADMIN PANEL GRID READABLE FIX */
+
+.activeSectionScreen #admin-panel .adminStats,
+.activeSectionScreen #admin-panel .statsGrid,
+.activeSectionScreen #admin-panel .dashboardGrid {
+  grid-template-columns: repeat(4, minmax(200px, 1fr)) !important;
+  gap: 18px !important;
+  align-items: stretch !important;
+}
+
+.activeSectionScreen #admin-panel .statCard,
+.activeSectionScreen #admin-panel .adminCard,
+.activeSectionScreen #admin-panel .dashboardCard {
+  min-height: 180px !important;
+  padding: 22px !important;
+  border-radius: 24px !important;
+}
+
+.activeSectionScreen #admin-panel .statCard h3,
+.activeSectionScreen #admin-panel .adminCard h3,
+.activeSectionScreen #admin-panel .dashboardCard h3 {
+  font-size: 20px !important;
+  line-height: 1.15 !important;
+}
+
+.activeSectionScreen #admin-panel .statCard p,
+.activeSectionScreen #admin-panel .adminCard p,
+.activeSectionScreen #admin-panel .dashboardCard p {
+  font-size: 13px !important;
+}
+/* FINAL ADMIN PANEL NO-CUT APPLE COMPACT FIX */
+
+.activeSectionScreen #admin-panel,
+.activeSectionScreen #admin-panel .adminPanel,
+.activeSectionScreen #admin-panel .admin-panel {
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+.activeSectionScreen #admin-panel .adminStats,
+.activeSectionScreen #admin-panel .statsGrid,
+.activeSectionScreen #admin-panel .dashboardGrid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(220px, 1fr)) !important;
+  gap: 18px !important;
+  align-items: stretch !important;
+}
+
+.activeSectionScreen #admin-panel .statCard,
+.activeSectionScreen #admin-panel .adminCard,
+.activeSectionScreen #admin-panel .dashboardCard {
+  min-height: 170px !important;
+  height: auto !important;
+  max-height: none !important;
+  padding: 20px !important;
+  border-radius: 24px !important;
+  overflow: visible !important;
+}
+
+.activeSectionScreen #admin-panel .statCard h3,
+.activeSectionScreen #admin-panel .adminCard h3,
+.activeSectionScreen #admin-panel .dashboardCard h3 {
+  font-size: 20px !important;
+  line-height: 1.15 !important;
+  word-break: normal !important;
+}
+
+.activeSectionScreen #admin-panel .platformHealth,
+.activeSectionScreen #admin-panel .healthCard {
+  margin-top: 24px !important;
+  padding: 24px !important;
+  border-radius: 24px !important;
+}
+
+@media (max-width: 1100px) {
+  .activeSectionScreen #admin-panel .adminStats,
+  .activeSectionScreen #admin-panel .statsGrid,
+  .activeSectionScreen #admin-panel .dashboardGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+/* FINAL ADMIN DASHBOARD CARD CUT FIX */
+
+.activeSectionScreen #admin-panel .adminStats,
+.activeSectionScreen #admin-panel .statsGrid,
+.activeSectionScreen #admin-panel .dashboardGrid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(240px, 1fr)) !important;
+  gap: 18px !important;
+  align-items: stretch !important;
+  overflow: visible !important;
+}
+
+.activeSectionScreen #admin-panel .statCard,
+.activeSectionScreen #admin-panel .adminCard,
+.activeSectionScreen #admin-panel .dashboardCard {
+  min-height: 165px !important;
+  max-height: none !important;
+  height: auto !important;
+  padding: 20px !important;
+  border-radius: 24px !important;
+  overflow: visible !important;
+}
+
+.activeSectionScreen #admin-panel .statCard h3,
+.activeSectionScreen #admin-panel .adminCard h3,
+.activeSectionScreen #admin-panel .dashboardCard h3 {
+  font-size: 20px !important;
+  line-height: 1.15 !important;
+  margin: 8px 0 !important;
+}
+
+.activeSectionScreen #admin-panel .statCard p,
+.activeSectionScreen #admin-panel .adminCard p,
+.activeSectionScreen #admin-panel .dashboardCard p {
+  font-size: 13px !important;
+  margin: 6px 0 !important;
+}
+
+.activeSectionScreen #admin-panel .platformHealth,
+.activeSectionScreen #admin-panel .healthCard {
+  margin-top: 22px !important;
+  padding: 22px !important;
+  border-radius: 24px !important;
+}
+/* FINAL ANNOUNCEMENT PANEL FIX */
+
+.activeSectionScreen #admin-panel .announcementsPanel,
+.activeSectionScreen #admin-panel .announcementSection,
+.activeSectionScreen #admin-panel .announcementCard,
+.activeSectionScreen #admin-panel .adminAnnouncements {
+  display: block !important;
+  width: 100% !important;
+  min-height: 320px !important;
+  height: auto !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.activeSectionScreen #admin-panel textarea,
+.activeSectionScreen #admin-panel input {
+  width: 100% !important;
+  min-height: 52px !important;
+  border-radius: 16px !important;
+}
+
+.activeSectionScreen #admin-panel textarea {
+  min-height: 140px !important;
+}
+
+.activeSectionScreen #admin-panel .announcementList {
+  margin-top: 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+}
+/* FINAL HOMEPAGE GAP FIX */
+
+.appDashboard {
+  padding-bottom: 30px !important;
+}
+
+.freeResources {
+  padding-top: 35px !important;
+  margin-top: 0 !important;
+}
+
+.freeResources h2 {
+  font-size: 52px !important;
+  margin-bottom: 14px !important;
+}
+
+.freeResources p {
+  margin-bottom: 28px !important;
+}
+/* FINAL OLD PREMIUM HERO COMPACT FIX */
+
+.premiumHero {
+  min-height: auto !important;
+  padding: 55px 7% 60px !important;
+  overflow: hidden !important;
+}
+
+.premiumHero h1 {
+  font-size: clamp(42px, 5vw, 72px) !important;
+  line-height: 0.95 !important;
+  letter-spacing: -0.05em !important;
+  margin-bottom: 22px !important;
+}
+
+.premiumHero p {
+  font-size: 16px !important;
+  line-height: 1.45 !important;
+  max-width: 620px !important;
+}
+
+.premiumHeroGrid,
+.premiumHeroContent {
+  display: grid !important;
+  grid-template-columns: 1fr 0.9fr !important;
+  gap: 46px !important;
+  align-items: center !important;
+}
+
+.premiumDashboardCard,
+.ctetDashboardCard,
+.masterDashboardCard {
+  max-width: 560px !important;
+  min-height: auto !important;
+  padding: 32px !important;
+  border-radius: 34px !important;
+  overflow: hidden !important;
+}
+
+.premiumDashboardCard * {
+  max-width: 100% !important;
+}
+/* FINAL HERO OVERFLOW FIX */
+
+.premiumHero,
+.hero,
+.heroSection {
+  min-height: 100vh !important;
+  height: auto !important;
+  overflow: visible !important;
+  padding-bottom: 120px !important;
+}
+
+.premiumHeroGrid,
+.premiumHeroContent,
+.heroContent {
+  align-items: center !important;
+}
+
+.premiumDashboardCard,
+.ctetDashboardCard,
+.masterDashboardCard {
+  position: relative !important;
+  top: 0 !important;
+  transform: none !important;
+
+  width: 100% !important;
+  max-width: 760px !important;
+
+  min-height: 720px !important;
+  height: auto !important;
+
+  margin: 0 auto !important;
+
+  overflow: visible !important;
+
+  border-radius: 38px !important;
+}
+
+/* dashboard inner items cut fix */
+
+.premiumDashboardCard *,
+.ctetDashboardCard *,
+.masterDashboardCard * {
+  overflow: visible !important;
+}
+
+/* mobile safe */
+
+@media (max-width: 1100px) {
+  .premiumHeroGrid,
+  .premiumHeroContent,
+  .heroContent {
+    grid-template-columns: 1fr !important;
+  }
+
+  .premiumDashboardCard,
+  .ctetDashboardCard,
+  .masterDashboardCard {
+    min-height: auto !important;
+    max-width: 100% !important;
+    margin-top: 40px !important;
+  }
+}
+/* FINAL PREMIUM HERO ONE-SCREEN FIX */
+
+.premiumHero {
+  min-height: calc(100vh - 86px) !important;
+  height: auto !important;
+  padding: 38px 7% 42px !important;
+  overflow: hidden !important;
+}
+
+.premiumHeroGrid,
+.premiumHeroContent {
+  display: grid !important;
+  grid-template-columns: 0.95fr 1fr !important;
+  gap: 38px !important;
+  align-items: center !important;
+}
+
+.premiumHero h1 {
+  font-size: clamp(38px, 4.2vw, 64px) !important;
+  line-height: 0.96 !important;
+  margin: 26px 0 18px !important;
+}
+
+.premiumHero p {
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+  margin-bottom: 18px !important;
+}
+
+.premiumHero .featureItem,
+.premiumHero li {
+  min-height: 54px !important;
+  padding: 14px 18px !important;
+  margin-bottom: 12px !important;
+  border-radius: 18px !important;
+  font-size: 14px !important;
+}
+
+.premiumDashboardCard,
+.ctetDashboardCard,
+.masterDashboardCard {
+  max-width: 620px !important;
+  min-height: 430px !important;
+  max-height: 520px !important;
+  padding: 30px !important;
+  border-radius: 34px !important;
+  overflow: hidden !important;
+}
+
+.premiumDashboardCard .dashboardMiniCard,
+.premiumDashboardCard .metricCard,
+.ctetDashboardCard .dashboardMiniCard,
+.masterDashboardCard .dashboardMiniCard {
+  min-height: 82px !important;
+  padding: 16px !important;
+  border-radius: 22px !important;
+}
+
+.premiumHero button,
+.premiumHero .btn {
+  height: 44px !important;
+  padding: 0 22px !important;
+  border-radius: 14px !important;
+  font-size: 14px !important;
+}
+/* FINAL HERO FIT FIX */
+
+.premium {
+  min-height: calc(100vh - 78px) !important;
+  height: calc(100vh - 78px) !important;
+  padding: 28px 6% !important;
+
+  display: grid !important;
+  grid-template-columns: 0.9fr 1fr !important;
+  align-items: center !important;
+  gap: 40px !important;
+
+  overflow: hidden !important;
+}
+
+/* LEFT SIDE */
+
+.premiumLeft h2 {
+  font-size: clamp(44px, 4.5vw, 76px) !important;
+  line-height: 0.92 !important;
+  margin: 18px 0 !important;
+  max-width: 580px !important;
+}
+
+.premiumLeft p {
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+  margin-bottom: 16px !important;
+  max-width: 520px !important;
+}
+
+.premiumFeatures {
+  gap: 10px !important;
+}
+
+.feature {
+  min-height: 54px !important;
+  padding: 14px 18px !important;
+  font-size: 15px !important;
+  border-radius: 18px !important;
+}
+
+/* BUTTON */
+
+.premiumLeft button {
+  margin-top: 12px !important;
+  height: 46px !important;
+  padding: 0 24px !important;
+  border-radius: 14px !important;
+}
+
+/* RIGHT DASHBOARD */
+
+.premiumCard {
+  width: 100% !important;
+  max-width: 680px !important;
+
+  height: 540px !important;
+  max-height: 540px !important;
+
+  padding: 34px !important;
+
+  border-radius: 36px !important;
+
+  overflow: hidden !important;
+}
+
+.dashboardGrid {
+  gap: 16px !important;
+}
+
+.miniCard {
+  min-height: 95px !important;
+  font-size: 15px !important;
+  border-radius: 22px !important;
+}
+
+/* MOBILE */
+
+@media (max-width: 1100px) {
+  .premium {
+    height: auto !important;
+    grid-template-columns: 1fr !important;
+    padding: 70px 24px !important;
+  }
+
+  .premiumLeft h2 {
+    font-size: 54px !important;
+  }
+
+  .premiumCard {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+}
+/* FINAL PREMIUM SECTION NO-CUT FIX */
+
+.premium {
+  height: auto !important;
+  min-height: auto !important;
+  padding: 70px 6% !important;
+  overflow: visible !important;
+
+  display: grid !important;
+  grid-template-columns: 0.85fr 0.95fr !important;
+  gap: 46px !important;
+  align-items: center !important;
+}
+
+.premiumLeft h2 {
+  font-size: clamp(38px, 4vw, 58px) !important;
+  line-height: 1 !important;
+  margin: 18px 0 !important;
+}
+
+.premiumLeft p {
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+  margin-bottom: 14px !important;
+}
+
+.premiumFeatures {
+  display: grid !important;
+  gap: 10px !important;
+}
+
+.feature {
+  padding: 12px 18px !important;
+  min-height: 46px !important;
+  font-size: 14px !important;
+  border-radius: 16px !important;
+}
+
+.premiumCard {
+  width: 100% !important;
+  max-width: 620px !important;
+  height: auto !important;
+  min-height: auto !important;
+  padding: 28px !important;
+  border-radius: 32px !important;
+  overflow: visible !important;
+}
+
+.dashboardStat {
+  padding: 18px 22px !important;
+  min-height: 54px !important;
+  border-radius: 22px !important;
+}
+
+.dashboardGrid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 12px !important;
+}
+
+.miniCard {
+  min-height: 72px !important;
+  padding: 14px !important;
+  font-size: 14px !important;
+  border-radius: 18px !important;
+}
+/* FINAL PREMIUM HERO TRUE ONE SCREEN FIX */
+
+.premium {
+  height: auto !important;
+  min-height: auto !important;
+  padding: 46px 6% 34px !important;
+  overflow: visible !important;
+  align-items: center !important;
+}
+
+.premiumLeft h2 {
+  font-size: clamp(34px, 3.7vw, 56px) !important;
+  line-height: 0.98 !important;
+  margin: 14px 0 !important;
+}
+
+.premiumLeft p {
+  font-size: 14px !important;
+  line-height: 1.45 !important;
+  margin-bottom: 12px !important;
+}
+
+.premiumFeatures {
+  gap: 8px !important;
+}
+
+.feature {
+  min-height: 38px !important;
+  padding: 9px 16px !important;
+  font-size: 13px !important;
+  border-radius: 14px !important;
+}
+
+.premiumLeft button {
+  height: 38px !important;
+  padding: 0 18px !important;
+  font-size: 13px !important;
+  margin-top: 8px !important;
+}
+
+/* right dashboard readable */
+
+.premiumCard {
+  max-width: 600px !important;
+  padding: 28px !important;
+  border-radius: 32px !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+}
+
+.premiumCard,
+.premiumCard * {
+  color: #111827 !important;
+}
+
+.premiumCard h3 {
+  color: #111827 !important;
+  font-size: 20px !important;
+}
+
+.dashboardStat {
+  background: rgba(255,255,255,0.78) !important;
+  color: #111827 !important;
+}
+
+.miniCard {
+  min-height: 68px !important;
+  padding: 12px !important;
+  font-size: 13px !important;
+  color: #111827 !important;
+  background: rgba(255,255,255,0.65) !important;
+}
+/* FINAL HOME HERO APPLE PREMIUM LOOK */
+
+.hero {
+  width: min(92%, 1500px) !important;
+  margin: 26px auto 0 !important;
+  padding: 46px 7% !important;
+  min-height: auto !important;
+
+  background:
+    radial-gradient(circle at 8% 10%, rgba(255, 145, 0, 0.18), transparent 32%),
+    radial-gradient(circle at 92% 45%, rgba(56, 189, 248, 0.18), transparent 34%),
+    rgba(255, 255, 255, 0.92) !important;
+
+  border: 1px solid rgba(255, 145, 0, 0.14) !important;
+  border-radius: 38px !important;
+  box-shadow: 0 34px 90px rgba(15, 23, 42, 0.10) !important;
+
+  grid-template-columns: 0.92fr 0.9fr !important;
+  gap: 46px !important;
+  overflow: visible !important;
+}
+
+.taglineCard {
+  max-width: 640px !important;
+  padding: 20px 26px !important;
+  border-radius: 26px !important;
+  margin-bottom: 30px !important;
+}
+
+.taglineIcon {
+  width: 56px !important;
+  height: 56px !important;
+  font-size: 26px !important;
+  border-radius: 18px !important;
+}
+
+.taglineCard h3 {
+  font-size: 22px !important;
+  line-height: 1.05 !important;
+}
+
+.taglineCard p {
+  font-size: 15px !important;
+}
+
+.heroContent h1 {
+  font-size: clamp(42px, 5vw, 74px) !important;
+  line-height: 0.96 !important;
+  letter-spacing: -0.05em !important;
+  margin: 22px 0 16px !important;
+}
+
+.heroContent > p {
+  font-size: 17px !important;
+  margin-bottom: 22px !important;
+}
+
+.heroActions button,
+.heroActions a {
+  height: 48px !important;
+  padding: 0 26px !important;
+  border-radius: 16px !important;
+}
+
+.heroGoalCard {
+  max-width: 560px !important;
+  padding: 34px !important;
+  border-radius: 34px !important;
+  background: rgba(255,255,255,0.86) !important;
+  box-shadow: 0 28px 70px rgba(14, 165, 233, 0.18) !important;
+}
+
+.heroStats {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 12px !important;
+  margin-top: 20px !important;
+}
+
+.heroStats .statCard,
+.heroStats > div {
+  min-height: 76px !important;
+  padding: 14px !important;
+  border-radius: 18px !important;
+}

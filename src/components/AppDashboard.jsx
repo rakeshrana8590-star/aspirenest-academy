@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function AppDashboard({ setActiveSection, user, isAdmin }) {
+export default function AppDashboard({ setActiveSection, setActiveAdminTab, user, isAdmin }) {
   return (
     <section className="appDashboard">
       <div className="appDashboardHeader">
@@ -146,7 +146,10 @@ export default function AppDashboard({ setActiveSection, user, isAdmin }) {
   </p>
 
   <button
-    onClick={() => setActiveSection("announcements")}
+   onClick={() => {
+    setActiveAdminTab("Announcements");
+    setActiveSection("admin-panel");
+  }}
   >
     Open
   </button>

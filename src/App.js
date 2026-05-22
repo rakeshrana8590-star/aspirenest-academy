@@ -1819,13 +1819,14 @@ return (
       </div>
     </div>
   </div>
-)}
-    <AppDashboard
-  setActiveSection={setActiveSection}
-  user={user}
-  isAdmin={isAdmin}
+)}<AppDashboard
+setActiveSection={setActiveSection}
+setActiveAdminTab={setActiveAdminTab}
+user={user}
+isAdmin={isAdmin}
 />
 
+{(leaderboard || []).length > 0 && (
 <section className="leaderboardSection">
   <div className="leaderboardHeader">
     <span className="badge">Top Performers</span>
@@ -1840,23 +1841,28 @@ return (
   <div className="leaderboardGrid">
     {(leaderboard || []).map((student, index) => (
       <div className="leaderCard" key={student.id || index}>
-        <div className="rankBadge">#{index + 1}</div>
+        <div className="rankBadge">
+          #{index + 1}
+        </div>
 
-        <h3>{student.email || "Student"}</h3>
+        <h3>
+          {student.email || "Student"}
+        </h3>
 
         <p className="leaderScore">
           {student.percentage || 0}%
         </p>
 
-        <span className="leaderTag">Top Score</span>
+        <span className="leaderTag">
+          Top Score
+        </span>
       </div>
     ))}
   </div>
 </section>
-
+)}
 <section className="freeResources">
   <div className="container">
-
     <h2>Free Resources</h2>
 
     <p>
@@ -1864,11 +1870,7 @@ return (
     </p>
 
     <div className="freeGrid">
-
-      <div
-        className="freeCard"
-        onClick={() => setActiveSection("notes")}
-      >
+      <div className="freeCard" onClick={() => setActiveSection("notes")}>
         📘 Free CDP Notes
       </div>
 
@@ -1876,10 +1878,7 @@ return (
         🗓️ 7-Day Study Plan
       </div>
 
-      <div
-        className="freeCard"
-        onClick={() => setActiveSection("mock-tests")}
-      >
+      <div className="freeCard" onClick={() => setActiveSection("mock-tests")}>
         📝 Free Mock Test
       </div>
 
@@ -1894,11 +1893,9 @@ return (
       <div className="freeCard">
         ✅ Revision Checklist
       </div>
-
     </div>
   </div>
 </section>
-
 <section className="premium" id="premium-section">
         <div className="premiumLeft">
           <span className="premiumBadge">PREMIUM LEARNING EXPERIENCE</span>
