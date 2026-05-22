@@ -302,7 +302,6 @@ setEnquiries([]);
       alert(error.message);
     }
   };
-  
   const handleNoteAccess = (note) => {
     if (note.type === "PREMIUM" && !isPremiumUser) {
       alert(
@@ -311,16 +310,7 @@ setEnquiries([]);
       return;
     }
   
-    if (!note.pdf) {
-      alert("PDF is not available yet.");
-      return;
-    }
-  
-    window.open(note.pdf, "_blank");
-  };
-    }
-  
-    if (note.pdf === "#") {
+    if (!note.pdf || note.pdf === "#") {
       alert("PDF will be uploaded soon.");
       return;
     }

@@ -14225,115 +14225,438 @@ nav {
   border-radius: 14px !important;
   font-size: 15px !important;
 }
-/* PRICING IMAGE-MATCH FINAL */
+/* ===== FINAL PREMIUM PRICING FIX ===== */
 
 .applePricing {
-  padding: 88px 7% 80px !important;
-  background: #ffffff !important;
+  padding: 70px 5% !important;
+  background: #f8f8f8 !important;
 }
 
 .applePricing .pricingHeader {
-  text-align: center !important;
-  margin-bottom: 44px !important;
+  text-align: center;
+  margin-bottom: 38px;
 }
 
 .applePricing .pricingHeader h2 {
-  font-size: 38px !important;
+  font-size: 52px !important;
   line-height: 1.05 !important;
-  margin: 0 0 14px !important;
+  margin-bottom: 10px !important;
+  color: #0f172a !important;
 }
 
 .applePricing .pricingHeader p {
-  font-size: 17px !important;
-  color: #6b7280 !important;
+  font-size: 20px !important;
+  color: #64748b !important;
 }
 
 .applePricing .pricingGrid {
   display: grid !important;
   grid-template-columns: repeat(4, 1fr) !important;
-  gap: 26px !important;
-  max-width: 1240px !important;
-  margin: 0 auto !important;
+  gap: 22px !important;
+  align-items: stretch !important;
 }
 
 .applePricing .pricingCard {
-  height: 455px !important;
-  min-height: 455px !important;
-  padding: 28px 28px !important;
-  border-radius: 28px !important;
-  background: #fff !important;
-  border: 1px solid rgba(249,115,22,0.25) !important;
-  box-shadow: 0 24px 65px rgba(15,23,42,0.07) !important;
+  background: rgba(255,255,255,0.88) !important;
+  backdrop-filter: blur(18px) !important;
+
+  border-radius: 30px !important;
+
+  border: 1px solid rgba(251,146,60,0.35) !important;
+
+  padding: 26px 26px 22px !important;
+
+  min-height: 520px !important;
+
   display: flex !important;
   flex-direction: column !important;
+
+  box-shadow:
+    0 10px 30px rgba(15,23,42,0.06),
+    0 2px 10px rgba(15,23,42,0.04) !important;
+
+  transition: all 0.35s ease !important;
+}
+
+.applePricing .pricingCard:hover {
+  transform: translateY(-8px) !important;
+
+  box-shadow:
+    0 25px 50px rgba(15,23,42,0.12),
+    0 8px 20px rgba(15,23,42,0.08) !important;
+}
+
+.applePricing .featuredPrice {
+  transform: scale(1.02) !important;
+
+  border: 1.5px solid #fb923c !important;
+
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.96),
+    rgba(255,247,237,0.92)
+  ) !important;
 }
 
 .applePricing .priceBadge {
-  height: 42px !important;
-  padding: 0 18px !important;
+  width: 100% !important;
+
   border-radius: 999px !important;
-  background: #fff7ed !important;
-  color: #c2410c !important;
-  border: 1px solid rgba(249,115,22,0.22) !important;
-  display: flex !important;
-  align-items: center !important;
+
+  padding: 10px 18px !important;
+
   font-size: 14px !important;
-  font-weight: 900 !important;
-  margin-bottom: 26px !important;
+
+  font-weight: 800 !important;
+
+  letter-spacing: 0.4px !important;
+
+  margin-bottom: 24px !important;
+
+  background: #f7efe5 !important;
+
+  color: #c2410c !important;
+
+  border: 1px solid rgba(251,146,60,0.22) !important;
 }
 
 .applePricing .pricingCard h3 {
-  font-size: 23px !important;
-  line-height: 1.15 !important;
-  margin: 0 0 18px !important;
-  min-height: 52px !important;
-  color: #3b2418 !important;
+  font-size: 22px !important;
+  line-height: 1.25 !important;
+  min-height: 56px !important;
+  margin-bottom: 14px !important;
+  color: #1e293b !important;
 }
 
 .applePricing .pricingCard h1 {
-  font-size: 42px !important;
+  font-size: 58px !important;
   line-height: 1 !important;
-  margin: 0 0 32px !important;
-  color: #3b2418 !important;
+  margin-bottom: 24px !important;
+  color: #111827 !important;
 }
 
 .applePricing .pricingCard ul {
   list-style: none !important;
+
   padding: 0 !important;
+
   margin: 0 !important;
+
   display: flex !important;
   flex-direction: column !important;
+
   gap: 18px !important;
+
+  flex: 1 !important;
 }
 
 .applePricing .pricingCard li {
+  font-size: 17px !important;
+
+  color: #475569 !important;
+
+  line-height: 1.45 !important;
+
   display: flex !important;
   align-items: center !important;
-  gap: 14px !important;
-  font-size: 15px !important;
-  color: #374151 !important;
-}
 
-.applePricing .featureIcon {
-  width: 24px !important;
-  min-width: 24px !important;
-  text-align: center !important;
-}
-
-.applePricing .pricingCard li::before {
-  content: none !important;
+  gap: 10px !important;
 }
 
 .applePricing .pricingCard .btnLink {
-  margin-top: auto !important;
-  height: 56px !important;
-  border-radius: 18px !important;
-  background: #0f172a !important;
-  color: #fff !important;
+  margin-top: 26px !important;
+
+  height: 54px !important;
+
+  border-radius: 16px !important;
+
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+
   font-size: 17px !important;
-  font-weight: 900 !important;
-  box-shadow: 0 18px 42px rgba(15,23,42,0.18) !important;
+  font-weight: 700 !important;
+
+  background: linear-gradient(
+    135deg,
+    #0f172a,
+    #020617
+  ) !important;
+
+  color: white !important;
+
+  box-shadow:
+    0 10px 25px rgba(15,23,42,0.18) !important;
+}
+
+.applePricing .pricingCard .btnLink:hover {
+  transform: translateY(-2px) scale(1.01) !important;
+}
+
+@media (max-width: 1200px) {
+
+  .applePricing .pricingGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  .applePricing {
+    padding: 60px 18px !important;
+  }
+
+  .applePricing .pricingHeader h2 {
+    font-size: 38px !important;
+  }
+
+  .applePricing .pricingHeader p {
+    font-size: 16px !important;
+  }
+
+  .applePricing .pricingGrid {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+
+  .applePricing .pricingCard {
+    min-height: auto !important;
+    padding: 24px !important;
+  }
+
+  .applePricing .pricingCard h1 {
+    font-size: 48px !important;
+  }
+
+}
+/* ===== FINAL APPLE PRICING COMPACT FIX ===== */
+
+.pricingPro.applePricing {
+  padding: 10px 4% 16px !important;
+
+  background: #f8f8f8 !important;
+
+  min-height: auto !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+.applePricing .pricingHeader {
+  text-align: center !important;
+
+  margin-bottom: 12px !important;
+}
+
+.applePricing .pricingHeader h2 {
+  font-size: 24px !important;
+
+  line-height: 1.05 !important;
+
+  margin: 0 0 4px !important;
+
+  letter-spacing: -1px !important;
+}
+
+.applePricing .pricingHeader p {
+  font-size: 14px !important;
+
+  margin: 0 !important;
+
+  color: #64748b !important;
+}
+
+.applePricing .pricingGrid {
+  max-width: 1180px !important;
+
+  margin: 0 auto !important;
+
+  display: grid !important;
+
+  grid-template-columns: repeat(4, 1fr) !important;
+
+  gap: 16px !important;
+
+  align-items: stretch !important;
+}
+
+.applePricing .pricingCard {
+  height: 330px !important;
+
+  min-height: 330px !important;
+
+  padding: 16px 18px !important;
+
+  border-radius: 24px !important;
+
+  background: rgba(255,255,255,0.88) !important;
+
+  backdrop-filter: blur(18px) !important;
+
+  border: 1px solid rgba(251,146,60,0.35) !important;
+
+  box-shadow:
+    0 8px 20px rgba(15,23,42,0.05),
+    0 2px 8px rgba(15,23,42,0.03) !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  transition: all 0.3s ease !important;
+}
+
+.applePricing .pricingCard:hover {
+  transform: translateY(-4px) !important;
+
+  box-shadow:
+    0 18px 35px rgba(15,23,42,0.08),
+    0 4px 12px rgba(15,23,42,0.05) !important;
+}
+
+.applePricing .featuredPrice {
+  transform: none !important;
+
+  border: 1.5px solid #fb923c !important;
+
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.95),
+    rgba(255,247,237,0.92)
+  ) !important;
+}
+
+.applePricing .priceBadge {
+  height: 28px !important;
+
+  padding: 5px 14px !important;
+
+  margin-bottom: 10px !important;
+
+  border-radius: 999px !important;
+
+  font-size: 12px !important;
+
+  font-weight: 800 !important;
+
+  display: flex !important;
+  align-items: center !important;
+
+  background: #f7efe5 !important;
+
+  color: #c2410c !important;
+
+  border: 1px solid rgba(251,146,60,0.18) !important;
+}
+
+.applePricing .pricingCard h3 {
+  font-size: 16px !important;
+
+  line-height: 1.2 !important;
+
+  min-height: 32px !important;
+
+  margin: 0 0 8px !important;
+
+  color: #1e293b !important;
+}
+
+.applePricing .pricingCard h1 {
+  font-size: 30px !important;
+
+  line-height: 1 !important;
+
+  margin: 0 0 12px !important;
+
+  color: #111827 !important;
+}
+
+.applePricing .pricingCard ul {
+  list-style: none !important;
+
+  padding: 0 !important;
+
+  margin: 0 !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  gap: 7px !important;
+
+  flex: 1 !important;
+}
+
+.applePricing .pricingCard li {
+  font-size: 13px !important;
+
+  line-height: 1.2 !important;
+
+  color: #475569 !important;
+
+  display: flex !important;
+  align-items: center !important;
+
+  gap: 7px !important;
+}
+
+.applePricing .pricingCard .btnLink {
+  height: 40px !important;
+
+  min-height: 40px !important;
+
+  margin-top: 10px !important;
+
+  border-radius: 14px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  font-size: 14px !important;
+
+  font-weight: 700 !important;
+
+  background: linear-gradient(
+    135deg,
+    #0f172a,
+    #020617
+  ) !important;
+
+  color: white !important;
+
+  box-shadow:
+    0 8px 18px rgba(15,23,42,0.14) !important;
+}
+
+.applePricing .pricingCard .btnLink:hover {
+  transform: translateY(-1px) !important;
+}
+
+@media (max-width: 1100px) {
+
+  .applePricing .pricingGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  .pricingPro.applePricing {
+    padding: 22px 16px !important;
+  }
+
+  .applePricing .pricingGrid {
+    grid-template-columns: 1fr !important;
+
+    gap: 14px !important;
+  }
+
+  .applePricing .pricingCard {
+    height: auto !important;
+
+    min-height: auto !important;
+  }
+
 }
