@@ -1,87 +1,97 @@
 export default function Pricing({ handlePremiumPurchase }) {
-    return (
-      <section id="pricing" className="pricingPro">
+  const plans = [
+    {
+      badge: "FREE",
+      title: "Starter",
+      price: "₹0",
+      features: [
+        ["📘", "Sample Notes"],
+        ["📝", "1 Mock Test"],
+        ["📅", "Study Plan"],
+      ],
+      button: "Start Free",
+      href: "#resources",
+    },
+    {
+      badge: "BASIC",
+      title: "Topic-wise Courses",
+      price: "₹499",
+      features: [
+        ["🎯", "Topic Modules"],
+        ["📚", "PYQ Practice"],
+        ["📝", "Mini Tests"],
+      ],
+      button: "Join Now",
+      href: "#contact",
+    },
+    {
+      badge: "MOST POPULAR",
+      title: "Premium Batch",
+      price: "₹1499",
+      features: [
+        ["🎥", "Live Classes"],
+        ["📘", "Complete Notes"],
+        ["📝", "Full Mock Tests"],
+        ["🏆", "Performance Tracking"],
+      ],
+      button: "Get Premium",
+      action: handlePremiumPurchase,
+      featured: true,
+    },
+    {
+      badge: "MENTORSHIP",
+      title: "Personal Mentorship",
+      price: "₹2999",
+      features: [
+        ["👨‍🏫", "Mentor Guidance"],
+        ["📈", "Progress Analysis"],
+        ["🎯", "Strategy Sessions"],
+        ["📞", "Priority Support"],
+      ],
+      button: "Apply Now",
+      href: "#contact",
+    },
+  ];
+
+  return (
+    <section id="pricing" className="pricingPro applePricing">
+      <div className="pricingHeader">
         <h2>Choose Your Learning Plan</h2>
-  
-        <p className="sectionText">
-          Flexible pricing for every CTET/TET aspirant.
-        </p>
-  
-        <div className="pricingGrid">
-          <div className="pricingCard">
-            <span className="priceBadge">FREE</span>
-  
-            <h3>Starter</h3>
-  
-            <h1>₹0</h1>
-  
+        <p>Flexible pricing for every CTET/TET aspirant.</p>
+      </div>
+
+      <div className="pricingGrid">
+        {plans.map((plan) => (
+          <div
+            className={`pricingCard ${plan.featured ? "featuredPrice" : ""}`}
+            key={plan.title}
+          >
+            <span className="priceBadge">{plan.badge}</span>
+
+            <h3>{plan.title}</h3>
+            <h1>{plan.price}</h1>
+
             <ul>
-              <li>📘 Sample Notes</li>
-              <li>📝 1 Mock Test</li>
-              <li>📅 Study Plan</li>
+              {plan.features.map(([icon, text]) => (
+                <li key={text}>
+                  <span className="featureIcon">{icon}</span>
+                  <span>{text}</span>
+                </li>
+              ))}
             </ul>
-  
-            <a href="#resources" className="btnLink">
-              Start Free
-            </a>
+
+            {plan.action ? (
+              <button className="btnLink" onClick={plan.action}>
+                {plan.button}
+              </button>
+            ) : (
+              <a href={plan.href} className="btnLink">
+                {plan.button}
+              </a>
+            )}
           </div>
-  
-          <div className="pricingCard">
-            <span className="priceBadge orange">BASIC</span>
-  
-            <h3>Topic-wise Courses</h3>
-  
-            <h1>₹499</h1>
-  
-            <ul>
-              <li>🎯 Topic Modules</li>
-              <li>📚 PYQ Practice</li>
-              <li>📝 Mini Tests</li>
-            </ul>
-  
-            <a href="#contact" className="btnLink">
-              Join Now
-            </a>
-          </div>
-  
-          <div className="pricingCard featuredPrice">
-            <span className="priceBadge premium">MOST POPULAR</span>
-  
-            <h3>Premium Batch</h3>
-  
-            <h1>₹1499</h1>
-  
-            <ul>
-              <li>🎥 Live Classes</li>
-              <li>📘 Complete Notes</li>
-              <li>📝 Full Mock Tests</li>
-              <li>🏆 Performance Tracking</li>
-            </ul>
-  
-            <button className="btnLink" onClick={handlePremiumPurchase}>
-              Get Premium
-            </button>
-          </div>
-  
-          <div className="pricingCard darkPrice">
-            <span className="priceBadge darkTag">MENTORSHIP</span>
-  
-            <h3>Personal Mentorship</h3>
-  
-            <h1>₹2999</h1>
-  
-            <ul>
-              <li>👨‍🏫 Mentor Guidance</li>
-              <li>📈 Progress Analysis</li>
-              <li>🎯 Strategy Sessions</li>
-              <li>📞 Priority Support</li>
-            </ul>
-  
-            <a href="#contact" className="btnLink">
-              Apply Now
-            </a>
-          </div>
-        </div>
-      </section>
-    );
-  }
+        ))}
+      </div>
+    </section>
+  );
+}

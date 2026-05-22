@@ -1,176 +1,143 @@
 import React from "react";
+import {
+  BookOpen,
+  Route,
+  FileText,
+  ClipboardCheck,
+  Newspaper,
+  Crown,
+  BarChart3,
+  Megaphone,
+  Settings,
+} from "lucide-react";
 
-export default function AppDashboard({ setActiveSection, setActiveAdminTab, user, isAdmin }) {
+export default function AppDashboard({
+  setActiveSection,
+  setActiveAdminTab,
+  user,
+  isAdmin,
+}) {
+  const rows = [
+    {
+      title: "Start Learning",
+      cards: [
+        {
+          Icon: BookOpen,
+          title: "Courses",
+          text: "CTET/TET learning paths and topic-wise preparation.",
+          action: () => setActiveSection("courses"),
+        },
+        {
+          Icon: Route,
+          title: "Learning Paths",
+          text: "Beginner to premium structured learning programs.",
+          action: () => setActiveSection("learning-paths"),
+        },
+        {
+          Icon: FileText,
+          title: "Notes",
+          text: "Premium and free revision notes for quick learning.",
+          action: () => setActiveSection("notes"),
+        },
+      ],
+    },
+    {
+      title: "Practice",
+      cards: [
+        {
+          Icon: ClipboardCheck,
+          title: "Mock Tests",
+          text: "Practice tests, score tracking and exam preparation.",
+          action: () => setActiveSection("mock-tests"),
+        },
+        {
+          Icon: Newspaper,
+          title: "Current Affairs",
+          text: "Monthly PDF updates and exam-focused current affairs.",
+          action: () => setActiveSection("current-affairs"),
+        },
+        {
+          Icon: BarChart3,
+          title: "My Progress",
+          text: "Student dashboard, analytics and learning progress.",
+          action: () => setActiveSection("student-profile"),
+        },
+      ],
+    },
+    {
+      title: "Premium",
+      cards: [
+        {
+          Icon: Crown,
+          title: "Premium",
+          text: "Unlock full course, mock tests, notes and mentorship.",
+          action: () => setActiveSection("pricing"),
+        },
+        {
+          Icon: Megaphone,
+          title: "Announcements",
+          text: "Latest updates, exam alerts and platform notifications.",
+          action: () => setActiveSection("announcements"),
+        },
+        ...(isAdmin(user)
+          ? [
+              {
+                Icon: Settings,
+                title: "Admin Panel",
+                text: "Manage students, notes, mock tests and analytics.",
+                action: () => {
+                  setActiveAdminTab("Dashboard");
+                  setActiveSection("admin-panel");
+                },
+                admin: true,
+              },
+            ]
+          : []),
+      ],
+    },
+  ];
+
   return (
-    <section className="appDashboard">
+    <section className="appDashboard appleStoreHub">
       <div className="appDashboardHeader">
-        <span className="dashboardBadge">
-          AspireNest Learning Hub
-        </span>
+        <span className="dashboardBadge">AspireNest Learning Hub</span>
 
-        <h1>Choose what you want to study today</h1>
+        <h1>Choose what you want to study today.</h1>
 
-        <p>
-          Open any section directly without scrolling the full website.
-        </p>
+        <p>Open any section directly without scrolling the full website.</p>
       </div>
 
-      <div className="dashboardGrid">
+      {rows.map((row) => (
+        <div className="appleHubRow" key={row.title}>
+          <div className="appleHubRowHeader">
+            <h2>{row.title}</h2>
+          </div>
 
-        {/* Courses */}
-        <div className="dashboardCard">
-          <span>📚</span>
+          <div className="appleHubScroller">
+            {row.cards.map((card) => {
+              const Icon = card.Icon;
 
-          <h3>Courses</h3>
+              return (
+                <div
+                  className={`dashboardCard appleHubCard ${
+                    card.admin ? "adminHubCard" : ""
+                  }`}
+                  key={card.title}
+                >
+                  <div className="premiumIconBadge">
+                    <Icon size={24} strokeWidth={2.2} />
+                  </div>
 
-          <p>
-            CTET/TET learning paths and topic-wise preparation.
-          </p>
+                  <h3>{card.title}</h3>
+                  <p>{card.text}</p>
 
-          <button
-            onClick={() => setActiveSection("courses")}
-          >
-            Open
-          </button>
+                  <button onClick={card.action}>Open</button>
+                </div>
+              );
+            })}
+          </div>
         </div>
-{/* Learning Paths */}
-<div className="dashboardCard">
-  <span>🎯</span>
-
-  <h3>Learning Paths</h3>
-
-  <p>
-    Beginner to premium structured learning programs.
-  </p>
-
-  <button
-    onClick={() => setActiveSection("learning-paths")}
-  >
-    Open
-  </button>
-</div>
-        {/* Notes */}
-        <div className="dashboardCard">
-          <span>📝</span>
-
-          <h3>Notes</h3>
-
-          <p>
-            Premium and free revision notes for quick learning.
-          </p>
-
-          <button
-            onClick={() => setActiveSection("notes")}
-          >
-            Open
-          </button>
-        </div>
-
-        {/* Mock Tests */}
-        <div className="dashboardCard">
-          <span>🧪</span>
-
-          <h3>Mock Tests</h3>
-
-          <p>
-            Practice tests, score tracking and exam preparation.
-          </p>
-
-          <button
-            onClick={() => setActiveSection("mock-tests")}
-          >
-            Open
-          </button>
-        </div>
-
-        {/* Current Affairs */}
-        <div className="dashboardCard">
-          <span>📰</span>
-
-          <h3>Current Affairs</h3>
-
-          <p>
-            Monthly PDF updates and exam-focused current affairs.
-          </p>
-
-          <button
-            onClick={() => setActiveSection("current-affairs")}
-          >
-            Open
-          </button>
-        </div>
-
-        {/* Premium */}
-        <div className="dashboardCard">
-          <span>👑</span>
-
-          <h3>Premium</h3>
-
-          <p>
-            Unlock full course, mock tests, notes and mentorship.
-          </p>
-
-          <button
-            onClick={() => setActiveSection("pricing")}
-          >
-            Open
-          </button>
-        </div>
-
-        {isAdmin(user) && (
-  <div className="dashboardCard">
-    <span>🛠️</span>
-
-    <h3>Admin Panel</h3>
-
-    <p>
-      Manage students, notes, mock tests, announcements and analytics.
-    </p>
-
-    <button
-      onClick={() => setActiveSection("admin-panel")}
-    >
-      Open
-    </button>
-  </div>
-)}
-        {/* Progress */}
-        {/* Announcements */}
-<div className="dashboardCard">
-  <span>📢</span>
-
-  <h3>Announcements</h3>
-
-  <p>
-    Latest updates, exam alerts and important platform notifications.
-  </p>
-
-  <button
-   onClick={() => {
-    setActiveAdminTab("Announcements");
-    setActiveSection("admin-panel");
-  }}
-  >
-    Open
-  </button>
-</div>
-        <div className="dashboardCard">
-          <span>📊</span>
-
-          <h3>My Progress</h3>
-
-          <p>
-            Student dashboard, analytics and learning progress.
-          </p>
-
-          <button
-            onClick={() => setActiveSection("student-profile")}
-          >
-            Open
-          </button>
-        </div>
-
-      </div>
+      ))}
     </section>
   );
 }

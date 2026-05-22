@@ -54,10 +54,12 @@ import januaryCurrentAffairsPdf from "./assets/pdfs/CA JANUARY 26.pdf";
 import februaryCurrentAffairsPdf from "./assets/pdfs/CA FEBRUARY 26.pdf";
 import marchCurrentAffairsPdf from "./assets/pdfs/CA MARCH 26.pdf";
 import aprilCurrentAffairsPdf from "./assets/pdfs/CA APRIL 26.pdf";
+import childDevelopmentNotes from "./assets/pdfs/notes/child-development-notes.pdf";
 
 export default function App() {
   const [darkMode, setDarkMode] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [activeSection, setActiveSection] = useState(null);
   const [mockStarted, setMockStarted] = useState(false);
@@ -307,6 +309,15 @@ setEnquiries([]);
         "This is premium content. Please upgrade to access this note."
       );
       return;
+    }
+  
+    if (!note.pdf) {
+      alert("PDF is not available yet.");
+      return;
+    }
+  
+    window.open(note.pdf, "_blank");
+  };
     }
   
     if (note.pdf === "#") {
@@ -1044,9 +1055,9 @@ const usersData = usersSnap.docs.map((doc) => ({
       id: 1,
       title: "Child Development Notes",
       category: "CDP",
-      type: "FREE",
-      pages: 42,
-      pdf: "#",
+      type: "PREMIUM",
+      pages: 69,
+      pdf: childDevelopmentNotes,
     },
     {
       id: 2,
@@ -1495,7 +1506,50 @@ return (
     <button onClick={() => setActiveSection("contact")}>
   Contact
 </button>
-    <button onClick={() => setActiveSection("student-profile")}>Login</button>
+{user ? (
+  <div className="profileMenuWrapper">
+    <button
+      type="button"
+      className="profileTrigger"
+      onClick={(e) => {
+        e.stopPropagation();
+        setProfileMenuOpen((prev) => !prev);
+      }}
+    >
+      <div className="profileAvatar">
+        {isAdmin(user) ? "A" : user?.email?.charAt(0)}
+      </div>
+
+      <span className="profileName">
+        {isAdmin(user) ? "Admin" : user?.email?.split("@")[0]}
+      </span>
+    </button>
+
+    {profileMenuOpen && (
+      <div className="profileDropdown">
+        <button onClick={() => setActiveSection("student-profile")}>
+          My Dashboard
+        </button>
+
+        <button onClick={() => setActiveSection("pricing")}>
+          Premium Access
+        </button>
+
+        {isAdmin(user) && (
+          <button onClick={() => setActiveSection("admin-panel")}>
+            Admin Panel
+          </button>
+        )}
+
+        <button onClick={handleLogout}>Logout</button>
+      </div>
+    )}
+  </div>
+) : (
+  <button onClick={() => setActiveSection("student-profile")}>
+    Login
+  </button>
+)}
     <button onClick={() => setActiveSection(null)}>
   Home
 </button>
@@ -1866,7 +1920,7 @@ isAdmin={isAdmin}
     <h2>Free Resources</h2>
 
     <p>
-      Free notes aur study tools se preparation start karein.
+    Start your preparation with free notes and study tools.
     </p>
 
     <div className="freeGrid">
@@ -2403,7 +2457,50 @@ isAdmin={isAdmin}
 >
   Contact
 </button>
-          <a href="#student-profile">Login</a>
+{user ? (
+  <div
+    className="profileMenuWrapper"
+    onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+  >
+    <div className="profileAvatar">
+      {user?.displayName?.charAt(0) || user?.email?.charAt(0)}
+    </div>
+
+    <span className="profileName">
+      {user?.displayName || user?.email?.split("@")[0]}
+    </span>
+
+    {profileMenuOpen && (
+      <div className="profileDropdown">
+        <button
+          onClick={() => setActiveSection("student-profile")}
+        >
+          My Dashboard
+        </button>
+
+        <button
+          onClick={() => setActiveSection("pricing")}
+        >
+          Premium Access
+        </button>
+
+        {isAdmin(user) && (
+          <button
+            onClick={() => setActiveSection("admin-panel")}
+          >
+            Admin Panel
+          </button>
+        )}
+
+        <button onClick={handleLogout}>
+          Logout
+        </button>
+      </div>
+    )}
+  </div>
+) : (
+  <a href="#student-profile">Login</a>
+)}
           <button
   className="mobile-menu-btn"
   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -2677,150 +2774,8 @@ isPremiumUser={isPremiumUser}
 />
 </section>
 
-<section className="leaderboardSection">
-  <div className="leaderboardHeader">
-    <span className="badge">Top Performers</span>
 
-    <h2>Mock Test Leaderboard</h2>
-
-    <p>
-      Highest scoring students from recent CTET/TET mock practice.
-    </p>
-  </div>
-
-  <div className="leaderboardGrid">
-  {leaderboard.map((student, index) => (
-   <div className="leaderCard" key={student.id}>
-   <div className="rankBadge">
-     #{index + 1}
-   </div>
- 
-   <h3>{student.email}</h3>
- 
-   <p className="leaderScore">
-     {student.percentage}%
-   </p>
- 
-   <span className="leaderTag">
-     Top Score
-   </span>
- </div>
-    ))}
-  </div>
-</section>
-      <section className="resources" id="resources">
-        <h2>Free Resources</h2>
-        <p className="sectionText">
-          Free notes aur study tools se preparation start karein.
-        </p>
-
-        <div className="grid">
-          <div className="course">📘 Free CDP Notes</div>
-          <div className="course">📅 7-Day Study Plan</div>
-          <div className="course">📝 Free Mock Test</div>
-          <div className="course">📄 PYQ Starter Pack</div>
-          <div className="course">🎯 Exam Strategy Guide</div>
-          <div className="course">✅ Revision Checklist</div>
-        </div>
-      </section>
-      <div className="mobileBottomNav">
-  <a href="#courses">
-    <span className="navIcon">🏠</span>
-    <span>Home</span>
-  </a>
-
-  <a href="#notes">
-    <span className="navIcon">📘</span>
-    <span>Notes</span>
-  </a>
-
-  <a href="#mock-tests">
-    <span className="navIcon">📝</span>
-    <span>Mock</span>
-  </a>
-
-  <a href="#pricing">
-    <span className="navIcon">⭐</span>
-    <span>Premium</span>
-  </a>
-
-  <a href="#student-profile">
-    <span className="navIcon">👤</span>
-    <span>Profile</span>
-  </a>
-</div>
-
-<a
-  className="whatsapp"
-  href="https://wa.me/917304256002?text=Hello%20AspireNest%20Academy,%20I%20want%20details%20about%20your%20CTET/TET%20courses%20and%20premium%20study%20materials."
-  target="_blank"
-  rel="noreferrer"
->
-  💬 WhatsApp Enquiry
-</a>
-<section className="premium" id="premium-section">
-        <div className="premiumLeft">
-          <span className="premiumBadge">PREMIUM LEARNING EXPERIENCE</span>
-
-          <h2>
-            India’s Smartest
-            <br />
-            CTET/TET Preparation Platform
-          </h2>
-
-          <p>
-            AI-powered visual learning, bilingual notes, premium mock tests,
-            revision systems and mentor guidance for serious aspirants.
-          </p>
-
-          <div className="premiumFeatures">
-            <div className="feature">✅ Visual Learning Notes</div>
-
-            <div className="feature">✅ Full Mock Test Series</div>
-
-            <div className="feature">✅ Smart Revision System</div>
-
-            <div className="feature">✅ Hindi + English Support</div>
-          </div>
-
-          <button onClick={handlePremiumSectionAccess}>
-  Explore Premium
-</button>
-        </div>
-
-        <div className="premiumCard">
-          <div className="glow"></div>
-
-          <h3>CTET Master Dashboard</h3>
-
-          <div className="dashboardStat">
-            <span>Course Progress</span>
-            <strong>82%</strong>
-          </div>
-
-          <div className="dashboardBar">
-            <div className="dashboardFill"></div>
-          </div>
-
-          <div className="dashboardGrid">
-            <div className="miniCard">📘 150+ Notes</div>
-
-            <div className="miniCard">🎯 50+ Tests</div>
-
-            <div className="miniCard">🧠 AI Revision</div>
-
-            <div className="miniCard">🏆 Top Scores</div>
-          </div>
-        </div>
-      </section>
-      <section id="pricing">
-
-
-  <Pricing
-    handlePremiumPurchase={handlePremiumPurchase}
-    isPremiumUser={isPremiumUser}
-  />
-</section>
+     
 <section id="student-profile">
       <StudentDashboard
   user={user}
@@ -2940,107 +2895,7 @@ setAnnouncementMessage={setAnnouncementMessage}
 
 
 
-<section className="stats">
-  <div className="statBox">
-    <h1>10K+</h1>
-    <p>Students</p>
-  </div>
 
-  <div className="statBox">
-    <h1>150+</h1>
-    <p>Visual Notes</p>
-  </div>
-
-  <div className="statBox">
-    <h1>50+</h1>
-    <p>Mock Tests</p>
-  </div>
-
-  <div className="statBox">
-    <h1>95%</h1>
-    <p>Success Rate</p>
-  </div>
-</section>
-
-<section className="footerPanels">
-  <div className="footerPanelCard">
-    <span>STUDENT REVIEWS</span>
-    <h3>Trusted by CTET/TET learners.</h3>
-    <p className="stars">⭐⭐⭐⭐⭐</p>
-    <p>Visual notes se revision bahut fast ho gaya.</p>
-    <strong>Priya Sharma</strong>
-  </div>
-
-  <div className="footerPanelCard enquiryPanel">
-    <span>GET IN TOUCH</span>
-    <h3>Need guidance? Send enquiry.</h3>
-
-    <input
-      value={fullName}
-      onChange={(e) => setFullName(e.target.value)}
-      placeholder="Full Name"
-    />
-
-    <input
-      value={mobile}
-      onChange={(e) => setMobile(e.target.value)}
-      placeholder="Mobile Number"
-    />
-
-    <input
-      value={contactEmail}
-      onChange={(e) => setContactEmail(e.target.value)}
-      placeholder="Email"
-    />
-
-    <button type="button" onClick={handleContactSubmit}>
-      Submit Enquiry
-    </button>
-  </div>
-
-  <div className="footerPanelCard">
-    <span>FAQ</span>
-    <h3>Quick answers before joining.</h3>
-    <p>▶ Is this course bilingual?</p>
-    <p>▶ Are mock tests included?</p>
-    <p>▶ Can I use this on mobile?</p>
-    <p>▶ Is pricing in INR?</p>
-  </div>
-</section>
-
-<footer className="premiumFooter">
-  <div className="footerGrid">
-    <div className="footerBrand">
-      <h2>AspireNest Academy</h2>
-
-      <p>
-        Premium bilingual CTET/TET learning platform
-        for future educators in India.
-      </p>
-    </div>
-
-    <div className="footerLinks">
-      <h3>Quick Links</h3>
-
-      <a href="#courses">Courses</a>
-      <a href="#cdp">CDP Module</a>
-      <a href="#resources">Free Resources</a>
-      <a href="#pricing">Pricing</a>
-    </div>
-
-    <div className="footerContact">
-      <h3>Contact</h3>
-
-      <p>📞 +917304256002</p>
-      <p>📧 aspirenestacademy@gmail.com</p>
-      <p>📍 India</p>
-    </div>
-  </div>
-
-  <div className="footerBottom">
-    © 2026 AspireNest Academy • All Rights Reserved
-  </div>
-</footer>
 </div>
 )}
 </React.Suspense>

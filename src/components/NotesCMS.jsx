@@ -24,8 +24,9 @@ export default function NotesCMS({
               <p>📄 Pages: {note.pages}</p>
   
               <button
-                className="btnLink"
-                onClick={() => handleNoteAccess(note)}
+  className="btnLink"
+  onClick={() => window.open(note.pdf, "_blank")}
+>
               >
                 {note.type === "PREMIUM" && !isPremiumUser
                   ? "🔒 Premium Only"
