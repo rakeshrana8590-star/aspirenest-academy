@@ -14660,3 +14660,146 @@ nav {
   }
 
 }
+
+/* Admin Panel PRO emergency restore */
+.adminPanelPro,
+.adminPanelPro * {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+.adminPanelPro::before,
+.adminPanelPro::after {
+  display: none !important;
+}
+
+.adminPanelPro {
+  max-width: 1280px !important;
+  margin: 60px auto !important;
+  overflow: hidden !important;
+}
+
+.adminStatsGrid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 24px !important;
+}
+
+.adminStatCard {
+  background: #ffffff !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* Navbar click emergency fix */
+.navbar,
+.header,
+.topNav,
+nav {
+  position: relative !important;
+  z-index: 9999 !important;
+}
+
+.floatingUserMenu,
+.dashboardQuickActions,
+.studentQuickActions {
+  z-index: 999 !important;
+}
+
+.adminPanelPro::before,
+.adminPanelPro::after,
+.studentDashboard::before,
+.studentDashboard::after {
+  pointer-events: none !important;
+}
+
+/* Emergency: floating quick menu ko sirf dashboard/admin pages me control karo */
+.floatingUserMenu,
+.dashboardQuickActions,
+.studentQuickActions {
+  display: none !important;
+}
+
+.studentDashboard .floatingUserMenu,
+.studentDashboard .dashboardQuickActions,
+.studentDashboard .studentQuickActions,
+.adminPanelPro .floatingUserMenu,
+.adminPanelPro .dashboardQuickActions,
+.adminPanelPro .studentQuickActions {
+  display: flex !important;
+}
+
+/* FIX: invisible overlay blocking dashboard */
+
+.studentDashboard::before,
+.studentDashboard::after,
+.dashboardContent::before,
+.dashboardContent::after,
+.analyticsSection::before,
+.analyticsSection::after {
+  pointer-events: none !important;
+}
+
+/* remove accidental floating overlay */
+.studentDashboard * {
+  pointer-events: auto;
+}
+
+/* fix empty clickable white area */
+.studentDashboard {
+  position: relative;
+  z-index: 1;
+}
+
+.studyPlanBox {
+  position: relative;
+  z-index: 5;
+}
+
+/* FINAL FIX: Profile dropdown invisible overlay remove */
+.profileMenuWrapper {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  z-index: 9999 !important;
+}
+
+.profileDropdown {
+  position: absolute !important;
+  top: calc(100% + 10px) !important;
+  right: 0 !important;
+  left: auto !important;
+
+  width: 150px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+
+  padding: 10px !important;
+  border-radius: 18px !important;
+
+  background: #ffffff !important;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18) !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+
+  overflow: hidden !important;
+  cursor: default !important;
+  pointer-events: auto !important;
+}
+
+.profileDropdown::before,
+.profileDropdown::after {
+  display: none !important;
+  content: none !important;
+}
+
+.profileDropdown button {
+  width: 100% !important;
+  height: auto !important;
+  padding: 12px 10px !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+}

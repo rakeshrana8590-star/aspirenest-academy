@@ -1516,24 +1516,46 @@ return (
     </button>
 
     {profileMenuOpen && (
-      <div className="profileDropdown">
-        <button onClick={() => setActiveSection("student-profile")}>
-          My Dashboard
-        </button>
+  <div className="profileDropdown">
+    <button
+      onClick={() => {
+        setActiveSection("student-profile");
+        setProfileMenuOpen(false);
+      }}
+    >
+      My Dashboard
+    </button>
 
-        <button onClick={() => setActiveSection("pricing")}>
-          Premium Access
-        </button>
+    <button
+      onClick={() => {
+        setActiveSection("pricing");
+        setProfileMenuOpen(false);
+      }}
+    >
+      Premium Access
+    </button>
 
-        {isAdmin(user) && (
-          <button onClick={() => setActiveSection("admin-panel")}>
-            Admin Panel
-          </button>
-        )}
-
-        <button onClick={handleLogout}>Logout</button>
-      </div>
+    {isAdmin(user) && (
+      <button
+        onClick={() => {
+          setActiveSection("admin-panel");
+          setProfileMenuOpen(false);
+        }}
+      >
+        Admin Panel
+      </button>
     )}
+
+    <button
+      onClick={() => {
+        setProfileMenuOpen(false);
+        handleLogout();
+      }}
+    >
+      Logout
+    </button>
+  </div>
+)}
   </div>
 ) : (
   <button onClick={() => setActiveSection("student-profile")}>
@@ -2284,7 +2306,7 @@ isAdmin={isAdmin}
 
   </section>
 )}
-)}
+
 
 {activeSection === "admin-panel" && (
   <section id="admin-panel">
@@ -2460,7 +2482,8 @@ isAdmin={isAdmin}
       {user?.displayName || user?.email?.split("@")[0]}
     </span>
 
-    {profileMenuOpen && (
+    {profileMenuOpen && activeSection !== "student-profile" && (
+
       <div className="profileDropdown">
         <button
           onClick={() => setActiveSection("student-profile")}

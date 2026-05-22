@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://aspirenest-academy.vercel.app/sitemap.xml
