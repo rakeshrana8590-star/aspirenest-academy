@@ -1,4 +1,5 @@
-import {
+import { useState } from "react";import {
+
   LineChart,
   Line,
   BarChart,
@@ -16,6 +17,7 @@ export default function AdminPanel({
   enquiries,
   leaderboard,
   handlePremiumControl,
+  approvePaymentRequest,
 
   adminNoteTitle,
   setAdminNoteTitle,
@@ -78,6 +80,8 @@ export default function AdminPanel({
   handleDeleteMockQuestion,
 
   paymentHistory,
+  paymentRequests,
+  loadPaymentRequests,
 
   announcementTitle,
   setAnnouncementTitle,
@@ -88,6 +92,7 @@ export default function AdminPanel({
   handleDeleteAnnouncement,
 }) {
   if (!isAdmin()) return null;
+  const [adminProofs, setAdminProofs] = useState({});
 
   const uniqueStudents = students.filter(
     (student, index, self) =>
@@ -768,39 +773,160 @@ export default function AdminPanel({
         </div>
       )}
 
-      {activeAdminTab === "Payments" && (
-        <div className="adminStudentsSection">
-          <h3>Payment History</h3>
+{activeAdminTab === "Payments" && (
+  <div className="adminStudentsSection">
+    <h3>Payment Verification</h3>
 
-          <div className="adminStudentsGrid">
-            {paymentHistory.length > 0 ? (
-              paymentHistory.map((payment, index) => (
-                <div
-                  className="studentCard"
-                  key={payment.id || index}
-                >
-                  <h4>{payment.email}</h4>
+    <button
+      className="btnLink"
+      onClick={loadPaymentRequests}
+    >
+      Refresh Payment Requests
+    </button>
 
-                  <p>💰 ₹{payment.amount}</p>
+    <div className="adminStudentsGrid">
+      {paymentRequests && paymentRequests.length > 0 ? (
+        paymentRequests.map((payment, index) => (
+          <div
+            className="studentCard"
+            key={payment.id || index}
+          >
+            <h4>{payment.studentEmail || payment.email || "Student"}</h4>
 
-                  <p>⭐ {payment.plan}</p>
+            <p>💰 Amount: ₹{payment.amount}</p>
+            <p>📦 Plan: {payment.planName || payment.plan || "Premium Plan"}</p>
+            <p>🧾 Order ID: {payment.orderId}</p>
+            <p>📌 Status: {payment.status}</p>
 
-                  <p>
-                    🕒{" "}
-                    {payment.createdAt?.toDate
-                      ? payment.createdAt
-                          .toDate()
-                          .toLocaleString()
-                      : "Recently"}
-                  </p>
-                </div>
-              ))
-            ) : (
-              <p>No payments found.</p>
+            {payment.studentProof && (
+              <p>
+                📝 Student Proof: {payment.studentProof}
+              </p>
             )}
+
+            <p>
+              🕒{" "}
+              {payment.createdAt?.toDate
+                ? payment.createdAt.toDate().toLocaleString()
+                : payment.createdAt || "Recently"}
+            </p>
+{payment.status !== "approved" && (
+  <textarea
+    value={adminProofs[payment.id] || ""}
+    onChange={(e) =>
+      setAdminProofs({
+        ...adminProofs,
+        [payment.id]: e.target.value,
+      })
+    }
+    placeholder="Admin received payment message / UTR paste karo"
+    rows="3"
+    style={{
+      width: "100%",
+      marginTop: "12px",
+      padding: "12px",
+      borderRadius: "12px",
+      border: "1px solid #ddd",
+      resize: "none",
+    }}
+  />
+)}
+            {payment.status === "approved" ? (
+  <div
+    style={{
+      marginTop: "12px",
+      padding: "12px 16px",
+      borderRadius: "14px",
+      background: "#dcfce7",
+      color: "#166534",
+      fontWeight: "800",
+      display: "inline-block",
+    }}
+  >
+    ✅ Premium Activated
+  </div>
+) : (
+<button
+  className="btnLink"
+  onClick={() => {
+    const adminProof = adminProofs[payment.id] || "";
+    const studentProof = payment.studentProof || "";
+
+    if (!adminProof.trim()) {
+      alert("Admin received payment message / UTR paste karo.");
+      return;
+    }
+
+    if (
+      !studentProof
+        .toLowerCase()
+        .includes(adminProof.toLowerCase())
+    ) {
+      alert("Verification mismatch. Please check UTR/payment message.");
+      return;
+    }
+
+    approvePaymentRequest(payment);
+  }}
+>
+  Auto Match & Approve
+</button>
+)}
+{adminProofs[payment.id] && payment.studentProof && (
+  <div
+    style={{
+      marginTop: "12px",
+      padding: "12px",
+      borderRadius: "12px",
+      background: "#f8fafc",
+      border: "1px solid #e2e8f0",
+    }}
+  >
+    <p style={{ fontWeight: "700", marginBottom: "8px" }}>
+      🔍 Verification Compare
+    </p>
+
+    <p>
+      <strong>Student:</strong> {payment.studentProof}
+    </p>
+
+    <p style={{ marginTop: "8px" }}>
+      <strong>Admin:</strong> {adminProofs[payment.id]}
+    </p>
+
+    {payment.studentProof
+      .toLowerCase()
+      .includes(adminProofs[payment.id].toLowerCase()) ? (
+      <div
+        style={{
+          marginTop: "10px",
+          color: "#166534",
+          fontWeight: "800",
+        }}
+      >
+        ✅ Possible Match Found
+      </div>
+    ) : (
+      <div
+        style={{
+          marginTop: "10px",
+          color: "#dc2626",
+          fontWeight: "800",
+        }}
+      >
+        ❌ Verification Mismatch
+      </div>
+    )}
+  </div>
+)}
           </div>
-        </div>
+        ))
+      ) : (
+        <p>No payment requests found.</p>
       )}
+    </div>
+  </div>
+)}
 
 {activeAdminTab === "Announcements" && (
   <div className="adminStudentsSection">

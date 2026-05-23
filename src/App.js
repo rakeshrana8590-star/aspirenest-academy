@@ -1,5 +1,6 @@
 import { auth, db } from "./firebase";
 import { storage } from "./firebase";
+import { QRCodeCanvas } from "qrcode.react";
 
 import {
   createUserWithEmailAndPassword,
@@ -82,9 +83,17 @@ const [contactEmail, setContactEmail] = useState("");
   const adminEmail = "aspirenestplatform@gmail.com";
   const isAdmin = (currentUser = user) =>
   currentUser?.email === adminEmail;
+  const generateOrderId = () => {
+    return "ASP-" + Date.now();
+  };
   const [students, setStudents] = useState([]);
 const [enquiries, setEnquiries] = useState([]);
 const [mockResults, setMockResults] = useState([]);
+const [paymentRequests, setPaymentRequests] = useState([]);
+const [activePayment, setActivePayment] = useState(null);
+const [paymentProof, setPaymentProof] = useState("");
+const [adminPaymentProof, setAdminPaymentProof] = useState("");
+const [paymentLoading, setPaymentLoading] = useState(false);
 const [leaderboard, setLeaderboard] = useState([]);
 const [mockQuestions, setMockQuestions] = useState([]);
 const [selectedSubject, setSelectedSubject] = useState("CDP");
@@ -156,7 +165,56 @@ const [announcementTitle, setAnnouncementTitle] = useState("");
 const [announcementMessage, setAnnouncementMessage] = useState("");
 const [announcements, setAnnouncements] = useState([]);
 const [paymentHistory, setPaymentHistory] = useState([]);
+
   const provider = new GoogleAuthProvider();
+  const createPaymentRequest = async (
+    planName,
+    amount
+  ) => {
+    if (!user) {
+      alert("Please login first");
+      return;
+    }
+  
+    try {
+      setPaymentLoading(true);
+  
+      const orderId = generateOrderId();
+  
+      const upiLink = `upi://pay?pa=aspirenestplatform@oksbi&pn=AspireNest Academy&am=${amount}&tn=${orderId}`;
+      const paymentData = {
+        orderId,
+        userId: user.uid,
+        upiLink,
+        studentEmail: user.email || "",
+        studentMobile: mobile || "",
+        studentName: fullName || "",
+        planName,
+        amount,
+        status: "pending_payment",
+        studentProof: "",
+        adminProof: "",
+        matchStatus: "waiting",
+        createdAt: new Date().toISOString(),
+      };
+  
+      console.log("Payment Request Created:", paymentData);
+      const paymentDocRef = await addDoc(collection(db, "payments"), paymentData);
+      setActivePayment({
+        id: paymentDocRef.id,
+        ...paymentData,
+      });
+  
+      alert(
+        `Payment Request Created!\nOrder ID: ${orderId}`
+      );
+    } catch (error) {
+      console.error("Payment Error:", error);
+      alert(error.message);
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       const verifiedUser =
@@ -187,6 +245,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
         setTimeout(() => {
           loadLeaderboard();
           loadPaymentHistory(verifiedUser);
+          loadPaymentRequests();
         }, 600);
       }
     
@@ -673,6 +732,24 @@ const usersData = usersSnap.docs.map((doc) => ({
       alert(error.message);
     }
   };
+  const loadPaymentRequests = async () => {
+    if (!user || !isAdmin(user)) return;
+  
+    try {
+      const querySnapshot = await getDocs(
+        collection(db, "payments")
+      );
+  
+      const data = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+  
+      setPaymentRequests(data);
+    } catch (error) {
+      alert(error.message);
+    }
+  };
   const handleAddMockQuestion = async () => {
     if (
       !adminQuestion ||
@@ -975,6 +1052,54 @@ const usersData = usersSnap.docs.map((doc) => ({
     setAnnouncements(updatedAnnouncements);
   
     alert("Announcement deleted successfully ✅");
+  };
+  const approvePaymentRequest = async (payment) => {
+    if (!payment?.id) {
+      alert("Payment record not found.");
+      return;
+    }
+  
+    try {
+      if (!payment.userId) {
+        alert("Student user ID not found in this payment.");
+        return;
+      }
+  
+      const userRef = doc(db, "users", payment.userId);
+  
+      const purchaseDate = new Date();
+      const expiryDate = new Date();
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+  
+      await setDoc(
+        userRef,
+        {
+          email: payment.studentEmail || payment.email || "",
+          isPremium: true,
+          subscriptionType: "PREMIUM",
+          premiumStatus: "ACTIVE",
+          purchasedCourses: [payment.planName || "Premium Notes"],
+          purchaseDate,
+          expiryDate,
+          updatedAt: new Date(),
+        },
+        { merge: true }
+      );
+  
+      await updateDoc(doc(db, "payments", payment.id), {
+        status: "approved",
+        matchStatus: "admin_approved",
+        approvedAt: new Date(),
+      });
+  
+      alert("Payment approved and premium access activated ✅");
+  
+      loadPaymentRequests();
+      loadPaymentHistory();
+      loadAdminData();
+    } catch (error) {
+      alert(error.message);
+    }
   };
   const handlePremiumControl = async (studentEmail, makePremium) => {
     try {
@@ -1577,6 +1702,37 @@ return (
 
  {!activeSection && (
   <>
+ <div
+  style={{
+    padding: "20px",
+    textAlign: "center",
+    position: "fixed",
+    top: "20px",
+    left: "20px",
+    zIndex: "99999",
+  }}
+>
+  <button
+    onClick={() =>
+      createPaymentRequest(
+        "CTET Premium Plan",
+        199
+      )
+    }
+    style={{
+      padding: "14px 24px",
+      borderRadius: "14px",
+      border: "none",
+      background: "#ff7b00",
+      color: "#fff",
+      fontWeight: "700",
+      cursor: "pointer",
+      fontSize: "16px",
+    }}
+  >
+    Test Payment Request
+  </button>
+</div>
   <section className="hero">
   <div className="heroContent">
     <div className="taglineCard">
@@ -2098,6 +2254,220 @@ isAdmin={isAdmin}
 
   </>
 )}
+{activePayment && (
+  <div
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.7)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 999999,
+      padding: "20px",
+    }}
+  >
+    <div
+      style={{
+        background: "#fff",
+        borderRadius: "24px",
+        padding: "30px",
+        maxWidth: "420px",
+        width: "100%",
+        textAlign: "center",
+      }}
+    >
+      <h2
+        style={{
+          fontSize: "28px",
+          marginBottom: "10px",
+        }}
+      >
+        Scan & Pay
+      </h2>
+
+      <p
+        style={{
+          color: "#666",
+          marginBottom: "20px",
+        }}
+      >
+        Complete your payment using any UPI app
+      </p>
+
+      <div
+        style={{
+          background: "#fff",
+          padding: "16px",
+          borderRadius: "18px",
+          display: "inline-block",
+          boxShadow:
+            "0 10px 30px rgba(0,0,0,0.1)",
+        }}
+      >
+        <QRCodeCanvas
+          value={activePayment.upiLink}
+          size={220}
+        />
+      </div>
+
+      <h3
+        style={{
+          marginTop: "20px",
+          fontSize: "32px",
+          color: "#ff7b00",
+        }}
+      >
+        ₹{activePayment.amount}
+      </h3>
+
+      <p
+        style={{
+          marginTop: "10px",
+          color: "#666",
+          fontSize: "14px",
+        }}
+      >
+        Order ID: {activePayment.orderId}
+        {activePayment.status === "pending_verification" && (
+  <div
+    style={{
+      marginTop: "16px",
+      padding: "14px",
+      borderRadius: "14px",
+      background: "#fff7ed",
+      color: "#9a3412",
+      fontWeight: "700",
+      fontSize: "14px",
+    }}
+  >
+    ⏳ Approval Pending  
+    <br />
+    Your payment proof step has started. Please wait for verification.
+  </div>
+)}
+      </p>
+      {activePayment.status === "pending_verification" && (
+  <div
+    style={{
+      marginTop: "16px",
+      textAlign: "left",
+    }}
+  >
+    <label
+      style={{
+        display: "block",
+        fontWeight: "700",
+        marginBottom: "8px",
+        color: "#111827",
+      }}
+    >
+      Paste Payment Message / UTR
+    </label>
+
+    <textarea
+      value={paymentProof}
+      onChange={(e) => setPaymentProof(e.target.value)}
+      placeholder="Example: Paid ₹199 via PhonePe. UTR: 1234567890"
+      rows="4"
+      style={{
+        width: "100%",
+        padding: "12px",
+        borderRadius: "12px",
+        border: "1px solid #ddd",
+        resize: "none",
+        fontSize: "14px",
+      }}
+    />
+<button
+  onClick={async () => {
+    if (!paymentProof.trim()) {
+      alert("Please paste payment message or UTR first.");
+      return;
+    }
+
+    const updatedPayment = {
+      ...activePayment,
+      studentProof: paymentProof,
+      status: "student_proof_submitted",
+    };
+
+    setActivePayment(updatedPayment);
+
+    await updateDoc(
+      doc(db, "payments", activePayment.id),
+      {
+        studentProof: paymentProof,
+        status: "student_proof_submitted",
+        updatedAt: new Date(),
+      }
+    );
+
+    alert(
+      "Payment proof submitted ✅ Your access is under verification."
+    );
+  }}
+  style={{
+    marginTop: "12px",
+    padding: "13px 18px",
+    borderRadius: "12px",
+    border: "none",
+    background: "#16a34a",
+    color: "#fff",
+    fontWeight: "700",
+    cursor: "pointer",
+    width: "100%",
+  }}
+>
+  Submit Payment Proof
+</button>
+  </div>
+)}
+      <button
+  onClick={() => {
+    setActivePayment({
+      ...activePayment,
+      status: "pending_verification",
+    });
+
+    alert(
+      "Payment proof step started. Now student can submit payment details."
+    );
+  }}
+  style={{
+    marginTop: "20px",
+    padding: "14px 22px",
+    borderRadius: "14px",
+    border: "none",
+    background: "#ff7b00",
+    color: "#fff",
+    cursor: "pointer",
+    fontWeight: "700",
+    width: "100%",
+  }}
+>
+  I Have Paid
+</button>
+      <button
+        onClick={() =>
+          setActivePayment(null)
+        }
+        style={{
+          marginTop: "24px",
+          padding: "14px 22px",
+          borderRadius: "14px",
+          border: "none",
+          background: "#111827",
+          color: "#fff",
+          cursor: "pointer",
+          fontWeight: "700",
+        }}
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
    {activeSection && (
   <div className="activeSectionScreen">
     <button
@@ -2332,12 +2702,15 @@ isAdmin={isAdmin}
 
       announcements={announcements || []}
       paymentHistory={paymentHistory || []}
+      paymentRequests={paymentRequests || []}
+loadPaymentRequests={loadPaymentRequests}
 
       loadAdminData={loadAdminData}
       loadLeaderboard={loadLeaderboard}
       loadPaymentHistory={loadPaymentHistory}
 
       handlePremiumControl={handlePremiumControl}
+      approvePaymentRequest={approvePaymentRequest}
 
       handleDeleteMockQuestion={handleDeleteMockQuestion}
       handleAddMockQuestion={handleAddMockQuestion}
