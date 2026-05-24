@@ -80,6 +80,7 @@ const [contactEmail, setContactEmail] = useState("");
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
+  const [activePlan, setActivePlan] = useState("FREE");
   const adminEmail = "aspirenestplatform@gmail.com";
   const isAdmin = (currentUser = user) =>
   currentUser?.email === adminEmail;
@@ -427,7 +428,7 @@ premiumStatus: "ACTIVE",
       alert(error.message);
     }
   };
-  const unlockPremiumAccess = async () => {
+  const unlockPremiumAccess = async (planName = "PREMIUM") => {
     if (!user) {
       alert("Please login first.");
       return;
@@ -446,8 +447,8 @@ premiumStatus: "ACTIVE",
         {
           email: user.email,
           isPremium: true,
-          subscriptionType: "PREMIUM",
-          purchasedCourses: ["Premium Notes"],
+          subscriptionType: planType,
+          purchasedCourses: [planType],
           purchaseDate: purchaseDate,
           expiryDate: expiryDate,
           premiumStatus: "ACTIVE",
@@ -456,7 +457,8 @@ premiumStatus: "ACTIVE",
       );
   
       setIsPremiumUser(true);
-  
+      setActivePlan(planType);
+
       alert("Premium access unlocked successfully ✅");
     } catch (error) {
       alert(error.message);
@@ -1143,25 +1145,27 @@ const usersData = usersSnap.docs.map((doc) => ({
     {
       id: "ctet-paper-2",
       title: "CTET Paper II",
+      subtitle: "Foundation Program",
       level: "Intermediate",
       price: "₹1499",
       category: "CTET",
       desc: "Comprehensive preparation covering Child Development & Pedagogy, Mathematics, Science, Social Science, and Language I & II, along with concept clarity, practice sessions, and strategic guidance for upper primary teaching aspirants.",
       lessons: "All",
       tests: 10,
-      badge: "BASIC",
+      badge: "FOUNDATION",
       points: ["CDP", "Language I & II", "Maths/Science", "Social Science", "PYQ"],
     },
     {
       id: "ctet-paper-2",
       title: "CTET Paper II",
+      subtitle: "Exam Mastery Program",
       level: "Exam Focused",
       price: "₹2499",
       category: "State TET",
       desc: "Complete guidance on State TET exam pattern, updated syllabus, previous year question papers (PYQs), practice tests, and full-length mock tests designed to improve accuracy, confidence, and time management skills.",
       lessons: "All",
       tests: 50,
-      badge: "PREMIUM",
+      badge: "EXAM MASTERY",
       points: ["State Pattern", "Syllabus", "Practice Sets", "PYQ", "Strategy"],
     },
   ];
@@ -1196,6 +1200,22 @@ const usersData = usersSnap.docs.map((doc) => ({
       category: "PYQ",
       type: "PREMIUM",
       pages: 50,
+      pdf: "#",
+    },
+    {
+      id: 5,
+      title: "Topic-wise CDP Short Notes",
+      category: "CDP",
+      type: "BASIC",
+      pages: 22,
+      pdf: "#",
+    },
+    {
+      id: 6,
+      title: "Mentor Strategy Sheet",
+      category: "Strategy",
+      type: "MENTORSHIP",
+      pages: 12,
       pdf: "#",
     },
   ];
@@ -2254,6 +2274,68 @@ isAdmin={isAdmin}
 
   </>
 )}
+
+{selectedCourse && (
+  <div
+    className="mentorProfileOverlay"
+    onClick={() => setSelectedCourse(null)}
+  >
+    <div
+      className="mentorProfileModal profileModal"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button
+        className="closeMentorProfile"
+        onClick={() => setSelectedCourse(null)}
+      >
+        ✕
+      </button>
+
+      <span className="badge">{selectedCourse.badge}</span>
+
+      <h2>{selectedCourse.title}</h2>
+
+      <p className="profileTag">
+        {selectedCourse.category} • {selectedCourse.level}
+      </p>
+
+      <p>{selectedCourse.desc}</p>
+
+      <div className="profileContent">
+        <h4>What You Get</h4>
+
+        <ul>
+          {(selectedCourse.points || []).map((point) => (
+            <li key={point}>✅ {point}</li>
+          ))}
+        </ul>
+
+        <p>
+          <strong>Lessons:</strong> {selectedCourse.lessons}
+        </p>
+
+        <p>
+          <strong>Mock Tests:</strong> {selectedCourse.tests}
+        </p>
+
+        <p>
+          <strong>Price:</strong> {selectedCourse.price}
+        </p>
+      </div>
+
+      <button
+        className="btnLink"
+        onClick={() => {
+          setSelectedCourse(null);
+          setActiveSection("pricing");
+        }}
+      >
+        View Plans & Enroll
+      </button>
+    </div>
+  </div>
+)}
+
 {activePayment && (
   <div
     style={{
@@ -2537,38 +2619,56 @@ isAdmin={isAdmin}
   </section>
 )}
     {activeSection === "courses" && (
-  <section className="coursePages" id="courses">
-    <h2>CTET/TET Courses</h2>
+ <section className="coursePages" id="courses">
+ <h2>CTET/TET Courses</h2>
 
-    <p>
-      Structured learning programs designed for concept clarity,
-      mock practice, and exam success.
-    </p>
+ <p>
+   Structured learning programs designed for concept clarity,
+   mock practice, and exam success.
+ </p>
 
-    <div className="grid">
-      {courses.map((course) => (
-        <div className="course" key={course.id}>
-          <span className="planTag">{course.badge}</span>
+ <div className="grid">
+   {courses.map((course) => (
+     <div className="course" key={course.id}>
+       <span className="planTag">{course.badge}</span>
 
-          <h3>{course.title}</h3>
+       <h3>{course.title}</h3>
 
-          <p>{course.desc}</p>
+       <p className="courseSubtitle">
+         {course.subtitle}
+       </p>
 
-          <p><strong>Level:</strong> {course.level}</p>
+       <p>{course.desc}</p>
 
-          <p><strong>Lessons:</strong> {course.lessons}</p>
+       <p>
+         <strong>Level:</strong> {course.level}
+       </p>
 
-          <p><strong>Mock Tests:</strong> {course.tests}</p>
+       <p>
+         <strong>Lessons:</strong> {course.lessons}
+       </p>
 
-          <p><strong>Price:</strong> {course.price}</p>
+       <p>
+         <strong>Mock Tests:</strong> {course.tests}
+       </p>
 
-          <button onClick={() => setSelectedCourse(course)}>
-            View Details
-          </button>
-        </div>
-      ))}
-    </div>
-  </section>
+       {course.badge === "FOUNDATION" ? (
+         <p className="courseAccess">
+           🔓 Included in BASIC Plan
+         </p>
+       ) : (
+         <p className="courseAccess">
+           🌟 Included in PREMIUM Plan
+         </p>
+       )}
+
+       <button onClick={() => setSelectedCourse(course)}>
+         View Details
+       </button>
+     </div>
+   ))}
+ </div>
+</section>
 )}
 {activeSection === "notes" && (
   <section id="notes">
@@ -2577,6 +2677,8 @@ isAdmin={isAdmin}
       firebaseNotes={firebaseNotes}
       handleNoteAccess={handleNoteAccess}
       isPremiumUser={isPremiumUser}
+      setActiveSection={setActiveSection}
+      activePlan={activePlan}
     />
   </section>
 )}
@@ -2609,12 +2711,12 @@ isAdmin={isAdmin}
 {activeSection === "pricing" && (
   <section id="pricing">
     <Pricing
-      handlePremiumPurchase={handlePremiumPurchase}
+      createPaymentRequest={createPaymentRequest}
       isPremiumUser={isPremiumUser}
+      setActiveSection={setActiveSection}
     />
   </section>
 )}
-
 {activeSection === "contact" && (
   <section className="footerPanels contactScreen">
 
