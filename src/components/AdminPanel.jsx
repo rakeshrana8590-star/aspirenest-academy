@@ -75,6 +75,8 @@ export default function AdminPanel({
   setAdminSubject,
   adminLevel,
   setAdminLevel,
+  adminAccessPlan,
+  setAdminAccessPlan,
   handleAddMockQuestion,
   mockQuestions,
   handleDeleteMockQuestion,
@@ -796,6 +798,25 @@ const isDuplicateUtr = duplicateUtrCount > 1;
               <option value="Medium">Medium</option>
               <option value="Hard">Hard</option>
             </select>
+
+            <select
+  value={adminAccessPlan}
+  onChange={(e) =>
+    setAdminAccessPlan(e.target.value)
+  }
+>
+  <option value="FREE">
+    FREE ACCESS
+  </option>
+
+  <option value="PREMIUM">
+    PREMIUM ACCESS
+  </option>
+
+  <option value="MENTORSHIP">
+    MENTORSHIP ACCESS
+  </option>
+</select>
 
             <button
               className="btnLink"

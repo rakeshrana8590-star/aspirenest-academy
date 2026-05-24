@@ -128,6 +128,7 @@ const [adminOption4, setAdminOption4] = useState("");
 const [adminAnswer, setAdminAnswer] = useState("");
 const [adminSubject, setAdminSubject] = useState("CDP");
 const [adminLevel, setAdminLevel] = useState("Easy");
+const [adminAccessPlan, setAdminAccessPlan] = useState("FREE");
 const [activeAdminTab, setActiveAdminTab] = useState("Dashboard");
 const [adminNoteTitle, setAdminNoteTitle] = useState("");
 const [adminNoteCategory, setAdminNoteCategory] = useState("");
@@ -277,6 +278,30 @@ const [paymentHistory, setPaymentHistory] = useState([]);
     
     return () => unsubscribe();
   }, []);
+  React.useEffect(() => {
+    const hash =
+      window.location.hash.replace("#", "");
+  
+    if (!hash) return;
+  
+    if (
+      hash === "notes" &&
+      !hasPlanAccess("PREMIUM")
+    ) {
+      setActiveSection("pricing");
+      return;
+    }
+  
+    if (
+      hash === "current-affairs" &&
+      !hasPlanAccess("PREMIUM")
+    ) {
+      setActiveSection("pricing");
+      return;
+    }
+  
+    setActiveSection(hash);
+  }, [userPlanType]);
   const handleRegister = async () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -385,10 +410,23 @@ setEnquiries([]);
     }
   };
   const handleNoteAccess = (note) => {
-    if (note.type === "PREMIUM" && !isPremiumUser) {
+    if (!note) {
+      return;
+    }
+  
+    const accessType =
+      note.accessPlan || note.type || "FREE";
+  
+    if (
+      accessType !== "FREE" &&
+      !hasPlanAccess(accessType)
+    ) {
+      setActiveSection("pricing");
+  
       alert(
-        "This is premium content. Please upgrade to access this note."
+        `This content requires ${accessType} membership access.`
       );
+  
       return;
     }
   
@@ -614,6 +652,16 @@ const usersData = usersSnap.docs.map((doc) => ({
 if (expiryDate && expiryDate < new Date()) {
   setIsPremiumUser(false);
   setUserPlanType("FREE");
+  await setDoc(
+    userRef,
+    {
+      isPremium: false,
+      subscriptionType: "FREE",
+      premiumStatus: "EXPIRED",
+      expiredAt: new Date(),
+    },
+    { merge: true }
+  );
 } else {
   setUserPlanType(
     userSnap.data().subscriptionType || "PREMIUM"
@@ -830,14 +878,22 @@ if (expiryDate && expiryDate < new Date()) {
     try {
       await addDoc(collection(db, "mockQuestions"), {
         question: adminQuestion,
+  
         option1: adminOption1,
         option2: adminOption2,
         option3: adminOption3,
         option4: adminOption4,
+  
         answer: adminAnswer,
+  
         subject: adminSubject,
+  
         level: adminLevel,
+  
+        accessPlan: adminAccessPlan,
+  
         language: "English",
+  
         createdAt: new Date(),
       });
   
@@ -849,6 +905,8 @@ if (expiryDate && expiryDate < new Date()) {
       setAdminOption3("");
       setAdminOption4("");
       setAdminAnswer("");
+  
+      setAdminAccessPlan("FREE");
   
       loadMockQuestions(adminSubject);
     } catch (error) {
@@ -3443,6 +3501,8 @@ chartColors={chartColors}
   setAdminSubject={setAdminSubject}
   adminLevel={adminLevel}
   setAdminLevel={setAdminLevel}
+  adminAccessPlan={adminAccessPlan}
+  setAdminAccessPlan={setAdminAccessPlan}
   handleAddMockQuestion={handleAddMockQuestion}
   mockQuestions={mockQuestions}
   handleDeleteMockQuestion={handleDeleteMockQuestion}
