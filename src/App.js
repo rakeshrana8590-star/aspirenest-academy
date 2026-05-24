@@ -1732,26 +1732,7 @@ return (
     zIndex: "99999",
   }}
 >
-  <button
-    onClick={() =>
-      createPaymentRequest(
-        "CTET Premium Plan",
-        199
-      )
-    }
-    style={{
-      padding: "14px 24px",
-      borderRadius: "14px",
-      border: "none",
-      background: "#ff7b00",
-      color: "#fff",
-      fontWeight: "700",
-      cursor: "pointer",
-      fontSize: "16px",
-    }}
-  >
-    Test Payment Request
-  </button>
+
 </div>
   <section className="hero">
   <div className="heroContent">
@@ -2467,6 +2448,29 @@ isAdmin={isAdmin}
       alert("Please paste payment message or UTR first.");
       return;
     }
+
+    const whatsappMessage = `
+🚨 AspireNest Payment Proof Submitted
+
+👤 Student: ${user?.email || "Student"}
+💰 Amount: ₹${activePayment?.amount}
+📦 Plan: ${activePayment?.planName}
+🧾 Order ID: ${activePayment?.orderId}
+
+📝 Student Payment Proof:
+${paymentProof}
+
+✅ Action Required:
+✅ Please verify and activate premium access if payment is valid.
+
+`;
+
+    window.open(
+      `https://wa.me/919624158590?text=${encodeURIComponent(
+        whatsappMessage
+      )}`,
+      "_blank"
+    );
 
     const updatedPayment = {
       ...activePayment,

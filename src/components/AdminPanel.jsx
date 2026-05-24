@@ -848,7 +848,7 @@ export default function AdminPanel({
 ) : (
 <button
   className="btnLink"
-  onClick={() => {
+  onClick={async () => {
     const adminProof = adminProofs[payment.id] || "";
     const studentProof = payment.studentProof || "";
 
@@ -857,14 +857,31 @@ export default function AdminPanel({
       return;
     }
 
-    if (
-      !studentProof
-        .toLowerCase()
-        .includes(adminProof.toLowerCase())
-    ) {
-      alert("Verification mismatch. Please check UTR/payment message.");
-      return;
-    }
+    const studentText = studentProof.toLowerCase();
+const adminText = adminProof.toLowerCase();
+
+const utrMatch =
+  studentText.match(/\d{6,}/)?.[0] ===
+  adminText.match(/\d{6,}/)?.[0];
+
+const amountMatch =
+  studentText.includes(`₹${payment.amount}`) ||
+  studentText.includes(`${payment.amount}`);
+
+  if (!utrMatch || !amountMatch) {
+    await updateDoc(doc(db, "paymentRequests", payment.id), {
+      status: "review_required",
+      reviewRequired: true,
+      reviewReason: "UTR or amount mismatch",
+      reviewedAt: new Date(),
+    });
+  
+    alert(
+      "Mismatch detected. Request moved to Review Required."
+    );
+  
+    return;
+  }
 
     approvePaymentRequest(payment);
   }}
@@ -894,19 +911,31 @@ export default function AdminPanel({
       <strong>Admin:</strong> {adminProofs[payment.id]}
     </p>
 
-    {payment.studentProof
-      .toLowerCase()
-      .includes(adminProofs[payment.id].toLowerCase()) ? (
-      <div
-        style={{
-          marginTop: "10px",
-          color: "#166534",
-          fontWeight: "800",
-        }}
-      >
-        ✅ Possible Match Found
-      </div>
-    ) : (
+    {(() => {
+  const studentText = payment.studentProof.toLowerCase();
+  const adminText = adminProofs[payment.id].toLowerCase();
+
+  const studentUtr = studentText.match(/\d{6,}/)?.[0];
+  const adminUtr = adminText.match(/\d{6,}/)?.[0];
+
+  const utrMatch = studentUtr === adminUtr;
+
+  const amountMatch =
+    studentText.includes(`₹${payment.amount}`) ||
+    studentText.includes(`${payment.amount}`);
+
+  return utrMatch && amountMatch;
+})() ? (
+  <div
+    style={{
+      marginTop: "10px",
+      color: "#166534",
+      fontWeight: "800",
+    }}
+  >
+    ✅ Possible Match Found
+  </div>
+) : (
       <div
         style={{
           marginTop: "10px",
