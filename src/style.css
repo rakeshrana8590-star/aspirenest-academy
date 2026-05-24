@@ -15059,46 +15059,50 @@ nav {
 .lockedCourse:hover {
   transform: translateY(-8px);
 }
-/* AAA PREMIUM TEASER EFFECT */
-
-.lockedCourse h3,
-.lockedCourse p {
-  filter: blur(0.3px);
+/* PROFILE DROPDOWN CLICK-BLOCK FIX */
+.profileMenuWrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  z-index: 30;
 }
 
-.lockedCourse:hover h3,
-.lockedCourse:hover p {
-  filter: blur(0px);
-}
-
-.lockedCourse::after {
-  content: "";
-
+.profileDropdown {
   position: absolute;
-  inset: 0;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 170px;
+  max-width: 170px;
+  padding: 10px;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16);
+  z-index: 999;
+}
 
-  background:
-    linear-gradient(
-      to bottom,
-      rgba(255,255,255,0.02),
-      rgba(255,180,0,0.03)
-    );
+.profileDropdown button {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  margin: 0 0 8px 0;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.15;
+  white-space: normal;
+}
 
+.profileDropdown button:last-child {
+  margin-bottom: 0;
+}
+
+.mainHeader,
+.nav {
+  overflow: visible;
+}
+.profileDropdown {
+  pointer-events: auto;
+}
+
+.profileDropdown.hidden {
   pointer-events: none;
-}
-/* AAA Notes Button Visibility Fix */
-
-.notesSection .course {
-  min-height: 330px !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-.notesSection .course .btnLink {
-  margin-top: auto !important;
-  width: fit-content !important;
-}
-
-.notesSection .course p {
-  margin: 8px 0 !important;
 }

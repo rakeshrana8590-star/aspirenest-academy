@@ -2,6 +2,7 @@ import { auth, db } from "./firebase";
 import { storage } from "./firebase";
 import { QRCodeCanvas } from "qrcode.react";
 
+
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -47,7 +48,14 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Link,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import AspireNestLogo from "./components/AspireNestLogo.jsx";
 import AppDashboard from "./components/AppDashboard.jsx";
 import './style.css';
@@ -58,6 +66,9 @@ import aprilCurrentAffairsPdf from "./assets/pdfs/CA APRIL 26.pdf";
 import childDevelopmentNotes from "./assets/pdfs/notes/child-development-notes.pdf";
 
 export default function App() {
+
+  const location = useLocation();
+  const navigate = useNavigate();
   const [darkMode, setDarkMode] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -279,13 +290,24 @@ const [paymentHistory, setPaymentHistory] = useState([]);
     return () => unsubscribe();
   }, []);
   React.useEffect(() => {
-    const hash =
-      window.location.hash.replace("#", "");
+    const routeToSection = {
+      "/": null,
+      "/courses": "courses",
+      "/notes": "notes",
+      "/mock-tests": "mock-tests",
+      "/current-affairs": "current-affairs",
+      "/pricing": "pricing",
+      "/contact": "contact",
+      "/student-dashboard": "student-profile",
+      "/admin": "admin-panel",
+    };
   
-    if (!hash) return;
+    const sectionName = routeToSection[location.pathname];
+  
+    if (sectionName === undefined) return;
   
     if (
-      hash === "notes" &&
+      sectionName === "notes" &&
       !hasPlanAccess("PREMIUM")
     ) {
       setActiveSection("pricing");
@@ -293,15 +315,15 @@ const [paymentHistory, setPaymentHistory] = useState([]);
     }
   
     if (
-      hash === "current-affairs" &&
+      sectionName === "current-affairs" &&
       !hasPlanAccess("PREMIUM")
     ) {
       setActiveSection("pricing");
       return;
     }
   
-    setActiveSection(hash);
-  }, [userPlanType]);
+    setActiveSection(sectionName);
+  }, [location.pathname, userPlanType]);
   const handleRegister = async () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -1685,77 +1707,74 @@ const studyTimeMessage =
       <React.Suspense
         fallback={
           <div className="premium-loader">
-<img
-  src="/logo-header.png"
-  alt="AspireNest Academy"
-  className="premium-loader-logo"
-  loading="eager"
-  decoding="async"
-/>
-        
-          <div className="premium-loader-ring"></div>
-        
-          <h2>Loading AspireNest Academy</h2>
-        
-          <p>Preparing your smart learning experience...</p>
-        </div>
+            <img
+              src="/logo-header.png"
+              alt="AspireNest Academy"
+              className="premium-loader-logo"
+              loading="eager"
+              decoding="async"
+            />
+    
+            <div className="premium-loader-ring"></div>
+    
+            <h2>Loading AspireNest Academy</h2>
+    
+            <p>Preparing your smart learning experience...</p>
+          </div>
         }
       >
         <div className={darkMode ? "app dark" : "app"}>
-        <header>
-        <div className="brand">
-  <AspireNestLogo />
-
-</div>
-        </header>
-  
-        <div
-          style={{
-            height: "calc(100vh - 90px)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: "0 20px",
-            overflow: "hidden",
-          }}
-        >
-          <AuthSection
-            email={email}
-            setEmail={setEmail}
-            password={password}
-            setPassword={setPassword}
-            handleLogin={handleLogin}
-            handleGoogleLogin={handleGoogleLogin}
-            handleForgotPassword={handleForgotPassword}
-            handleRegister={handleRegister}
-          />
+          <header>
+            <div className="brand">
+              <AspireNestLogo />
+            </div>
+          </header>
+    
+          <div
+            style={{
+              height: "calc(100vh - 90px)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "0 20px",
+              overflow: "hidden",
+            }}
+          >
+            <AuthSection
+              email={email}
+              setEmail={setEmail}
+              password={password}
+              setPassword={setPassword}
+              handleLogin={handleLogin}
+              handleGoogleLogin={handleGoogleLogin}
+              handleForgotPassword={handleForgotPassword}
+              handleRegister={handleRegister}
+            />
+          </div>
         </div>
-        </div>
-    </React.Suspense>
-  );
+      </React.Suspense>
+    );
 }
 return (
-  <BrowserRouter>
-  <React.Suspense
+        <React.Suspense
+          fallback={
+            <div className="premium-loader">
+              <img
+                src="/logo-header.png"
+                alt="AspireNest Academy"
+                className="header-logo"
+                loading="eager"
+                decoding="async"
+              />
 
-    fallback={
-      <div className="premium-loader">
-    <img
-  src="/logo-header.png"
-  alt="AspireNest Academy"
-  className="header-logo"
-  loading="eager"
-  decoding="async"
-/>
-    
-      <div className="premium-loader-ring"></div>
-    
-      <h2>Loading AspireNest Academy</h2>
-    
-      <p>Preparing your smart learning experience...</p>
-    </div>
-    }
-  >
+              <div className="premium-loader-ring"></div>
+
+              <h2>Loading AspireNest Academy</h2>
+
+              <p>Preparing your smart learning experience...</p>
+            </div>
+          }
+        >
 
 <header className="mainHeader">
   <div className="brand">
@@ -1763,16 +1782,46 @@ return (
   </div>
 
   <nav className={mobileMenuOpen ? "nav mobile-open" : "nav"}>
-    <button onClick={() => setActiveSection("courses")}>Courses</button>
-    <button onClick={() =>
-  openProtectedSection("notes", "PREMIUM")
-}>Notes</button>
-    <button onClick={() => setActiveSection("pricing")}>Pricing</button>
-    <button onClick={() => setActiveSection("contact")}>
+  <button
+  onClick={() => {
+    setProfileMenuOpen(false);
+    navigate("/courses");
+  }}
+>
+  Courses
+</button>
+
+<button
+  onClick={() => {
+    setProfileMenuOpen(false);
+    navigate("/notes");
+  }}
+>
+  Notes
+</button>
+
+<button
+  onClick={() => {
+    setProfileMenuOpen(false);
+    navigate("/pricing");
+  }}
+>
+  Pricing
+</button>
+
+<button
+  onClick={() => {
+    setProfileMenuOpen(false);
+    navigate("/contact");
+  }}
+>
   Contact
 </button>
 {user ? (
-  <div className="profileMenuWrapper">
+  <div
+  className="profileMenuWrapper"
+  onMouseLeave={() => setProfileMenuOpen(false)}
+>
     <button
       type="button"
       className="profileTrigger"
@@ -1837,7 +1886,14 @@ return (
     Login
   </button>
 )}
-    <button onClick={() => setActiveSection(null)}>
+<button
+  onClick={() => {
+    setProfileMenuOpen(false);
+    setActiveSection(null);
+    navigate("/");
+    setTimeout(() => window.scrollTo(0, 0), 50);
+  }}
+>
   Home
 </button>
   </nav>
@@ -3100,33 +3156,51 @@ loadPaymentRequests={loadPaymentRequests}
     </span>
 
     {profileMenuOpen && activeSection !== "student-profile" && (
+      <div
+  className={`profileDropdown ${
+    profileMenuOpen ? "" : "hidden"
+  }`}
+  onMouseLeave={() => setProfileMenuOpen(false)}
+>
+    <button
+      onClick={() => {
+        setProfileMenuOpen(false);
+        navigate("/student-dashboard");
+      }}
+    >
+      My Dashboard
+    </button>
 
-      <div className="profileDropdown">
-        <button
-          onClick={() => setActiveSection("student-profile")}
-        >
-          My Dashboard
-        </button>
+    <button
+      onClick={() => {
+        setProfileMenuOpen(false);
+        navigate("/pricing");
+      }}
+    >
+      Premium Access
+    </button>
 
-        <button
-          onClick={() => setActiveSection("pricing")}
-        >
-          Premium Access
-        </button>
-
-        {isAdmin(user) && (
-          <button
-            onClick={() => setActiveSection("admin-panel")}
-          >
-            Admin Panel
-          </button>
-        )}
-
-        <button onClick={handleLogout}>
-          Logout
-        </button>
-      </div>
+    {isAdmin(user) && (
+      <button
+        onClick={() => {
+          setProfileMenuOpen(false);
+          navigate("/admin");
+        }}
+      >
+        Admin Panel
+      </button>
     )}
+
+    <button
+      onClick={() => {
+        setProfileMenuOpen(false);
+        handleLogout();
+      }}
+    >
+      Logout
+    </button>
+  </div>
+)}
   </div>
 ) : (
   <a href="#student-profile">Login</a>
@@ -3533,7 +3607,6 @@ setActiveSection={setActiveSection}
 
 </div>
 )}
-</React.Suspense>
-</BrowserRouter>
+  </React.Suspense>
 );
 }
