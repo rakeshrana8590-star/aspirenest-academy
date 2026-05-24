@@ -80,6 +80,28 @@ const [contactEmail, setContactEmail] = useState("");
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
+  const [userPlanType, setUserPlanType] = useState("FREE");
+  const [membershipExpiry, setMembershipExpiry] = useState(null);
+  const hasPlanAccess = (requiredPlan) => {
+    const hierarchy = {
+      FREE: 0,
+      BASIC: 1,
+      PREMIUM: 2,
+      MENTORSHIP: 3,
+    };
+    const openProtectedSection = (sectionName, requiredPlan = "PREMIUM") => {
+      if (hasPlanAccess(requiredPlan)) {
+        setActiveSection(sectionName);
+      } else {
+        setActiveSection("pricing");
+      }
+    };
+  
+    return (
+      hierarchy[userPlanType || "FREE"] >=
+      hierarchy[requiredPlan]
+    );
+  };
   const [activePlan, setActivePlan] = useState("FREE");
   const adminEmail = "aspirenestplatform@gmail.com";
   const isAdmin = (currentUser = user) =>
@@ -420,6 +442,7 @@ expiryDate.setFullYear(expiryDate.getFullYear() + 1);
         purchaseDate: purchaseDate,
 expiryDate: expiryDate,
 premiumStatus: "ACTIVE",
+activePlan: payment.planName || planType,
         createdAt: new Date(),
       });
   
@@ -582,6 +605,22 @@ const usersData = usersSnap.docs.map((doc) => ({
       }
   
       setIsPremiumUser(userSnap.data().isPremium === true);
+      const expiryDate = userSnap.data().expiryDate?.toDate
+  ? userSnap.data().expiryDate.toDate()
+  : userSnap.data().expiryDate
+  ? new Date(userSnap.data().expiryDate)
+  : null;
+
+if (expiryDate && expiryDate < new Date()) {
+  setIsPremiumUser(false);
+  setUserPlanType("FREE");
+} else {
+  setUserPlanType(
+    userSnap.data().subscriptionType || "PREMIUM"
+  );
+  
+  setMembershipExpiry(expiryDate);
+}
     } catch (error) {
       alert(error.message);
       setIsPremiumUser(false);
@@ -626,7 +665,9 @@ const usersData = usersSnap.docs.map((doc) => ({
       alert(error.message);
     }
   };
-  const loadMockQuestions = async (subject = selectedSubject) => {
+  const loadMockQuestions = async (
+    subject = selectedSubject
+  ) => {
     try {
       const q = query(
         collection(db, "mockQuestions"),
@@ -637,20 +678,41 @@ const usersData = usersSnap.docs.map((doc) => ({
   
       const questions = querySnapshot.docs.map((doc) => ({
         id: doc.id,
+  
         question: doc.data().question,
+  
         options: [
           doc.data().option1,
           doc.data().option2,
           doc.data().option3,
           doc.data().option4,
         ],
+  
         answer: doc.data().answer,
+  
         subject: doc.data().subject,
+  
         level: doc.data().level,
+  
         language: doc.data().language,
+  
+        accessPlan:
+          doc.data().accessPlan || "FREE",
       }));
   
-      setMockQuestions(questions);
+      const filteredQuestions =
+        questions.filter((question) => {
+          if (question.accessPlan === "FREE") {
+            return true;
+          }
+  
+          return hasPlanAccess(
+            question.accessPlan
+          );
+        });
+  
+      setMockQuestions(filteredQuestions);
+  
       setCurrentQuestion(0);
       setSelectedAnswer("");
       setScore(0);
@@ -1068,19 +1130,27 @@ const usersData = usersSnap.docs.map((doc) => ({
       }
   
       const userRef = doc(db, "users", payment.userId);
+      const planType =
+  payment.planName === "Personal Mentorship"
+    ? "MENTORSHIP"
+    : payment.planName === "Premium Batch"
+    ? "PREMIUM"
+    : payment.planName === "Topic-wise Courses"
+    ? "BASIC"
+    : "PREMIUM";
   
       const purchaseDate = new Date();
       const expiryDate = new Date();
-      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+      expiryDate.setMonth(expiryDate.getMonth() + 6);
   
       await setDoc(
         userRef,
         {
           email: payment.studentEmail || payment.email || "",
           isPremium: true,
-          subscriptionType: "PREMIUM",
+          subscriptionType: planType,
           premiumStatus: "ACTIVE",
-          purchasedCourses: [payment.planName || "Premium Notes"],
+          purchasedCourses: [payment.planName || planType],
           purchaseDate,
           expiryDate,
           updatedAt: new Date(),
@@ -1636,7 +1706,9 @@ return (
 
   <nav className={mobileMenuOpen ? "nav mobile-open" : "nav"}>
     <button onClick={() => setActiveSection("courses")}>Courses</button>
-    <button onClick={() => setActiveSection("notes")}>Notes</button>
+    <button onClick={() =>
+  openProtectedSection("notes", "PREMIUM")
+}>Notes</button>
     <button onClick={() => setActiveSection("pricing")}>Pricing</button>
     <button onClick={() => setActiveSection("contact")}>
   Contact
@@ -2683,6 +2755,8 @@ ${paymentProof}
       isPremiumUser={isPremiumUser}
       setActiveSection={setActiveSection}
       activePlan={activePlan}
+      userPlanType={userPlanType}
+      hasPlanAccess={hasPlanAccess}
     />
   </section>
 )}
@@ -2709,6 +2783,9 @@ ${paymentProof}
       setSelectedAnswer={setSelectedAnswer}
       showAnswer={showAnswer}
       handleAnswerSubmit={handleAnswerSubmit}
+      userPlanType={userPlanType}
+hasPlanAccess={hasPlanAccess}
+setActiveSection={setActiveSection}
     />
   </section>
 )}
@@ -2849,6 +2926,9 @@ loadPaymentRequests={loadPaymentRequests}
     <StudentDashboard
       user={user}
       isPremiumUser={isPremiumUser}
+      userPlanType={userPlanType}
+      membershipExpiry={membershipExpiry}
+      hasPlanAccess={hasPlanAccess}
       isAdmin={isAdmin}
       handlePremiumSectionAccess={handlePremiumSectionAccess}
       handleLogout={handleLogout}
@@ -3383,6 +3463,9 @@ setAnnouncementMessage={setAnnouncementMessage}
   fallbackCurrentAffairs={fallbackCurrentAffairs}
   handleNoteAccess={handleNoteAccess}
   isPremiumUser={isPremiumUser}
+  userPlanType={userPlanType}
+hasPlanAccess={hasPlanAccess}
+setActiveSection={setActiveSection}
 />
 
 

@@ -5,6 +5,8 @@ export default function NotesCMS({
   isPremiumUser,
   setActiveSection,
   activePlan,
+  userPlanType,
+  hasPlanAccess,
 }) {
   const allNotes = [...notesData, ...firebaseNotes];
 
@@ -14,53 +16,25 @@ export default function NotesCMS({
     if (note.type === "MENTORSHIP") return "MENTORSHIP BONUS";
     return "PREMIUM PLAN";
   };
+
   const canAccessNote = (note) => {
-    if (note.type === "FREE") {
-      return true;
-    }
-  
-    if (activePlan === "MENTORSHIP") {
-      return true;
-    }
-  
-    if (
-      activePlan === "PREMIUM" &&
-      (note.type === "PREMIUM" ||
-        note.type === "BASIC")
-    ) {
-      return true;
-    }
-  
-    if (
-      activePlan === "BASIC" &&
-      note.type === "BASIC"
-    ) {
-      return true;
-    }
-  
+    if (note.type === "FREE") return true;
+    if (note.type === "BASIC") return hasPlanAccess("BASIC");
+    if (note.type === "PREMIUM") return hasPlanAccess("PREMIUM");
+    if (note.type === "MENTORSHIP") return hasPlanAccess("MENTORSHIP");
     return false;
   };
+
   const getButtonText = (note) => {
     if (canAccessNote(note)) {
-      if (note.type === "FREE") {
-        return "📥 Download Free PDF";
-      }
-  
+      if (note.type === "FREE") return "📥 Download Free PDF";
       return "🌟 Open PDF";
     }
-  
-    if (note.type === "BASIC") {
-      return "🔒 Upgrade to BASIC";
-    }
-  
-    if (note.type === "PREMIUM") {
-      return "🔒 Upgrade to PREMIUM";
-    }
-  
-    if (note.type === "MENTORSHIP") {
-      return "🔒 Upgrade to MENTORSHIP";
-    }
-  
+
+    if (note.type === "BASIC") return "🔒 Upgrade to BASIC";
+    if (note.type === "PREMIUM") return "🔒 Upgrade to PREMIUM";
+    if (note.type === "MENTORSHIP") return "🔒 Upgrade to MENTORSHIP";
+
     return "🔒 Upgrade to Unlock";
   };
 
@@ -72,78 +46,62 @@ export default function NotesCMS({
         Free, Basic and Premium notes clearly organized for CTET/TET preparation.
       </p>
 
-      <>
-  {["FREE", "BASIC", "PREMIUM", "MENTORSHIP"].map(
-    (sectionType) => {
-      const sectionNotes = allNotes.filter(
-        (note) => note.type === sectionType
-      );
+      {["FREE", "BASIC", "PREMIUM", "MENTORSHIP"].map((sectionType) => {
+        const sectionNotes = allNotes.filter(
+          (note) => note.type === sectionType
+        );
 
-      if (sectionNotes.length === 0) return null;
+        if (sectionNotes.length === 0) return null;
 
-      return (
-        <div
-          className="notesGroupSection"
-          key={sectionType}
-        >
-          <h2 className="notesGroupTitle">
-            {sectionType === "FREE" &&
-              "📘 FREE NOTES"}
+        return (
+          <div className="notesGroupSection" key={sectionType}>
+            <h2 className="notesGroupTitle">
+              {sectionType === "FREE" && "📘 FREE NOTES"}
+              {sectionType === "BASIC" && "🟦 BASIC NOTES"}
+              {sectionType === "PREMIUM" && "🌟 PREMIUM LIBRARY"}
+              {sectionType === "MENTORSHIP" && "👨‍🏫 MENTORSHIP VAULT"}
+            </h2>
 
-            {sectionType === "BASIC" &&
-              "🟦 BASIC NOTES"}
+            <div className="grid">
+              {sectionNotes.map((note) => {
+                const unlocked = canAccessNote(note);
 
-            {sectionType === "PREMIUM" &&
-              "🌟 PREMIUM LIBRARY"}
+                return (
+                  <div
+                    className={`course ${!unlocked ? "lockedCourse" : ""}`}
+                    key={note.id}
+                  >
+                    <span className="planTag">{getAccessLabel(note)}</span>
 
-            {sectionType === "MENTORSHIP" &&
-              "👨‍🏫 MENTORSHIP VAULT"}
-          </h2>
+                    <h3>{note.title}</h3>
 
-          <div className="grid">
-            {sectionNotes.map((note) => (
-              <div
-              className={`course ${
-                note.type === "PREMIUM" && !isPremiumUser
-                  ? "lockedCourse"
-                  : ""
-              }`}
-              key={note.id}
-            >
-              <span className="planTag">
-                {getAccessLabel(note)}
-              </span>
-            
-              <h3>{note.title}</h3>
-            
-              <p>
-                📂 Category: {note.category}
-              </p>
-            
-              <p>
-                📄 Pages: {note.pages}
-              </p>
-                
-              <button
-  className="btnLink"
-  onClick={() => {
-    if (canAccessNote(note)) {
-      handleNoteAccess(note);
-    } else {
- setActiveSection("pricing");
-  }
-  }}
->
-  {getButtonText(note)}
-</button>
+                    <p>📂 Category: {note.category}</p>
+                    <p>📄 Pages: {note.pages}</p>
+
+                    <p>
+                      🔐 Access:{" "}
+                      <strong>{unlocked ? "Unlocked" : getAccessLabel(note)}</strong>
+                    </p>
+
+                    <button
+                      className="btnLink"
+                      onClick={() => {
+                        if (unlocked) {
+                          handleNoteAccess(note);
+                        } else {
+                          setActiveSection("pricing");
+                        }
+                      }}
+                    >
+                      {getButtonText(note)}
+                    </button>
+                  </div>
+                );
+              })}
             </div>
-            ))}
           </div>
-        </div>
-      );
-    }
-  )}
-</>
+        );
+      })}
     </section>
   );
 }

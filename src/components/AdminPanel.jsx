@@ -93,6 +93,7 @@ export default function AdminPanel({
 }) {
   if (!isAdmin()) return null;
   const [adminProofs, setAdminProofs] = useState({});
+  const [paymentFilter, setPaymentFilter] = useState("student_proof_submitted");
 
   const uniqueStudents = students.filter(
     (student, index, self) =>
@@ -107,6 +108,76 @@ export default function AdminPanel({
     { name: "Fri", students: 9, enquiries: 5 },
     { name: "Sat", students: 12, enquiries: 6 },
   ];
+
+  const getPaymentPriority = (payment) => {
+    const proofText = payment.studentProof || "";
+  
+    const hasUtr = /\d{6,}/.test(proofText);
+    const currentUtr = proofText.match(/\d{6,}/)?.[0];
+
+const duplicateUtrCount = paymentRequests.filter((p) => {
+  const utr = (p.studentProof || "").match(/\d{6,}/)?.[0];
+
+  return utr && currentUtr && utr === currentUtr;
+}).length;
+
+const isDuplicateUtr = duplicateUtrCount > 1;
+    const isHighAmount = Number(payment.amount) >= 1499;
+  
+    if (isDuplicateUtr) {
+      return {
+        label: "🚨 Duplicate UTR Detected",
+        bg: "#fee2e2",
+        color: "#991b1b",
+      };
+    }
+    if (payment.status === "approved") {
+      return {
+        label: "✅ Verified",
+        bg: "#dcfce7",
+        color: "#166534",
+      };
+    }
+  
+    if (payment.status === "review_required") {
+      return {
+        label: "🔴 Needs Manual Review",
+        bg: "#fee2e2",
+        color: "#991b1b",
+      };
+    }
+  
+    if (payment.status === "student_proof_submitted" && !hasUtr) {
+      return {
+        label: "⚠️ UTR Missing",
+        bg: "#fef3c7",
+        color: "#92400e",
+      };
+    }
+  
+    if (payment.status === "student_proof_submitted" && isHighAmount) {
+      return {
+        label: "🚨 High Amount Verify Carefully",
+        bg: "#ffedd5",
+        color: "#9a3412",
+      };
+    }
+  
+    if (payment.status === "student_proof_submitted") {
+      return {
+        label: "🔥 Needs Verification",
+        bg: "#dbeafe",
+        color: "#1d4ed8",
+      };
+    }
+  
+    return {
+      label: "⏳ Waiting",
+      bg: "#f1f5f9",
+      color: "#475569",
+    };
+  };
+
   const allNotes =
     firebaseNotes.length > 0 ? firebaseNotes : notesData;
 
@@ -783,20 +854,203 @@ export default function AdminPanel({
     >
       Refresh Payment Requests
     </button>
+    <button
+  className="btnLink"
+  onClick={() => setShowRecentOnly(!showRecentOnly)}
+  style={{
+    marginLeft: "10px",
+    background: showRecentOnly ? "#ea580c" : "#0f172a",
+  }}
+>
+  {showRecentOnly ? "🔥 Showing Recent Only" : "📜 Showing All History"}
+</button>
+    <div
+  style={{
+    display: "flex",
+    gap: "10px",
+    flexWrap: "wrap",
+    marginBottom: "20px",
+  }}
+>
+  <button
+    className="btnLink"
+    onClick={() => setPaymentFilter("all")}
+  >
+    All
+  </button>
+
+  <button
+    className="btnLink"
+    onClick={() =>
+      setPaymentFilter("student_proof_submitted")
+    }
+  >
+    🔍 Proof Submitted
+  </button>
+
+  <button
+    className="btnLink"
+    onClick={() => setPaymentFilter("approved")}
+  >
+    ✅ Approved
+  </button>
+
+  <button
+    className="btnLink"
+    onClick={() => setPaymentFilter("rejected")}
+  >
+    ❌ Rejected
+  </button>
+
+  <button
+    className="btnLink"
+    onClick={() => setPaymentFilter("pending_payment")}
+  >
+    ⏳ Pending
+  </button>
+</div>
+
 
     <div className="adminStudentsGrid">
       {paymentRequests && paymentRequests.length > 0 ? (
-        paymentRequests.map((payment, index) => (
+     paymentRequests
+     .filter((payment) => {
+      if (paymentFilter !== "all" && payment.status !== paymentFilter) {
+        return false;
+      }
+    
+      if (!showRecentOnly) return true;
+    
+      const createdTime = payment.createdAt?.toDate
+        ? payment.createdAt.toDate().getTime()
+        : new Date(payment.createdAt || 0).getTime();
+    
+      const threeDays = 3 * 24 * 60 * 60 * 1000;
+    
+      return Date.now() - createdTime < threeDays;
+    })
+     .sort((a, b) => {
+       const timeA = a.createdAt?.toDate
+         ? a.createdAt.toDate().getTime()
+         : new Date(a.createdAt || 0).getTime();
+   
+       const timeB = b.createdAt?.toDate
+         ? b.createdAt.toDate().getTime()
+         : new Date(b.createdAt || 0).getTime();
+   
+       return timeB - timeA;
+     })
+     .map((payment, index) => (
           <div
             className="studentCard"
             key={payment.id || index}
           >
             <h4>{payment.studentEmail || payment.email || "Student"}</h4>
+            {(() => {
+  const priority = getPaymentPriority(payment);
+
+  return (
+    <div
+      style={{
+        marginTop: "8px",
+        marginBottom: "10px",
+        padding: "8px 12px",
+        borderRadius: "999px",
+        background: priority.bg,
+        color: priority.color,
+        fontWeight: "700",
+        fontSize: "13px",
+        display: "inline-block",
+      }}
+    >
+      {priority.label}
+    </div>
+  );
+})()}
+
 
             <p>💰 Amount: ₹{payment.amount}</p>
             <p>📦 Plan: {payment.planName || payment.plan || "Premium Plan"}</p>
             <p>🧾 Order ID: {payment.orderId}</p>
-            <p>📌 Status: {payment.status}</p>
+            <p>
+  📌 Status:{" "}
+  {payment.status === "review_required" ? (
+    <strong style={{ color: "#f59e0b" }}>
+      🟠 Review Required
+    </strong>
+  ) : payment.status === "approved" ? (
+    <strong style={{ color: "#16a34a" }}>
+      ✅ Approved
+    </strong>
+  ) : payment.status === "student_proof_submitted" ? (
+    <strong style={{ color: "#2563eb" }}>
+      🔍 Proof Submitted
+    </strong>
+  ) : (
+    payment.status
+  )}
+</p>
+<div style={{ margin: "10px 0" }}>
+  {payment.status === "student_proof_submitted" && (
+    <span
+      style={{
+        background: "#dbeafe",
+        color: "#1d4ed8",
+        padding: "7px 12px",
+        borderRadius: "999px",
+        fontWeight: "800",
+        fontSize: "13px",
+      }}
+    >
+      🔥 Needs Verification
+    </span>
+  )}
+
+  {payment.status === "review_required" && (
+    <span
+      style={{
+        background: "#fef3c7",
+        color: "#92400e",
+        padding: "7px 12px",
+        borderRadius: "999px",
+        fontWeight: "800",
+        fontSize: "13px",
+      }}
+    >
+      ⚠️ Manual Review Required
+    </span>
+  )}
+
+  {payment.status === "approved" && (
+    <span
+      style={{
+        background: "#dcfce7",
+        color: "#166534",
+        padding: "7px 12px",
+        borderRadius: "999px",
+        fontWeight: "800",
+        fontSize: "13px",
+      }}
+    >
+      ✅ Activated
+    </span>
+  )}
+
+  {payment.status === "pending_payment" && (
+    <span
+      style={{
+        background: "#f1f5f9",
+        color: "#475569",
+        padding: "7px 12px",
+        borderRadius: "999px",
+        fontWeight: "800",
+        fontSize: "13px",
+      }}
+    >
+      ⏳ Waiting for Proof
+    </span>
+  )}
+</div>
 
             {payment.studentProof && (
               <p>
@@ -912,42 +1166,111 @@ const amountMatch =
     </p>
 
     {(() => {
-  const studentText = payment.studentProof.toLowerCase();
-  const adminText = adminProofs[payment.id].toLowerCase();
+  const studentText = payment.studentProof || "";
+  const adminText = adminProofs[payment.id] || "";
 
-  const studentUtr = studentText.match(/\d{6,}/)?.[0];
-  const adminUtr = adminText.match(/\d{6,}/)?.[0];
+  const studentUtr = studentText.match(/\d{6,}/)?.[0] || "Not found";
+  const adminUtr = adminText.match(/\d{6,}/)?.[0] || "Not found";
 
-  const utrMatch = studentUtr === adminUtr;
+  const amount = payment.amount;
 
-  const amountMatch =
-    studentText.includes(`₹${payment.amount}`) ||
-    studentText.includes(`${payment.amount}`);
+  return (
+    <div
+      style={{
+        marginTop: "10px",
+        padding: "10px",
+        borderRadius: "10px",
+        background: "#fff7ed",
+        fontSize: "14px",
+      }}
+    >
+      <p>🧾 Student UTR: <strong>{studentUtr}</strong></p>
+      <p>🏦 Admin UTR: <strong>{adminUtr}</strong></p>
+      <p>💰 Expected Amount: <strong>₹{amount}</strong></p>
+    </div>
+  );
+})()}
 
-  return utrMatch && amountMatch;
-})() ? (
-  <div
-    style={{
-      marginTop: "10px",
-      color: "#166534",
-      fontWeight: "800",
-    }}
-  >
-    ✅ Possible Match Found
-  </div>
-) : (
+    {(() => {
+      const studentText = payment.studentProof.toLowerCase();
+      const adminText = adminProofs[payment.id].toLowerCase();
+
+      const studentUtr = studentText.match(/\d{6,}/)?.[0];
+      const adminUtr = adminText.match(/\d{6,}/)?.[0];
+
+      const utrMatch = studentUtr === adminUtr;
+
+      const amountMatch =
+        studentText.includes(`₹${payment.amount}`) ||
+        studentText.includes(`${payment.amount}`);
+
+      return utrMatch && amountMatch;
+    })() ? (
       <div
         style={{
           marginTop: "10px",
-          color: "#dc2626",
+          color: "#166534",
           fontWeight: "800",
         }}
       >
-        ❌ Verification Mismatch
+        ✅ Possible Match Found
       </div>
+    ) : (
+      <>
+        <div
+          style={{
+            marginTop: "10px",
+            color: "#dc2626",
+            fontWeight: "800",
+          }}
+        >
+          ❌ Verification Mismatch
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: "10px",
+            marginTop: "14px",
+            flexWrap: "wrap",
+          }}
+        >
+          <button
+            className="btnLink"
+            onClick={() => approvePaymentRequest(payment)}
+            style={{
+              background: "#16a34a",
+            }}
+          >
+            ✅ Approve Manually
+          </button>
+
+          <button
+            className="btnLink"
+            onClick={async () => {
+              await updateDoc(
+                doc(db, "paymentRequests", payment.id),
+                {
+                  status: "rejected",
+                  rejectedAt: new Date(),
+                }
+              );
+
+              alert("Payment request rejected.");
+            }}
+            style={{
+              background: "#dc2626",
+            }}
+          >
+            ❌ Reject Request
+          </button>
+        </div>
+      </>
     )}
   </div>
 )}
+
+
           </div>
         ))
       ) : (

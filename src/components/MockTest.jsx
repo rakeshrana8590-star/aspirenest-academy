@@ -18,14 +18,39 @@ export default function MockTest({
   setSelectedAnswer,
   showAnswer,
   handleAnswerSubmit,
+  userPlanType,
+  hasPlanAccess,
+  setActiveSection,
 }) {
   const safeQuestions = mockQuestions || [];
   const currentMockQuestion = safeQuestions[currentQuestion];
 
+  const canAccessSubject = () => {
+    if (safeQuestions.length === 0) {
+      return true;
+    }
+  
+    return safeQuestions.some((question) => {
+      if (question.accessPlan === "FREE") {
+        return true;
+      }
+  
+      return hasPlanAccess(
+        question.accessPlan
+      );
+    });
+  };
+
+  const canStartMock = canAccessSubject();
+
   return (
     <section className="mockPyq premiumMock" id="mock-tests">
       <div className="mockIntro">
-        <span className="badge">Free Practice Test</span>
+        <span className="badge">
+          {userPlanType === "FREE"
+            ? "Free Practice Test"
+            : `${userPlanType} Practice Access`}
+        </span>
 
         <h2>CTET Mock Test</h2>
 
@@ -60,26 +85,50 @@ export default function MockTest({
       )}
 
       <div className="subjectFilters">
-        {["CDP", "Maths", "EVS", "Language"].map((subject) => (
-          <button
-            key={subject}
-            className={
-              selectedSubject === subject
-                ? "subjectBtn activeSubject"
-                : "subjectBtn"
-            }
-            onClick={() => {
-              setSelectedSubject(subject);
-              loadMockQuestions(subject);
-            }}
-          >
+        {["CDP", "Maths", "EVS", "Language"].map((subject) => {
+          const unlocked = canAccessSubject(subject);
+
+          return (
+            <button
+              key={subject}
+              className={
+                selectedSubject === subject
+                  ? "subjectBtn activeSubject"
+                  : "subjectBtn"
+              }
+              onClick={() => {
+                if (!unlocked) {
+                  setActiveSection("pricing");
+                  return;
+                }
+
+                setSelectedSubject(subject);
+                loadMockQuestions(subject);
+              }}
+            >
             {subject}
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
 
       <div className="mockBox premiumMockBox">
-        {!mockStarted ? (
+        {!canStartMock ? (
+          <>
+            <h3>🔒 Upgrade Required</h3>
+
+            <p>
+              {selectedSubject} mock test unlock karne ke liye premium plan choose karo.
+            </p>
+
+            <button
+              className="btnLink"
+              onClick={() => setActiveSection("pricing")}
+            >
+              View Plans
+            </button>
+          </>
+        ) : !mockStarted ? (
           <>
             <h3>Ready to start?</h3>
 
