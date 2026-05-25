@@ -1771,6 +1771,7 @@ const studyTimeMessage =
       </React.Suspense>
     );
 }
+
 return (
         <React.Suspense
           fallback={
@@ -1922,7 +1923,11 @@ return (
   </button>
 </header>
 
- {!activeSection && (
+<Routes>
+  <Route
+    path="/"
+    element={
+      !activeSection ? (
   <>
  <div
   style={{
@@ -2472,7 +2477,736 @@ isAdmin={isAdmin}
 </footer>
 
   </>
-)}
+      ) : null
+    }
+  />
+    />
+
+    <Route
+  path="/courses"
+  element={
+    <section className="coursePages subjectHubPage">
+      <div className="sectionHeader">
+        <span className="badge">CTET / TET Courses</span>
+
+        <h2>Choose Your CTET/TET Course</h2>
+
+        <p>
+          Start with the right course path under the CTET/TET learning ecosystem.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        <button onClick={() => navigate("/courses/ctet")}>
+          📘 CTET Course
+        </button>
+
+        <button onClick={() => navigate("/courses/tet")}>
+          🧑‍🏫 TET Course
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet")}>
+          🔙 Back to CTET/TET Hub
+        </button>
+      </div>
+    </section>
+  }
+/>
+<Route
+  path="/academy-overview"
+  element={
+    <section className="coursePages academyOverviewPage">
+      <div className="sectionHeader">
+        <span className="badge">
+          AspireNest Learning Ecosystem
+        </span>
+
+        <h2>
+          Welcome to AspireNest Academy
+        </h2>
+
+        <p>
+          Explore mentor-guided learning systems,
+          AI-powered preparation, premium courses,
+          and future-ready education pathways.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        <button onClick={() => navigate("/subjects")}>
+          📚 Explore Subjects
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet")}>
+          🧑‍🏫 CTET / TET Hub
+        </button>
+
+        <button onClick={() => navigate("/pricing")}>
+          💎 Premium Plans
+        </button>
+
+        <button onClick={() => navigate("/student-dashboard")}>
+          📊 Student Dashboard
+        </button>
+
+        {isAdmin(user) && (
+          <button onClick={() => navigate("/admin")}>
+            ⚙️ Admin Panel
+          </button>
+        )}
+      </div>
+    </section>
+  }
+/>
+<Route
+  path="/subjects"
+  element={
+    <section className="coursePages subjectSelectorPage">
+      <div className="sectionHeader">
+        <span className="badge">Choose Learning Category</span>
+
+        <h2>Select Your Subject / Exam Path</h2>
+
+        <p>
+          Every subject will have its own mentor, courses, notes,
+          tests, dashboard, and premium learning system.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        <button onClick={() => navigate("/subjects/ctet-tet")}>
+          🧑‍🏫 CTET / TET
+        </button>
+
+        <button>
+          🧠 Psychology
+        </button>
+
+        <button>
+          🎓 B.Ed / D.El.Ed
+        </button>
+
+        <button>
+          🏛️ Government Exams
+        </button>
+
+        <button>
+          📚 State TET
+        </button>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/subjects/ctet-tet"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">CTET / TET</span>
+
+        <h2>CTET & TET Preparation Hub</h2>
+
+        <p>
+          Mentor-guided preparation system by
+          Dr. Varsha D. Maru.
+        </p>
+      </div>
+    </section>
+  }
+/>
+<Route
+  path="/courses/ctet"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">CTET Course</span>
+
+        <h2>CTET Complete Preparation Program</h2>
+
+        <p>
+          Learn Child Development & Pedagogy,
+          Language, Maths, EVS, and exam strategy
+          through premium mentor-guided preparation.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        <button onClick={() => navigate("/notes")}>
+          📘 CTET Notes
+        </button>
+
+        <button onClick={() => navigate("/mock-tests")}>
+          📝 CTET Mock Tests
+        </button>
+
+        <button onClick={() => navigate("/pricing")}>
+          💎 Premium Plans
+        </button>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/courses/tet"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">TET Course</span>
+
+        <h2>State TET Preparation Program</h2>
+
+        <p>
+          Prepare for State TET examinations with
+          structured courses, premium notes,
+          mock tests, and mentor guidance.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        <button onClick={() => navigate("/notes")}>
+          📘 TET Notes
+        </button>
+
+        <button onClick={() => navigate("/mock-tests")}>
+          📝 TET Mock Tests
+        </button>
+
+        <button onClick={() => navigate("/pricing")}>
+          💎 Premium Plans
+        </button>
+      </div>
+    </section>
+  }
+/>
+<Route
+  path="/notes"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Notes Library</span>
+
+        <h2>CTET/TET Notes Ecosystem</h2>
+
+        <p>
+          Access free notes, premium notes,
+          revision material, and mentor-guided study resources.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        <button onClick={() => navigate("/courses/ctet")}>
+          📘 CTET Notes
+        </button>
+
+        <button onClick={() => navigate("/courses/tet")}>
+          📚 TET Notes
+        </button>
+
+        <button onClick={() => navigate("/pricing")}>
+          💎 Unlock Premium Notes
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet")}>
+          🔙 Back to CTET/TET Hub
+        </button>
+      </div>
+    </section>
+  }
+/>
+<Route
+  path="/mock-tests"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Mock Test Center</span>
+
+        <h2>CTET/TET Mock Test Ecosystem</h2>
+
+        <p>
+          Practice with subject-wise mock tests,
+          PYQs, revision tests, and performance analytics.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        <button onClick={() => navigate("/courses/ctet")}>
+          📝 CTET Mock Tests
+        </button>
+
+        <button onClick={() => navigate("/courses/tet")}>
+          📚 TET Mock Tests
+        </button>
+
+        <button onClick={() => navigate("/student-dashboard")}>
+          📊 Performance Dashboard
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet")}>
+          🔙 Back to CTET/TET Hub
+        </button>
+      </div>
+    </section>
+  }
+/>
+<Route
+  path="/current-affairs"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Current Affairs</span>
+
+        <h2>Monthly Current Affairs Hub</h2>
+
+        <p>
+          Stay updated with exam-oriented monthly current affairs,
+          revision PDFs, and educational updates.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        <button>
+          📰 January Current Affairs
+        </button>
+
+        <button>
+          📰 February Current Affairs
+        </button>
+
+        <button>
+          📰 March Current Affairs
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet")}>
+          🔙 Back to CTET/TET Hub
+        </button>
+      </div>
+    </section>
+  }
+/>
+<Route
+  path="/pricing"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Plans & Pricing</span>
+
+        <h2>Choose Your AspireNest Plan</h2>
+
+        <p>
+          Upgrade your learning with premium notes,
+          mock tests, AI classroom, analytics, and mentor guidance.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        <button onClick={() => createPaymentRequest("Topic-wise Courses", 499)}>
+          BASIC — Topic-wise Courses
+        </button>
+
+        <button onClick={() => createPaymentRequest("Premium Batch", 999)}>
+          PREMIUM — Full Batch
+        </button>
+
+        <button onClick={() => createPaymentRequest("Personal Mentorship", 1999)}>
+          MENTORSHIP — Personal Guidance
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet")}>
+          🔙 Back to CTET/TET Hub
+        </button>
+      </div>
+    </section>
+  }
+/>
+<Route
+  path="/student-dashboard"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Student App</span>
+
+        <h2>Student Dashboard</h2>
+
+        <p>
+          Track your courses, notes, tests, premium access,
+          payment history, leaderboard, and AI classroom.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        <button onClick={() => navigate("/my-courses")}>
+          📚 My Courses
+        </button>
+
+        <button onClick={() => navigate("/my-notes")}>
+          📘 My Notes
+        </button>
+
+        <button onClick={() => navigate("/my-tests")}>
+          📝 My Tests
+        </button>
+
+        <button onClick={() => navigate("/payment-history")}>
+          🧾 Payment History
+        </button>
+
+        <button onClick={() => navigate("/leaderboard")}>
+          🏆 Leaderboard
+        </button>
+
+        <button onClick={() => navigate("/ai-classroom")}>
+          🤖 AI Classroom
+        </button>
+      </div>
+    </section>
+  }
+/>
+<Route
+  path="/my-courses"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">My Courses</span>
+
+        <h2>Your Enrolled Courses</h2>
+
+        <p>
+          Access your purchased CTET/TET learning programs.
+        </p>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/my-notes"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">My Notes</span>
+
+        <h2>Premium Notes Library</h2>
+
+        <p>
+          Access your saved and premium study materials.
+        </p>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/my-tests"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">My Tests</span>
+
+        <h2>Mock Test Analytics</h2>
+
+        <p>
+          Track mock attempts, accuracy, and performance insights.
+        </p>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/payment"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Upgrade Plan</span>
+
+        <h2>Choose Premium Access</h2>
+
+        <p>
+          Unlock premium learning features and mentor guidance.
+        </p>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/payment-history"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Payment History</span>
+
+        <h2>Your Purchase Records</h2>
+
+        <p>
+          View payment requests, approvals, and subscriptions.
+        </p>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/leaderboard"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Leaderboard</span>
+
+        <h2>Top Student Rankings</h2>
+
+        <p>
+          Compare performance with top CTET/TET learners.
+        </p>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/ai-classroom"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">AI Classroom</span>
+
+        <h2>AspireNest AI Learning Center</h2>
+
+        <p>
+          Smart revision, AI guidance, analytics,
+          and adaptive learning tools.
+        </p>
+      </div>
+    </section>
+  }
+/>
+<Route
+  path="/admin"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Admin Dashboard</span>
+
+        <h2>AspireNest Admin Control Center</h2>
+
+        <p>
+          Manage students, mentors, content,
+          payments, analytics, and platform systems.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        <button onClick={() => navigate("/admin/students")}>
+          👨‍🎓 Students
+        </button>
+
+        <button onClick={() => navigate("/admin/notes")}>
+          📘 Notes CMS
+        </button>
+
+        <button onClick={() => navigate("/admin/mock-tests")}>
+          📝 Mock Tests CMS
+        </button>
+
+        <button onClick={() => navigate("/admin/current-affairs")}>
+          📰 Current Affairs CMS
+        </button>
+
+        <button onClick={() => navigate("/admin/payments")}>
+          💳 Payments
+        </button>
+
+        <button onClick={() => navigate("/admin/analytics")}>
+          📊 Analytics
+        </button>
+
+        <button onClick={() => navigate("/admin/announcements")}>
+          📢 Announcements
+        </button>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/admin/students"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Students</span>
+
+        <h2>Student Management</h2>
+
+        <p>
+          Manage enrolled students, memberships,
+          and learning activity.
+        </p>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/admin/notes"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Notes CMS</span>
+
+        <h2>Notes Management System</h2>
+
+        <p>
+          Upload, edit, organize, and manage premium notes.
+        </p>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/admin/mock-tests"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Mock Tests CMS</span>
+
+        <h2>Mock Test Management</h2>
+
+        <p>
+          Manage questions, test series,
+          subject-wise exams, and analytics.
+        </p>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/admin/current-affairs"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Current Affairs CMS</span>
+
+        <h2>Current Affairs Management</h2>
+
+        <p>
+          Upload and manage monthly current affairs PDFs.
+        </p>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/admin/payments"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Payments</span>
+
+        <h2>Payment Approval System</h2>
+
+        <p>
+          Verify payments, manage premium access,
+          and monitor subscriptions.
+        </p>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/admin/analytics"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Analytics</span>
+
+        <h2>Platform Analytics</h2>
+
+        <p>
+          Monitor growth, student performance,
+          revenue, and engagement analytics.
+        </p>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/admin/announcements"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Announcements</span>
+
+        <h2>Announcement Management</h2>
+
+        <p>
+          Publish updates, notices,
+          and learning announcements.
+        </p>
+      </div>
+    </section>
+  }
+/>
+<Route
+  path="/privacy-policy"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Privacy Policy</span>
+
+        <h2>AspireNest Privacy Policy</h2>
+
+        <p>
+          Learn how AspireNest Academy collects,
+          stores, and protects student information.
+        </p>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/terms"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Terms & Conditions</span>
+
+        <h2>Platform Usage Terms</h2>
+
+        <p>
+          Review platform rules, memberships,
+          subscriptions, and learning policies.
+        </p>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/refund-policy"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Refund Policy</span>
+
+        <h2>Refund & Cancellation Policy</h2>
+
+        <p>
+          Understand payment refunds,
+          cancellations, and premium access policies.
+        </p>
+      </div>
+    </section>
+  }
+/>
+</Routes>
 
 {selectedCourse && (
   <div
