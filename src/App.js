@@ -2887,6 +2887,38 @@ isAdmin={isAdmin}
           🤖 AI Classroom
         </button>
       </div>
+      <div style={{ marginTop: "30px" }}>
+      <StudentDashboard
+  user={user}
+  isPremiumUser={isPremiumUser}
+  userPlanType={userPlanType}
+  membershipExpiry={membershipExpiry}
+  hasPlanAccess={hasPlanAccess}
+  isAdmin={isAdmin}
+  handlePremiumSectionAccess={handlePremiumSectionAccess}
+  handleLogout={handleLogout}
+  loadAdminData={loadAdminData}
+  mockResults={mockResults}
+  averageAccuracy={averageAccuracy}
+  weeklyPerformanceData={weeklyPerformanceData}
+  subjectPerformanceData={subjectPerformanceData}
+  highestScore={highestScore}
+  totalMockAttempts={totalMockAttempts}
+  dailyStreak={dailyStreak}
+  weeklyGrowthMessage={weeklyGrowthMessage}
+  estimatedRank={estimatedRank}
+  rankPredictionMessage={rankPredictionMessage}
+  estimatedStudyHours={estimatedStudyHours}
+  studyTimeMessage={studyTimeMessage}
+  aiStudyPlan={aiStudyPlan}
+  analyticsMessage={analyticsMessage}
+  weakestSubject={weakestSubject}
+  smartRecommendation={smartRecommendation}
+  performanceChartData={performanceChartData}
+  subjectChartData={subjectChartData}
+  chartColors={chartColors}
+/>
+</div>
     </section>
   }
 />
@@ -3403,6 +3435,13 @@ isAdmin={isAdmin}
           🔙 Back to CTET/TET Hub
         </button>
       </div>
+      <div style={{ marginTop: "30px" }}>
+  <Pricing
+    createPaymentRequest={createPaymentRequest}
+    isPremiumUser={isPremiumUser}
+    setActiveSection={setActiveSection}
+  />
+</div>
     </section>
   }
 />
