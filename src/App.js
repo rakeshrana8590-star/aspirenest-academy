@@ -3293,6 +3293,18 @@ isAdmin={isAdmin}
           🔙 Back to CTET/TET Hub
         </button>
       </div>
+      <div style={{ marginTop: "30px" }}>
+  <NotesCMS
+    notesData={notesData}
+    firebaseNotes={firebaseNotes}
+    handleNoteAccess={handleNoteAccess}
+    isPremiumUser={isPremiumUser}
+    setActiveSection={setActiveSection}
+    activePlan={activePlan}
+    userPlanType={userPlanType}
+    hasPlanAccess={hasPlanAccess}
+  />
+</div>
     </section>
   }
 />
@@ -3325,6 +3337,9 @@ isAdmin={isAdmin}
           🔙 Back to CTET/TET Hub
         </button>
       </div>
+      <div style={{ marginTop: "30px" }}>
+  <MockTest />
+</div>
     </section>
   }
 />
@@ -3353,6 +3368,9 @@ isAdmin={isAdmin}
           🔙 Back to CTET/TET Hub
         </button>
       </div>
+      <div style={{ marginTop: "30px" }}>
+  <CurrentAffairs />
+</div>
     </section>
   }
 />
