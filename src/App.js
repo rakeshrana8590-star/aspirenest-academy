@@ -1802,7 +1802,7 @@ return (
   <button
   onClick={() => {
     setProfileMenuOpen(false);
-    navigate("/courses");
+    navigate("/subjects/ctet-tet/courses");
   }}
 >
   Courses
@@ -1811,7 +1811,7 @@ return (
 <button
   onClick={() => {
     setProfileMenuOpen(false);
-    navigate("/notes");
+    navigate("/subjects/ctet-tet/notes");
   }}
 >
   Notes
@@ -1820,7 +1820,7 @@ return (
 <button
   onClick={() => {
     setProfileMenuOpen(false);
-    navigate("/pricing");
+    navigate("/subjects/ctet-tet/pricing");
   }}
 >
   Pricing
@@ -1970,7 +1970,7 @@ return (
 </button>
 
 <button
-  onClick={() => navigate("/notes")}
+  onClick={() => navigate("/subjects/ctet-tet/notes")}
 >
   Free Notes
 </button>
@@ -2061,7 +2061,7 @@ return (
   <div className="buttons">
   <button
     className="btnLink"
-    onClick={() => navigate("/courses")}
+    onClick={() => navigate("/subjects/ctet-tet/courses")}
   >
     Explore Courses
   </button>
@@ -2449,7 +2449,7 @@ isAdmin={isAdmin}
 
     <div className="footerLinks">
       <h3>Quick Links</h3>
-      <button onClick={() => navigate("/courses")}>
+      <button onClick={() => navigate("/subjects/ctet-tet/courses")}>
   Courses
 </button>
 <button onClick={() => navigate("/cdp")}>
@@ -2458,7 +2458,7 @@ isAdmin={isAdmin}
 <button onClick={() => navigate("/resources")}>
   Free Resources
 </button>
-      <button onClick={() => navigate("/pricing")}>
+      <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
   Pricing
 </button>
     </div>
@@ -2541,7 +2541,7 @@ isAdmin={isAdmin}
           🧑‍🏫 CTET / TET Hub
         </button>
 
-        <button onClick={() => navigate("/pricing")}>
+        <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
           💎 Premium Plans
         </button>
 
@@ -2601,16 +2601,43 @@ isAdmin={isAdmin}
 <Route
   path="/subjects/ctet-tet"
   element={
-    <section className="coursePages">
+    <section className="coursePages subjectHubPage">
       <div className="sectionHeader">
-        <span className="badge">CTET / TET</span>
+        <span className="badge">CTET / TET Subject Hub</span>
 
-        <h2>CTET & TET Preparation Hub</h2>
+        <h2>CTET & TET Preparation Ecosystem</h2>
 
         <p>
-          Mentor-guided preparation system by
-          Dr. Varsha D. Maru.
+          A complete mentor-guided learning system with courses,
+          notes, mock tests, current affairs, premium plans,
+          dashboard, and guidance by Dr. Varsha D. Maru.
         </p>
+      </div>
+
+      <div className="courseGrid">
+        <button onClick={() => navigate("/subjects/ctet-tet/courses")}>
+          📚 Courses
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet/notes")}>
+          📘 Notes
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet/mock-tests")}>
+          📝 Mock Tests
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet/current-affairs")}>
+          📰 Current Affairs
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
+          💎 Plans
+        </button>
+
+        <button onClick={() => navigate("/student-dashboard")}>
+          📊 Student Dashboard
+        </button>
       </div>
     </section>
   }
@@ -2632,15 +2659,15 @@ isAdmin={isAdmin}
       </div>
 
       <div className="courseGrid">
-        <button onClick={() => navigate("/notes")}>
+        <button onClick={() => navigate("/subjects/ctet-tet/notes")}>
           📘 CTET Notes
         </button>
 
-        <button onClick={() => navigate("/mock-tests")}>
+        <button onClick={() => navigate("/subjects/ctet-tet/mock-tests")}>
           📝 CTET Mock Tests
         </button>
 
-        <button onClick={() => navigate("/pricing")}>
+        <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
           💎 Premium Plans
         </button>
       </div>
@@ -2665,15 +2692,15 @@ isAdmin={isAdmin}
       </div>
 
       <div className="courseGrid">
-        <button onClick={() => navigate("/notes")}>
+        <button onClick={() => navigate("/subjects/ctet-tet/notes")}>
           📘 TET Notes
         </button>
 
-        <button onClick={() => navigate("/mock-tests")}>
+        <button onClick={() => navigate("/subjects/ctet-tet/mock-tests")}>
           📝 TET Mock Tests
         </button>
 
-        <button onClick={() => navigate("/pricing")}>
+        <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
           💎 Premium Plans
         </button>
       </div>
@@ -2704,7 +2731,7 @@ isAdmin={isAdmin}
           📚 TET Notes
         </button>
 
-        <button onClick={() => navigate("/pricing")}>
+        <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
           💎 Unlock Premium Notes
         </button>
 
@@ -3206,6 +3233,161 @@ isAdmin={isAdmin}
     </section>
   }
 />
+<Route
+  path="/subjects/ctet-tet/courses"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">CTET / TET Courses</span>
+
+        <h2>Courses for CTET & TET Preparation</h2>
+
+        <p>
+          Choose structured learning programs, topic-wise courses,
+          crash courses, and mentor-guided preparation paths.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        <button onClick={() => navigate("/courses/ctet")}>
+          📘 CTET Course
+        </button>
+
+        <button onClick={() => navigate("/courses/tet")}>
+          🧑‍🏫 TET Course
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet")}>
+          🔙 Back to CTET/TET Hub
+        </button>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/subjects/ctet-tet/notes"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">CTET / TET Notes</span>
+
+        <h2>Notes & Revision Library</h2>
+
+        <p>
+          Access free notes, premium notes, revision sheets,
+          CDP notes, PYQ notes, and mentor-curated study material.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        <button onClick={() => navigate("/subjects/ctet-tet/notes")}>
+          📘 Open Notes Library
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
+          💎 Unlock Premium Notes
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet")}>
+          🔙 Back to CTET/TET Hub
+        </button>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/subjects/ctet-tet/mock-tests"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">CTET / TET Mock Tests</span>
+
+        <h2>Practice & Performance Center</h2>
+
+        <p>
+          Attempt subject-wise mock tests, PYQs, revision tests,
+          and track your score with analytics.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        <button onClick={() => navigate("/subjects/ctet-tet/mock-tests")}>
+          📝 Open Mock Tests
+        </button>
+
+        <button onClick={() => navigate("/leaderboard")}>
+          🏆 Leaderboard
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet")}>
+          🔙 Back to CTET/TET Hub
+        </button>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/subjects/ctet-tet/current-affairs"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">CTET / TET Current Affairs</span>
+
+        <h2>Exam-Oriented Current Affairs</h2>
+
+        <p>
+          Monthly PDFs, education updates, NEP/NCF-related content,
+          and teaching-exam focused current affairs.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        <button onClick={() => navigate("/subjects/ctet-tet/current-affairs")}>
+          📰 Open Current Affairs
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet")}>
+          🔙 Back to CTET/TET Hub
+        </button>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/subjects/ctet-tet/pricing"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">CTET / TET Plans</span>
+
+        <h2>Choose Your CTET/TET Learning Plan</h2>
+
+        <p>
+          Select Basic, Premium, or Mentorship access for
+          notes, tests, dashboard, AI classroom, and mentor guidance.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
+          💎 View Plans
+        </button>
+
+        <button onClick={() => navigate("/payment")}>
+          🧾 Upgrade Now
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet")}>
+          🔙 Back to CTET/TET Hub
+        </button>
+      </div>
+    </section>
+  }
+/>
 </Routes>
 
 {selectedCourse && (
@@ -3542,7 +3724,7 @@ ${paymentProof}
           CTET/TET learning paths and topic-wise preparation.
         </p>
 
-        <button onClick={() => navigate("/courses")}>
+        <button onClick={() => navigate("/subjects/ctet-tet/courses")}>
   Open
 </button>
       </div>
@@ -3566,7 +3748,7 @@ ${paymentProof}
           Premium and free revision notes for quick learning.
         </p>
 
-        <button onClick={() => navigate("/notes")}>
+        <button onClick={() => navigate("/subjects/ctet-tet/notes")}>
   Open
 </button>
       </div>
@@ -3586,7 +3768,7 @@ ${paymentProof}
           Practice tests, score tracking and exam preparation.
         </p>
 
-        <button onClick={() => navigate("/mock-tests")}>
+        <button onClick={() => navigate("/subjects/ctet-tet/mock-tests")}>
   Open
 </button>
       </div>
@@ -3598,7 +3780,7 @@ ${paymentProof}
           Monthly PDF updates and exam-focused current affairs.
         </p>
 
-        <button onClick={() => navigate("/current-affairs")}>
+        <button onClick={() => navigate("/subjects/ctet-tet/current-affairs")}>
   Open
 </button>
       </div>
@@ -3632,7 +3814,7 @@ ${paymentProof}
           Unlock full course, mock tests, notes and mentorship.
         </p>
 
-        <button onClick={() => navigate("/pricing")}>
+        <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
   Open
 </button>
       </div>
@@ -4015,7 +4197,7 @@ loadPaymentRequests={loadPaymentRequests}
             <div className="popupButtons">
             <button
   className="btnLink"
-  onClick={() => navigate("/pricing")}
+  onClick={() => navigate("/subjects/ctet-tet/pricing")}
 >
   Join Course
 </button>
@@ -4046,17 +4228,17 @@ loadPaymentRequests={loadPaymentRequests}
         <button
   onClick={() => {
     setProfileMenuOpen(false);
-    navigate("/courses");
+    navigate("/subjects/ctet-tet/courses");
   }}
 >
   Courses
 </button>
 
-<button onClick={() => navigate("/notes")}>
+<button onClick={() => navigate("/subjects/ctet-tet/notes")}>
   Notes
 </button>
 
-<button onClick={() => navigate("/pricing")}>
+<button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
   Pricing
 </button>
 
@@ -4105,7 +4287,7 @@ loadPaymentRequests={loadPaymentRequests}
     <button
       onClick={() => {
         setProfileMenuOpen(false);
-        navigate("/pricing");
+        navigate("/subjects/ctet-tet/pricing");
       }}
     >
       Premium Access
@@ -4148,19 +4330,19 @@ loadPaymentRequests={loadPaymentRequests}
         </nav>
       </header>
       <div className="stickySectionNav">
-      <button onClick={() => navigate("/courses")}>
+      <button onClick={() => navigate("/subjects/ctet-tet/courses")}>
   Courses
 </button>
-<button onClick={() => navigate("/notes")}>
+<button onClick={() => navigate("/subjects/ctet-tet/notes")}>
   Notes
 </button>
-<button onClick={() => navigate("/current-affairs")}>
+<button onClick={() => navigate("/subjects/ctet-tet/current-affairs")}>
   Current Affairs
 </button>
-<button onClick={() => navigate("/mock-tests")}>
+<button onClick={() => navigate("/subjects/ctet-tet/mock-tests")}>
   Mock Tests
 </button>
-<button onClick={() => navigate("/pricing")}>
+<button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
   Premium
 </button>
   <button onClick={() => navigate("/contact")}>
@@ -4293,7 +4475,7 @@ loadPaymentRequests={loadPaymentRequests}
 
             <button
   className="btnLink"
-  onClick={() => navigate("/courses")}
+  onClick={() => navigate("/subjects/ctet-tet/courses")}
 >
   Explore Courses
 </button>
@@ -4313,7 +4495,7 @@ loadPaymentRequests={loadPaymentRequests}
 
             <button
   className="btnLink"
-  onClick={() => navigate("/pricing")}
+  onClick={() => navigate("/subjects/ctet-tet/pricing")}
 >
   Join Premium
 </button>
