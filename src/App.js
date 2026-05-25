@@ -3085,6 +3085,43 @@ isAdmin={isAdmin}
           📢 Announcements
         </button>
       </div>
+      <div style={{ marginTop: "30px" }}>
+  <AdminPanel
+    user={user}
+    isAdmin={isAdmin}
+    activeAdminTab={activeAdminTab}
+    setActiveAdminTab={setActiveAdminTab}
+    students={students || []}
+    enquiries={enquiries || []}
+    mockResults={mockResults || []}
+    leaderboard={leaderboard || []}
+    mockQuestions={mockQuestions || []}
+    notesData={notesData || []}
+    firebaseNotes={firebaseNotes || []}
+    currentAffairs={currentAffairsList || []}
+    currentAffairsList={currentAffairsList || []}
+    fallbackCurrentAffairs={currentAffairsList || []}
+    announcements={announcements || []}
+    paymentHistory={paymentHistory || []}
+    paymentRequests={paymentRequests || []}
+    loadPaymentRequests={loadPaymentRequests}
+    loadAdminData={loadAdminData}
+    loadLeaderboard={loadLeaderboard}
+    loadPaymentHistory={loadPaymentHistory}
+    handlePremiumControl={handlePremiumControl}
+    approvePaymentRequest={approvePaymentRequest}
+    handleDeleteMockQuestion={handleDeleteMockQuestion}
+    handleAddMockQuestion={handleAddMockQuestion}
+    handleSaveNote={handleSaveNote}
+    handleEditNote={handleEditNote}
+    handleDeleteNote={handleDeleteNote}
+    handleSaveCurrentAffairs={handleSaveCurrentAffairs}
+    handleEditCurrentAffairs={handleEditCurrentAffairs}
+    handleDeleteCurrentAffairs={handleDeleteCurrentAffairs}
+    handleAddAnnouncement={handleAddAnnouncement}
+    handleDeleteAnnouncement={handleDeleteAnnouncement}
+  />
+</div>
     </section>
   }
 />
