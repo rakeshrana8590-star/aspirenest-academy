@@ -292,27 +292,30 @@ const [paymentHistory, setPaymentHistory] = useState([]);
   React.useEffect(() => {
     const routeToSection = {
       "/": null,
+    
+      "/learning": "learning-hub",
+    
       "/courses": "courses",
+      "/learning-paths": "learning-paths",
       "/notes": "notes",
+    
       "/mock-tests": "mock-tests",
       "/current-affairs": "current-affairs",
+    
       "/pricing": "pricing",
-      "/contact": "contact",
+    
       "/student-dashboard": "student-profile",
+    
       "/admin": "admin-panel",
+    
+      "/contact": "contact",
     };
   
     const sectionName = routeToSection[location.pathname];
   
     if (sectionName === undefined) return;
   
-    if (
-      sectionName === "notes" &&
-      !hasPlanAccess("PREMIUM")
-    ) {
-      setActiveSection("pricing");
-      return;
-    }
+  
   
     if (
       sectionName === "current-affairs" &&
@@ -1944,13 +1947,15 @@ return (
 
     <p>Bilingual preparation platform for Indian students.</p>
     <div className="heroButtons">
-  <button onClick={() => setActiveSection("courses")}>
-    Start Learning
-  </button>
+    <button onClick={() => navigate("/learning-paths")}>
+  Open
+</button>
 
-  <button onClick={() => setActiveSection("notes")}>
-    Free Notes
-  </button>
+<button
+  onClick={() => navigate("/notes")}
+>
+  Free Notes
+</button>
 </div>
 
 <div className="heroStats">
@@ -2748,6 +2753,157 @@ ${paymentProof}
     >
       ← Back to Dashboard
     </button>
+    {activeSection === "learning-hub" && (
+  <section className="learningHubSection">
+
+    <p className="learningHubTag">
+      AspireNest Learning Hub
+    </p>
+
+    <h1 className="learningHubTitle">
+      Choose what you want to study today.
+    </h1>
+
+    <p className="learningHubSubtitle">
+      Open any section directly without scrolling the full website.
+    </p>
+
+    <h2 className="learningHubHeading">
+      Start Learning
+    </h2>
+
+    <div className="learningHubGrid">
+
+      <div className="learningHubCard">
+        <div className="learningHubIcon">📖</div>
+        <h3>Courses</h3>
+        <p>
+          CTET/TET learning paths and topic-wise preparation.
+        </p>
+
+        <button onClick={() => navigate("/courses")}>
+  Open
+</button>
+      </div>
+
+      <div className="learningHubCard">
+        <div className="learningHubIcon">🛣️</div>
+        <h3>Learning Paths</h3>
+        <p>
+          Beginner to premium structured learning programs.
+        </p>
+
+        <button onClick={() => navigate("/learning-paths")}>
+  Open
+</button>
+      </div>
+
+      <div className="learningHubCard">
+        <div className="learningHubIcon">📝</div>
+        <h3>Notes</h3>
+        <p>
+          Premium and free revision notes for quick learning.
+        </p>
+
+        <button onClick={() => navigate("/notes")}>
+  Open
+</button>
+      </div>
+
+    </div>
+
+    <h2 className="learningHubHeading">
+      Practice
+    </h2>
+
+    <div className="learningHubGrid">
+
+      <div className="learningHubCard">
+        <div className="learningHubIcon">✅</div>
+        <h3>Mock Tests</h3>
+        <p>
+          Practice tests, score tracking and exam preparation.
+        </p>
+
+        <button onClick={() => navigate("/mock-tests")}>
+  Open
+</button>
+      </div>
+
+      <div className="learningHubCard">
+        <div className="learningHubIcon">📰</div>
+        <h3>Current Affairs</h3>
+        <p>
+          Monthly PDF updates and exam-focused current affairs.
+        </p>
+
+        <button onClick={() => navigate("/current-affairs")}>
+  Open
+</button>
+      </div>
+
+      <div className="learningHubCard">
+        <div className="learningHubIcon">📊</div>
+        <h3>My Progress</h3>
+        <p>
+          Student dashboard, analytics and learning progress.
+        </p>
+
+        <button
+  onClick={() => navigate("/student-dashboard")}
+>
+  Open
+</button>
+      </div>
+
+    </div>
+
+    <h2 className="learningHubHeading">
+      Premium
+    </h2>
+
+    <div className="learningHubGrid">
+
+      <div className="learningHubCard">
+        <div className="learningHubIcon">👑</div>
+        <h3>Premium</h3>
+        <p>
+          Unlock full course, mock tests, notes and mentorship.
+        </p>
+
+        <button onClick={() => navigate("/pricing")}>
+  Open
+</button>
+      </div>
+
+      <div className="learningHubCard">
+        <div className="learningHubIcon">📣</div>
+        <h3>Announcements</h3>
+        <p>
+          Latest updates, exam alerts and platform notifications.
+        </p>
+
+        <button onClick={() => setActiveSection("announcements")}>
+  Open
+</button>
+      </div>
+
+      <div className="learningHubCard">
+        <div className="learningHubIcon">⚙️</div>
+        <h3>Admin Panel</h3>
+        <p>
+          Manage students, notes, mock tests and analytics.
+        </p>
+
+        <button onClick={() => navigate("/admin")}>
+  Open
+</button>
+      </div>
+
+    </div>
+
+  </section>
+)}
     {activeSection === "learning-paths" && (
   <section className="plansSection" id="learning-paths">
     <h2>Learning Paths</h2>
