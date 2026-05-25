@@ -292,30 +292,32 @@ const [paymentHistory, setPaymentHistory] = useState([]);
   React.useEffect(() => {
     const routeToSection = {
       "/": null,
-    
+  
       "/learning": "learning-hub",
-    
+  
       "/courses": "courses",
       "/learning-paths": "learning-paths",
+  
       "/notes": "notes",
-    
+  
+      "/resources": "resources",
+      "/cdp": "cdp",
+  
       "/mock-tests": "mock-tests",
       "/current-affairs": "current-affairs",
-    
+  
       "/pricing": "pricing",
-    
+  
       "/student-dashboard": "student-profile",
-    
+  
       "/admin": "admin-panel",
-    
+  
       "/contact": "contact",
     };
   
     const sectionName = routeToSection[location.pathname];
   
     if (sectionName === undefined) return;
-  
-  
   
     if (
       sectionName === "current-affairs" &&
@@ -326,6 +328,17 @@ const [paymentHistory, setPaymentHistory] = useState([]);
     }
   
     setActiveSection(sectionName);
+  
+    setTimeout(() => {
+      const section = document.getElementById(sectionName);
+  
+      if (section) {
+        section.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    }, 100);
   }, [location.pathname, userPlanType]);
   const handleRegister = async () => {
     try {
@@ -1947,8 +1960,8 @@ return (
 
     <p>Bilingual preparation platform for Indian students.</p>
     <div className="heroButtons">
-    <button onClick={() => navigate("/learning-paths")}>
-  Open
+    <button onClick={() => navigate("/learning")}>
+  Start Learning
 </button>
 
 <button
@@ -3449,7 +3462,7 @@ loadPaymentRequests={loadPaymentRequests}
     className="btnLink"
     onClick={() => navigate("/learning")}
   >
-    Start Learning →
+    Start Learning
   </button>
 </div>
   </div>
