@@ -2041,11 +2041,17 @@ return (
   </div>
 
   <div className="buttons">
-    <a href="#courses" className="btnLink">Explore Courses</a>
-    <button
-  className="secondaryBtn"
-  onClick={() => setShowMentorProfile(true)}
->
+  <button
+    className="btnLink"
+    onClick={() => navigate("/courses")}
+  >
+    Explore Courses
+  </button>
+
+  <button
+    className="secondaryBtn"
+    onClick={() => setShowMentorProfile(true)}
+  >
   Contact Mentor
 </button>
 <button
@@ -2425,10 +2431,18 @@ isAdmin={isAdmin}
 
     <div className="footerLinks">
       <h3>Quick Links</h3>
-      <a href="#courses">Courses</a>
-      <a href="#cdp">CDP Module</a>
-      <a href="#resources">Free Resources</a>
-      <a href="#pricing">Pricing</a>
+      <button onClick={() => navigate("/courses")}>
+  Courses
+</button>
+<button onClick={() => navigate("/cdp")}>
+  CDP Module
+</button>
+<button onClick={() => navigate("/resources")}>
+  Free Resources
+</button>
+      <button onClick={() => navigate("/pricing")}>
+  Pricing
+</button>
     </div>
 
     <div className="footerContact">
@@ -3252,9 +3266,12 @@ loadPaymentRequests={loadPaymentRequests}
               ))}
             </ul>
             <div className="popupButtons">
-              <a href="#pricing" className="btnLink">
-                Join Course
-              </a>
+            <button
+  className="btnLink"
+  onClick={() => navigate("/pricing")}
+>
+  Join Course
+</button>
 
               <a
                 href="https://wa.me/917304256002"
@@ -3279,11 +3296,22 @@ loadPaymentRequests={loadPaymentRequests}
   </div>
 
         <nav className={mobileMenuOpen ? "nav mobile-open" : "nav"}>
-        <a href="#courses">Courses</a>
+        <button
+  onClick={() => {
+    setProfileMenuOpen(false);
+    navigate("/courses");
+  }}
+>
+  Courses
+</button>
 
-          <a href="#notes">Notes</a>
+<button onClick={() => navigate("/notes")}>
+  Notes
+</button>
 
-          <a href="#pricing">Pricing</a>
+<button onClick={() => navigate("/pricing")}>
+  Pricing
+</button>
 
           <button
   onClick={() => {
@@ -3359,7 +3387,9 @@ loadPaymentRequests={loadPaymentRequests}
 )}
   </div>
 ) : (
-  <a href="#student-profile">Login</a>
+  <button onClick={() => navigate("/student-profile")}>
+  Login
+</button>
 )}
           <button
   className="mobile-menu-btn"
@@ -3371,12 +3401,24 @@ loadPaymentRequests={loadPaymentRequests}
         </nav>
       </header>
       <div className="stickySectionNav">
-  <a href="#courses">Courses</a>
-  <a href="#notes">Notes</a>
-  <a href="#current-affairs">Current Affairs</a>
-  <a href="#mock-tests">Mock Tests</a>
-  <a href="#premium-section">Premium</a>
-  <a href="#contact">Contact</a>
+      <button onClick={() => navigate("/courses")}>
+  Courses
+</button>
+<button onClick={() => navigate("/notes")}>
+  Notes
+</button>
+<button onClick={() => navigate("/current-affairs")}>
+  Current Affairs
+</button>
+<button onClick={() => navigate("/mock-tests")}>
+  Mock Tests
+</button>
+<button onClick={() => navigate("/pricing")}>
+  Premium
+</button>
+  <button onClick={() => navigate("/contact")}>
+  Contact
+</button>
 </div>
 <section className="hero">
   <div className="heroContent">
@@ -3403,10 +3445,13 @@ loadPaymentRequests={loadPaymentRequests}
     <p>Bilingual preparation platform for Indian students.</p>
 
     <div className="buttons">
-      <a href="#courses" className="btnLink">
-        Start Learning →
-      </a>
-    </div>
+  <button
+    className="btnLink"
+    onClick={() => navigate("/learning")}
+  >
+    Start Learning →
+  </button>
+</div>
   </div>
 
   <div className="card heroGoalCard">
@@ -3480,9 +3525,12 @@ loadPaymentRequests={loadPaymentRequests}
               <li>📅 7-Day Study Plan</li>
             </ul>
 
-            <a href="#resources" className="btnLink">
-              Start Free
-            </a>
+            <button
+  className="btnLink"
+  onClick={() => navigate("/resources")}
+>
+  Start Free
+</button>
           </div>
 
           <div className="planCard">
@@ -3496,9 +3544,12 @@ loadPaymentRequests={loadPaymentRequests}
               <li>🎯 PYQ Practice</li>
             </ul>
 
-            <a href="#courses" className="btnLink">
-              Explore Courses
-            </a>
+            <button
+  className="btnLink"
+  onClick={() => navigate("/courses")}
+>
+  Explore Courses
+</button>
           </div>
 
           <div className="planCard premiumCard2">
@@ -3513,9 +3564,12 @@ loadPaymentRequests={loadPaymentRequests}
               <li>🏆 Mentorship Support</li>
             </ul>
 
-            <a href="#pricing" className="btnLink">
-              Join Premium
-            </a>
+            <button
+  className="btnLink"
+  onClick={() => navigate("/pricing")}
+>
+  Join Premium
+</button>
           </div>
         </div>
       </section>
