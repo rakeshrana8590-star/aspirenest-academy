@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 export default function MockTest({
   mockStarted,
   setMockStarted,
@@ -22,6 +24,9 @@ export default function MockTest({
   hasPlanAccess,
   setActiveSection,
 }) {
+
+  const navigate = useNavigate();
+
   const safeQuestions = mockQuestions || [];
   const currentMockQuestion = safeQuestions[currentQuestion];
 
@@ -29,15 +34,13 @@ export default function MockTest({
     if (safeQuestions.length === 0) {
       return true;
     }
-  
+
     return safeQuestions.some((question) => {
       if (question.accessPlan === "FREE") {
         return true;
       }
-  
-      return hasPlanAccess(
-        question.accessPlan
-      );
+
+      return hasPlanAccess(question.accessPlan);
     });
   };
 
@@ -98,7 +101,7 @@ export default function MockTest({
               }
               onClick={() => {
                 if (!unlocked) {
-                  setActiveSection("pricing");
+                  navigate("/subjects/ctet-tet/pricing");
                   return;
                 }
 
@@ -106,7 +109,7 @@ export default function MockTest({
                 loadMockQuestions(subject);
               }}
             >
-            {subject}
+              {subject}
             </button>
           );
         })}
@@ -123,7 +126,7 @@ export default function MockTest({
 
             <button
               className="btnLink"
-              onClick={() => setActiveSection("pricing")}
+              onClick={() => navigate("/subjects/ctet-tet/pricing")}
             >
               View Plans
             </button>

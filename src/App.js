@@ -104,7 +104,7 @@ const [contactEmail, setContactEmail] = useState("");
       if (hasPlanAccess(requiredPlan)) {
         setActiveSection(sectionName);
       } else {
-        setActiveSection("pricing");
+        navigate("/subjects/ctet-tet/pricing");;
       }
     };
   
@@ -323,7 +323,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
       sectionName === "current-affairs" &&
       !hasPlanAccess("PREMIUM")
     ) {
-      setActiveSection("pricing");
+      navigate("/subjects/ctet-tet/pricing");
       return;
     }
   
@@ -459,7 +459,7 @@ setEnquiries([]);
       accessType !== "FREE" &&
       !hasPlanAccess(accessType)
     ) {
-      setActiveSection("pricing");
+      navigate("/subjects/ctet-tet/pricing");
   
       alert(
         `This content requires ${accessType} membership access.`
@@ -1860,7 +1860,7 @@ return (
   <div className="profileDropdown">
     <button
       onClick={() => {
-        setActiveSection("student-profile");
+        navigate("/student-dashboard");
         setProfileMenuOpen(false);
       }}
     >
@@ -1869,7 +1869,7 @@ return (
 
     <button
       onClick={() => {
-        setActiveSection("pricing");
+        navigate("/subjects/ctet-tet/pricing");
         setProfileMenuOpen(false);
       }}
     >
@@ -1879,7 +1879,7 @@ return (
     {isAdmin(user) && (
       <button
         onClick={() => {
-          setActiveSection("admin-panel");
+          navigate("/admin");
           setProfileMenuOpen(false);
         }}
       >
@@ -1899,7 +1899,7 @@ return (
 )}
   </div>
 ) : (
-  <button onClick={() => setActiveSection("student-profile")}>
+  <button onClick={() => navigate("/student-dashboard")}>
     Login
   </button>
 )}
@@ -2308,7 +2308,10 @@ isAdmin={isAdmin}
     </p>
 
     <div className="freeGrid">
-      <div className="freeCard" onClick={() => setActiveSection("notes")}>
+    <div
+  className="freeCard"
+  onClick={() => navigate("/subjects/ctet-tet/notes")}
+>
         📘 Free CDP Notes
       </div>
 
@@ -2316,7 +2319,10 @@ isAdmin={isAdmin}
         🗓️ 7-Day Study Plan
       </div>
 
-      <div className="freeCard" onClick={() => setActiveSection("mock-tests")}>
+      <div
+  className="freeCard"
+  onClick={() => navigate("/subjects/ctet-tet/mock-tests")}
+>
         📝 Free Mock Test
       </div>
 
@@ -2925,7 +2931,7 @@ isAdmin={isAdmin}
 <Route
   path="/my-courses"
   element={
-    <section className="coursePages">
+    <section className="coursePages" style={{ paddingTop: "190px" }}>
       <div className="sectionHeader">
         <span className="badge">My Courses</span>
 
@@ -2934,6 +2940,12 @@ isAdmin={isAdmin}
         <p>
           Access your purchased CTET/TET learning programs.
         </p>
+        <button
+  className="btnPrimary"
+  onClick={() => navigate("/student-dashboard")}
+>
+  ← Back to Dashboard
+</button>
       </div>
     </section>
   }
@@ -3438,7 +3450,15 @@ isAdmin={isAdmin}
         </button>
       </div>
       <div style={{ marginTop: "30px" }}>
-  <CurrentAffairs />
+      <CurrentAffairs
+  currentAffairsList={currentAffairsList}
+  fallbackCurrentAffairs={fallbackCurrentAffairs}
+  handleNoteAccess={handleNoteAccess}
+  isPremiumUser={isPremiumUser}
+  userPlanType={userPlanType}
+  hasPlanAccess={hasPlanAccess}
+  setActiveSection={setActiveSection}
+/>
 </div>
     </section>
   }
@@ -3536,7 +3556,7 @@ isAdmin={isAdmin}
         className="btnLink"
         onClick={() => {
           setSelectedCourse(null);
-          setActiveSection("pricing");
+          navigate("/subjects/ctet-tet/pricing");
         }}
       >
         View Plans & Enroll
@@ -3920,7 +3940,7 @@ ${paymentProof}
           Latest updates, exam alerts and platform notifications.
         </p>
 
-        <button onClick={() => setActiveSection("announcements")}>
+        <button onClick={() => navigate("/announcements")}>
   Open
 </button>
       </div>
@@ -3961,9 +3981,9 @@ ${paymentProof}
           <li>📅 7-Day Study Plan</li>
         </ul>
 
-        <button onClick={() => setActiveSection("notes")}>
-          Start Free
-        </button>
+        <button onClick={() => navigate("/subjects/ctet-tet/notes")}>
+  Start Free
+</button>
       </div>
 
       <div className="planCard">
@@ -3977,9 +3997,9 @@ ${paymentProof}
           <li>🎯 PYQ Practice</li>
         </ul>
 
-        <button onClick={() => setActiveSection("courses")}>
-          Explore Courses
-        </button>
+        <button onClick={() => navigate("/subjects/ctet-tet/courses")}>
+  Explore Courses
+</button>
       </div>
 
       <div className="planCard premiumCard2">
@@ -3994,7 +4014,7 @@ ${paymentProof}
           <li>🏆 Mentorship Support</li>
         </ul>
 
-        <button onClick={() => setActiveSection("pricing")}>
+        <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
           Join Premium
         </button>
       </div>
@@ -4228,40 +4248,7 @@ loadPaymentRequests={loadPaymentRequests}
     />
   </section>
 )}
-{activeSection === "student-profile" && (
-  <section id="student-profile">
-    <StudentDashboard
-      user={user}
-      isPremiumUser={isPremiumUser}
-      userPlanType={userPlanType}
-      membershipExpiry={membershipExpiry}
-      hasPlanAccess={hasPlanAccess}
-      isAdmin={isAdmin}
-      handlePremiumSectionAccess={handlePremiumSectionAccess}
-      handleLogout={handleLogout}
-      loadAdminData={loadAdminData}
-      mockResults={mockResults}
-      averageAccuracy={averageAccuracy}
-      weeklyPerformanceData={weeklyPerformanceData}
-      subjectPerformanceData={subjectPerformanceData}
-      highestScore={highestScore}
-      totalMockAttempts={totalMockAttempts}
-      dailyStreak={dailyStreak}
-      weeklyGrowthMessage={weeklyGrowthMessage}
-      estimatedRank={estimatedRank}
-      rankPredictionMessage={rankPredictionMessage}
-      estimatedStudyHours={estimatedStudyHours}
-      studyTimeMessage={studyTimeMessage}
-      aiStudyPlan={aiStudyPlan}
-      analyticsMessage={analyticsMessage}
-      weakestSubject={weakestSubject}
-      smartRecommendation={smartRecommendation}
-      performanceChartData={performanceChartData}
-      subjectChartData={subjectChartData}
-      chartColors={chartColors}
-    />
-  </section>
-)}
+
   </div>
 )}
 {false && (

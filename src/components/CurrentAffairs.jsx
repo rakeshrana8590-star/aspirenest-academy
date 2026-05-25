@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 export default function CurrentAffairs({
   currentAffairsList,
   fallbackCurrentAffairs,
@@ -7,10 +9,16 @@ export default function CurrentAffairs({
   hasPlanAccess,
   setActiveSection,
 }) {
+
+  const navigate = useNavigate();
+
+  const safeCurrentAffairsList = currentAffairsList || [];
+  const safeFallbackCurrentAffairs = fallbackCurrentAffairs || [];
+  
   const finalCurrentAffairs =
-    currentAffairsList.length > 0
-      ? currentAffairsList
-      : fallbackCurrentAffairs;
+    safeCurrentAffairsList.length > 0
+      ? safeCurrentAffairsList
+      : safeFallbackCurrentAffairs;
 
   const canAccessCurrentAffair = (item) => {
     if (item.type === "FREE") return true;
@@ -83,7 +91,7 @@ export default function CurrentAffairs({
                   if (unlocked) {
                     handleNoteAccess(item);
                   } else {
-                    setActiveSection("pricing");
+                    navigate("/subjects/ctet-tet/pricing");
                   }
                 }}
               >

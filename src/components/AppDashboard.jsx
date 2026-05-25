@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   BookOpen,
   Route,
@@ -17,6 +18,9 @@ export default function AppDashboard({
   user,
   isAdmin,
 }) {
+  
+  const navigate = useNavigate();
+
   const rows = [
     {
       title: "Start Learning",
@@ -25,19 +29,19 @@ export default function AppDashboard({
           Icon: BookOpen,
           title: "Courses",
           text: "CTET/TET learning paths and topic-wise preparation.",
-          action: () => setActiveSection("courses"),
+          action: () => navigate("/subjects/ctet-tet/courses"),
         },
         {
           Icon: Route,
           title: "Learning Paths",
           text: "Beginner to premium structured learning programs.",
-          action: () => setActiveSection("learning-paths"),
+          action: () => navigate("/subjects/ctet-tet"),
         },
         {
           Icon: FileText,
           title: "Notes",
           text: "Premium and free revision notes for quick learning.",
-          action: () => setActiveSection("notes"),
+          action: () => navigate("/subjects/ctet-tet/notes"),
         },
       ],
     },
@@ -48,19 +52,19 @@ export default function AppDashboard({
           Icon: ClipboardCheck,
           title: "Mock Tests",
           text: "Practice tests, score tracking and exam preparation.",
-          action: () => setActiveSection("mock-tests"),
+          action: () => navigate("/subjects/ctet-tet/mock-tests"),
         },
         {
           Icon: Newspaper,
           title: "Current Affairs",
           text: "Monthly PDF updates and exam-focused current affairs.",
-          action: () => setActiveSection("current-affairs"),
+          action: () => navigate("/subjects/ctet-tet/current-affairs"),
         },
         {
           Icon: BarChart3,
           title: "My Progress",
           text: "Student dashboard, analytics and learning progress.",
-          action: () => setActiveSection("student-profile"),
+          action: () => navigate("/student-dashboard"),
         },
       ],
     },
@@ -71,13 +75,13 @@ export default function AppDashboard({
           Icon: Crown,
           title: "Premium",
           text: "Unlock full course, mock tests, notes and mentorship.",
-          action: () => setActiveSection("pricing"),
+          action: () => navigate("/subjects/ctet-tet/pricing"),
         },
         {
           Icon: Megaphone,
           title: "Announcements",
           text: "Latest updates, exam alerts and platform notifications.",
-          action: () => setActiveSection("announcements"),
+          action: () => navigate("/announcements"),
         },
         ...(isAdmin(user)
           ? [
@@ -87,7 +91,7 @@ export default function AppDashboard({
                 text: "Manage students, notes, mock tests and analytics.",
                 action: () => {
                   setActiveAdminTab("Dashboard");
-                  setActiveSection("admin-panel");
+                  navigate("/admin");
                 },
                 admin: true,
               },

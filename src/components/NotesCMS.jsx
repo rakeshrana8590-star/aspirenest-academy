@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 export default function NotesCMS({
   notesData,
   firebaseNotes,
@@ -8,6 +10,9 @@ export default function NotesCMS({
   userPlanType,
   hasPlanAccess,
 }) {
+
+  const navigate = useNavigate();
+
   const allNotes = [...notesData, ...firebaseNotes];
 
   const getAccessLabel = (note) => {
@@ -89,7 +94,7 @@ export default function NotesCMS({
                         if (unlocked) {
                           handleNoteAccess(note);
                         } else {
-                          setActiveSection("pricing");
+                          navigate("/subjects/ctet-tet/pricing");
                         }
                       }}
                     >
