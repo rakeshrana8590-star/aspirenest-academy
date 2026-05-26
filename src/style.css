@@ -1717,6 +1717,304 @@ font-size: 0;
   font-size: 40px;
   }
   }
+
+  .academyOverviewPage {
+    padding: 90px 8%;
+    background:
+      radial-gradient(
+        circle at top left,
+        rgba(255, 184, 0, 0.12),
+        transparent 25%
+      ),
+      radial-gradient(
+        circle at bottom right,
+        rgba(59, 130, 246, 0.10),
+        transparent 28%
+      ),
+      linear-gradient(
+        135deg,
+        #fffaf5,
+        #ffffff 48%,
+        #f8fbff
+      );
+  
+    min-height: 100vh;
+  }
+  
+  .academyHero {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 60px;
+    align-items: center;
+  }
+  
+  .academyHeroLeft h1 {
+    font-size: clamp(54px, 5vw, 84px);
+    line-height: 1;
+    font-weight: 950;
+    letter-spacing: -3px;
+  
+    margin: 24px 0;
+  
+    background: linear-gradient(
+      90deg,
+      #111827,
+      #7c2d12,
+      #ea580c
+    );
+  
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .academyHeroLeft p {
+    font-size: 20px;
+    line-height: 1.8;
+    color: #475569;
+  
+    max-width: 700px;
+  }
+  
+  .academyBadge {
+    display: inline-flex;
+    align-items: center;
+  
+    padding: 12px 20px;
+  
+    border-radius: 999px;
+  
+    background: rgba(255,255,255,0.82);
+  
+    border: 1px solid rgba(249,115,22,0.18);
+  
+    backdrop-filter: blur(14px);
+  
+    font-weight: 800;
+    color: #ea580c;
+  
+    box-shadow:
+      0 10px 30px rgba(15,23,42,0.06);
+  }
+  
+  .academyHeroButtons {
+    display: flex;
+    gap: 18px;
+  
+    margin-top: 38px;
+  }
+  
+  .academyHeroButtons button {
+    padding: 18px 28px;
+  
+    border-radius: 18px;
+  
+    font-size: 16px;
+    font-weight: 800;
+  }
+  
+  .academyPreviewCard {
+    position: relative;
+  
+    overflow: hidden;
+  
+    padding: 36px;
+  
+    border-radius: 38px;
+  
+    background:
+      linear-gradient(
+        135deg,
+        rgba(255,255,255,0.92),
+        rgba(255,247,237,0.90)
+      );
+  
+    border: 1px solid rgba(249,115,22,0.16);
+  
+    box-shadow:
+      0 25px 80px rgba(15,23,42,0.10);
+  
+    backdrop-filter: blur(20px);
+  }
+  
+  .academyPreviewCard h3 {
+    margin-bottom: 28px;
+  
+    font-size: 30px;
+  
+    color: #111827;
+  }
+  
+  .academyStat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  
+    margin-bottom: 14px;
+  
+    color: #334155;
+  
+    font-weight: 700;
+  }
+  
+  .academyStat strong {
+    color: #ea580c;
+    font-size: 22px;
+  }
+  
+  .academyBar {
+    height: 14px;
+  
+    border-radius: 999px;
+  
+    overflow: hidden;
+  
+    background: rgba(15,23,42,0.08);
+  
+    margin-bottom: 34px;
+  }
+  
+  .academyFill {
+    width: 92%;
+    height: 100%;
+  
+    background: linear-gradient(
+      90deg,
+      #f59e0b,
+      #f97316
+    );
+  }
+  
+  .academyMiniGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  
+  .academyMiniCard {
+    padding: 24px;
+  
+    border-radius: 24px;
+  
+    background: rgba(255,255,255,0.84);
+  
+    border: 1px solid rgba(15,23,42,0.05);
+  
+    box-shadow:
+      0 10px 30px rgba(15,23,42,0.05);
+  
+    font-weight: 800;
+  
+    color: #111827;
+  
+    transition: 0.3s ease;
+  }
+  
+  .academyMiniCard:hover {
+    transform: translateY(-6px);
+  }
+  
+  .academyOverviewGrid {
+    margin-top: 90px;
+  
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  
+    gap: 28px;
+  }
+  
+  .academyOverviewCard {
+    padding: 34px;
+  
+    border-radius: 34px;
+  
+    background:
+      linear-gradient(
+        135deg,
+        rgba(255,255,255,0.92),
+        rgba(255,247,237,0.88)
+      );
+  
+    border: 1px solid rgba(249,115,22,0.14);
+  
+    box-shadow:
+      0 20px 60px rgba(15,23,42,0.08);
+  
+    transition: 0.35s ease;
+  
+    cursor: pointer;
+  }
+  
+  .academyOverviewCard:hover {
+    transform: translateY(-10px);
+  
+    box-shadow:
+      0 35px 80px rgba(15,23,42,0.14);
+  }
+  
+  .academyOverviewCard h3 {
+    font-size: 30px;
+  
+    margin-bottom: 18px;
+  
+    color: #111827;
+  }
+  
+  .academyOverviewCard p {
+    color: #475569;
+  
+    line-height: 1.8;
+  
+    margin-bottom: 24px;
+  }
+  
+  .academyOverviewCard span {
+    font-weight: 800;
+  
+    color: #ea580c;
+  }
+  
+  .academyOverviewCard.disabled {
+    opacity: 0.82;
+  }
+  
+  @media (max-width: 1000px) {
+  
+    .academyHero {
+      grid-template-columns: 1fr;
+    }
+  
+    .academyOverviewGrid {
+      grid-template-columns: 1fr;
+    }
+  
+  }
+  
+  @media (max-width: 768px) {
+  
+    .academyOverviewPage {
+      padding: 70px 20px;
+    }
+  
+    .academyHeroLeft h1 {
+      font-size: 42px;
+  
+      letter-spacing: -2px;
+    }
+  
+    .academyHeroLeft p {
+      font-size: 16px;
+    }
+  
+    .academyHeroButtons {
+      flex-direction: column;
+    }
+  
+    .academyMiniGrid {
+      grid-template-columns: 1fr;
+    }
+  
+  }
+
   .whatsapp {
   position: fixed;
   
@@ -3316,7 +3614,17 @@ font-size: 0;
   margin-top: 24px;
   }
   .adminStudentsSection {
-  margin-top: 24px;
+    margin-top: 24px;
+    background: rgba(6, 18, 55, 0.92);
+    border-radius: 32px;
+    padding: 32px;
+    border: 1px solid rgba(255,255,255,0.06);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.28);
+    width: 100%;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
   }
   
   .adminStudentsSection h3 {

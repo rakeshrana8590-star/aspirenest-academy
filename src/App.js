@@ -371,22 +371,26 @@ const [paymentHistory, setPaymentHistory] = useState([]);
   const handleLogin = async () => {
     try {
       const userCredential =
-      await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-    
-    if (!userCredential.user.emailVerified) {
-      alert(
-        "Please verify your email before login 📩"
-      );
-    
-      await signOut(auth);
-    
-      return;
-    }
+        await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+  
+      if (!userCredential.user.emailVerified) {
+        alert(
+          "Please verify your email before login 📩"
+        );
+  
+        await signOut(auth);
+  
+        return;
+      }
+  
       alert("Login Successful ✅");
+  
+      navigate("/academy-overview");
+  
     } catch (error) {
       alert(error.message);
     }
@@ -2502,17 +2506,6 @@ isAdmin={isAdmin}
       </div>
 
       <div className="courseGrid">
-        <button onClick={() => navigate("/courses/ctet")}>
-          📘 CTET Course
-        </button>
-
-        <button onClick={() => navigate("/courses/tet")}>
-          🧑‍🏫 TET Course
-        </button>
-
-        <button onClick={() => navigate("/subjects/ctet-tet")}>
-          🔙 Back to CTET/TET Hub
-        </button>
       </div>
     </section>
   }
@@ -2520,46 +2513,133 @@ isAdmin={isAdmin}
 <Route
   path="/academy-overview"
   element={
-    <section className="coursePages academyOverviewPage">
-      <div className="sectionHeader">
-        <span className="badge">
-          AspireNest Learning Ecosystem
-        </span>
+    <section className="academyOverviewPage">
 
-        <h2>
-          Welcome to AspireNest Academy
-        </h2>
+      <div className="academyHero">
 
-        <p>
-          Explore mentor-guided learning systems,
-          AI-powered preparation, premium courses,
-          and future-ready education pathways.
-        </p>
+        <div className="academyHeroLeft">
+
+          <span className="academyBadge">
+            AspireNest Learning Ecosystem
+          </span>
+
+          <h1>
+            AI-Powered Learning Ecosystem
+            for Future Educators
+          </h1>
+
+          <p>
+            Premium CTET/TET preparation platform with
+            mentor guidance, smart mock tests,
+            AI-powered analytics, premium notes,
+            and future-ready teaching career systems.
+          </p>
+
+          <div className="academyHeroButtons">
+
+            <button
+              onClick={() => navigate("/subjects")}
+            >
+              📚 Explore Subjects
+            </button>
+
+            <button
+              className="outline"
+              onClick={() => navigate("/subjects/ctet-tet")}
+            >
+              🧑‍🏫 Enter CTET / TET Hub
+            </button>
+
+          </div>
+
+        </div>
+
+        <div className="academyHeroRight">
+
+          <div className="academyPreviewCard">
+
+            <h3>AspireNest AI Dashboard</h3>
+
+            <div className="academyStat">
+              <span>Mock Accuracy</span>
+              <strong>92%</strong>
+            </div>
+
+            <div className="academyBar">
+              <div className="academyFill"></div>
+            </div>
+
+            <div className="academyMiniGrid">
+
+              <div className="academyMiniCard">
+                📚 Premium Notes
+              </div>
+
+              <div className="academyMiniCard">
+                🎯 Smart Tests
+              </div>
+
+              <div className="academyMiniCard">
+                🤖 AI Tracking
+              </div>
+
+              <div className="academyMiniCard">
+                🏆 Rank Growth
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
       </div>
 
-      <div className="courseGrid">
-        <button onClick={() => navigate("/subjects")}>
-          📚 Explore Subjects
-        </button>
+      <div className="academyOverviewGrid">
 
-        <button onClick={() => navigate("/subjects/ctet-tet")}>
-          🧑‍🏫 CTET / TET Hub
-        </button>
+        <div
+          className="academyOverviewCard"
+          onClick={() => navigate("/subjects/ctet-tet")}
+        >
+          <h3>CTET / TET</h3>
 
-        <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
-          💎 Premium Plans
-        </button>
+          <p>
+            Complete teaching exam ecosystem with
+            notes, mocks, mentorship, analytics,
+            and premium preparation systems.
+          </p>
 
-        <button onClick={() => navigate("/student-dashboard")}>
-          📊 Student Dashboard
-        </button>
+          <span>Active Learning Ecosystem →</span>
+        </div>
 
-        {isAdmin(user) && (
-          <button onClick={() => navigate("/admin")}>
-            ⚙️ Admin Panel
-          </button>
-        )}
+        <div className="academyOverviewCard disabled">
+
+          <h3>Psychology</h3>
+
+          <p>
+            Modern psychology learning ecosystem
+            for future expansion.
+          </p>
+
+          <span>Launching Soon</span>
+
+        </div>
+
+        <div className="academyOverviewCard disabled">
+
+          <h3>B.Ed / D.El.Ed</h3>
+
+          <p>
+            Professional teaching education systems
+            and pedagogy-focused preparation.
+          </p>
+
+          <span>Launching Soon</span>
+
+        </div>
+
       </div>
+
     </section>
   }
 />
@@ -3142,34 +3222,88 @@ isAdmin={isAdmin}
       </div>
 
       <div className="courseGrid">
-        <button onClick={() => navigate("/admin/students")}>
-          👨‍🎓 Students
-        </button>
+  <button
+    onClick={() => {
+      setActiveAdminTab("Dashboard");
+      navigate("/admin");
+    }}
+  >
+    📊 Dashboard
+  </button>
 
-        <button onClick={() => navigate("/admin/notes")}>
-          📘 Notes CMS
-        </button>
+  <button
+    onClick={() => {
+      setActiveAdminTab("Enquiries");
+      navigate("/admin/enquiries");
+    }}
+  >
+    📩 Enquiries
+  </button>
 
-        <button onClick={() => navigate("/admin/mock-tests")}>
-          📝 Mock Tests CMS
-        </button>
+  <button
+    onClick={() => {
+      setActiveAdminTab("Students");
+      navigate("/admin/students");
+    }}
+  >
+    👨‍🎓 Students
+  </button>
 
-        <button onClick={() => navigate("/admin/current-affairs")}>
-          📰 Current Affairs CMS
-        </button>
+  <button
+    onClick={() => {
+      setActiveAdminTab("Notes");
+      navigate("/admin/notes");
+    }}
+  >
+    📘 Notes CMS
+  </button>
 
-        <button onClick={() => navigate("/admin/payments")}>
-          💳 Payments
-        </button>
+  <button
+    onClick={() => {
+      setActiveAdminTab("Mock Tests");
+      navigate("/admin/mock-tests");
+    }}
+  >
+    📝 Mock Tests CMS
+  </button>
 
-        <button onClick={() => navigate("/admin/analytics")}>
-          📊 Analytics
-        </button>
+  <button
+    onClick={() => {
+      setActiveAdminTab("Current Affairs");
+      navigate("/admin/current-affairs");
+    }}
+  >
+    📰 Current Affairs CMS
+  </button>
 
-        <button onClick={() => navigate("/admin/announcements")}>
-          📢 Announcements
-        </button>
-      </div>
+  <button
+    onClick={() => {
+      setActiveAdminTab("Payments");
+      navigate("/admin/payments");
+    }}
+  >
+    💳 Payments
+  </button>
+
+  <button
+    onClick={() => {
+      setActiveAdminTab("Analytics");
+      navigate("/admin/analytics");
+    }}
+  >
+    📊 Analytics
+  </button>
+
+  <button
+    onClick={() => {
+      setActiveAdminTab("Announcements");
+      navigate("/admin/announcements");
+    }}
+  >
+    📢 Announcements
+  </button>
+</div>
+
       <div style={{ marginTop: "30px" }}>
   <AdminPanel
     user={user}
@@ -3181,6 +3315,32 @@ isAdmin={isAdmin}
     mockResults={mockResults || []}
     leaderboard={leaderboard || []}
     mockQuestions={mockQuestions || []}
+    adminQuestion={adminQuestion}
+setAdminQuestion={setAdminQuestion}
+
+adminOption1={adminOption1}
+setAdminOption1={setAdminOption1}
+
+adminOption2={adminOption2}
+setAdminOption2={setAdminOption2}
+
+adminOption3={adminOption3}
+setAdminOption3={setAdminOption3}
+
+adminOption4={adminOption4}
+setAdminOption4={setAdminOption4}
+
+adminAnswer={adminAnswer}
+setAdminAnswer={setAdminAnswer}
+
+adminSubject={adminSubject}
+setAdminSubject={setAdminSubject}
+
+adminLevel={adminLevel}
+setAdminLevel={setAdminLevel}
+
+adminAccessPlan={adminAccessPlan}
+setAdminAccessPlan={setAdminAccessPlan}
     notesData={notesData || []}
     firebaseNotes={firebaseNotes || []}
     currentAffairs={currentAffairsList || []}
@@ -3234,6 +3394,10 @@ isAdmin={isAdmin}
             currentAffairs={currentAffairsList || []}
             currentAffairsList={currentAffairsList || []}
             fallbackCurrentAffairs={currentAffairsList || []}
+            announcementTitle={announcementTitle}
+setAnnouncementTitle={setAnnouncementTitle}
+announcementMessage={announcementMessage}
+setAnnouncementMessage={setAnnouncementMessage}
             announcements={announcements || []}
             paymentHistory={paymentHistory || []}
             paymentRequests={paymentRequests || []}
@@ -3264,6 +3428,10 @@ isAdmin={isAdmin}
   path="/admin/enquiries"
   element={
     <section className="coursePages">
+      {(() => {
+  setTimeout(() => setActiveAdminTab("Enquiries"), 0);
+  return null;
+})()}
       <div className="sectionHeader">
         <span className="badge">Enquiries</span>
 
@@ -3336,6 +3504,20 @@ isAdmin={isAdmin}
             mockQuestions={mockQuestions || []}
             notesData={notesData || []}
             firebaseNotes={firebaseNotes || []}
+            adminNoteTitle={adminNoteTitle}
+setAdminNoteTitle={setAdminNoteTitle}
+adminNoteCategory={adminNoteCategory}
+setAdminNoteCategory={setAdminNoteCategory}
+adminNotePages={adminNotePages}
+setAdminNotePages={setAdminNotePages}
+manualNotePdfUrl={manualNotePdfUrl}
+setManualNotePdfUrl={setManualNotePdfUrl}
+setAdminNotePdf={setAdminNotePdf}
+uploadingPdf={uploadingPdf}
+handleUploadPdf={handleUploadPdf}
+adminNoteType={adminNoteType}
+setAdminNoteType={setAdminNoteType}
+editingNoteId={editingNoteId}
             currentAffairs={currentAffairsList || []}
             currentAffairsList={currentAffairsList || []}
             fallbackCurrentAffairs={currentAffairsList || []}
@@ -3427,17 +3609,57 @@ isAdmin={isAdmin}
             isAdmin={isAdmin}
             activeAdminTab="Current Affairs"
             setActiveAdminTab={setActiveAdminTab}
+
             students={students || []}
             enquiries={enquiries || []}
             mockResults={mockResults || []}
             leaderboard={leaderboard || []}
             mockQuestions={mockQuestions || []}
+            adminQuestion={adminQuestion}
+            setAdminQuestion={setAdminQuestion}
+            adminOption1={adminOption1}
+            setAdminOption1={setAdminOption1}
+            adminOption2={adminOption2}
+            setAdminOption2={setAdminOption2}
+            adminOption3={adminOption3}
+            setAdminOption3={setAdminOption3}
+            adminOption4={adminOption4}
+            setAdminOption4={setAdminOption4}
+            adminAnswer={adminAnswer}
+            setAdminAnswer={setAdminAnswer}
+            adminSubject={adminSubject}
+            setAdminSubject={setAdminSubject}
+            adminLevel={adminLevel}
+            setAdminLevel={setAdminLevel}
+            adminAccessPlan={adminAccessPlan}
+            setAdminAccessPlan={setAdminAccessPlan}
             notesData={notesData || []}
             firebaseNotes={firebaseNotes || []}
+
+            currentTitle={currentTitle}
+            setCurrentTitle={setCurrentTitle}
+            currentMonth={currentMonth}
+            setCurrentMonth={setCurrentMonth}
+            currentPages={currentPages}
+            setCurrentPages={setCurrentPages}
+            manualCurrentPdfUrl={manualCurrentPdfUrl}
+            setManualCurrentPdfUrl={setManualCurrentPdfUrl}
+            currentType={currentType}
+            setCurrentType={setCurrentType}
+            editingCurrentId={editingCurrentId}
+            setCurrentPdf={setCurrentPdf}
+            uploadingCurrentPdf={uploadingCurrentPdf}
+            handleUploadCurrentPdf={handleUploadCurrentPdf}
+
             currentAffairs={currentAffairsList || []}
             currentAffairsList={currentAffairsList || []}
             fallbackCurrentAffairs={currentAffairsList || []}
+            handleSaveCurrentAffairs={handleSaveCurrentAffairs}
+            handleEditCurrentAffairs={handleEditCurrentAffairs}
+            handleDeleteCurrentAffairs={handleDeleteCurrentAffairs}
+
             announcements={announcements || []}
+
             paymentHistory={paymentHistory || []}
             paymentRequests={paymentRequests || []}
             loadPaymentRequests={loadPaymentRequests}
@@ -3446,14 +3668,14 @@ isAdmin={isAdmin}
             loadPaymentHistory={loadPaymentHistory}
             handlePremiumControl={handlePremiumControl}
             approvePaymentRequest={approvePaymentRequest}
+
             handleDeleteMockQuestion={handleDeleteMockQuestion}
             handleAddMockQuestion={handleAddMockQuestion}
+
             handleSaveNote={handleSaveNote}
             handleEditNote={handleEditNote}
             handleDeleteNote={handleDeleteNote}
-            handleSaveCurrentAffairs={handleSaveCurrentAffairs}
-            handleEditCurrentAffairs={handleEditCurrentAffairs}
-            handleDeleteCurrentAffairs={handleDeleteCurrentAffairs}
+
             handleAddAnnouncement={handleAddAnnouncement}
             handleDeleteAnnouncement={handleDeleteAnnouncement}
           />
@@ -3584,6 +3806,10 @@ isAdmin={isAdmin}
             currentAffairs={currentAffairsList || []}
             currentAffairsList={currentAffairsList || []}
             fallbackCurrentAffairs={currentAffairsList || []}
+            announcementTitle={announcementTitle}
+setAnnouncementTitle={setAnnouncementTitle}
+announcementMessage={announcementMessage}
+setAnnouncementMessage={setAnnouncementMessage}
             announcements={announcements || []}
             paymentHistory={paymentHistory || []}
             paymentRequests={paymentRequests || []}
