@@ -1722,7 +1722,7 @@ const studyTimeMessage =
       </div>
     );
   }
-  if (!user) {
+  if (false && !user){
     return (
       <React.Suspense
         fallback={
@@ -2709,6 +2709,21 @@ isAdmin={isAdmin}
       </div>
 
     </section>
+  }
+/>
+<Route
+  path="/login"
+  element={
+    <AuthSection
+      email={email}
+      setEmail={setEmail}
+      password={password}
+      setPassword={setPassword}
+      handleLogin={handleLogin}
+      handleGoogleLogin={handleGoogleLogin}
+      handleForgotPassword={handleForgotPassword}
+      handleRegister={handleRegister}
+    />
   }
 />
 <Route
