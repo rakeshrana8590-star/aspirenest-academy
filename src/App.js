@@ -1796,137 +1796,33 @@ return (
             </div>
           }
         >
-
-<header className="mainHeader">
-  <div className="brand">
+<header className="cleanHeader">
+  <div className="cleanBrand">
     <AspireNestLogo />
   </div>
 
-  <nav className={mobileMenuOpen ? "nav mobile-open" : "nav"}>
-  <button
-  onClick={() => {
-    setProfileMenuOpen(false);
-    navigate("/subjects/ctet-tet/courses");
-  }}
->
-  Courses
-</button>
-
-<button
-  onClick={() => {
-    setProfileMenuOpen(false);
-    navigate("/subjects/ctet-tet/notes");
-  }}
->
-  Notes
-</button>
-
-<button
-  onClick={() => {
-    setProfileMenuOpen(false);
-    navigate("/subjects/ctet-tet/pricing");
-  }}
->
-  Pricing
-</button>
-
-<button
-  onClick={() => {
-    setProfileMenuOpen(false);
-    navigate("/contact");
-  }}
->
-  Contact
-</button>
-{user ? (
-  <div
-  className="profileMenuWrapper"
-  onMouseLeave={() => setProfileMenuOpen(false)}
->
+  <nav className="cleanNav">
+  {!user ? (
     <button
-      type="button"
-      className="profileTrigger"
-      onClick={(e) => {
-        e.stopPropagation();
-        setProfileMenuOpen((prev) => !prev);
-      }}
+      className="cleanHeaderBtn"
+      onClick={() => navigate("/login")}
     >
-      <div className="profileAvatar">
-        {isAdmin(user) ? "A" : user?.email?.charAt(0)}
-      </div>
-
-      <span className="profileName">
-        {isAdmin(user) ? "Admin" : user?.email?.split("@")[0]}
+      Login
+    </button>
+  ) : (
+    <button
+      className="cleanHeaderSwitch"
+      onClick={handleLogout}
+      title="Click to logout"
+    >
+      <span className="switchDot"></span>
+      <span>
+        {isAdmin(user) ? "Admin ON" : "Student ON"}
       </span>
     </button>
-
-    {profileMenuOpen && (
-  <div className="profileDropdown">
-    <button
-      onClick={() => {
-        navigate("/student-dashboard");
-        setProfileMenuOpen(false);
-      }}
-    >
-      My Dashboard
-    </button>
-
-    <button
-      onClick={() => {
-        navigate("/subjects/ctet-tet/pricing");
-        setProfileMenuOpen(false);
-      }}
-    >
-      Premium Access
-    </button>
-
-    {isAdmin(user) && (
-      <button
-        onClick={() => {
-          navigate("/admin");
-          setProfileMenuOpen(false);
-        }}
-      >
-        Admin Panel
-      </button>
-    )}
-
-    <button
-      onClick={() => {
-        setProfileMenuOpen(false);
-        handleLogout();
-      }}
-    >
-      Logout
-    </button>
-  </div>
-)}
-  </div>
-) : (
-  <button onClick={() => navigate("/student-dashboard")}>
-    Login
-  </button>
-)}
-<button
-  onClick={() => {
-    setProfileMenuOpen(false);
-    setActiveSection(null);
-    navigate("/");
-    setTimeout(() => window.scrollTo(0, 0), 50);
-  }}
->
-  Home
-</button>
-  </nav>
-
-  <button
-    className="mobile-menu-btn"
-    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-  >
-    ☰
-  </button>
+  )}
+</nav>
 </header>
-
 <Routes>
   <Route
     path="/"
@@ -1972,37 +1868,91 @@ return (
     <button onClick={() => navigate("/learning")}>
   Start Learning
 </button>
-
+{user && (
+  <button
+    onClick={() =>
+      navigate(isAdmin(user) ? "/admin" : "/student-dashboard")
+    }
+  >
+    {isAdmin(user)
+      ? "Admin Dashboard"
+      : "My Dashboard"}
+  </button>
+)}
 <button
   onClick={() => navigate("/subjects/ctet-tet/notes")}
 >
   Free Notes
 </button>
 </div>
-
-<div className="heroStats">
-  <div className="statCard">
-    <h3>5K+</h3>
-    <p>Students</p>
-  </div>
-
-  <div className="statCard">
-    <h3>120+</h3>
-    <p>Visual Notes</p>
-  </div>
-
-  <div className="statCard">
-    <h3>50+</h3>
-    <p>Mock Tests</p>
-  </div>
-
-  <div className="statCard">
-    <h3>92%</h3>
-    <p>Success Rate</p>
-  </div>
 </div>
-  </div>
 
+{false && (
+  <div className="heroStats">
+    <div className="statCard">
+      <h3>5K+</h3>
+      <p>Students</p>
+    </div>
+
+    <div className="statCard">
+      <h3>120+</h3>
+      <p>Visual Notes</p>
+    </div>
+
+    <div className="statCard">
+      <h3>50+</h3>
+      <p>Mock Tests</p>
+    </div>
+
+    <div className="statCard">
+      <h3>92%</h3>
+      <p>Success Rate</p>
+    </div>
+  </div>
+)}
+
+{user && (
+  <div
+    className="dashboardQuickCard"
+    onClick={() =>
+      navigate(isAdmin(user) ? "/admin" : "/student-dashboard")
+    }
+  >
+    <div className="dashboardQuickLeft">
+      <span className="dashboardQuickBadge">
+        {isAdmin(user) ? "ADMIN ACCESS" : "STUDENT ACCESS"}
+      </span>
+
+      <h3>
+        {isAdmin(user)
+          ? "Admin Dashboard"
+          : `Welcome back, ${
+              user?.displayName ||
+              user?.email?.split("@")[0] ||
+              "Student"
+            }`}
+      </h3>
+
+      <p>
+  {isAdmin(user)
+    ? "Manage students, payments, notes, mock tests, announcements and platform analytics from one admin workspace."
+    : "Continue your learning journey, track progress, access tests, analytics and premium resources."}
+</p>
+
+      <button>
+        {isAdmin(user)
+          ? "Open Admin Dashboard"
+          : "Open My Dashboard"}
+      </button>
+    </div>
+
+    <div className="dashboardQuickRight">
+      📊
+    </div>
+  </div>
+)}
+
+{false && (
   <div className="card heroGoalCard">
     <div className="goalTop">
       <div className="goalIcon">🎯</div>
@@ -2021,6 +1971,8 @@ return (
       <strong>75%</strong> Completed
     </span>
   </div>
+)}
+
 </section>
 
 <section className="mentor" id="about">
@@ -4735,142 +4687,54 @@ ${paymentProof}
           </div>
         </div>
       )}
-<header>
-  <div className="brand">
-  <img
-  src="/logo-header.png"
-  alt="AspireNest Academy"
-  className="header-logo"
-  loading="eager"
-  decoding="async"
-/>
+<header className="cleanHeader">
+  <div className="cleanBrand">
+    <img
+      src="/logo-header.png"
+      alt="AspireNest Academy"
+      className="cleanHeaderLogo"
+      loading="eager"
+      decoding="async"
+    />
   </div>
 
-        <nav className={mobileMenuOpen ? "nav mobile-open" : "nav"}>
-        <button
-  onClick={() => {
-    setProfileMenuOpen(false);
-    navigate("/subjects/ctet-tet/courses");
-  }}
->
-  Courses
-</button>
-
-<button onClick={() => navigate("/subjects/ctet-tet/notes")}>
-  Notes
-</button>
-
-<button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
-  Pricing
-</button>
-
-          <button
-  onClick={() => {
-    setActiveSection(null);
-
-    setTimeout(() => {
-      document
-        .getElementById("contact")
-        ?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
-  }}
->
-  Contact
-</button>
-{user ? (
-  <div
-    className="profileMenuWrapper"
-    onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-  >
-    <div className="profileAvatar">
-      {user?.displayName?.charAt(0) || user?.email?.charAt(0)}
-    </div>
-
-    <span className="profileName">
-      {user?.displayName || user?.email?.split("@")[0]}
-    </span>
-
-    {profileMenuOpen && activeSection !== "student-profile" && (
-      <div
-  className={`profileDropdown ${
-    profileMenuOpen ? "" : "hidden"
-  }`}
-  onMouseLeave={() => setProfileMenuOpen(false)}
->
-    <button
-      onClick={() => {
-        setProfileMenuOpen(false);
-        navigate("/student-dashboard");
-      }}
-    >
-      My Dashboard
-    </button>
-
-    <button
-      onClick={() => {
-        setProfileMenuOpen(false);
-        navigate("/subjects/ctet-tet/pricing");
-      }}
-    >
-      Premium Access
-    </button>
-
-    {isAdmin(user) && (
+  <nav className="cleanNav">
+    {!user ? (
       <button
+        className="cleanHeaderBtn"
+        onClick={() => {
+          setProfileMenuOpen(false);
+          navigate("/login");
+        }}
+      >
+        Login
+      </button>
+    ) : isAdmin(user) ? (
+      <button
+        className="cleanHeaderBtn"
         onClick={() => {
           setProfileMenuOpen(false);
           navigate("/admin");
         }}
       >
-        Admin Panel
+        Admin
+      </button>
+    ) : (
+      <button
+        className="cleanHeaderBtn"
+        onClick={() => {
+          setProfileMenuOpen(false);
+          navigate("/student-dashboard");
+        }}
+      >
+        {user?.displayName || user?.email?.split("@")[0] || "Student"}
       </button>
     )}
-
-    <button
-      onClick={() => {
-        setProfileMenuOpen(false);
-        handleLogout();
-      }}
-    >
-      Logout
-    </button>
-  </div>
+  </nav>
+</header>
+      {false && (
+  <div className="stickySectionNav"></div>
 )}
-  </div>
-) : (
-  <button onClick={() => navigate("/student-profile")}>
-  Login
-</button>
-)}
-          <button
-  className="mobile-menu-btn"
-  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
->
-  ☰
-</button>
-
-        </nav>
-      </header>
-      <div className="stickySectionNav">
-      <button onClick={() => navigate("/subjects/ctet-tet/courses")}>
-  Courses
-</button>
-<button onClick={() => navigate("/subjects/ctet-tet/notes")}>
-  Notes
-</button>
-<button onClick={() => navigate("/subjects/ctet-tet/current-affairs")}>
-  Current Affairs
-</button>
-<button onClick={() => navigate("/subjects/ctet-tet/mock-tests")}>
-  Mock Tests
-</button>
-<button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
-  Premium
-</button>
-  <button onClick={() => navigate("/contact")}>
-  Contact
-</button>
-</div>
 <section className="hero">
   <div className="heroContent">
     <div className="taglineCard">
