@@ -2931,7 +2931,7 @@ isAdmin={isAdmin}
 <Route
   path="/my-courses"
   element={
-    <section className="coursePages" style={{ paddingTop: "190px" }}>
+   <section className="coursePages myCoursesPage">
       <div className="sectionHeader">
         <span className="badge">My Courses</span>
 
@@ -4073,58 +4073,10 @@ ${paymentProof}
  </div>
 </section>
 )}
-{activeSection === "notes" && (
-  <section id="notes">
-    <NotesCMS
-      notesData={notesData}
-      firebaseNotes={firebaseNotes}
-      handleNoteAccess={handleNoteAccess}
-      isPremiumUser={isPremiumUser}
-      setActiveSection={setActiveSection}
-      activePlan={activePlan}
-      userPlanType={userPlanType}
-      hasPlanAccess={hasPlanAccess}
-    />
-  </section>
-)}
+activeSection === "notes"
 
-{activeSection === "mock-tests" && (
-  <section id="mock-tests">
-    <MockTest
-      mockStarted={mockStarted}
-      setMockStarted={setMockStarted}
-      showResult={showResult}
-      currentQuestion={currentQuestion}
-      mockQuestions={mockQuestions || []}
-      timeLeft={timeLeft}
-      setTimeLeft={setTimeLeft}
-      score={score}
-      selectedSubject={selectedSubject}
-      setSelectedSubject={setSelectedSubject}
-      loadMockQuestions={loadMockQuestions}
-      percentage={percentage}
-      performanceLevel={performanceLevel}
-      motivationalMessage={motivationalMessage}
-      restartMockTest={restartMockTest}
-      selectedAnswer={selectedAnswer}
-      setSelectedAnswer={setSelectedAnswer}
-      showAnswer={showAnswer}
-      handleAnswerSubmit={handleAnswerSubmit}
-      userPlanType={userPlanType}
-hasPlanAccess={hasPlanAccess}
-setActiveSection={setActiveSection}
-    />
-  </section>
-)}
-{activeSection === "pricing" && (
-  <section id="pricing">
-    <Pricing
-      createPaymentRequest={createPaymentRequest}
-      isPremiumUser={isPremiumUser}
-      setActiveSection={setActiveSection}
-    />
-  </section>
-)}
+
+
 {activeSection === "contact" && (
   <section className="footerPanels contactScreen">
 
@@ -4187,57 +4139,6 @@ setActiveSection={setActiveSection}
   </section>
 )}
 
-
-{activeSection === "admin-panel" && (
-  <section id="admin-panel">
-    <AdminPanel
-      user={user}
-      isAdmin={isAdmin}
-
-      activeAdminTab={activeAdminTab}
-      setActiveAdminTab={setActiveAdminTab}
-
-      students={students || []}
-      enquiries={enquiries || []}
-      mockResults={mockResults || []}
-      leaderboard={leaderboard || []}
-      mockQuestions={mockQuestions || []}
-
-      notesData={notesData || []}
-      firebaseNotes={firebaseNotes || []}
-
-      currentAffairs={currentAffairsList || []}
-      currentAffairsList={currentAffairsList || []}
-      fallbackCurrentAffairs={currentAffairsList || []}
-
-      announcements={announcements || []}
-      paymentHistory={paymentHistory || []}
-      paymentRequests={paymentRequests || []}
-loadPaymentRequests={loadPaymentRequests}
-
-      loadAdminData={loadAdminData}
-      loadLeaderboard={loadLeaderboard}
-      loadPaymentHistory={loadPaymentHistory}
-
-      handlePremiumControl={handlePremiumControl}
-      approvePaymentRequest={approvePaymentRequest}
-
-      handleDeleteMockQuestion={handleDeleteMockQuestion}
-      handleAddMockQuestion={handleAddMockQuestion}
-
-      handleSaveNote={handleSaveNote}
-      handleEditNote={handleEditNote}
-      handleDeleteNote={handleDeleteNote}
-
-      handleSaveCurrentAffairs={handleSaveCurrentAffairs}
-      handleEditCurrentAffairs={handleEditCurrentAffairs}
-      handleDeleteCurrentAffairs={handleDeleteCurrentAffairs}
-
-      handleAddAnnouncement={handleAddAnnouncement}
-      handleDeleteAnnouncement={handleDeleteAnnouncement}
-    />
-  </section>
-)}
 
 {activeSection === "login" && (
   <section id="login">

@@ -15384,3 +15384,7 @@ nav {
 }
   }
 }
+.myCoursesPage {
+  padding-top: 120px;
+  min-height: 100vh;
+}
