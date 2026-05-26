@@ -387,9 +387,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
         return;
       }
   
-      alert("Login Successful ✅");
-  
-      navigate("/academy-overview");
+      navigate("/academy-overview", { replace: true });
   
     } catch (error) {
       alert(error.message);
@@ -408,7 +406,9 @@ setEnquiries([]);
   const handleGoogleLogin = async () => {
     try {
       await signInWithPopup(auth, provider);
-      alert("Google Login Successful ✅");
+  
+      navigate("/academy-overview", { replace: true });
+  
     } catch (error) {
       alert(error.message);
     }
@@ -2490,67 +2490,33 @@ isAdmin={isAdmin}
       ) : null
     }
     />
-
-    <Route
-  path="/courses"
-  element={
-    <section className="coursePages subjectHubPage">
-      <div className="sectionHeader">
-        <span className="badge">CTET / TET Courses</span>
-
-        <h2>Choose Your CTET/TET Course</h2>
-
-        <p>
-          Start with the right course path under the CTET/TET learning ecosystem.
-        </p>
-      </div>
-
-      <div className="courseGrid">
-      </div>
-    </section>
-  }
-/>
 <Route
   path="/academy-overview"
   element={
     <section className="academyOverviewPage">
 
+      {/* SCREEN 1 — HERO */}
       <div className="academyHero">
 
         <div className="academyHeroLeft">
 
           <span className="academyBadge">
-            AspireNest Learning Ecosystem
+            AspireNest Academic Overview
           </span>
 
           <h1>
-            AI-Powered Learning Ecosystem
-            for Future Educators
+            AspireNest Academy
+            Learning Platform
+            for Every Student Journey
           </h1>
 
           <p>
-            Premium CTET/TET preparation platform with
-            mentor guidance, smart mock tests,
-            AI-powered analytics, premium notes,
-            and future-ready teaching career systems.
+            A structured academic platform where students can explore
+            learning domains, study resources, practice systems,
+            guidance, progress tracking, and subject-wise preparation pathways.
           </p>
 
-          <div className="academyHeroButtons">
-
-            <button
-              onClick={() => navigate("/subjects")}
-            >
-              📚 Explore Subjects
-            </button>
-
-            <button
-              className="outline"
-              onClick={() => navigate("/subjects/ctet-tet")}
-            >
-              🧑‍🏫 Enter CTET / TET Hub
-            </button>
-
-          </div>
+         
 
         </div>
 
@@ -2558,10 +2524,10 @@ isAdmin={isAdmin}
 
           <div className="academyPreviewCard">
 
-            <h3>AspireNest AI Dashboard</h3>
+            <h3>AspireNest Academic System</h3>
 
             <div className="academyStat">
-              <span>Mock Accuracy</span>
+              <span>Learning Structure</span>
               <strong>92%</strong>
             </div>
 
@@ -2571,21 +2537,10 @@ isAdmin={isAdmin}
 
             <div className="academyMiniGrid">
 
-              <div className="academyMiniCard">
-                📚 Premium Notes
-              </div>
-
-              <div className="academyMiniCard">
-                🎯 Smart Tests
-              </div>
-
-              <div className="academyMiniCard">
-                🤖 AI Tracking
-              </div>
-
-              <div className="academyMiniCard">
-                🏆 Rank Growth
-              </div>
+              <div className="academyMiniCard">📚 Study Resources</div>
+              <div className="academyMiniCard">🎯 Practice Systems</div>
+              <div className="academyMiniCard">🧭 Guided Learning</div>
+              <div className="academyMiniCard">📊 Progress Tracking</div>
 
             </div>
 
@@ -2595,21 +2550,80 @@ isAdmin={isAdmin}
 
       </div>
 
+      {/* SCREEN 2 — PLATFORM OVERVIEW */}
+      <div className="academySectionIntro">
+
+
+        <h2>
+          A complete academic platform,
+          designed to grow beyond one subject.
+        </h2>
+        <p>
+  AspireNest Academy is designed as a scalable
+  learning platform where students can access
+  structured preparation systems, practice tools,
+  study resources, mentorship, and future academic domains
+  under one organized ecosystem.
+</p>
+
+      </div>
+
+      <div className="academyTrustStrip">
+
+        <div className="academyTrustCard">
+          <h3>Structured Learning</h3>
+          <p>Clear academic pathways for focused preparation.</p>
+        </div>
+
+        <div className="academyTrustCard">
+          <h3>Study Resources</h3>
+          <p>Notes, learning material, and subject-wise support.</p>
+        </div>
+
+        <div className="academyTrustCard">
+          <h3>Practice System</h3>
+          <p>Mock tests and preparation tools for improvement.</p>
+        </div>
+
+        <div className="academyTrustCard">
+          <h3>Progress Tracking</h3>
+          <p>Learning performance and student growth visibility.</p>
+        </div>
+
+      </div>
+
+      {/* SCREEN 3 — LEARNING DOMAINS */}
+      <div className="academySectionIntro">
+
+
+        <h2>
+          Choose a learning domain
+          to continue.
+        </h2>
+
+        <p>
+          CTET/TET is the first active learning domain.
+          More academic domains can be added under the same
+          platform structure as AspireNest grows.
+        </p>
+
+      </div>
+
       <div className="academyOverviewGrid">
 
         <div
           className="academyOverviewCard"
-          onClick={() => navigate("/subjects/ctet-tet")}
+          onClick={() => navigate("/")}
         >
+
           <h3>CTET / TET</h3>
 
           <p>
-            Complete teaching exam ecosystem with
-            notes, mocks, mentorship, analytics,
-            and premium preparation systems.
+            Active preparation domain with notes, practice systems,
+            mock tests, current affairs, mentorship, and learning tools.
           </p>
 
-          <span>Active Learning Ecosystem →</span>
+
         </div>
 
         <div className="academyOverviewCard disabled">
@@ -2617,8 +2631,7 @@ isAdmin={isAdmin}
           <h3>Psychology</h3>
 
           <p>
-            Modern psychology learning ecosystem
-            for future expansion.
+            Future learning domain for psychology-focused academic study.
           </p>
 
           <span>Launching Soon</span>
@@ -2630,13 +2643,68 @@ isAdmin={isAdmin}
           <h3>B.Ed / D.El.Ed</h3>
 
           <p>
-            Professional teaching education systems
-            and pedagogy-focused preparation.
+            Future domain for teaching education and pedagogy learning.
           </p>
 
           <span>Launching Soon</span>
 
         </div>
+
+      </div>
+
+{/* SCREEN 4 — LEARNING EXPERIENCE */}
+<div className="academyStorySection">
+
+  <div className="academyStoryText">
+
+    <span>LEARNING EXPERIENCE</span>
+
+    <h2>
+      A clear learning journey
+      from study to progress.
+    </h2>
+
+    <p>
+      AspireNest keeps preparation simple and organized:
+      students choose a learning domain, access study resources,
+      practice with structured systems, and track their progress
+      step by step.
+    </p>
+
+  </div>
+
+  <div className="academyStoryVisual">
+
+    <div className="academyVisualCard">
+
+      <h3>Student Learning Flow</h3>
+
+      <div className="academyVisualList">
+        <p>✅ Choose a learning domain</p>
+        <p>✅ Study with organized resources</p>
+        <p>✅ Practice with mock systems</p>
+        <p>✅ Track preparation progress</p>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+      {/* SCREEN 5 — FUTURE VISION */}
+      <div className="academyFinalCTA">
+
+
+        <h2>
+          Built to expand into a complete
+          academic learning ecosystem.
+        </h2>
+
+        <p>
+          AspireNest starts with CTET/TET and can grow into multiple
+          subject-wise learning domains without changing the core platform.
+        </p>
 
       </div>
 
