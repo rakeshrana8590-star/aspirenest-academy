@@ -3174,7 +3174,7 @@ isAdmin={isAdmin}
   <AdminPanel
     user={user}
     isAdmin={isAdmin}
-    activeAdminTab={activeAdminTab}
+    activeAdminTab="Dashboard"
     setActiveAdminTab={setActiveAdminTab}
     students={students || []}
     enquiries={enquiries || []}
@@ -3215,15 +3215,102 @@ isAdmin={isAdmin}
   path="/admin/students"
   element={
     <section className="coursePages">
-      <div className="sectionHeader">
-        <span className="badge">Students</span>
+      {(() => {
+        setTimeout(() => setActiveAdminTab("Students"), 0);
 
-        <h2>Student Management</h2>
+        return (
+          <AdminPanel
+            user={user}
+            isAdmin={isAdmin}
+            activeAdminTab="Students"
+            setActiveAdminTab={setActiveAdminTab}
+            students={students || []}
+            enquiries={enquiries || []}
+            mockResults={mockResults || []}
+            leaderboard={leaderboard || []}
+            mockQuestions={mockQuestions || []}
+            notesData={notesData || []}
+            firebaseNotes={firebaseNotes || []}
+            currentAffairs={currentAffairsList || []}
+            currentAffairsList={currentAffairsList || []}
+            fallbackCurrentAffairs={currentAffairsList || []}
+            announcements={announcements || []}
+            paymentHistory={paymentHistory || []}
+            paymentRequests={paymentRequests || []}
+            loadPaymentRequests={loadPaymentRequests}
+            loadAdminData={loadAdminData}
+            loadLeaderboard={loadLeaderboard}
+            loadPaymentHistory={loadPaymentHistory}
+            handlePremiumControl={handlePremiumControl}
+            approvePaymentRequest={approvePaymentRequest}
+            handleDeleteMockQuestion={handleDeleteMockQuestion}
+            handleAddMockQuestion={handleAddMockQuestion}
+            handleSaveNote={handleSaveNote}
+            handleEditNote={handleEditNote}
+            handleDeleteNote={handleDeleteNote}
+            handleSaveCurrentAffairs={handleSaveCurrentAffairs}
+            handleEditCurrentAffairs={handleEditCurrentAffairs}
+            handleDeleteCurrentAffairs={handleDeleteCurrentAffairs}
+            handleAddAnnouncement={handleAddAnnouncement}
+            handleDeleteAnnouncement={handleDeleteAnnouncement}
+          />
+        );
+      })()}
+    </section>
+  }
+/>
+
+<Route
+  path="/admin/enquiries"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Enquiries</span>
+
+        <h2>Student Enquiries</h2>
 
         <p>
-          Manage enrolled students, memberships,
-          and learning activity.
+          Manage contact requests, doubts,
+          support messages and student enquiries.
         </p>
+      </div>
+
+      <div style={{ marginTop: "30px" }}>
+        <AdminPanel
+          user={user}
+          isAdmin={isAdmin}
+          activeAdminTab="Enquiries"
+          setActiveAdminTab={setActiveAdminTab}
+          students={students || []}
+          enquiries={enquiries || []}
+          mockResults={mockResults || []}
+          leaderboard={leaderboard || []}
+          mockQuestions={mockQuestions || []}
+          notesData={notesData || []}
+          firebaseNotes={firebaseNotes || []}
+          currentAffairs={currentAffairsList || []}
+          currentAffairsList={currentAffairsList || []}
+          fallbackCurrentAffairs={currentAffairsList || []}
+          announcements={announcements || []}
+          paymentHistory={paymentHistory || []}
+          paymentRequests={paymentRequests || []}
+          loadPaymentRequests={loadPaymentRequests}
+          loadAdminData={loadAdminData}
+          loadLeaderboard={loadLeaderboard}
+          loadPaymentHistory={loadPaymentHistory}
+          handlePremiumControl={handlePremiumControl}
+          approvePaymentRequest={approvePaymentRequest}
+          handleDeleteMockQuestion={handleDeleteMockQuestion}
+          handleAddMockQuestion={handleAddMockQuestion}
+          handleSaveNote={handleSaveNote}
+          handleEditNote={handleEditNote}
+          handleDeleteNote={handleDeleteNote}
+          handleSaveCurrentAffairs={handleSaveCurrentAffairs}
+          handleEditCurrentAffairs={handleEditCurrentAffairs}
+          handleDeleteCurrentAffairs={handleDeleteCurrentAffairs}
+          handleAddAnnouncement={handleAddAnnouncement}
+          handleDeleteAnnouncement={handleDeleteAnnouncement}
+        />
       </div>
     </section>
   }
@@ -3233,15 +3320,47 @@ isAdmin={isAdmin}
   path="/admin/notes"
   element={
     <section className="coursePages">
-      <div className="sectionHeader">
-        <span className="badge">Notes CMS</span>
+      {(() => {
+        setTimeout(() => setActiveAdminTab("Notes"), 0);
 
-        <h2>Notes Management System</h2>
-
-        <p>
-          Upload, edit, organize, and manage premium notes.
-        </p>
-      </div>
+        return (
+          <AdminPanel
+            user={user}
+            isAdmin={isAdmin}
+            activeAdminTab="Notes"
+            setActiveAdminTab={setActiveAdminTab}
+            students={students || []}
+            enquiries={enquiries || []}
+            mockResults={mockResults || []}
+            leaderboard={leaderboard || []}
+            mockQuestions={mockQuestions || []}
+            notesData={notesData || []}
+            firebaseNotes={firebaseNotes || []}
+            currentAffairs={currentAffairsList || []}
+            currentAffairsList={currentAffairsList || []}
+            fallbackCurrentAffairs={currentAffairsList || []}
+            announcements={announcements || []}
+            paymentHistory={paymentHistory || []}
+            paymentRequests={paymentRequests || []}
+            loadPaymentRequests={loadPaymentRequests}
+            loadAdminData={loadAdminData}
+            loadLeaderboard={loadLeaderboard}
+            loadPaymentHistory={loadPaymentHistory}
+            handlePremiumControl={handlePremiumControl}
+            approvePaymentRequest={approvePaymentRequest}
+            handleDeleteMockQuestion={handleDeleteMockQuestion}
+            handleAddMockQuestion={handleAddMockQuestion}
+            handleSaveNote={handleSaveNote}
+            handleEditNote={handleEditNote}
+            handleDeleteNote={handleDeleteNote}
+            handleSaveCurrentAffairs={handleSaveCurrentAffairs}
+            handleEditCurrentAffairs={handleEditCurrentAffairs}
+            handleDeleteCurrentAffairs={handleDeleteCurrentAffairs}
+            handleAddAnnouncement={handleAddAnnouncement}
+            handleDeleteAnnouncement={handleDeleteAnnouncement}
+          />
+        );
+      })()}
     </section>
   }
 />
@@ -3250,16 +3369,47 @@ isAdmin={isAdmin}
   path="/admin/mock-tests"
   element={
     <section className="coursePages">
-      <div className="sectionHeader">
-        <span className="badge">Mock Tests CMS</span>
+      {(() => {
+        setTimeout(() => setActiveAdminTab("Mock Tests"), 0);
 
-        <h2>Mock Test Management</h2>
-
-        <p>
-          Manage questions, test series,
-          subject-wise exams, and analytics.
-        </p>
-      </div>
+        return (
+          <AdminPanel
+            user={user}
+            isAdmin={isAdmin}
+            activeAdminTab="Mock Tests"
+            setActiveAdminTab={setActiveAdminTab}
+            students={students || []}
+            enquiries={enquiries || []}
+            mockResults={mockResults || []}
+            leaderboard={leaderboard || []}
+            mockQuestions={mockQuestions || []}
+            notesData={notesData || []}
+            firebaseNotes={firebaseNotes || []}
+            currentAffairs={currentAffairsList || []}
+            currentAffairsList={currentAffairsList || []}
+            fallbackCurrentAffairs={currentAffairsList || []}
+            announcements={announcements || []}
+            paymentHistory={paymentHistory || []}
+            paymentRequests={paymentRequests || []}
+            loadPaymentRequests={loadPaymentRequests}
+            loadAdminData={loadAdminData}
+            loadLeaderboard={loadLeaderboard}
+            loadPaymentHistory={loadPaymentHistory}
+            handlePremiumControl={handlePremiumControl}
+            approvePaymentRequest={approvePaymentRequest}
+            handleDeleteMockQuestion={handleDeleteMockQuestion}
+            handleAddMockQuestion={handleAddMockQuestion}
+            handleSaveNote={handleSaveNote}
+            handleEditNote={handleEditNote}
+            handleDeleteNote={handleDeleteNote}
+            handleSaveCurrentAffairs={handleSaveCurrentAffairs}
+            handleEditCurrentAffairs={handleEditCurrentAffairs}
+            handleDeleteCurrentAffairs={handleDeleteCurrentAffairs}
+            handleAddAnnouncement={handleAddAnnouncement}
+            handleDeleteAnnouncement={handleDeleteAnnouncement}
+          />
+        );
+      })()}
     </section>
   }
 />
@@ -3268,15 +3418,47 @@ isAdmin={isAdmin}
   path="/admin/current-affairs"
   element={
     <section className="coursePages">
-      <div className="sectionHeader">
-        <span className="badge">Current Affairs CMS</span>
+      {(() => {
+        setTimeout(() => setActiveAdminTab("Current Affairs"), 0);
 
-        <h2>Current Affairs Management</h2>
-
-        <p>
-          Upload and manage monthly current affairs PDFs.
-        </p>
-      </div>
+        return (
+          <AdminPanel
+            user={user}
+            isAdmin={isAdmin}
+            activeAdminTab="Current Affairs"
+            setActiveAdminTab={setActiveAdminTab}
+            students={students || []}
+            enquiries={enquiries || []}
+            mockResults={mockResults || []}
+            leaderboard={leaderboard || []}
+            mockQuestions={mockQuestions || []}
+            notesData={notesData || []}
+            firebaseNotes={firebaseNotes || []}
+            currentAffairs={currentAffairsList || []}
+            currentAffairsList={currentAffairsList || []}
+            fallbackCurrentAffairs={currentAffairsList || []}
+            announcements={announcements || []}
+            paymentHistory={paymentHistory || []}
+            paymentRequests={paymentRequests || []}
+            loadPaymentRequests={loadPaymentRequests}
+            loadAdminData={loadAdminData}
+            loadLeaderboard={loadLeaderboard}
+            loadPaymentHistory={loadPaymentHistory}
+            handlePremiumControl={handlePremiumControl}
+            approvePaymentRequest={approvePaymentRequest}
+            handleDeleteMockQuestion={handleDeleteMockQuestion}
+            handleAddMockQuestion={handleAddMockQuestion}
+            handleSaveNote={handleSaveNote}
+            handleEditNote={handleEditNote}
+            handleDeleteNote={handleDeleteNote}
+            handleSaveCurrentAffairs={handleSaveCurrentAffairs}
+            handleEditCurrentAffairs={handleEditCurrentAffairs}
+            handleDeleteCurrentAffairs={handleDeleteCurrentAffairs}
+            handleAddAnnouncement={handleAddAnnouncement}
+            handleDeleteAnnouncement={handleDeleteAnnouncement}
+          />
+        );
+      })()}
     </section>
   }
 />
@@ -3285,16 +3467,47 @@ isAdmin={isAdmin}
   path="/admin/payments"
   element={
     <section className="coursePages">
-      <div className="sectionHeader">
-        <span className="badge">Payments</span>
+      {(() => {
+        setTimeout(() => setActiveAdminTab("Payments"), 0);
 
-        <h2>Payment Approval System</h2>
-
-        <p>
-          Verify payments, manage premium access,
-          and monitor subscriptions.
-        </p>
-      </div>
+        return (
+          <AdminPanel
+            user={user}
+            isAdmin={isAdmin}
+            activeAdminTab="Payments"
+            setActiveAdminTab={setActiveAdminTab}
+            students={students || []}
+            enquiries={enquiries || []}
+            mockResults={mockResults || []}
+            leaderboard={leaderboard || []}
+            mockQuestions={mockQuestions || []}
+            notesData={notesData || []}
+            firebaseNotes={firebaseNotes || []}
+            currentAffairs={currentAffairsList || []}
+            currentAffairsList={currentAffairsList || []}
+            fallbackCurrentAffairs={currentAffairsList || []}
+            announcements={announcements || []}
+            paymentHistory={paymentHistory || []}
+            paymentRequests={paymentRequests || []}
+            loadPaymentRequests={loadPaymentRequests}
+            loadAdminData={loadAdminData}
+            loadLeaderboard={loadLeaderboard}
+            loadPaymentHistory={loadPaymentHistory}
+            handlePremiumControl={handlePremiumControl}
+            approvePaymentRequest={approvePaymentRequest}
+            handleDeleteMockQuestion={handleDeleteMockQuestion}
+            handleAddMockQuestion={handleAddMockQuestion}
+            handleSaveNote={handleSaveNote}
+            handleEditNote={handleEditNote}
+            handleDeleteNote={handleDeleteNote}
+            handleSaveCurrentAffairs={handleSaveCurrentAffairs}
+            handleEditCurrentAffairs={handleEditCurrentAffairs}
+            handleDeleteCurrentAffairs={handleDeleteCurrentAffairs}
+            handleAddAnnouncement={handleAddAnnouncement}
+            handleDeleteAnnouncement={handleDeleteAnnouncement}
+          />
+        );
+      })()}
     </section>
   }
 />
@@ -3303,16 +3516,47 @@ isAdmin={isAdmin}
   path="/admin/analytics"
   element={
     <section className="coursePages">
-      <div className="sectionHeader">
-        <span className="badge">Analytics</span>
+      {(() => {
+        setTimeout(() => setActiveAdminTab("Analytics"), 0);
 
-        <h2>Platform Analytics</h2>
-
-        <p>
-          Monitor growth, student performance,
-          revenue, and engagement analytics.
-        </p>
-      </div>
+        return (
+          <AdminPanel
+            user={user}
+            isAdmin={isAdmin}
+            activeAdminTab="Analytics"
+            setActiveAdminTab={setActiveAdminTab}
+            students={students || []}
+            enquiries={enquiries || []}
+            mockResults={mockResults || []}
+            leaderboard={leaderboard || []}
+            mockQuestions={mockQuestions || []}
+            notesData={notesData || []}
+            firebaseNotes={firebaseNotes || []}
+            currentAffairs={currentAffairsList || []}
+            currentAffairsList={currentAffairsList || []}
+            fallbackCurrentAffairs={currentAffairsList || []}
+            announcements={announcements || []}
+            paymentHistory={paymentHistory || []}
+            paymentRequests={paymentRequests || []}
+            loadPaymentRequests={loadPaymentRequests}
+            loadAdminData={loadAdminData}
+            loadLeaderboard={loadLeaderboard}
+            loadPaymentHistory={loadPaymentHistory}
+            handlePremiumControl={handlePremiumControl}
+            approvePaymentRequest={approvePaymentRequest}
+            handleDeleteMockQuestion={handleDeleteMockQuestion}
+            handleAddMockQuestion={handleAddMockQuestion}
+            handleSaveNote={handleSaveNote}
+            handleEditNote={handleEditNote}
+            handleDeleteNote={handleDeleteNote}
+            handleSaveCurrentAffairs={handleSaveCurrentAffairs}
+            handleEditCurrentAffairs={handleEditCurrentAffairs}
+            handleDeleteCurrentAffairs={handleDeleteCurrentAffairs}
+            handleAddAnnouncement={handleAddAnnouncement}
+            handleDeleteAnnouncement={handleDeleteAnnouncement}
+          />
+        );
+      })()}
     </section>
   }
 />
@@ -3321,16 +3565,47 @@ isAdmin={isAdmin}
   path="/admin/announcements"
   element={
     <section className="coursePages">
-      <div className="sectionHeader">
-        <span className="badge">Announcements</span>
+      {(() => {
+        setTimeout(() => setActiveAdminTab("Announcements"), 0);
 
-        <h2>Announcement Management</h2>
-
-        <p>
-          Publish updates, notices,
-          and learning announcements.
-        </p>
-      </div>
+        return (
+          <AdminPanel
+            user={user}
+            isAdmin={isAdmin}
+            activeAdminTab="Announcements"
+            setActiveAdminTab={setActiveAdminTab}
+            students={students || []}
+            enquiries={enquiries || []}
+            mockResults={mockResults || []}
+            leaderboard={leaderboard || []}
+            mockQuestions={mockQuestions || []}
+            notesData={notesData || []}
+            firebaseNotes={firebaseNotes || []}
+            currentAffairs={currentAffairsList || []}
+            currentAffairsList={currentAffairsList || []}
+            fallbackCurrentAffairs={currentAffairsList || []}
+            announcements={announcements || []}
+            paymentHistory={paymentHistory || []}
+            paymentRequests={paymentRequests || []}
+            loadPaymentRequests={loadPaymentRequests}
+            loadAdminData={loadAdminData}
+            loadLeaderboard={loadLeaderboard}
+            loadPaymentHistory={loadPaymentHistory}
+            handlePremiumControl={handlePremiumControl}
+            approvePaymentRequest={approvePaymentRequest}
+            handleDeleteMockQuestion={handleDeleteMockQuestion}
+            handleAddMockQuestion={handleAddMockQuestion}
+            handleSaveNote={handleSaveNote}
+            handleEditNote={handleEditNote}
+            handleDeleteNote={handleDeleteNote}
+            handleSaveCurrentAffairs={handleSaveCurrentAffairs}
+            handleEditCurrentAffairs={handleEditCurrentAffairs}
+            handleDeleteCurrentAffairs={handleDeleteCurrentAffairs}
+            handleAddAnnouncement={handleAddAnnouncement}
+            handleDeleteAnnouncement={handleDeleteAnnouncement}
+          />
+        );
+      })()}
     </section>
   }
 />

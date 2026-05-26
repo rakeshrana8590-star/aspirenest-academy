@@ -1,4 +1,6 @@
-import { useState } from "react";import {
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
 
   LineChart,
   Line,
@@ -93,6 +95,8 @@ export default function AdminPanel({
   handleAddAnnouncement,
   handleDeleteAnnouncement,
 }) {
+  const navigate = useNavigate();
+const [showRecentOnly, setShowRecentOnly] = useState(true);
   if (!isAdmin()) return null;
   const [adminProofs, setAdminProofs] = useState({});
   const [paymentFilter, setPaymentFilter] = useState("student_proof_submitted");
@@ -216,16 +220,32 @@ const isDuplicateUtr = duplicateUtrCount > 1;
           "Announcements",
         ].map((tab) => (
           <button
-            key={tab}
-            className={
-              activeAdminTab === tab
-                ? "adminTab activeAdminTab"
-                : "adminTab"
-            }
-            onClick={() => setActiveAdminTab(tab)}
-          >
-            {tab}
-          </button>
+          key={tab}
+          className={
+            activeAdminTab === tab
+              ? "adminTab activeAdminTab"
+              : "adminTab"
+          }
+          onClick={() => {
+            setActiveAdminTab(tab);
+        
+            const adminRoutes = {
+              Dashboard: "/admin",
+              Students: "/admin/students",
+              Enquiries: "/admin/enquiries",
+              Notes: "/admin/notes",
+              "Current Affairs": "/admin/current-affairs",
+              "Mock Tests": "/admin/mock-tests",
+              Analytics: "/admin/analytics",
+              Payments: "/admin/payments",
+              Announcements: "/admin/announcements",
+            };
+        
+            navigate(adminRoutes[tab]);
+          }}
+        >
+          {tab}
+        </button>
         ))}
       </div>
 
