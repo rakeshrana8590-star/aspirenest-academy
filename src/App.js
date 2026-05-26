@@ -102,7 +102,7 @@ const [contactEmail, setContactEmail] = useState("");
     };
     const openProtectedSection = (sectionName, requiredPlan = "PREMIUM") => {
       if (hasPlanAccess(requiredPlan)) {
-        setActiveSection(sectionName);
+        navigate(`/${sectionName}`);
       } else {
         navigate("/subjects/ctet-tet/pricing");;
       }
@@ -2485,7 +2485,6 @@ isAdmin={isAdmin}
   </>
       ) : null
     }
-  />
     />
 
     <Route
@@ -2818,6 +2817,43 @@ isAdmin={isAdmin}
     </section>
   }
 />
+
+<Route
+  path="/announcements"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">Announcements</span>
+
+        <h2>Latest Platform Announcements</h2>
+
+        <p>
+          Stay updated with latest exam alerts, platform updates,
+          important notices, and AspireNest announcements.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        <button>
+          📢 New Mock Tests Added
+        </button>
+
+        <button>
+          📢 CTET Revision Schedule Live
+        </button>
+
+        <button>
+          📢 Premium Notes Updated
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet")}>
+          🔙 Back to CTET/TET Hub
+        </button>
+      </div>
+    </section>
+  }
+/>
+
 <Route
   path="/pricing"
   element={
@@ -2848,6 +2884,43 @@ isAdmin={isAdmin}
 
         <button onClick={() => navigate("/subjects/ctet-tet")}>
           🔙 Back to CTET/TET Hub
+        </button>
+      </div>
+    </section>
+  }
+/>
+<Route
+  path="/contact"
+  element={
+    <section className="footerPanels contactScreen">
+      <div className="footerPanelCard">
+        <span>STUDENT REVIEWS</span>
+
+        <h3>Trusted by CTET/TET learners.</h3>
+
+        <p className="stars">⭐⭐⭐⭐⭐</p>
+
+        <p>
+          Visual notes se revision bahut fast ho gaya.
+        </p>
+
+        <strong>Priva Sharma</strong>
+      </div>
+
+      <div className="footerPanelCard">
+        <span>CONTACT</span>
+
+        <h3>Let’s build your teaching career.</h3>
+
+        <p>Email: aspirenestacademy@gmail.com</p>
+
+        <p>WhatsApp Support Available</p>
+
+        <button
+          onClick={() => navigate("/")}
+          className="btnPrimary"
+        >
+          ← Back to Home
         </button>
       </div>
     </section>
@@ -4019,123 +4092,6 @@ ${paymentProof}
         </button>
       </div>
     </div>
-  </section>
-)}
-    {activeSection === "courses" && (
- <section className="coursePages" id="courses">
- <h2>CTET/TET Courses</h2>
-
- <p>
-   Structured learning programs designed for concept clarity,
-   mock practice, and exam success.
- </p>
-
- <div className="grid">
-   {courses.map((course) => (
-     <div className="course" key={course.id}>
-       <span className="planTag">{course.badge}</span>
-
-       <h3>{course.title}</h3>
-
-       <p className="courseSubtitle">
-         {course.subtitle}
-       </p>
-
-       <p>{course.desc}</p>
-
-       <p>
-         <strong>Level:</strong> {course.level}
-       </p>
-
-       <p>
-         <strong>Lessons:</strong> {course.lessons}
-       </p>
-
-       <p>
-         <strong>Mock Tests:</strong> {course.tests}
-       </p>
-
-       {course.badge === "FOUNDATION" ? (
-         <p className="courseAccess">
-           🔓 Included in BASIC Plan
-         </p>
-       ) : (
-         <p className="courseAccess">
-           🌟 Included in PREMIUM Plan
-         </p>
-       )}
-
-       <button onClick={() => setSelectedCourse(course)}>
-         View Details
-       </button>
-     </div>
-   ))}
- </div>
-</section>
-)}
-activeSection === "notes"
-
-
-
-{activeSection === "contact" && (
-  <section className="footerPanels contactScreen">
-
-    <div className="footerPanelCard">
-      <span>STUDENT REVIEWS</span>
-
-      <h3>Trusted by CTET/TET learners.</h3>
-
-      <p className="stars">⭐⭐⭐⭐⭐</p>
-
-      <p>
-        Visual notes se revision bahut fast ho gaya.
-      </p>
-
-      <strong>Priya Sharma</strong>
-    </div>
-
-    <div className="footerPanelCard enquiryPanel">
-      <span>GET IN TOUCH</span>
-
-      <h3>Need guidance? Send enquiry.</h3>
-
-      <input
-        value={fullName}
-        onChange={(e) => setFullName(e.target.value)}
-        placeholder="Full Name"
-      />
-
-      <input
-        value={mobile}
-        onChange={(e) => setMobile(e.target.value)}
-        placeholder="Mobile Number"
-      />
-
-      <input
-        value={contactEmail}
-        onChange={(e) => setContactEmail(e.target.value)}
-        placeholder="Email"
-      />
-
-      <button type="button">
-        Submit Enquiry
-      </button>
-    </div>
-
-    <div className="footerPanelCard">
-      <span>FAQ</span>
-
-      <h3>Quick answers before joining.</h3>
-
-      <p>▶ Is this course bilingual?</p>
-
-      <p>▶ Are mock tests included?</p>
-
-      <p>▶ Can I use this on mobile?</p>
-
-      <p>▶ Is pricing in INR?</p>
-    </div>
-
   </section>
 )}
 
