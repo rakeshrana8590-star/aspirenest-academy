@@ -66,7 +66,7 @@ transition: all 0.3s ease;
   }
   
   nav a {
-  color: #111827;
+  color: var(--color-dark);
   text-decoration: none;
   font-weight: 700;
   font-size: 17px;
@@ -172,7 +172,7 @@ transition: all 0.3s ease;
     backdrop-filter: blur(16px);
   
     border: 1px solid rgba(255, 166, 0, 0.18);
-    border-radius: 30px;
+    border-radius: var(--radius-xl);
   
     box-shadow:
       0 10px 40px rgba(255, 166, 0, 0.08),
@@ -642,7 +642,7 @@ transition: all 0.3s ease;
   text-align: center;
   background: linear-gradient(180deg, #ffffff, #fff7ed);
   border: 1px solid #fed7aa;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.08);
+ box-shadow: var(--shadow-soft);
   }
   
   .price h3 {
@@ -1056,53 +1056,36 @@ transition: all 0.3s ease;
       #111827,
       #7c2d12,
       #ea580c
-      );
-
-      .closeMentorProfile {
-      position: absolute;
-    
-      top: 18px;
-      right: 22px;
-    
-      width: 42px;
-      height: 42px;
-    
-      border: none;
-      border-radius: 50%;
-    
-      background: linear-gradient(135deg, #f97316, #ea580c);
-    
-      color: white;
-    
-      font-size: 26px;
-      font-weight: 800;
-    
-      cursor: pointer;
-    
-      z-index: 10;
-    
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    
-      transition: 0.3s ease;
-    }
-    
-    .closeMentorProfile:hover {
-      background: #0f172a;
-    
-      color: white;
-    
-      transform: rotate(90deg);
-    }
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
   
-
+  .closeMentorProfile {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    color: white;
+    font-size: 26px;
+    font-weight: 800;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s ease;
+  }
+  
   .closeMentorProfile:hover {
-    background: #ea580c;
+    background: #0f172a;
     color: white;
     transform: rotate(90deg);
   }
-}
   
   .premiumMentorCard {
     position: relative;
