@@ -1,3 +1,16 @@
+/* =========================
+   GLOBAL BASE STYLES
+========================= */
+:root {
+  --color-dark: #111827;
+  --color-orange: #f97316;
+  --color-gold: #facc15;
+  --color-soft-bg: #fff7ed;
+  --shadow-soft: 0 25px 60px rgba(0, 0, 0, 0.08);
+  --shadow-premium: 0 30px 80px rgba(0, 0, 0, 0.12);
+  --radius-xl: 30px;
+  --radius-2xl: 40px;
+}
 html {
   scroll-behavior: smooth;
 }
@@ -11,7 +24,7 @@ img {
     animation: appFade 0.5s ease;
     margin: 0;
     font-family: Arial;
-    background: #fff7ed;
+   background: var(--color-soft-bg);
     scroll-behavior: smooth;
     overflow-x: hidden;
     -webkit-tap-highlight-color: transparent;
@@ -131,6 +144,10 @@ transition: all 0.3s ease;
       display: none;
     }
   }
+
+/* =========================
+   HERO SECTION
+========================= */
   .hero {
     padding: 80px 8%;
     display: grid;
@@ -213,6 +230,9 @@ transition: all 0.3s ease;
     color: #4b5563;
   }
   
+  /* =========================
+   MOBILE / RESPONSIVE
+========================= */
   @media (max-width: 768px) {
     .taglineCard {
       flex-direction: column;
@@ -252,6 +272,9 @@ transition: all 0.3s ease;
   font-size: 50px;
   }
   
+  /* =========================
+   BUTTON SYSTEM
+========================= */
   .buttons {
   display: flex;
   gap: 15px;
@@ -275,13 +298,16 @@ transition: all 0.3s ease;
   border: 1px solid black;
   }
   
+  /* =========================
+   CARD SYSTEM
+========================= */
   .card {
     background: rgba(255, 255, 255, 0.85);
     padding: 40px;
-    border-radius: 30px;
+    border-radius: var(--radius-xl);
     border: 1px solid #f3f4f6;
     backdrop-filter: blur(16px);
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--shadow-soft);
   }
   
   .progress {
@@ -307,6 +333,9 @@ transition: all 0.3s ease;
   gap: 20px;
   }
   
+  /* =========================
+   COURSES / LEARNING CARDS
+========================= */
   .course,
   .price {
   background: white;
@@ -639,6 +668,10 @@ transition: all 0.3s ease;
   .dark .grid {
   margin-top: 35px;
   }
+
+  /* =========================
+   CONTACT SECTION
+========================= */
   #contact {
   padding: 100px 8%;
   
@@ -879,6 +912,9 @@ transition: all 0.3s ease;
   animation: floatGlow2 12s ease-in-out infinite;
   }
   
+/* =========================
+   ANIMATIONS
+========================= */
   @keyframes floatGlow {
   0% {
   transform: translateY(0px);
@@ -1302,6 +1338,10 @@ transition: all 0.3s ease;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   }
+
+  /* =========================
+   DASHBOARD SECTION
+========================= */
   .dashboard {
   padding: 100px 8%;
   display: grid;
@@ -1351,6 +1391,10 @@ transition: all 0.3s ease;
   font-size: 38px;
   }
   }
+
+  /* =========================
+   FOOTER SECTION
+========================= */
   .footer {
   background: linear-gradient(135deg, #020617, #111827);
   
@@ -1398,7 +1442,7 @@ transition: all 0.3s ease;
   }
   
   .footer a:hover {
-  color: #f97316;
+ color: var(--color-orange);
   }
   
   .footerBottom {
@@ -1560,6 +1604,9 @@ transition: all 0.3s ease;
   grid-template-columns: 1fr;
   }
   }
+  /* =========================
+   PRICING SECTION
+========================= */
   .pricingPro {
   padding: 110px 8%;
   
@@ -16939,6 +16986,9 @@ nav {
   display: block;
 }
 
+/* =========================
+   NAVIGATION / HEADER
+========================= */
 .cleanNav {
   display: flex;
   align-items: center;
