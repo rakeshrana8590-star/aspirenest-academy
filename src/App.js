@@ -4345,6 +4345,55 @@ setAnnouncementMessage={setAnnouncementMessage}
     </section>
   }
 />
+
+<Route
+  path="/subjects/ctet-tet/current-affairs"
+  element={
+    <section className="coursePages currentAffairsPremiumPage">
+      <div className="sectionHeader">
+        <span className="badge">CTET / TET Current Affairs</span>
+
+        <h1>Current Affairs for Teaching Exams</h1>
+
+        <p>
+          Monthly exam-oriented updates, education news, NEP/NCF highlights,
+          and downloadable PDFs for CTET/TET preparation.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        {[
+          { month: "January", pages: "8 Pages" },
+          { month: "February", pages: "10 Pages" },
+          { month: "March", pages: "11 Pages" },
+          { month: "April", pages: "12 Pages" },
+        ].map((item) => (
+          <div className="courseCard" key={item.month}>
+            <div className="courseIcon">📰</div>
+            <h3>{item.month} Current Affairs</h3>
+            <p>📅 {item.month} 2026</p>
+            <p>📄 {item.pages}</p>
+            <p>🔓 Access: Unlocked</p>
+
+            <button onClick={() => alert("PDF will be uploaded soon.")}>
+              📥 Download PDF
+            </button>
+          </div>
+        ))}
+
+        <div className="courseCard">
+          <div className="courseIcon">⬅️</div>
+          <h3>Back to Hub</h3>
+          <p>Return to the CTET/TET learning ecosystem.</p>
+
+          <button onClick={() => navigate("/subjects/ctet-tet")}>
+            Go Back
+          </button>
+        </div>
+      </div>
+    </section>
+  }
+/>
 <Route
   path="/subjects/ctet-tet/pricing"
   element={

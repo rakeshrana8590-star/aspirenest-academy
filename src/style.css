@@ -19253,3 +19253,134 @@ nav {
     transform: none !important;
   }
 }
+/* STEP 4B — Current Affairs Premium Grid Fix */
+.currentAffairsPremiumPage .courseGrid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 28px !important;
+  align-items: stretch !important;
+}
+
+.currentAffairsPremiumPage .courseCard {
+  min-height: 320px !important;
+  padding: 34px !important;
+  border-radius: 30px !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  border: 1px solid rgba(249, 115, 22, 0.14) !important;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08) !important;
+}
+
+.currentAffairsPremiumPage .courseCard button {
+  margin-top: 18px !important;
+  width: fit-content !important;
+  padding: 14px 22px !important;
+  border-radius: 16px !important;
+}
+
+@media (max-width: 900px) {
+  .currentAffairsPremiumPage .courseGrid {
+    grid-template-columns: 1fr !important;
+  }
+}
+/* STEP 5A — MOBILE HERO PREMIUM POLISH */
+@media (max-width: 768px) {
+  .hero {
+    padding: 34px 18px 24px !important;
+  }
+
+  .heroContent {
+    gap: 24px !important;
+  }
+
+  .heroText h1 {
+    font-size: clamp(48px, 12vw, 68px) !important;
+    line-height: 0.95 !important;
+    letter-spacing: -2px !important;
+  }
+
+  .heroText p {
+    font-size: 17px !important;
+    line-height: 1.7 !important;
+    max-width: 100% !important;
+  }
+
+  .heroButtons {
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .heroButtons button,
+  .heroButtons a {
+    min-height: 52px !important;
+    padding: 14px 20px !important;
+    border-radius: 18px !important;
+    font-size: 15px !important;
+  }
+
+  .heroCard,
+  .dashboardPreview,
+  .adminPreviewCard {
+    border-radius: 28px !important;
+  }
+}
+/* STEP 5B — PREMIUM SUBJECT HORIZONTAL RAIL */
+
+.notesSubjectsRow {
+  display: flex;
+  gap: 22px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+
+  scrollbar-width: none;
+}
+
+.notesSubjectsRow::-webkit-scrollbar {
+  display: none;
+}
+
+.notesSubjectsRow .noteCard,
+.notesSubjectsRow .subjectCard,
+.notesSubjectsRow .courseCard {
+  min-width: 290px;
+  flex-shrink: 0;
+
+  border-radius: 30px !important;
+
+  background: rgba(255,255,255,0.92) !important;
+
+  backdrop-filter: blur(20px);
+
+  box-shadow:
+    0 14px 45px rgba(15,23,42,0.08);
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.notesSubjectsRow .noteCard:hover,
+.notesSubjectsRow .subjectCard:hover,
+.notesSubjectsRow .courseCard:hover {
+  transform: translateY(-6px);
+
+  box-shadow:
+    0 24px 60px rgba(15,23,42,0.12);
+}
+
+@media (max-width: 768px) {
+
+  .notesSubjectsRow {
+    gap: 18px;
+    padding-bottom: 8px;
+  }
+
+  .notesSubjectsRow .noteCard,
+  .notesSubjectsRow .subjectCard,
+  .notesSubjectsRow .courseCard {
+    min-width: 82vw;
+  }
+
+}
