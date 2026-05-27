@@ -2308,47 +2308,7 @@ isAdmin={isAdmin}
   </div>
 </section>
 )}
-<section className="freeResources">
-  <div className="container">
-    <h2>Free Resources</h2>
 
-    <p>
-    Start your preparation with free notes and study tools.
-    </p>
-
-    <div className="freeGrid">
-    <div
-  className="freeCard"
-  onClick={() => navigate("/subjects/ctet-tet/notes")}
->
-        📘 Free CDP Notes
-      </div>
-
-      <div className="freeCard">
-        🗓️ 7-Day Study Plan
-      </div>
-
-      <div
-  className="freeCard"
-  onClick={() => navigate("/subjects/ctet-tet/mock-tests")}
->
-        📝 Free Mock Test
-      </div>
-
-      <div className="freeCard">
-        📄 PYQ Starter Pack
-      </div>
-
-      <div className="freeCard">
-        🎯 Exam Strategy Guide
-      </div>
-
-      <div className="freeCard">
-        ✅ Revision Checklist
-      </div>
-    </div>
-  </div>
-</section>
 <section className="premium" id="premium-section">
         <div className="premiumLeft">
           <span className="premiumBadge">PREMIUM LEARNING EXPERIENCE</span>
@@ -2404,6 +2364,49 @@ isAdmin={isAdmin}
           </div>
         </div>
       </section>
+
+<section className="freeResources">
+  <div className="container">
+    <h2>Free Resources</h2>
+
+    <p>
+    Start your preparation with free notes and study tools.
+    </p>
+
+    <div className="freeGrid">
+    <div
+  className="freeCard"
+  onClick={() => navigate("/subjects/ctet-tet/notes")}
+>
+        📘 Free CDP Notes
+      </div>
+
+      <div className="freeCard">
+        🗓️ 7-Day Study Plan
+      </div>
+
+      <div
+  className="freeCard"
+  onClick={() => navigate("/subjects/ctet-tet/mock-tests")}
+>
+        📝 Free Mock Test
+      </div>
+
+      <div className="freeCard">
+        📄 PYQ Starter Pack
+      </div>
+
+      <div className="freeCard">
+        🎯 Exam Strategy Guide
+      </div>
+
+      <div className="freeCard">
+        ✅ Revision Checklist
+      </div>
+    </div>
+  </div>
+</section>
+
 
       <section className="footerPanels" id="contact">
   <div className="footerPanelCard">
@@ -4743,138 +4746,162 @@ ${paymentProof}
     <h2 className="learningHubHeading">
       Start Learning
     </h2>
-
     <div className="learningHubGrid">
 
-      <div className="learningHubCard">
-        <div className="learningHubIcon">📖</div>
-        <h3>Courses</h3>
-        <p>
-          CTET/TET learning paths and topic-wise preparation.
-        </p>
+<div
+  className="learningHubCard"
+  onClick={() => navigate("/subjects/ctet-tet/courses")}
+>
+  <div className="learningHubIcon">📖</div>
 
-        <button onClick={() => navigate("/subjects/ctet-tet/courses")}>
-  Open
-</button>
-      </div>
+  <h3>Courses</h3>
 
-      <div className="learningHubCard">
-        <div className="learningHubIcon">🛣️</div>
-        <h3>Learning Paths</h3>
-        <p>
-          Beginner to premium structured learning programs.
-        </p>
+  <p>
+    CTET/TET learning paths and topic-wise preparation.
+  </p>
 
-        <button onClick={() => navigate("/learning-paths")}>
-  Open
-</button>
-      </div>
+  <span className="learningHubArrow">→</span>
+</div>
 
-      <div className="learningHubCard">
-        <div className="learningHubIcon">📝</div>
-        <h3>Notes</h3>
-        <p>
-          Premium and free revision notes for quick learning.
-        </p>
+<div
+  className="learningHubCard"
+  onClick={() => navigate("/learning-paths")}
+>
+  <div className="learningHubIcon">🛣️</div>
 
-        <button onClick={() => navigate("/subjects/ctet-tet/notes")}>
-  Open
-</button>
-      </div>
+  <h3>Learning Paths</h3>
 
-    </div>
+  <p>
+    Beginner to premium structured learning programs.
+  </p>
 
-    <h2 className="learningHubHeading">
-      Practice
-    </h2>
+  <span className="learningHubArrow">→</span>
+</div>
 
-    <div className="learningHubGrid">
+<div
+  className="learningHubCard"
+  onClick={() => navigate("/subjects/ctet-tet/notes")}
+>
+  <div className="learningHubIcon">📝</div>
 
-      <div className="learningHubCard">
-        <div className="learningHubIcon">✅</div>
-        <h3>Mock Tests</h3>
-        <p>
-          Practice tests, score tracking and exam preparation.
-        </p>
+  <h3>Notes</h3>
 
-        <button onClick={() => navigate("/subjects/ctet-tet/mock-tests")}>
-  Open
-</button>
-      </div>
+  <p>
+    Premium and free revision notes for quick learning.
+  </p>
 
-      <div className="learningHubCard">
-        <div className="learningHubIcon">📰</div>
-        <h3>Current Affairs</h3>
-        <p>
-          Monthly PDF updates and exam-focused current affairs.
-        </p>
+  <span className="learningHubArrow">→</span>
+</div>
 
-        <button onClick={() => navigate("/subjects/ctet-tet/current-affairs")}>
-  Open
-</button>
-      </div>
+</div>
 
-      <div className="learningHubCard">
-        <div className="learningHubIcon">📊</div>
-        <h3>My Progress</h3>
-        <p>
-          Student dashboard, analytics and learning progress.
-        </p>
+<h2 className="learningHubHeading">
+Practice
+</h2>
 
-        <button
+<div className="learningHubGrid">
+
+<div
+  className="learningHubCard"
+  onClick={() => navigate("/subjects/ctet-tet/mock-tests")}
+>
+  <div className="learningHubIcon">✅</div>
+
+  <h3>Mock Tests</h3>
+
+  <p>
+    Practice tests, score tracking and exam preparation.
+  </p>
+
+  <span className="learningHubArrow">→</span>
+</div>
+
+<div
+  className="learningHubCard"
+  onClick={() => navigate("/subjects/ctet-tet/current-affairs")}
+>
+  <div className="learningHubIcon">📰</div>
+
+  <h3>Current Affairs</h3>
+
+  <p>
+    Monthly PDF updates and exam-focused current affairs.
+  </p>
+
+  <span className="learningHubArrow">→</span>
+</div>
+
+<div
+  className="learningHubCard"
   onClick={() => navigate("/student-dashboard")}
 >
-  Open
-</button>
-      </div>
+  <div className="learningHubIcon">📊</div>
 
-    </div>
+  <h3>My Progress</h3>
 
-    <h2 className="learningHubHeading">
-      Premium
-    </h2>
+  <p>
+    Student dashboard, analytics and learning progress.
+  </p>
 
-    <div className="learningHubGrid">
+  <span className="learningHubArrow">→</span>
+</div>
 
-      <div className="learningHubCard">
-        <div className="learningHubIcon">👑</div>
-        <h3>Premium</h3>
-        <p>
-          Unlock full course, mock tests, notes and mentorship.
-        </p>
+</div>
 
-        <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
-  Open
-</button>
-      </div>
+<h2 className="learningHubHeading">
+Premium
+</h2>
 
-      <div className="learningHubCard">
-        <div className="learningHubIcon">📣</div>
-        <h3>Announcements</h3>
-        <p>
-          Latest updates, exam alerts and platform notifications.
-        </p>
+<div className="learningHubGrid">
 
-        <button onClick={() => navigate("/announcements")}>
-  Open
-</button>
-      </div>
+<div
+  className="learningHubCard"
+  onClick={() => navigate("/subjects/ctet-tet/pricing")}
+>
+  <div className="learningHubIcon">👑</div>
 
-      <div className="learningHubCard">
-        <div className="learningHubIcon">⚙️</div>
-        <h3>Admin Panel</h3>
-        <p>
-          Manage students, notes, mock tests and analytics.
-        </p>
+  <h3>Premium</h3>
 
-        <button onClick={() => navigate("/admin")}>
-  Open
-</button>
-      </div>
+  <p>
+    Unlock full course, mock tests, notes and mentorship.
+  </p>
 
-    </div>
+  <span className="learningHubArrow">→</span>
+</div>
 
-  </section>
+<div
+  className="learningHubCard"
+  onClick={() => navigate("/announcements")}
+>
+  <div className="learningHubIcon">📣</div>
+
+  <h3>Announcements</h3>
+
+  <p>
+    Latest updates, exam alerts and platform notifications.
+  </p>
+
+  <span className="learningHubArrow">→</span>
+</div>
+
+<div
+  className="learningHubCard"
+  onClick={() => navigate("/admin")}
+>
+  <div className="learningHubIcon">⚙️</div>
+
+  <h3>Admin Panel</h3>
+
+  <p>
+    Manage students, notes, mock tests and analytics.
+  </p>
+
+  <span className="learningHubArrow">→</span>
+</div>
+
+</div>
+
+</section>
 )}
     {activeSection === "learning-paths" && (
   <section className="plansSection" id="learning-paths">
@@ -5438,6 +5465,14 @@ setActiveSection={setActiveSection}
 
 </div>
 )}
+<a
+  href="https://wa.me/917304256002"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="whatsappFloat"
+>
+  💬
+</a>
   </React.Suspense>
 );
 }

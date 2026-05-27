@@ -10,15 +10,14 @@ import {
   BarChart3,
   Megaphone,
   Settings,
+  ArrowRight,
 } from "lucide-react";
 
 export default function AppDashboard({
-  setActiveSection,
   setActiveAdminTab,
   user,
   isAdmin,
 }) {
-  
   const navigate = useNavigate();
 
   const rows = [
@@ -34,7 +33,7 @@ export default function AppDashboard({
         {
           Icon: Route,
           title: "Learning Paths",
-          text: "Beginner to premium structured learning programs.",
+          text: "Structured CTET/TET ecosystem with courses, notes and tests.",
           action: () => navigate("/subjects/ctet-tet"),
         },
         {
@@ -73,8 +72,8 @@ export default function AppDashboard({
       cards: [
         {
           Icon: Crown,
-          title: "Premium",
-          text: "Unlock full course, mock tests, notes and mentorship.",
+          title: "Premium Plans",
+          text: "Unlock courses, mock tests, notes and mentorship.",
           action: () => navigate("/subjects/ctet-tet/pricing"),
         },
         {
@@ -104,11 +103,16 @@ export default function AppDashboard({
   return (
     <section className="appDashboard appleStoreHub">
       <div className="appDashboardHeader">
-        <span className="dashboardBadge">AspireNest Learning Hub</span>
+        <span className="dashboardBadge">
+          AspireNest Learning Hub
+        </span>
 
         <h1>Choose what you want to study today.</h1>
 
-        <p>Open any section directly without scrolling the full website.</p>
+        <p>
+          Open courses, notes, tests, current affairs and progress
+          from one premium learning hub.
+        </p>
       </div>
 
       {rows.map((row) => (
@@ -127,15 +131,24 @@ export default function AppDashboard({
                     card.admin ? "adminHubCard" : ""
                   }`}
                   key={card.title}
+                  onClick={card.action}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") card.action();
+                  }}
                 >
                   <div className="premiumIconBadge">
-                    <Icon size={24} strokeWidth={2.2} />
+                    <Icon size={25} strokeWidth={2.3} />
                   </div>
 
                   <h3>{card.title}</h3>
+
                   <p>{card.text}</p>
 
-                  <button onClick={card.action}>Open</button>
+                  <span className="learningHubArrow">
+                    <ArrowRight size={22} strokeWidth={2.8} />
+                  </span>
                 </div>
               );
             })}

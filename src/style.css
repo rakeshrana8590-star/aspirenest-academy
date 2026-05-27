@@ -7559,12 +7559,7 @@ body {
     bottom: 12px !important;
   }
 
-  .whatsappFloat,
-  .whatsappButton {
-    bottom: 110px !important;
-    right: 16px !important;
-    transform: scale(0.92);
-  }
+ 
 }
 /* FINAL MOBILE OVERFLOW FIX */
 @media (max-width: 768px) {
@@ -7880,10 +7875,10 @@ canvas {
   .whatsappButton,
   .floatingWhatsapp,
   .chatButton {
-    bottom: 95px !important;
-    right: 16px !important;
-    transform: scale(0.92) !important;
-    z-index: 999 !important;
+    bottom: 24px !important;
+    right: 18px !important;
+    transform: scale(1.28) !important;
+    z-index: 99999 !important;
   }
 
   .scrollTopBtn,
@@ -18586,4 +18581,675 @@ nav {
   background: #ffffff;
   color: #0f172a;
   border: 1px solid rgba(15,23,42,0.08);
+}
+
+/* STEP 8C — Learning Hub Premium Card Override */
+.learningHubCard {
+  position: relative;
+  overflow: hidden;
+  padding: 34px 30px !important;
+  border-radius: 34px !important;
+  cursor: pointer;
+  background:
+    radial-gradient(circle at top right, rgba(255, 237, 213, 0.9), transparent 34%),
+    rgba(255,255,255,0.92) !important;
+  border: 1px solid rgba(15,23,42,0.06) !important;
+  box-shadow:
+    0 10px 30px rgba(15,23,42,0.05),
+    0 30px 70px rgba(15,23,42,0.06) !important;
+  transition: all 0.32s ease;
+}
+
+.learningHubCard:hover {
+  transform: translateY(-10px);
+  border-color: rgba(249,115,22,0.18) !important;
+  box-shadow:
+    0 18px 50px rgba(15,23,42,0.08),
+    0 40px 90px rgba(249,115,22,0.10) !important;
+}
+
+.learningHubArrow {
+  position: absolute;
+  right: 28px;
+  bottom: 26px;
+  font-size: 30px;
+  font-weight: 900;
+  color: #ea580c;
+}
+/* STEP 8C-3 — Learning Hub Final Premium Polish */
+.appleStoreHub {
+  max-width: 1760px;
+  margin: 0 auto;
+  padding: 70px 7% 74px;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(255, 237, 213, 0.55), transparent 30%),
+    radial-gradient(circle at 90% 18%, rgba(248, 250, 252, 0.95), transparent 34%),
+    linear-gradient(135deg, #ffffff 0%, #fffaf5 48%, #f8fafc 100%);
+  border-radius: 0 0 44px 44px;
+}
+
+.appDashboardHeader {
+  max-width: 900px;
+  margin-bottom: 46px;
+}
+
+.dashboardBadge {
+  display: inline-flex;
+  margin-bottom: 18px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: #fff7ed;
+  color: #ea580c;
+  border: 1px solid rgba(249, 115, 22, 0.16);
+  font-weight: 900;
+}
+
+.appDashboardHeader h1 {
+  font-size: clamp(52px, 5.2vw, 82px);
+  line-height: 0.98;
+  letter-spacing: -3.5px;
+  margin-bottom: 18px;
+}
+
+.appDashboardHeader p {
+  font-size: 20px;
+  line-height: 1.55;
+  color: #64748b;
+}
+
+.appleHubRow {
+  margin-top: 42px;
+}
+
+.appleHubRowHeader h2 {
+  font-size: clamp(34px, 3vw, 50px);
+  letter-spacing: -2px;
+  margin-bottom: 22px;
+}
+
+.appleHubScroller {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 22px !important;
+}
+
+.appleHubCard {
+  min-height: 245px !important;
+  padding: 30px 30px !important;
+  border-radius: 30px !important;
+  cursor: pointer;
+  background:
+    radial-gradient(circle at 88% 16%, rgba(255, 237, 213, 0.75), transparent 32%),
+    rgba(255,255,255,0.94) !important;
+  border: 1px solid rgba(15,23,42,0.07) !important;
+  box-shadow:
+    0 12px 32px rgba(15,23,42,0.05),
+    0 28px 65px rgba(15,23,42,0.06) !important;
+  transition: all 0.3s ease;
+}
+
+.appleHubCard:hover {
+  transform: translateY(-8px);
+  border-color: rgba(249,115,22,0.18) !important;
+  box-shadow:
+    0 22px 60px rgba(15,23,42,0.09),
+    0 42px 90px rgba(249,115,22,0.10) !important;
+}
+
+.appleHubCard .premiumIconBadge {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  margin-bottom: 20px;
+  background: #fff7ed;
+  color: #f97316;
+  border: 1px solid rgba(249,115,22,0.14);
+}
+
+.appleHubCard h3 {
+  font-size: 24px;
+  line-height: 1.08;
+  letter-spacing: -0.8px;
+  margin-bottom: 12px;
+}
+
+.appleHubCard p {
+  max-width: 82%;
+  font-size: 16px;
+  line-height: 1.55;
+  color: #64748b;
+}
+
+.appleHubCard .learningHubArrow {
+  right: 30px;
+  bottom: 28px;
+  color: #f97316;
+  transition: all 0.28s ease;
+}
+
+.appleHubCard:hover .learningHubArrow {
+  transform: translateX(7px);
+}
+
+@media (max-width: 950px) {
+  .appleStoreHub {
+    padding: 46px 6%;
+  }
+
+  .appleHubScroller {
+    grid-template-columns: 1fr !important;
+  }
+
+  .appDashboardHeader h1 {
+    font-size: clamp(42px, 11vw, 62px);
+  }
+}
+/* STEP 8C-4 — Learning Hub Final Compact Tuning */
+.appDashboardHeader {
+  max-width: 820px;
+  margin-bottom: 36px !important;
+}
+
+.appleStoreHub {
+  padding-top: 58px !important;
+  padding-bottom: 62px !important;
+}
+
+.appleHubRow {
+  margin-top: 34px !important;
+}
+
+.appleHubRowHeader h2 {
+  margin-bottom: 18px !important;
+}
+
+.appleHubCard {
+  min-height: 215px !important;
+  padding: 26px 28px !important;
+}
+
+.appleHubCard .premiumIconBadge {
+  width: 52px !important;
+  height: 52px !important;
+  margin-bottom: 18px !important;
+}
+
+.appleHubCard h3 {
+  font-size: 23px !important;
+  margin-bottom: 10px !important;
+}
+
+.appleHubCard p {
+  font-size: 15.5px !important;
+  line-height: 1.48 !important;
+}
+
+.appleHubCard .learningHubArrow {
+  bottom: 24px !important;
+  right: 28px !important;
+}
+/* STEP 8C-5 — Premium Density Polish */
+
+.appleStoreHub {
+  padding-top: 44px !important;
+}
+
+.appDashboardHeader {
+  margin-bottom: 18px !important;
+}
+
+.appDashboardHeader h1 {
+  margin-bottom: 18px !important;
+  line-height: 0.96 !important;
+}
+
+.appDashboardHeader p {
+  max-width: 760px !important;
+}
+
+.appleHubRow {
+  margin-top: 18px !important;
+}
+
+.appleHubRowHeader h2 {
+  margin-bottom: 14px !important;
+}
+
+.appleHubCard {
+  min-height: 190px !important;
+  padding: 24px 26px !important;
+}
+
+.appleHubCard p {
+  max-width: 85% !important;
+}
+
+.appleHubScroller {
+  gap: 18px !important;
+}
+/* FINAL CINEMATIC POLISH */
+
+.appleStoreHub {
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(255, 140, 0, 0.05),
+      transparent 28%
+    ),
+    #f6f6f8 !important;
+}
+
+.appleHubCard {
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border: 1px solid rgba(255, 255, 255, 0.85) !important;
+
+  box-shadow:
+    0 8px 30px rgba(15, 23, 42, 0.05),
+    0 2px 10px rgba(255, 140, 0, 0.03) !important;
+
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    border-color 0.35s ease !important;
+}
+
+.appleHubCard:hover {
+  transform: translateY(-8px);
+
+  border-color: rgba(255, 140, 0, 0.18) !important;
+
+  box-shadow:
+    0 18px 50px rgba(15, 23, 42, 0.09),
+    0 10px 24px rgba(255, 140, 0, 0.08) !important;
+}
+
+.premiumIconBadge {
+  background: rgba(255, 255, 255, 0.72) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    0 6px 18px rgba(255,140,0,0.08) !important;
+}
+
+.appDashboardHeader h1 {
+  letter-spacing: -2.8px !important;
+}
+
+.appleHubRowHeader h2 {
+  letter-spacing: -1.3px !important;
+}
+/* FINAL MICRO LUXURY TUNING */
+
+.appDashboardHeader {
+  max-width: 920px !important;
+}
+
+.appDashboardHeader h1 {
+  max-width: 820px !important;
+}
+
+.appDashboardHeader p {
+  margin-top: 20px !important;
+  line-height: 1.7 !important;
+}
+
+.appleHubRowHeader h2 {
+  padding-left: 2px !important;
+}
+
+.appleHubCard {
+  justify-content: space-between !important;
+}
+
+.appleHubCard h3 {
+  margin-top: 18px !important;
+  margin-bottom: 14px !important;
+}
+
+.appleHubCard p {
+  line-height: 1.7 !important;
+}
+
+.learningHubArrow {
+  opacity: 0.92;
+}
+/* FINAL CARD COMPACT TUNING */
+
+.appleHubCard {
+  min-height: 168px !important;
+  padding: 22px 26px !important;
+}
+
+.appleHubCard p {
+  margin-top: 10px !important;
+}
+
+.appleHubScroller {
+  align-items: stretch !important;
+}
+/* STEP 8D-1 — Hide Dummy CTET Master Dashboard */
+.premiumCard {
+  display: none !important;
+}
+
+.premium {
+  grid-template-columns: 1fr !important;
+}
+
+.premiumLeft {
+  max-width: 980px !important;
+}
+
+.premiumLeft h2 {
+  max-width: 900px !important;
+}
+
+.premiumLeft p {
+  max-width: 760px !important;
+}
+/* STEP 8D-2 — Premium Section Center Polish */
+.premium {
+  min-height: auto !important;
+  padding: 72px 7% 64px !important;
+  display: flex !important;
+  justify-content: center !important;
+  text-align: center !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 237, 213, 0.7), transparent 32%),
+    linear-gradient(135deg, #ffffff 0%, #fffaf5 55%, #f8fafc 100%) !important;
+}
+
+.premiumLeft {
+  max-width: 1050px !important;
+  margin: 0 auto !important;
+}
+
+.premiumLeft h2 {
+  max-width: 1050px !important;
+  margin: 0 auto 20px !important;
+}
+
+.premiumLeft p {
+  max-width: 760px !important;
+  margin: 0 auto 26px !important;
+}
+
+.premiumFeatures {
+  max-width: 880px !important;
+  margin: 0 auto 22px !important;
+}
+
+.premiumLeft button {
+  margin: 0 auto !important;
+}
+/* STEP 8E-1 — Keep Only Get In Touch */
+.studentReviews,
+.faqBox {
+  display: none !important;
+}
+
+.trustGrid {
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.enquiryBox {
+  max-width: 620px !important;
+  width: 100% !important;
+}
+/* STEP 8E-1 FIX — Remove Reviews + FAQ */
+.reviewCard,
+.faqCard {
+  display: none !important;
+}
+
+.contactGrid {
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.contactCard {
+  width: 100% !important;
+  max-width: 760px !important;
+}
+/* STEP 8E-2 — Keep Only Get In Touch */
+
+.footerPanels {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+}
+
+.footerPanels > .footerPanelCard:first-child,
+.footerPanels > .footerPanelCard:last-child {
+  display: none !important;
+}
+
+.enquiryPanel {
+  width: 100%;
+  max-width: 760px;
+}
+/* STEP 8E-3 — Free Resources + Contact One Screen Premium */
+.freeResources {
+  padding: 42px 7% 34px !important;
+  background: #ffffff !important;
+}
+
+.freeResources .container {
+  max-width: 1500px !important;
+}
+
+.freeResources h2 {
+  font-size: clamp(44px, 4.6vw, 70px) !important;
+  margin-bottom: 14px !important;
+}
+
+.freeResources .container > p {
+  font-size: 20px !important;
+  margin-bottom: 28px !important;
+  text-align: center;
+}
+
+.freeGrid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+}
+
+.freeCard {
+  min-height: 72px !important;
+  padding: 20px 26px !important;
+  border-radius: 22px !important;
+  background: rgba(255,255,255,0.94) !important;
+  border: 1px solid rgba(15,23,42,0.06) !important;
+  box-shadow: 0 16px 40px rgba(15,23,42,0.05) !important;
+}
+
+.footerPanels {
+  margin-top: 26px !important;
+  padding: 0 7% 42px !important;
+  background: #ffffff !important;
+}
+
+.footerPanels > .footerPanelCard:first-child,
+.footerPanels > .footerPanelCard:last-child {
+  display: none !important;
+}
+
+.footerPanels {
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.enquiryPanel {
+  max-width: 720px !important;
+  width: 100% !important;
+  padding: 30px !important;
+  border-radius: 30px !important;
+  background:
+    radial-gradient(circle at top right, rgba(255,237,213,0.75), transparent 35%),
+    rgba(255,255,255,0.96) !important;
+  box-shadow:
+    0 20px 60px rgba(15,23,42,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.8) !important;
+}
+
+.enquiryPanel input {
+  min-height: 54px !important;
+}
+
+.enquiryPanel button {
+  min-height: 56px !important;
+  border-radius: 999px !important;
+}
+/* STEP 8E-4 — Premium Contact + Free Resources Finish */
+.freeResources {
+  background:
+    radial-gradient(circle at 50% 8%, rgba(255, 237, 213, 0.55), transparent 30%),
+    linear-gradient(180deg, #ffffff 0%, #fffaf5 55%, #ffffff 100%) !important;
+}
+
+.freeResources h2 {
+  letter-spacing: -2.5px !important;
+}
+
+.freeCard {
+  cursor: pointer;
+  backdrop-filter: blur(14px);
+  transition: all 0.28s ease;
+}
+
+.freeCard:hover {
+  transform: translateY(-5px);
+  border-color: rgba(249,115,22,0.18) !important;
+  box-shadow:
+    0 20px 55px rgba(15,23,42,0.08),
+    0 20px 45px rgba(249,115,22,0.08) !important;
+}
+
+.footerPanels {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 237, 213, 0.75), transparent 35%),
+    linear-gradient(180deg, #ffffff 0%, #fffaf5 100%) !important;
+}
+
+.enquiryPanel {
+  border: 1px solid rgba(249,115,22,0.12) !important;
+  box-shadow:
+    0 28px 85px rgba(15,23,42,0.10),
+    0 24px 60px rgba(249,115,22,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.85) !important;
+}
+
+.enquiryPanel span {
+  letter-spacing: 3px !important;
+}
+
+.enquiryPanel input {
+  background: rgba(248,250,252,0.72) !important;
+  border: 1px solid rgba(15,23,42,0.07) !important;
+  transition: all 0.25s ease;
+}
+
+.enquiryPanel input:focus {
+  outline: none !important;
+  background: #ffffff !important;
+  border-color: rgba(249,115,22,0.32) !important;
+  box-shadow: 0 0 0 4px rgba(249,115,22,0.08) !important;
+}
+
+.enquiryPanel button {
+  box-shadow: 0 18px 42px rgba(15,23,42,0.16) !important;
+  transition: all 0.28s ease;
+}
+
+.enquiryPanel button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 26px 60px rgba(15,23,42,0.22) !important;
+}
+/* FINAL WHATSAPP FIX */
+.whatsappFloat,
+.whatsappButton,
+.floatingWhatsapp,
+.chatButton {
+  position: fixed !important;
+  right: 18px !important;
+  bottom: 18px !important;
+  z-index: 999999 !important;
+
+  transform: none !important;
+}
+
+@media (max-width: 768px) {
+  .whatsappFloat,
+  .whatsappButton,
+  .floatingWhatsapp,
+  .chatButton {
+    right: 14px !important;
+    bottom: 14px !important;
+    transform: scale(0.95) !important;
+  }
+}
+/* FINAL PREMIUM WHATSAPP FLOAT */
+.whatsappFloat {
+  position: fixed !important;
+  right: 24px !important;
+  bottom: 28px !important;
+
+  width: 64px !important;
+  height: 64px !important;
+  min-width: 64px !important;
+  min-height: 64px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border-radius: 999px !important;
+
+  background: linear-gradient(
+    135deg,
+    #25d366,
+    #16a34a
+  ) !important;
+
+  color: #ffffff !important;
+  font-size: 30px !important;
+  text-decoration: none !important;
+
+  box-shadow:
+    0 18px 45px rgba(37, 211, 102, 0.35),
+    0 0 35px rgba(37, 211, 102, 0.25) !important;
+
+  z-index: 9999999 !important;
+  transform: none !important;
+
+  transition: all 0.3s ease !important;
+}
+
+.whatsappFloat:hover {
+  transform: translateY(-4px) scale(1.06) !important;
+
+  box-shadow:
+    0 22px 55px rgba(37, 211, 102, 0.42),
+    0 0 45px rgba(37, 211, 102, 0.35) !important;
+}
+
+@media (max-width: 768px) {
+  .whatsappFloat {
+    right: 18px !important;
+    bottom: 24px !important;
+
+    width: 62px !important;
+    height: 62px !important;
+
+    min-width: 62px !important;
+    min-height: 62px !important;
+
+    font-size: 30px !important;
+
+    transform: none !important;
+  }
 }
