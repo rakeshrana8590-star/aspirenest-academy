@@ -73,6 +73,7 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [selectedNotesSubject, setSelectedNotesSubject] = useState(null);
   const [activeSection, setActiveSection] = useState(null);
   const [mockStarted, setMockStarted] = useState(false);
 const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -1339,6 +1340,36 @@ if (expiryDate && expiryDate < new Date()) {
       points: ["State Pattern", "Syllabus", "Practice Sets", "PYQ", "Strategy"],
     },
   ];
+  const notesLibraryData = {
+    FREE: [
+      { id: "free-1", title: "Subject 01", description: "Coming Soon", cover: "📘" },
+      { id: "free-2", title: "Subject 02", description: "Coming Soon", cover: "🧠" },
+      { id: "free-3", title: "Subject 03", description: "Coming Soon", cover: "📚" },
+      { id: "free-4", title: "Subject 04", description: "Coming Soon", cover: "✏️" },
+      { id: "free-5", title: "Subject 05", description: "Coming Soon", cover: "🎯" },
+    ],
+    BASIC: [
+      { id: "basic-1", title: "Subject 01", description: "Coming Soon", cover: "📘" },
+      { id: "basic-2", title: "Subject 02", description: "Coming Soon", cover: "🧠" },
+      { id: "basic-3", title: "Subject 03", description: "Coming Soon", cover: "📚" },
+      { id: "basic-4", title: "Subject 04", description: "Coming Soon", cover: "✏️" },
+      { id: "basic-5", title: "Subject 05", description: "Coming Soon", cover: "🎯" },
+    ],
+    PREMIUM: [
+      { id: "premium-1", title: "Subject 01", description: "Coming Soon", cover: "🔥" },
+      { id: "premium-2", title: "Subject 02", description: "Coming Soon", cover: "🚀" },
+      { id: "premium-3", title: "Subject 03", description: "Coming Soon", cover: "📖" },
+      { id: "premium-4", title: "Subject 04", description: "Coming Soon", cover: "🎓" },
+      { id: "premium-5", title: "Subject 05", description: "Coming Soon", cover: "💡" },
+    ],
+    MENTORSHIP: [
+      { id: "mentor-1", title: "Subject 01", description: "Coming Soon", cover: "👑" },
+      { id: "mentor-2", title: "Subject 02", description: "Coming Soon", cover: "🧠" },
+      { id: "mentor-3", title: "Subject 03", description: "Coming Soon", cover: "📚" },
+      { id: "mentor-4", title: "Subject 04", description: "Coming Soon", cover: "🚀" },
+      { id: "mentor-5", title: "Subject 05", description: "Coming Soon", cover: "🎯" },
+    ],
+  };
   const notesData = [
     {
       id: 1,
@@ -1389,7 +1420,22 @@ if (expiryDate && expiryDate < new Date()) {
       pdf: "#",
     },
   ];
-
+  const notesSubjectRouteMatch = location.pathname.match(
+    /^\/subjects\/ctet-tet\/notes\/([^/]+)\/([^/]+)$/
+  );
+  
+  const activeNotesPlan =
+    notesSubjectRouteMatch?.[1]?.toUpperCase() || null;
+  
+  const activeNotesSubjectId =
+    notesSubjectRouteMatch?.[2] || null;
+  
+  const activeNotesSubject =
+    activeNotesPlan && activeNotesSubjectId
+      ? notesLibraryData[activeNotesPlan]?.find(
+          (subject) => subject.id === activeNotesSubjectId
+        )
+      : null;
 
   
   const sampleMockQuestions = [
@@ -2714,6 +2760,40 @@ isAdmin={isAdmin}
           📚 State TET
         </button>
       </div>
+      <div className="notesNetflixLibrary">
+  {Object.entries(notesLibraryData).map(([planName, subjects]) => (
+    <div className="notesShelf" key={planName}>
+      <div className="notesShelfHeader">
+        <h2>
+          {planName === "FREE" && "📘 FREE NOTES"}
+          {planName === "BASIC" && "🔷 BASIC NOTES"}
+          {planName === "PREMIUM" && "⭐ PREMIUM LIBRARY"}
+          {planName === "MENTORSHIP" && "👩‍🏫 MENTORSHIP VAULT"}
+        </h2>
+        <span>{subjects.length} Subjects</span>
+      </div>
+
+      <div className="notesSubjectRow">
+        {subjects.map((subject) => (
+          <div
+            className="notesSubjectCard"
+            key={subject.id}
+            onClick={() =>
+              navigate(
+                `/subjects/ctet-tet/notes/${planName.toLowerCase()}/${subject.id}`
+              )
+            }
+          >
+            <div className="notesSubjectIcon">{subject.cover}</div>
+            <h3>{subject.title}</h3>
+            <p>{subject.description}</p>
+            <span className="notesSubjectTag">{planName}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  ))}
+</div>
     </section>
   }
 />
@@ -3930,7 +4010,7 @@ setAnnouncementMessage={setAnnouncementMessage}
       <div className="sectionHeader">
         <span className="badge">CTET / TET Courses</span>
 
-        <h2>Courses for CTET & TET Preparation</h2>
+        <h1>Courses for CTET & TET Preparation</h1>
 
         <p>
           Choose structured learning programs, topic-wise courses,
@@ -3950,6 +4030,27 @@ setAnnouncementMessage={setAnnouncementMessage}
         <button onClick={() => navigate("/subjects/ctet-tet")}>
           🔙 Back to CTET/TET Hub
         </button>
+      </div>
+
+      <div className="grid" style={{ marginTop: "40px" }}>
+        {courses.map((course, index) => (
+          <div className="course" key={`${course.id}-${index}`}>
+            <span className="planTag">{course.badge}</span>
+
+            <h3>{course.title}</h3>
+
+            <p>{course.desc}</p>
+
+            <p><strong>Level:</strong> {course.level}</p>
+            <p><strong>Lessons:</strong> {course.lessons}</p>
+            <p><strong>Mock Tests:</strong> {course.tests}</p>
+            <p><strong>Price:</strong> {course.price}</p>
+
+            <button onClick={() => setSelectedCourse(course)}>
+              View Details
+            </button>
+          </div>
+        ))}
       </div>
     </section>
   }
@@ -3983,17 +4084,124 @@ setAnnouncementMessage={setAnnouncementMessage}
           🔙 Back to CTET/TET Hub
         </button>
       </div>
-      <div style={{ marginTop: "30px" }}>
-  <NotesCMS
-    notesData={notesData}
-    firebaseNotes={firebaseNotes}
-    handleNoteAccess={handleNoteAccess}
-    isPremiumUser={isPremiumUser}
-    setActiveSection={setActiveSection}
-    activePlan={activePlan}
-    userPlanType={userPlanType}
-    hasPlanAccess={hasPlanAccess}
-  />
+      <div className="notesNetflixLibrary">
+  {Object.entries(notesLibraryData).map(([planName, subjects]) => (
+    <div className="notesShelf" key={planName}>
+      <div className="notesShelfHeader">
+        <h2>
+          {planName === "FREE" && "📘 FREE NOTES"}
+          {planName === "BASIC" && "🔷 BASIC NOTES"}
+          {planName === "PREMIUM" && "⭐ PREMIUM LIBRARY"}
+          {planName === "MENTORSHIP" && "👩‍🏫 MENTORSHIP VAULT"}
+        </h2>
+
+        <span>{subjects.length} Subjects</span>
+      </div>
+
+      <div className="notesSubjectRow">
+        {subjects.map((subject) => (
+          <div
+            className="notesSubjectCard"
+            key={subject.id}
+            onClick={() =>
+              navigate(
+                `/subjects/ctet-tet/notes/${planName.toLowerCase()}/${subject.id}`
+              )
+            }
+          >
+            <div className="notesSubjectIcon">{subject.cover}</div>
+            <h3>{subject.title}</h3>
+            <p>{subject.description}</p>
+            <span className="notesSubjectTag">{planName}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  ))}
+  {selectedNotesSubject && (
+  <div className="selectedSubjectPanel">
+    <div className="selectedSubjectHeader">
+      <button onClick={() => setSelectedNotesSubject(null)}>
+        ← Back
+      </button>
+
+      <div>
+        <span>{selectedNotesSubject.plan} LIBRARY</span>
+        <h2>
+          {selectedNotesSubject.cover} {selectedNotesSubject.title}
+        </h2>
+        <p>PDF resources will appear here. Coming soon.</p>
+      </div>
+    </div>
+
+    <div
+  className="pdfShelfRow"
+  ref={(el) => {
+    if (el) el.scrollLeft = 0;
+  }}
+>
+      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item) => (
+        <div className="pdfMiniCard" key={item}>
+          <div className="pdfIcon">📄</div>
+          <h3>PDF {item}</h3>
+          <p>Coming Soon</p>
+          <span>{selectedNotesSubject.plan}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+</div>
+    </section>
+  }
+/>
+<Route
+  path="/subjects/ctet-tet/notes/:plan/:subjectId"
+  element={
+    <section className="notesSubjectRoutePage">
+      <button onClick={() => navigate("/subjects/ctet-tet/notes")}>
+        ← Back to Notes Library
+      </button>
+
+      <span className="notesSubjectRouteBadge">
+        {activeNotesPlan} LIBRARY
+      </span>
+
+      <h1>
+        {activeNotesSubject?.cover}{" "}
+        {activeNotesSubject?.title || "Subject Library"}
+      </h1>
+
+      <p>
+        Subject-wise PDF library. PDF resources will appear here.
+      </p>
+
+     
+      <div className="pdfShelfWrap">
+      <button
+  className="pdfNextHint"
+  type="button"
+  onClick={(e) => {
+    const row = e.currentTarget.parentElement.querySelector(".pdfShelfRow");
+    row?.scrollBy({
+      left: 320,
+      behavior: "smooth",
+    });
+  }}
+>
+  ›
+</button>
+
+  <div className="pdfShelfRow">
+    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item) => (
+      <div className="pdfMiniCard" key={item}>
+        <div className="pdfIcon">📄</div>
+        <h3>PDF {item}</h3>
+        <p>Coming Soon</p>
+        <span>{activeNotesPlan}</span>
+      </div>
+    ))}
+  </div>
 </div>
     </section>
   }
