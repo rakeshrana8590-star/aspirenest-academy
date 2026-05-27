@@ -69,6 +69,13 @@ export default function App() {
 
   const location = useLocation();
   const navigate = useNavigate();
+  React.useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, [location.pathname]);
   const [darkMode, setDarkMode] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -2760,44 +2767,49 @@ isAdmin={isAdmin}
           📚 State TET
         </button>
       </div>
-      <div className="notesNetflixLibrary">
-  {Object.entries(notesLibraryData).map(([planName, subjects]) => (
-    <div className="notesShelf" key={planName}>
-      <div className="notesShelfHeader">
-        <h2>
-          {planName === "FREE" && "📘 FREE NOTES"}
-          {planName === "BASIC" && "🔷 BASIC NOTES"}
-          {planName === "PREMIUM" && "⭐ PREMIUM LIBRARY"}
-          {planName === "MENTORSHIP" && "👩‍🏫 MENTORSHIP VAULT"}
-        </h2>
-        <span>{subjects.length} Subjects</span>
-      </div>
 
-      <div className="notesSubjectRow">
-        {subjects.map((subject) => (
-          <div
-            className="notesSubjectCard"
-            key={subject.id}
-            onClick={() =>
-              navigate(
-                `/subjects/ctet-tet/notes/${planName.toLowerCase()}/${subject.id}`
-              )
-            }
-          >
-            <div className="notesSubjectIcon">{subject.cover}</div>
-            <h3>{subject.title}</h3>
-            <p>{subject.description}</p>
-            <span className="notesSubjectTag">{planName}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  ))}
-</div>
     </section>
   }
 />
+<Route
+  path="/subjects"
+  element={
+    <section className="coursePages subjectSelectorPage">
+      <div className="sectionHeader">
+        <span className="badge">Choose Learning Category</span>
 
+        <h2>Select Your Subject / Exam Path</h2>
+
+        <p>
+          Every subject will have its own mentor, courses, notes,
+          tests, dashboard, and premium learning system.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        <button onClick={() => navigate("/subjects/ctet-tet")}>
+          🧑‍🏫 CTET / TET
+        </button>
+
+        <button>
+          🧠 Psychology
+        </button>
+
+        <button>
+          🎓 B.Ed / D.El.Ed
+        </button>
+
+        <button>
+          🏛️ Government Exams
+        </button>
+
+        <button>
+          📚 State TET
+        </button>
+      </div>
+    </section>
+  }
+/>
 <Route
   path="/subjects/ctet-tet"
   element={
@@ -2813,32 +2825,98 @@ isAdmin={isAdmin}
           dashboard, and guidance by Dr. Varsha D. Maru.
         </p>
       </div>
+      <div className="subjectHubGrid">
+<div
+  className="subjectHubCard"
+  onClick={() => navigate("/subjects/ctet-tet/courses")}
+>
+  <div className="subjectHubIcon">📚</div>
 
-      <div className="courseGrid">
-        <button onClick={() => navigate("/subjects/ctet-tet/courses")}>
-          📚 Courses
-        </button>
+  <h3>Courses</h3>
 
-        <button onClick={() => navigate("/subjects/ctet-tet/notes")}>
-          📘 Notes
-        </button>
+  <p>
+    Structured CTET/TET learning paths with concept-wise preparation.
+  </p>
 
-        <button onClick={() => navigate("/subjects/ctet-tet/mock-tests")}>
-          📝 Mock Tests
-        </button>
+  <span>Explore Courses →</span>
+</div>
 
-        <button onClick={() => navigate("/subjects/ctet-tet/current-affairs")}>
-          📰 Current Affairs
-        </button>
+<div
+  className="subjectHubCard"
+  onClick={() => navigate("/subjects/ctet-tet/notes")}
+>
+  <div className="subjectHubIcon">📘</div>
 
-        <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
-          💎 Plans
-        </button>
+  <h3>Notes Library</h3>
 
-        <button onClick={() => navigate("/student-dashboard")}>
-          📊 Student Dashboard
-        </button>
-      </div>
+  <p>
+    Free, premium, revision, and mentor-curated study notes.
+  </p>
+
+  <span>Open Notes →</span>
+</div>
+
+<div
+  className="subjectHubCard"
+  onClick={() => navigate("/subjects/ctet-tet/mock-tests")}
+>
+  <div className="subjectHubIcon">📝</div>
+
+  <h3>Mock Tests</h3>
+
+  <p>
+    Practice tests with analytics, ranking, and performance tracking.
+  </p>
+
+  <span>Start Practice →</span>
+</div>
+
+<div
+  className="subjectHubCard"
+  onClick={() => navigate("/subjects/ctet-tet/current-affairs")}
+>
+  <div className="subjectHubIcon">📰</div>
+
+  <h3>Current Affairs</h3>
+
+  <p>
+    Daily educational updates and exam-focused current affairs.
+  </p>
+
+  <span>Read Updates →</span>
+</div>
+
+<div
+  className="subjectHubCard"
+  onClick={() => navigate("/subjects/ctet-tet/pricing")}
+>
+  <div className="subjectHubIcon">💎</div>
+
+  <h3>Premium Plans</h3>
+
+  <p>
+    Unlock premium mentorship, notes, tests, and learning tools.
+  </p>
+
+  <span>View Plans →</span>
+</div>
+
+<div
+  className="subjectHubCard"
+  onClick={() => navigate("/student-dashboard")}
+>
+  <div className="subjectHubIcon">📊</div>
+
+  <h3>Student Dashboard</h3>
+
+  <p>
+    Track progress, performance analytics, targets, and study growth.
+  </p>
+
+  <span>Open Dashboard →</span>
+</div>
+
+</div>
     </section>
   }
 />
@@ -4006,7 +4084,7 @@ setAnnouncementMessage={setAnnouncementMessage}
 <Route
   path="/subjects/ctet-tet/courses"
   element={
-    <section className="coursePages">
+    <section className="coursePages coursesMasterPage">
       <div className="sectionHeader">
         <span className="badge">CTET / TET Courses</span>
 
@@ -4018,33 +4096,52 @@ setAnnouncementMessage={setAnnouncementMessage}
         </p>
       </div>
 
-      <div className="courseGrid">
-        <button onClick={() => navigate("/courses/ctet")}>
-          📘 CTET Course
-        </button>
+      <div className="coursePathGrid">
+        <div
+          className="coursePathCard"
+          onClick={() => navigate("/courses/ctet")}
+        >
+          <div className="coursePathIcon">📘</div>
+          <h3>CTET Course</h3>
+          <p>Paper-wise structured preparation for CTET aspirants.</p>
+          <span>Open CTET Track →</span>
+        </div>
 
-        <button onClick={() => navigate("/courses/tet")}>
-          🧑‍🏫 TET Course
-        </button>
+        <div
+          className="coursePathCard"
+          onClick={() => navigate("/courses/tet")}
+        >
+          <div className="coursePathIcon">🧑‍🏫</div>
+          <h3>TET Course</h3>
+          <p>State TET preparation with syllabus, PYQ and mock practice.</p>
+          <span>Open TET Track →</span>
+        </div>
 
-        <button onClick={() => navigate("/subjects/ctet-tet")}>
-          🔙 Back to CTET/TET Hub
-        </button>
+        <div
+          className="coursePathCard"
+          onClick={() => navigate("/subjects/ctet-tet")}
+        >
+          <div className="coursePathIcon">🔙</div>
+          <h3>Back to Hub</h3>
+          <p>Return to the full CTET/TET learning ecosystem.</p>
+          <span>Go Back →</span>
+        </div>
       </div>
 
-      <div className="grid" style={{ marginTop: "40px" }}>
+      <div className="premiumCourseShelf">
         {courses.map((course, index) => (
-          <div className="course" key={`${course.id}-${index}`}>
+          <div className="premiumCourseCard" key={`${course.id}-${index}`}>
             <span className="planTag">{course.badge}</span>
 
             <h3>{course.title}</h3>
-
             <p>{course.desc}</p>
 
-            <p><strong>Level:</strong> {course.level}</p>
-            <p><strong>Lessons:</strong> {course.lessons}</p>
-            <p><strong>Mock Tests:</strong> {course.tests}</p>
-            <p><strong>Price:</strong> {course.price}</p>
+            <div className="courseMetaGrid">
+              <span><strong>Level</strong>{course.level}</span>
+              <span><strong>Lessons</strong>{course.lessons}</span>
+              <span><strong>Tests</strong>{course.tests}</span>
+              <span><strong>Price</strong>{course.price}</span>
+            </div>
 
             <button onClick={() => setSelectedCourse(course)}>
               View Details
@@ -4071,19 +4168,19 @@ setAnnouncementMessage={setAnnouncementMessage}
         </p>
       </div>
 
-      <div className="courseGrid">
-        <button onClick={() => navigate("/subjects/ctet-tet/notes")}>
-          📘 Open Notes Library
-        </button>
+      <div className="notesActionRow">
+  <button onClick={() => navigate("/subjects/ctet-tet/notes")}>
+    📘 Open Notes Library
+  </button>
 
-        <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
-          💎 Unlock Premium Notes
-        </button>
+  <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
+    💎 Unlock Premium Notes
+  </button>
 
-        <button onClick={() => navigate("/subjects/ctet-tet")}>
-          🔙 Back to CTET/TET Hub
-        </button>
-      </div>
+  <button onClick={() => navigate("/subjects/ctet-tet")}>
+    🔙 Back to CTET/TET Hub
+  </button>
+</div>
       <div className="notesNetflixLibrary">
   {Object.entries(notesLibraryData).map(([planName, subjects]) => (
     <div className="notesShelf" key={planName}>
@@ -4118,39 +4215,7 @@ setAnnouncementMessage={setAnnouncementMessage}
       </div>
     </div>
   ))}
-  {selectedNotesSubject && (
-  <div className="selectedSubjectPanel">
-    <div className="selectedSubjectHeader">
-      <button onClick={() => setSelectedNotesSubject(null)}>
-        ← Back
-      </button>
 
-      <div>
-        <span>{selectedNotesSubject.plan} LIBRARY</span>
-        <h2>
-          {selectedNotesSubject.cover} {selectedNotesSubject.title}
-        </h2>
-        <p>PDF resources will appear here. Coming soon.</p>
-      </div>
-    </div>
-
-    <div
-  className="pdfShelfRow"
-  ref={(el) => {
-    if (el) el.scrollLeft = 0;
-  }}
->
-      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item) => (
-        <div className="pdfMiniCard" key={item}>
-          <div className="pdfIcon">📄</div>
-          <h3>PDF {item}</h3>
-          <p>Coming Soon</p>
-          <span>{selectedNotesSubject.plan}</span>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
 </div>
     </section>
   }
@@ -4206,11 +4271,10 @@ setAnnouncementMessage={setAnnouncementMessage}
     </section>
   }
 />
-
 <Route
   path="/subjects/ctet-tet/mock-tests"
   element={
-    <section className="coursePages">
+    <section className="coursePages mockMasterPage">
       <div className="sectionHeader">
         <span className="badge">CTET / TET Mock Tests</span>
 
@@ -4222,69 +4286,66 @@ setAnnouncementMessage={setAnnouncementMessage}
         </p>
       </div>
 
-      <div className="courseGrid">
-        <button onClick={() => navigate("/subjects/ctet-tet/mock-tests")}>
-          📝 Open Mock Tests
-        </button>
+      <div className="mockActionGrid">
+        <div
+          className="mockActionCard"
+          onClick={() => navigate("/subjects/ctet-tet/mock-tests")}
+        >
+          <div className="mockActionIcon">📝</div>
 
-        <button onClick={() => navigate("/leaderboard")}>
-          🏆 Leaderboard
-        </button>
+          <h3>Open Mock Tests</h3>
 
-        <button onClick={() => navigate("/subjects/ctet-tet")}>
-          🔙 Back to CTET/TET Hub
-        </button>
+          <p>
+            Start practice with topic-wise tests, PYQs,
+            revision quizzes, and full-length exams.
+          </p>
+
+          <span>Start Practice →</span>
+        </div>
+
+        <div
+          className="mockActionCard"
+          onClick={() => navigate("/leaderboard")}
+        >
+          <div className="mockActionIcon">🏆</div>
+
+          <h3>Leaderboard</h3>
+
+          <p>
+            Compare performance, rankings, streaks,
+            and overall learning progress.
+          </p>
+
+          <span>View Rankings →</span>
+        </div>
+
+        <div
+          className="mockActionCard"
+          onClick={() => navigate("/subjects/ctet-tet")}
+        >
+          <div className="mockActionIcon">🔙</div>
+
+          <h3>Back to Hub</h3>
+
+          <p>
+            Return to the CTET/TET ecosystem dashboard
+            and continue learning flow.
+          </p>
+
+          <span>Go Back →</span>
+        </div>
       </div>
-      <div style={{ marginTop: "30px" }}>
-  <MockTest />
-</div>
+
+      <div className="premiumMockContainer">
+        <MockTest />
+      </div>
     </section>
   }
 />
-
-<Route
-  path="/subjects/ctet-tet/current-affairs"
-  element={
-    <section className="coursePages">
-      <div className="sectionHeader">
-        <span className="badge">CTET / TET Current Affairs</span>
-
-        <h2>Exam-Oriented Current Affairs</h2>
-
-        <p>
-          Monthly PDFs, education updates, NEP/NCF-related content,
-          and teaching-exam focused current affairs.
-        </p>
-      </div>
-
-      <div className="courseGrid">
-        <button onClick={() => navigate("/subjects/ctet-tet/current-affairs")}>
-          📰 Open Current Affairs
-        </button>
-
-        <button onClick={() => navigate("/subjects/ctet-tet")}>
-          🔙 Back to CTET/TET Hub
-        </button>
-      </div>
-      <div style={{ marginTop: "30px" }}>
-      <CurrentAffairs
-  currentAffairsList={currentAffairsList}
-  fallbackCurrentAffairs={fallbackCurrentAffairs}
-  handleNoteAccess={handleNoteAccess}
-  isPremiumUser={isPremiumUser}
-  userPlanType={userPlanType}
-  hasPlanAccess={hasPlanAccess}
-  setActiveSection={setActiveSection}
-/>
-</div>
-    </section>
-  }
-/>
-
 <Route
   path="/subjects/ctet-tet/pricing"
   element={
-    <section className="coursePages">
+    <section className="coursePages pricingMasterPage">
       <div className="sectionHeader">
         <span className="badge">CTET / TET Plans</span>
 
@@ -4296,26 +4357,63 @@ setAnnouncementMessage={setAnnouncementMessage}
         </p>
       </div>
 
-      <div className="courseGrid">
-        <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
-          💎 View Plans
-        </button>
+      <div className="pricingActionGrid">
+        <div
+          className="pricingActionCard"
+          onClick={() => navigate("/subjects/ctet-tet/pricing")}
+        >
+          <div className="pricingActionIcon">💎</div>
 
-        <button onClick={() => navigate("/payment")}>
-          🧾 Upgrade Now
-        </button>
+          <h3>View Plans</h3>
 
-        <button onClick={() => navigate("/subjects/ctet-tet")}>
-          🔙 Back to CTET/TET Hub
-        </button>
+          <p>
+            Compare Premium, Mentorship, and advanced
+            learning access for complete preparation.
+          </p>
+
+          <span>Explore Plans →</span>
+        </div>
+
+        <div
+          className="pricingActionCard"
+          onClick={() => navigate("/payment")}
+        >
+          <div className="pricingActionIcon">🧾</div>
+
+          <h3>Upgrade Now</h3>
+
+          <p>
+            Unlock premium notes, tests, dashboards,
+            AI classroom, and mentorship support.
+          </p>
+
+          <span>Upgrade Access →</span>
+        </div>
+
+        <div
+          className="pricingActionCard"
+          onClick={() => navigate("/subjects/ctet-tet")}
+        >
+          <div className="pricingActionIcon">🔙</div>
+
+          <h3>Back to Hub</h3>
+
+          <p>
+            Return to the CTET/TET ecosystem and continue
+            your structured preparation journey.
+          </p>
+
+          <span>Go Back →</span>
+        </div>
       </div>
-      <div style={{ marginTop: "30px" }}>
-  <Pricing
-    createPaymentRequest={createPaymentRequest}
-    isPremiumUser={isPremiumUser}
-    setActiveSection={setActiveSection}
-  />
-</div>
+
+      <div className="premiumPricingContainer">
+        <Pricing
+          createPaymentRequest={createPaymentRequest}
+          isPremiumUser={isPremiumUser}
+          setActiveSection={setActiveSection}
+        />
+      </div>
     </section>
   }
 />

@@ -17569,3 +17569,1021 @@ nav {
   box-shadow: 0 18px 45px rgba(15, 23, 42, 0.24);
   pointer-events: auto;
 }
+/* STEP 2 — CTET/TET Subject Hub Premium Polish */
+.subjectHubGrid {
+  margin-top: 42px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.subjectHubCard {
+  cursor: pointer;
+  min-height: 210px;
+  padding: 28px;
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(249, 115, 22, 0.14);
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.07);
+  backdrop-filter: blur(18px);
+  transition: transform 0.35s ease, box-shadow 0.35s ease, border 0.35s ease;
+}
+
+.subjectHubCard:hover {
+  transform: translateY(-10px) scale(1.025);
+  box-shadow: 0 32px 80px rgba(15, 23, 42, 0.14);
+  border-color: rgba(249, 115, 22, 0.28);
+}
+
+.subjectHubIcon {
+  width: 58px;
+  height: 58px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  background: linear-gradient(135deg, #fff7ed, #ffffff);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9),
+              0 12px 28px rgba(249,115,22,0.12);
+  margin-bottom: 20px;
+}
+
+.subjectHubCard h3 {
+  margin: 0 0 10px;
+  font-size: 25px;
+  color: #111827;
+}
+
+.subjectHubCard p {
+  margin: 0 0 18px;
+  color: #64748b;
+  line-height: 1.55;
+  font-weight: 650;
+}
+
+.subjectHubCard span {
+  color: #ea580c;
+  font-weight: 900;
+}
+
+@media (max-width: 900px) {
+  .subjectHubGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .subjectHubCard {
+    min-height: auto;
+  }
+}
+/* STEP 3B — Courses Master Page */
+.coursePathGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  margin-top: 42px;
+}
+
+.coursePathCard {
+  cursor: pointer;
+  padding: 30px;
+  border-radius: 32px;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(249,115,22,0.12);
+  box-shadow: 0 18px 50px rgba(15,23,42,0.07);
+  transition: all 0.35s ease;
+  backdrop-filter: blur(18px);
+}
+
+.coursePathCard:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 30px 80px rgba(15,23,42,0.14);
+}
+
+.coursePathIcon {
+  width: 60px;
+  height: 60px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  background: linear-gradient(135deg, #fff7ed, #ffffff);
+  margin-bottom: 18px;
+}
+
+.coursePathCard h3 {
+  margin-bottom: 10px;
+  font-size: 26px;
+  color: #111827;
+}
+
+.coursePathCard p {
+  color: #64748b;
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+
+.coursePathCard span {
+  color: #ea580c;
+  font-weight: 800;
+}
+
+.premiumCourseShelf {
+  margin-top: 52px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.premiumCourseCard {
+  padding: 34px;
+  border-radius: 34px;
+  background: #ffffff;
+  border: 1px solid rgba(15,23,42,0.06);
+  box-shadow: 0 18px 50px rgba(15,23,42,0.06);
+  transition: all 0.35s ease;
+}
+
+.premiumCourseCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 30px 70px rgba(15,23,42,0.12);
+}
+
+.courseMetaGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 24px 0;
+}
+
+.courseMetaGrid span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  border-radius: 18px;
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+}
+
+.courseMetaGrid strong {
+  color: #111827;
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .coursePathGrid,
+  .premiumCourseShelf {
+    grid-template-columns: 1fr;
+  }
+}
+/* STEP 4C — Notes Action Row */
+.notesActionRow {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 36px;
+  margin-bottom: 46px;
+}
+
+.notesActionRow button {
+  border: none;
+  cursor: pointer;
+  padding: 18px 26px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.88);
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 800;
+  box-shadow: 0 12px 30px rgba(15,23,42,0.08);
+  transition: all 0.3s ease;
+}
+
+.notesActionRow button:hover {
+  transform: translateY(-4px);
+  background: #ffffff;
+  box-shadow: 0 18px 40px rgba(15,23,42,0.12);
+}
+/* STEP 5B — Mock Test Premium UI */
+.mockActionGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 42px;
+  margin-bottom: 50px;
+}
+
+.mockActionCard {
+  cursor: pointer;
+  padding: 30px;
+  border-radius: 30px;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(249,115,22,0.12);
+  box-shadow: 0 18px 50px rgba(15,23,42,0.08);
+  transition: all 0.35s ease;
+}
+
+.mockActionCard:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 28px 70px rgba(15,23,42,0.14);
+}
+
+.mockActionIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  background: linear-gradient(135deg, #fff7ed, #ffffff);
+  margin-bottom: 20px;
+}
+
+.mockActionCard h3 {
+  font-size: 26px;
+  margin-bottom: 12px;
+  color: #0f172a;
+}
+
+.mockActionCard p {
+  color: #64748b;
+  line-height: 1.7;
+  margin-bottom: 18px;
+}
+
+.mockActionCard span {
+  color: #ea580c;
+  font-weight: 800;
+}
+
+.premiumMockContainer {
+  padding: 36px;
+  border-radius: 36px;
+  background: rgba(255,255,255,0.94);
+  box-shadow: 0 18px 60px rgba(15,23,42,0.08);
+}
+
+@media (max-width: 900px) {
+  .mockActionGrid {
+    grid-template-columns: 1fr;
+  }
+}
+/* STEP 6B — Current Affairs Premium UI */
+.currentAffairsActionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 42px;
+  margin-bottom: 48px;
+}
+
+.currentAffairsActionCard {
+  cursor: pointer;
+  padding: 32px;
+  border-radius: 32px;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(249,115,22,0.12);
+  box-shadow: 0 18px 50px rgba(15,23,42,0.08);
+  transition: all 0.35s ease;
+}
+
+.currentAffairsActionCard:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 28px 70px rgba(15,23,42,0.14);
+}
+
+.currentAffairsActionIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  background: linear-gradient(135deg, #fff7ed, #ffffff);
+  margin-bottom: 20px;
+}
+
+.currentAffairsActionCard h3 {
+  font-size: 26px;
+  margin-bottom: 12px;
+  color: #0f172a;
+}
+
+.currentAffairsActionCard p {
+  color: #64748b;
+  line-height: 1.7;
+  margin-bottom: 18px;
+}
+
+.currentAffairsActionCard span {
+  color: #ea580c;
+  font-weight: 800;
+}
+
+.premiumCurrentAffairsContainer {
+  padding: 34px;
+  border-radius: 36px;
+  background: rgba(255,255,255,0.95);
+  box-shadow: 0 18px 60px rgba(15,23,42,0.08);
+}
+
+@media (max-width: 900px) {
+  .currentAffairsActionGrid {
+    grid-template-columns: 1fr;
+  }
+}
+/* STEP 7B — Pricing Premium UI */
+.pricingActionGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 42px;
+  margin-bottom: 50px;
+}
+
+.pricingActionCard {
+  cursor: pointer;
+  padding: 32px;
+  border-radius: 32px;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(249,115,22,0.12);
+  box-shadow: 0 18px 50px rgba(15,23,42,0.08);
+  transition: all 0.35s ease;
+}
+
+.pricingActionCard:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 28px 70px rgba(15,23,42,0.14);
+}
+
+.pricingActionIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  background: linear-gradient(135deg, #fff7ed, #ffffff);
+  margin-bottom: 20px;
+}
+
+.pricingActionCard h3 {
+  font-size: 26px;
+  margin-bottom: 12px;
+  color: #0f172a;
+}
+
+.pricingActionCard p {
+  color: #64748b;
+  line-height: 1.7;
+  margin-bottom: 18px;
+}
+
+.pricingActionCard span {
+  color: #ea580c;
+  font-weight: 800;
+}
+
+.premiumPricingContainer {
+  padding: 34px;
+  border-radius: 36px;
+  background: rgba(255,255,255,0.95);
+  box-shadow: 0 18px 60px rgba(15,23,42,0.08);
+}
+
+@media (max-width: 900px) {
+  .pricingActionGrid {
+    grid-template-columns: 1fr;
+  }
+}
+/* STEP 8A — Home Hero Premium Polish */
+.hero {
+  min-height: calc(100vh - 92px);
+  padding: 70px 7% 56px;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  align-items: center;
+  gap: 56px;
+  background: linear-gradient(135deg, #ffffff 0%, #fffaf5 48%, #f8fafc 100%);
+  border-radius: 0 0 46px 46px;
+}
+
+.heroContent {
+  max-width: 720px;
+}
+
+.taglineCard {
+  max-width: 620px;
+  margin-bottom: 34px;
+}
+
+.hero h2 {
+  font-size: clamp(54px, 5.8vw, 92px);
+  line-height: 0.98;
+  letter-spacing: -4px;
+  margin: 28px 0 18px;
+}
+
+.heroContent > p {
+  font-size: 22px;
+  color: #64748b;
+  margin-bottom: 28px;
+}
+
+.heroButtons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.heroButtons button {
+  min-width: 150px;
+  border-radius: 18px;
+  padding: 17px 24px;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.14);
+}
+
+.dashboardQuickCard {
+  max-width: 620px;
+  min-height: 320px;
+  border-radius: 34px;
+  background: linear-gradient(135deg, #ffffff 0%, #fff7ed 100%);
+  border: 1px solid rgba(249, 115, 22, 0.18);
+  box-shadow: 0 30px 90px rgba(15, 23, 42, 0.08);
+}
+
+@media (max-width: 950px) {
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 48px 6% 42px;
+  }
+
+  .hero h2 {
+    letter-spacing: -2px;
+  }
+
+  .dashboardQuickCard {
+    max-width: 100%;
+  }
+}
+/* STEP 8A-2 — Hero Final Compact Premium Override */
+.hero {
+  min-height: calc(100vh - 120px);
+  padding-top: 44px;
+  padding-bottom: 44px;
+  gap: 48px;
+}
+
+.taglineCard {
+  max-width: 540px;
+  padding: 18px 22px;
+  border-radius: 26px;
+  background: linear-gradient(135deg, #fff7ed, #ffffff);
+  border: 1px solid rgba(249, 115, 22, 0.14);
+  box-shadow: 0 18px 55px rgba(15, 23, 42, 0.07);
+}
+
+.taglineIcon {
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+}
+
+.hero .badge {
+  margin-top: 10px;
+}
+
+.hero h2 {
+  max-width: 690px;
+  font-size: clamp(58px, 5.2vw, 82px);
+  line-height: 0.98;
+  margin-top: 24px;
+}
+
+.dashboardQuickCard {
+  padding: 42px;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dashboardQuickCard h3 {
+  font-size: clamp(32px, 2.6vw, 44px);
+  line-height: 1.05;
+}
+
+.dashboardQuickCard p {
+  max-width: 430px;
+  font-size: 20px;
+  line-height: 1.45;
+}
+
+.dashboardQuickRight {
+  font-size: 58px;
+  filter: drop-shadow(0 16px 30px rgba(249,115,22,0.18));
+}
+
+@media (max-width: 950px) {
+  .hero {
+    min-height: auto;
+    padding-top: 34px;
+    padding-bottom: 36px;
+  }
+
+  .hero h2 {
+    font-size: clamp(44px, 11vw, 64px);
+  }
+
+  .dashboardQuickCard {
+    padding: 28px;
+  }
+}
+/* STEP 8A-3 — Hero Notes-Level Premium Final */
+.hero {
+  max-width: 1760px;
+  margin: 0 auto;
+  min-height: auto;
+  padding: 54px 7% 54px;
+  border-radius: 0 0 42px 42px;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(255, 237, 213, 0.55), transparent 28%),
+    linear-gradient(135deg, #ffffff 0%, #fffaf5 52%, #f8fafc 100%);
+}
+
+.taglineCard {
+  margin-bottom: 28px;
+}
+
+.hero h2 {
+  font-size: clamp(54px, 5vw, 78px);
+  letter-spacing: -3.5px;
+}
+
+.dashboardQuickCard {
+  max-width: 660px;
+  min-height: 270px;
+  border-radius: 36px;
+  background:
+    radial-gradient(circle at 82% 22%, rgba(255, 237, 213, 0.8), transparent 35%),
+    #ffffff;
+}
+
+.dashboardQuickCard button {
+  margin-top: 10px;
+}
+
+.heroButtons button:hover,
+.dashboardQuickCard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 34px 90px rgba(15, 23, 42, 0.13);
+}
+/* STEP 8A-4 — Ultra Premium Hero Finish */
+.heroContent {
+  transform: translateY(-10px);
+}
+
+.heroButtons button {
+  border-radius: 20px;
+  font-size: 17px;
+  font-weight: 700;
+  padding: 18px 28px;
+  background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: all 0.28s ease;
+}
+
+.heroButtons button:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 26px 60px rgba(15, 23, 42, 0.2);
+}
+
+.dashboardQuickCard {
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 35px 90px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255,255,255,0.7);
+}
+
+.dashboardQuickCard::before {
+  content: "";
+  position: absolute;
+  top: -120px;
+  right: -120px;
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(
+    circle,
+    rgba(251,191,36,0.18),
+    transparent 70%
+  );
+}
+
+.dashboardQuickCard::after {
+  content: "";
+  position: absolute;
+  bottom: -140px;
+  left: -140px;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(
+    circle,
+    rgba(249,115,22,0.08),
+    transparent 72%
+  );
+}
+
+.hero h2 {
+  text-shadow: 0 2px 0 rgba(255,255,255,0.4);
+}
+/* STEP 8B — Mentor Section Premium Polish */
+.mentor {
+  max-width: 1760px;
+  margin: 0 auto;
+  padding: 62px 7%;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 48px;
+  align-items: center;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(255, 237, 213, 0.75), transparent 32%),
+    linear-gradient(135deg, #ffffff 0%, #fffaf5 55%, #f8fafc 100%);
+}
+
+.mentorLeft {
+  max-width: 760px;
+}
+
+.mentor .badge {
+  display: inline-flex;
+  margin-bottom: 24px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: #fff7ed;
+  color: #ea580c;
+  border: 1px solid rgba(249, 115, 22, 0.16);
+  font-weight: 900;
+}
+
+.mentor h2 {
+  font-size: clamp(48px, 5vw, 76px);
+  line-height: 0.98;
+  letter-spacing: -3px;
+  margin-bottom: 22px;
+}
+
+.mentorIntro {
+  font-size: 19px;
+  line-height: 1.55;
+  color: #64748b;
+  max-width: 760px;
+}
+
+.mentorStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 28px 0 32px;
+}
+
+.mentorStat {
+  padding: 22px;
+  border-radius: 22px;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(15,23,42,0.06);
+  box-shadow: 0 14px 40px rgba(15,23,42,0.06);
+}
+
+.mentorStat h3 {
+  margin: 0 0 8px;
+  color: #ea580c;
+  font-size: 30px;
+}
+
+.mentorStat span,
+.mentorStat p {
+  margin: 0;
+  color: #475569;
+  font-weight: 700;
+}
+
+.mentorQuote {
+  margin: 0 0 30px;
+  padding: 20px 24px;
+  border-radius: 24px;
+  background: rgba(255,255,255,0.72);
+  border: 1px solid rgba(15,23,42,0.06);
+  color: #334155;
+  line-height: 1.6;
+}
+
+.mentor .buttons {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.mentor .buttons button {
+  border-radius: 18px;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #020617, #0f172a);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 16px 35px rgba(15,23,42,0.14);
+  transition: all 0.28s ease;
+}
+
+.mentor .buttons button:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 24px 60px rgba(15,23,42,0.2);
+}
+
+.premiumMentorCard {
+  padding: 34px;
+  border-radius: 36px;
+  background: rgba(255,255,255,0.94);
+  border: 1px solid rgba(15,23,42,0.06);
+  box-shadow: 0 28px 85px rgba(15,23,42,0.09);
+}
+
+.mentorCardTop {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+.mentorAvatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #7c2d12, #ea580c);
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 950;
+  box-shadow: 0 16px 35px rgba(249,115,22,0.22);
+}
+
+.mentorCardTop h3 {
+  font-size: 32px;
+  margin: 0 0 6px;
+}
+
+.mentorCardTop p {
+  color: #64748b;
+  font-weight: 800;
+}
+
+.mentorHighlights {
+  display: grid;
+  gap: 14px;
+}
+
+.mentorHighlight {
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: #ffffff;
+  border: 1px solid rgba(15,23,42,0.06);
+  box-shadow: 0 10px 30px rgba(15,23,42,0.04);
+}
+
+.mentorHighlight strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #0f172a;
+}
+
+.mentorHighlight span {
+  color: #475569;
+  font-weight: 750;
+}
+
+@media (max-width: 950px) {
+  .mentor {
+    grid-template-columns: 1fr;
+    padding: 42px 6%;
+  }
+
+  .mentorStats {
+    grid-template-columns: 1fr;
+  }
+
+  .mentor h2 {
+    letter-spacing: -2px;
+  }
+}
+/* STEP 8B-2 — Mentor One Screen Compact Fix */
+.mentor {
+  min-height: calc(100vh - 95px);
+  padding: 38px 7% 34px;
+  gap: 36px;
+  align-items: center;
+}
+
+.mentor h2 {
+  font-size: clamp(44px, 4.4vw, 66px);
+  margin-bottom: 16px;
+}
+
+.mentorIntro {
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+.mentorStats {
+  margin: 22px 0 22px;
+  gap: 14px;
+}
+
+.mentorStat {
+  padding: 18px;
+  border-radius: 20px;
+}
+
+.mentorStat h3 {
+  font-size: 28px;
+}
+
+.mentorQuote {
+  margin-bottom: 22px;
+  padding: 16px 20px;
+}
+
+.premiumMentorCard {
+  padding: 26px;
+  border-radius: 32px;
+}
+
+.mentorCardTop {
+  margin-bottom: 16px;
+}
+
+.mentorAvatar {
+  width: 62px;
+  height: 62px;
+  font-size: 24px;
+}
+
+.mentorCardTop h3 {
+  font-size: 30px;
+}
+
+.mentorHighlights {
+  gap: 10px;
+}
+
+.mentorHighlight {
+  padding: 13px 16px;
+  border-radius: 18px;
+}
+
+.mentorHighlight strong {
+  margin-bottom: 4px;
+}
+/* STEP 8B-3 — Mentor Final One-Screen Fit */
+.mentor {
+  padding-top: 30px;
+  padding-bottom: 28px;
+}
+
+.mentor h2 {
+  font-size: clamp(42px, 4vw, 60px);
+}
+
+.premiumMentorCard {
+  padding: 22px;
+}
+
+.mentorCardTop {
+  margin-bottom: 12px;
+}
+
+.mentorCardTop h3 {
+  font-size: 28px;
+}
+
+.mentorHighlights {
+  gap: 8px;
+}
+
+.mentorHighlight {
+  padding: 11px 15px;
+  min-height: auto;
+}
+
+.mentorHighlight strong {
+  font-size: 15px;
+}
+
+.mentorHighlight span {
+  font-size: 14px;
+}
+
+.mentorAvatar {
+  width: 58px;
+  height: 58px;
+}
+/* STEP 8B-4 — Mentor Profile Compact Grid */
+.mentorHighlights {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mentorHighlight {
+  padding: 13px 14px;
+}
+
+.mentorHighlight strong {
+  font-size: 14px;
+}
+
+.mentorHighlight span {
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+@media (max-width: 950px) {
+  .mentorHighlights {
+    grid-template-columns: 1fr;
+  }
+}
+/* STEP 8B-5 — Mentor Premium Visual Finish */
+.mentor {
+  border-radius: 0 0 44px 44px;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(255, 237, 213, 0.95), transparent 34%),
+    radial-gradient(circle at 8% 88%, rgba(248, 250, 252, 0.95), transparent 35%),
+    linear-gradient(135deg, #ffffff 0%, #fffaf5 52%, #f8fafc 100%);
+}
+
+.mentorLeft {
+  position: relative;
+}
+
+.mentorLeft::before {
+  content: "";
+  position: absolute;
+  left: -36px;
+  top: 38px;
+  width: 6px;
+  height: 170px;
+  border-radius: 999px;
+  background: linear-gradient(#f97316, transparent);
+  opacity: 0.35;
+}
+
+.mentorStat,
+.mentorQuote,
+.premiumMentorCard,
+.mentorHighlight {
+  backdrop-filter: blur(18px);
+}
+
+.mentorStat:hover,
+.mentorHighlight:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 22px 55px rgba(15, 23, 42, 0.1);
+}
+
+.mentorStat,
+.mentorHighlight {
+  transition: all 0.3s ease;
+}
+
+.premiumMentorCard {
+  border: 1px solid rgba(249, 115, 22, 0.12);
+  box-shadow:
+    0 34px 90px rgba(15, 23, 42, 0.10),
+    inset 0 1px 0 rgba(255,255,255,0.8);
+}
+
+.mentorCardTop {
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.mentorAvatar {
+  box-shadow:
+    0 18px 40px rgba(249,115,22,0.24),
+    inset 0 1px 0 rgba(255,255,255,0.35);
+}
+
+.mentor .buttons button {
+  min-width: 150px;
+}
+
+.mentor .buttons button:nth-child(2),
+.mentor .buttons button:nth-child(3) {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid rgba(15,23,42,0.08);
+}
