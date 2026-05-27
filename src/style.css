@@ -6,9 +6,7 @@ img {
   height: auto;
   display: block;
 }
-html {
-  scroll-behavior: smooth;
-  }
+
   body {
     animation: appFade 0.5s ease;
     margin: 0;
@@ -106,10 +104,11 @@ transition: all 0.3s ease;
     transition: all 0.25s ease;
   
     min-width: 52px;
-font-size: 0;
-.stickySectionNav a::first-letter {
-  font-size: 18px;
-}
+    font-size: 0;
+  }
+  
+  .stickySectionNav a::first-letter {
+    font-size: 18px;
   }
   
   .stickySectionNav a:hover {
@@ -241,10 +240,12 @@ font-size: 0;
     }
   }
   .badge {
-  background: gold;
-  padding: 10px 18px;
-  border-radius: 30px;
-  font-weight: bold;
+    background: linear-gradient(90deg, #facc15, #f97316);
+    color: #111827;
+    padding: 10px 18px;
+    border-radius: 30px;
+    font-weight: bold;
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.35);
   }
   
   .hero h2 {
@@ -275,10 +276,12 @@ font-size: 0;
   }
   
   .card {
-  background: white;
-  padding: 40px;
-  border-radius: 30px;
-  box-shadow: 0 10px 30px #0001;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 40px;
+    border-radius: 30px;
+    border: 1px solid #f3f4f6;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.12);
   }
   
   .progress {
@@ -347,23 +350,7 @@ font-size: 0;
   -webkit-text-fill-color: transparent;
   }
   
-  .badge {
-  background: linear-gradient(90deg, #facc15, #f97316);
-  color: #111827;
-  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.35);
-  }
-  
-  .card {
-  border: 1px solid #f3f4f6;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px);
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.12);
-  }
-  
-  button {
-  box-shadow: 0 10px 25px rgba(17, 24, 39, 0.25);
-  transition: 0.3s;
-  }
+
   
   button:hover {
   transform: translateY(-3px);
@@ -842,14 +829,7 @@ font-size: 0;
   margin-top: 0;
   }
   }
-  body {
-    margin: 0;
-    font-family: Arial;
-    background: #fff7ed;
-    scroll-behavior: smooth;
-    -webkit-tap-highlight-color: transparent;
-    overflow-x: hidden;
-  }
+
   
   .app {
   position: relative;
@@ -1040,7 +1020,9 @@ font-size: 0;
       #111827,
       #7c2d12,
       #ea580c
-    );.closeMentorProfile {
+      );
+
+      .closeMentorProfile {
       position: absolute;
     
       top: 18px;
