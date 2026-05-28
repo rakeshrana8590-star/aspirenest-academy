@@ -68,6 +68,11 @@ import {
 } from "./contentSystem";
 import {
   loadPublishedContent,
+  addContentItem,
+  updateContentItem,
+  deleteContentItem,
+  unpublishContentItem,
+  archiveContentItem,
 } from "./contentService";
 import januaryCurrentAffairsPdf from "./assets/pdfs/CA JANUARY 26.pdf";
 import februaryCurrentAffairsPdf from "./assets/pdfs/CA FEBRUARY 26.pdf";
@@ -312,6 +317,45 @@ const [editingNoteId, setEditingNoteId] = useState(null);
 const [editingCurrentId, setEditingCurrentId] = useState(null);
 const [announcementTitle, setAnnouncementTitle] = useState("");
 const [announcementMessage, setAnnouncementMessage] = useState("");
+const [cmsTitle, setCmsTitle] = useState("");
+const [cmsSection, setCmsSection] = useState(
+  CONTENT_SECTIONS.NOTES
+);
+
+const [cmsSubject, setCmsSubject] = useState("");
+const [cmsCourse, setCmsCourse] = useState("");
+const [cmsChapter, setCmsChapter] = useState("");
+
+const [cmsPlanType, setCmsPlanType] = useState(
+  PLAN_TYPES.FREE
+);
+
+const [cmsContentType, setCmsContentType] = useState(
+  CONTENT_TYPES.PDF
+);
+
+const [cmsSourceType, setCmsSourceType] = useState(
+  SOURCE_TYPES.DRIVE
+);
+
+const [cmsFileUrl, setCmsFileUrl] = useState("");
+const [cmsVideoUrl, setCmsVideoUrl] = useState("");
+const [cmsThumbnailUrl, setCmsThumbnailUrl] =
+  useState("");
+
+const [cmsMentorName, setCmsMentorName] =
+  useState("");
+
+const [cmsMonth, setCmsMonth] = useState("");
+const [cmsDuration, setCmsDuration] =
+  useState("");
+
+const [cmsStatus, setCmsStatus] = useState(
+  CONTENT_STATUS.DRAFT
+);
+
+const [editingCmsId, setEditingCmsId] =
+  useState(null);
 const [announcements, setAnnouncements] = useState([]);
 const [paymentHistory, setPaymentHistory] = useState([]);
 
@@ -1355,6 +1399,65 @@ if (expiryDate && expiryDate < new Date()) {
     setAnnouncementMessage("");
   
     alert("Announcement published successfully ✅");
+  };
+  const handleSaveUniversalContent = async () => {
+    try {
+      const payload = {
+        title: cmsTitle,
+        section: cmsSection,
+        subject: cmsSubject,
+        course: cmsCourse,
+        chapter: cmsChapter,
+        month: cmsMonth,
+  
+        planType: cmsPlanType,
+        contentType: cmsContentType,
+        sourceType: cmsSourceType,
+  
+        fileUrl: cmsFileUrl,
+        videoUrl: cmsVideoUrl,
+        thumbnailUrl: cmsThumbnailUrl,
+  
+        mentorName: cmsMentorName,
+        duration: cmsDuration,
+  
+        status: cmsStatus,
+      };
+  
+      if (editingCmsId) {
+        await updateContentItem(
+          editingCmsId,
+          payload
+        );
+  
+        alert("Universal content updated ✅");
+      } else {
+        await addContentItem(payload);
+  
+        alert("Universal content published ✅");
+      }
+  
+      setCmsTitle("");
+      setCmsSubject("");
+      setCmsCourse("");
+      setCmsChapter("");
+  
+      setCmsFileUrl("");
+      setCmsVideoUrl("");
+      setCmsThumbnailUrl("");
+  
+      setCmsMentorName("");
+      setCmsMonth("");
+      setCmsDuration("");
+  
+      setEditingCmsId(null);
+  
+      loadUniversalContent();
+    } catch (error) {
+      console.error(error);
+  
+      alert(error.message);
+    }
   };
   const handleDeleteAnnouncement = (announcementId) => {
     const updatedAnnouncements = announcements.filter(
