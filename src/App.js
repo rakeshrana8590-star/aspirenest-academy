@@ -3718,6 +3718,11 @@ isAdmin={isAdmin}
           <button onClick={() => { setActiveAdminTab("Announcements"); navigate("/admin/announcements"); }}>
             📢 Announcements
           </button>
+
+          <button onClick={() => { setActiveAdminTab("Universal CMS"); navigate("/admin/universal-cms"); }}>
+            🌍 Universal CMS
+          </button>
+
         </div>
 
         <div style={{ marginTop: "30px" }}>
@@ -4284,6 +4289,79 @@ isAdmin={isAdmin}
 
               handleAddAnnouncement={handleAddAnnouncement}
               handleDeleteAnnouncement={handleDeleteAnnouncement}
+            />
+          );
+        })()}
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/universal-cms"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        {(() => {
+          setTimeout(() => setActiveAdminTab("Universal CMS"), 0);
+
+          return (
+            <AdminPanel
+              user={user}
+              isAdmin={isAdmin}
+              activeAdminTab="Universal CMS"
+              setActiveAdminTab={setActiveAdminTab}
+              students={students || []}
+              enquiries={enquiries || []}
+              mockResults={mockResults || []}
+              notesData={notesData || []}
+              firebaseNotes={firebaseNotes || []}
+              currentAffairs={currentAffairsList || []}
+              currentAffairsList={currentAffairsList || []}
+              fallbackCurrentAffairs={currentAffairsList || []}
+              announcements={announcements || []}
+              paymentHistory={paymentHistory || []}
+              paymentRequests={paymentRequests || []}
+              loadPaymentRequests={loadPaymentRequests}
+              loadAdminData={loadAdminData}
+              loadLeaderboard={loadLeaderboard}
+              loadPaymentHistory={loadPaymentHistory}
+              handlePremiumControl={handlePremiumControl}
+              approvePaymentRequest={approvePaymentRequest}
+              handleDeleteMockQuestion={handleDeleteMockQuestion}
+              handleAddMockQuestion={handleAddMockQuestion}
+              handleSaveNote={handleSaveNote}
+              handleEditNote={handleEditNote}
+              handleDeleteNote={handleDeleteNote}
+              handleSaveCurrentAffairs={handleSaveCurrentAffairs}
+              handleEditCurrentAffairs={handleEditCurrentAffairs}
+              handleDeleteCurrentAffairs={handleDeleteCurrentAffairs}
+              handleAddAnnouncement={handleAddAnnouncement}
+              handleDeleteAnnouncement={handleDeleteAnnouncement}
+              universalContent={universalContent}
+contentLoading={contentLoading}
+cmsTitle={cmsTitle}
+setCmsTitle={setCmsTitle}
+cmsSection={cmsSection}
+setCmsSection={setCmsSection}
+cmsSubject={cmsSubject}
+setCmsSubject={setCmsSubject}
+cmsCourse={cmsCourse}
+setCmsCourse={setCmsCourse}
+cmsChapter={cmsChapter}
+setCmsChapter={setCmsChapter}
+cmsPlanType={cmsPlanType}
+setCmsPlanType={setCmsPlanType}
+cmsFileUrl={cmsFileUrl}
+setCmsFileUrl={setCmsFileUrl}
+cmsVideoUrl={cmsVideoUrl}
+setCmsVideoUrl={setCmsVideoUrl}
+cmsMentorName={cmsMentorName}
+setCmsMentorName={setCmsMentorName}
+cmsMonth={cmsMonth}
+setCmsMonth={setCmsMonth}
+editingCmsId={editingCmsId}
+handleSaveUniversalContent={handleSaveUniversalContent}
             />
           );
         })()}
