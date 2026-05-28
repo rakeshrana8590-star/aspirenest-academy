@@ -44,7 +44,18 @@ export const loadPublishedContent = async (section) => {
     orderBy("createdAt", "desc")
   );
 
-  const snapshot = await getDocs(q);
+  let snapshot;
+
+try {
+  snapshot = await getDocs(q);
+} catch (error) {
+  console.warn(
+    "Universal CMS collection not ready yet:",
+    error
+  );
+
+  return [];
+}
 
   return snapshot.docs.map((document) => ({
     id: document.id,

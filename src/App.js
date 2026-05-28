@@ -66,6 +66,9 @@ import {
   SOURCE_TYPES,
   CONTENT_TYPES,
 } from "./contentSystem";
+import {
+  loadPublishedContent,
+} from "./contentService";
 import januaryCurrentAffairsPdf from "./assets/pdfs/CA JANUARY 26.pdf";
 import februaryCurrentAffairsPdf from "./assets/pdfs/CA FEBRUARY 26.pdf";
 import marchCurrentAffairsPdf from "./assets/pdfs/CA MARCH 26.pdf";
@@ -104,6 +107,8 @@ const [timeLeft, setTimeLeft] = useState(60);
 const [mobile, setMobile] = useState("");
 const [contactEmail, setContactEmail] = useState("");
   const [user, setUser] = useState(null);
+  const [universalContent, setUniversalContent] = useState([]);
+const [contentLoading, setContentLoading] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
   const [userPlanType, setUserPlanType] = useState("FREE");
@@ -382,6 +387,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
         loadFirebaseNotes();
         loadCurrentAffairs();
         loadAnnouncements();
+        loadUniversalContent();
       }, 300);
     
       // Admin heavy data sirf admin ke liye
@@ -966,6 +972,39 @@ if (expiryDate && expiryDate < new Date()) {
       setAnnouncements(data);
     } catch (error) {
       alert(error.message);
+    }
+  };
+  const loadUniversalContent = async () => {
+    try {
+      setContentLoading(true);
+  
+      const notesContent = await loadPublishedContent(
+        CONTENT_SECTIONS.NOTES
+      );
+  
+      const currentAffairsContent = await loadPublishedContent(
+        CONTENT_SECTIONS.CURRENT_AFFAIRS
+      );
+  
+      const videoContent = await loadPublishedContent(
+        CONTENT_SECTIONS.RECORDED_VIDEO
+      );
+  
+      setUniversalContent([
+        ...notesContent,
+        ...currentAffairsContent,
+        ...videoContent,
+      ]);
+  
+      console.log("Universal CMS Loaded:", {
+        notes: notesContent.length,
+        currentAffairs: currentAffairsContent.length,
+        videos: videoContent.length,
+      });
+    } catch (error) {
+      console.error("Universal content loading error:", error);
+    } finally {
+      setContentLoading(false);
     }
   };
   const loadPaymentHistory = async (currentUser = user) => {
