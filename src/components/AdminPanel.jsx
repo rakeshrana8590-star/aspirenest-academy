@@ -11,6 +11,10 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import {
+  CONTENT_SECTIONS,
+  PLAN_TYPES,
+} from "../contentSystem";
 export default function AdminPanel({
   isAdmin,
   activeAdminTab,
@@ -300,7 +304,139 @@ const isDuplicateUtr = duplicateUtrCount > 1;
 
       {activeAdminTab === "Dashboard" && (
   <div className="adminDashboardPro">
+<div className="dashboardCard proCard">
+  <h2>🌍 Universal Content CMS</h2>
 
+  <p>
+    Upload and manage notes, current affairs,
+    videos, PDFs, and premium learning content.
+  </p>
+
+  <div className="adminFormGrid">
+    <input
+      type="text"
+      placeholder="Content Title"
+      value={cmsTitle}
+      onChange={(e) =>
+        setCmsTitle(e.target.value)
+      }
+    />
+
+    <input
+      type="text"
+      placeholder="Subject"
+      value={cmsSubject}
+      onChange={(e) =>
+        setCmsSubject(e.target.value)
+      }
+    />
+
+    <input
+      type="text"
+      placeholder="Course"
+      value={cmsCourse}
+      onChange={(e) =>
+        setCmsCourse(e.target.value)
+      }
+    />
+
+    <input
+      type="text"
+      placeholder="Chapter"
+      value={cmsChapter}
+      onChange={(e) =>
+        setCmsChapter(e.target.value)
+      }
+    />
+
+    <input
+      type="text"
+      placeholder="Month"
+      value={cmsMonth}
+      onChange={(e) =>
+        setCmsMonth(e.target.value)
+      }
+    />
+
+    <input
+      type="text"
+      placeholder="Mentor Name"
+      value={cmsMentorName}
+      onChange={(e) =>
+        setCmsMentorName(e.target.value)
+      }
+    />
+
+    <input
+      type="text"
+      placeholder="PDF / Drive URL"
+      value={cmsFileUrl}
+      onChange={(e) =>
+        setCmsFileUrl(e.target.value)
+      }
+    />
+
+    <input
+      type="text"
+      placeholder="YouTube Video URL"
+      value={cmsVideoUrl}
+      onChange={(e) =>
+        setCmsVideoUrl(e.target.value)
+      }
+    />
+
+    <select
+      value={cmsSection}
+      onChange={(e) =>
+        setCmsSection(e.target.value)
+      }
+    >
+ <option value={PLAN_TYPES.FREE}>
+  FREE
+</option>
+
+<option value={PLAN_TYPES.BASIC}>
+  BASIC
+</option>
+
+<option value={PLAN_TYPES.PREMIUM}>
+  PREMIUM
+</option>
+
+<option value={PLAN_TYPES.MENTORSHIP}>
+  MENTORSHIP
+</option>
+    </select>
+
+    <select
+      value={cmsPlanType}
+      onChange={(e) =>
+        setCmsPlanType(e.target.value)
+      }
+    >
+      <option value="FREE">FREE</option>
+
+      <option value="BASIC">BASIC</option>
+
+      <option value="PREMIUM">
+        PREMIUM
+      </option>
+
+      <option value="MENTORSHIP">
+        MENTORSHIP
+      </option>
+    </select>
+
+    <button
+      className="premiumBtn"
+      onClick={handleSaveUniversalContent}
+    >
+      {editingCmsId
+        ? "Update Content"
+        : "Publish Content"}
+    </button>
+  </div>
+</div>
     <div className="adminStatsGrid">
 
       <div className="dashboardCard proStatCard">
