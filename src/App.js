@@ -216,6 +216,78 @@ const fallbackCurrentAffairs = [
     pages: 12,
     pdf: aprilCurrentAffairsPdf,
   },
+
+  {
+    id: "ca-may-2026",
+    title: "May Current Affairs",
+    month: "May 2026",
+    type: "COMING_SOON",
+    pages: 0,
+    pdf: "#",
+  },
+
+  {
+    id: "ca-june-2026",
+    title: "June Current Affairs",
+    month: "June 2026",
+    type: "COMING_SOON",
+    pages: 0,
+    pdf: "#",
+  },
+
+  {
+    id: "ca-july-2026",
+    title: "July Current Affairs",
+    month: "July 2026",
+    type: "COMING_SOON",
+    pages: 0,
+    pdf: "#",
+  },
+
+  {
+    id: "ca-august-2026",
+    title: "August Current Affairs",
+    month: "August 2026",
+    type: "COMING_SOON",
+    pages: 0,
+    pdf: "#",
+  },
+
+  {
+    id: "ca-september-2026",
+    title: "September Current Affairs",
+    month: "September 2026",
+    type: "COMING_SOON",
+    pages: 0,
+    pdf: "#",
+  },
+
+  {
+    id: "ca-october-2026",
+    title: "October Current Affairs",
+    month: "October 2026",
+    type: "COMING_SOON",
+    pages: 0,
+    pdf: "#",
+  },
+
+  {
+    id: "ca-november-2026",
+    title: "November Current Affairs",
+    month: "November 2026",
+    type: "COMING_SOON",
+    pages: 0,
+    pdf: "#",
+  },
+
+  {
+    id: "ca-december-2026",
+    title: "December Current Affairs",
+    month: "December 2026",
+    type: "COMING_SOON",
+    pages: 0,
+    pdf: "#",
+  },
 ];
 const [currentTitle, setCurrentTitle] = useState("");
 const [currentMonth, setCurrentMonth] = useState("");

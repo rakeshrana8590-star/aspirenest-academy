@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 export default function CurrentAffairs({
   currentAffairsList,
   fallbackCurrentAffairs,
-  handleNoteAccess,
   hasPlanAccess,
 }) {
   const navigate = useNavigate();
@@ -16,15 +15,25 @@ export default function CurrentAffairs({
       ? safeCurrentAffairsList
       : safeFallbackCurrentAffairs;
 
+  const isComingSoon = (item) =>
+    item?.type === "COMING_SOON" || !item?.pdf || item?.pdf === "#";
+
   const canAccessCurrentAffair = (item) => {
-    if (item.type === "FREE") return true;
-    if (item.type === "BASIC") return hasPlanAccess("BASIC");
-    if (item.type === "PREMIUM") return hasPlanAccess("PREMIUM");
-    if (item.type === "MENTORSHIP") return hasPlanAccess("MENTORSHIP");
-    return false;
+    if (isComingSoon(item)) return false;
+
+    const accessType = item?.accessPlan || item?.type || "FREE";
+
+    if (accessType === "FREE") return true;
+
+    return hasPlanAccess ? hasPlanAccess(accessType) : false;
   };
 
-  const openCurrentAffair = (item) => {
+  const openPdf = (item) => {
+    if (isComingSoon(item)) {
+      alert("This month's PDF will be uploaded soon.");
+      return;
+    }
+
     const unlocked = canAccessCurrentAffair(item);
 
     if (!unlocked) {
@@ -32,11 +41,14 @@ export default function CurrentAffairs({
       return;
     }
 
-    navigate(`/subjects/ctet-tet/current-affairs/${item.id}`);
+    window.open(item.pdf, "_blank", "noopener,noreferrer");
   };
 
   return (
-    <section id="current-affairs" className="currentAffairs currentAffairsRailPage">
+    <section
+      id="current-affairs"
+      className="currentAffairs currentAffairsRailPage"
+    >
       <div className="sectionHeader">
         <span className="sectionBadge">📚 Monthly Updates</span>
 
@@ -49,19 +61,25 @@ export default function CurrentAffairs({
 
       <div className="currentAffairsRail">
         {finalCurrentAffairs.map((item) => {
+          const comingSoon = isComingSoon(item);
           const unlocked = canAccessCurrentAffair(item);
 
           return (
             <div
               className={`currentAffairCard currentAffairRailCard ${
-                !unlocked ? "lockedCourse" : ""
-              }`}
+                comingSoon ? "comingSoonCard" : ""
+              } ${!comingSoon && !unlocked ? "lockedCourse" : ""}`}
               key={item.id}
-              onClick={() => openCurrentAffair(item)}
+              onClick={() => openPdf(item)}
             >
               <div className="currentAffairTop">
-                <span className="planTag">{item.type}</span>
-                <span className="currentAffairArrow">→</span>
+                <span className="planTag">
+                  {comingSoon ? "COMING SOON" : item?.type || "FREE"}
+                </span>
+
+                {!comingSoon && (
+                  <span className="currentAffairArrow">→</span>
+                )}
               </div>
 
               <div className="currentAffairIcon">📰</div>
@@ -70,26 +88,31 @@ export default function CurrentAffairs({
 
               <div className="currentAffairMeta">
                 <p>📅 {item.month}</p>
-                <p>📄 {item.pages} Pages</p>
+                <p>
+                  📄 {comingSoon ? "PDF Pending" : `${item.pages} Pages`}
+                </p>
               </div>
 
               <p className="currentAffairAccess">
-                {unlocked ? "🔓 Unlocked" : `🔒 ${item.type}`}
+                {comingSoon
+                  ? "⏳ Coming Soon"
+                  : unlocked
+                  ? "🔓 Unlocked"
+                  : `🔒 ${item.type}`}
               </p>
 
               <button
                 className="currentAffairBtn"
                 onClick={(e) => {
                   e.stopPropagation();
-
-                  if (unlocked) {
-                    handleNoteAccess(item);
-                  } else {
-                    navigate("/subjects/ctet-tet/pricing");
-                  }
+                  openPdf(item);
                 }}
               >
-                {unlocked ? "📥 Download PDF" : "🔒 Upgrade"}
+                {comingSoon
+                  ? "⏳ Coming Soon"
+                  : unlocked
+                  ? "📥 Download PDF"
+                  : "🔒 Upgrade"}
               </button>
             </div>
           );
