@@ -97,9 +97,10 @@ export default function AdminPanel({
 }) {
   const navigate = useNavigate();
 const [showRecentOnly, setShowRecentOnly] = useState(true);
-  if (!isAdmin()) return null;
-  const [adminProofs, setAdminProofs] = useState({});
-  const [paymentFilter, setPaymentFilter] = useState("student_proof_submitted");
+const [adminProofs, setAdminProofs] = useState({});
+const [paymentFilter, setPaymentFilter] = useState("student_proof_submitted");
+
+if (!isAdmin()) return null;
 
   const uniqueStudents = students.filter(
     (student, index, self) =>

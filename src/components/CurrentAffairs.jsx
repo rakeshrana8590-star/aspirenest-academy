@@ -4,17 +4,13 @@ export default function CurrentAffairs({
   currentAffairsList,
   fallbackCurrentAffairs,
   handleNoteAccess,
-  isPremiumUser,
-  userPlanType,
   hasPlanAccess,
-  setActiveSection,
 }) {
-
   const navigate = useNavigate();
 
   const safeCurrentAffairsList = currentAffairsList || [];
   const safeFallbackCurrentAffairs = fallbackCurrentAffairs || [];
-  
+
   const finalCurrentAffairs =
     safeCurrentAffairsList.length > 0
       ? safeCurrentAffairsList
@@ -25,49 +21,50 @@ export default function CurrentAffairs({
     if (item.type === "BASIC") return hasPlanAccess("BASIC");
     if (item.type === "PREMIUM") return hasPlanAccess("PREMIUM");
     if (item.type === "MENTORSHIP") return hasPlanAccess("MENTORSHIP");
-
     return false;
   };
 
-  const getButtonText = (item) => {
-    if (canAccessCurrentAffair(item)) {
-      return "📥 Download PDF";
+  const openCurrentAffair = (item) => {
+    const unlocked = canAccessCurrentAffair(item);
+
+    if (!unlocked) {
+      navigate("/subjects/ctet-tet/pricing");
+      return;
     }
 
-    if (item.type === "BASIC") return "🔒 Upgrade to BASIC";
-    if (item.type === "PREMIUM") return "🔒 Upgrade to PREMIUM";
-    if (item.type === "MENTORSHIP") return "🔒 Upgrade to MENTORSHIP";
-
-    return "🔒 Upgrade Required";
+    navigate(`/subjects/ctet-tet/current-affairs/${item.id}`);
   };
 
   return (
-    <section id="current-affairs" className="currentAffairs">
+    <section id="current-affairs" className="currentAffairs currentAffairsRailPage">
       <div className="sectionHeader">
         <span className="sectionBadge">📚 Monthly Updates</span>
 
-        <h2>Current Affairs Hub</h2>
+        <h2>Monthly Current Affairs</h2>
 
         <p className="sectionText">
-          Premium monthly current affairs PDFs for CTET/TET and teaching exams
-          preparation.
+          Swipe monthly CTET/TET current affairs PDFs in a premium horizontal library.
         </p>
       </div>
 
-      <div className="currentAffairsGrid">
+      <div className="currentAffairsRail">
         {finalCurrentAffairs.map((item) => {
           const unlocked = canAccessCurrentAffair(item);
 
           return (
             <div
-              className={`currentAffairCard ${
+              className={`currentAffairCard currentAffairRailCard ${
                 !unlocked ? "lockedCourse" : ""
               }`}
               key={item.id}
+              onClick={() => openCurrentAffair(item)}
             >
               <div className="currentAffairTop">
                 <span className="planTag">{item.type}</span>
+                <span className="currentAffairArrow">→</span>
               </div>
+
+              <div className="currentAffairIcon">📰</div>
 
               <h3>{item.title}</h3>
 
@@ -76,18 +73,15 @@ export default function CurrentAffairs({
                 <p>📄 {item.pages} Pages</p>
               </div>
 
-              <p
-                style={{
-                  marginBottom: "12px",
-                  fontWeight: "600",
-                }}
-              >
-                🔐 Access: {unlocked ? "Unlocked" : item.type}
+              <p className="currentAffairAccess">
+                {unlocked ? "🔓 Unlocked" : `🔒 ${item.type}`}
               </p>
 
               <button
                 className="currentAffairBtn"
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
+
                   if (unlocked) {
                     handleNoteAccess(item);
                   } else {
@@ -95,7 +89,7 @@ export default function CurrentAffairs({
                   }
                 }}
               >
-                {getButtonText(item)}
+                {unlocked ? "📥 Download PDF" : "🔒 Upgrade"}
               </button>
             </div>
           );

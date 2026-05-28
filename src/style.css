@@ -19384,3 +19384,711 @@ nav {
   }
 
 }
+
+/* STEP CA — CURRENT AFFAIRS NETFLIX / APPLE HORIZONTAL RAIL */
+
+.currentAffairsRailPage {
+  padding: 70px 0 80px !important;
+  background:
+    radial-gradient(circle at 92% 10%, rgba(255, 237, 213, 0.85), transparent 30%),
+    linear-gradient(180deg, #f8fafc 0%, #ffffff 100%) !important;
+  overflow: hidden !important;
+}
+
+.currentAffairsRailPage .sectionHeader {
+  padding: 0 7% !important;
+  max-width: 980px !important;
+  margin-bottom: 28px !important;
+}
+
+.currentAffairsRailPage .sectionHeader h2 {
+  font-size: clamp(44px, 5vw, 72px) !important;
+  line-height: 0.98 !important;
+  letter-spacing: -2.5px !important;
+  color: #0f172a !important;
+}
+
+.currentAffairsRailPage .sectionText {
+  color: #64748b !important;
+  font-size: 18px !important;
+}
+
+.currentAffairsRail {
+  display: flex !important;
+  gap: 24px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 10px 7% 34px !important;
+  scroll-behavior: smooth !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+}
+
+.currentAffairsRail::-webkit-scrollbar {
+  display: none !important;
+}
+
+.currentAffairRailCard {
+  min-width: 330px !important;
+  max-width: 330px !important;
+  flex: 0 0 330px !important;
+  min-height: 360px !important;
+
+  padding: 30px !important;
+  border-radius: 34px !important;
+  cursor: pointer !important;
+
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid rgba(249, 115, 22, 0.16) !important;
+
+  box-shadow:
+    0 22px 65px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+
+  transition: transform 0.28s ease, box-shadow 0.28s ease !important;
+}
+
+.currentAffairRailCard:hover {
+  transform: translateY(-8px) !important;
+  box-shadow:
+    0 34px 85px rgba(15, 23, 42, 0.13),
+    0 0 35px rgba(249, 115, 22, 0.10) !important;
+}
+
+.currentAffairRailCard .currentAffairTop {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 22px !important;
+}
+
+.currentAffairRailCard .currentAffairIcon {
+  width: 58px !important;
+  height: 58px !important;
+  border-radius: 20px !important;
+  display: grid !important;
+  place-items: center !important;
+  background: #fff7ed !important;
+  font-size: 26px !important;
+  margin-bottom: 22px !important;
+}
+
+.currentAffairRailCard h3 {
+  font-size: 30px !important;
+  line-height: 1.08 !important;
+  letter-spacing: -0.8px !important;
+  color: #f97316 !important;
+  margin-bottom: 22px !important;
+}
+
+.currentAffairRailCard p {
+  color: #475569 !important;
+  font-weight: 750 !important;
+}
+
+.currentAffairRailCard .planTag {
+  background: #dcfce7 !important;
+  color: #166534 !important;
+  border-radius: 999px !important;
+  padding: 9px 16px !important;
+  font-weight: 950 !important;
+}
+
+.currentAffairArrow {
+  color: #f97316 !important;
+  font-size: 28px !important;
+  font-weight: 950 !important;
+}
+
+.currentAffairAccess {
+  margin-top: 18px !important;
+}
+
+.currentAffairRailCard .currentAffairBtn {
+  margin-top: 18px !important;
+  width: fit-content !important;
+  padding: 14px 22px !important;
+  border-radius: 16px !important;
+  background: #020617 !important;
+  color: #ffffff !important;
+}
+
+@media (max-width: 768px) {
+  .currentAffairsRailPage {
+    padding: 46px 0 60px !important;
+  }
+
+  .currentAffairsRailPage .sectionHeader {
+    padding: 0 22px !important;
+  }
+
+  .currentAffairsRailPage .sectionHeader h2 {
+    font-size: 42px !important;
+    letter-spacing: -1.6px !important;
+  }
+
+  .currentAffairsRail {
+    gap: 18px !important;
+    padding: 8px 22px 28px !important;
+  }
+
+  .currentAffairRailCard {
+    min-width: 82vw !important;
+    max-width: 82vw !important;
+    flex-basis: 82vw !important;
+    min-height: 340px !important;
+  }
+}
+/* STEP CA-4 — CURRENT AFFAIRS RAIL SNAP + PREMIUM EDGE FADE */
+
+.currentAffairsRail {
+  scroll-snap-type: x mandatory !important;
+  position: relative !important;
+}
+
+.currentAffairRailCard {
+  scroll-snap-align: start !important;
+}
+
+.currentAffairsRailPage::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 120px;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(248, 250, 252, 0),
+    rgba(248, 250, 252, 0.95)
+  );
+}
+
+.currentAffairsRailPage {
+  position: relative !important;
+}
+
+@media (max-width: 768px) {
+  .currentAffairsRailPage::after {
+    width: 55px;
+  }
+}
+/* =========================
+   STEP 4B — GLOBAL APP SHELL
+========================= */
+
+.cleanHeader {
+  width: 100%;
+  min-height: 88px;
+}
+
+.coursePages,
+.academyOverviewPage,
+.loginSection,
+.notesSubjectRoutePage {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.coursePages {
+  padding-top: 120px;
+}
+
+.sectionHeader {
+  max-width: 980px;
+  margin: 0 auto 46px;
+  text-align: center;
+}
+
+.sectionHeader h1,
+.sectionHeader h2 {
+  font-size: clamp(42px, 5vw, 76px);
+  line-height: 0.98;
+  letter-spacing: -3px;
+}
+
+.sectionHeader p {
+  max-width: 760px;
+  margin: 18px auto 0;
+  font-size: 18px;
+  line-height: 1.7;
+  color: #64748b;
+}
+
+@media (max-width: 768px) {
+  .cleanHeader {
+    min-height: 78px;
+    padding: 0 18px;
+  }
+
+  .coursePages {
+    padding: 104px 18px 56px;
+  }
+
+  .sectionHeader h1,
+  .sectionHeader h2 {
+    font-size: 40px;
+    letter-spacing: -2px;
+  }
+
+  .sectionHeader p {
+    font-size: 15.5px;
+  }
+}
+/* =========================
+   STEP 4C — CURRENT AFFAIRS SHELL FIX
+========================= */
+
+.currentAffairsPremiumPage {
+  padding-top: 118px;
+  overflow: hidden;
+}
+
+.currentAffairsPremiumPage .currentAffairs {
+  padding: 0;
+  background: transparent;
+}
+
+.currentAffairsPremiumPage .currentHeader {
+  max-width: 980px;
+  margin: 0 auto 52px;
+}
+
+.currentAffairsPremiumPage .currentHeader h2 {
+  font-size: clamp(44px, 5.4vw, 82px);
+  line-height: 0.95;
+  letter-spacing: -4px;
+}
+
+@media (max-width: 768px) {
+  .currentAffairsPremiumPage {
+    padding-top: 104px;
+  }
+
+  .currentAffairsPremiumPage .currentHeader {
+    margin-bottom: 34px;
+  }
+
+  .currentAffairsPremiumPage .currentHeader h2 {
+    font-size: 42px;
+    letter-spacing: -2px;
+  }
+}
+/* =========================
+   STEP 4D — NOTES PDF SHELL FIX
+========================= */
+
+.notesSubjectRoutePage {
+  padding: 118px 7% 70px;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.notesSubjectRoutePage > button {
+  margin-bottom: 26px;
+}
+
+.notesSubjectRoutePage h1 {
+  font-size: clamp(42px, 5.2vw, 78px);
+  line-height: 0.98;
+  letter-spacing: -3px;
+  margin: 18px 0;
+}
+
+.notesSubjectRoutePage > p {
+  max-width: 720px;
+  color: #64748b;
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+@media (max-width: 768px) {
+  .notesSubjectRoutePage {
+    padding: 104px 18px 56px;
+  }
+
+  .notesSubjectRoutePage h1 {
+    font-size: 40px;
+    letter-spacing: -2px;
+  }
+
+  .notesSubjectRoutePage > p {
+    font-size: 15.5px;
+  }
+}
+/* =========================
+   STEP 4E — MASTER ROUTE SHELL CONSISTENCY
+========================= */
+
+.coursesMasterPage,
+.mockMasterPage,
+.pricingMasterPage,
+.subjectHubPage,
+.subjectSelectorPage {
+  padding-top: 118px;
+  min-height: 100vh;
+}
+
+.coursePathGrid,
+.mockActionGrid,
+.pricingActionGrid,
+.subjectHubGrid {
+  max-width: 1180px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.premiumCourseShelf,
+.premiumMockContainer,
+.premiumPricingContainer,
+.notesNetflixLibrary {
+  max-width: 1240px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 768px) {
+  .coursesMasterPage,
+  .mockMasterPage,
+  .pricingMasterPage,
+  .subjectHubPage,
+  .subjectSelectorPage {
+    padding-top: 104px;
+  }
+}
+/* =========================
+   STEP 4F.2 — REAL APP SHELL
+========================= */
+
+.appShell {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(255, 170, 0, 0.08),
+      transparent 26%
+    ),
+    linear-gradient(
+      to bottom,
+      #ffffff,
+      #fbfbfd
+    );
+
+  isolation: isolate;
+}
+
+.appShell::before {
+  content: "";
+
+  position: fixed;
+  inset: 0;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.78),
+      rgba(255,255,255,0)
+    );
+
+  z-index: -1;
+}
+
+@media (max-width: 768px) {
+  .appShell {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+/* =========================
+   STEP 4F.3 — ROUTE TRANSITION FEEL
+========================= */
+
+.appShell > section,
+.appShell .coursePages,
+.appShell .academyOverviewPage,
+.appShell .loginSection,
+.appShell .notesSubjectRoutePage {
+  animation: routeSoftEnter 0.45s ease both;
+}
+
+@keyframes routeSoftEnter {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .appShell > section,
+  .appShell .coursePages,
+  .appShell .academyOverviewPage,
+  .appShell .loginSection,
+  .appShell .notesSubjectRoutePage {
+    animation: none;
+  }
+}
+/* =========================
+   STEP 4F.4 — NAVBAR SHELL CONSISTENCY
+========================= */
+
+.cleanHeader {
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+
+  max-width: 100%;
+  margin: 0 auto;
+
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.cleanBrand {
+  display: flex;
+  align-items: center;
+}
+
+.cleanNav {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cleanHeaderBtn,
+.cleanHeaderSwitch {
+  min-height: 44px;
+  border-radius: 999px;
+  padding: 11px 18px;
+  font-weight: 800;
+}
+
+@media (max-width: 768px) {
+  .cleanHeader {
+    height: 78px;
+    flex-direction: row;
+  }
+
+  .cleanBrand .header-logo {
+    width: 150px;
+  }
+
+  .cleanNav {
+    gap: 8px;
+  }
+
+  .cleanHeaderBtn,
+  .cleanHeaderSwitch {
+    min-height: 40px;
+    padding: 9px 13px;
+    font-size: 13px;
+  }
+}
+/* =========================
+   STEP 6A — UNIVERSAL PAGE RHYTHM
+========================= */
+
+.appShell {
+  --page-max: 1440px;
+  --content-max: 1180px;
+  --section-gap: 56px;
+}
+
+.appShell .coursePages,
+.appShell .academyOverviewPage,
+.appShell .loginSection,
+.appShell .notesSubjectRoutePage {
+  width: 100%;
+  max-width: var(--page-max);
+  margin-inline: auto;
+}
+
+.appShell .sectionHeader,
+.appShell .currentHeader,
+.appShell .appDashboardHeader,
+.appShell .academySectionIntro {
+  max-width: 980px;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.appShell .courseGrid,
+.appShell .subjectHubGrid,
+.appShell .coursePathGrid,
+.appShell .mockActionGrid,
+.appShell .pricingActionGrid,
+.appShell .adminStudentsGrid,
+.appShell .freeGrid {
+  max-width: var(--content-max);
+  margin-inline: auto;
+}
+
+@media (max-width: 768px) {
+  .appShell {
+    --section-gap: 34px;
+  }
+}
+/* =========================
+   STEP 6B — UNIVERSAL PREMIUM CARD GRID
+========================= */
+
+.appShell .courseGrid,
+.appShell .subjectHubGrid,
+.appShell .coursePathGrid,
+.appShell .mockActionGrid,
+.appShell .pricingActionGrid {
+  gap: 22px;
+}
+
+.appShell .courseGrid button,
+.appShell .subjectHubCard,
+.appShell .coursePathCard,
+.appShell .mockActionCard,
+.appShell .pricingActionCard,
+.appShell .studentCard,
+.appShell .dashboardCard {
+  border-radius: 28px;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.07);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.appShell .courseGrid button:hover,
+.appShell .subjectHubCard:hover,
+.appShell .coursePathCard:hover,
+.appShell .mockActionCard:hover,
+.appShell .pricingActionCard:hover,
+.appShell .studentCard:hover,
+.appShell .dashboardCard:hover {
+  transform: translateY(-7px);
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.12);
+}
+
+@media (max-width: 768px) {
+  .appShell .courseGrid,
+  .appShell .subjectHubGrid,
+  .appShell .coursePathGrid,
+  .appShell .mockActionGrid,
+  .appShell .pricingActionGrid {
+    gap: 16px;
+  }
+}
+/* =========================
+   STEP 6C — LOGIN / OVERVIEW / HOME RHYTHM
+========================= */
+
+.appShell .loginExperience,
+.appShell .academyOverviewPage,
+.appShell .hero,
+.appShell .mentor,
+.appShell .premium,
+.appShell .freeResources,
+.appShell .footerPanels,
+.appShell .premiumFooter {
+  max-width: 1440px;
+  margin-inline: auto;
+}
+
+.appShell .hero,
+.appShell .mentor,
+.appShell .premium {
+  border-radius: 0;
+}
+
+.appShell .academyOverviewPage,
+.appShell .loginExperience {
+  padding-top: 118px;
+}
+
+.appShell .academyHero,
+.appShell .academyTrustStrip,
+.appShell .academyOverviewGrid,
+.appShell .academyStorySection,
+.appShell .academyFinalCTA {
+  max-width: 1180px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 768px) {
+  .appShell .academyOverviewPage,
+  .appShell .loginExperience {
+    padding-top: 104px;
+  }
+}
+/* =========================
+   STEP 6D — UNIVERSAL PAGE TRANSITIONS
+========================= */
+
+.appShell main,
+.appShell section,
+.appShell .coursePages,
+.appShell .academyOverviewPage,
+.appShell .appDashboard,
+.appShell .studentDashboard,
+.appShell .adminPanel {
+  animation: appFade 0.45s ease;
+}
+
+@keyframes appFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.appShell {
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
+}
+/* =========================
+   STEP 6E — MOBILE APP SAFE AREA
+========================= */
+
+@media (max-width: 768px) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    min-height: 100%;
+    overflow-x: hidden;
+  }
+
+  .appShell {
+    min-height: 100dvh;
+    padding-bottom: calc(18px + env(safe-area-inset-bottom));
+  }
+
+  .whatsappFloat {
+    bottom: calc(18px + env(safe-area-inset-bottom));
+  }
+
+  button,
+  .subjectHubCard,
+  .coursePathCard,
+  .mockActionCard,
+  .pricingActionCard,
+  .notesSubjectCard,
+  .pdfMiniCard {
+    touch-action: manipulation;
+  }
+}
