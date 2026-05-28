@@ -5727,6 +5727,42 @@ setAnnouncementMessage={setAnnouncementMessage}
   announcements={announcements}
   handleAddAnnouncement={handleAddAnnouncement}
   handleDeleteAnnouncement={handleDeleteAnnouncement}
+  universalContent={universalContent}
+  contentLoading={contentLoading}
+
+  cmsTitle={cmsTitle}
+  setCmsTitle={setCmsTitle}
+  cmsSection={cmsSection}
+  setCmsSection={setCmsSection}
+  cmsSubject={cmsSubject}
+  setCmsSubject={setCmsSubject}
+  cmsCourse={cmsCourse}
+  setCmsCourse={setCmsCourse}
+  cmsChapter={cmsChapter}
+  setCmsChapter={setCmsChapter}
+  cmsPlanType={cmsPlanType}
+  setCmsPlanType={setCmsPlanType}
+  cmsContentType={cmsContentType}
+  setCmsContentType={setCmsContentType}
+  cmsSourceType={cmsSourceType}
+  setCmsSourceType={setCmsSourceType}
+  cmsFileUrl={cmsFileUrl}
+  setCmsFileUrl={setCmsFileUrl}
+  cmsVideoUrl={cmsVideoUrl}
+  setCmsVideoUrl={setCmsVideoUrl}
+  cmsThumbnailUrl={cmsThumbnailUrl}
+  setCmsThumbnailUrl={setCmsThumbnailUrl}
+  cmsMentorName={cmsMentorName}
+  setCmsMentorName={setCmsMentorName}
+  cmsMonth={cmsMonth}
+  setCmsMonth={setCmsMonth}
+  cmsDuration={cmsDuration}
+  setCmsDuration={setCmsDuration}
+  cmsStatus={cmsStatus}
+  setCmsStatus={setCmsStatus}
+  editingCmsId={editingCmsId}
+  setEditingCmsId={setEditingCmsId}
+  handleSaveUniversalContent={handleSaveUniversalContent}
 />
 )}
 <CurrentAffairs

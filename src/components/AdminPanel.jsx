@@ -94,6 +94,54 @@ export default function AdminPanel({
   announcements,
   handleAddAnnouncement,
   handleDeleteAnnouncement,
+  universalContent,
+  contentLoading,
+
+  cmsTitle,
+  setCmsTitle,
+  cmsSection,
+  setCmsSection,
+  cmsSubject,
+  setCmsSubject,
+  cmsCourse,
+  setCmsCourse,
+  cmsChapter,
+  setCmsChapter,
+
+  cmsPlanType,
+  setCmsPlanType,
+
+  cmsContentType,
+  setCmsContentType,
+
+  cmsSourceType,
+  setCmsSourceType,
+
+  cmsFileUrl,
+  setCmsFileUrl,
+
+  cmsVideoUrl,
+  setCmsVideoUrl,
+
+  cmsThumbnailUrl,
+  setCmsThumbnailUrl,
+
+  cmsMentorName,
+  setCmsMentorName,
+
+  cmsMonth,
+  setCmsMonth,
+
+  cmsDuration,
+  setCmsDuration,
+
+  cmsStatus,
+  setCmsStatus,
+
+  editingCmsId,
+  setEditingCmsId,
+
+  handleSaveUniversalContent,
 }) {
   const navigate = useNavigate();
 const [showRecentOnly, setShowRecentOnly] = useState(true);
