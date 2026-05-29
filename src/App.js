@@ -113,6 +113,23 @@ const [mobile, setMobile] = useState("");
 const [contactEmail, setContactEmail] = useState("");
   const [user, setUser] = useState(null);
   const [universalContent, setUniversalContent] = useState([]);
+  const universalNotes = universalContent.filter(
+    (item) =>
+      item.section === CONTENT_SECTIONS.NOTES
+  );
+  
+  const universalCurrentAffairs =
+    universalContent.filter(
+      (item) =>
+        item.section ===
+        CONTENT_SECTIONS.CURRENT_AFFAIRS
+    );
+  
+  const universalVideos = universalContent.filter(
+    (item) =>
+      item.section ===
+      CONTENT_SECTIONS.RECORDED_VIDEO
+  );
 const [contentLoading, setContentLoading] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
@@ -350,10 +367,9 @@ const [cmsMonth, setCmsMonth] = useState("");
 const [cmsDuration, setCmsDuration] =
   useState("");
 
-const [cmsStatus, setCmsStatus] = useState(
-  CONTENT_STATUS.DRAFT
-);
-
+  const [cmsStatus, setCmsStatus] = useState(
+    CONTENT_STATUS.PUBLISHED
+  );
 const [editingCmsId, setEditingCmsId] =
   useState(null);
 const [announcements, setAnnouncements] = useState([]);
@@ -1051,6 +1067,9 @@ if (expiryDate && expiryDate < new Date()) {
       setContentLoading(false);
     }
   };
+  React.useEffect(() => {
+    loadUniversalContent();
+  }, []);
   const loadPaymentHistory = async (currentUser = user) => {
     if (!currentUser) return;
   
@@ -1591,34 +1610,13 @@ if (expiryDate && expiryDate < new Date()) {
     },
   ];
   const notesLibraryData = {
-    FREE: [
-      { id: "free-1", title: "Subject 01", description: "Coming Soon", cover: "📘" },
-      { id: "free-2", title: "Subject 02", description: "Coming Soon", cover: "🧠" },
-      { id: "free-3", title: "Subject 03", description: "Coming Soon", cover: "📚" },
-      { id: "free-4", title: "Subject 04", description: "Coming Soon", cover: "✏️" },
-      { id: "free-5", title: "Subject 05", description: "Coming Soon", cover: "🎯" },
-    ],
-    BASIC: [
-      { id: "basic-1", title: "Subject 01", description: "Coming Soon", cover: "📘" },
-      { id: "basic-2", title: "Subject 02", description: "Coming Soon", cover: "🧠" },
-      { id: "basic-3", title: "Subject 03", description: "Coming Soon", cover: "📚" },
-      { id: "basic-4", title: "Subject 04", description: "Coming Soon", cover: "✏️" },
-      { id: "basic-5", title: "Subject 05", description: "Coming Soon", cover: "🎯" },
-    ],
-    PREMIUM: [
-      { id: "premium-1", title: "Subject 01", description: "Coming Soon", cover: "🔥" },
-      { id: "premium-2", title: "Subject 02", description: "Coming Soon", cover: "🚀" },
-      { id: "premium-3", title: "Subject 03", description: "Coming Soon", cover: "📖" },
-      { id: "premium-4", title: "Subject 04", description: "Coming Soon", cover: "🎓" },
-      { id: "premium-5", title: "Subject 05", description: "Coming Soon", cover: "💡" },
-    ],
-    MENTORSHIP: [
-      { id: "mentor-1", title: "Subject 01", description: "Coming Soon", cover: "👑" },
-      { id: "mentor-2", title: "Subject 02", description: "Coming Soon", cover: "🧠" },
-      { id: "mentor-3", title: "Subject 03", description: "Coming Soon", cover: "📚" },
-      { id: "mentor-4", title: "Subject 04", description: "Coming Soon", cover: "🚀" },
-      { id: "mentor-5", title: "Subject 05", description: "Coming Soon", cover: "🎯" },
-    ],
+    FREE: [],
+  
+    BASIC: [],
+  
+    PREMIUM: [],
+  
+    MENTORSHIP: [],
   };
   const notesData = [
     {
@@ -1670,6 +1668,40 @@ if (expiryDate && expiryDate < new Date()) {
       pdf: "#",
     },
   ];
+
+  const dynamicNotesLibraryData = Object.keys(
+    notesLibraryData
+  ).reduce((library, planName) => {
+    const cmsSubjects = universalNotes
+      .filter(
+        (item) =>
+          (item.planType || "FREE") === planName &&
+          item.subject
+      )
+      .map((item) => ({
+        id: item.subject
+          .toLowerCase()
+          .replace(/\s+/g, "-"),
+        title: item.subject,
+        description: "CMS uploaded notes",
+        cover: "📄",
+      }));
+  
+    const mergedSubjects = [
+      ...notesLibraryData[planName],
+      ...cmsSubjects,
+    ].filter(
+      (subject, index, self) =>
+        index ===
+        self.findIndex((s) => s.id === subject.id)
+    );
+  
+    return {
+      ...library,
+      [planName]: mergedSubjects,
+    };
+  }, {});
+
   const notesSubjectRouteMatch = location.pathname.match(
     /^\/subjects\/ctet-tet\/notes\/([^/]+)\/([^/]+)$/
   );
@@ -4524,7 +4556,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   </button>
 </div>
       <div className="notesNetflixLibrary">
-  {Object.entries(notesLibraryData).map(([planName, subjects]) => (
+      {Object.entries(dynamicNotesLibraryData).map(([planName, subjects]) => (
     <div className="notesShelf" key={planName}>
       <div className="notesShelfHeader">
         <h2>
@@ -4583,33 +4615,82 @@ handleSaveUniversalContent={handleSaveUniversalContent}
         Subject-wise PDF library. PDF resources will appear here.
       </p>
 
-     
       <div className="pdfShelfWrap">
-      <button
-  className="pdfNextHint"
-  type="button"
-  onClick={(e) => {
-    const row = e.currentTarget.parentElement.querySelector(".pdfShelfRow");
-    row?.scrollBy({
-      left: 320,
-      behavior: "smooth",
-    });
-  }}
->
-  ›
-</button>
+        <button
+          className="pdfNextHint"
+          type="button"
+          onClick={(e) => {
+            const row =
+              e.currentTarget.parentElement.querySelector(".pdfShelfRow");
 
-  <div className="pdfShelfRow">
-    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item) => (
-      <div className="pdfMiniCard" key={item}>
-        <div className="pdfIcon">📄</div>
-        <h3>PDF {item}</h3>
-        <p>Coming Soon</p>
-        <span>{activeNotesPlan}</span>
+            row?.scrollBy({
+              left: 320,
+              behavior: "smooth",
+            });
+          }}
+        >
+          ›
+        </button>
+
+        <div className="pdfShelfRow">
+          {universalNotes
+            .filter((item) => {
+              const itemPlan = item.planType?.toUpperCase();
+
+              const itemSubject = (
+                item.subject ||
+                item.category ||
+                ""
+              )
+                .toLowerCase()
+                .trim();
+
+              const activeSubject = (
+                activeNotesSubject?.id ||
+                activeNotesSubjectId ||
+                ""
+              )
+                .toLowerCase()
+                .trim();
+
+              return (
+                itemPlan === activeNotesPlan &&
+                (
+                  itemSubject.includes(activeSubject) ||
+                  activeSubject.includes(itemSubject)
+                )
+              );
+            })
+            .map((pdf) => (
+              <div className="pdfMiniCard" key={pdf.id}>
+                <div className="pdfIcon">📄</div>
+
+                <h3>{pdf.title}</h3>
+
+                <p>
+                  {pdf.chapter || "Premium Study Material"}
+                </p>
+
+                <span>{pdf.planType}</span>
+
+                <button
+                  className="btnLink"
+                  onClick={() =>
+                    handleNoteAccess({
+                      ...pdf,
+                      pdf:
+                        pdf.fileUrl ||
+                        pdf.pdfUrl ||
+                        pdf.pdf,
+                    })
+                  }
+                >
+                  Open PDF
+                </button>
+              </div>
+            ))}
+        </div>
       </div>
-    ))}
-  </div>
-</div>
     </section>
   }
 />
@@ -5688,6 +5769,7 @@ Premium
       <NotesCMS
 notesData={notesData}
 firebaseNotes={firebaseNotes}
+universalNotes={universalNotes}
 handleNoteAccess={handleNoteAccess}
 isPremiumUser={isPremiumUser}
 />

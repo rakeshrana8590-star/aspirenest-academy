@@ -1500,16 +1500,23 @@ const amountMatch =
           onChange={(e) => setCmsVideoUrl(e.target.value)}
         />
 
-        <select
-          value={cmsSection}
-          onChange={(e) => setCmsSection(e.target.value)}
-        >
-          <option value={PLAN_TYPES.FREE}>FREE</option>
-          <option value={PLAN_TYPES.BASIC}>BASIC</option>
-          <option value={PLAN_TYPES.PREMIUM}>PREMIUM</option>
-          <option value={PLAN_TYPES.MENTORSHIP}>MENTORSHIP</option>
-        </select>
+<select
+  value={cmsSection}
+  onChange={(e) => setCmsSection(e.target.value)}
+>
+  <option value={CONTENT_SECTIONS.NOTES}>Notes</option>
+  <option value={CONTENT_SECTIONS.CURRENT_AFFAIRS}>Current Affairs</option>
+  <option value={CONTENT_SECTIONS.RECORDED_VIDEO}>Recorded Video</option>
+  <option value={CONTENT_SECTIONS.COURSE_MATERIAL}>Course Material</option>
+</select>
 
+<select
+  value={cmsContentType}
+  onChange={(e) => setCmsContentType(e.target.value)}
+>
+  <option value="PDF">PDF</option>
+  <option value="VIDEO">VIDEO</option>
+</select>
         <select
           value={cmsPlanType}
           onChange={(e) => setCmsPlanType(e.target.value)}

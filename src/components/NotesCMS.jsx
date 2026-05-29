@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 export default function NotesCMS({
   notesData,
   firebaseNotes,
+  universalNotes = [],
   handleNoteAccess,
   isPremiumUser,
   setActiveSection,
@@ -13,20 +14,42 @@ export default function NotesCMS({
 
   const navigate = useNavigate();
 
-  const allNotes = [...notesData, ...firebaseNotes];
+  const allNotes = [
+    ...notesData,
+    ...firebaseNotes,
+    ...universalNotes,
+  ];
 
+  const getNotePlanType = (note) => {
+    return note.planType || note.type || "FREE";
+  };
   const getAccessLabel = (note) => {
-    if (note.type === "FREE") return "FREE ACCESS";
-    if (note.type === "BASIC") return "BASIC PLAN";
-    if (note.type === "MENTORSHIP") return "MENTORSHIP BONUS";
+    const planType = getNotePlanType(note);
+  
+    if (planType === "FREE") return "FREE ACCESS";
+    if (planType === "BASIC") return "BASIC PLAN";
+    if (planType === "MENTORSHIP") return "MENTORSHIP BONUS";
+  
     return "PREMIUM PLAN";
   };
 
   const canAccessNote = (note) => {
-    if (note.type === "FREE") return true;
-    if (note.type === "BASIC") return hasPlanAccess("BASIC");
-    if (note.type === "PREMIUM") return hasPlanAccess("PREMIUM");
-    if (note.type === "MENTORSHIP") return hasPlanAccess("MENTORSHIP");
+    const planType = getNotePlanType(note);
+  
+    if (planType === "FREE") return true;
+  
+    if (planType === "BASIC") {
+      return hasPlanAccess("BASIC");
+    }
+  
+    if (planType === "PREMIUM") {
+      return hasPlanAccess("PREMIUM");
+    }
+  
+    if (planType === "MENTORSHIP") {
+      return hasPlanAccess("MENTORSHIP");
+    }
+  
     return false;
   };
 
@@ -52,9 +75,10 @@ export default function NotesCMS({
       </p>
 
       {["FREE", "BASIC", "PREMIUM", "MENTORSHIP"].map((sectionType) => {
-        const sectionNotes = allNotes.filter(
-          (note) => note.type === sectionType
-        );
+     const sectionNotes = allNotes.filter(
+      (note) =>
+        getNotePlanType(note) === sectionType
+    );
 
         if (sectionNotes.length === 0) return null;
 
@@ -80,8 +104,16 @@ export default function NotesCMS({
 
                     <h3>{note.title}</h3>
 
-                    <p>📂 Category: {note.category}</p>
-                    <p>📄 Pages: {note.pages}</p>
+                    <p>
+  📂 Category:{" "}
+  {note.category ||
+    note.subject ||
+    "General"}
+</p>
+<p>
+  📄 Pages:{" "}
+  {note.pages || "PDF"}
+</p>
 
                     <p>
                       🔐 Access:{" "}
@@ -92,7 +124,13 @@ export default function NotesCMS({
                       className="btnLink"
                       onClick={() => {
                         if (unlocked) {
-                          handleNoteAccess(note);
+                          handleNoteAccess({
+                            ...note,
+                            pdfUrl:
+                              note.pdfUrl ||
+                              note.fileUrl ||
+                              "",
+                          });
                         } else {
                           navigate("/subjects/ctet-tet/pricing");
                         }

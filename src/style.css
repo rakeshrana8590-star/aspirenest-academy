@@ -20411,3 +20411,102 @@ body {
   display: none !important;
   content: none !important;
 }
+/* =========================
+   PREMIUM HORIZONTAL LIBRARY
+========================= */
+
+.premiumLibraryWrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.premiumLibraryGrid {
+  display: flex;
+  gap: 24px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  padding: 12px 56px 28px 4px;
+  box-sizing: border-box;
+}
+
+.premiumLibraryGrid::-webkit-scrollbar {
+  height: 8px;
+}
+
+.premiumLibraryGrid::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.06);
+  border-radius: 999px;
+}
+
+.premiumLibraryGrid::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.35);
+  border-radius: 999px;
+}
+
+.premiumLibraryGrid > * {
+  flex: 0 0 240px;
+  min-width: 240px;
+  scroll-snap-align: start;
+}
+
+.libraryScrollDots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.libraryScrollDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(15, 23, 42, 0.22);
+  cursor: pointer;
+}
+
+.libraryScrollDot.active {
+  width: 34px;
+  background: linear-gradient(90deg, #ffb347, #ff7b00);
+}
+
+.libraryArrow {
+  position: absolute;
+  top: 45%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: white;
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.18);
+  cursor: pointer;
+  font-size: 26px;
+  color: #ff7b00;
+}
+
+.libraryArrow.left {
+  left: 6px;
+}
+
+.libraryArrow.right {
+  right: 6px;
+}
+
+@media (max-width: 768px) {
+  .premiumLibraryGrid {
+    padding: 10px 46px 24px 4px;
+  }
+
+  .premiumLibraryGrid > * {
+    flex: 0 0 82%;
+    min-width: 82%;
+  }
+}

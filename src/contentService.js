@@ -40,8 +40,7 @@ export const loadPublishedContent = async (section) => {
   const q = query(
     collection(db, CONTENT_COLLECTION),
     where("section", "==", section),
-    where("status", "==", CONTENT_STATUS.PUBLISHED),
-    orderBy("createdAt", "desc")
+    where("status", "==", CONTENT_STATUS.PUBLISHED)
   );
 
   let snapshot;
