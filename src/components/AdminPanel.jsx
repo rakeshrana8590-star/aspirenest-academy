@@ -1534,6 +1534,36 @@ const amountMatch =
           {editingCmsId ? "Update Content" : "Publish Content"}
         </button>
       </div>
+      <div className="universalContentList">
+  <h4>📦 Published Universal Content</h4>
+
+  <p style={{ color: "#111827", fontWeight: "800" }}>
+  Total Universal Items: {universalContent ? universalContent.length : 0}
+</p>
+
+  {contentLoading ? (
+    <p>Loading content...</p>
+  ) : universalContent && universalContent.length > 0 ? (
+    <div className="universalContentGrid">
+      {universalContent.map((item) => (
+        <div className="universalContentCard" key={item.id}>
+          <strong>{item.title || "Untitled Content"}</strong>
+
+          <p>Section: {item.section || "—"}</p>
+          <p>Subject: {item.subject || "—"}</p>
+          <p>Month: {item.month || "—"}</p>
+          <p>Plan: {item.planType || "FREE"}</p>
+          <p>Type: {item.contentType || "—"}</p>
+          <p>Source: {item.sourceType || "—"}</p>
+
+          <span>{item.status || "PUBLISHED"}</span>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <p>No universal content uploaded yet.</p>
+  )}
+</div>
     </div>
   </div>
 )}

@@ -20510,3 +20510,37 @@ body {
     min-width: 82%;
   }
 }
+/* NOTES LIBRARY — SAFE HORIZONTAL SCROLL FIX */
+
+.notesShelf {
+  width: 100%;
+  overflow: hidden;
+}
+
+.notesSubjectRow {
+  width: max-content !important;
+  min-width: 100% !important;
+}
+
+.notesSubjectCard {
+  flex: 0 0 280px !important;
+  min-width: 280px !important;
+  max-width: 280px !important;
+}
+
+.notesSubjectRow::-webkit-scrollbar {
+  height: 8px;
+}
+
+.notesSubjectRow::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.25);
+  border-radius: 999px;
+}
+
+.notesSubjectRow::-webkit-scrollbar-track {
+  background: transparent;
+}
+.notesSubjectRow {
+  cursor: grab;
+  -webkit-overflow-scrolling: touch;
+}

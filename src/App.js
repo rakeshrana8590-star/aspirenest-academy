@@ -4637,21 +4637,21 @@ handleSaveUniversalContent={handleSaveUniversalContent}
             .filter((item) => {
               const itemPlan = item.planType?.toUpperCase();
 
-              const itemSubject = (
-                item.subject ||
-                item.category ||
-                ""
-              )
+              const normalizeSubject = (value = "") =>
+              value
+                .toString()
                 .toLowerCase()
-                .trim();
-
-              const activeSubject = (
-                activeNotesSubject?.id ||
-                activeNotesSubjectId ||
-                ""
-              )
-                .toLowerCase()
-                .trim();
+                .trim()
+                .replace(/-/g, " ")
+                .replace(/\s+/g, " ");
+            
+            const itemSubject = normalizeSubject(
+              item.subject || item.category || ""
+            );
+            
+            const activeSubject = normalizeSubject(
+              activeNotesSubject?.id || activeNotesSubjectId || ""
+            );
 
               return (
                 itemPlan === activeNotesPlan &&
@@ -5925,14 +5925,20 @@ setAnnouncementMessage={setAnnouncementMessage}
   handleSaveUniversalContent={handleSaveUniversalContent}
 />
 )}
+
+
 <CurrentAffairs
-  currentAffairsList={currentAffairsList}
-  fallbackCurrentAffairs={fallbackCurrentAffairs}
+  currentAffairsList={
+    universalCurrentAffairs.length > 0
+      ? universalCurrentAffairs
+      : currentAffairsList
+  }
+  fallbackCurrentAffairs={[]}
   handleNoteAccess={handleNoteAccess}
   isPremiumUser={isPremiumUser}
   userPlanType={userPlanType}
-hasPlanAccess={hasPlanAccess}
-setActiveSection={setActiveSection}
+  hasPlanAccess={hasPlanAccess}
+  setActiveSection={setActiveSection}
 />
 
 
