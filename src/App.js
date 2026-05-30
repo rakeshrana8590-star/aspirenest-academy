@@ -1441,7 +1441,7 @@ if (expiryDate && expiryDate < new Date()) {
   
     alert("Announcement published successfully ✅");
   };
-  const handlePublishNotesContent = () => {
+  const handlePublishNotesContent = async () => {
 
     const notesPayload = {
       title: notesCmsTitle,
@@ -1465,6 +1465,11 @@ if (expiryDate && expiryDate < new Date()) {
       notesPayload
     );
   
+    await addDoc(
+      collection(db, "contentItems"),
+      notesPayload
+    );
+    
     setUniversalContent((prevContent) => [
       {
         id: Date.now(),
@@ -1472,11 +1477,37 @@ if (expiryDate && expiryDate < new Date()) {
       },
       ...prevContent,
     ]);
-
+    
     alert(
-      "Structured notes payload ready."
+      "Notes saved to Firestore successfully."
     );
   };
+
+  const loadContentItemsFromFirestore = async () => {
+    try {
+      const snapshot = await getDocs(
+        collection(db, "contentItems")
+      );
+  
+      const loadedItems = snapshot.docs.map((docItem) => ({
+        id: docItem.id,
+        ...docItem.data(),
+      }));
+  
+      setUniversalContent(loadedItems);
+  
+      console.log(
+        "Loaded contentItems from Firestore:",
+        loadedItems
+      );
+    } catch (error) {
+      console.error(
+        "Error loading contentItems:",
+        error
+      );
+    }
+  };
+
   const handleSaveUniversalContent = async () => {
     try {
       const payload = {
