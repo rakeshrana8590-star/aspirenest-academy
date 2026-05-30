@@ -123,6 +123,7 @@ const [notesCmsYear, setNotesCmsYear] = useState("");
 const [notesCmsPdfUrl, setNotesCmsPdfUrl] = useState("");
 const [notesCmsThumbnailUrl, setNotesCmsThumbnailUrl] = useState("");
 const [notesCmsStatus, setNotesCmsStatus] = useState("Draft");
+const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
   const universalNotes = universalContent.filter(
     (item) =>
       item.section === CONTENT_SECTIONS.NOTES
@@ -1454,33 +1455,48 @@ if (expiryDate && expiryDate < new Date()) {
       pdfUrl: notesCmsPdfUrl,
       thumbnailUrl: notesCmsThumbnailUrl,
       status: notesCmsStatus,
-  
       section: "notes",
-  
-      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
   
-    console.log(
-      "Structured Notes Payload:",
-      notesPayload
-    );
+    try {
+      if (editingNotesCmsId) {
+        await updateDoc(
+          doc(db, "contentItems", editingNotesCmsId),
+          notesPayload
+        );
   
-    await addDoc(
-      collection(db, "contentItems"),
-      notesPayload
-    );
-    
-    setUniversalContent((prevContent) => [
-      {
-        id: Date.now(),
-        ...notesPayload,
-      },
-      ...prevContent,
-    ]);
-    
-    alert(
-      "Notes saved to Firestore successfully."
-    );
+        alert("Notes updated successfully.");
+      } else {
+        await addDoc(
+          collection(db, "contentItems"),
+          {
+            ...notesPayload,
+            createdAt: new Date().toISOString(),
+          }
+        );
+  
+        alert("Notes saved to Firestore successfully.");
+      }
+  
+      setNotesCmsTitle("");
+      setNotesCmsDescription("");
+      setNotesCmsPlanType("FREE");
+      setNotesCmsSubject("");
+      setNotesCmsChapter("");
+      setNotesCmsMonth("");
+      setNotesCmsYear("");
+      setNotesCmsPdfUrl("");
+      setNotesCmsThumbnailUrl("");
+      setNotesCmsStatus("Draft");
+      setEditingNotesCmsId(null);
+  
+      await loadContentItemsFromFirestore();
+  
+    } catch (error) {
+      console.error("Notes save/update error:", error);
+      alert("Notes save/update failed.");
+    }
   };
 
   const handleDeleteLocalContentItem = async (itemId) => {
@@ -4173,7 +4189,9 @@ isAdmin={isAdmin}
               className="publishButton"
               onClick={handlePublishNotesContent}
             >
-              Publish Content
+              {editingNotesCmsId
+  ? "Update Content"
+  : "Publish Content"}
             </button>
           </div>
         </div>
@@ -4195,6 +4213,31 @@ isAdmin={isAdmin}
                 <span>
                   {item.planType} • {item.subject} • {item.status}
                 </span>
+
+                <button
+  className="publishButton"
+  onClick={() => {
+    setEditingNotesCmsId(item.id);
+
+    setNotesCmsTitle(item.title || "");
+    setNotesCmsDescription(item.description || "");
+    setNotesCmsPlanType(item.planType || "FREE");
+    setNotesCmsSubject(item.subject || "");
+    setNotesCmsChapter(item.chapter || "");
+    setNotesCmsMonth(item.month || "");
+    setNotesCmsYear(item.year || "");
+    setNotesCmsPdfUrl(item.pdfUrl || "");
+    setNotesCmsThumbnailUrl(item.thumbnailUrl || "");
+    setNotesCmsStatus(item.status || "Draft");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }}
+>
+  Edit
+</button>
 
                 <button
                   className="deleteContentButton"
