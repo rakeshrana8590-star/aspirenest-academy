@@ -113,6 +113,16 @@ const [mobile, setMobile] = useState("");
 const [contactEmail, setContactEmail] = useState("");
   const [user, setUser] = useState(null);
   const [universalContent, setUniversalContent] = useState([]);
+  const [notesCmsTitle, setNotesCmsTitle] = useState("");
+const [notesCmsDescription, setNotesCmsDescription] = useState("");
+const [notesCmsPlanType, setNotesCmsPlanType] = useState("FREE");
+const [notesCmsSubject, setNotesCmsSubject] = useState("");
+const [notesCmsChapter, setNotesCmsChapter] = useState("");
+const [notesCmsMonth, setNotesCmsMonth] = useState("");
+const [notesCmsYear, setNotesCmsYear] = useState("");
+const [notesCmsPdfUrl, setNotesCmsPdfUrl] = useState("");
+const [notesCmsThumbnailUrl, setNotesCmsThumbnailUrl] = useState("");
+const [notesCmsStatus, setNotesCmsStatus] = useState("Draft");
   const universalNotes = universalContent.filter(
     (item) =>
       item.section === CONTENT_SECTIONS.NOTES
@@ -1430,6 +1440,42 @@ if (expiryDate && expiryDate < new Date()) {
     setAnnouncementMessage("");
   
     alert("Announcement published successfully ✅");
+  };
+  const handlePublishNotesContent = () => {
+
+    const notesPayload = {
+      title: notesCmsTitle,
+      description: notesCmsDescription,
+      planType: notesCmsPlanType,
+      subject: notesCmsSubject,
+      chapter: notesCmsChapter,
+      month: notesCmsMonth,
+      year: notesCmsYear,
+      pdfUrl: notesCmsPdfUrl,
+      thumbnailUrl: notesCmsThumbnailUrl,
+      status: notesCmsStatus,
+  
+      section: "notes",
+  
+      createdAt: new Date().toISOString(),
+    };
+  
+    console.log(
+      "Structured Notes Payload:",
+      notesPayload
+    );
+  
+    setUniversalContent((prevContent) => [
+      {
+        id: Date.now(),
+        ...notesPayload,
+      },
+      ...prevContent,
+    ]);
+
+    alert(
+      "Structured notes payload ready."
+    );
   };
   const handleSaveUniversalContent = async () => {
     try {
@@ -3954,45 +4000,148 @@ isAdmin={isAdmin}
         </p>
       </div>
 
-      <div className="subjectHubGrid">
+      <div className="contentStudioForm">
 
-        <button>
-          FREE Notes
-        </button>
+  <div className="contentStudioGrid">
 
-        <button>
-          BASIC Notes
-        </button>
+  <input
+  type="text"
+  placeholder="Content Title"
+  value={notesCmsTitle}
+  onChange={(e) =>
+    setNotesCmsTitle(e.target.value)
+  }
+/>
 
-        <button>
-          PREMIUM Notes
-        </button>
+<input
+  type="text"
+  placeholder="Short Description"
+  value={notesCmsDescription}
+  onChange={(e) =>
+    setNotesCmsDescription(e.target.value)
+  }
+/>
 
-        <button>
-          MENTORSHIP Notes
-        </button>
+<select
+  value={notesCmsPlanType}
+  onChange={(e) =>
+    setNotesCmsPlanType(e.target.value)
+  }
+>
+  <option>FREE</option>
+  <option>BASIC</option>
+  <option>PREMIUM</option>
+  <option>MENTORSHIP</option>
+</select>
 
-        <button>
-          Subjects
-        </button>
+<input
+  type="text"
+  placeholder="Subject Name"
+  value={notesCmsSubject}
+  onChange={(e) =>
+    setNotesCmsSubject(e.target.value)
+  }
+/>
 
-        <button>
-          Chapters
-        </button>
+<input
+  type="text"
+  placeholder="Chapter / Topic"
+  value={notesCmsChapter}
+  onChange={(e) =>
+    setNotesCmsChapter(e.target.value)
+  }
+/>
 
-        <button>
-          PDFs
-        </button>
+<input
+  type="text"
+  placeholder="Month"
+  value={notesCmsMonth}
+  onChange={(e) =>
+    setNotesCmsMonth(e.target.value)
+  }
+/>
 
-        <button
-          onClick={() =>
-            navigate("/admin/content")
-          }
-        >
-          ← Back to Content Studio
-        </button>
+<input
+  type="text"
+  placeholder="Year"
+  value={notesCmsYear}
+  onChange={(e) =>
+    setNotesCmsYear(e.target.value)
+  }
+/>
 
+<input
+  type="text"
+  placeholder="PDF URL"
+  value={notesCmsPdfUrl}
+  onChange={(e) =>
+    setNotesCmsPdfUrl(e.target.value)
+  }
+/>
+
+<input
+  type="text"
+  placeholder="Thumbnail URL"
+  value={notesCmsThumbnailUrl}
+  onChange={(e) =>
+    setNotesCmsThumbnailUrl(e.target.value)
+  }
+/>
+
+<select
+  value={notesCmsStatus}
+  onChange={(e) =>
+    setNotesCmsStatus(e.target.value)
+  }
+>
+  <option>Draft</option>
+  <option>Published</option>
+  <option>Archived</option>
+</select>
+
+  </div>
+
+  <div className="contentStudioActions">
+
+  <button
+  className="publishButton"
+  onClick={handlePublishNotesContent}
+>
+  Publish Content
+</button>
+
+    <button
+      className="backButton"
+      onClick={() =>
+        navigate("/admin/content")
+      }
+    >
+      ← Back to Content Studio
+    </button>
+
+  </div>
+
+</div>
+<div className="contentStudioList">
+  <h3>Published Notes Preview</h3>
+
+  {universalContent
+    .filter((item) => item.section === "notes")
+    .map((item) => (
+      <div
+        className="contentStudioItem"
+        key={item.id}
+      >
+        <strong>{item.title}</strong>
+
+        <p>{item.description}</p>
+
+        <span>
+          {item.planType} • {item.subject} • {item.status}
+        </span>
       </div>
+    ))}
+</div>
     </section>
   }
 />
