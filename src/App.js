@@ -3950,9 +3950,9 @@ isAdmin={isAdmin}
       <div className="subjectHubGrid">
 
         <button
-          onClick={() =>
-            navigate("/admin/content/notes")
-          }
+         onClick={() =>
+          navigate("/admin/content/notes")
+        }
         >
           📘 Notes Manager
         </button>
@@ -4030,182 +4030,187 @@ isAdmin={isAdmin}
   }
 />
 
+
 <Route
   path="/admin/content/notes"
   element={
-    <section className="coursePages">
-      <div className="sectionHeader">
-        <span className="badge">
-          NOTES MANAGER
-        </span>
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">
+            NOTES MANAGER
+          </span>
 
-        <h1>
-          Notes Content Manager
-        </h1>
+          <h1>
+            Notes Content Manager
+          </h1>
 
-        <p>
-          Manage CTET/TET notes by plan,
-          subject, chapter, PDF source,
-          publish status, and access level.
-        </p>
-      </div>
+          <p>
+            Manage CTET/TET notes by plan,
+            subject, chapter, PDF source,
+            publish status, and access level.
+          </p>
+        </div>
 
-      <div className="contentStudioForm">
+        <div className="subjectHubGrid">
+          <button>FREE Notes</button>
+          <button>BASIC Notes</button>
+          <button>PREMIUM Notes</button>
+          <button>MENTORSHIP Notes</button>
+          <button>Subjects</button>
+          <button>Chapters</button>
+          <button>PDFs</button>
 
-  <div className="contentStudioGrid">
+          <button
+            onClick={() =>
+              navigate("/admin/content")
+            }
+          >
+            ← Back to Content Studio
+          </button>
+        </div>
 
-  <input
-  type="text"
-  placeholder="Content Title"
-  value={notesCmsTitle}
-  onChange={(e) =>
-    setNotesCmsTitle(e.target.value)
+        <div className="contentStudioForm">
+          <div className="contentStudioGrid">
+            <input
+              type="text"
+              placeholder="Content Title"
+              value={notesCmsTitle}
+              onChange={(e) =>
+                setNotesCmsTitle(e.target.value)
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Short Description"
+              value={notesCmsDescription}
+              onChange={(e) =>
+                setNotesCmsDescription(e.target.value)
+              }
+            />
+
+            <select
+              value={notesCmsPlanType}
+              onChange={(e) =>
+                setNotesCmsPlanType(e.target.value)
+              }
+            >
+              <option>FREE</option>
+              <option>BASIC</option>
+              <option>PREMIUM</option>
+              <option>MENTORSHIP</option>
+            </select>
+
+            <input
+              type="text"
+              placeholder="Subject Name"
+              value={notesCmsSubject}
+              onChange={(e) =>
+                setNotesCmsSubject(e.target.value)
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Chapter / Topic"
+              value={notesCmsChapter}
+              onChange={(e) =>
+                setNotesCmsChapter(e.target.value)
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Month"
+              value={notesCmsMonth}
+              onChange={(e) =>
+                setNotesCmsMonth(e.target.value)
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Year"
+              value={notesCmsYear}
+              onChange={(e) =>
+                setNotesCmsYear(e.target.value)
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="PDF URL"
+              value={notesCmsPdfUrl}
+              onChange={(e) =>
+                setNotesCmsPdfUrl(e.target.value)
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Thumbnail URL"
+              value={notesCmsThumbnailUrl}
+              onChange={(e) =>
+                setNotesCmsThumbnailUrl(e.target.value)
+              }
+            />
+
+            <select
+              value={notesCmsStatus}
+              onChange={(e) =>
+                setNotesCmsStatus(e.target.value)
+              }
+            >
+              <option>Draft</option>
+              <option>Published</option>
+              <option>Archived</option>
+            </select>
+          </div>
+
+          <div className="contentStudioActions">
+            <button
+              className="publishButton"
+              onClick={handlePublishNotesContent}
+            >
+              Publish Content
+            </button>
+          </div>
+        </div>
+
+        <div className="contentStudioList">
+          <h3>Published Notes Preview</h3>
+
+          {universalContent
+            .filter((item) => item.section === "notes")
+            .map((item) => (
+              <div
+                className="contentStudioItem"
+                key={item.id}
+              >
+                <strong>{item.title}</strong>
+
+                <p>{item.description}</p>
+
+                <span>
+                  {item.planType} • {item.subject} • {item.status}
+                </span>
+
+                <button
+                  className="deleteContentButton"
+                  onClick={() =>
+                    handleDeleteLocalContentItem(item.id)
+                  }
+                >
+                  Delete Preview
+                </button>
+              </div>
+            ))}
+        </div>
+      </section>
+    ) : null
   }
 />
-
-<input
-  type="text"
-  placeholder="Short Description"
-  value={notesCmsDescription}
-  onChange={(e) =>
-    setNotesCmsDescription(e.target.value)
-  }
-/>
-
-<select
-  value={notesCmsPlanType}
-  onChange={(e) =>
-    setNotesCmsPlanType(e.target.value)
-  }
->
-  <option>FREE</option>
-  <option>BASIC</option>
-  <option>PREMIUM</option>
-  <option>MENTORSHIP</option>
-</select>
-
-<input
-  type="text"
-  placeholder="Subject Name"
-  value={notesCmsSubject}
-  onChange={(e) =>
-    setNotesCmsSubject(e.target.value)
-  }
-/>
-
-<input
-  type="text"
-  placeholder="Chapter / Topic"
-  value={notesCmsChapter}
-  onChange={(e) =>
-    setNotesCmsChapter(e.target.value)
-  }
-/>
-
-<input
-  type="text"
-  placeholder="Month"
-  value={notesCmsMonth}
-  onChange={(e) =>
-    setNotesCmsMonth(e.target.value)
-  }
-/>
-
-<input
-  type="text"
-  placeholder="Year"
-  value={notesCmsYear}
-  onChange={(e) =>
-    setNotesCmsYear(e.target.value)
-  }
-/>
-
-<input
-  type="text"
-  placeholder="PDF URL"
-  value={notesCmsPdfUrl}
-  onChange={(e) =>
-    setNotesCmsPdfUrl(e.target.value)
-  }
-/>
-
-<input
-  type="text"
-  placeholder="Thumbnail URL"
-  value={notesCmsThumbnailUrl}
-  onChange={(e) =>
-    setNotesCmsThumbnailUrl(e.target.value)
-  }
-/>
-
-<select
-  value={notesCmsStatus}
-  onChange={(e) =>
-    setNotesCmsStatus(e.target.value)
-  }
->
-  <option>Draft</option>
-  <option>Published</option>
-  <option>Archived</option>
-</select>
-
-  </div>
-
-  <div className="contentStudioActions">
-
-  <button
-  className="publishButton"
-  onClick={handlePublishNotesContent}
->
-  Publish Content
-</button>
-
-    <button
-      className="backButton"
-      onClick={() =>
-        navigate("/admin/content")
-      }
-    >
-      ← Back to Content Studio
-    </button>
-
-  </div>
-
-</div>
-<div className="contentStudioList">
-  <h3>Published Notes Preview</h3>
-
-  {universalContent
-    .filter((item) => item.section === "notes")
-    .map((item) => (
-      <div
-        className="contentStudioItem"
-        key={item.id}
-      >
-        <strong>{item.title}</strong>
-
-        <p>{item.description}</p>
-
-        <span>
-          {item.planType} • {item.subject} • {item.status}
-        </span>
-
-        <button
-  className="deleteContentButton"
-  onClick={() =>
-    handleDeleteLocalContentItem(item.id)
-  }
->
-  Delete Preview
-</button>
-
-      </div>
-    ))}
-</div>
-    </section>
-  }
-/>
-
 <Route
   path="/admin/content/current-affairs"
   element={
@@ -5489,7 +5494,10 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   element={
     <section className="coursePages currentAffairsPremiumPage">
       <CurrentAffairs
-        currentAffairsList={currentAffairsList}
+       currentAffairsList={[
+        ...universalCurrentAffairs,
+        ...currentAffairsList,
+      ]}
         fallbackCurrentAffairs={fallbackCurrentAffairs}
         handleNoteAccess={handleNoteAccess}
         isPremiumUser={isPremiumUser}
