@@ -1483,6 +1483,23 @@ if (expiryDate && expiryDate < new Date()) {
     );
   };
 
+  const handleDeleteLocalContentItem = async (itemId) => {
+    try {
+      await deleteDoc(
+        doc(db, "contentItems", itemId)
+      );
+  
+      setUniversalContent((prevContent) =>
+        prevContent.filter((item) => item.id !== itemId)
+      );
+  
+      alert("Content deleted from Firestore.");
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("Delete failed.");
+    }
+  };
+
   const loadContentItemsFromFirestore = async () => {
     try {
       const snapshot = await getDocs(
@@ -1567,6 +1584,8 @@ if (expiryDate && expiryDate < new Date()) {
       alert(error.message);
     }
   };
+
+  
   const handleDeleteAnnouncement = (announcementId) => {
     const updatedAnnouncements = announcements.filter(
       (item) => item.id !== announcementId
@@ -4170,6 +4189,16 @@ isAdmin={isAdmin}
         <span>
           {item.planType} • {item.subject} • {item.status}
         </span>
+
+        <button
+  className="deleteContentButton"
+  onClick={() =>
+    handleDeleteLocalContentItem(item.id)
+  }
+>
+  Delete Preview
+</button>
+
       </div>
     ))}
 </div>
