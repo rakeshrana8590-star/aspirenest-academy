@@ -1038,31 +1038,43 @@ if (expiryDate && expiryDate < new Date()) {
     try {
       setContentLoading(true);
   
-      const notesContent = await loadPublishedContent(
-        CONTENT_SECTIONS.NOTES
-      );
+      const notesContent =
+        (await loadPublishedContent(
+          CONTENT_SECTIONS.NOTES
+        )) || [];
   
-      const currentAffairsContent = await loadPublishedContent(
-        CONTENT_SECTIONS.CURRENT_AFFAIRS
-      );
+      const currentAffairsContent =
+        (await loadPublishedContent(
+          CONTENT_SECTIONS.CURRENT_AFFAIRS
+        )) || [];
   
-      const videoContent = await loadPublishedContent(
-        CONTENT_SECTIONS.RECORDED_VIDEO
-      );
+      const videoContent =
+        (await loadPublishedContent(
+          CONTENT_SECTIONS.RECORDED_VIDEO
+        )) || [];
   
-      setUniversalContent([
+      const finalContent = [
         ...notesContent,
         ...currentAffairsContent,
         ...videoContent,
-      ]);
+      ];
+  
+      setUniversalContent(finalContent);
   
       console.log("Universal CMS Loaded:", {
+        total: finalContent.length,
         notes: notesContent.length,
         currentAffairs: currentAffairsContent.length,
         videos: videoContent.length,
+        finalContent,
       });
     } catch (error) {
-      console.error("Universal content loading error:", error);
+      console.error(
+        "Universal content loading error:",
+        error
+      );
+  
+      setUniversalContent([]);
     } finally {
       setContentLoading(false);
     }
@@ -3811,6 +3823,503 @@ isAdmin={isAdmin}
             handleAddAnnouncement={handleAddAnnouncement}
             handleDeleteAnnouncement={handleDeleteAnnouncement}
           />
+        </div>
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">
+          CONTENT STUDIO
+        </span>
+
+        <h1>
+          AspireNest Content Studio
+        </h1>
+
+        <p>
+          Manage notes, current affairs,
+          videos, mock tests, banners,
+          announcements, and future
+          learning content from one
+          professional publishing system.
+        </p>
+      </div>
+
+      <div className="subjectHubGrid">
+
+        <button
+          onClick={() =>
+            navigate("/admin/content/notes")
+          }
+        >
+          📘 Notes Manager
+        </button>
+
+        <button
+          onClick={() =>
+            navigate(
+              "/admin/content/current-affairs"
+            )
+          }
+        >
+          📰 Current Affairs
+        </button>
+
+        <button
+          onClick={() =>
+            navigate("/admin/content/videos")
+          }
+        >
+          🎥 Videos Manager
+        </button>
+
+        <button
+          onClick={() =>
+            navigate(
+              "/admin/content/mock-tests"
+            )
+          }
+        >
+          🧠 Mock Tests
+        </button>
+
+        <button
+          onClick={() =>
+            navigate(
+              "/admin/content/courses"
+            )
+          }
+        >
+          🎓 Courses
+        </button>
+
+        <button
+          onClick={() =>
+            navigate(
+              "/admin/content/banners"
+            )
+          }
+        >
+          🖼 Banner Manager
+        </button>
+
+        <button
+          onClick={() =>
+            navigate(
+              "/admin/content/announcements"
+            )
+          }
+        >
+          📢 Announcements
+        </button>
+
+        <button
+          onClick={() =>
+            navigate(
+              "/admin/content/pricing"
+            )
+          }
+        >
+          💳 Pricing Manager
+        </button>
+
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/admin/content/notes"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">
+          NOTES MANAGER
+        </span>
+
+        <h1>
+          Notes Content Manager
+        </h1>
+
+        <p>
+          Manage CTET/TET notes by plan,
+          subject, chapter, PDF source,
+          publish status, and access level.
+        </p>
+      </div>
+
+      <div className="subjectHubGrid">
+
+        <button>
+          FREE Notes
+        </button>
+
+        <button>
+          BASIC Notes
+        </button>
+
+        <button>
+          PREMIUM Notes
+        </button>
+
+        <button>
+          MENTORSHIP Notes
+        </button>
+
+        <button>
+          Subjects
+        </button>
+
+        <button>
+          Chapters
+        </button>
+
+        <button>
+          PDFs
+        </button>
+
+        <button
+          onClick={() =>
+            navigate("/admin/content")
+          }
+        >
+          ← Back to Content Studio
+        </button>
+
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/admin/content/current-affairs"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">
+            Current Affairs CMS
+          </span>
+
+          <h1>
+            Current Affairs Manager
+          </h1>
+
+          <p>
+            Manage daily, monthly, and yearly
+            current affairs PDFs, capsules,
+            updates, and premium content.
+          </p>
+        </div>
+
+        <div className="subjectHubGrid">
+          <button>Daily Updates</button>
+
+          <button>Monthly Capsules</button>
+
+          <button>Yearly Compilations</button>
+
+          <button>FREE Current Affairs</button>
+
+          <button>BASIC Current Affairs</button>
+
+          <button>PREMIUM Current Affairs</button>
+
+          <button
+  onClick={() =>
+    navigate("/admin/content")
+  }
+>
+  ← Back to Content Studio
+</button>
+        </div>
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/videos"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">
+          Video CMS
+        </span>
+
+        <h1>
+          Recorded Videos Manager
+        </h1>
+
+        <p>
+          Manage YouTube lectures,
+          mentorship sessions, AI classes,
+          premium video libraries, and
+          future recorded learning systems.
+        </p>
+      </div>
+
+      <div className="subjectHubGrid">
+        <button>FREE Videos</button>
+        <button>BASIC Videos</button>
+        <button>PREMIUM Videos</button>
+        <button>MENTORSHIP Videos</button>
+        <button>YouTube Videos</button>
+        <button>AI Classroom Videos</button>
+
+        <button
+          onClick={() =>
+            navigate("/admin/content")
+          }
+        >
+          ← Back to Content Studio
+        </button>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/admin/content/mock-tests"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">
+            Mock Test CMS
+          </span>
+
+          <h1>
+            Mock Tests Manager
+          </h1>
+
+          <p>
+            Manage CTET/TET mock tests,
+            subjects, difficulty levels,
+            question banks, answers, and
+            student practice systems.
+          </p>
+        </div>
+
+        <div className="subjectHubGrid">
+          <button>FREE Mock Tests</button>
+
+          <button>BASIC Mock Tests</button>
+
+          <button>PREMIUM Mock Tests</button>
+
+          <button>MENTORSHIP Mock Tests</button>
+
+          <button>Question Bank</button>
+
+          <button>Test Results</button>
+
+          <button
+            onClick={() =>
+              navigate("/admin/content")
+            }
+          >
+            ← Back to Content Studio
+          </button>
+        </div>
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/courses"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">
+            Courses CMS
+          </span>
+
+          <h1>
+            Courses Manager
+          </h1>
+
+          <p>
+            Manage CTET/TET courses,
+            modules, lessons, study paths,
+            mentor guidance, and future
+            subject-wise learning programs.
+          </p>
+        </div>
+
+        <div className="subjectHubGrid">
+          <button>CTET Courses</button>
+
+          <button>TET Courses</button>
+
+          <button>Course Modules</button>
+
+          <button>Lessons</button>
+
+          <button>Study Materials</button>
+
+          <button>Mentor Guidance</button>
+
+          <button
+            onClick={() =>
+              navigate("/admin/content")
+            }
+          >
+            ← Back to Content Studio
+          </button>
+        </div>
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/banners"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">
+            Banner CMS
+          </span>
+
+          <h1>
+            Banner Manager
+          </h1>
+
+          <p>
+            Manage homepage banners,
+            hero sliders, promotions,
+            announcements, campaigns,
+            and future AspireNest branding visuals.
+          </p>
+        </div>
+
+        <div className="subjectHubGrid">
+          <button>Homepage Banners</button>
+
+          <button>Hero Sliders</button>
+
+          <button>Course Promotions</button>
+
+          <button>Festival Campaigns</button>
+
+          <button>Mobile Banners</button>
+
+          <button>Brand Assets</button>
+
+          <button
+            onClick={() =>
+              navigate("/admin/content")
+            }
+          >
+            ← Back to Content Studio
+          </button>
+        </div>
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/announcements"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">
+            Announcements CMS
+          </span>
+
+          <h1>
+            Announcements Manager
+          </h1>
+
+          <p>
+            Manage student notices,
+            homepage alerts, exam updates,
+            offer announcements, mentor
+            messages, and system alerts.
+          </p>
+        </div>
+
+        <div className="subjectHubGrid">
+          <button>Student Notices</button>
+
+          <button>Homepage Alerts</button>
+
+          <button>Exam Updates</button>
+
+          <button>Offer Announcements</button>
+
+          <button>Mentor Messages</button>
+
+          <button>System Alerts</button>
+
+          <button
+            onClick={() =>
+              navigate("/admin/content")
+            }
+          >
+            ← Back to Content Studio
+          </button>
+        </div>
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/pricing"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">
+            Pricing CMS
+          </span>
+
+          <h1>
+            Pricing Manager
+          </h1>
+
+          <p>
+            Manage AspireNest plans,
+            FREE/BASIC/PREMIUM pricing,
+            mentorship subscriptions,
+            offers, coupons, and future
+            payment systems.
+          </p>
+        </div>
+
+        <div className="subjectHubGrid">
+          <button>FREE Plan</button>
+
+          <button>BASIC Plan</button>
+
+          <button>PREMIUM Plan</button>
+
+          <button>MENTORSHIP Plan</button>
+
+          <button>Coupons & Offers</button>
+
+          <button>Subscriptions</button>
+
+          <button
+            onClick={() =>
+              navigate("/admin/content")
+            }
+          >
+            ← Back to Content Studio
+          </button>
         </div>
       </section>
     ) : null

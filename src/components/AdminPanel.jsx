@@ -151,6 +151,8 @@ export default function AdminPanel({
 const [showRecentOnly, setShowRecentOnly] = useState(true);
 const [adminProofs, setAdminProofs] = useState({});
 const [paymentFilter, setPaymentFilter] = useState("student_proof_submitted");
+const [cmsFilter, setCmsFilter] = useState("ALL");
+const [cmsPlanFilter, setCmsPlanFilter] = useState("ALL");
 
 if (!isAdmin()) return null;
 
@@ -1375,64 +1377,6 @@ const amountMatch =
   </div>
 )}
 
-{activeAdminTab === "Announcements" && (
-  <div className="adminStudentsSection">
-    <h3>Announcements CMS</h3>
-
-    <div className="dashboardCard">
-      <input
-        type="text"
-        placeholder="Announcement Title"
-        value={announcementTitle}
-        onChange={(e) =>
-          setAnnouncementTitle(e.target.value)
-        }
-      />
-
-      <textarea
-        placeholder="Write announcement message..."
-        value={announcementMessage}
-        onChange={(e) =>
-          setAnnouncementMessage(e.target.value)
-        }
-      />
-
-      <button
-        className="btnLink"
-        onClick={handleAddAnnouncement}
-      >
-        Publish Announcement
-      </button>
-    </div>
-
-    <div className="adminStudentsGrid">
-      {announcements.length > 0 ? (
-        announcements.map((item, index) => (
-          <div
-            className="studentCard"
-            key={item.id || index}
-          >
-            <h4>{item.title}</h4>
-
-            <p>{item.message}</p>
-
-            <button
-              className="btnLink"
-              onClick={() =>
-                handleDeleteAnnouncement(item.id)
-              }
-            >
-              Delete
-            </button>
-          </div>
-        ))
-      ) : (
-        <p>No announcements yet.</p>
-      )}
-    </div>
-  </div>
-)}
-
 {activeAdminTab === "Universal CMS" && (
   <div className="adminStudentsSection">
     <h3>🌍 Universal Content CMS</h3>
@@ -1444,126 +1388,263 @@ const amountMatch =
       </p>
 
       <div className="adminFormGrid">
-        <input
-          type="text"
-          placeholder="Content Title"
-          value={cmsTitle}
-          onChange={(e) => setCmsTitle(e.target.value)}
-        />
+        <input type="text" placeholder="Content Title" value={cmsTitle} onChange={(e) => setCmsTitle(e.target.value)} />
+        <input type="text" placeholder="Subject" value={cmsSubject} onChange={(e) => setCmsSubject(e.target.value)} />
+        <input type="text" placeholder="Course" value={cmsCourse} onChange={(e) => setCmsCourse(e.target.value)} />
+        <input type="text" placeholder="Chapter" value={cmsChapter} onChange={(e) => setCmsChapter(e.target.value)} />
+        <input type="text" placeholder="Month" value={cmsMonth} onChange={(e) => setCmsMonth(e.target.value)} />
+        <input type="text" placeholder="Mentor Name" value={cmsMentorName} onChange={(e) => setCmsMentorName(e.target.value)} />
+        <input type="text" placeholder="PDF / Drive URL" value={cmsFileUrl} onChange={(e) => setCmsFileUrl(e.target.value)} />
+        <input type="text" placeholder="YouTube Video URL" value={cmsVideoUrl} onChange={(e) => setCmsVideoUrl(e.target.value)} />
 
-        <input
-          type="text"
-          placeholder="Subject"
-          value={cmsSubject}
-          onChange={(e) => setCmsSubject(e.target.value)}
-        />
+        <select value={cmsSection} onChange={(e) => setCmsSection(e.target.value)}>
+          <option value={CONTENT_SECTIONS.NOTES}>Notes</option>
+          <option value={CONTENT_SECTIONS.CURRENT_AFFAIRS}>Current Affairs</option>
+          <option value={CONTENT_SECTIONS.RECORDED_VIDEO}>Recorded Video</option>
+          <option value={CONTENT_SECTIONS.COURSE_MATERIAL}>Course Material</option>
+        </select>
 
-        <input
-          type="text"
-          placeholder="Course"
-          value={cmsCourse}
-          onChange={(e) => setCmsCourse(e.target.value)}
-        />
+        <select value={cmsContentType} onChange={(e) => setCmsContentType(e.target.value)}>
+          <option value="PDF">PDF</option>
+          <option value="VIDEO">VIDEO</option>
+        </select>
 
-        <input
-          type="text"
-          placeholder="Chapter"
-          value={cmsChapter}
-          onChange={(e) => setCmsChapter(e.target.value)}
-        />
-
-        <input
-          type="text"
-          placeholder="Month"
-          value={cmsMonth}
-          onChange={(e) => setCmsMonth(e.target.value)}
-        />
-
-        <input
-          type="text"
-          placeholder="Mentor Name"
-          value={cmsMentorName}
-          onChange={(e) => setCmsMentorName(e.target.value)}
-        />
-
-        <input
-          type="text"
-          placeholder="PDF / Drive URL"
-          value={cmsFileUrl}
-          onChange={(e) => setCmsFileUrl(e.target.value)}
-        />
-
-        <input
-          type="text"
-          placeholder="YouTube Video URL"
-          value={cmsVideoUrl}
-          onChange={(e) => setCmsVideoUrl(e.target.value)}
-        />
-
-<select
-  value={cmsSection}
-  onChange={(e) => setCmsSection(e.target.value)}
->
-  <option value={CONTENT_SECTIONS.NOTES}>Notes</option>
-  <option value={CONTENT_SECTIONS.CURRENT_AFFAIRS}>Current Affairs</option>
-  <option value={CONTENT_SECTIONS.RECORDED_VIDEO}>Recorded Video</option>
-  <option value={CONTENT_SECTIONS.COURSE_MATERIAL}>Course Material</option>
-</select>
-
-<select
-  value={cmsContentType}
-  onChange={(e) => setCmsContentType(e.target.value)}
->
-  <option value="PDF">PDF</option>
-  <option value="VIDEO">VIDEO</option>
-</select>
-        <select
-          value={cmsPlanType}
-          onChange={(e) => setCmsPlanType(e.target.value)}
-        >
+        <select value={cmsPlanType} onChange={(e) => setCmsPlanType(e.target.value)}>
           <option value="FREE">FREE</option>
           <option value="BASIC">BASIC</option>
           <option value="PREMIUM">PREMIUM</option>
           <option value="MENTORSHIP">MENTORSHIP</option>
         </select>
 
-        <button
-          className="premiumBtn"
-          onClick={handleSaveUniversalContent}
-        >
+        <button className="premiumBtn" onClick={handleSaveUniversalContent}>
           {editingCmsId ? "Update Content" : "Publish Content"}
         </button>
       </div>
-      <div className="universalContentList">
-  <h4>📦 Published Universal Content</h4>
-
-  <p style={{ color: "#111827", fontWeight: "800" }}>
-  Total Universal Items: {universalContent ? universalContent.length : 0}
-</p>
-
-  {contentLoading ? (
-    <p>Loading content...</p>
-  ) : universalContent && universalContent.length > 0 ? (
-    <div className="universalContentGrid">
-      {universalContent.map((item) => (
-        <div className="universalContentCard" key={item.id}>
-          <strong>{item.title || "Untitled Content"}</strong>
-
-          <p>Section: {item.section || "—"}</p>
-          <p>Subject: {item.subject || "—"}</p>
-          <p>Month: {item.month || "—"}</p>
-          <p>Plan: {item.planType || "FREE"}</p>
-          <p>Type: {item.contentType || "—"}</p>
-          <p>Source: {item.sourceType || "—"}</p>
-
-          <span>{item.status || "PUBLISHED"}</span>
-        </div>
-      ))}
     </div>
-  ) : (
-    <p>No universal content uploaded yet.</p>
-  )}
+
+    <div className="universalContentList">
+      <h4>📦 Published Universal Content</h4>
+      <div
+  style={{
+    display: "flex",
+    gap: "12px",
+    flexWrap: "wrap",
+    marginTop: "18px",
+    marginBottom: "20px",
+  }}
+>
+
+  <div
+  style={{
+    display: "flex",
+    gap: "12px",
+    flexWrap: "wrap",
+    marginTop: "14px",
+  }}
+>
+<div className="cmsGroupedOverview">
+
+  <div className="cmsGroupBlock">
+    <h4>📘 NOTES</h4>
+
+    <div className="cmsMiniChips">
+    <button
+  className="premiumBtn smallBtn"
+  onClick={() => {
+    setCmsFilter("notes");
+    setCmsPlanFilter("FREE");
+  }}
+>
+  FREE (
+  {
+    universalContent.filter(
+      (item) =>
+        item.section === "notes" &&
+        item.planType === "FREE"
+    ).length
+  }
+  )
+</button>
+
+<button
+  className="premiumBtn smallBtn"
+  onClick={() => {
+    setCmsFilter("notes");
+    setCmsPlanFilter("BASIC");
+  }}
+>
+  BASIC (
+  {
+    universalContent.filter(
+      (item) =>
+        item.section === "notes" &&
+        item.planType === "BASIC"
+    ).length
+  }
+  )
+</button>
+
+<button
+  className="premiumBtn smallBtn"
+  onClick={() => {
+    setCmsFilter("notes");
+    setCmsPlanFilter("PREMIUM");
+  }}
+>
+  PREMIUM (
+  {
+    universalContent.filter(
+      (item) =>
+        item.section === "notes" &&
+        item.planType === "PREMIUM"
+    ).length
+  }
+  )
+</button>
+
+<button
+  className="premiumBtn smallBtn"
+  onClick={() => {
+    setCmsFilter("notes");
+    setCmsPlanFilter("MENTORSHIP");
+  }}
+>
+  MENTORSHIP (
+  {
+    universalContent.filter(
+      (item) =>
+        item.section === "notes" &&
+        item.planType === "MENTORSHIP"
+    ).length
+  }
+  )
+</button>
+    </div>
+  </div>
+
+  <div className="cmsGroupBlock">
+    <h4>📰 CURRENT AFFAIRS</h4>
+
+    <div className="cmsMiniChips">
+      <span>
+        TOTAL (
+        {
+          universalContent.filter(
+            (item) =>
+              item.section === "currentAffairs"
+          ).length
+        }
+        )
+      </span>
+    </div>
+  </div>
+
+  <div className="cmsGroupBlock">
+    <h4>🎥 RECORDED VIDEOS</h4>
+
+    <div className="cmsMiniChips">
+      <span>
+        TOTAL (
+        {
+          universalContent.filter(
+            (item) =>
+              item.section === "recordedVideo"
+          ).length
+        }
+        )
+      </span>
+    </div>
+  </div>
+
 </div>
+</div>
+</div>
+
+      <p style={{ color: "#111827", fontWeight: "900" }}>
+        Total Universal Items: {Array.isArray(universalContent) ? universalContent.length : 0}
+      </p>
+
+      {contentLoading ? (
+        <p>Loading content...</p>
+      ) : Array.isArray(universalContent) && universalContent.length > 0 ? (
+        <div className="universalContentGrid">
+          {universalContent
+.filter((item) => {
+  const sectionMatch =
+    cmsFilter === "ALL"
+      ? true
+      : item.section === cmsFilter;
+
+  const planMatch =
+    cmsPlanFilter === "ALL"
+      ? true
+      : item.planType === cmsPlanFilter;
+
+  return sectionMatch && planMatch;
+})
+.map((item) => (
+            <div className="universalContentCard" key={item.id}>
+              <div
+  style={{
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    marginBottom: "12px",
+    padding: "7px 12px",
+    borderRadius: "999px",
+    background: "#0f172a",
+    color: "#ffffff",
+    fontSize: "12px",
+    fontWeight: "900",
+    width: "fit-content",
+  }}
+>
+  {(item.section || "CONTENT").toUpperCase()} •{" "}
+  {(item.planType || "FREE").toUpperCase()} •{" "}
+  {(item.contentType || "PDF").toUpperCase()}
+</div>
+              <strong>{item.title || "Untitled Content"}</strong>
+
+              <p>Section: {item.section || "—"}</p>
+              <p>Subject: {item.subject || "—"}</p>
+              <p>Month: {item.month || "—"}</p>
+              <p>Plan: {item.planType || "FREE"}</p>
+              <p>Type: {item.contentType || "—"}</p>
+              <p>Source: {item.sourceType || "—"}</p>
+              <p>Status: {item.status || "PUBLISHED"}</p>
+
+              <button
+                className="premiumBtn smallBtn"
+                onClick={() => {
+                  setEditingCmsId(item.id);
+                  setCmsTitle(item.title || "");
+                  setCmsSubject(item.subject || "");
+                  setCmsCourse(item.course || "");
+                  setCmsChapter(item.chapter || "");
+                  setCmsMonth(item.month || "");
+                  setCmsMentorName(item.mentorName || "");
+                  setCmsFileUrl(item.fileUrl || "");
+                  setCmsVideoUrl(item.videoUrl || "");
+                  setCmsSection(item.section || CONTENT_SECTIONS.NOTES);
+                  setCmsContentType(item.contentType || "PDF");
+                  setCmsPlanType(item.planType || PLAN_TYPES.FREE);
+
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  });
+                }}
+              >
+                ✏️ Edit
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p style={{ fontWeight: "800" }}>
+          No universal content uploaded yet.
+        </p>
+      )}
     </div>
   </div>
 )}
