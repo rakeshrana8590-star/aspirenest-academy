@@ -123,6 +123,58 @@ const [notesCmsYear, setNotesCmsYear] = useState("");
 const [notesCmsPdfUrl, setNotesCmsPdfUrl] = useState("");
 const [notesCmsThumbnailUrl, setNotesCmsThumbnailUrl] = useState("");
 const [notesCmsStatus, setNotesCmsStatus] = useState("Draft");
+const [notesPlanFilter, setNotesPlanFilter] = useState("ALL");
+const [notesSubjectName, setNotesSubjectName] =
+  useState("");
+
+const [notesSubjectCode, setNotesSubjectCode] =
+  useState("");
+
+const [notesSubjectSlug, setNotesSubjectSlug] =
+  useState("");
+
+const [notesSubjectOrder, setNotesSubjectOrder] =
+  useState("");
+
+const [notesSubjectStatus, setNotesSubjectStatus] =
+  useState("Active");
+
+  const [notesSubjectsList, setNotesSubjectsList] =
+  useState([]);
+
+  const [editingNotesSubjectId, setEditingNotesSubjectId] =
+  useState(null);
+
+  const [notesChapterSubjectId, setNotesChapterSubjectId] =
+  useState("");
+
+  const [notesChapterName, setNotesChapterName] =
+  useState("");
+
+const [notesChapterCode, setNotesChapterCode] =
+  useState("");
+
+const [notesChapterSlug, setNotesChapterSlug] =
+  useState("");
+
+const [notesChapterOrder, setNotesChapterOrder] =
+  useState("");
+
+const [notesChapterStatus, setNotesChapterStatus] =
+  useState("Active");
+
+const [notesChaptersList, setNotesChaptersList] =
+  useState([]);
+
+const [editingNotesChapterId, setEditingNotesChapterId] =
+  useState(null);
+
+  const filteredNotesChapters =
+  notesChaptersList.filter(
+    (chapter) =>
+      chapter.subjectId === notesCmsSubject
+  );
+
 const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
   const universalNotes = universalContent.filter(
     (item) =>
@@ -1090,9 +1142,13 @@ if (expiryDate && expiryDate < new Date()) {
       setContentLoading(false);
     }
   };
+
   React.useEffect(() => {
     loadUniversalContent();
+    loadNotesSubjectsFromFirestore();
+    loadNotesChaptersFromFirestore();
   }, []);
+
   const loadPaymentHistory = async (currentUser = user) => {
     if (!currentUser) return;
   
@@ -1442,8 +1498,162 @@ if (expiryDate && expiryDate < new Date()) {
   
     alert("Announcement published successfully ✅");
   };
+
+  const handleSaveNotesSubject = async () => {
+    if (!notesSubjectName.trim()) {
+      alert("Please enter subject name.");
+      return;
+    }
+  
+    const subjectPayload = {
+      name: notesSubjectName.trim(),
+      code: notesSubjectCode.trim(),
+      slug:
+        notesSubjectSlug.trim() ||
+        notesSubjectName
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, "-"),
+      order: notesSubjectOrder || "0",
+      status: notesSubjectStatus,
+      updatedAt: new Date().toISOString(),
+    };
+  
+    try {
+      if (editingNotesSubjectId) {
+        await updateDoc(
+          doc(db, "notesSubjects", editingNotesSubjectId),
+          subjectPayload
+        );
+  
+        alert("Subject updated successfully.");
+      } else {
+        await addDoc(
+          collection(db, "notesSubjects"),
+          {
+            ...subjectPayload,
+            createdAt: new Date().toISOString(),
+          }
+        );
+  
+        alert("Subject saved to Firestore successfully.");
+      }
+  
+      setNotesSubjectName("");
+      setNotesSubjectCode("");
+      setNotesSubjectSlug("");
+      setNotesSubjectOrder("");
+      setNotesSubjectStatus("Active");
+      setEditingNotesSubjectId(null);
+  
+    } catch (error) {
+      console.error("Subject save/update error:", error);
+      alert("Subject save/update failed.");
+    }
+  };
+
+  const handleSaveNotesChapter = async () => {
+
+    if (!notesChapterSubjectId) {
+      alert("Please select subject.");
+      return;
+    }
+
+    if (!notesChapterName.trim()) {
+      alert("Please enter chapter name.");
+      return;
+    }
+  
+    const chapterPayload = {
+      subjectId: notesChapterSubjectId,
+subjectName:
+  notesSubjectsList.find(
+    (subject) => subject.id === notesChapterSubjectId
+  )?.name || "",
+      name: notesChapterName.trim(),
+      code: notesChapterCode.trim(),
+      slug:
+        notesChapterSlug.trim() ||
+        notesChapterName
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, "-"),
+      order: notesChapterOrder || "0",
+      status: notesChapterStatus,
+      updatedAt: new Date().toISOString(),
+    };
+  
+    try {
+      if (editingNotesChapterId) {
+        await updateDoc(
+          doc(db, "notesChapters", editingNotesChapterId),
+          chapterPayload
+        );
+  
+        alert("Chapter updated successfully.");
+      } else {
+        await addDoc(
+          collection(db, "notesChapters"),
+          {
+            ...chapterPayload,
+            createdAt: new Date().toISOString(),
+          }
+        );
+  
+        alert("Chapter saved to Firestore successfully.");
+      }
+  
+      setNotesChapterSubjectId("");
+      setNotesChapterName("");
+      setNotesChapterCode("");
+      setNotesChapterSlug("");
+      setNotesChapterOrder("");
+      setNotesChapterStatus("Active");
+      setEditingNotesChapterId(null);
+      await loadNotesChaptersFromFirestore();
+    } catch (error) {
+      console.error("Chapter save/update error:", error);
+      alert("Chapter save/update failed.");
+    }
+  };
+
   const handlePublishNotesContent = async () => {
 
+    const existingChapter = notesChaptersList.find(
+      (chapter) =>
+        chapter.subjectId === notesCmsSubject &&
+        chapter.name.toLowerCase() ===
+          notesCmsChapter.trim().toLowerCase()
+    );
+    
+    if (
+      notesCmsSubject &&
+      notesCmsChapter.trim() &&
+      !existingChapter
+    ) {
+      await addDoc(
+        collection(db, "notesChapters"),
+        {
+          subjectId: notesCmsSubject,
+          subjectName:
+            notesSubjectsList.find(
+              (subject) => subject.id === notesCmsSubject
+            )?.name || "",
+          name: notesCmsChapter.trim(),
+          code: "",
+          slug: notesCmsChapter
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, "-"),
+          order: "0",
+          status: "Active",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+      );
+    
+      await loadNotesChaptersFromFirestore();
+    }
     const notesPayload = {
       title: notesCmsTitle,
       description: notesCmsDescription,
@@ -1536,6 +1746,60 @@ if (expiryDate && expiryDate < new Date()) {
     } catch (error) {
       console.error(
         "Error loading contentItems:",
+        error
+      );
+    }
+  };
+
+  const loadNotesSubjectsFromFirestore = async () => {
+    try {
+      const snapshot = await getDocs(
+        collection(db, "notesSubjects")
+      );
+  
+      const loadedSubjects = snapshot.docs.map(
+        (docItem) => ({
+          id: docItem.id,
+          ...docItem.data(),
+        })
+      );
+  
+      setNotesSubjectsList(loadedSubjects);
+  
+      console.log(
+        "Loaded notesSubjects:",
+        loadedSubjects
+      );
+    } catch (error) {
+      console.error(
+        "Error loading notesSubjects:",
+        error
+      );
+    }
+  };
+
+  const loadNotesChaptersFromFirestore = async () => {
+    try {
+      const snapshot = await getDocs(
+        collection(db, "notesChapters")
+      );
+  
+      const loadedChapters = snapshot.docs.map(
+        (docItem) => ({
+          id: docItem.id,
+          ...docItem.data(),
+        })
+      );
+  
+      setNotesChaptersList(loadedChapters);
+  
+      console.log(
+        "Loaded notesChapters:",
+        loadedChapters
+      );
+    } catch (error) {
+      console.error(
+        "Error loading notesChapters:",
         error
       );
     }
@@ -4053,13 +4317,9 @@ isAdmin={isAdmin}
     requireAdmin() ? (
       <section className="coursePages">
         <div className="sectionHeader">
-          <span className="badge">
-            NOTES MANAGER
-          </span>
+          <span className="badge">NOTES MANAGER</span>
 
-          <h1>
-            Notes Content Manager
-          </h1>
+          <h1>Notes Content Manager</h1>
 
           <p>
             Manage CTET/TET notes by plan,
@@ -4069,21 +4329,68 @@ isAdmin={isAdmin}
         </div>
 
         <div className="subjectHubGrid">
+          <button onClick={() => navigate("/admin/content/notes/manage")}>
+            Manage All Notes
+          </button>
+
+          <button onClick={() => navigate("/admin/content/notes/form")}>
+            + Add New Note
+          </button>
+
           <button>FREE Notes</button>
           <button>BASIC Notes</button>
           <button>PREMIUM Notes</button>
           <button>MENTORSHIP Notes</button>
-          <button>Subjects</button>
-          <button>Chapters</button>
-          <button>PDFs</button>
-
           <button
-            onClick={() =>
-              navigate("/admin/content")
-            }
-          >
+  onClick={() =>
+    navigate("/admin/content/notes/subjects")
+  }
+>
+  Subjects
+</button>
+<button
+  onClick={() =>
+    navigate("/admin/content/notes/chapters")
+  }
+>
+  Chapters
+</button>
+<button
+  onClick={() =>
+    navigate("/admin/content/notes/pdfs")
+  }
+>
+  PDFs
+</button>
+
+          <button onClick={() => navigate("/admin/content")}>
             ← Back to Content Studio
           </button>
+        </div>
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/notes/form"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">NOTES FORM</span>
+
+          <h1>
+            {editingNotesCmsId
+              ? "Edit Note Content"
+              : "Add New Note"}
+          </h1>
+
+          <p>
+            Add or update CTET/TET notes,
+            PDF links, subjects, chapters,
+            and plan-based access.
+          </p>
         </div>
 
         <div className="contentStudioForm">
@@ -4118,23 +4425,62 @@ isAdmin={isAdmin}
               <option>MENTORSHIP</option>
             </select>
 
-            <input
-              type="text"
-              placeholder="Subject Name"
-              value={notesCmsSubject}
-              onChange={(e) =>
-                setNotesCmsSubject(e.target.value)
-              }
-            />
+            <select
+  value={notesCmsSubject}
+  onChange={(e) =>
+    setNotesCmsSubject(e.target.value)
+  }
+>
+  <option value="">
+    Select Subject
+  </option>
 
-            <input
-              type="text"
-              placeholder="Chapter / Topic"
-              value={notesCmsChapter}
-              onChange={(e) =>
-                setNotesCmsChapter(e.target.value)
-              }
-            />
+  {notesSubjectsList.map((subject) => (
+    <option
+      key={subject.id}
+      value={subject.id}
+    >
+      {subject.name}
+    </option>
+  ))}
+</select>
+
+<div className="hybridTopicBox">
+  <input
+    type="text"
+    placeholder="Search or add Chapter / Topic"
+    value={notesCmsChapter}
+    onChange={(e) =>
+      setNotesCmsChapter(e.target.value)
+    }
+  />
+
+  {notesCmsSubject && notesCmsChapter && (
+    <div className="hybridTopicSuggestions">
+      {filteredNotesChapters
+        .filter((chapter) =>
+          chapter.name
+            .toLowerCase()
+            .includes(
+              notesCmsChapter.toLowerCase()
+            )
+        )
+        .map((chapter) => (
+          <button
+            type="button"
+            key={chapter.id}
+            onClick={() =>
+              setNotesCmsChapter(
+                chapter.name
+              )
+            }
+          >
+            {chapter.name}
+          </button>
+        ))}
+    </div>
+  )}
+</div>
 
             <input
               type="text"
@@ -4190,17 +4536,83 @@ isAdmin={isAdmin}
               onClick={handlePublishNotesContent}
             >
               {editingNotesCmsId
-  ? "Update Content"
-  : "Publish Content"}
+                ? "Update Content"
+                : "Publish Content"}
+            </button>
+
+            <button
+              className="backButton"
+              onClick={() => navigate("/admin/content/notes")}
+            >
+              ← Back to Notes Manager
             </button>
           </div>
+        </div>
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/notes/manage"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">MANAGE NOTES</span>
+
+          <h1>Published Notes Manager</h1>
+
+          <p>
+            Review, edit, update, delete,
+            and organize all saved notes.
+          </p>
+
+          <div className="subjectHubGrid">
+  <button
+    onClick={() => setNotesPlanFilter("ALL")}
+  >
+    ALL
+  </button>
+
+  <button
+    onClick={() => setNotesPlanFilter("FREE")}
+  >
+    FREE
+  </button>
+
+  <button
+    onClick={() => setNotesPlanFilter("BASIC")}
+  >
+    BASIC
+  </button>
+
+  <button
+    onClick={() => setNotesPlanFilter("PREMIUM")}
+  >
+    PREMIUM
+  </button>
+
+  <button
+    onClick={() => setNotesPlanFilter("MENTORSHIP")}
+  >
+    MENTORSHIP
+  </button>
+</div>
+
         </div>
 
         <div className="contentStudioList">
           <h3>Published Notes Preview</h3>
 
           {universalContent
-            .filter((item) => item.section === "notes")
+           .filter((item) =>
+           item.section === "notes" &&
+           (
+             notesPlanFilter === "ALL" ||
+             item.planType === notesPlanFilter
+           )
+         )
             .map((item) => (
               <div
                 className="contentStudioItem"
@@ -4215,29 +4627,25 @@ isAdmin={isAdmin}
                 </span>
 
                 <button
-  className="publishButton"
-  onClick={() => {
-    setEditingNotesCmsId(item.id);
+                  className="publishButton"
+                  onClick={() => {
+                    setEditingNotesCmsId(item.id);
+                    setNotesCmsTitle(item.title || "");
+                    setNotesCmsDescription(item.description || "");
+                    setNotesCmsPlanType(item.planType || "FREE");
+                    setNotesCmsSubject(item.subject || "");
+                    setNotesCmsChapter(item.chapter || "");
+                    setNotesCmsMonth(item.month || "");
+                    setNotesCmsYear(item.year || "");
+                    setNotesCmsPdfUrl(item.pdfUrl || "");
+                    setNotesCmsThumbnailUrl(item.thumbnailUrl || "");
+                    setNotesCmsStatus(item.status || "Draft");
 
-    setNotesCmsTitle(item.title || "");
-    setNotesCmsDescription(item.description || "");
-    setNotesCmsPlanType(item.planType || "FREE");
-    setNotesCmsSubject(item.subject || "");
-    setNotesCmsChapter(item.chapter || "");
-    setNotesCmsMonth(item.month || "");
-    setNotesCmsYear(item.year || "");
-    setNotesCmsPdfUrl(item.pdfUrl || "");
-    setNotesCmsThumbnailUrl(item.thumbnailUrl || "");
-    setNotesCmsStatus(item.status || "Draft");
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }}
->
-  Edit
-</button>
+                    navigate("/admin/content/notes/form");
+                  }}
+                >
+                  Edit
+                </button>
 
                 <button
                   className="deleteContentButton"
@@ -4250,10 +4658,561 @@ isAdmin={isAdmin}
               </div>
             ))}
         </div>
+
+        <button
+          className="backButton"
+          onClick={() => navigate("/admin/content/notes")}
+        >
+          ← Back to Notes Manager
+        </button>
       </section>
     ) : null
   }
 />
+
+<Route
+  path="/admin/content/notes/subjects"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">SUBJECT MANAGER</span>
+
+          <h1>Notes Subject Manager</h1>
+
+          <p>
+            Create and manage official subject names,
+            short codes, order, and active status.
+          </p>
+        </div>
+
+        <div className="contentStudioForm">
+          <div className="contentStudioGrid">
+         
+
+<input
+  type="text"
+  placeholder="Subject Name"
+  value={notesSubjectName}
+  onChange={(e) =>
+    setNotesSubjectName(e.target.value)
+  }
+/>
+
+<input
+  type="text"
+  placeholder="Short Code e.g. CDP"
+  value={notesSubjectCode}
+  onChange={(e) =>
+    setNotesSubjectCode(e.target.value)
+  }
+/>
+
+<input
+  type="text"
+  placeholder="Slug e.g. cdp"
+  value={notesSubjectSlug}
+  onChange={(e) =>
+    setNotesSubjectSlug(e.target.value)
+  }
+/>
+
+<input
+  type="number"
+  placeholder="Order"
+  value={notesSubjectOrder}
+  onChange={(e) =>
+    setNotesSubjectOrder(e.target.value)
+  }
+/>
+
+<select
+  value={notesSubjectStatus}
+  onChange={(e) =>
+    setNotesSubjectStatus(e.target.value)
+  }
+>
+  <option>Active</option>
+  <option>Inactive</option>
+</select>
+          </div>
+
+          <div className="contentStudioActions">
+
+          <button
+  className="publishButton"
+  onClick={handleSaveNotesSubject}
+>
+  {editingNotesSubjectId
+    ? "Update Subject"
+    : "Save Subject"}
+</button>
+
+            <button
+              className="backButton"
+              onClick={() => navigate("/admin/content/notes")}
+            >
+              ← Back to Notes Manager
+            </button>
+          </div>
+        </div>
+
+        <div className="contentStudioList">
+  <h3>Saved Subjects</h3>
+
+  {notesSubjectsList.map((subject) => (
+    <div
+      className="contentStudioItem"
+      key={subject.id}
+    >
+      <strong>
+        {subject.name}
+      </strong>
+
+      <div className="contentStudioActions">
+
+<button
+  className="publishButton"
+  onClick={() => {
+    setEditingNotesSubjectId(subject.id);
+    setNotesSubjectName(subject.name);
+    setNotesSubjectCode(subject.code);
+    setNotesSubjectSlug(subject.slug);
+    setNotesSubjectOrder(subject.order);
+    setNotesSubjectStatus(subject.status);
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }}
+>
+  Edit Subject
+</button>
+
+</div>
+
+      <p>
+        {subject.code} • {subject.slug} • Order {subject.order} • {subject.status}
+      </p>
+
+      <button
+  className="deleteContentButton"
+  onClick={() =>
+    setNotesSubjectsList(
+      notesSubjectsList.filter(
+        (item) => item.id !== subject.id
+      )
+    )
+  }
+>
+  Delete Subject
+</button>
+
+    </div>
+  ))}
+</div>
+
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/notes/chapters"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">CHAPTER MANAGER</span>
+
+          <h1>Notes Chapter Manager</h1>
+
+          <p>
+            Create and manage chapter names,
+            short codes, order, and active status.
+          </p>
+        </div>
+
+        <div className="contentStudioForm">
+          <div className="contentStudioGrid">
+          <select
+  value={notesChapterSubjectId}
+  onChange={(e) =>
+    setNotesChapterSubjectId(e.target.value)
+  }
+>
+  <option value="">
+    Select Subject
+  </option>
+
+  {notesSubjectsList.map((subject) => (
+    <option
+      key={subject.id}
+      value={subject.id}
+    >
+      {subject.name}
+    </option>
+  ))}
+</select>
+            <input
+              type="text"
+              placeholder="Chapter Name"
+              value={notesChapterName}
+              onChange={(e) =>
+                setNotesChapterName(e.target.value)
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Short Code e.g. CDP-01"
+              value={notesChapterCode}
+              onChange={(e) =>
+                setNotesChapterCode(e.target.value)
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Slug e.g. child-development"
+              value={notesChapterSlug}
+              onChange={(e) =>
+                setNotesChapterSlug(e.target.value)
+              }
+            />
+
+            <input
+              type="number"
+              placeholder="Order"
+              value={notesChapterOrder}
+              onChange={(e) =>
+                setNotesChapterOrder(e.target.value)
+              }
+            />
+
+            <select
+              value={notesChapterStatus}
+              onChange={(e) =>
+                setNotesChapterStatus(e.target.value)
+              }
+            >
+              <option>Active</option>
+              <option>Inactive</option>
+            </select>
+          </div>
+
+          <div className="contentStudioActions">
+            <button
+              className="publishButton"
+              onClick={handleSaveNotesChapter}
+            >
+              {editingNotesChapterId
+                ? "Update Chapter"
+                : "Save Chapter"}
+            </button>
+
+            <button
+              className="backButton"
+              onClick={() =>
+                navigate("/admin/content/notes")
+              }
+            >
+              ← Back to Notes Manager
+            </button>
+          </div>
+        </div>
+
+        <div className="contentStudioList">
+          <h3>Saved Chapters</h3>
+
+          {notesChaptersList.map((chapter) => (
+            <div
+              className="contentStudioItem"
+              key={chapter.id}
+            >
+              <strong>{chapter.name}</strong>
+
+              <div className="contentStudioActions">
+                <button
+                  className="publishButton"
+                  onClick={() => {
+                    setEditingNotesChapterId(chapter.id);
+                    setNotesChapterSubjectId(chapter.subjectId || "");
+                    setNotesChapterName(chapter.name);
+                    setNotesChapterCode(chapter.code);
+                    setNotesChapterSlug(chapter.slug);
+                    setNotesChapterOrder(chapter.order);
+                    setNotesChapterStatus(chapter.status);
+
+                    window.scrollTo({
+                      top: 0,
+                      behavior: "smooth",
+                    });
+                  }}
+                >
+                  Edit Chapter
+                </button>
+              </div>
+
+              <p>
+  {chapter.subjectName ||
+    notesSubjectsList.find(
+      (subject) => subject.id === chapter.subjectId
+    )?.name ||
+    "No Subject"}{" "}
+  • {chapter.code} • {chapter.slug} •
+  Order {chapter.order} • {chapter.status}
+</p>
+
+              <button
+                className="deleteContentButton"
+                onClick={() =>
+                  setNotesChaptersList(
+                    notesChaptersList.filter(
+                      (item) => item.id !== chapter.id
+                    )
+                  )
+                }
+              >
+                Delete Chapter
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/notes/pdfs"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">PDF MANAGER</span>
+
+          <h1>Notes PDF Manager</h1>
+
+          <p>
+            Create, edit, delete, and manage notes PDFs by title,
+            subject, topic, plan, publish status, and PDF source.
+          </p>
+        </div>
+
+        <div className="contentStudioForm">
+          <div className="contentStudioGrid">
+            <input
+              type="text"
+              placeholder="PDF Title"
+              value={notesCmsTitle}
+              onChange={(e) =>
+                setNotesCmsTitle(e.target.value)
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Short Description"
+              value={notesCmsDescription}
+              onChange={(e) =>
+                setNotesCmsDescription(e.target.value)
+              }
+            />
+
+            <select
+              value={notesCmsPlanType}
+              onChange={(e) =>
+                setNotesCmsPlanType(e.target.value)
+              }
+            >
+              <option>FREE</option>
+              <option>BASIC</option>
+              <option>PREMIUM</option>
+              <option>MENTORSHIP</option>
+            </select>
+
+            <select
+              value={notesCmsSubject}
+              onChange={(e) =>
+                setNotesCmsSubject(e.target.value)
+              }
+            >
+              <option value="">Select Subject</option>
+
+              {notesSubjectsList.map((subject) => (
+                <option
+                  key={subject.id}
+                  value={subject.id}
+                >
+                  {subject.name}
+                </option>
+              ))}
+            </select>
+
+            <div className="hybridTopicBox">
+              <input
+                type="text"
+                placeholder="Search or add Chapter / Topic"
+                value={notesCmsChapter}
+                onChange={(e) =>
+                  setNotesCmsChapter(e.target.value)
+                }
+              />
+
+              {notesCmsSubject && notesCmsChapter && (
+                <div className="hybridTopicSuggestions">
+                  {filteredNotesChapters
+                    .filter((chapter) =>
+                      chapter.name
+                        .toLowerCase()
+                        .includes(
+                          notesCmsChapter.toLowerCase()
+                        )
+                    )
+                    .map((chapter) => (
+                      <button
+                        type="button"
+                        key={chapter.id}
+                        onClick={() =>
+                          setNotesCmsChapter(chapter.name)
+                        }
+                      >
+                        {chapter.name}
+                      </button>
+                    ))}
+                </div>
+              )}
+            </div>
+
+            <input
+              type="text"
+              placeholder="Month"
+              value={notesCmsMonth}
+              onChange={(e) =>
+                setNotesCmsMonth(e.target.value)
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Year"
+              value={notesCmsYear}
+              onChange={(e) =>
+                setNotesCmsYear(e.target.value)
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="PDF URL"
+              value={notesCmsPdfUrl}
+              onChange={(e) =>
+                setNotesCmsPdfUrl(e.target.value)
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Thumbnail URL"
+              value={notesCmsThumbnailUrl}
+              onChange={(e) =>
+                setNotesCmsThumbnailUrl(e.target.value)
+              }
+            />
+
+            <select
+              value={notesCmsStatus}
+              onChange={(e) =>
+                setNotesCmsStatus(e.target.value)
+              }
+            >
+              <option>Draft</option>
+              <option>Published</option>
+              <option>Archived</option>
+            </select>
+          </div>
+
+          <div className="contentStudioActions">
+            <button
+              className="publishButton"
+              onClick={handlePublishNotesContent}
+            >
+              {editingNotesCmsId
+                ? "Update PDF"
+                : "Save PDF"}
+            </button>
+
+            <button
+              className="backButton"
+              onClick={() => navigate("/admin/content/notes")}
+            >
+              ← Back to Notes Manager
+            </button>
+          </div>
+        </div>
+
+        <div className="contentStudioList">
+          <h3>Saved PDFs</h3>
+
+          {universalNotes.length === 0 ? (
+            <p>No notes PDFs found.</p>
+          ) : (
+            universalNotes.map((note) => (
+              <div
+                className="contentStudioItem"
+                key={note.id}
+              >
+                <strong>{note.title}</strong>
+
+                <p>
+                  {note.subject} • {note.chapter} •{" "}
+                  {note.planType} • {note.status}
+                </p>
+
+                <div className="contentStudioActions">
+                  <button
+                    className="publishButton"
+                    onClick={() => {
+                      setEditingNotesCmsId(note.id);
+                      setNotesCmsTitle(note.title || "");
+                      setNotesCmsDescription(note.description || "");
+                      setNotesCmsPlanType(note.planType || "FREE");
+                      setNotesCmsSubject(note.subject || "");
+                      setNotesCmsChapter(note.chapter || "");
+                      setNotesCmsMonth(note.month || "");
+                      setNotesCmsYear(note.year || "");
+                      setNotesCmsPdfUrl(note.pdfUrl || "");
+                      setNotesCmsThumbnailUrl(note.thumbnailUrl || "");
+                      setNotesCmsStatus(note.status || "Draft");
+
+                      window.scrollTo({
+                        top: 0,
+                        behavior: "smooth",
+                      });
+                    }}
+                  >
+                    Edit PDF
+                  </button>
+
+                  <button
+                    className="deleteContentButton"
+                    onClick={() =>
+                      handleDeleteLocalContentItem(note.id)
+                    }
+                  >
+                    Delete PDF
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+    ) : null
+  }
+/>
+
 <Route
   path="/admin/content/current-affairs"
   element={
