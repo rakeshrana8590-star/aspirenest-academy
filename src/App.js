@@ -5346,8 +5346,8 @@ isAdmin={isAdmin}
                     .filter(
                       (note) =>
                         note.planType === activePlan &&
-                        note.status?.toLowerCase() ===
-                          "published"
+                        (note.status || "published")
+  .toLowerCase() === "published"
                     )
                     .map((note) => {
                       const subjectMatch =
