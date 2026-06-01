@@ -533,40 +533,14 @@ const [paymentHistory, setPaymentHistory] = useState([]);
   React.useEffect(() => {
     const routeToSection = {
       "/": null,
-  
       "/learning": "learning-hub",
-  
-      "/courses": "courses",
-      "/learning-paths": "learning-paths",
-  
-      "/notes": "notes",
-  
-      "/resources": "resources",
-      "/cdp": "cdp",
-  
-      "/mock-tests": "mock-tests",
-      "/current-affairs": "current-affairs",
-  
-      "/pricing": "pricing",
-  
-      "/student-dashboard": "student-profile",
-  
-      "/admin": "admin-panel",
-  
-      "/contact": "contact",
     };
   
     const sectionName = routeToSection[location.pathname];
   
     if (sectionName === undefined) return;
   
-    if (
-      sectionName === "current-affairs" &&
-      !hasPlanAccess("PREMIUM")
-    ) {
-      navigate("/subjects/ctet-tet/pricing");
-      return;
-    }
+  
   
     setActiveSection(sectionName);
   
@@ -610,6 +584,15 @@ const [paymentHistory, setPaymentHistory] = useState([]);
     }
   };
   const handleLogin = async () => {
+    if (window.self !== window.top) {
+      alert(
+        "StackBlitz preview me login block ho sakta hai. App new tab me open ho rahi hai."
+      );
+  
+      window.open(window.location.href, "_blank");
+      return;
+    }
+  
     try {
       const userCredential =
         await signInWithEmailAndPassword(
@@ -645,6 +628,15 @@ setEnquiries([]);
     }
   };
   const handleGoogleLogin = async () => {
+    if (window.self !== window.top) {
+      alert(
+        "StackBlitz preview me Google login block hota hai. App new tab me open ho rahi hai."
+      );
+  
+      window.open(window.location.href, "_blank");
+      return;
+    }
+  
     try {
       await signInWithPopup(auth, provider);
   
@@ -2161,9 +2153,9 @@ subjectName:
   const activeNotesSubjectId =
     notesSubjectRouteMatch?.[2] || null;
   
-  const activeNotesSubject =
+    const activeNotesSubject =
     activeNotesPlan && activeNotesSubjectId
-      ? notesLibraryData[activeNotesPlan]?.find(
+      ? dynamicNotesLibraryData[activeNotesPlan]?.find(
           (subject) => subject.id === activeNotesSubjectId
         )
       : null;
@@ -2602,11 +2594,11 @@ return (
 </header>
 <main className="appShell">
   <Routes>
+
   <Route
-    path="/"
+    path="/ctet-tet"
     element={
-      !activeSection ? (
-  <>
+      <>
  <div
   style={{
     padding: "20px",
@@ -3219,12 +3211,12 @@ isAdmin={isAdmin}
   </div>
 </footer>
 
-  </>
-      ) : null
-    }
-    />
+</>
+  }
+/>
+
 <Route
-  path="/academy-overview"
+  path="/"
   element={
     <section className="academyOverviewPage">
 
@@ -3346,7 +3338,7 @@ isAdmin={isAdmin}
 
         <div
           className="academyOverviewCard"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/ctet-tet")}
         >
 
           <h3>CTET / TET</h3>
@@ -3499,45 +3491,8 @@ isAdmin={isAdmin}
     </section>
   }
 />
-<Route
-  path="/subjects"
-  element={
-    <section className="coursePages subjectSelectorPage">
-      <div className="sectionHeader">
-        <span className="badge">Choose Learning Category</span>
 
-        <h2>Select Your Subject / Exam Path</h2>
 
-        <p>
-          Every subject will have its own mentor, courses, notes,
-          tests, dashboard, and premium learning system.
-        </p>
-      </div>
-
-      <div className="courseGrid">
-        <button onClick={() => navigate("/subjects/ctet-tet")}>
-          🧑‍🏫 CTET / TET
-        </button>
-
-        <button>
-          🧠 Psychology
-        </button>
-
-        <button>
-          🎓 B.Ed / D.El.Ed
-        </button>
-
-        <button>
-          🏛️ Government Exams
-        </button>
-
-        <button>
-          📚 State TET
-        </button>
-      </div>
-    </section>
-  }
-/>
 <Route
   path="/subjects/ctet-tet"
   element={
@@ -4398,7 +4353,8 @@ isAdmin={isAdmin}
           </p>
         </div>
 
-        <div className="subjectHubGrid">
+        <div className="contentStudioForm">
+  <div className="contentStudioGrid">
           <button onClick={() => navigate("/admin/content/notes/manage")}>
             Manage All Notes
           </button>
@@ -4463,7 +4419,8 @@ isAdmin={isAdmin}
           <button onClick={() => navigate("/admin/content")}>
             ← Back to Content Studio
           </button>
-        </div>
+          </div>
+</div>
       </section>
     ) : null
   }
@@ -4665,7 +4622,8 @@ isAdmin={isAdmin}
             and organize all saved notes.
           </p>
 
-          <div className="subjectHubGrid">
+          <div className="contentStudioForm">
+  <div className="contentStudioGrid"></div>
   <button
     onClick={() => setNotesPlanFilter("ALL")}
   >
@@ -6750,22 +6708,33 @@ handleSaveUniversalContent={handleSaveUniversalContent}
         <span>{subjects.length} Subjects</span>
       </div>
 
+      <button
+  type="button"
+  className="btnLink"
+  onClick={() =>
+    navigate(`/subjects/ctet-tet/notes/${planName.toLowerCase()}`)
+  }
+>
+  Open {planName} Library →
+</button>
+
       <div className="notesSubjectRow">
         {subjects.map((subject) => (
-          <div
-            className="notesSubjectCard"
-            key={subject.id}
-            onClick={() =>
-              navigate(
-                `/subjects/ctet-tet/notes/${planName.toLowerCase()}/${subject.id}`
-              )
-            }
-          >
+       <button
+       type="button"
+       className="notesSubjectCard"
+       key={subject.id}
+       onClick={() =>
+         navigate(
+           `/subjects/ctet-tet/notes/${planName.toLowerCase()}/${encodeURIComponent(subject.id)}`
+         )
+       }
+     >
             <div className="notesSubjectIcon">{subject.cover}</div>
             <h3>{subject.title}</h3>
             <p>{subject.description}</p>
             <span className="notesSubjectTag">{planName}</span>
-          </div>
+            </button>
         ))}
       </div>
     </div>
@@ -6775,6 +6744,48 @@ handleSaveUniversalContent={handleSaveUniversalContent}
     </section>
   }
 />
+
+<Route
+  path="/subjects/ctet-tet/notes/:plan"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">
+          {activeNotesPlan} NOTES
+        </span>
+
+        <h2>{activeNotesPlan} Subject Library</h2>
+
+        <p>
+          Choose a subject to open chapters and PDF resources.
+        </p>
+      </div>
+
+      <div className="notesSubjectRow">
+        {(dynamicNotesLibraryData[activeNotesPlan] || []).map((subject) => (
+          <button
+            type="button"
+            className="notesSubjectCard"
+            key={subject.id}
+            onClick={() =>
+              navigate(
+                `/subjects/ctet-tet/notes/${activeNotesPlan.toLowerCase()}/${encodeURIComponent(subject.id)}`
+              )
+            }
+          >
+            <div className="notesSubjectIcon">{subject.cover}</div>
+            <h3>{subject.title}</h3>
+            <p>{subject.description}</p>
+            <span className="notesSubjectTag">
+              {activeNotesPlan}
+            </span>
+          </button>
+        ))}
+      </div>
+    </section>
+  }
+/>
+
 <Route
   path="/subjects/ctet-tet/notes/:plan/:subjectId"
   element={
@@ -6796,85 +6807,216 @@ handleSaveUniversalContent={handleSaveUniversalContent}
         Subject-wise PDF library. PDF resources will appear here.
       </p>
 
-      <div className="pdfShelfWrap">
-        <button
-          className="pdfNextHint"
-          type="button"
-          onClick={(e) => {
-            const row =
-              e.currentTarget.parentElement.querySelector(".pdfShelfRow");
+      <div className="chapterLibraryStack">
+  {Object.keys(
+    universalNotes
+      .filter((item) => {
+        const itemPlan = item.planType?.toUpperCase();
 
-            row?.scrollBy({
-              left: 320,
-              behavior: "smooth",
-            });
-          }}
-        >
-          ›
-        </button>
+        const normalizeSubject = (value = "") =>
+          value
+            .toString()
+            .toLowerCase()
+            .trim()
+            .replace(/-/g, " ")
+            .replace(/\s+/g, " ");
 
-        <div className="pdfShelfRow">
-          {universalNotes
-            .filter((item) => {
-              const itemPlan = item.planType?.toUpperCase();
+        const itemSubject = normalizeSubject(
+          item.subject || item.category || ""
+        );
 
-              const normalizeSubject = (value = "") =>
+        const activeSubject = normalizeSubject(
+          activeNotesSubject?.id || activeNotesSubjectId || ""
+        );
+
+        return (
+          itemPlan === activeNotesPlan &&
+          (
+            itemSubject.includes(activeSubject) ||
+            activeSubject.includes(itemSubject)
+          )
+        );
+      })
+      .reduce((chapters, pdf) => {
+        const chapterName =
+          pdf.chapter?.trim() || "General Notes";
+
+        const chapterId = chapterName
+          .toLowerCase()
+          .trim()
+          .replace(/\s+/g, "-");
+
+        return {
+          ...chapters,
+          [chapterId]: chapterName,
+        };
+      }, {})
+  ).map((chapterId) => {
+    const chapterName = universalNotes
+      .filter((item) => {
+        const itemPlan = item.planType?.toUpperCase();
+
+        const normalizeSubject = (value = "") =>
+          value
+            .toString()
+            .toLowerCase()
+            .trim()
+            .replace(/-/g, " ")
+            .replace(/\s+/g, " ");
+
+        const itemSubject = normalizeSubject(
+          item.subject || item.category || ""
+        );
+
+        const activeSubject = normalizeSubject(
+          activeNotesSubject?.id || activeNotesSubjectId || ""
+        );
+
+        return (
+          itemPlan === activeNotesPlan &&
+          (
+            itemSubject.includes(activeSubject) ||
+            activeSubject.includes(itemSubject)
+          )
+        );
+      })
+      .reduce((chapters, pdf) => {
+        const chapterName =
+          pdf.chapter?.trim() || "General Notes";
+
+        const id = chapterName
+          .toLowerCase()
+          .trim()
+          .replace(/\s+/g, "-");
+
+        return {
+          ...chapters,
+          [id]: chapterName,
+        };
+      }, {})[chapterId];
+
+    return (
+      <button
+        type="button"
+        className="notesSubjectCard"
+        key={chapterId}
+        onClick={() =>
+          navigate(
+            `/subjects/ctet-tet/notes/${activeNotesPlan.toLowerCase()}/${activeNotesSubjectId}/${chapterId}`
+          )
+        }
+      >
+        <div className="notesSubjectIcon">📘</div>
+        <h3>{chapterName}</h3>
+        <p>Open chapter PDFs</p>
+        <span className="notesSubjectTag">
+          {activeNotesPlan}
+        </span>
+      </button>
+    );
+  })}
+  </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/subjects/ctet-tet/notes/:plan/:subjectId/:chapterId"
+  element={
+    <section className="notesSubjectRoutePage">
+      <button
+        onClick={() =>
+          navigate(
+            `/subjects/ctet-tet/notes/${activeNotesPlan?.toLowerCase()}/${activeNotesSubjectId}`
+          )
+        }
+      >
+        ← Back to Chapters
+      </button>
+
+      <span className="notesSubjectRouteBadge">
+        {activeNotesPlan} CHAPTER
+      </span>
+
+      <h1>
+        {location.pathname
+          .split("/")
+          .pop()
+          ?.replace(/-/g, " ")
+          .replace(/\b\w/g, (char) => char.toUpperCase())}
+      </h1>
+
+      <p>
+        Chapter-wise PDF library. Open or download your study PDFs.
+      </p>
+
+      <div className="pdfShelfRow">
+        {universalNotes
+          .filter((item) => {
+            const itemPlan = item.planType?.toUpperCase();
+
+            const normalizeValue = (value = "") =>
               value
                 .toString()
                 .toLowerCase()
                 .trim()
                 .replace(/-/g, " ")
                 .replace(/\s+/g, " ");
-            
-            const itemSubject = normalizeSubject(
+
+            const itemSubject = normalizeValue(
               item.subject || item.category || ""
             );
-            
-            const activeSubject = normalizeSubject(
+
+            const activeSubject = normalizeValue(
               activeNotesSubject?.id || activeNotesSubjectId || ""
             );
 
-              return (
-                itemPlan === activeNotesPlan &&
-                (
-                  itemSubject.includes(activeSubject) ||
-                  activeSubject.includes(itemSubject)
-                )
-              );
-            })
-            .map((pdf) => (
-              <div className="pdfMiniCard" key={pdf.id}>
-                <div className="pdfIcon">📄</div>
+            const itemChapter = normalizeValue(
+              item.chapter || "General Notes"
+            );
 
-                <h3>{pdf.title}</h3>
+            const activeChapter = normalizeValue(
+              location.pathname.split("/").pop() || ""
+            );
 
-                <p>
-                  {pdf.chapter || "Premium Study Material"}
-                </p>
+            return (
+              itemPlan === activeNotesPlan &&
+              (
+                itemSubject.includes(activeSubject) ||
+                activeSubject.includes(itemSubject)
+              ) &&
+              itemChapter.includes(activeChapter) ||
+              activeChapter.includes(itemChapter)
+            );
+          })
+          .map((pdf) => (
+            <div className="pdfMiniCard" key={pdf.id}>
+              <div className="pdfIcon">📄</div>
 
-                <span>{pdf.planType}</span>
+              <h3>{pdf.title}</h3>
 
-                <button
-                  className="btnLink"
-                  onClick={() =>
-                    handleNoteAccess({
-                      ...pdf,
-                      pdf:
-                        pdf.fileUrl ||
-                        pdf.pdfUrl ||
-                        pdf.pdf,
-                    })
-                  }
-                >
-                  Open PDF
-                </button>
-              </div>
-            ))}
-        </div>
+              <p>{pdf.chapter || "Premium Study Material"}</p>
+
+              <span>{pdf.planType}</span>
+
+              <button
+                className="btnLink"
+                onClick={() =>
+                  handleNoteAccess({
+                    ...pdf,
+                    pdf: pdf.fileUrl || pdf.pdfUrl || pdf.pdf,
+                  })
+                }
+              >
+                Open PDF
+              </button>
+            </div>
+          ))}
       </div>
     </section>
   }
 />
+
 <Route
   path="/subjects/ctet-tet/mock-tests"
   element={
@@ -7342,7 +7484,7 @@ ${paymentProof}
     </div>
   </div>
 )}
-   {activeSection && (
+   {activeSection && location.pathname === "/learning" && (
   <div className="activeSectionScreen">
     <button
       className="backToDashboardBtn"
