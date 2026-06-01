@@ -4897,7 +4897,11 @@ isAdmin={isAdmin}
   onClick={() => {
     if (
       window.confirm(
-        "Delete this subject permanently?"
+        `Delete "${subject.name}" permanently?
+      
+      All chapters and PDFs linked to this subject may become inaccessible.
+      
+      This action cannot be undone.`
       )
     ) {
       setNotesSubjectsList(
@@ -5072,7 +5076,11 @@ isAdmin={isAdmin}
                 onClick={() => {
                   if (
                     window.confirm(
-                      "Delete this chapter permanently?"
+                      `Delete "${chapter.name}" permanently?
+                    
+                    All PDFs linked to this chapter may become inaccessible.
+                    
+                    This action cannot be undone.`
                     )
                   ) {
                     setNotesChaptersList(
@@ -5309,7 +5317,10 @@ isAdmin={isAdmin}
                     onClick={() => {
                       if (
                         window.confirm(
-                          "Delete this PDF permanently?"
+                          `Delete "${note.title}" permanently?
+                        
+                        This PDF record will be removed from AspireNest Content Studio.
+                        This action cannot be undone.`
                         )
                       ) {
                         handleDeleteLocalContentItem(note.id);
@@ -5634,7 +5645,10 @@ isAdmin={isAdmin}
   onClick={() => {
     if (
       window.confirm(
-        "Delete this PDF permanently?"
+        `Delete "${note.title}" permanently?
+      
+      This PDF record will be removed from AspireNest Content Studio.
+      This action cannot be undone.`
       )
     ) {
       handleDeleteLocalContentItem(note.id);
