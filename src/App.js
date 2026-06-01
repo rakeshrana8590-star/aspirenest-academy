@@ -172,6 +172,7 @@ const [editingNotesChapterId, setEditingNotesChapterId] =
   const filteredNotesChapters =
   notesChaptersList.filter(
     (chapter) =>
+      chapter.subjectName === notesCmsSubject ||
       chapter.subjectId === notesCmsSubject
   );
 
@@ -510,7 +511,9 @@ const [paymentHistory, setPaymentHistory] = useState([]);
         loadFirebaseNotes();
         loadCurrentAffairs();
         loadAnnouncements();
-        loadUniversalContent();
+        loadContentItemsFromFirestore();
+        loadNotesSubjectsFromFirestore();
+        loadNotesChaptersFromFirestore();
       }, 300);
     
       // Admin heavy data sirf admin ke liye
@@ -1144,7 +1147,7 @@ if (expiryDate && expiryDate < new Date()) {
   };
 
   React.useEffect(() => {
-    loadUniversalContent();
+    loadContentItemsFromFirestore();
     loadNotesSubjectsFromFirestore();
     loadNotesChaptersFromFirestore();
   }, []);
@@ -1497,6 +1500,23 @@ if (expiryDate && expiryDate < new Date()) {
     setAnnouncementMessage("");
   
     alert("Announcement published successfully ✅");
+  };
+
+  const getSubjectDisplayName = (subjectValue) => {
+    if (!subjectValue) return "";
+  
+    const value = subjectValue.toString().trim().toLowerCase();
+  
+    const subjectMatch = notesSubjectsList.find((subject) => {
+      return (
+        subject.id?.toString().trim().toLowerCase() === value ||
+        subject.name?.toString().trim().toLowerCase() === value ||
+        subject.slug?.toString().trim().toLowerCase() === value ||
+        subject.code?.toString().trim().toLowerCase() === value
+      );
+    });
+  
+    return subjectMatch?.name || subjectValue;
   };
 
   const handleSaveNotesSubject = async () => {
@@ -1898,7 +1918,7 @@ subjectName:
   
       setEditingCmsId(null);
   
-      loadUniversalContent();
+      loadContentItemsFromFirestore();
     } catch (error) {
       console.error(error);
   
@@ -4184,6 +4204,15 @@ isAdmin={isAdmin}
             🌍 Universal CMS
           </button>
 
+          <button
+  onClick={() => {
+    setActiveAdminTab("Content Studio");
+    navigate("/admin/content");
+  }}
+>
+  🧩 Content Studio
+</button>
+
         </div>
 
         <div style={{ marginTop: "30px" }}>
@@ -5350,17 +5379,8 @@ isAdmin={isAdmin}
   .toLowerCase() === "published"
                     )
                     .map((note) => {
-                      const subjectMatch =
-                        notesSubjectsList.find(
-                          (subject) =>
-                            subject.id === note.subject ||
-                            subject.name === note.subject
-                        );
-
-                      return (
-                        subjectMatch?.name ||
-                        note.subject
-                      );
+                    
+                        return getSubjectDisplayName(note.subject);
                     })
                     .filter(Boolean)
                 ),
@@ -5371,19 +5391,19 @@ isAdmin={isAdmin}
               ) : (
                 <div className="contentStudioGrid">
                   {subjectsInPlan.map((subjectName) => (
-                    <button
-                      key={subjectName}
-                      className="publishButton"
-                      onClick={() =>
-                        navigate(
-                          `/admin/content/notes/plan/${activePlan}/${encodeURIComponent(
-                            subjectName
-                          )}`
-                        )
-                      }
-                    >
-                      {subjectName}
-                    </button>
+                <button
+                key={subjectName}
+                className="publishButton"
+                onClick={() =>
+                  navigate(
+                    `/admin/content/notes/plan/${activePlan}/${encodeURIComponent(
+                      getSubjectDisplayName(subjectName)
+                    )}`
+                  )
+                }
+              >
+                {getSubjectDisplayName(subjectName)}
+              </button>
                   ))}
                 </div>
               );
