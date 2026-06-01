@@ -2144,7 +2144,7 @@ subjectName:
   }, {});
 
   const notesSubjectRouteMatch = location.pathname.match(
-    /^\/subjects\/ctet-tet\/notes\/([^/]+)\/([^/]+)$/
+    /^\/ctet-tet\/notes\/plan\/([^/]+)\/([^/]+)$/
   );
   
   const activeNotesPlan =
@@ -2650,7 +2650,7 @@ return (
   </button>
 )}
 <button
-  onClick={() => navigate("/subjects/ctet-tet/notes")}
+  onClick={() => navigate("/ctet-tet/notes")}
 >
   Free Notes
 </button>
@@ -3093,7 +3093,7 @@ isAdmin={isAdmin}
     <div className="freeGrid">
     <div
   className="freeCard"
-  onClick={() => navigate("/subjects/ctet-tet/notes")}
+  onClick={() => navigate("/ctet-tet/notes")}
 >
         📘 Free CDP Notes
       </div>
@@ -3526,7 +3526,7 @@ isAdmin={isAdmin}
 
 <div
   className="subjectHubCard"
-  onClick={() => navigate("/subjects/ctet-tet/notes")}
+  onClick={() => navigate("/ctet-tet/notes")}
 >
   <div className="subjectHubIcon">📘</div>
 
@@ -3620,7 +3620,7 @@ isAdmin={isAdmin}
       </div>
 
       <div className="courseGrid">
-        <button onClick={() => navigate("/subjects/ctet-tet/notes")}>
+        <button onClick={() => navigate("/ctet-tet/notes")}>
           📘 CTET Notes
         </button>
 
@@ -3653,7 +3653,7 @@ isAdmin={isAdmin}
       </div>
 
       <div className="courseGrid">
-        <button onClick={() => navigate("/subjects/ctet-tet/notes")}>
+        <button onClick={() => navigate("/ctet-tet/notes")}>
           📘 TET Notes
         </button>
 
@@ -6667,7 +6667,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 />
 
 <Route
-  path="/subjects/ctet-tet/notes"
+  path="/ctet-tet/notes"
   element={
     <section className="coursePages">
       <div className="sectionHeader">
@@ -6682,7 +6682,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
       </div>
 
       <div className="notesActionRow">
-  <button onClick={() => navigate("/subjects/ctet-tet/notes")}>
+  <button onClick={() => navigate("/ctet-tet/notes")}>
     📘 Open Notes Library
   </button>
 
@@ -6712,7 +6712,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   type="button"
   className="btnLink"
   onClick={() =>
-    navigate(`/subjects/ctet-tet/notes/${planName.toLowerCase()}`)
+    navigate(`/ctet-tet/notes/plan/${planName}`)
   }
 >
   Open {planName} Library →
@@ -6725,9 +6725,9 @@ handleSaveUniversalContent={handleSaveUniversalContent}
        className="notesSubjectCard"
        key={subject.id}
        onClick={() =>
-         navigate(
-           `/subjects/ctet-tet/notes/${planName.toLowerCase()}/${encodeURIComponent(subject.id)}`
-         )
+        navigate(
+          `/ctet-tet/notes/plan/${planName}/${encodeURIComponent(subject.id)}`
+          )
        }
      >
             <div className="notesSubjectIcon">{subject.cover}</div>
@@ -6787,10 +6787,10 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 />
 
 <Route
-  path="/subjects/ctet-tet/notes/:plan/:subjectId"
+  path="/ctet-tet/notes/plan/:plan/:subjectId"
   element={
     <section className="notesSubjectRoutePage">
-      <button onClick={() => navigate("/subjects/ctet-tet/notes")}>
+      <button onClick={() => navigate("/ctet-tet/notes")}>
         ← Back to Notes Library
       </button>
 
@@ -6802,6 +6802,8 @@ handleSaveUniversalContent={handleSaveUniversalContent}
         {activeNotesSubject?.cover}{" "}
         {activeNotesSubject?.title || "Subject Library"}
       </h1>
+
+      <h1>SUBJECT PAGE WORKING</h1>
 
       <p>
         Subject-wise PDF library. PDF resources will appear here.
@@ -6902,7 +6904,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
         key={chapterId}
         onClick={() =>
           navigate(
-            `/subjects/ctet-tet/notes/${activeNotesPlan.toLowerCase()}/${activeNotesSubjectId}/${chapterId}`
+            `/ctet-tet/notes/plan/${activeNotesPlan}/${activeNotesSubjectId}/${chapterId}`
           )
         }
       >
@@ -6921,13 +6923,13 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 />
 
 <Route
-  path="/subjects/ctet-tet/notes/:plan/:subjectId/:chapterId"
+ path="/ctet-tet/notes/plan/:plan/:subjectId/:chapterId"
   element={
     <section className="notesSubjectRoutePage">
       <button
         onClick={() =>
           navigate(
-            `/subjects/ctet-tet/notes/${activeNotesPlan?.toLowerCase()}/${activeNotesSubjectId}`
+            `/ctet-tet/notes/plan/${activeNotesPlan}/${activeNotesSubjectId}`
           )
         }
       >
@@ -7544,7 +7546,7 @@ ${paymentProof}
 
 <div
   className="learningHubCard"
-  onClick={() => navigate("/subjects/ctet-tet/notes")}
+  onClick={() => navigate("/ctet-tet/notes")}
 >
   <div className="learningHubIcon">📝</div>
 
@@ -7687,7 +7689,7 @@ Premium
           <li>📅 7-Day Study Plan</li>
         </ul>
 
-        <button onClick={() => navigate("/subjects/ctet-tet/notes")}>
+        <button onClick={() => navigate("/ctet-tet/notes")}>
   Start Free
 </button>
       </div>

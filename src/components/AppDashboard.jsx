@@ -40,7 +40,7 @@ export default function AppDashboard({
           Icon: FileText,
           title: "Notes",
           text: "Premium and free revision notes for quick learning.",
-          action: () => navigate("/subjects/ctet-tet/notes"),
+          action: () => navigate("/ctet-tet/notes"),
         },
       ],
     },
