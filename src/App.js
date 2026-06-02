@@ -6882,7 +6882,6 @@ handleSaveUniversalContent={handleSaveUniversalContent}
         {activeNotesSubject?.title || "Subject Library"}
       </h1>
 
-      <h1>SUBJECT PAGE WORKING</h1>
 
       <p>
         Subject-wise PDF library. PDF resources will appear here.
@@ -6979,7 +6978,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
     return (
       <button
         type="button"
-        className="notesSubjectCard"
+        className="notesSubjectCard chapterLibraryCard"
         key={chapterId}
         onClick={() =>
           navigate(
