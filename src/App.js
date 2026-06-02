@@ -84,6 +84,39 @@ export default function App() {
 
   const location = useLocation();
   const navigate = useNavigate();
+
+  const [notesScrollState, setNotesScrollState] = React.useState({});
+
+  const updateNotesScrollState = (rowId) => {
+    const row = document.getElementById(rowId);
+    if (!row) return;
+  
+    const atStart = row.scrollLeft <= 5;
+    const atEnd =
+      row.scrollLeft + row.clientWidth >= row.scrollWidth - 5;
+  
+    setNotesScrollState((prev) => ({
+      ...prev,
+      [rowId]: {
+        atStart,
+        atEnd,
+        canScroll: row.scrollWidth > row.clientWidth + 5,
+      },
+    }));
+  };
+  
+  const scrollShelf = (rowId, direction) => {
+    const row = document.getElementById(rowId);
+    if (!row) return;
+  
+    row.scrollBy({
+      left: direction === "right" ? 520 : -520,
+      behavior: "smooth",
+    });
+  
+    setTimeout(() => updateNotesScrollState(rowId), 350);
+  };
+
   React.useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -6681,106 +6714,152 @@ handleSaveUniversalContent={handleSaveUniversalContent}
         </p>
       </div>
 
-      <div className="notesActionRow">
-  <button onClick={() => navigate("/ctet-tet/notes")}>
-    📘 Open Notes Library
-  </button>
-
-  <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
-    💎 Unlock Premium Notes
-  </button>
-
-  <button onClick={() => navigate("/subjects/ctet-tet")}>
-    🔙 Back to CTET/TET Hub
-  </button>
-</div>
       <div className="notesNetflixLibrary">
-      {Object.entries(dynamicNotesLibraryData).map(([planName, subjects]) => (
-    <div className="notesShelf" key={planName}>
-      <div className="notesShelfHeader">
-        <h2>
-          {planName === "FREE" && "📘 FREE NOTES"}
-          {planName === "BASIC" && "🔷 BASIC NOTES"}
-          {planName === "PREMIUM" && "⭐ PREMIUM LIBRARY"}
-          {planName === "MENTORSHIP" && "👩‍🏫 MENTORSHIP VAULT"}
-        </h2>
+        {Object.entries(dynamicNotesLibraryData).map(([planName, subjects]) => (
+          <div className="notesShelf" key={planName}>
+            <div className="notesShelfHeader">
+              <h2>
+                {planName === "FREE" && "📘 FREE NOTES"}
+                {planName === "BASIC" && "🔷 BASIC NOTES"}
+                {planName === "PREMIUM" && "⭐ PREMIUM LIBRARY"}
+                {planName === "MENTORSHIP" && "👩‍🏫 MENTORSHIP VAULT"}
+              </h2>
 
-        <span>{subjects.length} Subjects</span>
-      </div>
+              <span>{subjects.length} Subjects</span>
+            </div>
 
-      <button
-  type="button"
-  className="btnLink"
-  onClick={() =>
-    navigate(`/ctet-tet/notes/plan/${planName}`)
-  }
->
-  Open {planName} Library →
-</button>
+            <div className="notesShelfScrollWrap">
+              {notesScrollState[`notes-row-${planName}`]?.canScroll &&
+                !notesScrollState[`notes-row-${planName}`]?.atStart && (
+                  <button
+                    type="button"
+                    className="notesShelfArrow notesShelfArrowLeft"
+                    onClick={() =>
+                      scrollShelf(`notes-row-${planName}`, "left")
+                    }
+                  >
+                    ‹
+                  </button>
+                )}
 
-      <div className="notesSubjectRow">
-        {subjects.map((subject) => (
-       <button
-       type="button"
-       className="notesSubjectCard"
-       key={subject.id}
-       onClick={() =>
-        navigate(
-          `/ctet-tet/notes/plan/${planName}/${encodeURIComponent(subject.id)}`
-          )
-       }
-     >
-            <div className="notesSubjectIcon">{subject.cover}</div>
-            <h3>{subject.title}</h3>
-            <p>{subject.description}</p>
-            <span className="notesSubjectTag">{planName}</span>
-            </button>
+              <div
+                className="notesSubjectRow"
+                id={`notes-row-${planName}`}
+                onScroll={() =>
+                  updateNotesScrollState(`notes-row-${planName}`)
+                }
+                onMouseEnter={() =>
+                  updateNotesScrollState(`notes-row-${planName}`)
+                }
+              >
+                {subjects.map((subject) => (
+                  <button
+                    type="button"
+                    className="notesSubjectCard"
+                    key={subject.id}
+                    onClick={() =>
+                      navigate(
+                        `/ctet-tet/notes/plan/${planName}/${encodeURIComponent(
+                          subject.id
+                        )}`
+                      )
+                    }
+                  >
+                    <div className="notesSubjectIcon">{subject.cover}</div>
+                    <h3>{subject.title}</h3>
+                    <p>{subject.description}</p>
+                    <span className="notesSubjectTag">{planName}</span>
+                  </button>
+                ))}
+              </div>
+
+              {notesScrollState[`notes-row-${planName}`]?.canScroll &&
+                !notesScrollState[`notes-row-${planName}`]?.atEnd && (
+                  <button
+                    type="button"
+                    className="notesShelfArrow notesShelfArrowRight"
+                    onClick={() =>
+                      scrollShelf(`notes-row-${planName}`, "right")
+                    }
+                  >
+                    ›
+                  </button>
+                )}
+            </div>
+          </div>
         ))}
       </div>
-    </div>
-  ))}
-
-</div>
     </section>
   }
 />
 
 <Route
-  path="/subjects/ctet-tet/notes/:plan"
+  path="/ctet-tet/notes/plan/:plan"
   element={
     <section className="coursePages">
       <div className="sectionHeader">
-        <span className="badge">
-          {activeNotesPlan} NOTES
-        </span>
+        <span className="badge">{activeNotesPlan} NOTES</span>
 
         <h2>{activeNotesPlan} Subject Library</h2>
 
-        <p>
-          Choose a subject to open chapters and PDF resources.
-        </p>
+        <p>Choose a subject to open chapters and PDF resources.</p>
       </div>
 
-      <div className="notesSubjectRow">
-        {(dynamicNotesLibraryData[activeNotesPlan] || []).map((subject) => (
-          <button
-            type="button"
-            className="notesSubjectCard"
-            key={subject.id}
-            onClick={() =>
-              navigate(
-                `/subjects/ctet-tet/notes/${activeNotesPlan.toLowerCase()}/${encodeURIComponent(subject.id)}`
-              )
-            }
-          >
-            <div className="notesSubjectIcon">{subject.cover}</div>
-            <h3>{subject.title}</h3>
-            <p>{subject.description}</p>
-            <span className="notesSubjectTag">
-              {activeNotesPlan}
-            </span>
-          </button>
-        ))}
+      <div className="notesShelfScrollWrap">
+        {notesScrollState[`notes-row-${activeNotesPlan}`]?.canScroll &&
+          !notesScrollState[`notes-row-${activeNotesPlan}`]?.atStart && (
+            <button
+              type="button"
+              className="notesShelfArrow notesShelfArrowLeft"
+              onClick={() =>
+                scrollShelf(`notes-row-${activeNotesPlan}`, "left")
+              }
+            >
+              ‹
+            </button>
+          )}
+
+        <div
+          className="notesSubjectRow"
+          id={`notes-row-${activeNotesPlan}`}
+          onScroll={() =>
+            updateNotesScrollState(`notes-row-${activeNotesPlan}`)
+          }
+          onMouseEnter={() =>
+            updateNotesScrollState(`notes-row-${activeNotesPlan}`)
+          }
+        >
+          {(dynamicNotesLibraryData[activeNotesPlan] || []).map((subject) => (
+            <button
+              type="button"
+              className="notesSubjectCard"
+              key={subject.id}
+              onClick={() =>
+                navigate(
+                  `/ctet-tet/notes/plan/${activeNotesPlan}/${encodeURIComponent(subject.id)}`
+                )
+              }
+            >
+              <div className="notesSubjectIcon">{subject.cover}</div>
+              <h3>{subject.title}</h3>
+              <p>{subject.description}</p>
+              <span className="notesSubjectTag">{activeNotesPlan}</span>
+            </button>
+          ))}
+        </div>
+
+        {notesScrollState[`notes-row-${activeNotesPlan}`]?.canScroll &&
+          !notesScrollState[`notes-row-${activeNotesPlan}`]?.atEnd && (
+            <button
+              type="button"
+              className="notesShelfArrow notesShelfArrowRight"
+              onClick={() =>
+                scrollShelf(`notes-row-${activeNotesPlan}`, "right")
+              }
+            >
+              ›
+            </button>
+          )}
       </div>
     </section>
   }
