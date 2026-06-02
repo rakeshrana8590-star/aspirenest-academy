@@ -440,6 +440,8 @@ const [cmsSubject, setCmsSubject] = useState("");
 const [cmsCourse, setCmsCourse] = useState("");
 const [cmsChapter, setCmsChapter] = useState("");
 
+
+
 const [cmsPlanType, setCmsPlanType] = useState(
   PLAN_TYPES.FREE
 );
@@ -1951,6 +1953,75 @@ subjectName:
     }
   };
 
+  const handleSaveCurrentAffairsContent = async () => {
+    if (!cmsTitle.trim()) {
+      alert("Please enter current affair title.");
+      return;
+    }
+  
+    if (!cmsMonth.trim()) {
+      alert("Please select month.");
+      return;
+    }
+  
+    if (!cmsDuration.trim()) {
+      alert("Please enter year.");
+      return;
+    }
+  
+    if (!cmsChapter.trim()) {
+      alert("Please select week/type.");
+      return;
+    }
+  
+    if (!cmsFileUrl.trim()) {
+      alert("Please enter PDF URL.");
+      return;
+    }
+  
+    const payload = {
+      title: cmsTitle.trim(),
+      section: CONTENT_SECTIONS.CURRENT_AFFAIRS,
+      subject: "CTET/TET",
+      course: "CTET/TET",
+      chapter: cmsChapter,
+      month: `${cmsMonth} ${cmsDuration}`,
+      planType: cmsPlanType,
+      contentType: CONTENT_TYPES.PDF,
+      sourceType: SOURCE_TYPES.DRIVE,
+      fileUrl: cmsFileUrl.trim(),
+      videoUrl: "",
+      thumbnailUrl: "",
+      mentorName: "",
+      duration: cmsDuration,
+      status: cmsStatus,
+    };
+  
+    try {
+      if (editingCmsId) {
+        await updateContentItem(editingCmsId, payload);
+        alert("Current Affair updated successfully ✅");
+      } else {
+        await addContentItem(payload);
+        alert("Current Affair saved successfully ✅");
+      }
+  
+      alert("Current Affair saved successfully ✅");
+  
+      setCmsTitle("");
+      setCmsMonth("");
+      setCmsDuration("");
+      setCmsChapter("");
+      setCmsPlanType(PLAN_TYPES.FREE);
+      setCmsFileUrl("");
+      setCmsStatus(CONTENT_STATUS.PUBLISHED);
+  
+      await loadContentItemsFromFirestore();
+    } catch (error) {
+      console.error(error);
+      alert("Current Affair save failed.");
+    }
+  };
   
   const handleDeleteAnnouncement = (announcementId) => {
     const updatedAnnouncements = announcements.filter(
@@ -5667,7 +5738,7 @@ isAdmin={isAdmin}
       <section className="coursePages">
         <div className="sectionHeader">
           <span className="badge">
-            Current Affairs CMS
+            CURRENT AFFAIRS MANAGER
           </span>
 
           <h1>
@@ -5675,33 +5746,503 @@ isAdmin={isAdmin}
           </h1>
 
           <p>
-            Manage daily, monthly, and yearly
-            current affairs PDFs, capsules,
-            updates, and premium content.
+            Manage CTET/TET current affairs by month, week,
+            PDF source, plan access, publish status, and student visibility.
           </p>
         </div>
 
         <div className="subjectHubGrid">
-          <button>Daily Updates</button>
-
-          <button>Monthly Capsules</button>
-
-          <button>Yearly Compilations</button>
-
-          <button>FREE Current Affairs</button>
-
-          <button>BASIC Current Affairs</button>
-
-          <button>PREMIUM Current Affairs</button>
+          <button
+            onClick={() =>
+              navigate("/admin/content/current-affairs/manage")
+            }
+          >
+            Manage Current Affairs
+          </button>
 
           <button
-  onClick={() =>
-    navigate("/admin/content")
-  }
->
-  ← Back to Content Studio
-</button>
+            onClick={() =>
+              navigate("/admin/content/current-affairs/add")
+            }
+          >
+            + Add Current Affair
+          </button>
+
+          <button
+            onClick={() =>
+              navigate("/admin/content/current-affairs/months")
+            }
+          >
+            Months
+          </button>
+
+          <button
+            onClick={() =>
+              navigate("/admin/content/current-affairs/published")
+            }
+          >
+            Published PDFs
+          </button>
+
+          <button
+            onClick={() =>
+              navigate("/admin/content")
+            }
+          >
+            ← Back to Content Studio
+          </button>
         </div>
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/current-affairs/add"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+        <span className="badge">
+  {editingCmsId
+    ? "EDIT CURRENT AFFAIR"
+    : "ADD CURRENT AFFAIR"}
+</span>
+
+<h1>
+  {editingCmsId
+    ? "Edit Current Affair PDF"
+    : "Add Current Affair PDF"}
+</h1>
+          <p>
+            Add CTET/TET current affairs by month, week, plan,
+            PDF source, and publish status.
+          </p>
+        </div>
+
+        <div className="contentStudioForm">
+          <div className="contentStudioGrid">
+            <input
+              type="text"
+              placeholder="Title e.g. June 2026 Weekly Capsule"
+              value={cmsTitle}
+              onChange={(e) => setCmsTitle(e.target.value)}
+            />
+
+            <select
+              value={cmsMonth}
+              onChange={(e) => setCmsMonth(e.target.value)}
+            >
+              <option value="">Select Month</option>
+              <option value="June">June</option>
+              <option value="May">May</option>
+              <option value="April">April</option>
+              <option value="March">March</option>
+              <option value="February">February</option>
+              <option value="January">January</option>
+            </select>
+
+            <input
+              type="text"
+              placeholder="Year e.g. 2026"
+              value={cmsDuration}
+              onChange={(e) => setCmsDuration(e.target.value)}
+            />
+
+            <select
+              value={cmsChapter}
+              onChange={(e) => setCmsChapter(e.target.value)}
+            >
+              <option value="">Select Week / Type</option>
+              <option value="Week 1">Week 1</option>
+              <option value="Week 2">Week 2</option>
+              <option value="Week 3">Week 3</option>
+              <option value="Week 4">Week 4</option>
+              <option value="Monthly Revision">Monthly Revision</option>
+              <option value="Yearly Compilation">Yearly Compilation</option>
+            </select>
+
+            <select
+              value={cmsPlanType}
+              onChange={(e) => setCmsPlanType(e.target.value)}
+            >
+              <option value={PLAN_TYPES.FREE}>FREE</option>
+              <option value={PLAN_TYPES.BASIC}>BASIC</option>
+              <option value={PLAN_TYPES.PREMIUM}>PREMIUM</option>
+              <option value={PLAN_TYPES.MENTORSHIP}>MENTORSHIP</option>
+            </select>
+
+            <input
+              type="text"
+              placeholder="PDF URL"
+              value={cmsFileUrl}
+              onChange={(e) => setCmsFileUrl(e.target.value)}
+            />
+
+            <select
+              value={cmsStatus}
+              onChange={(e) => setCmsStatus(e.target.value)}
+            >
+              <option value={CONTENT_STATUS.PUBLISHED}>published</option>
+              <option value={CONTENT_STATUS.DRAFT}>draft</option>
+              <option value={CONTENT_STATUS.UNPUBLISHED}>unpublished</option>
+            </select>
+          </div>
+
+          <div className="contentStudioActions">
+          <button
+  className="publishButton"
+  onClick={handleSaveCurrentAffairsContent}
+>
+  {editingCmsId
+    ? "Update Current Affair"
+    : "Publish Current Affair"}
+</button>
+
+            <button
+              className="backButton"
+              onClick={() =>
+                navigate("/admin/content/current-affairs")
+              }
+            >
+              ← Back to Current Affairs
+            </button>
+          </div>
+        </div>
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/current-affairs/manage"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">
+            MANAGE CURRENT AFFAIRS
+          </span>
+
+          <h1>Published Current Affairs</h1>
+
+          <p>
+            Review, edit, delete, and manage all saved CTET/TET current affairs PDFs.
+          </p>
+        </div>
+
+        <div className="contentStudioList">
+          {universalCurrentAffairs.length === 0 ? (
+            <div className="contentStudioItem">
+              <strong>No current affairs added yet.</strong>
+              <p>Add your first current affairs PDF from the Add Current Affair page.</p>
+            </div>
+          ) : (
+            universalCurrentAffairs.map((item) => (
+              <div className="contentStudioItem" key={item.id}>
+                <strong>{item.title}</strong>
+
+                <p>
+                  {item.month} • {item.chapter} • {item.planType} • {item.status}
+                </p>
+
+                <div className="contentStudioActions">
+                  <button
+                    className="backButton"
+                    onClick={() => window.open(item.fileUrl, "_blank")}
+                  >
+                    Open PDF
+                  </button>
+
+                  <button
+  className="backButton"
+  onClick={() => {
+    setEditingCmsId(item.id);
+
+    setCmsTitle(item.title || "");
+
+    const monthParts = (item.month || "").split(" ");
+    setCmsMonth(monthParts[0] || "");
+    setCmsDuration(monthParts[1] || "");
+
+    setCmsChapter(item.chapter || "");
+    setCmsPlanType(item.planType || PLAN_TYPES.FREE);
+    setCmsFileUrl(item.fileUrl || "");
+    setCmsStatus(item.status || CONTENT_STATUS.PUBLISHED);
+
+    navigate("/admin/content/current-affairs/add");
+  }}
+>
+  Edit
+</button>
+
+                  <button
+                    className="backButton"
+                    onClick={async () => {
+                      const confirmDelete = window.confirm(
+                        `Delete "${item.title}" permanently?
+                        
+                        Students may lose access to this current affair PDF.
+                        
+                        This action cannot be undone.`
+                        );
+
+                        if (!confirmDelete) return;
+
+                      await deleteContentItem(item.id);
+                      await loadContentItemsFromFirestore();
+
+                      alert("Current affair deleted successfully ✅");
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="contentStudioActions">
+          <button
+            className="backButton"
+            onClick={() => navigate("/admin/content/current-affairs")}
+          >
+            ← Back to Current Affairs
+          </button>
+        </div>
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/current-affairs/months"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">
+            CURRENT AFFAIRS MONTHS
+          </span>
+
+          <h1>Current Affairs Month Library</h1>
+
+          <p>
+            All current affairs are automatically grouped by Month + Year.
+          </p>
+        </div>
+
+        <div className="subjectHubGrid">
+          {[...new Set(
+            universalCurrentAffairs
+              .map((item) => item.month)
+              .filter(Boolean)
+          )].map((month) => {
+            const monthItems = universalCurrentAffairs.filter(
+              (item) => item.month === month
+            );
+
+            return (
+              <button
+                key={month}
+                onClick={() =>
+                  navigate(
+                    `/admin/content/current-affairs/months/${month
+                      .toLowerCase()
+                      .trim()
+                      .replace(/\s+/g, "-")}`
+                  )
+                }
+              >
+                {month}
+                <br />
+                <small>
+                  {monthItems.length} PDF
+                  {monthItems.length > 1 ? "s" : ""}
+                </small>
+              </button>
+            );
+          })}
+
+          <button
+            onClick={() =>
+              navigate("/admin/content/current-affairs")
+            }
+          >
+            ← Back to Current Affairs
+          </button>
+        </div>
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/current-affairs/months/:monthId"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        {(() => {
+          const formatSlug = (value = "") =>
+            value
+              .toString()
+              .toLowerCase()
+              .trim()
+              .replace(/\s+/g, "-");
+
+          const activeMonthId = window.location.pathname
+            .split("/")
+            .pop();
+
+          const monthItems = universalCurrentAffairs.filter(
+            (item) => formatSlug(item.month) === activeMonthId
+          );
+
+          const monthTitle =
+            monthItems[0]?.month || "Current Affairs Month";
+
+          const groupedWeeks = monthItems.reduce((groups, item) => {
+            const weekName =
+              item.chapter?.trim() || "General PDFs";
+
+            if (!groups[weekName]) {
+              groups[weekName] = [];
+            }
+
+            groups[weekName].push(item);
+            return groups;
+          }, {});
+
+          return (
+            <>
+              <div className="sectionHeader">
+                <span className="badge">
+                  CURRENT AFFAIRS MONTH
+                </span>
+
+                <h1>{monthTitle}</h1>
+
+                <p>
+                  View weekly, monthly, and yearly current affairs PDFs for this month.
+                </p>
+              </div>
+
+              <div className="contentStudioList">
+                {Object.keys(groupedWeeks).length === 0 ? (
+                  <div className="contentStudioItem">
+                    <strong>No PDFs found for this month.</strong>
+                    <p>
+                      Add PDFs from Add Current Affair and select this month.
+                    </p>
+                  </div>
+                ) : (
+                  Object.entries(groupedWeeks).map(([weekName, items]) => (
+                    <div className="contentStudioItem" key={weekName}>
+                      <strong>{weekName}</strong>
+
+                      <p>
+                        {items.length} PDF{items.length > 1 ? "s" : ""} in {monthTitle}
+                      </p>
+
+                      <div className="contentStudioList">
+                        {items.map((item) => (
+                          <div className="contentStudioItem" key={item.id}>
+                            <strong>{item.title}</strong>
+
+                            <p>
+                              {item.month} • {item.chapter} • {item.planType} • {item.status}
+                            </p>
+
+                            <div className="contentStudioActions">
+                              <button
+                                className="backButton"
+                                onClick={() =>
+                                  window.open(item.fileUrl, "_blank")
+                                }
+                              >
+                                Open PDF
+                              </button>
+
+                              <button
+                                className="backButton"
+                                onClick={() => {
+                                  setEditingCmsId(item.id);
+                                  setCmsTitle(item.title || "");
+
+                                  const monthParts = (item.month || "").split(" ");
+                                  setCmsMonth(monthParts[0] || "");
+                                  setCmsDuration(monthParts[1] || "");
+
+                                  setCmsChapter(item.chapter || "");
+                                  setCmsPlanType(item.planType || PLAN_TYPES.FREE);
+                                  setCmsFileUrl(item.fileUrl || "");
+                                  setCmsStatus(
+                                    item.status || CONTENT_STATUS.PUBLISHED
+                                  );
+
+                                  navigate(
+                                    "/admin/content/current-affairs/add"
+                                  );
+                                }}
+                              >
+                                Edit
+                              </button>
+
+                              <button
+                                className="backButton"
+                                onClick={async () => {
+                                  const confirmDelete = window.confirm(
+                                    `Delete "${item.title}" permanently?
+
+Students may lose access to this current affair PDF.
+
+This action cannot be undone.`
+                                  );
+
+                                  if (!confirmDelete) return;
+
+                                  await deleteContentItem(item.id);
+                                  await loadContentItemsFromFirestore();
+
+                                  alert(
+                                    "Current affair deleted successfully ✅"
+                                  );
+                                }}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="contentStudioActions">
+                <button
+                  className="backButton"
+                  onClick={() =>
+                    navigate("/admin/content/current-affairs/months")
+                  }
+                >
+                  ← Back to Months
+                </button>
+
+                <button
+                  className="publishButton"
+                  onClick={() =>
+                    navigate("/admin/content/current-affairs/add")
+                  }
+                >
+                  + Add Current Affair
+                </button>
+              </div>
+            </>
+          );
+        })()}
       </section>
     ) : null
   }
