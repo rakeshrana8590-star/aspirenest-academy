@@ -21742,3 +21742,729 @@ button {
   line-height: 1.35 !important;
   margin: 0 !important;
 }
+
+/* =========================
+   CURRENT AFFAIRS MONTH LIBRARY
+   Uses Notes shelf system
+========================= */
+
+.currentAffairsPremiumPage {
+  overflow-x: hidden;
+}
+
+.currentAffairsNetflixLibrary {
+  margin-top: 34px;
+}
+
+.currentAffairsMonthRow {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  padding: 10px 4px 22px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.currentAffairsMonthRow::-webkit-scrollbar {
+  display: none;
+}
+
+.currentAffairsMonthCard {
+  min-width: 220px;
+  max-width: 220px;
+  min-height: 150px;
+  flex-shrink: 0;
+}
+
+.currentAffairsMonthCard .notesSubjectIcon {
+  font-size: 34px;
+}
+
+.currentAffairsMonthCard .notesSubjectTag {
+  color: #ff7a00;
+  font-weight: 800;
+}
+
+/* =========================
+   CURRENT AFFAIRS MONTH DETAIL
+========================= */
+
+.currentAffairsPremiumPage .contentStudioItem {
+  border-radius: 24px;
+}
+
+.currentAffairsPremiumPage .contentStudioItem .sectionHeader {
+  padding: 10px 0 18px;
+}
+
+.currentAffairsPremiumPage .contentStudioItem .sectionHeader h2 {
+  font-size: 34px;
+  margin-bottom: 6px;
+}
+
+.currentAffairsPremiumPage .contentStudioList {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  padding: 8px 4px 20px;
+  scrollbar-width: none;
+}
+
+.currentAffairsPremiumPage .contentStudioList::-webkit-scrollbar {
+  display: none;
+}
+
+.currentAffairsPremiumPage .contentStudioList > .contentStudioItem {
+  min-width: 240px;
+  max-width: 260px;
+  min-height: 150px;
+  flex-shrink: 0;
+  padding: 22px;
+  border-radius: 22px;
+}
+
+.currentAffairsPremiumPage .contentStudioActions {
+  margin-top: 18px;
+}
+
+.currentAffairsPremiumPage .contentStudioActions .backButton {
+  padding: 11px 18px;
+  border-radius: 999px;
+}
+/* CA month cards - match Notes theme */
+.currentAffairsNetflixLibrary .notesShelf {
+  margin-top: 20px;
+}
+
+.currentAffairsShelfHeader {
+  max-width: 1180px;
+  margin: 0 auto 14px;
+  padding: 0 8px;
+}
+
+.currentAffairsShelfHeader h2 {
+  font-size: 30px;
+  font-weight: 900;
+  color: #111827;
+}
+
+.currentAffairsMonthRow {
+  padding: 8px 4px 24px;
+}
+
+.currentAffairsMonthCard {
+  min-width: 220px !important;
+  max-width: 220px !important;
+  min-height: 150px !important;
+  padding: 22px !important;
+  text-align: left !important;
+  cursor: pointer !important;
+}
+
+.currentAffairsMonthCard h3 {
+  font-size: 18px !important;
+  margin: 14px 0 6px !important;
+}
+
+.currentAffairsMonthCard p {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #64748b !important;
+}
+
+.currentAffairsMonthCard .notesSubjectTag {
+  display: inline-flex;
+  margin-top: 18px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(255, 122, 0, 0.08);
+  color: #ff6b00 !important;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.currentAffairsMonthCard .notesSubjectIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 122, 0, 0.07);
+  font-size: 18px !important;
+}
+
+/* =========================
+   CURRENT AFFAIRS PDF CARDS
+========================= */
+
+.currentAffairsPdfCard {
+  min-width: 230px;
+  max-width: 230px;
+
+  border-radius: 24px !important;
+
+  cursor: pointer;
+
+  transition: .25s ease;
+
+  background: rgba(255,255,255,.82);
+
+  border: 1px solid rgba(255,120,0,.12);
+
+  box-shadow:
+    0 18px 45px rgba(15,23,42,.06);
+}
+
+.currentAffairsPdfCard:hover {
+  transform: translateY(-6px);
+}
+
+.currentAffairsPdfTop {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 16px;
+}
+
+.currentAffairsPdfIcon {
+  font-size: 26px;
+}
+
+.currentAffairsPdfPlan {
+  background: rgba(255,122,0,.10);
+
+  color: #ff7a00;
+
+  padding: 7px 12px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+
+  font-weight: 800;
+}
+
+.currentAffairsPdfOpen {
+  display: inline-block;
+
+  margin-top: 16px;
+
+  color: #ff7a00;
+
+  font-weight: 800;
+}
+
+/* =========================
+   CA MONTH DETAIL — WEEK SHELVES FINAL
+========================= */
+
+.currentAffairsPremiumPage > .contentStudioList {
+  display: block !important;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.currentAffairsPremiumPage > .contentStudioList > .contentStudioItem {
+  width: 100%;
+  margin-bottom: 26px;
+  padding: 28px;
+  border-radius: 28px;
+  background: rgba(255,255,255,0.78);
+}
+
+.currentAffairsPremiumPage > .contentStudioList > .contentStudioItem > .sectionHeader {
+  text-align: left;
+  padding: 0;
+  margin-bottom: 18px;
+}
+
+.currentAffairsPremiumPage > .contentStudioList > .contentStudioItem > .sectionHeader h2 {
+  font-size: 30px;
+  margin-bottom: 4px;
+}
+
+.currentAffairsPremiumPage > .contentStudioList > .contentStudioItem > .sectionHeader p {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.currentAffairsPremiumPage > .contentStudioList > .contentStudioItem > .contentStudioList {
+  display: flex !important;
+  gap: 18px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 6px 4px 18px;
+  scrollbar-width: none;
+}
+
+.currentAffairsPremiumPage > .contentStudioList > .contentStudioItem > .contentStudioList::-webkit-scrollbar {
+  display: none;
+}
+
+.currentAffairsPdfCard {
+  min-width: 230px !important;
+  max-width: 230px !important;
+  min-height: 145px !important;
+  padding: 20px !important;
+  flex-shrink: 0 !important;
+}
+
+/* =========================
+   CA MONTH PAGE SIMPLE FINAL
+========================= */
+
+.caMonthPage {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.caWeekBlock {
+  margin-bottom: 34px;
+}
+
+.caWeekHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.caWeekHeader h2 {
+  font-size: 34px;
+  font-weight: 900;
+  color: #111827;
+  margin: 0;
+}
+
+.caWeekHeader span {
+  color: #64748b;
+  font-weight: 700;
+}
+
+.caPdfShelf {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 8px 4px 24px;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+.caPdfShelf::-webkit-scrollbar {
+  display: none;
+}
+
+.caPdfCard {
+  min-width: 230px;
+  max-width: 230px;
+  min-height: 155px;
+  flex-shrink: 0;
+  text-align: left;
+  padding: 20px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,120,0,0.12);
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 18px 45px rgba(15,23,42,0.06);
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.caPdfCard:hover {
+  transform: translateY(-6px);
+}
+
+.caPdfTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.caPdfIcon {
+  font-size: 24px;
+}
+
+.caPdfPlan {
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: rgba(255,122,0,0.10);
+  color: #ff7a00;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.caPdfCard h3 {
+  font-size: 18px;
+  margin: 0 0 8px;
+  color: #111827;
+}
+
+.caPdfCard p {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 16px;
+}
+
+.caPdfOpen {
+  color: #ff7a00;
+  font-weight: 900;
+}
+
+.caEmptyCard {
+  padding: 28px;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 18px 45px rgba(15,23,42,0.06);
+}
+/* =========================
+   CA MONTH DETAIL COMPACT OVERRIDE
+========================= */
+
+.caMonthPage {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.caWeekBlock {
+  margin-bottom: 28px;
+}
+
+.caWeekHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.caWeekHeader h2 {
+  font-size: 36px;
+  line-height: 1;
+  margin: 0;
+}
+
+.caWeekHeader span {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 800;
+}
+
+.caPdfShelf {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 6px 4px 20px;
+  scrollbar-width: none;
+}
+
+.caPdfShelf::-webkit-scrollbar {
+  display: none;
+}
+
+.caPdfCard {
+  min-width: 220px !important;
+  max-width: 220px !important;
+  min-height: 135px !important;
+  padding: 18px !important;
+  border-radius: 22px !important;
+}
+
+.caPdfTop {
+  margin-bottom: 14px;
+}
+
+.caPdfCard h3 {
+  font-size: 17px;
+  margin: 0 0 8px;
+}
+
+.caPdfCard p {
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+.caPdfOpen {
+  font-size: 13px;
+}
+/* =========================
+   CA PDF FINAL LIGHT OVERRIDE
+========================= */
+
+.caMonthPage {
+  max-width: 1180px !important;
+  margin: 0 auto !important;
+}
+
+.caWeekBlock {
+  margin-bottom: 30px !important;
+}
+
+.caWeekHeader {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 12px !important;
+  margin-bottom: 14px !important;
+}
+
+.caWeekHeader h2 {
+  font-size: 34px !important;
+  margin: 0 !important;
+}
+
+.caWeekHeader span {
+  font-size: 14px !important;
+  color: #64748b !important;
+  font-weight: 800 !important;
+}
+
+.caPdfShelf {
+  display: flex !important;
+  gap: 18px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 6px 4px 22px !important;
+  scrollbar-width: none !important;
+}
+
+.caPdfShelf::-webkit-scrollbar {
+  display: none !important;
+}
+
+.caPdfCard {
+  min-width: 230px !important;
+  max-width: 230px !important;
+  min-height: 145px !important;
+  padding: 20px !important;
+  flex-shrink: 0 !important;
+
+  background: rgba(255,255,255,0.92) !important;
+  border: 1px solid rgba(255,120,0,0.12) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 18px 45px rgba(15,23,42,0.06) !important;
+
+  color: #111827 !important;
+  text-align: left !important;
+  cursor: pointer !important;
+}
+
+.caPdfCard h3,
+.caPdfCard strong {
+  display: block !important;
+  color: #111827 !important;
+  font-size: 18px !important;
+  margin: 0 0 8px !important;
+}
+
+.caPdfCard p {
+  color: #64748b !important;
+  font-size: 14px !important;
+  margin: 0 0 14px !important;
+}
+
+.caPdfTop {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 16px !important;
+}
+
+.caPdfPlan {
+  background: rgba(255,122,0,0.10) !important;
+  color: #ff7a00 !important;
+  padding: 6px 11px !important;
+  border-radius: 999px !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+}
+
+.caPdfOpen {
+  color: #ff7a00 !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+}
+/* CA PDF CARD — FORCE APPLE WHITE THEME */
+
+.currentAffairsPremiumPage .caPdfShelf .caPdfCard {
+  background: rgba(255,255,255,0.92) !important;
+  color: #111827 !important;
+  border: 1px solid rgba(255,120,0,0.12) !important;
+  box-shadow: 0 18px 45px rgba(15,23,42,0.06) !important;
+  border-radius: 24px !important;
+}
+
+.currentAffairsPremiumPage .caPdfShelf .caPdfCard h3 {
+  color: #111827 !important;
+}
+
+.currentAffairsPremiumPage .caPdfShelf .caPdfCard p {
+  color: #64748b !important;
+}
+
+.currentAffairsPremiumPage .caPdfShelf .caPdfOpen {
+  color: #ff7a00 !important;
+}
+
+.currentAffairsPremiumPage .caPdfShelf .caPdfPlan {
+  background: rgba(255,122,0,0.1) !important;
+  color: #ff7a00 !important;
+}
+/* CURRENT AFFAIRS BACK BUTTONS */
+
+.currentAffairsPremiumPage .contentStudioActions {
+  margin-top: 50px;
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.currentAffairsPremiumPage .backButton {
+  background: rgba(255,255,255,0.92) !important;
+  color: #111827 !important;
+  border: 1px solid rgba(255,120,0,0.12) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 18px 45px rgba(15,23,42,0.06) !important;
+  padding: 14px 24px !important;
+  font-weight: 700;
+  transition: .25s ease;
+}
+
+.currentAffairsPremiumPage .backButton:hover {
+  transform: translateY(-3px);
+  color: #ff7a00 !important;
+}
+
+/* =========================
+   ADMIN / CONTENT STUDIO
+   CURRENT AFFAIRS MANAGER POLISH
+   CSS ONLY
+========================= */
+
+/* page-level polish */
+.coursePages .contentStudioForm,
+.coursePages .contentStudioList {
+  max-width: 1180px;
+}
+
+/* Manager action buttons card */
+.coursePages .contentStudioGrid {
+  gap: 18px;
+}
+
+/* Main manager white panel */
+.coursePages .contentStudioGrid,
+.coursePages .contentStudioList {
+  border-radius: 28px;
+}
+
+/* Current Affairs manager cards/buttons */
+.coursePages .contentStudioGrid > button,
+.coursePages .contentStudioGrid > .backButton {
+  min-height: 62px;
+  border-radius: 18px !important;
+  background: rgba(255,255,255,0.94) !important;
+  color: #111827 !important;
+  border: 1px solid rgba(15,23,42,0.08) !important;
+  box-shadow: 0 16px 38px rgba(15,23,42,0.06) !important;
+  font-weight: 900 !important;
+  transition: 0.25s ease;
+}
+
+.coursePages .contentStudioGrid > button:hover,
+.coursePages .contentStudioGrid > .backButton:hover {
+  transform: translateY(-3px);
+  color: #ff7a00 !important;
+  border-color: rgba(255,122,0,0.22) !important;
+}
+
+/* Published/manage list compact Google Drive style */
+.coursePages .contentStudioList > .contentStudioItem {
+  padding: 22px 24px !important;
+  border-radius: 22px !important;
+  background: rgba(255,255,255,0.94) !important;
+  border: 1px solid rgba(15,23,42,0.08) !important;
+  box-shadow: 0 18px 45px rgba(15,23,42,0.06) !important;
+}
+
+.coursePages .contentStudioItem strong {
+  font-size: 18px;
+  color: #111827;
+}
+
+.coursePages .contentStudioItem p {
+  margin: 10px 0 16px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* action buttons */
+.coursePages .contentStudioActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.coursePages .contentStudioActions .backButton {
+  padding: 10px 16px !important;
+  min-height: auto !important;
+  border-radius: 999px !important;
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid rgba(15,23,42,0.1) !important;
+  box-shadow: 0 10px 24px rgba(15,23,42,0.06) !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+}
+
+.coursePages .contentStudioActions .backButton:hover {
+  transform: translateY(-2px);
+  color: #ff7a00 !important;
+}
+/* Google Drive style actions right side */
+
+.contentStudioItem {
+  position: relative;
+}
+
+.contentStudioItem .contentStudioActions {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* mobile */
+@media (max-width: 768px) {
+
+  .contentStudioItem .contentStudioActions {
+    position: static;
+    margin-top: 16px;
+  }
+
+}
+
+/* Notes Manager buttons same as Open PDF */
+
+.contentStudioItem .publishButton,
+.contentStudioItem .deleteContentButton {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid rgba(15,23,42,0.1) !important;
+  box-shadow: none !important;
+  border-radius: 999px !important;
+  font-weight: 800 !important;
+}
+
+.contentStudioItem .publishButton:hover,
+.contentStudioItem .deleteContentButton:hover {
+  color: #ff7a00 !important;
+  border-color: rgba(255,122,0,0.25) !important;
+}

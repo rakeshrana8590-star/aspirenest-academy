@@ -4712,7 +4712,6 @@ isAdmin={isAdmin}
     ) : null
   }
 />
-
 <Route
   path="/admin/content/notes/manage"
   element={
@@ -4727,58 +4726,46 @@ isAdmin={isAdmin}
             Review, edit, update, delete,
             and organize all saved notes.
           </p>
+        </div>
 
-          <div className="contentStudioForm">
-  <div className="contentStudioGrid"></div>
-  <button
-    onClick={() => setNotesPlanFilter("ALL")}
-  >
-    ALL
-  </button>
+        <div className="contentStudioForm">
+          <div className="contentStudioGrid">
+            <button onClick={() => setNotesPlanFilter("ALL")}>
+              ALL
+            </button>
 
-  <button
-    onClick={() => setNotesPlanFilter("FREE")}
-  >
-    FREE
-  </button>
+            <button onClick={() => setNotesPlanFilter("FREE")}>
+              FREE
+            </button>
 
-  <button
-    onClick={() => setNotesPlanFilter("BASIC")}
-  >
-    BASIC
-  </button>
+            <button onClick={() => setNotesPlanFilter("BASIC")}>
+              BASIC
+            </button>
 
-  <button
-    onClick={() => setNotesPlanFilter("PREMIUM")}
-  >
-    PREMIUM
-  </button>
+            <button onClick={() => setNotesPlanFilter("PREMIUM")}>
+              PREMIUM
+            </button>
 
-  <button
-    onClick={() => setNotesPlanFilter("MENTORSHIP")}
-  >
-    MENTORSHIP
-  </button>
-</div>
-
+            <button onClick={() => setNotesPlanFilter("MENTORSHIP")}>
+              MENTORSHIP
+            </button>
+          </div>
         </div>
 
         <div className="contentStudioList">
           <h3>Published Notes Preview</h3>
 
           {universalContent
-           .filter((item) =>
-           item.section === "notes" &&
-           (
-             notesPlanFilter === "ALL" ||
-             item.planType === notesPlanFilter
-           )
-         )
+            .filter(
+              (item) =>
+                item.section === "notes" &&
+                (
+                  notesPlanFilter === "ALL" ||
+                  item.planType === notesPlanFilter
+                )
+            )
             .map((item) => (
-              <div
-                className="contentStudioItem"
-                key={item.id}
-              >
+              <div className="contentStudioItem" key={item.id}>
                 <strong>{item.title}</strong>
 
                 <p>{item.description}</p>
@@ -4787,36 +4774,77 @@ isAdmin={isAdmin}
                   {item.planType} • {item.subject} • {item.status}
                 </span>
 
-                <button
-                  className="publishButton"
-                  onClick={() => {
-                    setEditingNotesCmsId(item.id);
-                    setNotesCmsTitle(item.title || "");
-                    setNotesCmsDescription(item.description || "");
-                    setNotesCmsPlanType(item.planType || "FREE");
-                    setNotesCmsSubject(item.subject || "");
-                    setNotesCmsChapter(item.chapter || "");
-                    setNotesCmsMonth(item.month || "");
-                    setNotesCmsYear(item.year || "");
-                    setNotesCmsWeek(item.week || "");
-                    setNotesCmsPdfUrl(item.pdfUrl || "");
-                    setNotesCmsThumbnailUrl(item.thumbnailUrl || "");
-                    setNotesCmsStatus(item.status || "Draft");
+                <div className="contentStudioActions">
+                  <button
+                    className="backButton"
+                    onClick={() => {
+                      const finalPdfUrl =
+                        item.pdfUrl ||
+                        item.fileUrl ||
+                        item.pdf ||
+                        item.url ||
+                        "";
 
-                    navigate("/admin/content/notes/form");
-                  }}
-                >
-                  Edit
-                </button>
+                      if (!finalPdfUrl) {
+                        alert("PDF URL missing for this note.");
+                        return;
+                      }
 
-                <button
-                  className="deleteContentButton"
-                  onClick={() =>
-                    handleDeleteLocalContentItem(item.id)
-                  }
-                >
-                  Delete Preview
-                </button>
+                      window.open(
+                        finalPdfUrl,
+                        "_blank",
+                        "noopener,noreferrer"
+                      );
+                    }}
+                  >
+                    Open PDF
+                  </button>
+
+                  <button
+                    className="publishButton"
+                    onClick={() => {
+                      setEditingNotesCmsId(item.id);
+                      setNotesCmsTitle(item.title || "");
+                      setNotesCmsDescription(item.description || "");
+                      setNotesCmsPlanType(item.planType || "FREE");
+                      setNotesCmsSubject(item.subject || "");
+                      setNotesCmsChapter(item.chapter || "");
+                      setNotesCmsMonth(item.month || "");
+                      setNotesCmsYear(item.year || "");
+                      setNotesCmsWeek(item.week || "");
+                      setNotesCmsPdfUrl(
+                        item.pdfUrl ||
+                          item.fileUrl ||
+                          item.pdf ||
+                          item.url ||
+                          ""
+                      );
+                      setNotesCmsThumbnailUrl(item.thumbnailUrl || "");
+                      setNotesCmsStatus(item.status || "Draft");
+
+                      navigate("/admin/content/notes/form");
+                    }}
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    className="deleteContentButton"
+                    onClick={() => {
+                      const confirmDelete = window.confirm(
+                        `Delete "${item.title}" permanently?\n\n` +
+                          `Students may lose access to this content.\n\n` +
+                          `This action cannot be undone.`
+                      );
+
+                      if (!confirmDelete) return;
+
+                      handleDeleteLocalContentItem(item.id);
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
         </div>
@@ -7956,90 +7984,127 @@ handleSaveUniversalContent={handleSaveUniversalContent}
         </p>
       </div>
 
-      <div className="coursePathGrid">
-  {Object.entries(
-    [...universalCurrentAffairs, ...currentAffairsList]
-      .filter(
-        (item) =>
-          item.status === CONTENT_STATUS.PUBLISHED ||
-          item.status === "published"
-      )
-      .reduce((months, item) => {
-        const monthName = item.month || "Current Affairs";
+      <div className="notesNetflixLibrary currentAffairsNetflixLibrary">
+        <div className="notesShelf">
+          
 
-        if (!months[monthName]) {
-          months[monthName] = [];
-        }
+          <div className="notesShelfScrollWrap">
+            {notesScrollState["current-affairs-month-row"]?.canScroll &&
+              !notesScrollState["current-affairs-month-row"]?.atStart && (
+                <button
+                  type="button"
+                  className="notesShelfArrow notesShelfArrowLeft"
+                  onClick={() =>
+                    scrollShelf("current-affairs-month-row", "left")
+                  }
+                >
+                  ‹
+                </button>
+              )}
 
-        months[monthName].push(item);
-        return months;
-      }, {})
-  )
-    .sort(([a], [b]) => {
-      const monthOrder = [
-        "january",
-        "february",
-        "march",
-        "april",
-        "may",
-        "june",
-        "july",
-        "august",
-        "september",
-        "october",
-        "november",
-        "december",
-      ];
+            <div
+              className="notesSubjectRow currentAffairsMonthRow"
+              id="current-affairs-month-row"
+              onScroll={() =>
+                updateNotesScrollState("current-affairs-month-row")
+              }
+              onMouseEnter={() =>
+                updateNotesScrollState("current-affairs-month-row")
+              }
+            >
+              {Object.entries(
+                [...universalCurrentAffairs, ...currentAffairsList]
+                  .filter(
+                    (item) =>
+                      item.status === CONTENT_STATUS.PUBLISHED ||
+                      item.status === "published"
+                  )
+                  .reduce((months, item) => {
+                    const monthName = item.month || "Current Affairs";
 
-      const [monthA, yearA] = a.toLowerCase().split(" ");
-      const [monthB, yearB] = b.toLowerCase().split(" ");
+                    if (!months[monthName]) {
+                      months[monthName] = [];
+                    }
 
-      if (yearA !== yearB) {
-        return Number(yearB || 0) - Number(yearA || 0);
-      }
+                    months[monthName].push(item);
+                    return months;
+                  }, {})
+              )
+                .sort(([a], [b]) => {
+                  const monthOrder = [
+                    "january",
+                    "february",
+                    "march",
+                    "april",
+                    "may",
+                    "june",
+                    "july",
+                    "august",
+                    "september",
+                    "october",
+                    "november",
+                    "december",
+                  ];
 
-      return (
-        monthOrder.indexOf(monthB) -
-        monthOrder.indexOf(monthA)
-      );
-    })
-    .map(([monthName, items]) => {
-      const monthSlug = monthName
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g, "-");
+                  const [monthA, yearA] = a.toLowerCase().split(" ");
+                  const [monthB, yearB] = b.toLowerCase().split(" ");
 
-      return (
-        <div
-          className="coursePathCard"
-          key={monthName}
-          onClick={() =>
-            navigate(`/ctet-tet/current-affairs/${monthSlug}`)
-          }
-        >
-          <div className="coursePathIcon">🗞️</div>
+                  if (yearA !== yearB) {
+                    return Number(yearB || 0) - Number(yearA || 0);
+                  }
 
-          <h3>{monthName}</h3>
+                  return (
+                    monthOrder.indexOf(monthB) -
+                    monthOrder.indexOf(monthA)
+                  );
+                })
+                .map(([monthName, items]) => {
+                  const monthSlug = monthName
+                    .toLowerCase()
+                    .trim()
+                    .replace(/\s+/g, "-");
 
-          <p>
-            {items.length} PDF{items.length > 1 ? "s" : ""} available
-          </p>
+                  return (
+                    <button
+                      type="button"
+                      className="notesSubjectCard currentAffairsMonthCard"
+                      key={monthName}
+                      onClick={() =>
+                        navigate(`/ctet-tet/current-affairs/${monthSlug}`)
+                      }
+                    >
+                      <div className="notesSubjectIcon">📰</div>
 
-          <span>Open Month →</span>
+                      <h3>{monthName}</h3>
+
+                      <p>
+                        {items.length} PDF
+                        {items.length > 1 ? "s" : ""} available
+                      </p>
+
+                      <span className="notesSubjectTag">
+                        Open Month →
+                      </span>
+                    </button>
+                  );
+                })}
+            </div>
+
+            {notesScrollState["current-affairs-month-row"]?.canScroll &&
+              !notesScrollState["current-affairs-month-row"]?.atEnd && (
+                <button
+                  type="button"
+                  className="notesShelfArrow notesShelfArrowRight"
+                  onClick={() =>
+                    scrollShelf("current-affairs-month-row", "right")
+                  }
+                >
+                  ›
+                </button>
+              )}
+          </div>
         </div>
-      );
-    })}
-
-  <div
-    className="coursePathCard"
-    onClick={() => navigate("/ctet-tet")}
-  >
-    <div className="coursePathIcon">🔙</div>
-    <h3>Back to CTET/TET Hub</h3>
-    <p>Return to the main CTET/TET learning ecosystem.</p>
-    <span>Go Back →</span>
-  </div>
-</div>
+      </div>
     </section>
   }
 />
@@ -8050,15 +8115,9 @@ handleSaveUniversalContent={handleSaveUniversalContent}
     <section className="coursePages currentAffairsPremiumPage">
       {(() => {
         const formatSlug = (value = "") =>
-          value
-            .toString()
-            .toLowerCase()
-            .trim()
-            .replace(/\s+/g, "-");
+          value.toString().toLowerCase().trim().replace(/\s+/g, "-");
 
-        const activeMonthId = window.location.pathname
-          .split("/")
-          .pop();
+        const activeMonthId = window.location.pathname.split("/").pop();
 
         const publishedCurrentAffairs = [
           ...universalCurrentAffairs,
@@ -8073,22 +8132,41 @@ handleSaveUniversalContent={handleSaveUniversalContent}
           (item) => formatSlug(item.month) === activeMonthId
         );
 
-        const monthTitle =
-          monthItems[0]?.month || "Current Affairs Month";
+        const monthTitle = monthItems[0]?.month || "Current Affairs Month";
 
         const groupedWeeks = monthItems.reduce((groups, item) => {
           const weekName =
-            item.week?.trim() ||
-            item.chapter?.trim() ||
-            "Monthly PDFs";
+            item.week?.trim() || item.chapter?.trim() || "Monthly PDFs";
 
-          if (!groups[weekName]) {
-            groups[weekName] = [];
-          }
+          if (!groups[weekName]) groups[weekName] = [];
 
           groups[weekName].push(item);
           return groups;
         }, {});
+
+        const openCurrentAffairPdf = (item) => {
+          const finalPdfUrl =
+            item.fileUrl || item.pdfUrl || item.pdf || item.url || "";
+
+          const accessPlan = item.planType || item.plan || PLAN_TYPES.FREE;
+
+          if (!finalPdfUrl) {
+            alert("PDF URL missing in this current affair item.");
+            return;
+          }
+
+          if (
+            !isAdmin &&
+            accessPlan !== PLAN_TYPES.FREE &&
+            hasPlanAccess &&
+            !hasPlanAccess(accessPlan)
+          ) {
+            navigate("/ctet-tet/pricing");
+            return;
+          }
+
+          window.open(finalPdfUrl, "_blank", "noopener,noreferrer");
+        };
 
         return (
           <>
@@ -8097,92 +8175,63 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 
               <h1>{monthTitle}</h1>
 
-              <p>
-                Weekly and monthly CTET/TET current affairs PDFs.
-              </p>
+              <p>Weekly and monthly CTET/TET current affairs PDFs.</p>
             </div>
 
-            <div className="contentStudioList">
+            <div className="caMonthPage">
               {Object.keys(groupedWeeks).length === 0 ? (
-                <div className="contentStudioItem">
+                <div className="caEmptyCard">
                   <strong>No PDFs found.</strong>
                   <p>No published current affairs available for this month.</p>
                 </div>
               ) : (
                 Object.entries(groupedWeeks)
-                .sort(([a], [b]) => {
-                  const getWeekNumber = (weekName = "") => {
-                    const match = weekName.match(/\d+/);
-              
-                    return match ? Number(match[0]) : 99;
-                  };
-              
-                  return getWeekNumber(a) - getWeekNumber(b);
-                })
-                .map(([weekName, items]) => (
-                  <div className="contentStudioItem" key={weekName}>
-                    <div className="sectionHeader">
-                      <h2>{weekName}</h2>
-              
-                      <p>
-                        {items.length} PDF
-                        {items.length > 1 ? "s" : ""} in {monthTitle}
-                      </p>
-                    </div>
-              
-                    <div className="contentStudioList">
-                      {items.map((item) => (
-                        <div className="contentStudioItem" key={item.id}>
-                          <strong>{item.title}</strong>
-              
-                          <p>
-                            {item.month || "No Month"} •{" "}
-                            {item.week || item.chapter || "Monthly PDFs"} •{" "}
-                            {item.planType || PLAN_TYPES.FREE}
-                          </p>
-              
-                          <div className="contentStudioActions">
+                  .sort(([a], [b]) => {
+                    const getWeekNumber = (weekName = "") => {
+                      const match = weekName.match(/\d+/);
+                      return match ? Number(match[0]) : 99;
+                    };
+
+                    return getWeekNumber(a) - getWeekNumber(b);
+                  })
+                  .map(([weekName, items]) => (
+                    <div className="caWeekBlock" key={weekName}>
+                      <div className="caWeekHeader">
+                        <h2>{weekName}</h2>
+                        <span>
+                          {items.length} PDF{items.length > 1 ? "s" : ""} in{" "}
+                          {monthTitle}
+                        </span>
+                      </div>
+
+                      <div className="caPdfShelf">
+                        {items.map((item) => (
                           <button
-  className="backButton"
-  onClick={() => {
-    const finalPdfUrl =
-      item.fileUrl ||
-      item.pdfUrl ||
-      item.pdf ||
-      item.url ||
-      "";
+                            type="button"
+                            className="caPdfCard"
+                            key={item.id}
+                            onClick={() => openCurrentAffairPdf(item)}
+                          >
+                            <div className="caPdfTop">
+                              <span className="caPdfIcon">📄</span>
+                              <span className="caPdfPlan">
+                                {item.planType || PLAN_TYPES.FREE}
+                              </span>
+                            </div>
 
-    const accessPlan =
-      item.planType ||
-      item.plan ||
-      PLAN_TYPES.FREE;
+                            <h3>{item.title}</h3>
 
-    if (!finalPdfUrl) {
-      alert("PDF URL missing in this current affair item.");
-      return;
-    }
+                            <p>
+                              {item.month || "No Month"} •{" "}
+                              {item.week || item.chapter || "Monthly PDFs"}
+                            </p>
 
-    if (
-      !isAdmin &&
-      accessPlan !== PLAN_TYPES.FREE &&
-      hasPlanAccess &&
-      !hasPlanAccess(accessPlan)
-    ) {
-      navigate("/ctet-tet/pricing");
-      return;
-    }
-
-    window.open(finalPdfUrl, "_blank", "noopener,noreferrer");
-  }}
->
-  Open PDF
-</button>
-                          </div>
-                        </div>
-                      ))}
+                            <span className="caPdfOpen">Open PDF →</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))
+                  ))
               )}
             </div>
 
@@ -8194,10 +8243,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                 ← Back to Current Affairs
               </button>
 
-              <button
-                className="backButton"
-                onClick={() => navigate("/ctet-tet")}
-              >
+              <button className="backButton" onClick={() => navigate("/ctet-tet")}>
                 Back to CTET/TET Hub
               </button>
             </div>
