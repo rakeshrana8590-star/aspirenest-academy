@@ -7957,60 +7957,89 @@ handleSaveUniversalContent={handleSaveUniversalContent}
       </div>
 
       <div className="coursePathGrid">
-        {Object.entries(
-          [...universalCurrentAffairs, ...currentAffairsList]
-            .filter(
-              (item) =>
-                item.status === CONTENT_STATUS.PUBLISHED ||
-                item.status === "published"
-            )
-            .reduce((months, item) => {
-              const monthName = item.month || "Current Affairs";
+  {Object.entries(
+    [...universalCurrentAffairs, ...currentAffairsList]
+      .filter(
+        (item) =>
+          item.status === CONTENT_STATUS.PUBLISHED ||
+          item.status === "published"
+      )
+      .reduce((months, item) => {
+        const monthName = item.month || "Current Affairs";
 
-              if (!months[monthName]) {
-                months[monthName] = [];
-              }
+        if (!months[monthName]) {
+          months[monthName] = [];
+        }
 
-              months[monthName].push(item);
-              return months;
-            }, {})
-        ).map(([monthName, items]) => {
-          const monthSlug = monthName
-            .toLowerCase()
-            .trim()
-            .replace(/\s+/g, "-");
+        months[monthName].push(item);
+        return months;
+      }, {})
+  )
+    .sort(([a], [b]) => {
+      const monthOrder = [
+        "january",
+        "february",
+        "march",
+        "april",
+        "may",
+        "june",
+        "july",
+        "august",
+        "september",
+        "october",
+        "november",
+        "december",
+      ];
 
-          return (
-            <div
-              className="coursePathCard"
-              key={monthName}
-              onClick={() =>
-                navigate(`/ctet-tet/current-affairs/${monthSlug}`)
-              }
-            >
-              <div className="coursePathIcon">🗞️</div>
+      const [monthA, yearA] = a.toLowerCase().split(" ");
+      const [monthB, yearB] = b.toLowerCase().split(" ");
 
-              <h3>{monthName}</h3>
+      if (yearA !== yearB) {
+        return Number(yearB || 0) - Number(yearA || 0);
+      }
 
-              <p>
-                {items.length} PDF{items.length > 1 ? "s" : ""} available
-              </p>
+      return (
+        monthOrder.indexOf(monthB) -
+        monthOrder.indexOf(monthA)
+      );
+    })
+    .map(([monthName, items]) => {
+      const monthSlug = monthName
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, "-");
 
-              <span>Open Month →</span>
-            </div>
-          );
-        })}
-
+      return (
         <div
           className="coursePathCard"
-          onClick={() => navigate("/ctet-tet")}
+          key={monthName}
+          onClick={() =>
+            navigate(`/ctet-tet/current-affairs/${monthSlug}`)
+          }
         >
-          <div className="coursePathIcon">🔙</div>
-          <h3>Back to CTET/TET Hub</h3>
-          <p>Return to the main CTET/TET learning ecosystem.</p>
-          <span>Go Back →</span>
+          <div className="coursePathIcon">🗞️</div>
+
+          <h3>{monthName}</h3>
+
+          <p>
+            {items.length} PDF{items.length > 1 ? "s" : ""} available
+          </p>
+
+          <span>Open Month →</span>
         </div>
-      </div>
+      );
+    })}
+
+  <div
+    className="coursePathCard"
+    onClick={() => navigate("/ctet-tet")}
+  >
+    <div className="coursePathIcon">🔙</div>
+    <h3>Back to CTET/TET Hub</h3>
+    <p>Return to the main CTET/TET learning ecosystem.</p>
+    <span>Go Back →</span>
+  </div>
+</div>
     </section>
   }
 />
@@ -8080,46 +8109,74 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                   <p>No published current affairs available for this month.</p>
                 </div>
               ) : (
-                Object.entries(groupedWeeks).map(([weekName, items]) => (
+                Object.entries(groupedWeeks)
+                .sort(([a], [b]) => {
+                  const getWeekNumber = (weekName = "") => {
+                    const match = weekName.match(/\d+/);
+              
+                    return match ? Number(match[0]) : 99;
+                  };
+              
+                  return getWeekNumber(a) - getWeekNumber(b);
+                })
+                .map(([weekName, items]) => (
                   <div className="contentStudioItem" key={weekName}>
                     <div className="sectionHeader">
                       <h2>{weekName}</h2>
+              
                       <p>
-                        {items.length} PDF{items.length > 1 ? "s" : ""} in{" "}
-                        {monthTitle}
+                        {items.length} PDF
+                        {items.length > 1 ? "s" : ""} in {monthTitle}
                       </p>
                     </div>
-
+              
                     <div className="contentStudioList">
                       {items.map((item) => (
                         <div className="contentStudioItem" key={item.id}>
                           <strong>{item.title}</strong>
-
+              
                           <p>
                             {item.month || "No Month"} •{" "}
                             {item.week || item.chapter || "Monthly PDFs"} •{" "}
                             {item.planType || PLAN_TYPES.FREE}
                           </p>
-
+              
                           <div className="contentStudioActions">
-                            <button
-                              className="backButton"
-                              onClick={() =>
-                                handleNoteAccess({
-                                  ...item,
-                                  pdfUrl:
-                                    item.fileUrl ||
-                                    item.pdfUrl ||
-                                    item.pdf,
-                                  plan:
-                                    item.planType ||
-                                    item.plan ||
-                                    PLAN_TYPES.FREE,
-                                })
-                              }
-                            >
-                              Open PDF
-                            </button>
+                          <button
+  className="backButton"
+  onClick={() => {
+    const finalPdfUrl =
+      item.fileUrl ||
+      item.pdfUrl ||
+      item.pdf ||
+      item.url ||
+      "";
+
+    const accessPlan =
+      item.planType ||
+      item.plan ||
+      PLAN_TYPES.FREE;
+
+    if (!finalPdfUrl) {
+      alert("PDF URL missing in this current affair item.");
+      return;
+    }
+
+    if (
+      !isAdmin &&
+      accessPlan !== PLAN_TYPES.FREE &&
+      hasPlanAccess &&
+      !hasPlanAccess(accessPlan)
+    ) {
+      navigate("/ctet-tet/pricing");
+      return;
+    }
+
+    window.open(finalPdfUrl, "_blank", "noopener,noreferrer");
+  }}
+>
+  Open PDF
+</button>
                           </div>
                         </div>
                       ))}
@@ -8152,7 +8209,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 />
 
 <Route
-  path="/subjects/ctet-tet/pricing"
+  path="/ctet-tet/pricing"
   element={
     <section className="coursePages pricingMasterPage">
       <div className="sectionHeader">
@@ -8169,7 +8226,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
       <div className="pricingActionGrid">
         <div
           className="pricingActionCard"
-          onClick={() => navigate("/subjects/ctet-tet/pricing")}
+          onClick={() => navigate("/ctet-tet/pricing")}
         >
           <div className="pricingActionIcon">💎</div>
 
@@ -8201,7 +8258,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 
         <div
           className="pricingActionCard"
-          onClick={() => navigate("/subjects/ctet-tet")}
+          onClick={() => navigate("/ctet-tet")}
         >
           <div className="pricingActionIcon">🔙</div>
 

@@ -98,18 +98,17 @@ export default function CurrentAffairs({
     ([a], [b]) => {
       const [monthA, yearA] = a.toLowerCase().split(" ");
       const [monthB, yearB] = b.toLowerCase().split(" ");
-
+  
       if (yearA !== yearB) {
-        return Number(yearA) - Number(yearB);
+        return Number(yearB) - Number(yearA);
       }
-
+  
       return (
-        monthOrder.indexOf(monthA) -
-        monthOrder.indexOf(monthB)
+        monthOrder.indexOf(monthB) -
+        monthOrder.indexOf(monthA)
       );
     }
   );
-
   const canAccessCurrentAffair = (item) => {
     const accessType = item.accessPlan || "FREE";
 
