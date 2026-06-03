@@ -125,7 +125,7 @@ export default function CurrentAffairs({
     }
 
     if (!canAccessCurrentAffair(item)) {
-      navigate("/subjects/ctet-tet/pricing");
+      navigate("/ctet-tet/pricing");
       return;
     }
 

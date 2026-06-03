@@ -153,6 +153,7 @@ const [notesCmsSubject, setNotesCmsSubject] = useState("");
 const [notesCmsChapter, setNotesCmsChapter] = useState("");
 const [notesCmsMonth, setNotesCmsMonth] = useState("");
 const [notesCmsYear, setNotesCmsYear] = useState("");
+const [notesCmsWeek, setNotesCmsWeek] = useState("");
 const [notesCmsPdfUrl, setNotesCmsPdfUrl] = useState("");
 const [notesCmsThumbnailUrl, setNotesCmsThumbnailUrl] = useState("");
 const [notesCmsStatus, setNotesCmsStatus] = useState("Draft");
@@ -232,15 +233,28 @@ const [contentLoading, setContentLoading] = useState(false);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
   const [userPlanType, setUserPlanType] = useState("FREE");
   const [membershipExpiry, setMembershipExpiry] = useState(null);
-
   const requireLogin = () => {
-    return !!user;
+    if (!user) {
+      navigate("/login", { replace: true });
+      return false;
+    }
+  
+    return true;
   };
   
   const requireAdmin = () => {
-    return !!user && isAdmin(user);
+    if (!user) {
+      navigate("/login", { replace: true });
+      return false;
+    }
+  
+    if (!isAdmin(user)) {
+      navigate("/", { replace: true });
+      return false;
+    }
+  
+    return true;
   };
-
   const hasPlanAccess = (requiredPlan) => {
     const hierarchy = {
       FREE: 0,
@@ -633,7 +647,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
         return;
       }
   
-      navigate("/ctet-tet", { replace: true });
+      navigate("/academy-overview", { replace: true });
   
     } catch (error) {
       alert(error.message);
@@ -662,7 +676,7 @@ setEnquiries([]);
     try {
       await signInWithPopup(auth, provider);
   
-      navigate("/ctet-tet", { replace: true });
+      navigate("/academy-overview", { replace: true });
   
     } catch (error) {
       alert(error.message);
@@ -1741,6 +1755,7 @@ subjectName:
       chapter: notesCmsChapter,
       month: notesCmsMonth,
       year: notesCmsYear,
+      week: notesCmsWeek,
       pdfUrl: notesCmsPdfUrl,
       thumbnailUrl: notesCmsThumbnailUrl,
       status: notesCmsStatus,
@@ -2687,244 +2702,6 @@ return (
   <Routes>
 
   <Route
-  path="/"
-  element={
-    <section className="academyOverviewPage">
-
-      {/* SCREEN 1 — HERO */}
-      <div className="academyHero">
-
-        <div className="academyHeroLeft">
-
-          <span className="academyBadge">
-            AspireNest Academic Overview
-          </span>
-
-          <h1>
-            AspireNest Academy
-            Learning Platform
-            for Every Student Journey
-          </h1>
-
-          <p>
-            A structured academic platform where students can explore
-            learning domains, study resources, practice systems,
-            guidance, progress tracking, and subject-wise preparation pathways.
-          </p>
-
-         
-
-        </div>
-
-        <div className="academyHeroRight">
-
-          <div className="academyPreviewCard">
-
-            <h3>AspireNest Academic System</h3>
-
-            <div className="academyStat">
-              <span>Learning Structure</span>
-              <strong>92%</strong>
-            </div>
-
-            <div className="academyBar">
-              <div className="academyFill"></div>
-            </div>
-
-            <div className="academyMiniGrid">
-
-              <div className="academyMiniCard">📚 Study Resources</div>
-              <div className="academyMiniCard">🎯 Practice Systems</div>
-              <div className="academyMiniCard">🧭 Guided Learning</div>
-              <div className="academyMiniCard">📊 Progress Tracking</div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* SCREEN 2 — PLATFORM OVERVIEW */}
-      <div className="academySectionIntro">
-
-
-        <h2>
-          A complete academic platform,
-          designed to grow beyond one subject.
-        </h2>
-        <p>
-  AspireNest Academy is designed as a scalable
-  learning platform where students can access
-  structured preparation systems, practice tools,
-  study resources, mentorship, and future academic domains
-  under one organized ecosystem.
-</p>
-
-      </div>
-
-      <div className="academyTrustStrip">
-
-        <div className="academyTrustCard">
-          <h3>Structured Learning</h3>
-          <p>Clear academic pathways for focused preparation.</p>
-        </div>
-
-        <div className="academyTrustCard">
-          <h3>Study Resources</h3>
-          <p>Notes, learning material, and subject-wise support.</p>
-        </div>
-
-        <div className="academyTrustCard">
-          <h3>Practice System</h3>
-          <p>Mock tests and preparation tools for improvement.</p>
-        </div>
-
-        <div className="academyTrustCard">
-          <h3>Progress Tracking</h3>
-          <p>Learning performance and student growth visibility.</p>
-        </div>
-
-      </div>
-
-      {/* SCREEN 3 — LEARNING DOMAINS */}
-      <div className="academySectionIntro">
-
-
-        <h2>
-          Choose a learning domain
-          to continue.
-        </h2>
-
-        <p>
-          CTET/TET is the first active learning domain.
-          More academic domains can be added under the same
-          platform structure as AspireNest grows.
-        </p>
-
-      </div>
-
-      <div className="academyOverviewGrid">
-
-        <div
-          className="academyOverviewCard"
-          onClick={() => navigate("/ctet-tet")}
-        >
-
-          <h3>CTET / TET</h3>
-
-          <p>
-            Active preparation domain with notes, practice systems,
-            mock tests, current affairs, mentorship, and learning tools.
-          </p>
-
-
-        </div>
-
-        <div className="academyOverviewCard disabled">
-
-          <h3>Psychology</h3>
-
-          <p>
-            Future learning domain for psychology-focused academic study.
-          </p>
-
-          <span>Launching Soon</span>
-
-        </div>
-
-        <div className="academyOverviewCard disabled">
-
-          <h3>B.Ed / D.El.Ed</h3>
-
-          <p>
-            Future domain for teaching education and pedagogy learning.
-          </p>
-
-          <span>Launching Soon</span>
-
-        </div>
-
-      </div>
-
-{/* SCREEN 4 — LEARNING EXPERIENCE */}
-<div className="academyStorySection">
-
-  <div className="academyStoryText">
-
-    <span>LEARNING EXPERIENCE</span>
-
-    <h2>
-      A clear learning journey
-      from study to progress.
-    </h2>
-
-    <p>
-      AspireNest keeps preparation simple and organized:
-      students choose a learning domain, access study resources,
-      practice with structured systems, and track their progress
-      step by step.
-    </p>
-
-  </div>
-
-  <div className="academyStoryVisual">
-
-    <div className="academyVisualCard">
-
-      <h3>Student Learning Flow</h3>
-
-      <div className="academyVisualList">
-        <p>✅ Choose a learning domain</p>
-        <p>✅ Study with organized resources</p>
-        <p>✅ Practice with mock systems</p>
-        <p>✅ Track preparation progress</p>
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
-
-      {/* SCREEN 5 — FUTURE VISION */}
-      <div className="academyFinalCTA">
-
-
-        <h2>
-          Built to expand into a complete
-          academic learning ecosystem.
-        </h2>
-
-        <p>
-          AspireNest starts with CTET/TET and can grow into multiple
-          subject-wise learning domains without changing the core platform.
-        </p>
-
-      </div>
-
-    </section>
-  }
-/>
-
-<Route
-  path="/login"
-  element={
-    <AuthSection
-      email={email}
-      setEmail={setEmail}
-      password={password}
-      setPassword={setPassword}
-      handleLogin={handleLogin}
-      handleGoogleLogin={handleGoogleLogin}
-      handleForgotPassword={handleForgotPassword}
-      handleRegister={handleRegister}
-    />
-  }
-/>
-
-  <Route
     path="/ctet-tet"
     element={
       <>
@@ -2964,7 +2741,7 @@ return (
 
     <p>Bilingual preparation platform for Indian students.</p>
     <div className="heroButtons">
-    <button onClick={() => navigate("/ctet-tet/courses")}>
+    <button onClick={() => navigate("/learning")}>
   Start Learning
 </button>
 {user && (
@@ -3116,7 +2893,7 @@ return (
   <div className="buttons">
   <button
     className="btnLink"
-    onClick={() => navigate("/ctet-tet/courses")}
+    onClick={() => navigate("/subjects/ctet-tet/courses")}
   >
     Explore Courses
   </button>
@@ -3433,7 +3210,7 @@ isAdmin={isAdmin}
 
       <div
   className="freeCard"
-  onClick={() => navigate("/ctet-tet/mock-tests")}
+  onClick={() => navigate("/subjects/ctet-tet/mock-tests")}
 >
         📝 Free Mock Test
       </div>
@@ -3513,7 +3290,7 @@ isAdmin={isAdmin}
 
     <div className="footerLinks">
       <h3>Quick Links</h3>
-      <button onClick={() => navigate("/ctet-tet/courses")}>
+      <button onClick={() => navigate("/subjects/ctet-tet/courses")}>
   Courses
 </button>
 <button onClick={() => navigate("/cdp")}>
@@ -3522,7 +3299,7 @@ isAdmin={isAdmin}
 <button onClick={() => navigate("/resources")}>
   Free Resources
 </button>
-      <button onClick={() => navigate("/ctet-tet/pricing")}>
+      <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
   Pricing
 </button>
     </div>
@@ -3544,767 +3321,242 @@ isAdmin={isAdmin}
   }
 />
 
-
-
 <Route
-  path="/ctet-tet/courses"
+  path="/"
   element={
-    <section className="coursePages coursesMasterPage">
-      <div className="sectionHeader">
-        <span className="badge">CTET / TET Courses</span>
+    <section className="academyOverviewPage">
 
-        <h1>Choose Your CTET/TET Preparation Track</h1>
+      {/* SCREEN 1 — HERO */}
+      <div className="academyHero">
 
-        <p>
-          Select a structured course path for CTET or State TET preparation.
-          Each track connects you to notes, mock tests, current affairs,
-          premium plans, and mentor-guided learning.
-        </p>
+        <div className="academyHeroLeft">
+
+          <span className="academyBadge">
+            AspireNest Academic Overview
+          </span>
+
+          <h1>
+            AspireNest Academy
+            Learning Platform
+            for Every Student Journey
+          </h1>
+
+          <p>
+            A structured academic platform where students can explore
+            learning domains, study resources, practice systems,
+            guidance, progress tracking, and subject-wise preparation pathways.
+          </p>
+
+         
+
+        </div>
+
+        <div className="academyHeroRight">
+
+          <div className="academyPreviewCard">
+
+            <h3>AspireNest Academic System</h3>
+
+            <div className="academyStat">
+              <span>Learning Structure</span>
+              <strong>92%</strong>
+            </div>
+
+            <div className="academyBar">
+              <div className="academyFill"></div>
+            </div>
+
+            <div className="academyMiniGrid">
+
+              <div className="academyMiniCard">📚 Study Resources</div>
+              <div className="academyMiniCard">🎯 Practice Systems</div>
+              <div className="academyMiniCard">🧭 Guided Learning</div>
+              <div className="academyMiniCard">📊 Progress Tracking</div>
+
+            </div>
+
+          </div>
+
+        </div>
+
       </div>
 
-      <div className="coursePathGrid">
-        <div
-          className="coursePathCard"
-          onClick={() => navigate("/ctet-tet/courses/ctet")}
-        >
-          <div className="coursePathIcon">📘</div>
-          <h3>CTET Course</h3>
-          <p>
-            Paper-wise CTET preparation with notes, pedagogy,
-            practice tests, and revision support.
-          </p>
-          <span>Open CTET Track →</span>
+      {/* SCREEN 2 — PLATFORM OVERVIEW */}
+      <div className="academySectionIntro">
+
+
+        <h2>
+          A complete academic platform,
+          designed to grow beyond one subject.
+        </h2>
+        <p>
+  AspireNest Academy is designed as a scalable
+  learning platform where students can access
+  structured preparation systems, practice tools,
+  study resources, mentorship, and future academic domains
+  under one organized ecosystem.
+</p>
+
+      </div>
+
+      <div className="academyTrustStrip">
+
+        <div className="academyTrustCard">
+          <h3>Structured Learning</h3>
+          <p>Clear academic pathways for focused preparation.</p>
         </div>
 
-        <div
-          className="coursePathCard"
-          onClick={() => navigate("/ctet-tet/courses/tet")}
-        >
-          <div className="coursePathIcon">🧑‍🏫</div>
-          <h3>TET Course</h3>
-          <p>
-            State TET preparation with syllabus support,
-            PYQ practice, mock tests, and strategy.
-          </p>
-          <span>Open TET Track →</span>
+        <div className="academyTrustCard">
+          <h3>Study Resources</h3>
+          <p>Notes, learning material, and subject-wise support.</p>
         </div>
 
+        <div className="academyTrustCard">
+          <h3>Practice System</h3>
+          <p>Mock tests and preparation tools for improvement.</p>
+        </div>
+
+        <div className="academyTrustCard">
+          <h3>Progress Tracking</h3>
+          <p>Learning performance and student growth visibility.</p>
+        </div>
+
+      </div>
+
+      {/* SCREEN 3 — LEARNING DOMAINS */}
+      <div className="academySectionIntro">
+
+
+        <h2>
+          Choose a learning domain
+          to continue.
+        </h2>
+
+        <p>
+          CTET/TET is the first active learning domain.
+          More academic domains can be added under the same
+          platform structure as AspireNest grows.
+        </p>
+
+      </div>
+
+      <div className="academyOverviewGrid">
+
         <div
-          className="coursePathCard"
+          className="academyOverviewCard"
           onClick={() => navigate("/ctet-tet")}
         >
-          <div className="coursePathIcon">🔙</div>
-          <h3>Back to CTET/TET Hub</h3>
+
+          <h3>CTET / TET</h3>
+
           <p>
-            Return to the main CTET/TET learning ecosystem.
+            Active preparation domain with notes, practice systems,
+            mock tests, current affairs, mentorship, and learning tools.
           </p>
-          <span>Go Back →</span>
-        </div>
-      </div>
-
-      <div className="premiumCourseShelf">
-        {courses.map((course, index) => (
-          <div className="premiumCourseCard" key={`${course.id}-${index}`}>
-            <span className="planTag">{course.badge}</span>
-
-            <h3>{course.title}</h3>
-            <p>{course.desc}</p>
-
-            <div className="courseMetaGrid">
-              <span><strong>Level</strong>{course.level}</span>
-              <span><strong>Lessons</strong>{course.lessons}</span>
-              <span><strong>Tests</strong>{course.tests}</span>
-              <span><strong>Price</strong>{course.price}</span>
-            </div>
-
-            <button onClick={() => setSelectedCourse(course)}>
-              View Details
-            </button>
-          </div>
-        ))}
-      </div>
-    </section>
-  }
-/>
-
-<Route
-  path="/ctet-tet/courses/ctet"
-  element={
-    <section className="coursePages courseTrackPage">
-      <div className="sectionHeader">
-        <span className="badge">CTET Track</span>
-
-        <h1>CTET Complete Preparation Program</h1>
-
-        <p>
-          A focused CTET preparation path with notes, mock tests,
-          current affairs support, premium plans, and mentor guidance.
-        </p>
-      </div>
-
-      <div className="courseGrid">
-        <button onClick={() => navigate("/ctet-tet/notes")}>
-          📘 CTET Notes
-        </button>
-
-        <button onClick={() => navigate("/ctet-tet/mock-tests")}>
-          📝 CTET Mock Tests
-        </button>
-
-        <button onClick={() => navigate("/ctet-tet/current-affairs")}>
-          🗞️ Current Affairs
-        </button>
-
-        <button onClick={() => navigate("/ctet-tet/pricing")}>
-          💎 Premium Plans
-        </button>
-
-        <button onClick={() => navigate("/ctet-tet/courses")}>
-          🔙 Back to Courses
-        </button>
-      </div>
-    </section>
-  }
-/>
-
-<Route
-  path="/ctet-tet/courses/tet"
-  element={
-    <section className="coursePages courseTrackPage">
-      <div className="sectionHeader">
-        <span className="badge">TET Track</span>
-
-        <h1>State TET Preparation Program</h1>
-
-        <p>
-          A focused State TET preparation path with syllabus support,
-          notes, mock tests, current affairs, premium plans, and mentor guidance.
-        </p>
-      </div>
-
-      <div className="courseGrid">
-        <button onClick={() => navigate("/ctet-tet/notes")}>
-          📘 TET Notes
-        </button>
-
-        <button onClick={() => navigate("/ctet-tet/mock-tests")}>
-          📝 TET Mock Tests
-        </button>
-
-        <button onClick={() => navigate("/ctet-tet/current-affairs")}>
-          🗞️ Current Affairs
-        </button>
-
-        <button onClick={() => navigate("/ctet-tet/pricing")}>
-          💎 Premium Plans
-        </button>
-
-        <button onClick={() => navigate("/ctet-tet/courses")}>
-          🔙 Back to Courses
-        </button>
-      </div>
-    </section>
-  }
-/>
 
 
-<Route
-  path="/ctet-tet/notes"
-  element={
-    <section className="coursePages">
-      <div className="sectionHeader">
-        <span className="badge">CTET / TET Notes</span>
-
-        <h2>Notes & Revision Library</h2>
-
-        <p>
-          Access free notes, premium notes, revision sheets,
-          CDP notes, PYQ notes, and mentor-curated study material.
-        </p>
-      </div>
-
-      <div className="notesNetflixLibrary">
-        {Object.entries(dynamicNotesLibraryData).map(([planName, subjects]) => (
-          <div className="notesShelf" key={planName}>
-            <div className="notesShelfHeader">
-              <h2>
-                {planName === "FREE" && "📘 FREE NOTES"}
-                {planName === "BASIC" && "🔷 BASIC NOTES"}
-                {planName === "PREMIUM" && "⭐ PREMIUM LIBRARY"}
-                {planName === "MENTORSHIP" && "👩‍🏫 MENTORSHIP VAULT"}
-              </h2>
-
-              <span>{subjects.length} Subjects</span>
-            </div>
-
-            <div className="notesShelfScrollWrap">
-              {notesScrollState[`notes-row-${planName}`]?.canScroll &&
-                !notesScrollState[`notes-row-${planName}`]?.atStart && (
-                  <button
-                    type="button"
-                    className="notesShelfArrow notesShelfArrowLeft"
-                    onClick={() =>
-                      scrollShelf(`notes-row-${planName}`, "left")
-                    }
-                  >
-                    ‹
-                  </button>
-                )}
-
-              <div
-                className="notesSubjectRow"
-                id={`notes-row-${planName}`}
-                onScroll={() =>
-                  updateNotesScrollState(`notes-row-${planName}`)
-                }
-                onMouseEnter={() =>
-                  updateNotesScrollState(`notes-row-${planName}`)
-                }
-              >
-                {subjects.map((subject) => (
-                  <button
-                    type="button"
-                    className="notesSubjectCard"
-                    key={subject.id}
-                    onClick={() =>
-                      navigate(
-                        `/ctet-tet/notes/plan/${planName}/${encodeURIComponent(
-                          subject.id
-                        )}`
-                      )
-                    }
-                  >
-                    <div className="notesSubjectIcon">{subject.cover}</div>
-                    <h3>{subject.title}</h3>
-                    <p>{subject.description}</p>
-                    <span className="notesSubjectTag">{planName}</span>
-                  </button>
-                ))}
-              </div>
-
-              {notesScrollState[`notes-row-${planName}`]?.canScroll &&
-                !notesScrollState[`notes-row-${planName}`]?.atEnd && (
-                  <button
-                    type="button"
-                    className="notesShelfArrow notesShelfArrowRight"
-                    onClick={() =>
-                      scrollShelf(`notes-row-${planName}`, "right")
-                    }
-                  >
-                    ›
-                  </button>
-                )}
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  }
-/>
-
-<Route
-  path="/ctet-tet/notes/plan/:plan"
-  element={
-    <section className="coursePages">
-      <div className="sectionHeader">
-        <span className="badge">{activeNotesPlan} NOTES</span>
-
-        <h2>{activeNotesPlan} Subject Library</h2>
-
-        <p>Choose a subject to open chapters and PDF resources.</p>
-      </div>
-
-      <div className="notesShelfScrollWrap">
-        {notesScrollState[`notes-row-${activeNotesPlan}`]?.canScroll &&
-          !notesScrollState[`notes-row-${activeNotesPlan}`]?.atStart && (
-            <button
-              type="button"
-              className="notesShelfArrow notesShelfArrowLeft"
-              onClick={() =>
-                scrollShelf(`notes-row-${activeNotesPlan}`, "left")
-              }
-            >
-              ‹
-            </button>
-          )}
-
-        <div
-          className="notesSubjectRow"
-          id={`notes-row-${activeNotesPlan}`}
-          onScroll={() =>
-            updateNotesScrollState(`notes-row-${activeNotesPlan}`)
-          }
-          onMouseEnter={() =>
-            updateNotesScrollState(`notes-row-${activeNotesPlan}`)
-          }
-        >
-          {(dynamicNotesLibraryData[activeNotesPlan] || []).map((subject) => (
-            <button
-              type="button"
-              className="notesSubjectCard"
-              key={subject.id}
-              onClick={() =>
-                navigate(
-                  `/ctet-tet/notes/plan/${activeNotesPlan}/${encodeURIComponent(subject.id)}`
-                )
-              }
-            >
-              <div className="notesSubjectIcon">{subject.cover}</div>
-              <h3>{subject.title}</h3>
-              <p>{subject.description}</p>
-              <span className="notesSubjectTag">{activeNotesPlan}</span>
-            </button>
-          ))}
         </div>
 
-        {notesScrollState[`notes-row-${activeNotesPlan}`]?.canScroll &&
-          !notesScrollState[`notes-row-${activeNotesPlan}`]?.atEnd && (
-            <button
-              type="button"
-              className="notesShelfArrow notesShelfArrowRight"
-              onClick={() =>
-                scrollShelf(`notes-row-${activeNotesPlan}`, "right")
-              }
-            >
-              ›
-            </button>
-          )}
+        <div className="academyOverviewCard disabled">
+
+          <h3>Psychology</h3>
+
+          <p>
+            Future learning domain for psychology-focused academic study.
+          </p>
+
+          <span>Launching Soon</span>
+
+        </div>
+
+        <div className="academyOverviewCard disabled">
+
+          <h3>B.Ed / D.El.Ed</h3>
+
+          <p>
+            Future domain for teaching education and pedagogy learning.
+          </p>
+
+          <span>Launching Soon</span>
+
+        </div>
+
       </div>
-    </section>
-  }
-/>
 
-<Route
-  path="/ctet-tet/notes/plan/:plan/:subjectId"
-  element={
-    <section className="notesSubjectRoutePage">
-      <button onClick={() => navigate("/ctet-tet/notes")}>
-        ← Back to Notes Library
-      </button>
+{/* SCREEN 4 — LEARNING EXPERIENCE */}
+<div className="academyStorySection">
 
-      <span className="notesSubjectRouteBadge">
-        {activeNotesPlan} LIBRARY
-      </span>
+  <div className="academyStoryText">
 
-      <h1>
-        {activeNotesSubject?.cover}{" "}
-        {activeNotesSubject?.title || "Subject Library"}
-      </h1>
+    <span>LEARNING EXPERIENCE</span>
 
+    <h2>
+      A clear learning journey
+      from study to progress.
+    </h2>
 
-      <p>
-        Subject-wise PDF library. PDF resources will appear here.
-      </p>
+    <p>
+      AspireNest keeps preparation simple and organized:
+      students choose a learning domain, access study resources,
+      practice with structured systems, and track their progress
+      step by step.
+    </p>
 
-      <div className="chapterLibraryStack">
-  {Object.keys(
-    universalNotes
-      .filter((item) => {
-        const itemPlan = item.planType?.toUpperCase();
-
-        const normalizeSubject = (value = "") =>
-          value
-            .toString()
-            .toLowerCase()
-            .trim()
-            .replace(/-/g, " ")
-            .replace(/\s+/g, " ");
-
-        const itemSubject = normalizeSubject(
-          item.subject || item.category || ""
-        );
-
-        const activeSubject = normalizeSubject(
-          activeNotesSubject?.id || activeNotesSubjectId || ""
-        );
-
-        return (
-          itemPlan === activeNotesPlan &&
-          (
-            itemSubject.includes(activeSubject) ||
-            activeSubject.includes(itemSubject)
-          )
-        );
-      })
-      .reduce((chapters, pdf) => {
-        const chapterName =
-          pdf.chapter?.trim() || "General Notes";
-
-        const chapterId = chapterName
-          .toLowerCase()
-          .trim()
-          .replace(/\s+/g, "-");
-
-        return {
-          ...chapters,
-          [chapterId]: chapterName,
-        };
-      }, {})
-  ).map((chapterId) => {
-    const chapterName = universalNotes
-      .filter((item) => {
-        const itemPlan = item.planType?.toUpperCase();
-
-        const normalizeSubject = (value = "") =>
-          value
-            .toString()
-            .toLowerCase()
-            .trim()
-            .replace(/-/g, " ")
-            .replace(/\s+/g, " ");
-
-        const itemSubject = normalizeSubject(
-          item.subject || item.category || ""
-        );
-
-        const activeSubject = normalizeSubject(
-          activeNotesSubject?.id || activeNotesSubjectId || ""
-        );
-
-        return (
-          itemPlan === activeNotesPlan &&
-          (
-            itemSubject.includes(activeSubject) ||
-            activeSubject.includes(itemSubject)
-          )
-        );
-      })
-      .reduce((chapters, pdf) => {
-        const chapterName =
-          pdf.chapter?.trim() || "General Notes";
-
-        const id = chapterName
-          .toLowerCase()
-          .trim()
-          .replace(/\s+/g, "-");
-
-        return {
-          ...chapters,
-          [id]: chapterName,
-        };
-      }, {})[chapterId];
-
-    return (
-      <button
-        type="button"
-        className="notesSubjectCard chapterLibraryCard"
-        key={chapterId}
-        onClick={() =>
-          navigate(
-            `/ctet-tet/notes/plan/${activeNotesPlan}/${activeNotesSubjectId}/${chapterId}`
-          )
-        }
-      >
-        <div className="notesSubjectIcon">📘</div>
-        <h3>{chapterName}</h3>
-        <p>Open chapter PDFs</p>
-        <span className="notesSubjectTag">
-          {activeNotesPlan}
-        </span>
-      </button>
-    );
-  })}
   </div>
-    </section>
-  }
-/>
 
-<Route
- path="/ctet-tet/notes/plan/:plan/:subjectId/:chapterId"
-  element={
-    <section className="notesSubjectRoutePage">
-      <button
-        onClick={() =>
-          navigate(
-            `/ctet-tet/notes/plan/${activeNotesPlan}/${activeNotesSubjectId}`
-          )
-        }
-      >
-        ← Back to Chapters
-      </button>
+  <div className="academyStoryVisual">
 
-      <span className="notesSubjectRouteBadge">
-        {activeNotesPlan} CHAPTER
-      </span>
+    <div className="academyVisualCard">
 
-      <h1>
-        {location.pathname
-          .split("/")
-          .pop()
-          ?.replace(/-/g, " ")
-          .replace(/\b\w/g, (char) => char.toUpperCase())}
-      </h1>
+      <h3>Student Learning Flow</h3>
 
-      <p>
-        Chapter-wise PDF library. Open or download your study PDFs.
-      </p>
-
-      <div className="pdfShelfRow">
-        {universalNotes
-          .filter((item) => {
-            const itemPlan = item.planType?.toUpperCase();
-
-            const normalizeValue = (value = "") =>
-              value
-                .toString()
-                .toLowerCase()
-                .trim()
-                .replace(/-/g, " ")
-                .replace(/\s+/g, " ");
-
-            const itemSubject = normalizeValue(
-              item.subject || item.category || ""
-            );
-
-            const activeSubject = normalizeValue(
-              activeNotesSubject?.id || activeNotesSubjectId || ""
-            );
-
-            const itemChapter = normalizeValue(
-              item.chapter || "General Notes"
-            );
-
-            const activeChapter = normalizeValue(
-              location.pathname.split("/").pop() || ""
-            );
-
-            return (
-              itemPlan === activeNotesPlan &&
-              (
-                itemSubject.includes(activeSubject) ||
-                activeSubject.includes(itemSubject)
-              ) &&
-              itemChapter.includes(activeChapter) ||
-              activeChapter.includes(itemChapter)
-            );
-          })
-          .map((pdf) => (
-            <div className="pdfMiniCard" key={pdf.id}>
-              <div className="pdfIcon">📄</div>
-
-              <h3>{pdf.title}</h3>
-
-              <p>{pdf.chapter || "Premium Study Material"}</p>
-
-              <span>{pdf.planType}</span>
-
-              <button
-                className="btnLink"
-                onClick={() =>
-                  handleNoteAccess({
-                    ...pdf,
-                    pdf: pdf.fileUrl || pdf.pdfUrl || pdf.pdf,
-                  })
-                }
-              >
-                Open PDF
-              </button>
-            </div>
-          ))}
+      <div className="academyVisualList">
+        <p>✅ Choose a learning domain</p>
+        <p>✅ Study with organized resources</p>
+        <p>✅ Practice with mock systems</p>
+        <p>✅ Track preparation progress</p>
       </div>
-    </section>
-  }
-/>
 
-<Route
-  path="/ctet-tet/mock-tests"
-  element={
-    <section className="coursePages mockMasterPage">
-      <div className="sectionHeader">
-        <span className="badge">CTET / TET Practice Center</span>
+    </div>
 
-        <h1>Mock Tests & Performance Practice</h1>
+  </div>
+
+</div>
+
+      {/* SCREEN 5 — FUTURE VISION */}
+      <div className="academyFinalCTA">
+
+
+        <h2>
+          Built to expand into a complete
+          academic learning ecosystem.
+        </h2>
 
         <p>
-          Practice CTET/TET questions, attempt mock tests,
-          review performance, and improve your preparation with
-          structured exam-style practice.
+          AspireNest starts with CTET/TET and can grow into multiple
+          subject-wise learning domains without changing the core platform.
         </p>
+
       </div>
 
-      <div className="mockActionGrid">
-        <div
-          className="mockActionCard"
-          onClick={() => navigate("/ctet-tet/mock-tests")}
-        >
-          <div className="mockActionIcon">📝</div>
-
-          <h3>Start Mock Test</h3>
-
-          <p>
-            Attempt topic-wise practice, revision tests,
-            PYQ-style questions, and full-length mock tests.
-          </p>
-
-          <span>Start Practice →</span>
-        </div>
-
-        <div
-          className="mockActionCard"
-          onClick={() => navigate("/leaderboard")}
-        >
-          <div className="mockActionIcon">🏆</div>
-
-          <h3>Leaderboard</h3>
-
-          <p>
-            View rankings, compare progress, and track your
-            preparation performance.
-          </p>
-
-          <span>View Rankings →</span>
-        </div>
-
-        <div
-          className="mockActionCard"
-          onClick={() => navigate("/ctet-tet/courses")}
-        >
-          <div className="mockActionIcon">📚</div>
-
-          <h3>Back to Courses</h3>
-
-          <p>
-            Return to CTET/TET courses and continue your
-            structured preparation path.
-          </p>
-
-          <span>Open Courses →</span>
-        </div>
-
-        <div
-          className="mockActionCard"
-          onClick={() => navigate("/ctet-tet")}
-        >
-          <div className="mockActionIcon">🔙</div>
-
-          <h3>Back to CTET/TET Hub</h3>
-
-          <p>
-            Return to the main CTET/TET learning dashboard.
-          </p>
-
-          <span>Go Back →</span>
-        </div>
-      </div>
-
-      <div className="premiumMockContainer">
-        <MockTest />
-      </div>
     </section>
   }
 />
-
 <Route
-  path="/subjects/ctet-tet/current-affairs"
+  path="/login"
   element={
-    <section className="coursePages currentAffairsPremiumPage">
-      <CurrentAffairs
-       currentAffairsList={[
-        ...universalCurrentAffairs,
-        ...currentAffairsList,
-      ]}
-        fallbackCurrentAffairs={fallbackCurrentAffairs}
-        handleNoteAccess={handleNoteAccess}
-        isPremiumUser={isPremiumUser}
-        userPlanType={userPlanType}
-        hasPlanAccess={hasPlanAccess}
-        setActiveSection={setActiveSection}
-      />
-    </section>
+    <AuthSection
+      email={email}
+      setEmail={setEmail}
+      password={password}
+      setPassword={setPassword}
+      handleLogin={handleLogin}
+      handleGoogleLogin={handleGoogleLogin}
+      handleForgotPassword={handleForgotPassword}
+      handleRegister={handleRegister}
+    />
   }
 />
-
-
-
-
-<Route
-  path="/subjects/ctet-tet/pricing"
-  element={
-    <section className="coursePages pricingMasterPage">
-      <div className="sectionHeader">
-        <span className="badge">CTET / TET Plans</span>
-
-        <h2>Choose Your CTET/TET Learning Plan</h2>
-
-        <p>
-          Select Basic, Premium, or Mentorship access for
-          notes, tests, dashboard, AI classroom, and mentor guidance.
-        </p>
-      </div>
-
-      <div className="pricingActionGrid">
-        <div
-          className="pricingActionCard"
-          onClick={() => navigate("/subjects/ctet-tet/pricing")}
-        >
-          <div className="pricingActionIcon">💎</div>
-
-          <h3>View Plans</h3>
-
-          <p>
-            Compare Premium, Mentorship, and advanced
-            learning access for complete preparation.
-          </p>
-
-          <span>Explore Plans →</span>
-        </div>
-
-        <div
-          className="pricingActionCard"
-          onClick={() => navigate("/payment")}
-        >
-          <div className="pricingActionIcon">🧾</div>
-
-          <h3>Upgrade Now</h3>
-
-          <p>
-            Unlock premium notes, tests, dashboards,
-            AI classroom, and mentorship support.
-          </p>
-
-          <span>Upgrade Access →</span>
-        </div>
-
-        <div
-          className="pricingActionCard"
-          onClick={() => navigate("/subjects/ctet-tet")}
-        >
-          <div className="pricingActionIcon">🔙</div>
-
-          <h3>Back to Hub</h3>
-
-          <p>
-            Return to the CTET/TET ecosystem and continue
-            your structured preparation journey.
-          </p>
-
-          <span>Go Back →</span>
-        </div>
-      </div>
-
-      <div className="premiumPricingContainer">
-        <Pricing
-          createPaymentRequest={createPaymentRequest}
-          isPremiumUser={isPremiumUser}
-          setActiveSection={setActiveSection}
-        />
-      </div>
-    </section>
-  }
-/>
-
-
-
-
-
-
-
-
-
-
-
-
-
 <Route
   path="/subjects"
   element={
@@ -4345,7 +3597,6 @@ isAdmin={isAdmin}
     </section>
   }
 />
-
 
 
 <Route
@@ -4411,7 +3662,7 @@ isAdmin={isAdmin}
 
 <div
   className="subjectHubCard"
-  onClick={() => navigate("/subjects/ctet-tet/current-affairs")}
+  onClick={() => navigate("/ctet-tet/current-affairs")}
 >
   <div className="subjectHubIcon">📰</div>
 
@@ -4458,8 +3709,71 @@ isAdmin={isAdmin}
     </section>
   }
 />
+<Route
+  path="/courses/ctet"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">CTET Course</span>
 
+        <h2>CTET Complete Preparation Program</h2>
 
+        <p>
+          Learn Child Development & Pedagogy,
+          Language, Maths, EVS, and exam strategy
+          through premium mentor-guided preparation.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        <button onClick={() => navigate("/ctet-tet/notes")}>
+          📘 CTET Notes
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet/mock-tests")}>
+          📝 CTET Mock Tests
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
+          💎 Premium Plans
+        </button>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/courses/tet"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">TET Course</span>
+
+        <h2>State TET Preparation Program</h2>
+
+        <p>
+          Prepare for State TET examinations with
+          structured courses, premium notes,
+          mock tests, and mentor guidance.
+        </p>
+      </div>
+
+      <div className="courseGrid">
+        <button onClick={() => navigate("/ctet-tet/notes")}>
+          📘 TET Notes
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet/mock-tests")}>
+          📝 TET Mock Tests
+        </button>
+
+        <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
+          💎 Premium Plans
+        </button>
+      </div>
+    </section>
+  }
+/>
 <Route
   path="/notes"
   element={
@@ -5484,6 +4798,7 @@ isAdmin={isAdmin}
                     setNotesCmsChapter(item.chapter || "");
                     setNotesCmsMonth(item.month || "");
                     setNotesCmsYear(item.year || "");
+                    setNotesCmsWeek(item.week || "");
                     setNotesCmsPdfUrl(item.pdfUrl || "");
                     setNotesCmsThumbnailUrl(item.thumbnailUrl || "");
                     setNotesCmsStatus(item.status || "Draft");
@@ -5960,6 +5275,15 @@ isAdmin={isAdmin}
                 setNotesCmsMonth(e.target.value)
               }
             />
+
+<input
+  type="text"
+  placeholder="Week (Week 1 / Week 2 / Week 3 / Week 4)"
+  value={notesCmsWeek}
+  onChange={(e) =>
+    setNotesCmsWeek(e.target.value)
+  }
+/>
 
             <input
               type="text"
@@ -6792,7 +6116,9 @@ isAdmin={isAdmin}
 
           const groupedWeeks = monthItems.reduce((groups, item) => {
             const weekName =
-              item.chapter?.trim() || "General PDFs";
+            item.week?.trim() ||
+            item.chapter?.trim() ||
+            "Monthly PDFs";
 
             if (!groups[weekName]) {
               groups[weekName] = [];
@@ -6827,11 +6153,13 @@ isAdmin={isAdmin}
                 ) : (
                   Object.entries(groupedWeeks).map(([weekName, items]) => (
                     <div className="contentStudioItem" key={weekName}>
-                      <strong>{weekName}</strong>
+                   <div className="sectionHeader">
+  <h2>{weekName}</h2>
 
-                      <p>
-                        {items.length} PDF{items.length > 1 ? "s" : ""} in {monthTitle}
-                      </p>
+  <p>
+    {items.length} PDF{items.length > 1 ? "s" : ""} in {monthTitle}
+  </p>
+</div>
 
                       <div className="contentStudioList">
                         {items.map((item) => (
@@ -6876,6 +6204,32 @@ isAdmin={isAdmin}
                               >
                                 Edit
                               </button>
+
+                              <button
+  className="backButton"
+  onClick={async () => {
+    const newStatus =
+      item.status === CONTENT_STATUS.PUBLISHED
+        ? CONTENT_STATUS.DRAFT
+        : CONTENT_STATUS.PUBLISHED;
+
+    await updateContentItem(item.id, {
+      status: newStatus,
+    });
+
+    await loadContentItemsFromFirestore();
+
+    alert(
+      newStatus === CONTENT_STATUS.PUBLISHED
+        ? "Current affair published successfully ✅"
+        : "Current affair unpublished successfully ✅"
+    );
+  }}
+>
+  {item.status === CONTENT_STATUS.PUBLISHED
+    ? "Unpublish"
+    : "Publish"}
+</button>
 
                               <button
                                 className="backButton"
@@ -6931,6 +6285,195 @@ This action cannot be undone.`
             </>
           );
         })()}
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/current-affairs/published"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages currentAffairsPublishedPage">
+        <div className="sectionHeader">
+          <span className="badge">
+            PUBLISHED CURRENT AFFAIRS
+          </span>
+
+          <h1>Published Current Affairs PDFs</h1>
+
+          <p>
+            Manage all published CTET/TET current affairs PDFs
+            visible to students by month, week, plan, and status.
+          </p>
+        </div>
+
+        <div className="contentStudioList">
+          {universalCurrentAffairs.filter(
+            (item) =>
+              item.status === CONTENT_STATUS.PUBLISHED ||
+              item.status === "published"
+          ).length === 0 ? (
+            <div className="contentStudioItem">
+              <strong>No published PDFs found.</strong>
+
+              <p>
+                Publish current affairs from the manager or month
+                detail page first.
+              </p>
+            </div>
+          ) : (
+            universalCurrentAffairs
+              .filter(
+                (item) =>
+                  item.status === CONTENT_STATUS.PUBLISHED ||
+                  item.status === "published"
+              )
+              .map((item) => {
+                const monthSlug = (item.month || "")
+                  .toLowerCase()
+                  .trim()
+                  .replace(/\s+/g, "-");
+
+                return (
+                  <div className="contentStudioItem" key={item.id}>
+                    <strong>{item.title}</strong>
+
+                    <p>
+  {item.month || "No Month"}{" "}
+  •{" "}
+  {item.week || item.chapter || "Monthly PDFs"}{" "}
+  •{" "}
+  {item.planType || PLAN_TYPES.FREE}{" "}
+  •{" "}
+  {item.status || CONTENT_STATUS.PUBLISHED}
+</p>
+
+                    <div className="contentStudioActions">
+                      <button
+                        className="backButton"
+                        onClick={() =>
+                          window.open(item.fileUrl, "_blank")
+                        }
+                      >
+                        Open PDF
+                      </button>
+
+                      <button
+                        className="backButton"
+                        onClick={() => {
+                          setEditingCmsId(item.id);
+                          setCmsTitle(item.title || "");
+
+                          const monthParts =
+                            (item.month || "").split(" ");
+
+                          setCmsMonth(monthParts[0] || "");
+                          setCmsDuration(monthParts[1] || "");
+
+                          setCmsChapter(item.week || item.chapter || "");
+                          setCmsPlanType(
+                            item.planType || PLAN_TYPES.FREE
+                          );
+                          setCmsFileUrl(item.fileUrl || "");
+                          setCmsStatus(
+                            item.status || CONTENT_STATUS.PUBLISHED
+                          );
+
+                          navigate(
+                            "/admin/content/current-affairs/add"
+                          );
+                        }}
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        className="backButton"
+                        onClick={async () => {
+                          await updateContentItem(item.id, {
+                            status: CONTENT_STATUS.DRAFT,
+                          });
+
+                          await loadContentItemsFromFirestore();
+
+                          alert(
+                            "Current affair unpublished successfully ✅"
+                          );
+                        }}
+                      >
+                        Unpublish
+                      </button>
+
+                      <button
+                        className="backButton"
+                        onClick={() =>
+                          navigate(
+                            `/admin/content/current-affairs/months/${monthSlug}`
+                          )
+                        }
+                      >
+                        View Month
+                      </button>
+
+                      <button
+                        className="backButton"
+                        onClick={async () => {
+                          const confirmDelete = window.confirm(
+                            `Delete "${item.title}" permanently?
+
+Students may lose access to this current affair PDF.
+
+This action cannot be undone.`
+                          );
+
+                          if (!confirmDelete) return;
+
+                          await deleteContentItem(item.id);
+                          await loadContentItemsFromFirestore();
+
+                          alert(
+                            "Current affair deleted successfully ✅"
+                          );
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+          )}
+        </div>
+
+        <div className="contentStudioActions">
+          <button
+            className="backButton"
+            onClick={() =>
+              navigate("/admin/content/current-affairs")
+            }
+          >
+            ← Back to Current Affairs Manager
+          </button>
+
+          <button
+            className="publishButton"
+            onClick={() =>
+              navigate("/admin/content/current-affairs/add")
+            }
+          >
+            + Add Current Affair
+          </button>
+
+          <button
+            className="backButton"
+            onClick={() =>
+              navigate("/admin/content/current-affairs/months")
+            }
+          >
+            View Months
+          </button>
+        </div>
       </section>
     ) : null
   }
@@ -7856,10 +7399,833 @@ handleSaveUniversalContent={handleSaveUniversalContent}
     </section>
   }
 />
+<Route
+  path="/subjects/ctet-tet/courses"
+  element={
+    <section className="coursePages coursesMasterPage">
+      <div className="sectionHeader">
+        <span className="badge">CTET / TET Courses</span>
+
+        <h1>Courses for CTET & TET Preparation</h1>
+
+        <p>
+          Choose structured learning programs, topic-wise courses,
+          crash courses, and mentor-guided preparation paths.
+        </p>
+      </div>
+
+      <div className="coursePathGrid">
+        <div
+          className="coursePathCard"
+          onClick={() => navigate("/courses/ctet")}
+        >
+          <div className="coursePathIcon">📘</div>
+          <h3>CTET Course</h3>
+          <p>Paper-wise structured preparation for CTET aspirants.</p>
+          <span>Open CTET Track →</span>
+        </div>
+
+        <div
+          className="coursePathCard"
+          onClick={() => navigate("/courses/tet")}
+        >
+          <div className="coursePathIcon">🧑‍🏫</div>
+          <h3>TET Course</h3>
+          <p>State TET preparation with syllabus, PYQ and mock practice.</p>
+          <span>Open TET Track →</span>
+        </div>
+
+        <div
+          className="coursePathCard"
+          onClick={() => navigate("/subjects/ctet-tet")}
+        >
+          <div className="coursePathIcon">🔙</div>
+          <h3>Back to Hub</h3>
+          <p>Return to the full CTET/TET learning ecosystem.</p>
+          <span>Go Back →</span>
+        </div>
+      </div>
+
+      <div className="premiumCourseShelf">
+        {courses.map((course, index) => (
+          <div className="premiumCourseCard" key={`${course.id}-${index}`}>
+            <span className="planTag">{course.badge}</span>
+
+            <h3>{course.title}</h3>
+            <p>{course.desc}</p>
+
+            <div className="courseMetaGrid">
+              <span><strong>Level</strong>{course.level}</span>
+              <span><strong>Lessons</strong>{course.lessons}</span>
+              <span><strong>Tests</strong>{course.tests}</span>
+              <span><strong>Price</strong>{course.price}</span>
+            </div>
+
+            <button onClick={() => setSelectedCourse(course)}>
+              View Details
+            </button>
+          </div>
+        ))}
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/ctet-tet/notes"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">CTET / TET Notes</span>
+
+        <h2>Notes & Revision Library</h2>
+
+        <p>
+          Access free notes, premium notes, revision sheets,
+          CDP notes, PYQ notes, and mentor-curated study material.
+        </p>
+      </div>
+
+      <div className="notesNetflixLibrary">
+        {Object.entries(dynamicNotesLibraryData).map(([planName, subjects]) => (
+          <div className="notesShelf" key={planName}>
+            <div className="notesShelfHeader">
+              <h2>
+                {planName === "FREE" && "📘 FREE NOTES"}
+                {planName === "BASIC" && "🔷 BASIC NOTES"}
+                {planName === "PREMIUM" && "⭐ PREMIUM LIBRARY"}
+                {planName === "MENTORSHIP" && "👩‍🏫 MENTORSHIP VAULT"}
+              </h2>
+
+              <span>{subjects.length} Subjects</span>
+            </div>
+
+            <div className="notesShelfScrollWrap">
+              {notesScrollState[`notes-row-${planName}`]?.canScroll &&
+                !notesScrollState[`notes-row-${planName}`]?.atStart && (
+                  <button
+                    type="button"
+                    className="notesShelfArrow notesShelfArrowLeft"
+                    onClick={() =>
+                      scrollShelf(`notes-row-${planName}`, "left")
+                    }
+                  >
+                    ‹
+                  </button>
+                )}
+
+              <div
+                className="notesSubjectRow"
+                id={`notes-row-${planName}`}
+                onScroll={() =>
+                  updateNotesScrollState(`notes-row-${planName}`)
+                }
+                onMouseEnter={() =>
+                  updateNotesScrollState(`notes-row-${planName}`)
+                }
+              >
+                {subjects.map((subject) => (
+                  <button
+                    type="button"
+                    className="notesSubjectCard"
+                    key={subject.id}
+                    onClick={() =>
+                      navigate(
+                        `/ctet-tet/notes/plan/${planName}/${encodeURIComponent(
+                          subject.id
+                        )}`
+                      )
+                    }
+                  >
+                    <div className="notesSubjectIcon">{subject.cover}</div>
+                    <h3>{subject.title}</h3>
+                    <p>{subject.description}</p>
+                    <span className="notesSubjectTag">{planName}</span>
+                  </button>
+                ))}
+              </div>
+
+              {notesScrollState[`notes-row-${planName}`]?.canScroll &&
+                !notesScrollState[`notes-row-${planName}`]?.atEnd && (
+                  <button
+                    type="button"
+                    className="notesShelfArrow notesShelfArrowRight"
+                    onClick={() =>
+                      scrollShelf(`notes-row-${planName}`, "right")
+                    }
+                  >
+                    ›
+                  </button>
+                )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/ctet-tet/notes/plan/:plan"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">{activeNotesPlan} NOTES</span>
+
+        <h2>{activeNotesPlan} Subject Library</h2>
+
+        <p>Choose a subject to open chapters and PDF resources.</p>
+      </div>
+
+      <div className="notesShelfScrollWrap">
+        {notesScrollState[`notes-row-${activeNotesPlan}`]?.canScroll &&
+          !notesScrollState[`notes-row-${activeNotesPlan}`]?.atStart && (
+            <button
+              type="button"
+              className="notesShelfArrow notesShelfArrowLeft"
+              onClick={() =>
+                scrollShelf(`notes-row-${activeNotesPlan}`, "left")
+              }
+            >
+              ‹
+            </button>
+          )}
+
+        <div
+          className="notesSubjectRow"
+          id={`notes-row-${activeNotesPlan}`}
+          onScroll={() =>
+            updateNotesScrollState(`notes-row-${activeNotesPlan}`)
+          }
+          onMouseEnter={() =>
+            updateNotesScrollState(`notes-row-${activeNotesPlan}`)
+          }
+        >
+          {(dynamicNotesLibraryData[activeNotesPlan] || []).map((subject) => (
+            <button
+              type="button"
+              className="notesSubjectCard"
+              key={subject.id}
+              onClick={() =>
+                navigate(
+                  `/ctet-tet/notes/plan/${activeNotesPlan}/${encodeURIComponent(subject.id)}`
+                )
+              }
+            >
+              <div className="notesSubjectIcon">{subject.cover}</div>
+              <h3>{subject.title}</h3>
+              <p>{subject.description}</p>
+              <span className="notesSubjectTag">{activeNotesPlan}</span>
+            </button>
+          ))}
+        </div>
+
+        {notesScrollState[`notes-row-${activeNotesPlan}`]?.canScroll &&
+          !notesScrollState[`notes-row-${activeNotesPlan}`]?.atEnd && (
+            <button
+              type="button"
+              className="notesShelfArrow notesShelfArrowRight"
+              onClick={() =>
+                scrollShelf(`notes-row-${activeNotesPlan}`, "right")
+              }
+            >
+              ›
+            </button>
+          )}
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/ctet-tet/notes/plan/:plan/:subjectId"
+  element={
+    <section className="notesSubjectRoutePage">
+      <button onClick={() => navigate("/ctet-tet/notes")}>
+        ← Back to Notes Library
+      </button>
+
+      <span className="notesSubjectRouteBadge">
+        {activeNotesPlan} LIBRARY
+      </span>
+
+      <h1>
+        {activeNotesSubject?.cover}{" "}
+        {activeNotesSubject?.title || "Subject Library"}
+      </h1>
 
 
+      <p>
+        Subject-wise PDF library. PDF resources will appear here.
+      </p>
 
+      <div className="chapterLibraryStack">
+  {Object.keys(
+    universalNotes
+      .filter((item) => {
+        const itemPlan = item.planType?.toUpperCase();
 
+        const normalizeSubject = (value = "") =>
+          value
+            .toString()
+            .toLowerCase()
+            .trim()
+            .replace(/-/g, " ")
+            .replace(/\s+/g, " ");
+
+        const itemSubject = normalizeSubject(
+          item.subject || item.category || ""
+        );
+
+        const activeSubject = normalizeSubject(
+          activeNotesSubject?.id || activeNotesSubjectId || ""
+        );
+
+        return (
+          itemPlan === activeNotesPlan &&
+          (
+            itemSubject.includes(activeSubject) ||
+            activeSubject.includes(itemSubject)
+          )
+        );
+      })
+      .reduce((chapters, pdf) => {
+        const chapterName =
+          pdf.chapter?.trim() || "General Notes";
+
+        const chapterId = chapterName
+          .toLowerCase()
+          .trim()
+          .replace(/\s+/g, "-");
+
+        return {
+          ...chapters,
+          [chapterId]: chapterName,
+        };
+      }, {})
+  ).map((chapterId) => {
+    const chapterName = universalNotes
+      .filter((item) => {
+        const itemPlan = item.planType?.toUpperCase();
+
+        const normalizeSubject = (value = "") =>
+          value
+            .toString()
+            .toLowerCase()
+            .trim()
+            .replace(/-/g, " ")
+            .replace(/\s+/g, " ");
+
+        const itemSubject = normalizeSubject(
+          item.subject || item.category || ""
+        );
+
+        const activeSubject = normalizeSubject(
+          activeNotesSubject?.id || activeNotesSubjectId || ""
+        );
+
+        return (
+          itemPlan === activeNotesPlan &&
+          (
+            itemSubject.includes(activeSubject) ||
+            activeSubject.includes(itemSubject)
+          )
+        );
+      })
+      .reduce((chapters, pdf) => {
+        const chapterName =
+          pdf.chapter?.trim() || "General Notes";
+
+        const id = chapterName
+          .toLowerCase()
+          .trim()
+          .replace(/\s+/g, "-");
+
+        return {
+          ...chapters,
+          [id]: chapterName,
+        };
+      }, {})[chapterId];
+
+    return (
+      <button
+        type="button"
+        className="notesSubjectCard chapterLibraryCard"
+        key={chapterId}
+        onClick={() =>
+          navigate(
+            `/ctet-tet/notes/plan/${activeNotesPlan}/${activeNotesSubjectId}/${chapterId}`
+          )
+        }
+      >
+        <div className="notesSubjectIcon">📘</div>
+        <h3>{chapterName}</h3>
+        <p>Open chapter PDFs</p>
+        <span className="notesSubjectTag">
+          {activeNotesPlan}
+        </span>
+      </button>
+    );
+  })}
+  </div>
+    </section>
+  }
+/>
+
+<Route
+ path="/ctet-tet/notes/plan/:plan/:subjectId/:chapterId"
+  element={
+    <section className="notesSubjectRoutePage">
+      <button
+        onClick={() =>
+          navigate(
+            `/ctet-tet/notes/plan/${activeNotesPlan}/${activeNotesSubjectId}`
+          )
+        }
+      >
+        ← Back to Chapters
+      </button>
+
+      <span className="notesSubjectRouteBadge">
+        {activeNotesPlan} CHAPTER
+      </span>
+
+      <h1>
+        {location.pathname
+          .split("/")
+          .pop()
+          ?.replace(/-/g, " ")
+          .replace(/\b\w/g, (char) => char.toUpperCase())}
+      </h1>
+
+      <p>
+        Chapter-wise PDF library. Open or download your study PDFs.
+      </p>
+
+      <div className="pdfShelfRow">
+        {universalNotes
+          .filter((item) => {
+            const itemPlan = item.planType?.toUpperCase();
+
+            const normalizeValue = (value = "") =>
+              value
+                .toString()
+                .toLowerCase()
+                .trim()
+                .replace(/-/g, " ")
+                .replace(/\s+/g, " ");
+
+            const itemSubject = normalizeValue(
+              item.subject || item.category || ""
+            );
+
+            const activeSubject = normalizeValue(
+              activeNotesSubject?.id || activeNotesSubjectId || ""
+            );
+
+            const itemChapter = normalizeValue(
+              item.chapter || "General Notes"
+            );
+
+            const activeChapter = normalizeValue(
+              location.pathname.split("/").pop() || ""
+            );
+
+            return (
+              itemPlan === activeNotesPlan &&
+              (
+                itemSubject.includes(activeSubject) ||
+                activeSubject.includes(itemSubject)
+              ) &&
+              itemChapter.includes(activeChapter) ||
+              activeChapter.includes(itemChapter)
+            );
+          })
+          .map((pdf) => (
+            <div className="pdfMiniCard" key={pdf.id}>
+              <div className="pdfIcon">📄</div>
+
+              <h3>{pdf.title}</h3>
+
+              <p>{pdf.chapter || "Premium Study Material"}</p>
+
+              <span>{pdf.planType}</span>
+
+              <button
+                className="btnLink"
+                onClick={() =>
+                  handleNoteAccess({
+                    ...pdf,
+                    pdf: pdf.fileUrl || pdf.pdfUrl || pdf.pdf,
+                  })
+                }
+              >
+                Open PDF
+              </button>
+            </div>
+          ))}
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/subjects/ctet-tet/mock-tests"
+  element={
+    <section className="coursePages mockMasterPage">
+      <div className="sectionHeader">
+        <span className="badge">CTET / TET Mock Tests</span>
+
+        <h2>Practice & Performance Center</h2>
+
+        <p>
+          Attempt subject-wise mock tests, PYQs, revision tests,
+          and track your score with analytics.
+        </p>
+      </div>
+
+      <div className="mockActionGrid">
+        <div
+          className="mockActionCard"
+          onClick={() => navigate("/subjects/ctet-tet/mock-tests")}
+        >
+          <div className="mockActionIcon">📝</div>
+
+          <h3>Open Mock Tests</h3>
+
+          <p>
+            Start practice with topic-wise tests, PYQs,
+            revision quizzes, and full-length exams.
+          </p>
+
+          <span>Start Practice →</span>
+        </div>
+
+        <div
+          className="mockActionCard"
+          onClick={() => navigate("/leaderboard")}
+        >
+          <div className="mockActionIcon">🏆</div>
+
+          <h3>Leaderboard</h3>
+
+          <p>
+            Compare performance, rankings, streaks,
+            and overall learning progress.
+          </p>
+
+          <span>View Rankings →</span>
+        </div>
+
+        <div
+          className="mockActionCard"
+          onClick={() => navigate("/subjects/ctet-tet")}
+        >
+          <div className="mockActionIcon">🔙</div>
+
+          <h3>Back to Hub</h3>
+
+          <p>
+            Return to the CTET/TET ecosystem dashboard
+            and continue learning flow.
+          </p>
+
+          <span>Go Back →</span>
+        </div>
+      </div>
+
+      <div className="premiumMockContainer">
+        <MockTest />
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/ctet-tet/current-affairs"
+  element={
+    <section className="coursePages currentAffairsPremiumPage">
+      <div className="sectionHeader">
+        <span className="badge">CTET / TET Current Affairs</span>
+
+        <h1>Current Affairs Library</h1>
+
+        <p>
+          Month-wise current affairs PDFs with weekly grouping,
+          plan access, and exam-focused preparation material.
+        </p>
+      </div>
+
+      <div className="coursePathGrid">
+        {Object.entries(
+          [...universalCurrentAffairs, ...currentAffairsList]
+            .filter(
+              (item) =>
+                item.status === CONTENT_STATUS.PUBLISHED ||
+                item.status === "published"
+            )
+            .reduce((months, item) => {
+              const monthName = item.month || "Current Affairs";
+
+              if (!months[monthName]) {
+                months[monthName] = [];
+              }
+
+              months[monthName].push(item);
+              return months;
+            }, {})
+        ).map(([monthName, items]) => {
+          const monthSlug = monthName
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, "-");
+
+          return (
+            <div
+              className="coursePathCard"
+              key={monthName}
+              onClick={() =>
+                navigate(`/ctet-tet/current-affairs/${monthSlug}`)
+              }
+            >
+              <div className="coursePathIcon">🗞️</div>
+
+              <h3>{monthName}</h3>
+
+              <p>
+                {items.length} PDF{items.length > 1 ? "s" : ""} available
+              </p>
+
+              <span>Open Month →</span>
+            </div>
+          );
+        })}
+
+        <div
+          className="coursePathCard"
+          onClick={() => navigate("/ctet-tet")}
+        >
+          <div className="coursePathIcon">🔙</div>
+          <h3>Back to CTET/TET Hub</h3>
+          <p>Return to the main CTET/TET learning ecosystem.</p>
+          <span>Go Back →</span>
+        </div>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/ctet-tet/current-affairs/:monthId"
+  element={
+    <section className="coursePages currentAffairsPremiumPage">
+      {(() => {
+        const formatSlug = (value = "") =>
+          value
+            .toString()
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, "-");
+
+        const activeMonthId = window.location.pathname
+          .split("/")
+          .pop();
+
+        const publishedCurrentAffairs = [
+          ...universalCurrentAffairs,
+          ...currentAffairsList,
+        ].filter(
+          (item) =>
+            item.status === CONTENT_STATUS.PUBLISHED ||
+            item.status === "published"
+        );
+
+        const monthItems = publishedCurrentAffairs.filter(
+          (item) => formatSlug(item.month) === activeMonthId
+        );
+
+        const monthTitle =
+          monthItems[0]?.month || "Current Affairs Month";
+
+        const groupedWeeks = monthItems.reduce((groups, item) => {
+          const weekName =
+            item.week?.trim() ||
+            item.chapter?.trim() ||
+            "Monthly PDFs";
+
+          if (!groups[weekName]) {
+            groups[weekName] = [];
+          }
+
+          groups[weekName].push(item);
+          return groups;
+        }, {});
+
+        return (
+          <>
+            <div className="sectionHeader">
+              <span className="badge">CURRENT AFFAIRS MONTH</span>
+
+              <h1>{monthTitle}</h1>
+
+              <p>
+                Weekly and monthly CTET/TET current affairs PDFs.
+              </p>
+            </div>
+
+            <div className="contentStudioList">
+              {Object.keys(groupedWeeks).length === 0 ? (
+                <div className="contentStudioItem">
+                  <strong>No PDFs found.</strong>
+                  <p>No published current affairs available for this month.</p>
+                </div>
+              ) : (
+                Object.entries(groupedWeeks).map(([weekName, items]) => (
+                  <div className="contentStudioItem" key={weekName}>
+                    <div className="sectionHeader">
+                      <h2>{weekName}</h2>
+                      <p>
+                        {items.length} PDF{items.length > 1 ? "s" : ""} in{" "}
+                        {monthTitle}
+                      </p>
+                    </div>
+
+                    <div className="contentStudioList">
+                      {items.map((item) => (
+                        <div className="contentStudioItem" key={item.id}>
+                          <strong>{item.title}</strong>
+
+                          <p>
+                            {item.month || "No Month"} •{" "}
+                            {item.week || item.chapter || "Monthly PDFs"} •{" "}
+                            {item.planType || PLAN_TYPES.FREE}
+                          </p>
+
+                          <div className="contentStudioActions">
+                            <button
+                              className="backButton"
+                              onClick={() =>
+                                handleNoteAccess({
+                                  ...item,
+                                  pdfUrl:
+                                    item.fileUrl ||
+                                    item.pdfUrl ||
+                                    item.pdf,
+                                  plan:
+                                    item.planType ||
+                                    item.plan ||
+                                    PLAN_TYPES.FREE,
+                                })
+                              }
+                            >
+                              Open PDF
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="contentStudioActions">
+              <button
+                className="backButton"
+                onClick={() => navigate("/ctet-tet/current-affairs")}
+              >
+                ← Back to Current Affairs
+              </button>
+
+              <button
+                className="backButton"
+                onClick={() => navigate("/ctet-tet")}
+              >
+                Back to CTET/TET Hub
+              </button>
+            </div>
+          </>
+        );
+      })()}
+    </section>
+  }
+/>
+
+<Route
+  path="/subjects/ctet-tet/pricing"
+  element={
+    <section className="coursePages pricingMasterPage">
+      <div className="sectionHeader">
+        <span className="badge">CTET / TET Plans</span>
+
+        <h2>Choose Your CTET/TET Learning Plan</h2>
+
+        <p>
+          Select Basic, Premium, or Mentorship access for
+          notes, tests, dashboard, AI classroom, and mentor guidance.
+        </p>
+      </div>
+
+      <div className="pricingActionGrid">
+        <div
+          className="pricingActionCard"
+          onClick={() => navigate("/subjects/ctet-tet/pricing")}
+        >
+          <div className="pricingActionIcon">💎</div>
+
+          <h3>View Plans</h3>
+
+          <p>
+            Compare Premium, Mentorship, and advanced
+            learning access for complete preparation.
+          </p>
+
+          <span>Explore Plans →</span>
+        </div>
+
+        <div
+          className="pricingActionCard"
+          onClick={() => navigate("/payment")}
+        >
+          <div className="pricingActionIcon">🧾</div>
+
+          <h3>Upgrade Now</h3>
+
+          <p>
+            Unlock premium notes, tests, dashboards,
+            AI classroom, and mentorship support.
+          </p>
+
+          <span>Upgrade Access →</span>
+        </div>
+
+        <div
+          className="pricingActionCard"
+          onClick={() => navigate("/subjects/ctet-tet")}
+        >
+          <div className="pricingActionIcon">🔙</div>
+
+          <h3>Back to Hub</h3>
+
+          <p>
+            Return to the CTET/TET ecosystem and continue
+            your structured preparation journey.
+          </p>
+
+          <span>Go Back →</span>
+        </div>
+      </div>
+
+      <div className="premiumPricingContainer">
+        <Pricing
+          createPaymentRequest={createPaymentRequest}
+          isPremiumUser={isPremiumUser}
+          setActiveSection={setActiveSection}
+        />
+      </div>
+    </section>
+  }
+/>
 </Routes>
 </main>
 
@@ -8259,7 +8625,7 @@ Practice
 
 <div
   className="learningHubCard"
-  onClick={() => navigate("/subjects/ctet-tet/current-affairs")}
+  onClick={() => navigate("/ctet-tet/current-affairs")}
 >
   <div className="learningHubIcon">📰</div>
 

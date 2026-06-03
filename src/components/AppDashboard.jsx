@@ -28,13 +28,13 @@ export default function AppDashboard({
           Icon: BookOpen,
           title: "Courses",
           text: "CTET/TET learning paths and topic-wise preparation.",
-          action: () => navigate("/subjects/ctet-tet/courses"),
+          action: () => navigate("/ctet-tet/courses"),
         },
         {
           Icon: Route,
           title: "Learning Paths",
           text: "Structured CTET/TET ecosystem with courses, notes and tests.",
-          action: () => navigate("/subjects/ctet-tet"),
+          action: () => navigate("/ctet-tet"),
         },
         {
           Icon: FileText,
@@ -51,13 +51,13 @@ export default function AppDashboard({
           Icon: ClipboardCheck,
           title: "Mock Tests",
           text: "Practice tests, score tracking and exam preparation.",
-          action: () => navigate("/subjects/ctet-tet/mock-tests"),
+          action: () => navigate("/ctet-tet/mock-tests"),
         },
         {
           Icon: Newspaper,
           title: "Current Affairs",
           text: "Monthly PDF updates and exam-focused current affairs.",
-          action: () => navigate("/subjects/ctet-tet/current-affairs"),
+          action: () => navigate("/ctet-tet/current-affairs"),
         },
         {
           Icon: BarChart3,
@@ -74,7 +74,7 @@ export default function AppDashboard({
           Icon: Crown,
           title: "Premium Plans",
           text: "Unlock courses, mock tests, notes and mentorship.",
-          action: () => navigate("/subjects/ctet-tet/pricing"),
+          action: () => navigate("/ctet-tet/pricing"),
         },
         {
           Icon: Megaphone,
