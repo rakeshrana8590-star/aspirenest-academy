@@ -22494,3 +22494,29 @@ button {
     border-radius: 18px;
   }
 }
+
+/* =========================
+   VIDEO CLASSROOM SHELVES
+   Same system as Notes/PDF cards
+========================= */
+
+.videoClassroomShelf {
+  display: flex;
+  gap: 22px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 14px 4px 26px;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.videoClassroomShelf::-webkit-scrollbar {
+  display: none;
+}
+
+.videoClassroomShelf .pdfMiniCard {
+  min-width: 260px;
+  max-width: 280px;
+  flex: 0 0 auto;
+}

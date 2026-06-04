@@ -8592,7 +8592,6 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   }
 />
 
-
 <Route
   path="/ctet-tet/videos/watch/:videoId"
   element={
@@ -8613,15 +8612,19 @@ handleSaveUniversalContent={handleSaveUniversalContent}
               }
 
               if (parsedUrl.pathname.includes("/embed/")) {
-                return parsedUrl.pathname
-                  .split("/embed/")[1]
-                  ?.split("/")[0] || "";
+                return (
+                  parsedUrl.pathname
+                    .split("/embed/")[1]
+                    ?.split("/")[0] || ""
+                );
               }
 
               if (parsedUrl.pathname.includes("/shorts/")) {
-                return parsedUrl.pathname
-                  .split("/shorts/")[1]
-                  ?.split("/")[0] || "";
+                return (
+                  parsedUrl.pathname
+                    .split("/shorts/")[1]
+                    ?.split("/")[0] || ""
+                );
               }
 
               return parsedUrl.searchParams.get("v") || "";
@@ -8640,6 +8643,25 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 
           const youtubeId = getYouTubeId(rawVideoUrl);
 
+          const sameSubjectVideos = universalStudentVideos.filter(
+            (item) =>
+              item.id !== video.id &&
+              normalizeValue(item.subject) ===
+                normalizeValue(video.subject)
+          );
+
+          const sameChapterVideos = sameSubjectVideos.filter(
+            (item) =>
+              normalizeValue(item.chapter) ===
+              normalizeValue(video.chapter)
+          );
+
+          const continueLearningVideos = sameSubjectVideos.filter(
+            (item) =>
+              normalizeValue(item.chapter) !==
+              normalizeValue(video.chapter)
+          );
+
           const relatedNotes = universalNotes.filter(
             (note) =>
               normalizeValue(note.subject || note.category) ===
@@ -8648,12 +8670,21 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                 normalizeValue(video.chapter)
           );
 
-          const relatedVideos = universalStudentVideos.filter(
+          const currentSubjectVideos = universalStudentVideos.filter(
             (item) =>
-              item.id !== video.id &&
               normalizeValue(item.subject) ===
-                normalizeValue(video.subject)
+              normalizeValue(video.subject)
           );
+
+          const currentVideoIndex = currentSubjectVideos.findIndex(
+            (item) => item.id === video.id
+          );
+
+          const nextLecture =
+            currentVideoIndex >= 0 &&
+            currentVideoIndex < currentSubjectVideos.length - 1
+              ? currentSubjectVideos[currentVideoIndex + 1]
+              : null;
 
           return (
             <div key={video.id}>
@@ -8684,7 +8715,9 @@ handleSaveUniversalContent={handleSaveUniversalContent}
               ) : (
                 <button
                   className="btnLink"
-                  onClick={() => window.open(rawVideoUrl, "_blank")}
+                  onClick={() =>
+                    window.open(rawVideoUrl, "_blank")
+                  }
                 >
                   ▶ Open Video
                 </button>
@@ -8693,13 +8726,57 @@ handleSaveUniversalContent={handleSaveUniversalContent}
               <div className="pdfShelfRow">
                 <div className="pdfMiniCard">
                   <div className="pdfIcon">🎬</div>
+
                   <h3>{video.title}</h3>
-                  <p>Mentor: {video.mentorName || "AspireNest Mentor"}</p>
-                  <p>Duration: {video.duration || "Not specified"}</p>
+
+                  <p>
+                    Mentor:{" "}
+                    {video.mentorName || "AspireNest Mentor"}
+                  </p>
+
+                  <p>
+                    Duration:{" "}
+                    {video.duration || "Not specified"}
+                  </p>
+
                   <span>
-                    {video.planType} · {video.sourceType || "YouTube"}
+                    {video.planType} ·{" "}
+                    {video.sourceType || "YouTube"}
                   </span>
                 </div>
+
+                {nextLecture && (
+                  <div className="pdfMiniCard">
+                    <div className="pdfIcon">⏭️</div>
+
+                    <h3>Next Lecture</h3>
+
+                    <p>{nextLecture.title}</p>
+
+                    <span>
+                      {nextLecture.duration || "Continue"}
+                    </span>
+
+                    <button
+                      className="btnLink"
+                      onClick={() => {
+                        if (
+                          nextLecture.planType !== "FREE" &&
+                          !hasPlanAccess(nextLecture.planType)
+                        ) {
+                          navigate("/ctet-tet/pricing");
+                          return;
+                        }
+
+                        navigate(
+                          `/ctet-tet/videos/watch/${nextLecture.id}`
+                        );
+                      }}
+                    >
+                      Continue →
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="notesShelf">
@@ -8712,19 +8789,28 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                   {relatedNotes.length === 0 ? (
                     <div className="pdfMiniCard">
                       <div className="pdfIcon">📄</div>
+
                       <h3>No related notes yet</h3>
-                      <p>Matching notes will appear here.</p>
+
+                      <p>
+                        Matching notes from this chapter will appear
+                        here.
+                      </p>
+
                       <span>{video.chapter}</span>
                     </div>
                   ) : (
                     relatedNotes.map((note) => (
                       <div className="pdfMiniCard" key={note.id}>
                         <div className="pdfIcon">📄</div>
+
                         <h3>{note.title}</h3>
+
                         <p>
                           {note.subject || note.category} ·{" "}
                           {note.chapter || "General Notes"}
                         </p>
+
                         <span>{note.planType}</span>
 
                         <button
@@ -8732,7 +8818,10 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                           onClick={() =>
                             handleNoteAccess({
                               ...note,
-                              pdf: note.fileUrl || note.pdfUrl || note.pdf,
+                              pdf:
+                                note.fileUrl ||
+                                note.pdfUrl ||
+                                note.pdf,
                             })
                           }
                         >
@@ -8747,25 +8836,35 @@ handleSaveUniversalContent={handleSaveUniversalContent}
               <div className="notesShelf">
                 <div className="notesShelfHeader">
                   <h2>🎬 Related Videos</h2>
-                  <span>{relatedVideos.length} Videos</span>
+                  <span>{sameChapterVideos.length} Videos</span>
                 </div>
 
                 <div className="pdfShelfRow">
-                  {relatedVideos.length === 0 ? (
+                  {sameChapterVideos.length === 0 ? (
                     <div className="pdfMiniCard">
                       <div className="pdfIcon">▶️</div>
+
                       <h3>No related videos yet</h3>
-                      <p>More videos from this subject will appear here.</p>
-                      <span>{video.subject}</span>
+
+                      <p>
+                        More videos from this chapter will appear
+                        here.
+                      </p>
+
+                      <span>{video.chapter}</span>
                     </div>
                   ) : (
-                    relatedVideos.map((relatedVideo) => (
+                    sameChapterVideos.map((relatedVideo) => (
                       <div className="pdfMiniCard" key={relatedVideo.id}>
                         <div className="pdfIcon">▶️</div>
+
                         <h3>{relatedVideo.title}</h3>
+
                         <p>
-                          {relatedVideo.subject} · {relatedVideo.chapter}
+                          {relatedVideo.subject} ·{" "}
+                          {relatedVideo.chapter}
                         </p>
+
                         <span>
                           {relatedVideo.duration || "No duration"}
                         </span>
@@ -8787,6 +8886,65 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                           }}
                         >
                           Watch
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div className="notesShelf">
+                <div className="notesShelfHeader">
+                  <h2>▶ Continue Learning</h2>
+                  <span>{continueLearningVideos.length} Videos</span>
+                </div>
+
+                <div className="pdfShelfRow">
+                  {continueLearningVideos.length === 0 ? (
+                    <div className="pdfMiniCard">
+                      <div className="pdfIcon">🎓</div>
+
+                      <h3>No more lessons yet</h3>
+
+                      <p>
+                        More lessons from this subject will appear
+                        here.
+                      </p>
+
+                      <span>{video.subject}</span>
+                    </div>
+                  ) : (
+                    continueLearningVideos.map((nextVideo) => (
+                      <div className="pdfMiniCard" key={nextVideo.id}>
+                        <div className="pdfIcon">🎓</div>
+
+                        <h3>{nextVideo.title}</h3>
+
+                        <p>
+                          {nextVideo.subject} · {nextVideo.chapter}
+                        </p>
+
+                        <span>
+                          {nextVideo.duration || "No duration"}
+                        </span>
+
+                        <button
+                          className="btnLink"
+                          onClick={() => {
+                            if (
+                              nextVideo.planType !== "FREE" &&
+                              !hasPlanAccess(nextVideo.planType)
+                            ) {
+                              navigate("/ctet-tet/pricing");
+                              return;
+                            }
+
+                            navigate(
+                              `/ctet-tet/videos/watch/${nextVideo.id}`
+                            );
+                          }}
+                        >
+                          Continue →
                         </button>
                       </div>
                     ))
