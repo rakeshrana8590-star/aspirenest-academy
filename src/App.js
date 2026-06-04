@@ -230,6 +230,54 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
       item.section ===
       CONTENT_SECTIONS.RECORDED_VIDEO
   );
+
+  const universalStudentVideos = universalContent.filter(
+    (item) =>
+      item.section === "recordedVideo" &&
+      item.status === "published"
+  );
+  
+  const studentVideoPlanRouteMatch =
+    location.pathname.match(
+      /^\/ctet-tet\/videos\/plan\/([^/]+)$/
+    );
+  
+  const studentVideoSubjectRouteMatch =
+    location.pathname.match(
+      /^\/ctet-tet\/videos\/plan\/([^/]+)\/([^/]+)$/
+    );
+  
+  const studentVideoChapterRouteMatch =
+    location.pathname.match(
+      /^\/ctet-tet\/videos\/plan\/([^/]+)\/([^/]+)\/([^/]+)$/
+    );
+  
+  const studentVideoWatchRouteMatch =
+    location.pathname.match(
+      /^\/ctet-tet\/videos\/watch\/([^/]+)$/
+    );
+  
+  const activeVideoPlan =
+    (
+      studentVideoPlanRouteMatch?.[1] ||
+      studentVideoSubjectRouteMatch?.[1] ||
+      studentVideoChapterRouteMatch?.[1] ||
+      ""
+    ).toUpperCase();
+  
+  const activeVideoSubjectId =
+    studentVideoSubjectRouteMatch?.[2] ||
+    studentVideoChapterRouteMatch?.[2] ||
+    "";
+  
+  const activeVideoChapterId =
+    studentVideoChapterRouteMatch?.[3] ||
+    "";
+  
+  const activeWatchVideoId =
+    studentVideoWatchRouteMatch?.[1] ||
+    "";
+  
 const [contentLoading, setContentLoading] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
@@ -8223,6 +8271,468 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 />
 
 <Route
+  path="/ctet-tet/videos"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">
+          CTET / TET Videos
+        </span>
+
+        <h2>Recorded Video Library</h2>
+
+        <p>
+          Access recorded lectures organized
+          by plan, subject, and chapter.
+        </p>
+      </div>
+
+      <div className="contentStudioList">
+        {["FREE", "BASIC", "PREMIUM", "MENTORSHIP"].map(
+          (plan) => (
+            <div
+              className="contentStudioItem"
+              key={plan}
+            >
+              <div>
+                <strong>{plan}</strong>
+
+                <p>
+                  {
+                    universalStudentVideos.filter(
+                      (video) =>
+                        video.planType === plan
+                    ).length
+                  }{" "}
+                  videos available
+                </p>
+              </div>
+
+              <button
+                onClick={() =>
+                  navigate(
+                    `/ctet-tet/videos/plan/${plan}`
+                  )
+                }
+              >
+                View Subjects →
+              </button>
+            </div>
+          )
+        )}
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/ctet-tet/videos/plan/:plan"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">
+          {activeVideoPlan} VIDEOS
+        </span>
+
+        <h2>{activeVideoPlan} Video Subjects</h2>
+
+        <p>
+          Choose a subject to open chapters and recorded lectures.
+        </p>
+      </div>
+
+      <div className="contentStudioForm">
+        <button onClick={() => navigate("/ctet-tet/videos")}>
+          ← Back to Videos Library
+        </button>
+
+        <div className="contentStudioList">
+          {[
+            ...new Map(
+              universalStudentVideos
+                .filter(
+                  (video) =>
+                    video.planType === activeVideoPlan &&
+                    video.subject
+                )
+                .map((video) => [
+                  video.subject.trim().toLowerCase(),
+                  video.subject,
+                ])
+            ).values(),
+          ].map((subjectName) => (
+            <div className="contentStudioItem" key={subjectName}>
+              <div>
+                <strong>{subjectName}</strong>
+                <p>
+                  {
+                    universalStudentVideos.filter(
+                      (video) =>
+                        video.planType === activeVideoPlan &&
+                        video.subject?.trim().toLowerCase() ===
+                          subjectName.trim().toLowerCase()
+                    ).length
+                  }{" "}
+                  videos available
+                </p>
+              </div>
+
+              <button
+                onClick={() =>
+                  navigate(
+                    `/ctet-tet/videos/plan/${activeVideoPlan}/${encodeURIComponent(
+                      subjectName
+                    )}`
+                  )
+                }
+              >
+                View Chapters →
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/ctet-tet/videos/plan/:plan/:subjectId"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">
+          {activeVideoPlan} VIDEO CHAPTERS
+        </span>
+
+        <h2>Video Chapter Library</h2>
+
+        <p>
+          Choose a chapter to open recorded video lectures.
+        </p>
+      </div>
+
+      <div className="contentStudioForm">
+        <button
+          onClick={() =>
+            navigate(`/ctet-tet/videos/plan/${activeVideoPlan}`)
+          }
+        >
+          ← Back to Video Subjects
+        </button>
+
+        <div className="contentStudioList">
+          {[
+            ...new Set(
+              universalStudentVideos
+                .filter(
+                  (video) =>
+                    video.planType === activeVideoPlan &&
+                    video.subject?.trim().toLowerCase() ===
+                      decodeURIComponent(activeVideoSubjectId)
+                        .trim()
+                        .toLowerCase() &&
+                    video.chapter
+                )
+                .map((video) => video.chapter)
+            ),
+          ].map((chapterName) => (
+            <div className="contentStudioItem" key={chapterName}>
+              <div>
+                <strong>{chapterName}</strong>
+                <p>
+                  {
+                    universalStudentVideos.filter(
+                      (video) =>
+                        video.planType === activeVideoPlan &&
+                        video.subject?.trim().toLowerCase() ===
+                          decodeURIComponent(activeVideoSubjectId)
+                            .trim()
+                            .toLowerCase() &&
+                        video.chapter?.trim().toLowerCase() ===
+                          chapterName.trim().toLowerCase()
+                    ).length
+                  }{" "}
+                  videos available
+                </p>
+              </div>
+
+              <button
+                onClick={() =>
+                  navigate(
+                    `/ctet-tet/videos/plan/${activeVideoPlan}/${activeVideoSubjectId}/${encodeURIComponent(
+                      chapterName
+                    )}`
+                  )
+                }
+              >
+                View Videos →
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/ctet-tet/videos/plan/:plan/:subjectId/:chapterId"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">
+          {activeVideoPlan} VIDEOS
+        </span>
+
+        <h2>Recorded Video Lectures</h2>
+
+        <p>
+          Watch chapter-wise recorded lectures.
+        </p>
+      </div>
+
+      <div className="contentStudioForm">
+        <button
+          onClick={() =>
+            navigate(
+              `/ctet-tet/videos/plan/${activeVideoPlan}/${activeVideoSubjectId}`
+            )
+          }
+        >
+          ← Back to Video Chapters
+        </button>
+
+        <div className="contentStudioList">
+          {universalStudentVideos
+            .filter(
+              (video) =>
+                video.planType === activeVideoPlan &&
+                video.subject?.trim().toLowerCase() ===
+                  decodeURIComponent(activeVideoSubjectId)
+                    .trim()
+                    .toLowerCase() &&
+                video.chapter?.trim().toLowerCase() ===
+                  decodeURIComponent(activeVideoChapterId)
+                    .trim()
+                    .toLowerCase()
+            )
+            .map((video) => (
+              <div className="contentStudioItem" key={video.id}>
+                <div>
+                  <strong>{video.title}</strong>
+
+                  <p>
+                    {video.subject} · {video.chapter}
+                  </p>
+
+                  <p>
+                    {video.duration || "No duration"} ·{" "}
+                    {video.mentorName || "No mentor"}
+                  </p>
+                </div>
+
+                <button
+  onClick={() => {
+    if (
+      video.planType !== "FREE" &&
+      !hasPlanAccess(video.planType)
+    ) {
+      navigate("/ctet-tet/pricing");
+      return;
+    }
+
+    navigate(
+      `/ctet-tet/videos/watch/${video.id}`
+    );
+  }}
+>
+  ▶ Watch Video
+</button>
+              </div>
+            ))}
+        </div>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/ctet-tet/videos/watch/:videoId"
+  element={
+    <section className="coursePages">
+      {universalStudentVideos
+        .filter((video) => video.id === activeWatchVideoId)
+        .map((video) => {
+          const rawVideoUrl = video.videoUrl || video.fileUrl || "";
+
+          const youtubeId =
+            rawVideoUrl.includes("watch?v=")
+              ? rawVideoUrl.split("watch?v=")[1]?.split("&")[0]
+              : rawVideoUrl.includes("youtu.be/")
+              ? rawVideoUrl.split("youtu.be/")[1]?.split("?")[0]
+              : "";
+
+          const relatedVideos = universalStudentVideos.filter(
+            (item) =>
+              item.id !== video.id &&
+              item.subject?.trim().toLowerCase() ===
+                video.subject?.trim().toLowerCase() &&
+              item.chapter?.trim().toLowerCase() ===
+                video.chapter?.trim().toLowerCase()
+          );
+
+          const relatedNotes = universalNotes.filter(
+            (note) =>
+              note.subject?.trim().toLowerCase() ===
+                video.subject?.trim().toLowerCase() &&
+              note.chapter?.trim().toLowerCase() ===
+                video.chapter?.trim().toLowerCase()
+          );
+
+          return (
+            <div key={video.id}>
+              <div className="sectionHeader">
+                <span className="badge">VIDEO CLASSROOM</span>
+
+                <h2>{video.title}</h2>
+
+                <p>
+                  {video.planType} · {video.subject} · {video.chapter}
+                </p>
+              </div>
+
+              <div className="contentStudioForm">
+                <button onClick={() => navigate(-1)}>
+                  ← Back
+                </button>
+
+                {youtubeId ? (
+                  <div className="videoPlayerBox">
+                    <iframe
+                      width="100%"
+                      height="520"
+                      src={`https://www.youtube.com/embed/${youtubeId}`}
+                      title={video.title}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() =>
+                      window.open(rawVideoUrl, "_blank")
+                    }
+                  >
+                    ▶ Open Video
+                  </button>
+                )}
+
+                <div className="contentStudioItem">
+                  <div>
+                    <strong>{video.title}</strong>
+
+                    <p>
+                      Mentor: {video.mentorName || "AspireNest Mentor"}
+                    </p>
+
+                    <p>
+                      Duration: {video.duration || "Not specified"}
+                    </p>
+
+                    <p>
+                      Plan: {video.planType} · Source:{" "}
+                      {video.sourceType || "YouTube"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="contentStudioList">
+  <h3>Related Notes</h3>
+
+  {relatedNotes.length === 0 ? (
+    <p>No related notes yet.</p>
+  ) : (
+    relatedNotes.map((note) => (
+      <div className="contentStudioItem" key={note.id}>
+        <div>
+          <strong>{note.title}</strong>
+
+          <p>
+            {note.planType} · {note.subject} · {note.chapter}
+          </p>
+        </div>
+
+        <button
+          onClick={() =>
+            handleNoteAccess({
+              ...note,
+              pdf: note.fileUrl || note.pdfUrl || note.pdf,
+            })
+          }
+        >
+          📄 Open Note
+        </button>
+      </div>
+    ))
+  )}
+</div>
+
+                <div className="contentStudioList">
+                  <h3>Related Videos</h3>
+
+                  {relatedVideos.length === 0 ? (
+                    <p>No related videos yet.</p>
+                  ) : (
+                    relatedVideos.map((relatedVideo) => (
+                      <div
+                        className="contentStudioItem"
+                        key={relatedVideo.id}
+                      >
+                        <div>
+                          <strong>{relatedVideo.title}</strong>
+
+                          <p>
+                            {relatedVideo.subject} ·{" "}
+                            {relatedVideo.chapter}
+                          </p>
+
+                          <p>
+                            {relatedVideo.duration || "No duration"}
+                          </p>
+                        </div>
+
+                        <button
+  onClick={() => {
+    if (
+      relatedVideo.planType !== "FREE" &&
+      !hasPlanAccess(relatedVideo.planType)
+    ) {
+      navigate("/ctet-tet/pricing");
+      return;
+    }
+
+    navigate(
+      `/ctet-tet/videos/watch/${relatedVideo.id}`
+    );
+  }}
+>
+  ▶ Watch
+</button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+    </section>
+  }
+/>
+
+<Route
   path="/ctet-tet/notes"
   element={
     <section className="coursePages">
@@ -8619,6 +9129,8 @@ handleSaveUniversalContent={handleSaveUniversalContent}
     </section>
   }
 />
+
+
 
 <Route
   path="/subjects/ctet-tet/mock-tests"
