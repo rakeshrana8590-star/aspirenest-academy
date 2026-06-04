@@ -55,6 +55,8 @@ import {
   Link,
   useNavigate,
   useLocation,
+  useParams,
+  Navigate,
 } from "react-router-dom";
 import AspireNestLogo from "./components/AspireNestLogo.jsx";
 import AppDashboard from "./components/AppDashboard.jsx";
@@ -421,6 +423,75 @@ const fallbackCurrentAffairs = [
     pdf: "#",
   },
 ];
+
+const [videoForm, setVideoForm] = useState({
+  title: "",
+  planType: "",
+  subject: "",
+  chapter: "",
+  videoUrl: "",
+  thumbnailUrl: "",
+  duration: "",
+  mentorName: "",
+  status: "published",
+  sourceType: "YOUTUBE_PUBLIC",
+});
+
+const handleSaveVideo = async () => {
+  alert("Save button clicked");
+
+  try {
+    if (
+      !videoForm.title ||
+      !videoForm.planType ||
+      !videoForm.subject ||
+      !videoForm.chapter ||
+      !videoForm.videoUrl
+    ) {
+      alert("Please fill Title, Plan, Subject, Chapter, and Video URL");
+      return;
+    }
+
+    await addDoc(collection(db, "contentItems"), {
+      title: videoForm.title,
+      section: "recordedVideo",
+      contentType: "VIDEO",
+      planType: videoForm.planType,
+      subject: videoForm.subject,
+      chapter: videoForm.chapter,
+      videoUrl: videoForm.videoUrl,
+      fileUrl: videoForm.videoUrl,
+      thumbnailUrl: videoForm.thumbnailUrl,
+      duration: videoForm.duration,
+      mentorName: videoForm.mentorName,
+      status: videoForm.status,
+      sourceType: videoForm.sourceType,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    alert("Video saved successfully 🎥");
+
+    setVideoForm({
+      title: "",
+      planType: "",
+      subject: "",
+      chapter: "",
+      videoUrl: "",
+      thumbnailUrl: "",
+      duration: "",
+      mentorName: "",
+      status: "published",
+      sourceType: "YOUTUBE_PUBLIC",
+    });
+
+    navigate("/admin/content/videos/manage");
+  } catch (error) {
+    alert(error.message);
+  }
+};
+
+const [videoContent, setVideoContent] = useState([]);
 const [currentTitle, setCurrentTitle] = useState("");
 const [currentMonth, setCurrentMonth] = useState("");
 const [currentType, setCurrentType] = useState("FREE");
@@ -2259,6 +2330,15 @@ subjectName:
   const activeNotesSubjectId =
     notesSubjectRouteMatch?.[2] || null;
   
+    const videoSubjectRouteMatch = location.pathname.match(
+      /^\/admin\/content\/videos\/subjects\/([^/]+)$/
+    );
+    
+    const activeVideoSubjectName =
+      videoSubjectRouteMatch?.[1]
+        ? decodeURIComponent(videoSubjectRouteMatch[1])
+        : "";
+
     const activeNotesSubject =
     activeNotesPlan && activeNotesSubjectId
       ? dynamicNotesLibraryData[activeNotesPlan]?.find(
@@ -6507,46 +6587,689 @@ This action cannot be undone.`
   }
 />
 
+
 <Route
   path="/admin/content/videos"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">VIDEO CMS</span>
+
+          <h1>Recorded Videos Manager</h1>
+
+          <p>
+            Add, manage, organize, publish, and preview recorded
+            lectures for the student video learning system.
+          </p>
+        </div>
+
+        <div className="contentStudioForm">
+          <div className="contentStudioGrid">
+            <button onClick={() => navigate("/admin/content/videos/add")}>
+              ➕ Add Video
+            </button>
+
+            <button onClick={() => navigate("/admin/content/videos/manage")}>
+              📂 Manage Videos
+            </button>
+
+            <button onClick={() => navigate("/admin/content/videos/subjects")}>
+              📚 Subjects
+            </button>
+
+            <button onClick={() => navigate("/admin/content/videos/published")}>
+              🎬 Published Videos
+            </button>
+
+            <button onClick={() => navigate("/admin/content")}>
+              ← Back to Content Studio
+            </button>
+          </div>
+        </div>
+      </section>
+    ) : (
+      <Navigate to="/login" replace />
+    )
+  }
+/>
+
+<Route
+  path="/admin/content/videos/add"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">ADD VIDEO</span>
+
+          <h1>Add Recorded Video</h1>
+
+          <p>
+            Save YouTube public or unlisted lectures into Firestore
+            with plan, subject, chapter, mentor, and publish status.
+          </p>
+        </div>
+
+        <div className="contentStudioForm">
+        <div className="contentStudioGrid">
+  <input
+    type="text"
+    placeholder="Video Title"
+    value={videoForm.title}
+    onChange={(e) =>
+      setVideoForm({ ...videoForm, title: e.target.value })
+    }
+  />
+
+  <select
+    value={videoForm.planType}
+    onChange={(e) =>
+      setVideoForm({ ...videoForm, planType: e.target.value })
+    }
+  >
+    <option value="">Select Plan</option>
+    <option value="FREE">FREE</option>
+    <option value="BASIC">BASIC</option>
+    <option value="PREMIUM">PREMIUM</option>
+    <option value="MENTORSHIP">MENTORSHIP</option>
+  </select>
+
+  <select
+  value={videoForm.subject}
+  onChange={(e) =>
+    setVideoForm({
+      ...videoForm,
+      subject: e.target.value,
+      chapter: "",
+    })
+  }
+>
+  <option value="">Select Subject</option>
+
+  {[
+  ...new Map(
+    notesSubjectsList
+      .filter((subject) => subject.name)
+      .map((subject) => [
+        subject.name.trim().toLowerCase(),
+        subject,
+      ])
+  ).values(),
+].map((subject) => (
+  <option key={subject.id} value={subject.name}>
+    {subject.name}
+  </option>
+))}
+
+  <option value="CUSTOM">➕ Custom Subject</option>
+</select>
+
+<select
+  value={videoForm.chapter}
+  onChange={(e) =>
+    setVideoForm({ ...videoForm, chapter: e.target.value })
+  }
+>
+  <option value="">Select Chapter</option>
+
+  {[
+    ...new Map(
+      notesChaptersList
+      .filter((chapter) => {
+        if (!chapter.name) return false;
+    
+        if (!videoForm.subject || videoForm.subject === "CUSTOM") {
+          return false;
+        }
+    
+        const selectedSubject = videoForm.subject
+          .toString()
+          .trim()
+          .toLowerCase();
+    
+        const chapterSubjectName = (chapter.subjectName || "")
+          .toString()
+          .trim()
+          .toLowerCase();
+    
+        const chapterSubjectId = (chapter.subjectId || "")
+          .toString()
+          .trim()
+          .toLowerCase();
+    
+        return (
+          chapterSubjectName === selectedSubject ||
+          chapterSubjectId === selectedSubject
+        );
+      })
+        .map((chapter) => [
+          chapter.name.trim().toLowerCase(),
+          chapter,
+        ])
+    ).values(),
+  ].map((chapter) => (
+    <option key={chapter.id} value={chapter.name}>
+      {chapter.name}
+    </option>
+  ))}
+
+  <option value="CUSTOM">➕ Custom Chapter</option>
+</select>
+
+  <input
+    type="text"
+    placeholder="YouTube Video URL"
+    value={videoForm.videoUrl}
+    onChange={(e) =>
+      setVideoForm({ ...videoForm, videoUrl: e.target.value })
+    }
+  />
+
+  <input
+    type="text"
+    placeholder="Thumbnail URL"
+    value={videoForm.thumbnailUrl}
+    onChange={(e) =>
+      setVideoForm({ ...videoForm, thumbnailUrl: e.target.value })
+    }
+  />
+
+  <input
+    type="text"
+    placeholder="Duration e.g. 32 min"
+    value={videoForm.duration}
+    onChange={(e) =>
+      setVideoForm({ ...videoForm, duration: e.target.value })
+    }
+  />
+
+  <input
+    type="text"
+    placeholder="Mentor Name"
+    value={videoForm.mentorName}
+    onChange={(e) =>
+      setVideoForm({ ...videoForm, mentorName: e.target.value })
+    }
+  />
+
+  <select
+    value={videoForm.status}
+    onChange={(e) =>
+      setVideoForm({ ...videoForm, status: e.target.value })
+    }
+  >
+    <option value="published">Published</option>
+    <option value="draft">Draft</option>
+    <option value="unpublished">Unpublished</option>
+  </select>
+
+  <select
+    value={videoForm.sourceType}
+    onChange={(e) =>
+      setVideoForm({ ...videoForm, sourceType: e.target.value })
+    }
+  >
+    <option value="YOUTUBE_PUBLIC">YouTube Public</option>
+    <option value="YOUTUBE_UNLISTED">YouTube Unlisted</option>
+  </select>
+</div>
+
+<button
+  type="button"
+  onClick={(e) => {
+    e.preventDefault();
+    handleSaveVideo();
+  }}
+>
+  💾 Save Video
+</button>
+
+  <button onClick={() => navigate("/admin/content/videos")}>
+    ← Back to Videos Manager
+  </button>
+</div>
+      </section>
+    ) : (
+      <Navigate to="/login" replace />
+    )
+  }
+/>
+
+<Route
+  path="/admin/content/videos/manage"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">MANAGE VIDEOS</span>
+
+          <h1>Manage Recorded Videos</h1>
+
+          <p>
+            Review, edit, delete, preview, publish, and unpublish
+            all saved video lectures.
+          </p>
+        </div>
+
+        <div className="contentStudioForm">
+          <button onClick={() => navigate("/admin/content/videos")}>
+            ← Back to Videos Manager
+          </button>
+
+          <div className="contentStudioList">
+            {universalContent.filter(
+              (item) => item.section === "recordedVideo"
+            ).length === 0 ? (
+              <p>No videos found yet.</p>
+            ) : (
+              universalContent
+                .filter((item) => item.section === "recordedVideo")
+                .map((video) => (
+                  <div className="contentStudioItem" key={video.id}>
+                    <div>
+                      <strong>{video.title}</strong>
+
+                      <p>
+                        {video.planType} · {video.subject} ·{" "}
+                        {video.chapter}
+                      </p>
+
+                      <p>
+                        {video.duration || "No duration"} ·{" "}
+                        {video.mentorName || "No mentor"}
+                      </p>
+
+                      <p>Status: {video.status}</p>
+                    </div>
+
+                    <div className="contentStudioActions">
+                      <button
+                        onClick={() =>
+                          window.open(
+                            video.videoUrl || video.fileUrl,
+                            "_blank"
+                          )
+                        }
+                      >
+                        ▶ Preview
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setVideoForm({
+                            title: video.title || "",
+                            planType: video.planType || "FREE",
+                            subject: video.subject || "",
+                            chapter: video.chapter || "",
+                            videoUrl: video.videoUrl || video.fileUrl || "",
+                            thumbnailUrl: video.thumbnailUrl || "",
+                            duration: video.duration || "",
+                            mentorName: video.mentorName || "",
+                            status: video.status || "published",
+                            sourceType:
+                              video.sourceType || "YOUTUBE_PUBLIC",
+                          });
+
+                          setEditingCmsId(video.id);
+                          navigate("/admin/content/videos/add");
+                        }}
+                      >
+                        ✏️ Edit
+                      </button>
+
+                      <button
+                        onClick={async () => {
+                          const newStatus =
+                            video.status === "published"
+                              ? "unpublished"
+                              : "published";
+
+                          await updateDoc(
+                            doc(db, "contentItems", video.id),
+                            {
+                              status: newStatus,
+                              updatedAt: new Date(),
+                            }
+                          );
+
+                          alert(`Video ${newStatus} successfully`);
+
+                          await loadContentItemsFromFirestore();
+                        }}
+                      >
+                        {video.status === "published"
+                          ? "🚫 Unpublish"
+                          : "✅ Publish"}
+                      </button>
+
+                      <button
+                        onClick={async () => {
+                          const confirmDelete = window.confirm(
+                            "Are you sure you want to delete this video?"
+                          );
+
+                          if (!confirmDelete) return;
+
+                          await deleteDoc(
+                            doc(db, "contentItems", video.id)
+                          );
+
+                          alert("Video deleted successfully");
+
+                          await loadContentItemsFromFirestore();
+                        }}
+                      >
+                        🗑 Delete
+                      </button>
+                    </div>
+                  </div>
+                ))
+            )}
+          </div>
+        </div>
+      </section>
+    ) : (
+      <Navigate to="/login" replace />
+    )
+  }
+/>
+
+<Route
+  path="/admin/content/videos/subjects"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">VIDEO SUBJECTS</span>
+
+          <h1>Video Subject Library</h1>
+
+          <p>
+            Automatically group videos by plan, subject, and chapter
+            for the student-side video experience.
+          </p>
+        </div>
+        <div className="contentStudioForm">
+  <button onClick={() => navigate("/admin/content/videos")}>
+    ← Back to Videos Manager
+  </button>
+
+  <div className="contentStudioList">
+    {[
+      ...new Map(
+        universalContent
+          .filter((item) => item.section === "recordedVideo")
+          .filter((item) => item.subject)
+          .map((item) => [
+            item.subject.trim().toLowerCase(),
+            item.subject,
+          ])
+      ).values(),
+    ].length === 0 ? (
+      <p>No video subjects found yet.</p>
+    ) : (
+      [
+        ...new Map(
+          universalContent
+            .filter((item) => item.section === "recordedVideo")
+            .filter((item) => item.subject)
+            .map((item) => [
+              item.subject.trim().toLowerCase(),
+              item.subject,
+            ])
+        ).values(),
+      ].map((subjectName) => (
+        <div className="contentStudioItem" key={subjectName}>
+          <div>
+            <strong>{subjectName}</strong>
+            <p>
+              {
+                universalContent.filter(
+                  (item) =>
+                    item.section === "recordedVideo" &&
+                    item.subject?.trim().toLowerCase() ===
+                      subjectName.trim().toLowerCase()
+                ).length
+              }{" "}
+              videos available
+            </p>
+          </div>
+
+          <div>
+          <button
+  onClick={() =>
+    navigate(
+      `/admin/content/videos/subjects/${encodeURIComponent(
+        subjectName
+      )}`
+    )
+  }
+>
+  View Chapters →
+</button>
+          </div>
+        </div>
+      ))
+    )}
+  </div>
+</div>
+      </section>
+    ) : (
+      <Navigate to="/login" replace />
+    )
+  }
+/>
+
+<Route
+  path="/admin/content/videos/subjects/:subjectName"
   element={
     <section className="coursePages">
       <div className="sectionHeader">
         <span className="badge">
-          Video CMS
+          VIDEO CHAPTERS
         </span>
 
-        <h1>
-          Recorded Videos Manager
-        </h1>
+        <h1>Video Chapter Library</h1>
 
         <p>
-          Manage YouTube lectures,
-          mentorship sessions, AI classes,
-          premium video libraries, and
-          future recorded learning systems.
+          Browse video chapters inside the selected subject.
         </p>
-      </div>
+        <div className="contentStudioForm">
+  <button
+    onClick={() => navigate("/admin/content/videos/subjects")}
+  >
+    ← Back to Video Subjects
+  </button>
 
-      <div className="subjectHubGrid">
-        <button>FREE Videos</button>
-        <button>BASIC Videos</button>
-        <button>PREMIUM Videos</button>
-        <button>MENTORSHIP Videos</button>
-        <button>YouTube Videos</button>
-        <button>AI Classroom Videos</button>
+  <div className="contentStudioList">
+    {[
+      ...new Set(
+        universalContent
+          .filter(
+            (video) =>
+              video.section === "recordedVideo" &&
+              video.subject?.trim().toLowerCase() ===
+                activeVideoSubjectName.trim().toLowerCase() &&
+              video.chapter
+          )
+          .map((video) => video.chapter)
+      ),
+    ].length === 0 ? (
+      <p>No chapters found for this subject.</p>
+    ) : (
+      [
+        ...new Set(
+          universalContent
+            .filter(
+              (video) =>
+                video.section === "recordedVideo" &&
+                video.subject?.trim().toLowerCase() ===
+                  activeVideoSubjectName.trim().toLowerCase() &&
+                video.chapter
+            )
+            .map((video) => video.chapter)
+        ),
+      ].map((chapterName) => (
+        <div className="contentStudioItem" key={chapterName}>
+          <div>
+            <strong>{chapterName}</strong>
 
-        <button
-          onClick={() =>
-            navigate("/admin/content")
-          }
-        >
-          ← Back to Content Studio
-        </button>
+            <p>
+              {
+                universalContent.filter(
+                  (video) =>
+                    video.section === "recordedVideo" &&
+                    video.subject?.trim().toLowerCase() ===
+                      activeVideoSubjectName.trim().toLowerCase() &&
+                    video.chapter?.trim().toLowerCase() ===
+                      chapterName.trim().toLowerCase()
+                ).length
+              }{" "}
+              videos available
+            </p>
+          </div>
+
+          <button
+            onClick={() =>
+              navigate(
+                `/admin/content/videos/subjects/${encodeURIComponent(
+                  activeVideoSubjectName
+                )}/${encodeURIComponent(chapterName)}`
+              )
+            }
+          >
+            View Videos →
+          </button>
+        </div>
+      ))
+    )}
+  </div>
+</div>
+
+
       </div>
     </section>
   }
 />
+
+<Route
+  path="/admin/content/videos/subjects/:subjectName/:chapterName"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">CHAPTER VIDEOS</span>
+
+          <h1>Chapter Video Lectures</h1>
+
+          <p>
+            Review all saved video lectures inside the selected
+            subject and chapter.
+          </p>
+        </div>
+
+        <div className="contentStudioForm">
+          <button
+            onClick={() =>
+              navigate(
+                `/admin/content/videos/subjects/${decodeURIComponent(
+                  location.pathname.split("/").slice(-2)[0]
+                )}`
+              )
+            }
+          >
+            ← Back to Video Chapters
+          </button>
+
+          <div className="contentStudioList">
+            {universalContent
+              .filter((video) => {
+                const routeParts = location.pathname.split("/");
+                const routeSubject = decodeURIComponent(
+                  routeParts[routeParts.length - 2]
+                )
+                  .trim()
+                  .toLowerCase();
+
+                const routeChapter = decodeURIComponent(
+                  routeParts[routeParts.length - 1]
+                )
+                  .trim()
+                  .toLowerCase();
+
+                return (
+                  video.section === "recordedVideo" &&
+                  video.subject?.trim().toLowerCase() === routeSubject &&
+                  video.chapter?.trim().toLowerCase() === routeChapter
+                );
+              })
+              .map((video) => (
+                <div className="contentStudioItem" key={video.id}>
+                  <div>
+                    <strong>{video.title}</strong>
+
+                    <p>
+                      {video.planType} · {video.subject} ·{" "}
+                      {video.chapter}
+                    </p>
+
+                    <p>
+                      {video.duration || "No duration"} ·{" "}
+                      {video.mentorName || "No mentor"}
+                    </p>
+
+                    <p>Status: {video.status}</p>
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      window.open(
+                        video.videoUrl || video.fileUrl,
+                        "_blank"
+                      )
+                    }
+                  >
+                    ▶ Preview
+                  </button>
+                </div>
+              ))}
+          </div>
+        </div>
+      </section>
+    ) : (
+      <Navigate to="/login" replace />
+    )
+  }
+/>
+
+<Route
+  path="/admin/content/videos/published"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">PUBLISHED VIDEOS</span>
+
+          <h1>Published Video Lectures</h1>
+
+          <p>
+            See all published videos that are ready for student
+            access inside the CTET/TET video library.
+          </p>
+        </div>
+
+        <div className="contentStudioForm">
+          <button onClick={() => navigate("/admin/content/videos")}>
+            ← Back to Videos Manager
+          </button>
+        </div>
+      </section>
+    ) : (
+      <Navigate to="/login" replace />
+    )
+  }
+/>
+
 
 <Route
   path="/admin/content/mock-tests"
