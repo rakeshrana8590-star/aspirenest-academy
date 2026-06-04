@@ -22468,3 +22468,29 @@ button {
   color: #ff7a00 !important;
   border-color: rgba(255,122,0,0.25) !important;
 }
+/* =========================
+   VIDEO CLASSROOM PLAYER
+========================= */
+
+.videoPlayerBox {
+  width: 100%;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #020617;
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.22);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.videoPlayerBox iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  display: block;
+  border: 0;
+}
+
+@media (max-width: 768px) {
+  .videoPlayerBox {
+    border-radius: 18px;
+  }
+}
