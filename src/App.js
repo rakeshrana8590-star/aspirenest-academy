@@ -4732,63 +4732,48 @@ isAdmin={isAdmin}
               <option>PREMIUM</option>
               <option>MENTORSHIP</option>
             </select>
-
-            <select
+            <input
+  type="text"
+  list="notesSubjectSuggestions"
+  placeholder="Select or type Subject"
   value={notesCmsSubject}
   onChange={(e) =>
     setNotesCmsSubject(e.target.value)
   }
->
-  <option value="">
-    Select Subject
-  </option>
+/>
 
+<datalist id="notesSubjectSuggestions">
   {notesSubjectsList.map((subject) => (
-   <option
-   key={subject.id}
-   value={subject.name}
- >
-   {subject.name}
- </option>
+    <option
+      key={subject.id}
+      value={subject.name}
+    />
   ))}
-</select>
+</datalist>
 
-<div className="hybridTopicBox">
-  <input
-    type="text"
-    placeholder="Search or add Chapter / Topic"
-    value={notesCmsChapter}
-    onChange={(e) =>
-      setNotesCmsChapter(e.target.value)
-    }
-  />
+<input
+  type="text"
+  list="notesChapterSuggestions"
+  placeholder={
+    notesCmsSubject
+      ? "Select or type Chapter / Topic"
+      : "Select subject first"
+  }
+  value={notesCmsChapter}
+  onChange={(e) =>
+    setNotesCmsChapter(e.target.value)
+  }
+  disabled={!notesCmsSubject}
+/>
 
-  {notesCmsSubject && notesCmsChapter && (
-    <div className="hybridTopicSuggestions">
-      {filteredNotesChapters
-        .filter((chapter) =>
-          chapter.name
-            .toLowerCase()
-            .includes(
-              notesCmsChapter.toLowerCase()
-            )
-        )
-        .map((chapter) => (
-          <button
-            type="button"
-            key={chapter.id}
-            onClick={() =>
-              setNotesCmsChapter(
-                chapter.name
-              )
-            }
-          >
-            {chapter.name}
-          </button>
-        ))}
-    </div>
-  )}
-</div>
+<datalist id="notesChapterSuggestions">
+  {filteredNotesChapters.map((chapter) => (
+    <option
+      key={chapter.id}
+      value={chapter.name}
+    />
+  ))}
+</datalist>
 
             <input
               type="text"
@@ -5341,7 +5326,6 @@ isAdmin={isAdmin}
     ) : null
   }
 />
-
 <Route
   path="/admin/content/notes/pdfs"
   element={
@@ -5350,164 +5334,36 @@ isAdmin={isAdmin}
         <div className="sectionHeader">
           <span className="badge">PDF MANAGER</span>
 
-          <h1>Notes PDF Manager</h1>
+          <h1>Saved Notes PDFs</h1>
 
           <p>
-            Create, edit, delete, and manage notes PDFs by title,
-            subject, topic, plan, publish status, and PDF source.
+            Review, edit, preview, and delete all saved notes PDFs
+            from one clean manager page.
           </p>
         </div>
 
         <div className="contentStudioForm">
-          <div className="contentStudioGrid">
-            <input
-              type="text"
-              placeholder="PDF Title"
-              value={notesCmsTitle}
-              onChange={(e) =>
-                setNotesCmsTitle(e.target.value)
-              }
-            />
-
-            <input
-              type="text"
-              placeholder="Short Description"
-              value={notesCmsDescription}
-              onChange={(e) =>
-                setNotesCmsDescription(e.target.value)
-              }
-            />
-
-            <select
-              value={notesCmsPlanType}
-              onChange={(e) =>
-                setNotesCmsPlanType(e.target.value)
-              }
-            >
-              <option>FREE</option>
-              <option>BASIC</option>
-              <option>PREMIUM</option>
-              <option>MENTORSHIP</option>
-            </select>
-
-            <select
-              value={notesCmsSubject}
-              onChange={(e) =>
-                setNotesCmsSubject(e.target.value)
-              }
-            >
-              <option value="">Select Subject</option>
-
-              {notesSubjectsList.map((subject) => (
-                <option
-                  key={subject.id}
-                  value={subject.id}
-                >
-                  {subject.name}
-                </option>
-              ))}
-            </select>
-
-            <div className="hybridTopicBox">
-              <input
-                type="text"
-                placeholder="Search or add Chapter / Topic"
-                value={notesCmsChapter}
-                onChange={(e) =>
-                  setNotesCmsChapter(e.target.value)
-                }
-              />
-
-              {notesCmsSubject && notesCmsChapter && (
-                <div className="hybridTopicSuggestions">
-                  {filteredNotesChapters
-                    .filter((chapter) =>
-                      chapter.name
-                        .toLowerCase()
-                        .includes(
-                          notesCmsChapter.toLowerCase()
-                        )
-                    )
-                    .map((chapter) => (
-                      <button
-                        type="button"
-                        key={chapter.id}
-                        onClick={() =>
-                          setNotesCmsChapter(chapter.name)
-                        }
-                      >
-                        {chapter.name}
-                      </button>
-                    ))}
-                </div>
-              )}
-            </div>
-
-            <input
-              type="text"
-              placeholder="Month"
-              value={notesCmsMonth}
-              onChange={(e) =>
-                setNotesCmsMonth(e.target.value)
-              }
-            />
-
-<input
-  type="text"
-  placeholder="Week (Week 1 / Week 2 / Week 3 / Week 4)"
-  value={notesCmsWeek}
-  onChange={(e) =>
-    setNotesCmsWeek(e.target.value)
-  }
-/>
-
-            <input
-              type="text"
-              placeholder="Year"
-              value={notesCmsYear}
-              onChange={(e) =>
-                setNotesCmsYear(e.target.value)
-              }
-            />
-
-            <input
-              type="text"
-              placeholder="PDF URL"
-              value={notesCmsPdfUrl}
-              onChange={(e) =>
-                setNotesCmsPdfUrl(e.target.value)
-              }
-            />
-
-            <input
-              type="text"
-              placeholder="Thumbnail URL"
-              value={notesCmsThumbnailUrl}
-              onChange={(e) =>
-                setNotesCmsThumbnailUrl(e.target.value)
-              }
-            />
-
-            <select
-              value={notesCmsStatus}
-              onChange={(e) =>
-                setNotesCmsStatus(e.target.value)
-              }
-            >
-              <option>Draft</option>
-              <option>Published</option>
-              <option>Archived</option>
-            </select>
-          </div>
-
           <div className="contentStudioActions">
             <button
               className="publishButton"
-              onClick={handlePublishNotesContent}
+              onClick={() => {
+                setEditingNotesCmsId(null);
+                setNotesCmsTitle("");
+                setNotesCmsDescription("");
+                setNotesCmsPlanType("FREE");
+                setNotesCmsSubject("");
+                setNotesCmsChapter("");
+                setNotesCmsMonth("");
+                setNotesCmsWeek("");
+                setNotesCmsYear("");
+                setNotesCmsPdfUrl("");
+                setNotesCmsThumbnailUrl("");
+                setNotesCmsStatus("Draft");
+
+                navigate("/admin/content/notes/form");
+              }}
             >
-              {editingNotesCmsId
-                ? "Update PDF"
-                : "Save PDF"}
+              + Add New PDF
             </button>
 
             <button
@@ -5530,33 +5386,57 @@ isAdmin={isAdmin}
                 className="contentStudioItem"
                 key={note.id}
               >
-                <strong>{note.title}</strong>
+                <div>
+                  <strong>{note.title}</strong>
 
-                <p>
-                  {note.subject} • {note.chapter} •{" "}
-                  {note.planType} • {note.status}
-                </p>
+                  <p>
+                    {note.subject || "No Subject"} •{" "}
+                    {note.chapter || "No Chapter"} •{" "}
+                    {note.planType || "FREE"} •{" "}
+                    {note.status || "Draft"}
+                  </p>
+                </div>
 
                 <div className="contentStudioActions">
+                  <button
+                    className="publishButton"
+                    onClick={() =>
+                      window.open(
+                        note.pdfUrl || note.fileUrl,
+                        "_blank"
+                      )
+                    }
+                  >
+                    Preview PDF
+                  </button>
+
                   <button
                     className="publishButton"
                     onClick={() => {
                       setEditingNotesCmsId(note.id);
                       setNotesCmsTitle(note.title || "");
-                      setNotesCmsDescription(note.description || "");
-                      setNotesCmsPlanType(note.planType || "FREE");
+                      setNotesCmsDescription(
+                        note.description || ""
+                      );
+                      setNotesCmsPlanType(
+                        note.planType || "FREE"
+                      );
                       setNotesCmsSubject(note.subject || "");
                       setNotesCmsChapter(note.chapter || "");
                       setNotesCmsMonth(note.month || "");
+                      setNotesCmsWeek(note.week || "");
                       setNotesCmsYear(note.year || "");
-                      setNotesCmsPdfUrl(note.pdfUrl || "");
-                      setNotesCmsThumbnailUrl(note.thumbnailUrl || "");
-                      setNotesCmsStatus(note.status || "Draft");
+                      setNotesCmsPdfUrl(
+                        note.pdfUrl || note.fileUrl || ""
+                      );
+                      setNotesCmsThumbnailUrl(
+                        note.thumbnailUrl || ""
+                      );
+                      setNotesCmsStatus(
+                        note.status || "Draft"
+                      );
 
-                      window.scrollTo({
-                        top: 0,
-                        behavior: "smooth",
-                      });
+                      navigate("/admin/content/notes/form");
                     }}
                   >
                     Edit PDF
@@ -5567,10 +5447,7 @@ isAdmin={isAdmin}
                     onClick={() => {
                       if (
                         window.confirm(
-                          `Delete "${note.title}" permanently?
-                        
-                        This PDF record will be removed from AspireNest Content Studio.
-                        This action cannot be undone.`
+                          `Delete "${note.title}" permanently?`
                         )
                       ) {
                         handleDeleteLocalContentItem(note.id);
@@ -6742,45 +6619,52 @@ This action cannot be undone.`
               <option value="MENTORSHIP">MENTORSHIP</option>
             </select>
 
-            <select
-              value={videoForm.subject}
-              onChange={(e) =>
-                setVideoForm({
-                  ...videoForm,
-                  subject: e.target.value,
-                  customSubject: "",
-                  chapter: "",
-                  customChapter: "",
-                })
-              }
-            >
-              <option value="">Select Subject</option>
+            <input
+  type="text"
+  list="videoSubjectSuggestions"
+  placeholder="Select or type Subject"
+  value={
+    videoForm.subject === "CUSTOM"
+      ? videoForm.customSubject || ""
+      : videoForm.subject
+  }
+  onChange={(e) =>
+    setVideoForm({
+      ...videoForm,
+      subject: e.target.value,
+      customSubject: "",
+      chapter: "",
+      customChapter: "",
+    })
+  }
+/>
 
-              {[
-                ...new Map(
-                  notesSubjectsList
-                    .filter((subject) => {
-                      const name = (subject.name || "").trim();
+<datalist id="videoSubjectSuggestions">
+  {[
+    ...new Map(
+      notesSubjectsList
+        .filter((subject) => {
+          const name = (subject.name || "").trim();
 
-                      if (!name) return false;
-                      if (name.length < 3) return false;
-                      if (/^[a-zA-Z0-9]{15,}$/.test(name)) return false;
+          if (!name) return false;
+          if (name.length < 3) return false;
+          if (/^[a-zA-Z0-9]{15,}$/.test(name))
+            return false;
 
-                      return true;
-                    })
-                    .map((subject) => [
-                      subject.name.trim().toLowerCase(),
-                      subject,
-                    ])
-                ).values(),
-              ].map((subject) => (
-                <option key={subject.id} value={subject.name}>
-                  {subject.name}
-                </option>
-              ))}
-
-              <option value="CUSTOM">➕ Custom Subject</option>
-            </select>
+          return true;
+        })
+        .map((subject) => [
+          subject.name.trim().toLowerCase(),
+          subject,
+        ])
+    ).values(),
+  ].map((subject) => (
+    <option
+      key={subject.id}
+      value={subject.name}
+    />
+  ))}
+</datalist>
 
             {videoForm.subject === "CUSTOM" && (
               <input
@@ -6796,72 +6680,86 @@ This action cannot be undone.`
               />
             )}
 
-            <select
-              value={videoForm.chapter}
-              onChange={(e) =>
-                setVideoForm({
-                  ...videoForm,
-                  chapter: e.target.value,
-                  customChapter: "",
-                })
-              }
-            >
-              <option value="">Select Chapter</option>
+<input
+  type="text"
+  list="videoChapterSuggestions"
+  placeholder={
+    videoForm.subject
+      ? "Select or type Chapter"
+      : "Select subject first"
+  }
+  value={
+    videoForm.chapter === "CUSTOM"
+      ? videoForm.customChapter || ""
+      : videoForm.chapter
+  }
+  onChange={(e) =>
+    setVideoForm({
+      ...videoForm,
+      chapter: e.target.value,
+      customChapter: "",
+    })
+  }
+  disabled={!videoForm.subject}
+/>
 
-              {[
-                ...new Map(
-                  notesChaptersList
-                    .filter((chapter) => {
-                      if (!chapter.name) return false;
+<datalist id="videoChapterSuggestions">
+  {[
+    ...new Map(
+      notesChaptersList
+        .filter((chapter) => {
+          if (!chapter.name) return false;
 
-                      if (!videoForm.subject || videoForm.subject === "CUSTOM") {
-                        return false;
-                      }
+          if (!videoForm.subject) {
+            return false;
+          }
 
-                      const selectedSubject = videoForm.subject
-                        .toString()
-                        .trim()
-                        .toLowerCase();
+          const selectedSubject = videoForm.subject
+            .toString()
+            .trim()
+            .toLowerCase();
 
-                      const chapterSubjectName = (
-                        chapter.subjectName || ""
-                      )
-                        .toString()
-                        .trim()
-                        .toLowerCase();
+          const chapterSubjectName = (
+            chapter.subjectName || ""
+          )
+            .toString()
+            .trim()
+            .toLowerCase();
 
-                      const chapterSubjectId = (chapter.subjectId || "")
-                        .toString()
-                        .trim()
-                        .toLowerCase();
+          const chapterSubjectId = (
+            chapter.subjectId || ""
+          )
+            .toString()
+            .trim()
+            .toLowerCase();
 
-                      return (
-                        chapterSubjectName === selectedSubject ||
-                        chapterSubjectId === selectedSubject
-                      );
-                    })
-                    .filter((chapter) => {
-                      const name = (chapter.name || "").trim();
+          return (
+            chapterSubjectName === selectedSubject ||
+            chapterSubjectId === selectedSubject
+          );
+        })
+        .filter((chapter) => {
+          const name = (chapter.name || "").trim();
 
-                      if (!name) return false;
-                      if (name.length < 2) return false;
-                      if (/^[a-zA-Z0-9]{15,}$/.test(name)) return false;
+          if (!name) return false;
+          if (name.length < 2) return false;
+          if (/^[a-zA-Z0-9]{15,}$/.test(name))
+            return false;
 
-                      return true;
-                    })
-                    .map((chapter) => [
-                      chapter.name.trim().toLowerCase(),
-                      chapter,
-                    ])
-                ).values(),
-              ].map((chapter) => (
-                <option key={chapter.id} value={chapter.name}>
-                  {chapter.name}
-                </option>
-              ))}
-
-              <option value="CUSTOM">➕ Custom Chapter</option>
-            </select>
+          return true;
+        })
+        .map((chapter) => [
+          chapter.name.trim().toLowerCase(),
+          chapter,
+        ])
+    ).values(),
+  ].map((chapter) => (
+    <option
+      key={chapter.id}
+      value={chapter.name}
+    />
+  ))}
+</datalist>
 
             {videoForm.chapter === "CUSTOM" && (
               <input
@@ -7365,7 +7263,6 @@ This action cannot be undone.`
     )
   }
 />
-
 <Route
   path="/admin/content/videos/published"
   element={
@@ -7377,75 +7274,69 @@ This action cannot be undone.`
           <h1>Published Video Lectures</h1>
 
           <p>
-            Student side video library me jo published lectures live jane wale
-            hain, unka final review yaha se hoga.
+            Review all student-ready published videos by plan,
+            subject, chapter, mentor, and duration.
           </p>
         </div>
 
         <div className="contentStudioForm">
-          <button onClick={() => navigate("/admin/content/videos")}>
-            ← Back to Videos Manager
-          </button>
+          <div className="contentStudioActions">
+            <button onClick={() => navigate("/admin/content/videos")}>
+              ← Back to Videos Manager
+            </button>
 
-          {videoContent.filter(
+            <button onClick={() => navigate("/admin/content/videos/add")}>
+              + Add New Video
+            </button>
+
+            <button onClick={() => navigate("/admin/content/videos/manage")}>
+              Manage All Videos
+            </button>
+          </div>
+        </div>
+
+        {["FREE", "BASIC", "PREMIUM", "MENTORSHIP"].map((plan) => {
+          const planVideos = universalContent.filter(
             (item) =>
               item.section === "recordedVideo" &&
-              item.status === "published"
-          ).length === 0 ? (
-            <div className="emptyStateCard">
-              <h3>🎬 No published videos yet</h3>
+              (item.status || "").toLowerCase() === "published" &&
+              (item.planType || "FREE").toUpperCase() === plan
+          );
 
-              <p>
-                Add Video form se lecture save karo, status published rakho,
-                phir yaha student-ready videos dikhenge.
-              </p>
+          return (
+            <div className="contentStudioList" key={plan}>
+              <h3>{plan} Published Videos</h3>
 
-              <button onClick={() => navigate("/admin/content/videos/add")}>
-                ➕ Add First Video
-              </button>
-            </div>
-          ) : (
-            <div className="appleHubScroller">
-              {videoContent
-                .filter(
-                  (item) =>
-                    item.section === "recordedVideo" &&
-                    item.status === "published"
-                )
-                .map((item) => (
-                  <div className="dashboardCard appleHubCard" key={item.id}>
-                    <div className="premiumIconBadge">🎬</div>
+              {planVideos.length === 0 ? (
+                <p>No published videos in {plan} plan.</p>
+              ) : (
+                planVideos.map((item) => (
+                  <div
+                    className="contentStudioItem"
+                    key={item.id}
+                  >
+                    <div>
+                      <strong>{item.title || "Untitled Video"}</strong>
 
-                    <h3>{item.title || "Untitled Video"}</h3>
-
-                    <p>
-                      <strong>Plan:</strong> {item.planType || "FREE"}
-                    </p>
-
-                    <p>
-                      <strong>Subject:</strong> {item.subject || "General"}
-                    </p>
-
-                    <p>
-                      <strong>Chapter:</strong> {item.chapter || "No chapter"}
-                    </p>
-
-                    {item.duration && (
                       <p>
-                        <strong>Duration:</strong> {item.duration}
+                        {item.subject || "No Subject"} •{" "}
+                        {item.chapter || "No Chapter"} •{" "}
+                        {item.duration || "No Duration"}
                       </p>
-                    )}
 
-                    {item.mentorName && (
                       <p>
-                        <strong>Mentor:</strong> {item.mentorName}
+                        {item.mentorName || "No Mentor"} •{" "}
+                        Status: {item.status || "published"}
                       </p>
-                    )}
+                    </div>
 
-                    <div className="cardActionRow">
+                    <div className="contentStudioActions">
                       <button
                         onClick={() =>
-                          window.open(item.videoUrl || item.fileUrl, "_blank")
+                          window.open(
+                            item.videoUrl || item.fileUrl,
+                            "_blank"
+                          )
                         }
                       >
                         ▶ Preview
@@ -7453,26 +7344,71 @@ This action cannot be undone.`
 
                       <button
                         onClick={() => {
-                          setEditingCmsId(item.id);
-                          setCmsFormData(item);
+                          setVideoForm({
+                            title: item.title || "",
+                            planType: item.planType || "FREE",
+                            subject: item.subject || "",
+                            chapter: item.chapter || "",
+                            videoUrl:
+                              item.videoUrl || item.fileUrl || "",
+                            thumbnailUrl: item.thumbnailUrl || "",
+                            duration: item.duration || "",
+                            mentorName: item.mentorName || "",
+                            status: item.status || "published",
+                            sourceType:
+                              item.sourceType || "YOUTUBE_PUBLIC",
+                          });
+
                           navigate("/admin/content/videos/add");
                         }}
                       >
                         ✏️ Edit
                       </button>
+
+                      <button
+                        onClick={async () => {
+                          await updateDoc(
+                            doc(db, "contentItems", item.id),
+                            {
+                              status: "draft",
+                              updatedAt: new Date(),
+                            }
+                          );
+
+                          alert("Video unpublished successfully.");
+                          loadContentItemsFromFirestore();
+                        }}
+                      >
+                        🚫 Unpublish
+                      </button>
+
+                      <button
+                        className="deleteContentButton"
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              `Delete "${item.title}" permanently?`
+                            )
+                          ) {
+                            handleDeleteLocalContentItem(item.id);
+                          }
+                        }}
+                      >
+                        🗑 Delete
+                      </button>
                     </div>
                   </div>
-                ))}
+                ))
+              )}
             </div>
-          )}
-        </div>
+          );
+        })}
       </section>
     ) : (
       <Navigate to="/login" replace />
     )
   }
 />
-
 
 <Route
   path="/admin/content/mock-tests"
