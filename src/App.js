@@ -2829,7 +2829,246 @@ return (
 <main className="appShell">
   <Routes>
 
-  <Route
+
+
+<Route
+  path="/"
+  element={
+    <section className="academyOverviewPage">
+
+      {/* SCREEN 1 — HERO */}
+      <div className="academyHero">
+
+        <div className="academyHeroLeft">
+
+          <span className="academyBadge">
+            AspireNest Academic Overview
+          </span>
+
+          <h1>
+            AspireNest Academy
+            Learning Platform
+            for Every Student Journey
+          </h1>
+
+          <p>
+            A structured academic platform where students can explore
+            learning domains, study resources, practice systems,
+            guidance, progress tracking, and subject-wise preparation pathways.
+          </p>
+
+         
+
+        </div>
+
+        <div className="academyHeroRight">
+
+          <div className="academyPreviewCard">
+
+            <h3>AspireNest Academic System</h3>
+
+            <div className="academyStat">
+              <span>Learning Structure</span>
+              <strong>92%</strong>
+            </div>
+
+            <div className="academyBar">
+              <div className="academyFill"></div>
+            </div>
+
+            <div className="academyMiniGrid">
+
+              <div className="academyMiniCard">📚 Study Resources</div>
+              <div className="academyMiniCard">🎯 Practice Systems</div>
+              <div className="academyMiniCard">🧭 Guided Learning</div>
+              <div className="academyMiniCard">📊 Progress Tracking</div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* SCREEN 2 — PLATFORM OVERVIEW */}
+      <div className="academySectionIntro">
+
+
+        <h2>
+          A complete academic platform,
+          designed to grow beyond one subject.
+        </h2>
+        <p>
+  AspireNest Academy is designed as a scalable
+  learning platform where students can access
+  structured preparation systems, practice tools,
+  study resources, mentorship, and future academic domains
+  under one organized ecosystem.
+</p>
+
+      </div>
+
+      <div className="academyTrustStrip">
+
+        <div className="academyTrustCard">
+          <h3>Structured Learning</h3>
+          <p>Clear academic pathways for focused preparation.</p>
+        </div>
+
+        <div className="academyTrustCard">
+          <h3>Study Resources</h3>
+          <p>Notes, learning material, and subject-wise support.</p>
+        </div>
+
+        <div className="academyTrustCard">
+          <h3>Practice System</h3>
+          <p>Mock tests and preparation tools for improvement.</p>
+        </div>
+
+        <div className="academyTrustCard">
+          <h3>Progress Tracking</h3>
+          <p>Learning performance and student growth visibility.</p>
+        </div>
+
+      </div>
+
+      {/* SCREEN 3 — LEARNING DOMAINS */}
+      <div className="academySectionIntro">
+
+
+        <h2>
+          Choose a learning domain
+          to continue.
+        </h2>
+
+        <p>
+          CTET/TET is the first active learning domain.
+          More academic domains can be added under the same
+          platform structure as AspireNest grows.
+        </p>
+
+      </div>
+
+      <div className="academyOverviewGrid">
+
+        <div
+          className="academyOverviewCard"
+          onClick={() => navigate("/ctet-tet")}
+        >
+
+          <h3>CTET / TET</h3>
+
+          <p>
+            Active preparation domain with notes, practice systems,
+            mock tests, current affairs, mentorship, and learning tools.
+          </p>
+
+
+        </div>
+
+        <div className="academyOverviewCard disabled">
+
+          <h3>Psychology</h3>
+
+          <p>
+            Future learning domain for psychology-focused academic study.
+          </p>
+
+          <span>Launching Soon</span>
+
+        </div>
+
+        <div className="academyOverviewCard disabled">
+
+          <h3>B.Ed / D.El.Ed</h3>
+
+          <p>
+            Future domain for teaching education and pedagogy learning.
+          </p>
+
+          <span>Launching Soon</span>
+
+        </div>
+
+      </div>
+
+{/* SCREEN 4 — LEARNING EXPERIENCE */}
+<div className="academyStorySection">
+
+  <div className="academyStoryText">
+
+    <span>LEARNING EXPERIENCE</span>
+
+    <h2>
+      A clear learning journey
+      from study to progress.
+    </h2>
+
+    <p>
+      AspireNest keeps preparation simple and organized:
+      students choose a learning domain, access study resources,
+      practice with structured systems, and track their progress
+      step by step.
+    </p>
+
+  </div>
+
+  <div className="academyStoryVisual">
+
+    <div className="academyVisualCard">
+
+      <h3>Student Learning Flow</h3>
+
+      <div className="academyVisualList">
+        <p>✅ Choose a learning domain</p>
+        <p>✅ Study with organized resources</p>
+        <p>✅ Practice with mock systems</p>
+        <p>✅ Track preparation progress</p>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+      {/* SCREEN 5 — FUTURE VISION */}
+      <div className="academyFinalCTA">
+
+
+        <h2>
+          Built to expand into a complete
+          academic learning ecosystem.
+        </h2>
+
+        <p>
+          AspireNest starts with CTET/TET and can grow into multiple
+          subject-wise learning domains without changing the core platform.
+        </p>
+
+      </div>
+
+    </section>
+  }
+/>
+<Route
+  path="/login"
+  element={
+    <AuthSection
+      email={email}
+      setEmail={setEmail}
+      password={password}
+      setPassword={setPassword}
+      handleLogin={handleLogin}
+      handleGoogleLogin={handleGoogleLogin}
+      handleForgotPassword={handleForgotPassword}
+      handleRegister={handleRegister}
+    />
+  }
+/>
+
+<Route
     path="/ctet-tet"
     element={
       <>
@@ -3450,242 +3689,6 @@ isAdmin={isAdmin}
 />
 
 <Route
-  path="/"
-  element={
-    <section className="academyOverviewPage">
-
-      {/* SCREEN 1 — HERO */}
-      <div className="academyHero">
-
-        <div className="academyHeroLeft">
-
-          <span className="academyBadge">
-            AspireNest Academic Overview
-          </span>
-
-          <h1>
-            AspireNest Academy
-            Learning Platform
-            for Every Student Journey
-          </h1>
-
-          <p>
-            A structured academic platform where students can explore
-            learning domains, study resources, practice systems,
-            guidance, progress tracking, and subject-wise preparation pathways.
-          </p>
-
-         
-
-        </div>
-
-        <div className="academyHeroRight">
-
-          <div className="academyPreviewCard">
-
-            <h3>AspireNest Academic System</h3>
-
-            <div className="academyStat">
-              <span>Learning Structure</span>
-              <strong>92%</strong>
-            </div>
-
-            <div className="academyBar">
-              <div className="academyFill"></div>
-            </div>
-
-            <div className="academyMiniGrid">
-
-              <div className="academyMiniCard">📚 Study Resources</div>
-              <div className="academyMiniCard">🎯 Practice Systems</div>
-              <div className="academyMiniCard">🧭 Guided Learning</div>
-              <div className="academyMiniCard">📊 Progress Tracking</div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* SCREEN 2 — PLATFORM OVERVIEW */}
-      <div className="academySectionIntro">
-
-
-        <h2>
-          A complete academic platform,
-          designed to grow beyond one subject.
-        </h2>
-        <p>
-  AspireNest Academy is designed as a scalable
-  learning platform where students can access
-  structured preparation systems, practice tools,
-  study resources, mentorship, and future academic domains
-  under one organized ecosystem.
-</p>
-
-      </div>
-
-      <div className="academyTrustStrip">
-
-        <div className="academyTrustCard">
-          <h3>Structured Learning</h3>
-          <p>Clear academic pathways for focused preparation.</p>
-        </div>
-
-        <div className="academyTrustCard">
-          <h3>Study Resources</h3>
-          <p>Notes, learning material, and subject-wise support.</p>
-        </div>
-
-        <div className="academyTrustCard">
-          <h3>Practice System</h3>
-          <p>Mock tests and preparation tools for improvement.</p>
-        </div>
-
-        <div className="academyTrustCard">
-          <h3>Progress Tracking</h3>
-          <p>Learning performance and student growth visibility.</p>
-        </div>
-
-      </div>
-
-      {/* SCREEN 3 — LEARNING DOMAINS */}
-      <div className="academySectionIntro">
-
-
-        <h2>
-          Choose a learning domain
-          to continue.
-        </h2>
-
-        <p>
-          CTET/TET is the first active learning domain.
-          More academic domains can be added under the same
-          platform structure as AspireNest grows.
-        </p>
-
-      </div>
-
-      <div className="academyOverviewGrid">
-
-        <div
-          className="academyOverviewCard"
-          onClick={() => navigate("/ctet-tet")}
-        >
-
-          <h3>CTET / TET</h3>
-
-          <p>
-            Active preparation domain with notes, practice systems,
-            mock tests, current affairs, mentorship, and learning tools.
-          </p>
-
-
-        </div>
-
-        <div className="academyOverviewCard disabled">
-
-          <h3>Psychology</h3>
-
-          <p>
-            Future learning domain for psychology-focused academic study.
-          </p>
-
-          <span>Launching Soon</span>
-
-        </div>
-
-        <div className="academyOverviewCard disabled">
-
-          <h3>B.Ed / D.El.Ed</h3>
-
-          <p>
-            Future domain for teaching education and pedagogy learning.
-          </p>
-
-          <span>Launching Soon</span>
-
-        </div>
-
-      </div>
-
-{/* SCREEN 4 — LEARNING EXPERIENCE */}
-<div className="academyStorySection">
-
-  <div className="academyStoryText">
-
-    <span>LEARNING EXPERIENCE</span>
-
-    <h2>
-      A clear learning journey
-      from study to progress.
-    </h2>
-
-    <p>
-      AspireNest keeps preparation simple and organized:
-      students choose a learning domain, access study resources,
-      practice with structured systems, and track their progress
-      step by step.
-    </p>
-
-  </div>
-
-  <div className="academyStoryVisual">
-
-    <div className="academyVisualCard">
-
-      <h3>Student Learning Flow</h3>
-
-      <div className="academyVisualList">
-        <p>✅ Choose a learning domain</p>
-        <p>✅ Study with organized resources</p>
-        <p>✅ Practice with mock systems</p>
-        <p>✅ Track preparation progress</p>
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
-
-      {/* SCREEN 5 — FUTURE VISION */}
-      <div className="academyFinalCTA">
-
-
-        <h2>
-          Built to expand into a complete
-          academic learning ecosystem.
-        </h2>
-
-        <p>
-          AspireNest starts with CTET/TET and can grow into multiple
-          subject-wise learning domains without changing the core platform.
-        </p>
-
-      </div>
-
-    </section>
-  }
-/>
-<Route
-  path="/login"
-  element={
-    <AuthSection
-      email={email}
-      setEmail={setEmail}
-      password={password}
-      setPassword={setPassword}
-      handleLogin={handleLogin}
-      handleGoogleLogin={handleGoogleLogin}
-      handleForgotPassword={handleForgotPassword}
-      handleRegister={handleRegister}
-    />
-  }
-/>
-<Route
   path="/subjects"
   element={
     <section className="coursePages subjectSelectorPage">
@@ -3775,6 +3778,22 @@ isAdmin={isAdmin}
 
 <div
   className="subjectHubCard"
+  onClick={() => navigate("/ctet-tet/videos")}
+>
+  <div className="subjectHubIcon">🎬</div>
+
+  <h3>Recorded Videos</h3>
+
+  <p>
+    Watch chapter-wise recorded lectures with related notes,
+    next lectures, and classroom learning flow.
+  </p>
+
+  <span>Open Videos →</span>
+</div>
+
+<div
+  className="subjectHubCard"
   onClick={() => navigate("/subjects/ctet-tet/mock-tests")}
 >
   <div className="subjectHubIcon">📝</div>
@@ -3837,6 +3856,7 @@ isAdmin={isAdmin}
     </section>
   }
 />
+
 <Route
   path="/courses/ctet"
   element={
@@ -6693,189 +6713,245 @@ This action cannot be undone.`
           <h1>Add Recorded Video</h1>
 
           <p>
-            Save YouTube public or unlisted lectures into Firestore
-            with plan, subject, chapter, mentor, and publish status.
+            Save YouTube public or unlisted lectures into Firestore with plan,
+            subject, chapter, mentor, thumbnail, and publish status.
           </p>
         </div>
 
         <div className="contentStudioForm">
-        <div className="contentStudioGrid">
-  <input
-    type="text"
-    placeholder="Video Title"
-    value={videoForm.title}
-    onChange={(e) =>
-      setVideoForm({ ...videoForm, title: e.target.value })
-    }
-  />
+          <div className="contentStudioGrid">
+            <input
+              type="text"
+              placeholder="Video Title"
+              value={videoForm.title}
+              onChange={(e) =>
+                setVideoForm({ ...videoForm, title: e.target.value })
+              }
+            />
 
-  <select
-    value={videoForm.planType}
-    onChange={(e) =>
-      setVideoForm({ ...videoForm, planType: e.target.value })
-    }
-  >
-    <option value="">Select Plan</option>
-    <option value="FREE">FREE</option>
-    <option value="BASIC">BASIC</option>
-    <option value="PREMIUM">PREMIUM</option>
-    <option value="MENTORSHIP">MENTORSHIP</option>
-  </select>
+            <select
+              value={videoForm.planType}
+              onChange={(e) =>
+                setVideoForm({ ...videoForm, planType: e.target.value })
+              }
+            >
+              <option value="">Select Plan</option>
+              <option value="FREE">FREE</option>
+              <option value="BASIC">BASIC</option>
+              <option value="PREMIUM">PREMIUM</option>
+              <option value="MENTORSHIP">MENTORSHIP</option>
+            </select>
 
-  <select
-  value={videoForm.subject}
-  onChange={(e) =>
-    setVideoForm({
-      ...videoForm,
-      subject: e.target.value,
-      chapter: "",
-    })
-  }
->
-  <option value="">Select Subject</option>
+            <select
+              value={videoForm.subject}
+              onChange={(e) =>
+                setVideoForm({
+                  ...videoForm,
+                  subject: e.target.value,
+                  customSubject: "",
+                  chapter: "",
+                  customChapter: "",
+                })
+              }
+            >
+              <option value="">Select Subject</option>
 
-  {[
-  ...new Map(
-    notesSubjectsList
-      .filter((subject) => subject.name)
-      .map((subject) => [
-        subject.name.trim().toLowerCase(),
-        subject,
-      ])
-  ).values(),
-].map((subject) => (
-  <option key={subject.id} value={subject.name}>
-    {subject.name}
-  </option>
-))}
+              {[
+                ...new Map(
+                  notesSubjectsList
+                    .filter((subject) => {
+                      const name = (subject.name || "").trim();
 
-  <option value="CUSTOM">➕ Custom Subject</option>
-</select>
+                      if (!name) return false;
+                      if (name.length < 3) return false;
+                      if (/^[a-zA-Z0-9]{15,}$/.test(name)) return false;
 
-<select
-  value={videoForm.chapter}
-  onChange={(e) =>
-    setVideoForm({ ...videoForm, chapter: e.target.value })
-  }
->
-  <option value="">Select Chapter</option>
+                      return true;
+                    })
+                    .map((subject) => [
+                      subject.name.trim().toLowerCase(),
+                      subject,
+                    ])
+                ).values(),
+              ].map((subject) => (
+                <option key={subject.id} value={subject.name}>
+                  {subject.name}
+                </option>
+              ))}
 
-  {[
-    ...new Map(
-      notesChaptersList
-      .filter((chapter) => {
-        if (!chapter.name) return false;
-    
-        if (!videoForm.subject || videoForm.subject === "CUSTOM") {
-          return false;
-        }
-    
-        const selectedSubject = videoForm.subject
-          .toString()
-          .trim()
-          .toLowerCase();
-    
-        const chapterSubjectName = (chapter.subjectName || "")
-          .toString()
-          .trim()
-          .toLowerCase();
-    
-        const chapterSubjectId = (chapter.subjectId || "")
-          .toString()
-          .trim()
-          .toLowerCase();
-    
-        return (
-          chapterSubjectName === selectedSubject ||
-          chapterSubjectId === selectedSubject
-        );
-      })
-        .map((chapter) => [
-          chapter.name.trim().toLowerCase(),
-          chapter,
-        ])
-    ).values(),
-  ].map((chapter) => (
-    <option key={chapter.id} value={chapter.name}>
-      {chapter.name}
-    </option>
-  ))}
+              <option value="CUSTOM">➕ Custom Subject</option>
+            </select>
 
-  <option value="CUSTOM">➕ Custom Chapter</option>
-</select>
+            {videoForm.subject === "CUSTOM" && (
+              <input
+                type="text"
+                placeholder="Enter Custom Subject"
+                value={videoForm.customSubject || ""}
+                onChange={(e) =>
+                  setVideoForm({
+                    ...videoForm,
+                    customSubject: e.target.value,
+                  })
+                }
+              />
+            )}
 
-  <input
-    type="text"
-    placeholder="YouTube Video URL"
-    value={videoForm.videoUrl}
-    onChange={(e) =>
-      setVideoForm({ ...videoForm, videoUrl: e.target.value })
-    }
-  />
+            <select
+              value={videoForm.chapter}
+              onChange={(e) =>
+                setVideoForm({
+                  ...videoForm,
+                  chapter: e.target.value,
+                  customChapter: "",
+                })
+              }
+            >
+              <option value="">Select Chapter</option>
 
-  <input
-    type="text"
-    placeholder="Thumbnail URL"
-    value={videoForm.thumbnailUrl}
-    onChange={(e) =>
-      setVideoForm({ ...videoForm, thumbnailUrl: e.target.value })
-    }
-  />
+              {[
+                ...new Map(
+                  notesChaptersList
+                    .filter((chapter) => {
+                      if (!chapter.name) return false;
 
-  <input
-    type="text"
-    placeholder="Duration e.g. 32 min"
-    value={videoForm.duration}
-    onChange={(e) =>
-      setVideoForm({ ...videoForm, duration: e.target.value })
-    }
-  />
+                      if (!videoForm.subject || videoForm.subject === "CUSTOM") {
+                        return false;
+                      }
 
-  <input
-    type="text"
-    placeholder="Mentor Name"
-    value={videoForm.mentorName}
-    onChange={(e) =>
-      setVideoForm({ ...videoForm, mentorName: e.target.value })
-    }
-  />
+                      const selectedSubject = videoForm.subject
+                        .toString()
+                        .trim()
+                        .toLowerCase();
 
-  <select
-    value={videoForm.status}
-    onChange={(e) =>
-      setVideoForm({ ...videoForm, status: e.target.value })
-    }
-  >
-    <option value="published">Published</option>
-    <option value="draft">Draft</option>
-    <option value="unpublished">Unpublished</option>
-  </select>
+                      const chapterSubjectName = (
+                        chapter.subjectName || ""
+                      )
+                        .toString()
+                        .trim()
+                        .toLowerCase();
 
-  <select
-    value={videoForm.sourceType}
-    onChange={(e) =>
-      setVideoForm({ ...videoForm, sourceType: e.target.value })
-    }
-  >
-    <option value="YOUTUBE_PUBLIC">YouTube Public</option>
-    <option value="YOUTUBE_UNLISTED">YouTube Unlisted</option>
-  </select>
-</div>
+                      const chapterSubjectId = (chapter.subjectId || "")
+                        .toString()
+                        .trim()
+                        .toLowerCase();
 
-<button
-  type="button"
-  onClick={(e) => {
-    e.preventDefault();
-    handleSaveVideo();
-  }}
->
-  💾 Save Video
-</button>
+                      return (
+                        chapterSubjectName === selectedSubject ||
+                        chapterSubjectId === selectedSubject
+                      );
+                    })
+                    .filter((chapter) => {
+                      const name = (chapter.name || "").trim();
 
-  <button onClick={() => navigate("/admin/content/videos")}>
-    ← Back to Videos Manager
-  </button>
-</div>
+                      if (!name) return false;
+                      if (name.length < 2) return false;
+                      if (/^[a-zA-Z0-9]{15,}$/.test(name)) return false;
+
+                      return true;
+                    })
+                    .map((chapter) => [
+                      chapter.name.trim().toLowerCase(),
+                      chapter,
+                    ])
+                ).values(),
+              ].map((chapter) => (
+                <option key={chapter.id} value={chapter.name}>
+                  {chapter.name}
+                </option>
+              ))}
+
+              <option value="CUSTOM">➕ Custom Chapter</option>
+            </select>
+
+            {videoForm.chapter === "CUSTOM" && (
+              <input
+                type="text"
+                placeholder="Enter Custom Chapter"
+                value={videoForm.customChapter || ""}
+                onChange={(e) =>
+                  setVideoForm({
+                    ...videoForm,
+                    customChapter: e.target.value,
+                  })
+                }
+              />
+            )}
+
+            <input
+              type="text"
+              placeholder="YouTube Video URL"
+              value={videoForm.videoUrl}
+              onChange={(e) =>
+                setVideoForm({ ...videoForm, videoUrl: e.target.value })
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Thumbnail URL"
+              value={videoForm.thumbnailUrl}
+              onChange={(e) =>
+                setVideoForm({
+                  ...videoForm,
+                  thumbnailUrl: e.target.value,
+                })
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Duration e.g. 32 min"
+              value={videoForm.duration}
+              onChange={(e) =>
+                setVideoForm({ ...videoForm, duration: e.target.value })
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Mentor Name"
+              value={videoForm.mentorName}
+              onChange={(e) =>
+                setVideoForm({ ...videoForm, mentorName: e.target.value })
+              }
+            />
+
+            <select
+              value={videoForm.status}
+              onChange={(e) =>
+                setVideoForm({ ...videoForm, status: e.target.value })
+              }
+            >
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+              <option value="unpublished">Unpublished</option>
+            </select>
+
+            <select
+              value={videoForm.sourceType}
+              onChange={(e) =>
+                setVideoForm({ ...videoForm, sourceType: e.target.value })
+              }
+            >
+              <option value="YOUTUBE_PUBLIC">YouTube Public</option>
+              <option value="YOUTUBE_UNLISTED">YouTube Unlisted</option>
+            </select>
+          </div>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              handleSaveVideo();
+            }}
+          >
+            💾 Save Video
+          </button>
+
+          <button onClick={() => navigate("/admin/content/videos")}>
+            ← Back to Videos Manager
+          </button>
+        </div>
       </section>
     ) : (
       <Navigate to="/login" replace />
@@ -7301,8 +7377,8 @@ This action cannot be undone.`
           <h1>Published Video Lectures</h1>
 
           <p>
-            See all published videos that are ready for student
-            access inside the CTET/TET video library.
+            Student side video library me jo published lectures live jane wale
+            hain, unka final review yaha se hoga.
           </p>
         </div>
 
@@ -7310,6 +7386,85 @@ This action cannot be undone.`
           <button onClick={() => navigate("/admin/content/videos")}>
             ← Back to Videos Manager
           </button>
+
+          {videoContent.filter(
+            (item) =>
+              item.section === "recordedVideo" &&
+              item.status === "published"
+          ).length === 0 ? (
+            <div className="emptyStateCard">
+              <h3>🎬 No published videos yet</h3>
+
+              <p>
+                Add Video form se lecture save karo, status published rakho,
+                phir yaha student-ready videos dikhenge.
+              </p>
+
+              <button onClick={() => navigate("/admin/content/videos/add")}>
+                ➕ Add First Video
+              </button>
+            </div>
+          ) : (
+            <div className="appleHubScroller">
+              {videoContent
+                .filter(
+                  (item) =>
+                    item.section === "recordedVideo" &&
+                    item.status === "published"
+                )
+                .map((item) => (
+                  <div className="dashboardCard appleHubCard" key={item.id}>
+                    <div className="premiumIconBadge">🎬</div>
+
+                    <h3>{item.title || "Untitled Video"}</h3>
+
+                    <p>
+                      <strong>Plan:</strong> {item.planType || "FREE"}
+                    </p>
+
+                    <p>
+                      <strong>Subject:</strong> {item.subject || "General"}
+                    </p>
+
+                    <p>
+                      <strong>Chapter:</strong> {item.chapter || "No chapter"}
+                    </p>
+
+                    {item.duration && (
+                      <p>
+                        <strong>Duration:</strong> {item.duration}
+                      </p>
+                    )}
+
+                    {item.mentorName && (
+                      <p>
+                        <strong>Mentor:</strong> {item.mentorName}
+                      </p>
+                    )}
+
+                    <div className="cardActionRow">
+                      <button
+                        onClick={() =>
+                          window.open(item.videoUrl || item.fileUrl, "_blank")
+                        }
+                      >
+                        ▶ Preview
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setEditingCmsId(item.id);
+                          setCmsFormData(item);
+                          navigate("/admin/content/videos/add");
+                        }}
+                      >
+                        ✏️ Edit
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
         </div>
       </section>
     ) : (
@@ -10174,7 +10329,7 @@ Practice
 
 <div
   className="learningHubCard"
-  onClick={() => navigate("/subjects/ctet-tet/mock-tests")}
+  onClick={() => navigate("/ctet-tet/mock-tests")}
 >
   <div className="learningHubIcon">✅</div>
 
@@ -10698,6 +10853,8 @@ Premium
   />
   </section>
 )}
+
+
 <section id="notes">
       <NotesCMS
 notesData={notesData}

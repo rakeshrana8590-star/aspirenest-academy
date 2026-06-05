@@ -40,21 +40,20 @@ export default function StudentDashboard({
 }) {
   const getDaysRemaining = () => {
     if (!membershipExpiry) return null;
-  
+
     const today = new Date();
     const expiry = new Date(membershipExpiry);
-  
     const diffTime = expiry.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
-    return diffDays;
+
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
-  
+
   const daysRemaining = getDaysRemaining();
+
   if (!user) return null;
 
   return (
-    <section className="studentDashboard">
+    <section className="studentDashboard studentDashboardShelf">
       <aside className="dashboardSidebar">
         <h3>Dashboard</h3>
 
@@ -62,10 +61,10 @@ export default function StudentDashboard({
           <p>Welcome,</p>
           <strong>{user.email}</strong>
           <span>
-  {isPremiumUser
-    ? `🌟 ${userPlanType} MEMBER`
-    : "FREE MEMBER"}
-</span>
+            {isPremiumUser
+              ? `🌟 ${userPlanType} MEMBER`
+              : "FREE MEMBER"}
+          </span>
         </div>
 
         <div className="dashboardMenu">
@@ -96,70 +95,57 @@ export default function StudentDashboard({
           Track your mock test progress, accuracy, weak areas and AI study plan.
         </p>
 
-        <div className="analyticsCard">
-  <h3>🚀 Membership Status</h3>
+        <div className="dashboardShelf">
+          <div className="analyticsCard">
+            <h3>🚀 Membership Status</h3>
 
-  <h2>
-    {isPremiumUser
-      ? `🌟 ${userPlanType}`
-      : "FREE PLAN"}
-  </h2>
+            <h2>
+              {isPremiumUser ? `🌟 ${userPlanType}` : "FREE PLAN"}
+            </h2>
 
-  <p>
-    {isPremiumUser
-      ? "Premium features unlocked successfully."
-      : "Upgrade to unlock premium notes, mock tests and AI guidance."}
-  </p>
+            <p>
+              {isPremiumUser
+                ? "Premium features unlocked successfully."
+                : "Upgrade to unlock premium notes, mock tests and AI guidance."}
+            </p>
 
-  {!isPremiumUser && (
-    <button
-      className="btnLink"
-      onClick={handlePremiumSectionAccess}
-      style={{ marginTop: "12px" }}
-    >
-      Upgrade Now
-    </button>
-  )}
-</div>
-{membershipExpiry && (
-  <div className="analyticsCard">
-    <h3>📅 Membership Expiry</h3>
+            {!isPremiumUser && (
+              <button className="btnLink" onClick={handlePremiumSectionAccess}>
+                Upgrade Now
+              </button>
+            )}
+          </div>
 
-    <h2>
-      {new Date(membershipExpiry).toLocaleDateString()}
-    </h2>
+          {membershipExpiry && (
+            <div className="analyticsCard">
+              <h3>📅 Membership Expiry</h3>
 
-    <p>
-      Your premium access is active until this date.
-    </p>
-    {daysRemaining !== null && (
-  <p
-    style={{
-      marginTop: "10px",
-      fontWeight: "700",
-      color:
-        daysRemaining <= 7
-          ? "#dc2626"
-          : "#16a34a",
-    }}
-  >
-    {daysRemaining > 0
-      ? `⏳ ${daysRemaining} days remaining`
-      : "❌ Membership expired"}
-  </p>
-)}
-  </div>
-)}
-{daysRemaining !== null && daysRemaining <= 7 && (
-  <button
-    className="btnLink"
-    onClick={handlePremiumSectionAccess}
-    style={{ marginTop: "12px" }}
-  >
-    Renew / Upgrade Membership
-  </button>
-)}
-        <div className="dashboardCards">
+              <h2>{new Date(membershipExpiry).toLocaleDateString()}</h2>
+
+              <p>Your premium access is active until this date.</p>
+
+              {daysRemaining !== null && (
+                <p
+                  style={{
+                    marginTop: "10px",
+                    fontWeight: "700",
+                    color: daysRemaining <= 7 ? "#dc2626" : "#16a34a",
+                  }}
+                >
+                  {daysRemaining > 0
+                    ? `⏳ ${daysRemaining} days remaining`
+                    : "❌ Membership expired"}
+                </p>
+              )}
+
+              {daysRemaining !== null && daysRemaining <= 7 && (
+                <button className="btnLink" onClick={handlePremiumSectionAccess}>
+                  Renew / Upgrade
+                </button>
+              )}
+            </div>
+          )}
+
           <div className="dashboardMiniCard">
             <h3>{totalMockAttempts}</h3>
             <p>Total Mock Attempts</p>
@@ -179,9 +165,7 @@ export default function StudentDashboard({
             <h3>{dailyStreak}</h3>
             <p>Practice Streak</p>
           </div>
-        </div>
 
-        <div className="analyticsGrid">
           <div className="analyticsCard">
             <h3>📊 Progress Summary</h3>
             <p>{analyticsMessage}</p>
@@ -207,7 +191,7 @@ export default function StudentDashboard({
           </div>
         </div>
 
-        <div className="analyticsCharts">
+        <div className="dashboardShelf chartShelf">
           <div className="chartCard">
             <h3>📈 Weekly Performance</h3>
 
@@ -262,14 +246,14 @@ export default function StudentDashboard({
           </ul>
 
           {hasPlanAccess("PREMIUM") ? (
-  <button className="btnLink">
-    Premium Guidance Active ✅
-  </button>
-) : (
-  <button className="btnLink" onClick={handlePremiumSectionAccess}>
-    Unlock Premium Guidance
-  </button>
-)}
+            <button className="btnLink">
+              Premium Guidance Active ✅
+            </button>
+          ) : (
+            <button className="btnLink" onClick={handlePremiumSectionAccess}>
+              Unlock Premium Guidance
+            </button>
+          )}
         </div>
 
         {mockResults.length === 0 && (
@@ -281,4 +265,3 @@ export default function StudentDashboard({
     </section>
   );
 }
-

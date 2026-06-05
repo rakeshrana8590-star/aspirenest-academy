@@ -4,6 +4,7 @@ import {
   BookOpen,
   Route,
   FileText,
+  Video,
   ClipboardCheck,
   Newspaper,
   Crown,
@@ -41,6 +42,12 @@ export default function AppDashboard({
           title: "Notes",
           text: "Premium and free revision notes for quick learning.",
           action: () => navigate("/ctet-tet/notes"),
+        },
+        {
+          Icon: Video,
+          title: "Recorded Videos",
+          text: "Watch chapter-wise recorded lectures with classroom flow.",
+          action: () => navigate("/ctet-tet/videos"),
         },
       ],
     },
@@ -110,8 +117,8 @@ export default function AppDashboard({
         <h1>Choose what you want to study today.</h1>
 
         <p>
-          Open courses, notes, tests, current affairs and progress
-          from one premium learning hub.
+          Open courses, notes, tests, current affairs, videos and
+          progress from one premium learning hub.
         </p>
       </div>
 

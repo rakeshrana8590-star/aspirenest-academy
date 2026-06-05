@@ -22520,3 +22520,72 @@ button {
   max-width: 280px;
   flex: 0 0 auto;
 }
+
+/* FINAL APP DASHBOARD FIX */
+
+.appleHubScroller {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 22px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 10px 4px 34px !important;
+  scroll-snap-type: x mandatory !important;
+  scrollbar-width: none !important;
+}
+
+.appleHubScroller::-webkit-scrollbar {
+  display: none !important;
+}
+
+.appleHubScroller .appleHubCard {
+  flex: 0 0 360px !important;
+  width: 360px !important;
+  min-width: 360px !important;
+  max-width: 360px !important;
+  height: 235px !important;
+  scroll-snap-align: start !important;
+}
+
+@media (max-width: 768px) {
+  .appleHubScroller .appleHubCard {
+    flex-basis: 82vw !important;
+    width: 82vw !important;
+    min-width: 82vw !important;
+    max-width: 82vw !important;
+  }
+}
+/* APP DASHBOARD COMPACT CARD WIDTH FIX */
+
+.appleHubScroller {
+  padding-right: 80px !important;
+}
+
+.appleHubScroller .appleHubCard {
+  flex: 0 0 300px !important;
+  width: 300px !important;
+  min-width: 300px !important;
+  max-width: 300px !important;
+  height: 215px !important;
+  padding: 24px !important;
+}
+
+.appleHubCard h3 {
+  font-size: 22px !important;
+  line-height: 1.2 !important;
+}
+
+.appleHubCard p {
+  font-size: 15px !important;
+  line-height: 1.55 !important;
+}
+
+@media (max-width: 768px) {
+  .appleHubScroller .appleHubCard {
+    flex-basis: 82vw !important;
+    width: 82vw !important;
+    min-width: 82vw !important;
+    max-width: 82vw !important;
+  }
+}
