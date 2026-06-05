@@ -306,6 +306,10 @@ const [contentLoading, setContentLoading] = useState(false);
     return true;
   };
   const hasPlanAccess = (requiredPlan) => {
+    if (isAdmin(user)) {
+      return true;
+    }
+
     const hierarchy = {
       FREE: 0,
       BASIC: 1,
@@ -486,37 +490,86 @@ const [videoForm, setVideoForm] = useState({
 });
 
 const handleSaveVideo = async () => {
-  alert("Save button clicked");
-
   try {
+    const finalSubject = videoForm.subject?.trim();
+    const finalChapter = videoForm.chapter?.trim();
+
     if (
-      !videoForm.title ||
-      !videoForm.planType ||
-      !videoForm.subject ||
-      !videoForm.chapter ||
-      !videoForm.videoUrl
+      !videoForm.title?.trim() ||
+      !videoForm.planType?.trim() ||
+      !finalSubject ||
+      !finalChapter ||
+      !videoForm.videoUrl?.trim()
     ) {
       alert("Please fill Title, Plan, Subject, Chapter, and Video URL");
       return;
     }
 
-    await addDoc(collection(db, "contentItems"), {
-      title: videoForm.title,
+    const existingSubject = notesSubjectsList.find(
+      (subject) =>
+        subject.name?.trim().toLowerCase() ===
+        finalSubject.toLowerCase()
+    );
+
+    if (!existingSubject) {
+      await addDoc(collection(db, "notesSubjects"), {
+        name: finalSubject,
+        code: "",
+        slug: finalSubject.toLowerCase().replace(/\s+/g, "-"),
+        order: "0",
+        status: "Active",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      await loadNotesSubjectsFromFirestore();
+    }
+
+    const existingChapter = notesChaptersList.find(
+      (chapter) =>
+        chapter.subjectName?.trim().toLowerCase() ===
+          finalSubject.toLowerCase() &&
+        chapter.name?.trim().toLowerCase() ===
+          finalChapter.toLowerCase()
+    );
+
+    if (!existingChapter) {
+      await addDoc(collection(db, "notesChapters"), {
+        subjectId: "",
+        subjectName: finalSubject,
+        name: finalChapter,
+        code: "",
+        slug: finalChapter.toLowerCase().replace(/\s+/g, "-"),
+        order: "0",
+        status: "Active",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      await loadNotesChaptersFromFirestore();
+    }
+
+    const videoPayload = {
+      title: videoForm.title.trim(),
       section: "recordedVideo",
       contentType: "VIDEO",
       planType: videoForm.planType,
-      subject: videoForm.subject,
-      chapter: videoForm.chapter,
-      videoUrl: videoForm.videoUrl,
-      fileUrl: videoForm.videoUrl,
-      thumbnailUrl: videoForm.thumbnailUrl,
-      duration: videoForm.duration,
-      mentorName: videoForm.mentorName,
-      status: videoForm.status,
-      sourceType: videoForm.sourceType,
+      subject: finalSubject,
+      chapter: finalChapter,
+      videoUrl: videoForm.videoUrl.trim(),
+      fileUrl: videoForm.videoUrl.trim(),
+      thumbnailUrl: videoForm.thumbnailUrl || "",
+      duration: videoForm.duration || "",
+      mentorName: videoForm.mentorName || "",
+      status: (videoForm.status || "published").toLowerCase(),
+      sourceType: videoForm.sourceType || "YOUTUBE_UNLISTED",
       createdAt: new Date(),
       updatedAt: new Date(),
-    });
+    };
+
+    await addDoc(collection(db, "contentItems"), videoPayload);
+
+    await loadContentItemsFromFirestore();
 
     alert("Video saved successfully 🎥");
 
@@ -535,7 +588,8 @@ const handleSaveVideo = async () => {
 
     navigate("/admin/content/videos/manage");
   } catch (error) {
-    alert(error.message);
+    console.error("Video save error:", error);
+    alert(error.code + "\n\n" + error.message);
   }
 };
 
@@ -4743,12 +4797,35 @@ isAdmin={isAdmin}
 />
 
 <datalist id="notesSubjectSuggestions">
-  {notesSubjectsList.map((subject) => (
-    <option
-      key={subject.id}
-      value={subject.name}
-    />
-  ))}
+  {[
+    ...new Set([
+      ...notesSubjectsList
+        .map((subject) => subject.name)
+        .filter(Boolean),
+
+      ...universalContent
+        .map((item) => item.subject)
+        .filter(Boolean),
+    ]),
+  ]
+    .map((name) => name.trim())
+    .filter((name) => {
+      if (!name) return false;
+      if (name.length < 2) return false;
+      if (/^[a-zA-Z0-9]{15,}$/.test(name)) return false;
+
+      return true;
+    })
+    .filter(
+      (name, index, array) =>
+        array.findIndex(
+          (item) =>
+            item.toLowerCase() === name.toLowerCase()
+        ) === index
+    )
+    .map((name) => (
+      <option key={name} value={name} />
+    ))}
 </datalist>
 
 <input
@@ -4845,6 +4922,7 @@ isAdmin={isAdmin}
     ) : null
   }
 />
+
 <Route
   path="/admin/content/notes/manage"
   element={
@@ -6641,29 +6719,34 @@ This action cannot be undone.`
 
 <datalist id="videoSubjectSuggestions">
   {[
-    ...new Map(
-      notesSubjectsList
-        .filter((subject) => {
-          const name = (subject.name || "").trim();
+    ...new Set([
+      ...notesSubjectsList
+        .map((subject) => subject.name)
+        .filter(Boolean),
 
-          if (!name) return false;
-          if (name.length < 3) return false;
-          if (/^[a-zA-Z0-9]{15,}$/.test(name))
-            return false;
+      ...universalContent
+        .map((item) => item.subject)
+        .filter(Boolean),
+    ]),
+  ]
+    .map((name) => name.trim())
+    .filter((name) => {
+      if (!name) return false;
+      if (name.length < 2) return false;
+      if (/^[a-zA-Z0-9]{15,}$/.test(name)) return false;
 
-          return true;
-        })
-        .map((subject) => [
-          subject.name.trim().toLowerCase(),
-          subject,
-        ])
-    ).values(),
-  ].map((subject) => (
-    <option
-      key={subject.id}
-      value={subject.name}
-    />
-  ))}
+      return true;
+    })
+    .filter(
+      (name, index, array) =>
+        array.findIndex(
+          (item) =>
+            item.toLowerCase() === name.toLowerCase()
+        ) === index
+    )
+    .map((name) => (
+      <option key={name} value={name} />
+    ))}
 </datalist>
 
             {videoForm.subject === "CUSTOM" && (
@@ -6905,16 +6988,15 @@ This action cannot be undone.`
                     </div>
 
                     <div className="contentStudioActions">
-                      <button
-                        onClick={() =>
-                          window.open(
-                            video.videoUrl || video.fileUrl,
-                            "_blank"
-                          )
-                        }
-                      >
-                        ▶ Preview
-                      </button>
+                    <button
+  onClick={() =>
+    navigate(
+      `/ctet-tet/videos/watch/${video.id}`
+    )
+  }
+>
+  ▶ Preview
+</button>
 
                       <button
                         onClick={() => {
@@ -7242,17 +7324,15 @@ This action cannot be undone.`
 
                     <p>Status: {video.status}</p>
                   </div>
-
                   <button
-                    onClick={() =>
-                      window.open(
-                        video.videoUrl || video.fileUrl,
-                        "_blank"
-                      )
-                    }
-                  >
-                    ▶ Preview
-                  </button>
+  onClick={() =>
+    navigate(
+      `/ctet-tet/videos/watch/${video.id}`
+    )
+  }
+>
+  ▶ Preview
+</button>
                 </div>
               ))}
           </div>
@@ -7331,16 +7411,15 @@ This action cannot be undone.`
                     </div>
 
                     <div className="contentStudioActions">
-                      <button
-                        onClick={() =>
-                          window.open(
-                            item.videoUrl || item.fileUrl,
-                            "_blank"
-                          )
-                        }
-                      >
-                        ▶ Preview
-                      </button>
+                    <button
+  onClick={() =>
+    navigate(
+      `/ctet-tet/videos/watch/${item.id}`
+    )
+  }
+>
+  ▶ Preview
+</button>
 
                       <button
                         onClick={() => {
