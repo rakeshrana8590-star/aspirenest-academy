@@ -76,11 +76,7 @@ import {
   unpublishContentItem,
   archiveContentItem,
 } from "./contentService";
-import januaryCurrentAffairsPdf from "./assets/pdfs/CA JANUARY 26.pdf";
-import februaryCurrentAffairsPdf from "./assets/pdfs/CA FEBRUARY 26.pdf";
-import marchCurrentAffairsPdf from "./assets/pdfs/CA MARCH 26.pdf";
-import aprilCurrentAffairsPdf from "./assets/pdfs/CA APRIL 26.pdf";
-import childDevelopmentNotes from "./assets/pdfs/notes/child-development-notes.pdf";
+
 
 export default function App() {
 
@@ -373,7 +369,7 @@ const fallbackCurrentAffairs = [
     month: "January 2026",
     type: "FREE",
     pages: 8,
-    pdf: januaryCurrentAffairsPdf,
+    pdf: "#",
   },
 
   {
@@ -382,7 +378,7 @@ const fallbackCurrentAffairs = [
     month: "February 2026",
     type: "FREE",
     pages: 10,
-    pdf: februaryCurrentAffairsPdf,
+    pdf: "#",
   },
 
   {
@@ -391,7 +387,7 @@ const fallbackCurrentAffairs = [
     month: "March 2026",
     type: "FREE",
     pages: 11,
-    pdf: marchCurrentAffairsPdf,
+    pdf: "#",
   },
 
   {
@@ -400,7 +396,7 @@ const fallbackCurrentAffairs = [
     month: "April 2026",
     type: "FREE",
     pages: 12,
-    pdf: aprilCurrentAffairsPdf,
+    pdf: "#",
   },
 
   {
@@ -505,11 +501,20 @@ const handleSaveVideo = async () => {
       return;
     }
 
-    const existingSubject = notesSubjectsList.find(
-      (subject) =>
-        subject.name?.trim().toLowerCase() ===
-        finalSubject.toLowerCase()
-    );
+    const normalizeText = (value = "") =>
+    value
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replace(/-/g, " ")
+      .replace(/\s+/g, " ");
+  
+  const existingSubject = notesSubjectsList.find(
+    (subject) =>
+      normalizeText(subject.name) === normalizeText(finalSubject) ||
+      normalizeText(subject.slug) === normalizeText(finalSubject) ||
+      normalizeText(subject.code) === normalizeText(finalSubject)
+  );
 
     if (!existingSubject) {
       await addDoc(collection(db, "notesSubjects"), {
@@ -1867,11 +1872,20 @@ subjectName:
       return;
     }
   
-    const existingSubject = notesSubjectsList.find(
-      (subject) =>
-        subject.name?.trim().toLowerCase() ===
-        normalizedNotesSubject.toLowerCase()
-    );
+    const normalizeText = (value = "") =>
+    value
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replace(/-/g, " ")
+      .replace(/\s+/g, " ");
+  
+  const existingSubject = notesSubjectsList.find(
+    (subject) =>
+      normalizeText(subject.name) === normalizeText(normalizedNotesSubject) ||
+      normalizeText(subject.slug) === normalizeText(normalizedNotesSubject) ||
+      normalizeText(subject.code) === normalizeText(normalizedNotesSubject)
+  );
   
     if (normalizedNotesSubject && !existingSubject) {
       await addDoc(collection(db, "notesSubjects"), {
@@ -2338,56 +2352,7 @@ subjectName:
   
     MENTORSHIP: [],
   };
-  const notesData = [
-    {
-      id: 1,
-      title: "Child Development Notes",
-      category: "CDP",
-      type: "PREMIUM",
-      pages: 69,
-      pdf: childDevelopmentNotes,
-    },
-    {
-      id: 2,
-      title: "Learning Theories PDF",
-      category: "Psychology",
-      type: "FREE",
-      pages: 28,
-      pdf: "#",
-    },
-    {
-      id: 3,
-      title: "Inclusive Education",
-      category: "Pedagogy",
-      type: "PREMIUM",
-      pages: 35,
-      pdf: "#",
-    },
-    {
-      id: 4,
-      title: "CTET PYQ Notes",
-      category: "PYQ",
-      type: "PREMIUM",
-      pages: 50,
-      pdf: "#",
-    },
-    {
-      id: 5,
-      title: "Topic-wise CDP Short Notes",
-      category: "CDP",
-      type: "BASIC",
-      pages: 22,
-      pdf: "#",
-    },
-    {
-      id: 6,
-      title: "Mentor Strategy Sheet",
-      category: "Strategy",
-      type: "MENTORSHIP",
-      pages: 12,
-      pdf: "#",
-    },
-  ];
+
 
   const dynamicNotesLibraryData = Object.keys(
     notesLibraryData
@@ -4507,7 +4472,7 @@ isAdmin={isAdmin}
             setAdminLevel={setAdminLevel}
             adminAccessPlan={adminAccessPlan}
             setAdminAccessPlan={setAdminAccessPlan}
-            notesData={notesData || []}
+            notesData={[]}
             firebaseNotes={firebaseNotes || []}
             currentAffairs={currentAffairsList || []}
             currentAffairsList={currentAffairsList || []}
@@ -5071,6 +5036,8 @@ isAdmin={isAdmin}
   }
 />
 
+
+
 <Route
   path="/admin/content/notes/subjects"
   element={
@@ -5161,7 +5128,16 @@ isAdmin={isAdmin}
         <div className="contentStudioList">
   <h3>Saved Subjects</h3>
 
-  {notesSubjectsList.map((subject) => (
+  {[
+    ...new Map(
+      notesSubjectsList.map((subject) => [
+        (subject.name || "")
+          .trim()
+          .toLowerCase(),
+        subject,
+      ])
+    ).values(),
+  ].map((subject) => (
     <div
       className="contentStudioItem"
       key={subject.id}
@@ -5171,54 +5147,73 @@ isAdmin={isAdmin}
       </strong>
 
       <div className="contentStudioActions">
+        <button
+          className="publishButton"
+          onClick={() => {
+            setEditingNotesSubjectId(subject.id);
+            setNotesSubjectName(subject.name || "");
+            setNotesSubjectCode(subject.code || "");
+            setNotesSubjectSlug(subject.slug || "");
+            setNotesSubjectOrder(subject.order || "");
+            setNotesSubjectStatus(
+              subject.status || "Active"
+            );
 
-<button
-  className="publishButton"
-  onClick={() => {
-    setEditingNotesSubjectId(subject.id);
-    setNotesSubjectName(subject.name);
-    setNotesSubjectCode(subject.code);
-    setNotesSubjectSlug(subject.slug);
-    setNotesSubjectOrder(subject.order);
-    setNotesSubjectStatus(subject.status);
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
-  }}
->
-  Edit Subject
-</button>
-
-</div>
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            });
+          }}
+        >
+          Edit Subject
+        </button>
+      </div>
 
       <p>
-        {subject.code} • {subject.slug} • Order {subject.order} • {subject.status}
+        {subject.code || "-"} •{" "}
+        {subject.slug || "-"} • Order{" "}
+        {subject.order || 0} •{" "}
+        {subject.status || "Active"}
       </p>
 
       <button
-  className="deleteContentButton"
-  onClick={() => {
-    if (
-      window.confirm(
-        `Delete "${subject.name}" permanently?
-      
-      All chapters and PDFs linked to this subject may become inaccessible.
-      
-      This action cannot be undone.`
-      )
-    ) {
-      setNotesSubjectsList(
-        notesSubjectsList.filter(
-          (item) => item.id !== subject.id
-        )
-      );
-    }
-  }}
->
-  Delete Subject
-</button>
+        className="deleteContentButton"
+        onClick={async () => {
+          if (
+            window.confirm(
+              `Delete "${subject.name}" permanently?
 
+All chapters and PDFs linked to this subject may become inaccessible.
+
+This action cannot be undone.`
+            )
+          ) {
+            try {
+              await deleteDoc(
+                doc(
+                  db,
+                  "notesSubjects",
+                  subject.id
+                )
+              );
+
+              await loadNotesSubjectsFromFirestore();
+
+              alert(
+                "Subject deleted permanently."
+              );
+            } catch (error) {
+              console.error(error);
+
+              alert(
+                "Unable to delete subject."
+              );
+            }
+          }
+        }}
+      >
+        Delete Subject
+      </button>
     </div>
   ))}
 </div>
@@ -5226,7 +5221,7 @@ isAdmin={isAdmin}
       </section>
     ) : null
   }
-/>
+/>  
 
 <Route
   path="/admin/content/notes/chapters"
@@ -7749,7 +7744,7 @@ This action cannot be undone.`
               mockResults={mockResults || []}
               leaderboard={leaderboard || []}
               mockQuestions={mockQuestions || []}
-              notesData={notesData || []}
+              notesData={[]}
               firebaseNotes={firebaseNotes || []}
               currentAffairs={currentAffairsList || []}
               currentAffairsList={currentAffairsList || []}
@@ -7817,7 +7812,7 @@ This action cannot be undone.`
             mockResults={mockResults || []}
             leaderboard={leaderboard || []}
             mockQuestions={mockQuestions || []}
-            notesData={notesData || []}
+            notesData={[]}
             firebaseNotes={firebaseNotes || []}
             currentAffairs={currentAffairsList || []}
             currentAffairsList={currentAffairsList || []}
@@ -7867,7 +7862,7 @@ This action cannot be undone.`
               mockResults={mockResults || []}
               leaderboard={leaderboard || []}
               mockQuestions={mockQuestions || []}
-              notesData={notesData || []}
+              notesData={[]}
               firebaseNotes={firebaseNotes || []}
               adminNoteTitle={adminNoteTitle}
               setAdminNoteTitle={setAdminNoteTitle}
@@ -7932,7 +7927,7 @@ This action cannot be undone.`
               mockResults={mockResults || []}
               leaderboard={leaderboard || []}
               mockQuestions={mockQuestions || []}
-              notesData={notesData || []}
+              notesData={[]}
               firebaseNotes={firebaseNotes || []}
               currentAffairs={currentAffairsList || []}
               currentAffairsList={currentAffairsList || []}
@@ -8012,7 +8007,7 @@ This action cannot be undone.`
               adminAccessPlan={adminAccessPlan}
               setAdminAccessPlan={setAdminAccessPlan}
 
-              notesData={notesData || []}
+              notesData={[]}
               firebaseNotes={firebaseNotes || []}
 
               currentTitle={currentTitle}
@@ -8094,7 +8089,7 @@ This action cannot be undone.`
               mockResults={mockResults || []}
               leaderboard={leaderboard || []}
               mockQuestions={mockQuestions || []}
-              notesData={notesData || []}
+              notesData={[]}
               firebaseNotes={firebaseNotes || []}
               currentAffairs={currentAffairsList || []}
               currentAffairsList={currentAffairsList || []}
@@ -8145,7 +8140,7 @@ This action cannot be undone.`
               mockResults={mockResults || []}
               leaderboard={leaderboard || []}
               mockQuestions={mockQuestions || []}
-              notesData={notesData || []}
+              notesData={[]}
               firebaseNotes={firebaseNotes || []}
               currentAffairs={currentAffairsList || []}
               currentAffairsList={currentAffairsList || []}
@@ -8196,7 +8191,7 @@ This action cannot be undone.`
               mockResults={mockResults || []}
               leaderboard={leaderboard || []}
               mockQuestions={mockQuestions || []}
-              notesData={notesData || []}
+              notesData={[]}
               firebaseNotes={firebaseNotes || []}
               currentAffairs={currentAffairsList || []}
               currentAffairsList={currentAffairsList || []}
@@ -8259,7 +8254,7 @@ This action cannot be undone.`
               students={students || []}
               enquiries={enquiries || []}
               mockResults={mockResults || []}
-              notesData={notesData || []}
+              notesData={[]}
               firebaseNotes={firebaseNotes || []}
               currentAffairs={currentAffairsList || []}
               currentAffairsList={currentAffairsList || []}
@@ -10872,7 +10867,7 @@ Premium
 
 <section id="notes">
       <NotesCMS
-notesData={notesData}
+notesData={[]}
 firebaseNotes={firebaseNotes}
 universalNotes={universalNotes}
 handleNoteAccess={handleNoteAccess}
@@ -10936,7 +10931,7 @@ chartColors={chartColors}
   setAdminNoteType={setAdminNoteType}
   handleSaveNote={handleSaveNote}
   editingNoteId={editingNoteId}
-  notesData={notesData}
+  notesData={[]}
   firebaseNotes={firebaseNotes}
   handleDeleteNote={handleDeleteNote}
   handleEditNote={handleEditNote}
