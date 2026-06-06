@@ -101,7 +101,7 @@ export default function MockTest({
               }
               onClick={() => {
                 if (!unlocked) {
-                  navigate("/subjects/ctet-tet/pricing");
+                  navigate("/ctet-tet/pricing");
                   return;
                 }
 
@@ -126,7 +126,7 @@ export default function MockTest({
 
             <button
               className="btnLink"
-              onClick={() => navigate("/subjects/ctet-tet/pricing")}
+              onClick={() => navigate("/ctet-tet/pricing")}
             >
               View Plans
             </button>

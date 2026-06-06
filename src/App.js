@@ -274,6 +274,27 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
     studentVideoWatchRouteMatch?.[1] ||
     "";
   
+    const activeMockPlan =
+    decodeURIComponent(location.pathname.split("/")[4] || "FREE").toUpperCase();
+  
+  const activeMockSubjectId =
+    decodeURIComponent(location.pathname.split("/")[5] || "");
+  
+  const activeMockChapterId =
+    decodeURIComponent(location.pathname.split("/")[6] || "");
+  
+  const activeMockTestId =
+    decodeURIComponent(location.pathname.split("/")[7] || "");
+  
+  const activeStartMockTestId =
+    decodeURIComponent(location.pathname.split("/")[4] || "");
+  
+  const activeResultAttemptId =
+    decodeURIComponent(location.pathname.split("/")[4] || "");
+
+    const [mockAttemptAnswers, setMockAttemptAnswers] = useState({});
+const [activeMockQuestionIndex, setActiveMockQuestionIndex] = useState(0);
+
 const [contentLoading, setContentLoading] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
@@ -623,6 +644,8 @@ questionStatus: "published",
     alert(error.message);
   }
 };
+
+
 
 const handleSaveVideo = async () => {
   try {
@@ -4475,24 +4498,6 @@ isAdmin={isAdmin}
   }
 />
 
-<Route
-  path="/leaderboard"
-  element={
-    requireLogin() ? (
-      <section className="coursePages">
-        <div className="sectionHeader">
-          <span className="badge">Leaderboard</span>
-
-          <h2>Top Student Rankings</h2>
-
-          <p>
-            Compare performance with top CTET/TET learners.
-          </p>
-        </div>
-      </section>
-    ) : null
-  }
-/>
 
 <Route
   path="/ai-classroom"
@@ -7622,6 +7627,7 @@ This action cannot be undone.`
     )
   }
 />
+
 
 <Route
   path="/admin/content/mock-tests"
@@ -13257,78 +13263,883 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 />
 
 
-
 <Route
-  path="/subjects/ctet-tet/mock-tests"
+  path="/ctet-tet/mock-tests"
   element={
-    <section className="coursePages mockMasterPage">
+    <section className="coursePages">
       <div className="sectionHeader">
         <span className="badge">CTET / TET Mock Tests</span>
 
         <h2>Practice & Performance Center</h2>
 
         <p>
-          Attempt subject-wise mock tests, PYQs, revision tests,
-          and track your score with analytics.
+          Attempt plan-wise, subject-wise, and chapter-wise mock tests
+          with score tracking and analytics.
         </p>
       </div>
 
-      <div className="mockActionGrid">
-        <div
-          className="mockActionCard"
-          onClick={() => navigate("/subjects/ctet-tet/mock-tests")}
-        >
-          <div className="mockActionIcon">📝</div>
+      <div className="notesNetflixLibrary">
+        {["FREE", "BASIC", "PREMIUM", "MENTORSHIP"].map((planName) => {
+          const mockSubjects = [
+            ...new Map(
+              universalContent
+                .filter(
+                  (test) =>
+                    test.section === "mockTest" &&
+                    test.status === "published" &&
+                    test.planType === planName &&
+                    test.subject
+                )
+                .map((test) => [
+                  test.subject.trim().toLowerCase(),
+                  {
+                    id: test.subject.trim(),
+                    title: test.subject.trim(),
+                    cover: "📝",
+                    description: "Chapter-wise mock tests",
+                  },
+                ])
+            ).values(),
+          ];
 
-          <h3>Open Mock Tests</h3>
+          return (
+            <div className="notesShelf" key={planName}>
+              <div className="notesShelfHeader">
+                <h2>
+                  {planName === "FREE" && "📝 FREE MOCK TESTS"}
+                  {planName === "BASIC" && "🔷 BASIC MOCK TESTS"}
+                  {planName === "PREMIUM" && "⭐ PREMIUM TEST LIBRARY"}
+                  {planName === "MENTORSHIP" && "👩‍🏫 MENTORSHIP TEST VAULT"}
+                </h2>
 
-          <p>
-            Start practice with topic-wise tests, PYQs,
-            revision quizzes, and full-length exams.
-          </p>
+                <span>{mockSubjects.length} Subjects</span>
+              </div>
 
-          <span>Start Practice →</span>
-        </div>
+              <div className="notesShelfScrollWrap">
+                <div className="notesSubjectRow">
+                  {mockSubjects.length === 0 ? (
+                    <button
+                      type="button"
+                      className="notesSubjectCard"
+                      disabled
+                    >
+                      <div className="notesSubjectIcon">📝</div>
+                      <h3>No mock tests yet</h3>
+                      <p>Published mock tests will appear here.</p>
+                      <span className="notesSubjectTag">{planName}</span>
+                    </button>
+                  ) : (
+                    mockSubjects.map((subject) => (
+                      <button
+                        type="button"
+                        className="notesSubjectCard"
+                        key={subject.id}
+                        onClick={() =>
+                          navigate(
+                            `/ctet-tet/mock-tests/plan/${planName}/${encodeURIComponent(
+                              subject.id
+                            )}`
+                          )
+                        }
+                      >
+                        <div className="notesSubjectIcon">
+                          {subject.cover}
+                        </div>
 
-        <div
-          className="mockActionCard"
-          onClick={() => navigate("/leaderboard")}
-        >
-          <div className="mockActionIcon">🏆</div>
+                        <h3>{subject.title}</h3>
 
-          <h3>Leaderboard</h3>
+                        <p>{subject.description}</p>
 
-          <p>
-            Compare performance, rankings, streaks,
-            and overall learning progress.
-          </p>
-
-          <span>View Rankings →</span>
-        </div>
-
-        <div
-          className="mockActionCard"
-          onClick={() => navigate("/subjects/ctet-tet")}
-        >
-          <div className="mockActionIcon">🔙</div>
-
-          <h3>Back to Hub</h3>
-
-          <p>
-            Return to the CTET/TET ecosystem dashboard
-            and continue learning flow.
-          </p>
-
-          <span>Go Back →</span>
-        </div>
-      </div>
-
-      <div className="premiumMockContainer">
-        <MockTest />
+                        <span className="notesSubjectTag">
+                          {planName}
+                        </span>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   }
 />
+
+<Route
+  path="/ctet-tet/mock-tests/plan/:plan"
+  element={
+    <section className="coursePages">
+      <div className="sectionHeader">
+        <span className="badge">{activeMockPlan} MOCK TESTS</span>
+
+        <h2>{activeMockPlan} Subject Library</h2>
+
+        <p>Choose a subject to open chapters and available tests.</p>
+      </div>
+
+      <div className="notesShelfScrollWrap">
+        <div className="notesSubjectRow">
+          {[
+            ...new Map(
+              universalContent
+                .filter(
+                  (test) =>
+                    test.section === "mockTest" &&
+                    test.status === "published" &&
+                    test.planType === activeMockPlan &&
+                    test.subject
+                )
+                .map((test) => [
+                  test.subject.trim().toLowerCase(),
+                  test.subject.trim(),
+                ])
+            ).values(),
+          ].map((subjectName) => (
+            <button
+              type="button"
+              className="notesSubjectCard"
+              key={subjectName}
+              onClick={() =>
+                navigate(
+                  `/ctet-tet/mock-tests/plan/${activeMockPlan}/${encodeURIComponent(
+                    subjectName
+                  )}`
+                )
+              }
+            >
+              <div className="notesSubjectIcon">📝</div>
+              <h3>{subjectName}</h3>
+              <p>Open mock test chapters</p>
+              <span className="notesSubjectTag">{activeMockPlan}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/ctet-tet/mock-tests/plan/:plan/:subjectId"
+  element={
+    <section className="notesSubjectRoutePage">
+      <button onClick={() => navigate("/ctet-tet/mock-tests")}>
+        ← Back to Mock Test Library
+      </button>
+
+      <span className="notesSubjectRouteBadge">
+        {activeMockPlan} MOCK TESTS
+      </span>
+
+      <h1>
+        📝{" "}
+        {decodeURIComponent(activeMockSubjectId || "")
+          .replace(/-/g, " ")}
+      </h1>
+
+      <p>Subject-wise mock test chapters will appear here.</p>
+
+      <div className="chapterLibraryStack">
+        {[
+          ...new Set(
+            universalContent
+              .filter(
+                (test) =>
+                  test.section === "mockTest" &&
+                  test.status === "published" &&
+                  test.planType === activeMockPlan &&
+                  test.subject?.trim().toLowerCase() ===
+                    decodeURIComponent(activeMockSubjectId)
+                      .trim()
+                      .toLowerCase() &&
+                  test.chapter
+              )
+              .map((test) => test.chapter)
+          ),
+        ].map((chapterName) => (
+          <button
+            type="button"
+            className="notesSubjectCard chapterLibraryCard"
+            key={chapterName}
+            onClick={() =>
+              navigate(
+                `/ctet-tet/mock-tests/plan/${activeMockPlan}/${activeMockSubjectId}/${encodeURIComponent(
+                  chapterName
+                )}`
+              )
+            }
+          >
+            <div className="notesSubjectIcon">📚</div>
+            <h3>{chapterName}</h3>
+            <p>Open chapter tests</p>
+            <span className="notesSubjectTag">{activeMockPlan}</span>
+          </button>
+        ))}
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/ctet-tet/mock-tests/plan/:plan/:subjectId/:chapterId"
+  element={
+    <section className="notesSubjectRoutePage">
+      <button
+        onClick={() =>
+          navigate(
+            `/ctet-tet/mock-tests/plan/${activeMockPlan}/${activeMockSubjectId}`
+          )
+        }
+      >
+        ← Back to Chapters
+      </button>
+
+      <span className="notesSubjectRouteBadge">
+        {activeMockPlan} MOCK CHAPTER
+      </span>
+
+      <h1>
+        {decodeURIComponent(activeMockChapterId || "")
+          .replace(/-/g, " ")
+          .replace(/\b\w/g, (char) => char.toUpperCase())}
+      </h1>
+
+      <p>Chapter-wise available mock tests. Select a test to start practice.</p>
+
+      <div className="pdfShelfRow">
+        {universalContent
+          .filter(
+            (test) =>
+              test.section === "mockTest" &&
+              test.status === "published" &&
+              test.planType === activeMockPlan &&
+              test.subject?.trim().toLowerCase() ===
+                decodeURIComponent(activeMockSubjectId)
+                  .trim()
+                  .toLowerCase() &&
+              test.chapter?.trim().toLowerCase() ===
+                decodeURIComponent(activeMockChapterId)
+                  .trim()
+                  .toLowerCase()
+          )
+          .map((test) => (
+            <div className="pdfMiniCard" key={test.id}>
+              <div className="pdfIcon">📝</div>
+
+              <h3>{test.title}</h3>
+
+              <p>
+                {test.subject} · {test.chapter}
+              </p>
+
+              <span>
+                {test.planType} · {test.testType || "Mock Test"}
+              </span>
+
+              <button
+                className="btnLink"
+                onClick={() => {
+                  if (
+                    test.planType !== "FREE" &&
+                    !hasPlanAccess(test.planType)
+                  ) {
+                    navigate("/ctet-tet/pricing");
+                    return;
+                  }
+
+                  navigate(
+                    `/ctet-tet/mock-tests/start/${test.id}`
+                  );
+                }}
+              >
+                Start Test
+              </button>
+            </div>
+          ))}
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/ctet-tet/mock-tests/start/:testId"
+  element={
+    <section className="notesSubjectRoutePage">
+      {universalContent
+        .filter(
+          (test) =>
+            test.section === "mockTest" &&
+            test.id === activeStartMockTestId
+        )
+        .map((test) => (
+          <div key={test.id}>
+            <button onClick={() => navigate(-1)}>
+              ← Back to Tests
+            </button>
+
+            <span className="notesSubjectRouteBadge">
+              MOCK TEST START
+            </span>
+
+            <h1>{test.title}</h1>
+
+            <p>
+              {test.planType} · {test.subject} · {test.chapter}
+            </p>
+
+            <div className="pdfShelfRow">
+              <div className="pdfMiniCard">
+                <div className="pdfIcon">📝</div>
+
+                <h3>Test Details</h3>
+
+                <p>
+                  Type: {test.testType || "Mock Test"}
+                </p>
+
+                <p>
+                  Duration: {test.duration || "Not specified"}
+                </p>
+
+                <p>
+                  Questions: {test.questions?.length || 0}
+                </p>
+
+                <span>{test.planType}</span>
+
+                <button
+                  className="btnLink"
+                  onClick={() =>
+                    navigate(
+                      `/ctet-tet/mock-tests/attempt/${test.id}`
+                    )
+                  }
+                >
+                  Begin Test
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+    </section>
+  }
+/>
+
+<Route
+  path="/ctet-tet/mock-tests/attempt/:testId"
+  element={
+    <section className="notesSubjectRoutePage">
+      {universalContent
+        .filter(
+          (test) =>
+            test.section === "mockTest" &&
+            test.id === activeStartMockTestId
+        )
+        .map((test) => {
+          const questions = test.questions || [];
+          const currentQuestion =
+            questions[activeMockQuestionIndex];
+
+          const selectedAnswer =
+            mockAttemptAnswers[activeMockQuestionIndex];
+
+          return (
+            <div key={test.id}>
+              <button onClick={() => navigate(-1)}>
+                ← Back to Test Details
+              </button>
+
+              <span className="notesSubjectRouteBadge">
+                MOCK TEST ATTEMPT
+              </span>
+
+              <h1>{test.title}</h1>
+
+              <p>
+                {test.planType} · {test.subject} · {test.chapter}
+              </p>
+
+              {questions.length === 0 ? (
+                <div className="pdfMiniCard">
+                  <div className="pdfIcon">⚠️</div>
+
+                  <h3>No Questions Found</h3>
+
+                  <p>This mock test does not have questions yet.</p>
+                </div>
+              ) : (
+                <div className="pdfShelfRow">
+                  <div className="pdfMiniCard">
+                    <div className="pdfIcon">❓</div>
+
+                    <h3>
+                      Question {activeMockQuestionIndex + 1} of{" "}
+                      {questions.length}
+                    </h3>
+
+                    <p>{currentQuestion?.question}</p>
+
+                    <div className="contentStudioActions">
+                    {(
+  currentQuestion?.options ||
+  [
+    currentQuestion?.optionA,
+    currentQuestion?.optionB,
+    currentQuestion?.optionC,
+    currentQuestion?.optionD,
+    currentQuestion?.option1,
+    currentQuestion?.option2,
+    currentQuestion?.option3,
+    currentQuestion?.option4,
+  ].filter(Boolean)
+).map(
+                        (option, index) => (
+                          <button
+                            type="button"
+                            className={
+                              selectedAnswer === option
+                                ? "publishButton"
+                                : "backButton"
+                            }
+                            key={index}
+                            onClick={() =>
+                              setMockAttemptAnswers({
+                                ...mockAttemptAnswers,
+                                [activeMockQuestionIndex]: option,
+                              })
+                            }
+                          >
+                            {option}
+                          </button>
+                        )
+                      )}
+                    </div>
+
+                    <div className="contentStudioActions">
+                      <button
+                        className="backButton"
+                        disabled={activeMockQuestionIndex === 0}
+                        onClick={() =>
+                          setActiveMockQuestionIndex(
+                            activeMockQuestionIndex - 1
+                          )
+                        }
+                      >
+                        Previous
+                      </button>
+
+                      {activeMockQuestionIndex <
+                      questions.length - 1 ? (
+                        <button
+                          className="btnLink"
+                          onClick={() =>
+                            setActiveMockQuestionIndex(
+                              activeMockQuestionIndex + 1
+                            )
+                          }
+                        >
+                          Next
+                        </button>
+                      ) : (
+                        <button
+                          className="btnLink"
+                          onClick={() =>
+                            navigate(
+                              `/ctet-tet/mock-tests/result/${test.id}`
+                            )
+                          }
+                        >
+                          Submit Test
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+    </section>
+  }
+/>
+
+<Route
+  path="/ctet-tet/mock-tests/result/:testId"
+  element={
+    <section className="notesSubjectRoutePage">
+      {universalContent
+        .filter(
+          (test) =>
+            test.section === "mockTest" &&
+            test.id === activeResultAttemptId
+        )
+        .map((test) => {
+          const questions = test.questions || [];
+          const totalQuestions = questions.length;
+
+          const correctCount = questions.filter(
+            (question, index) =>
+              mockAttemptAnswers[index] &&
+              mockAttemptAnswers[index] === question.answer
+          ).length;
+
+          const skippedCount = questions.filter(
+            (_, index) => !mockAttemptAnswers[index]
+          ).length;
+
+          const wrongCount =
+            totalQuestions - correctCount - skippedCount;
+
+          const accuracy =
+            totalQuestions > 0
+              ? Math.round((correctCount / totalQuestions) * 100)
+              : 0;
+
+          return (
+            <div key={test.id}>
+              <button onClick={() => navigate(-1)}>
+                ← Back to Attempt
+              </button>
+
+              <span className="notesSubjectRouteBadge">
+                MOCK TEST RESULT
+              </span>
+
+              <h1>Result: {test.title}</h1>
+
+              <p>
+                {test.planType} · {test.subject} · {test.chapter}
+              </p>
+
+              <div className="pdfShelfRow">
+                <div className="pdfMiniCard">
+                  <div className="pdfIcon">🏆</div>
+
+                  <h3>Score Summary</h3>
+
+                  <p>Total Questions: {totalQuestions}</p>
+
+                  <p>Correct: {correctCount}</p>
+
+                  <p>Wrong: {wrongCount}</p>
+
+                  <p>Skipped: {skippedCount}</p>
+
+                  <span>Accuracy: {accuracy}%</span>
+
+                  <button
+                    className="btnLink"
+                    onClick={() =>
+                      navigate(
+                        `/ctet-tet/mock-tests/review/${test.id}`
+                      )
+                    }
+                  >
+                    Review Answers
+                  </button>
+                </div>
+
+                <div className="pdfMiniCard">
+                  <div className="pdfIcon">📊</div>
+
+                  <h3>Performance</h3>
+
+                  <p>
+                    Score: {correctCount} / {totalQuestions}
+                  </p>
+
+                  <span>
+                    {accuracy >= 80
+                      ? "Excellent"
+                      : accuracy >= 50
+                      ? "Good Attempt"
+                      : "Needs Revision"}
+                  </span>
+
+                  <button
+                    className="btnLink"
+                    onClick={() => navigate("/ctet-tet/mock-tests")}
+                  >
+                    Back to Mock Tests
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+    </section>
+  }
+/>
+
+<Route
+  path="/ctet-tet/mock-tests/review/:testId"
+  element={
+    <section className="notesSubjectRoutePage">
+      {universalContent
+        .filter(
+          (test) =>
+            test.section === "mockTest" &&
+            test.id === activeResultAttemptId
+        )
+        .map((test) => (
+          <div key={test.id}>
+            <button onClick={() => navigate(-1)}>
+              ← Back to Result
+            </button>
+
+            <span className="notesSubjectRouteBadge">
+              ANSWER REVIEW
+            </span>
+
+            <h1>{test.title}</h1>
+
+            <p>Review your answers, correct answers, and explanations.</p>
+
+            <div className="pdfShelfRow">
+              {(test.questions || []).map((question, index) => {
+                const userAnswer = mockAttemptAnswers[index];
+                const isCorrect = userAnswer === question.answer;
+                const isSkipped = !userAnswer;
+
+                return (
+                  <div className="pdfMiniCard" key={index}>
+                    <div className="pdfIcon">
+                      {isSkipped ? "⏭️" : isCorrect ? "✅" : "❌"}
+                    </div>
+
+                    <h3>Question {index + 1}</h3>
+
+                    <p>{question.question}</p>
+
+                    <p>
+                      Your Answer:{" "}
+                      <strong>{userAnswer || "Not Attempted"}</strong>
+                    </p>
+
+                    <p>
+                      Correct Answer:{" "}
+                      <strong>{question.answer}</strong>
+                    </p>
+
+                    <span>
+                      {isSkipped
+                        ? "Skipped"
+                        : isCorrect
+                        ? "Correct"
+                        : "Wrong"}
+                    </span>
+
+                    {question.explanation && (
+                      <p>
+                        Explanation: {question.explanation}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <button
+              className="btnLink"
+              onClick={() => navigate("/ctet-tet/mock-tests/history")}
+            >
+              My Attempts History
+            </button>
+          </div>
+        ))}
+    </section>
+  }
+/>
+
+<Route
+  path="/ctet-tet/mock-tests/history"
+  element={
+    <section className="notesSubjectRoutePage">
+      <span className="notesSubjectRouteBadge">
+        MY ATTEMPTS
+      </span>
+
+      <h1>Mock Test History</h1>
+
+      <p>
+        Previous mock tests and performance records
+        from Firestore.
+      </p>
+
+      <div className="pdfShelfRow">
+        {mockResults.filter(
+          (result) =>
+            result.email === user?.email ||
+            result.studentEmail === user?.email
+        ).length === 0 ? (
+          <div className="pdfMiniCard">
+            <div className="pdfIcon">📊</div>
+
+            <h3>No Attempts Yet</h3>
+
+            <p>
+              Attempted mock tests will appear here
+              after submission.
+            </p>
+
+            <span>Start Practice</span>
+
+            <button
+              className="btnLink"
+              onClick={() =>
+                navigate("/ctet-tet/mock-tests")
+              }
+            >
+              Open Mock Tests
+            </button>
+          </div>
+        ) : (
+          mockResults
+            .filter(
+              (result) =>
+                result.email === user?.email ||
+                result.studentEmail === user?.email
+            )
+            .map((result) => (
+              <div
+                className="pdfMiniCard"
+                key={result.id}
+              >
+                <div className="pdfIcon">🏆</div>
+
+                <h3>
+                  {result.testTitle || "Mock Test"}
+                </h3>
+
+                <p>
+                  {result.subject || "Subject"} ·{" "}
+                  {result.chapter || "Chapter"}
+                </p>
+
+                <p>
+                  Score: {result.score || 0} /{" "}
+                  {result.totalQuestions || 0}
+                </p>
+
+                <p>
+                  Correct: {result.correct || 0} · Wrong:{" "}
+                  {result.wrong || 0} · Skipped:{" "}
+                  {result.skipped || 0}
+                </p>
+
+                <span>
+                  Accuracy: {result.accuracy || 0}%
+                </span>
+
+                <button
+                  className="btnLink"
+                  onClick={() =>
+                    navigate("/leaderboard")
+                  }
+                >
+                  View Leaderboard
+                </button>
+              </div>
+            ))
+        )}
+      </div>
+    </section>
+  }
+/>
+
+<Route
+  path="/leaderboard"
+  element={
+    <section className="notesSubjectRoutePage">
+      <span className="notesSubjectRouteBadge">
+        LEADERBOARD
+      </span>
+
+      <h1>Top Student Rankings</h1>
+
+      <p>
+        Rankings generated from saved mock test results.
+      </p>
+
+      <div className="pdfShelfRow">
+        {mockResults.length === 0 ? (
+          <div className="pdfMiniCard">
+            <div className="pdfIcon">🏆</div>
+
+            <h3>No Rankings Yet</h3>
+
+            <p>
+              Leaderboard will appear after students submit mock tests.
+            </p>
+
+            <span>Start Practice</span>
+
+            <button
+              className="btnLink"
+              onClick={() =>
+                navigate("/ctet-tet/mock-tests")
+              }
+            >
+              Open Mock Tests
+            </button>
+          </div>
+        ) : (
+          [...mockResults]
+            .sort(
+              (a, b) =>
+                Number(b.score || 0) - Number(a.score || 0)
+            )
+            .slice(0, 20)
+            .map((result, index) => (
+              <div
+                className="pdfMiniCard"
+                key={result.id || index}
+              >
+                <div className="pdfIcon">
+                  {index === 0
+                    ? "🥇"
+                    : index === 1
+                    ? "🥈"
+                    : index === 2
+                    ? "🥉"
+                    : "🏆"}
+                </div>
+
+                <h3>
+                  #{index + 1}{" "}
+                  {result.studentName ||
+                    result.studentEmail ||
+                    result.email ||
+                    "Student"}
+                </h3>
+
+                <p>
+                  {result.testTitle || "Mock Test"}
+                </p>
+
+                <p>
+                  Score: {result.score || 0} /{" "}
+                  {result.totalQuestions || 0}
+                </p>
+
+                <p>
+                  Correct: {result.correct || 0} · Wrong:{" "}
+                  {result.wrong || 0} · Skipped:{" "}
+                  {result.skipped || 0}
+                </p>
+
+                <span>
+                  Accuracy: {result.accuracy || 0}%
+                </span>
+              </div>
+            ))
+        )}
+      </div>
+    </section>
+  }
+/>
+
 
 <Route
   path="/ctet-tet/current-affairs"
