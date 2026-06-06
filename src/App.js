@@ -8782,6 +8782,895 @@ questionStatus: "published",
 />
 
 <Route
+  path="/admin/content/mock-tests/plan/:planType"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        {(() => {
+          const activePlan =
+            location.pathname.split("/").pop();
+
+          const planMockTests = universalContent.filter(
+            (item) =>
+              item.section === "mockTest" &&
+              (item.planType || "FREE") === activePlan
+          );
+
+          const subjectsInPlan = [
+            ...new Set(
+              planMockTests
+                .map((test) => test.subject)
+                .filter(Boolean)
+            ),
+          ];
+
+          return (
+            <>
+              <div className="sectionHeader">
+                <span className="badge">
+                  {activePlan} MOCK TESTS
+                </span>
+
+                <h1>{activePlan} Mock Test Library</h1>
+
+                <p>
+                  Manage subjects, chapters, and mock tests
+                  inside the {activePlan} plan.
+                </p>
+              </div>
+
+              <div className="contentStudioForm">
+                <div className="contentStudioActions">
+                  <button
+                    className="backButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests")
+                    }
+                  >
+                    ← Back to Mock Tests Manager
+                  </button>
+
+                  <button
+                    className="publishButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests/add")
+                    }
+                  >
+                    + Add Mock Test
+                  </button>
+                </div>
+              </div>
+
+              <div className="contentStudioList">
+                <h3>Subjects in {activePlan}</h3>
+
+                {subjectsInPlan.length === 0 ? (
+                  <div className="contentStudioItem">
+                    <strong>No subjects found.</strong>
+                    <p>
+                      Add a mock test in this plan first.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="contentStudioGrid">
+                    {subjectsInPlan.map((subjectName) => (
+                      <button
+                        key={subjectName}
+                        className="publishButton"
+                        onClick={() =>
+                          navigate(
+                            `/admin/content/mock-tests/plan/${activePlan}/${encodeURIComponent(
+                              subjectName
+                            )}`
+                          )
+                        }
+                      >
+                        {subjectName}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          );
+        })()}
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/mock-tests/plan/:planType/:subjectName"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        {(() => {
+          const routeParts = location.pathname.split("/");
+
+          const activePlan = routeParts[5];
+
+          const activeSubject = decodeURIComponent(
+            routeParts[6] || ""
+          );
+
+          const subjectMockTests =
+            universalContent.filter(
+              (item) =>
+                item.section === "mockTest" &&
+                (item.planType || "FREE") === activePlan &&
+                item.subject === activeSubject
+            );
+
+          const chaptersInSubject = [
+            ...new Set(
+              subjectMockTests
+                .map((test) => test.chapter)
+                .filter(Boolean)
+            ),
+          ];
+
+          return (
+            <>
+              <div className="sectionHeader">
+                <span className="badge">
+                  {activePlan} SUBJECT MOCKS
+                </span>
+
+                <h1>{activeSubject}</h1>
+
+                <p>
+                  Manage chapters and mock tests inside
+                  this subject.
+                </p>
+              </div>
+
+              <div className="contentStudioForm">
+                <div className="contentStudioActions">
+                  <button
+                    className="backButton"
+                    onClick={() =>
+                      navigate(
+                        `/admin/content/mock-tests/plan/${activePlan}`
+                      )
+                    }
+                  >
+                    ← Back to {activePlan}
+                  </button>
+
+                  <button
+                    className="publishButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests/add")
+                    }
+                  >
+                    + Add Mock Test
+                  </button>
+                </div>
+              </div>
+
+              <div className="contentStudioList">
+                <h3>Chapters in {activeSubject}</h3>
+
+                {chaptersInSubject.length === 0 ? (
+                  <div className="contentStudioItem">
+                    <strong>No chapters found.</strong>
+                    <p>
+                      Add a mock test with chapter under this
+                      subject first.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="contentStudioGrid">
+                    {chaptersInSubject.map((chapterName) => (
+                      <button
+                        key={chapterName}
+                        className="publishButton"
+                        onClick={() =>
+                          navigate(
+                            `/admin/content/mock-tests/plan/${activePlan}/${encodeURIComponent(
+                              activeSubject
+                            )}/${encodeURIComponent(
+                              chapterName
+                            )}`
+                          )
+                        }
+                      >
+                        {chapterName}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          );
+        })()}
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/mock-tests/plan/:planType/:subjectName/:chapterName"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        {(() => {
+          const routeParts = location.pathname.split("/");
+
+          const activePlan = routeParts[5];
+
+          const activeSubject = decodeURIComponent(
+            routeParts[6] || ""
+          );
+
+          const activeChapter = decodeURIComponent(
+            routeParts[7] || ""
+          );
+
+          const chapterMockTests =
+            universalContent.filter(
+              (item) =>
+                item.section === "mockTest" &&
+                (item.planType || "FREE") === activePlan &&
+                item.subject === activeSubject &&
+                item.chapter === activeChapter
+            );
+
+          return (
+            <>
+              <div className="sectionHeader">
+                <span className="badge">
+                  {activePlan} CHAPTER MOCKS
+                </span>
+
+                <h1>{activeChapter}</h1>
+
+                <p>
+                  Review and manage mock tests inside{" "}
+                  {activeSubject}.
+                </p>
+              </div>
+
+              <div className="contentStudioForm">
+                <div className="contentStudioActions">
+                  <button
+                    className="backButton"
+                    onClick={() =>
+                      navigate(
+                        `/admin/content/mock-tests/plan/${activePlan}/${encodeURIComponent(
+                          activeSubject
+                        )}`
+                      )
+                    }
+                  >
+                    ← Back to {activeSubject}
+                  </button>
+
+                  <button
+                    className="publishButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests/add")
+                    }
+                  >
+                    + Add Mock Test
+                  </button>
+                </div>
+              </div>
+
+              <div className="contentStudioList">
+                <h3>Mock Tests in {activeChapter}</h3>
+
+                {chapterMockTests.length === 0 ? (
+                  <div className="contentStudioItem">
+                    <strong>No mock tests found.</strong>
+
+                    <p>
+                      Add a mock test under this chapter first.
+                    </p>
+                  </div>
+                ) : (
+                  chapterMockTests.map((test) => (
+                    <div
+                      className="contentStudioItem"
+                      key={test.id}
+                    >
+                      <strong>{test.title}</strong>
+
+                      <p>
+                        {test.planType || "FREE"} •{" "}
+                        {test.subject || "No Subject"} •{" "}
+                        {test.chapter || "No Chapter"} •{" "}
+                        {test.testType || "Mock Test"} •{" "}
+                        {test.status || "draft"}
+                      </p>
+
+                      <p>
+                        {test.questions?.length || 0} Questions •{" "}
+                        {test.duration || 0} min •{" "}
+                        {test.examType || "CTET/TET"}
+                      </p>
+
+                      <div className="contentStudioActions">
+                        <button
+                          className="publishButton"
+                          onClick={() =>
+                            navigate(
+                              `/admin/content/mock-tests/preview/${test.id}`
+                            )
+                          }
+                        >
+                          Preview
+                        </button>
+
+                        <button
+                          className="publishButton"
+                          onClick={() => {
+                            setEditingMockTestId(test.id);
+
+                            setMockTestForm({
+                              title: test.title || "",
+                              planType:
+                                test.planType || "FREE",
+                              subject: test.subject || "",
+                              chapter: test.chapter || "",
+                              examType:
+                                test.examType || "CTET",
+                              testType:
+                                test.testType ||
+                                "Chapter Test",
+                              duration:
+                                test.duration?.toString() ||
+                                "30",
+                              totalQuestions:
+                                test.totalQuestions?.toString() ||
+                                "10",
+                              marksPerQuestion:
+                                test.marksPerQuestion?.toString() ||
+                                "1",
+                              negativeMarks:
+                                test.negativeMarks?.toString() ||
+                                "0",
+                              status:
+                                test.status || "published",
+                            });
+
+                            setMockTestQuestionsForm(
+                              test.questions?.length
+                                ? test.questions
+                                : [
+                                    {
+                                      question: "",
+                                      option1: "",
+                                      option2: "",
+                                      option3: "",
+                                      option4: "",
+                                      answer: "",
+                                      explanation: "",
+                                      level: "Easy",
+                                      questionType:
+                                        "Single Correct",
+                                      language: "English",
+                                      tag: "",
+                                      positiveMarks: "1",
+                                      negativeMarks: "0",
+                                      questionStatus:
+                                        "published",
+                                    },
+                                  ]
+                            );
+
+                            navigate(
+                              "/admin/content/mock-tests/add"
+                            );
+                          }}
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          className="backButton"
+                          onClick={async () => {
+                            const newStatus =
+                              test.status === "published"
+                                ? "unpublished"
+                                : "published";
+
+                            await updateDoc(
+                              doc(db, "contentItems", test.id),
+                              {
+                                status: newStatus,
+                                updatedAt: new Date(),
+                              }
+                            );
+
+                            await loadContentItemsFromFirestore();
+
+                            alert(
+                              newStatus === "published"
+                                ? "Mock test published successfully ✅"
+                                : "Mock test unpublished successfully ✅"
+                            );
+                          }}
+                        >
+                          {test.status === "published"
+                            ? "Unpublish"
+                            : "Publish"}
+                        </button>
+
+                        <button
+                          className="deleteContentButton"
+                          onClick={() => {
+                            if (
+                              window.confirm(
+                                `Delete "${test.title}" permanently?\n\nThis mock test will be removed from this chapter.\n\nThis action cannot be undone.`
+                              )
+                            ) {
+                              handleDeleteLocalContentItem(test.id);
+                            }
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </>
+          );
+        })()}
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/mock-tests/subjects"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        {(() => {
+          const mockTests = universalContent.filter(
+            (item) => item.section === "mockTest"
+          );
+
+          const subjects = [
+            ...new Set(
+              mockTests
+                .map((test) => test.subject)
+                .filter(Boolean)
+            ),
+          ];
+
+          return (
+            <>
+              <div className="sectionHeader">
+                <span className="badge">
+                  MOCK TEST SUBJECTS
+                </span>
+
+                <h1>Mock Test Subject Library</h1>
+
+                <p>
+                  Browse all mock test subjects and open their
+                  chapters, tests, and question collections.
+                </p>
+              </div>
+
+              <div className="contentStudioForm">
+                <div className="contentStudioActions">
+                  <button
+                    className="backButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests")
+                    }
+                  >
+                    ← Back to Mock Tests Manager
+                  </button>
+
+                  <button
+                    className="publishButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests/add")
+                    }
+                  >
+                    + Add Mock Test
+                  </button>
+                </div>
+              </div>
+
+              <div className="contentStudioList">
+                <h3>All Mock Test Subjects</h3>
+
+                {subjects.length === 0 ? (
+                  <div className="contentStudioItem">
+                    <strong>No subjects found.</strong>
+                    <p>
+                      Add mock tests first to generate subjects.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="contentStudioGrid">
+                    {subjects.map((subjectName) => {
+                      const subjectTests = mockTests.filter(
+                        (test) =>
+                          test.subject === subjectName
+                      );
+
+                      return (
+                        <button
+                          key={subjectName}
+                          className="publishButton"
+                          onClick={() =>
+                            navigate(
+                              `/admin/content/mock-tests/subjects/${encodeURIComponent(
+                                subjectName
+                              )}`
+                            )
+                          }
+                        >
+                          {subjectName}
+                          <br />
+                          <small>
+                            {subjectTests.length} Test
+                            {subjectTests.length > 1
+                              ? "s"
+                              : ""}
+                          </small>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </>
+          );
+        })()}
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/mock-tests/question-bank"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        {(() => {
+          const mockTests = universalContent.filter(
+            (item) => item.section === "mockTest"
+          );
+
+          const questionBankQuestions =
+            mockTests.flatMap((test) =>
+              (test.questions || []).map((question, index) => ({
+                ...question,
+                testId: test.id,
+                testTitle: test.title,
+                planType: test.planType,
+                subject: test.subject,
+                chapter: test.chapter,
+                questionNumber: index + 1,
+              }))
+            );
+
+          const subjects = [
+            ...new Set(
+              questionBankQuestions
+                .map((question) => question.subject)
+                .filter(Boolean)
+            ),
+          ];
+
+          return (
+            <>
+              <div className="sectionHeader">
+                <span className="badge">
+                  QUESTION BANK
+                </span>
+
+                <h1>Mock Test Question Bank</h1>
+
+                <p>
+                  Browse all questions grouped by subject and chapter.
+                  Future AI explanations, PYQ pools, and adaptive
+                  tests will use this bank.
+                </p>
+              </div>
+
+              <div className="contentStudioForm">
+                <div className="contentStudioActions">
+                  <button
+                    className="backButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests")
+                    }
+                  >
+                    ← Back to Mock Tests Manager
+                  </button>
+
+                  <button
+                    className="publishButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests/add")
+                    }
+                  >
+                    + Add Mock Test
+                  </button>
+                </div>
+              </div>
+
+              <div className="contentStudioList">
+                <h3>Subjects in Question Bank</h3>
+
+                {subjects.length === 0 ? (
+                  <div className="contentStudioItem">
+                    <strong>No questions found.</strong>
+                    <p>
+                      Add mock tests with questions first.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="contentStudioGrid">
+                    {subjects.map((subjectName) => {
+                      const subjectQuestionCount =
+                        questionBankQuestions.filter(
+                          (question) =>
+                            question.subject === subjectName
+                        ).length;
+
+                      return (
+                        <button
+                          key={subjectName}
+                          className="publishButton"
+                          onClick={() =>
+                            navigate(
+                              `/admin/content/mock-tests/question-bank/${encodeURIComponent(
+                                subjectName
+                              )}`
+                            )
+                          }
+                        >
+                          {subjectName}
+                          <br />
+                          <small>
+                            {subjectQuestionCount} Questions
+                          </small>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </>
+          );
+        })()}
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/mock-tests/question-bank/:subjectName"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        {(() => {
+          const routeParts = location.pathname.split("/");
+          const activeSubject = decodeURIComponent(routeParts[5] || "");
+
+          const normalize = (value = "") =>
+            value.toString().trim().toLowerCase();
+
+          const mockTests = universalContent.filter(
+            (item) => item.section === "mockTest"
+          );
+
+          const subjectTests = mockTests.filter(
+            (test) =>
+              normalize(test.subject) === normalize(activeSubject)
+          );
+
+          const chapters = [
+            ...new Set(
+              subjectTests
+                .map((test) => test.chapter)
+                .filter(Boolean)
+            ),
+          ];
+
+          return (
+            <>
+              <div className="sectionHeader">
+                <span className="badge">QUESTION BANK SUBJECT</span>
+
+                <h1>{activeSubject}</h1>
+
+                <p>
+                  Browse chapters and question pools inside this subject.
+                </p>
+              </div>
+
+              <div className="contentStudioForm">
+                <div className="contentStudioActions">
+                  <button
+                    className="backButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests/question-bank")
+                    }
+                  >
+                    ← Back to Question Bank
+                  </button>
+                </div>
+              </div>
+
+              <div className="contentStudioList">
+                <h3>Chapters in {activeSubject}</h3>
+
+                {chapters.length === 0 ? (
+                  <div className="contentStudioItem">
+                    <strong>No chapters found.</strong>
+                    <p>Add mock tests with questions under this subject first.</p>
+                  </div>
+                ) : (
+                  <div className="contentStudioGrid">
+                    {chapters.map((chapterName) => {
+                      const questionCount = subjectTests
+                        .filter(
+                          (test) =>
+                            normalize(test.chapter) === normalize(chapterName)
+                        )
+                        .reduce(
+                          (total, test) =>
+                            total + (test.questions?.length || 0),
+                          0
+                        );
+
+                      return (
+                        <button
+                          key={chapterName}
+                          className="publishButton"
+                          onClick={() =>
+                            navigate(
+                              `/admin/content/mock-tests/question-bank/${encodeURIComponent(
+                                activeSubject
+                              )}/${encodeURIComponent(chapterName)}`
+                            )
+                          }
+                        >
+                          {chapterName}
+                          <br />
+                          <small>{questionCount} Questions</small>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </>
+          );
+        })()}
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/mock-tests/question-bank/:subjectName/:chapterName"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        {(() => {
+          const routeParts = location.pathname.split("/");
+          const activeSubject = decodeURIComponent(routeParts[5] || "");
+          const activeChapter = decodeURIComponent(routeParts[6] || "");
+
+          const normalize = (value = "") =>
+            value.toString().trim().toLowerCase();
+
+          const mockTests = universalContent.filter(
+            (item) =>
+              item.section === "mockTest" &&
+              normalize(item.subject) === normalize(activeSubject) &&
+              normalize(item.chapter) === normalize(activeChapter)
+          );
+
+          const questions = mockTests.flatMap((test) =>
+            (test.questions || []).map((question, index) => ({
+              ...question,
+              testTitle: test.title,
+              planType: test.planType,
+              questionNumber: index + 1,
+            }))
+          );
+
+          return (
+            <>
+              <div className="sectionHeader">
+                <span className="badge">QUESTION BANK CHAPTER</span>
+
+                <h1>{activeChapter}</h1>
+
+                <p>
+                  {activeSubject} • {questions.length} Questions
+                </p>
+              </div>
+
+              <div className="contentStudioForm">
+                <div className="contentStudioActions">
+                  <button
+                    className="backButton"
+                    onClick={() =>
+                      navigate(
+                        `/admin/content/mock-tests/question-bank/${encodeURIComponent(
+                          activeSubject
+                        )}`
+                      )
+                    }
+                  >
+                    ← Back to {activeSubject}
+                  </button>
+
+                  <button
+                    className="publishButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests/add")
+                    }
+                  >
+                    + Add Mock Test
+                  </button>
+                </div>
+              </div>
+
+              <div className="contentStudioList">
+                <h3>Questions in {activeChapter}</h3>
+
+                {questions.length === 0 ? (
+                  <div className="contentStudioItem">
+                    <strong>No questions found.</strong>
+                    <p>Add questions under this chapter first.</p>
+                  </div>
+                ) : (
+                  questions.map((question, index) => (
+                    <div className="contentStudioItem" key={index}>
+                      <strong>
+                        Q{index + 1}. {question.question}
+                      </strong>
+
+                      <p>A. {question.option1}</p>
+                      <p>B. {question.option2}</p>
+                      <p>C. {question.option3}</p>
+                      <p>D. {question.option4}</p>
+
+                      <p>
+                        <strong>Correct:</strong> {question.answer}
+                      </p>
+
+                      <p>
+                        <strong>Explanation:</strong>{" "}
+                        {question.explanation || "No explanation added."}
+                      </p>
+
+                      <p>
+                        {question.planType || "FREE"} •{" "}
+                        {question.level || "Easy"} •{" "}
+                        {question.questionType || "Single Correct"} •{" "}
+                        {question.language || "English"} •{" "}
+                        {question.testTitle}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </>
+          );
+        })()}
+      </section>
+    ) : null
+  }
+/>
+
+<Route
   path="/admin/content/courses"
   element={
     requireAdmin() ? (
