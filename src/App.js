@@ -9332,6 +9332,674 @@ questionStatus: "published",
 />
 
 <Route
+  path="/admin/content/mock-tests/subjects/:subjectName"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        {(() => {
+          const routeParts = location.pathname.split("/");
+
+          const activeSubject = decodeURIComponent(
+            routeParts[5] || ""
+          );
+
+          const mockTests = universalContent.filter(
+            (item) =>
+              item.section === "mockTest" &&
+              item.subject === activeSubject
+          );
+
+          const chapters = [
+            ...new Set(
+              mockTests
+                .map((test) => test.chapter)
+                .filter(Boolean)
+            ),
+          ];
+
+          return (
+            <>
+              <div className="sectionHeader">
+                <span className="badge">
+                  MOCK TEST SUBJECT
+                </span>
+
+                <h1>{activeSubject}</h1>
+
+                <p>
+                  Browse all chapters and mock tests inside
+                  this subject.
+                </p>
+              </div>
+
+              <div className="contentStudioForm">
+                <div className="contentStudioActions">
+                  <button
+                    className="backButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests/subjects")
+                    }
+                  >
+                    ← Back to Subjects
+                  </button>
+
+                  <button
+                    className="publishButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests/add")
+                    }
+                  >
+                    + Add Mock Test
+                  </button>
+                </div>
+              </div>
+
+              <div className="contentStudioList">
+                <h3>Chapters in {activeSubject}</h3>
+
+                {chapters.length === 0 ? (
+                  <div className="contentStudioItem">
+                    <strong>No chapters found.</strong>
+                    <p>
+                      Add mock tests under this subject first.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="contentStudioGrid">
+                    {chapters.map((chapterName) => {
+                      const chapterTests = mockTests.filter(
+                        (test) =>
+                          test.chapter === chapterName
+                      );
+
+                      return (
+                        <button
+                          key={chapterName}
+                          className="publishButton"
+                          onClick={() =>
+                            navigate(
+                              `/admin/content/mock-tests/subjects/${encodeURIComponent(
+                                activeSubject
+                              )}/${encodeURIComponent(
+                                chapterName
+                              )}`
+                            )
+                          }
+                        >
+                          {chapterName}
+                          <br />
+                          <small>
+                            {chapterTests.length} Test
+                            {chapterTests.length > 1
+                              ? "s"
+                              : ""}
+                          </small>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </>
+          );
+        })()}
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/mock-tests/subjects/:subjectName/:chapterName"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        {(() => {
+          const routeParts = location.pathname.split("/");
+
+          const activeSubject = decodeURIComponent(
+            routeParts[5] || ""
+          );
+
+          const activeChapter = decodeURIComponent(
+            routeParts[6] || ""
+          );
+
+          const chapterTests = universalContent.filter(
+            (item) =>
+              item.section === "mockTest" &&
+              item.subject === activeSubject &&
+              item.chapter === activeChapter
+          );
+
+          return (
+            <>
+              <div className="sectionHeader">
+                <span className="badge">
+                  MOCK TEST CHAPTER
+                </span>
+
+                <h1>{activeChapter}</h1>
+
+                <p>
+                  {activeSubject} • Browse all tests inside
+                  this chapter.
+                </p>
+              </div>
+
+              <div className="contentStudioForm">
+                <div className="contentStudioActions">
+                  <button
+                    className="backButton"
+                    onClick={() =>
+                      navigate(
+                        `/admin/content/mock-tests/subjects/${encodeURIComponent(
+                          activeSubject
+                        )}`
+                      )
+                    }
+                  >
+                    ← Back to {activeSubject}
+                  </button>
+
+                  <button
+                    className="publishButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests/add")
+                    }
+                  >
+                    + Add Mock Test
+                  </button>
+                </div>
+              </div>
+
+              <div className="contentStudioList">
+                <h3>Tests in {activeChapter}</h3>
+
+                {chapterTests.length === 0 ? (
+                  <div className="contentStudioItem">
+                    <strong>No tests found.</strong>
+                    <p>
+                      Add mock tests under this chapter first.
+                    </p>
+                  </div>
+                ) : (
+                  chapterTests.map((test) => (
+                    <div
+                      className="contentStudioItem"
+                      key={test.id}
+                    >
+                      <strong>{test.title}</strong>
+
+                      <p>
+                        {test.planType || "FREE"} •{" "}
+                        {test.subject || "No Subject"} •{" "}
+                        {test.chapter || "No Chapter"} •{" "}
+                        {test.testType || "Mock Test"} •{" "}
+                        {test.status || "draft"}
+                      </p>
+
+                      <p>
+                        {test.questions?.length || 0} Questions •{" "}
+                        {test.duration || 0} min •{" "}
+                        {test.examType || "CTET/TET"}
+                      </p>
+
+                      <div className="contentStudioActions">
+                        <button
+                          className="publishButton"
+                          onClick={() =>
+                            navigate(
+                              `/admin/content/mock-tests/preview/${test.id}`
+                            )
+                          }
+                        >
+                          Preview
+                        </button>
+
+                        <button
+                          className="publishButton"
+                          onClick={() => {
+                            setEditingMockTestId(test.id);
+
+                            setMockTestForm({
+                              title: test.title || "",
+                              planType:
+                                test.planType || "FREE",
+                              subject: test.subject || "",
+                              chapter: test.chapter || "",
+                              examType:
+                                test.examType || "CTET",
+                              testType:
+                                test.testType ||
+                                "Chapter Test",
+                              duration:
+                                test.duration?.toString() ||
+                                "30",
+                              totalQuestions:
+                                test.totalQuestions?.toString() ||
+                                "10",
+                              marksPerQuestion:
+                                test.marksPerQuestion?.toString() ||
+                                "1",
+                              negativeMarks:
+                                test.negativeMarks?.toString() ||
+                                "0",
+                              status:
+                                test.status || "published",
+                            });
+
+                            setMockTestQuestionsForm(
+                              test.questions?.length
+                                ? test.questions
+                                : [
+                                    {
+                                      question: "",
+                                      option1: "",
+                                      option2: "",
+                                      option3: "",
+                                      option4: "",
+                                      answer: "",
+                                      explanation: "",
+                                      level: "Easy",
+                                      questionType:
+                                        "Single Correct",
+                                      language: "English",
+                                      tag: "",
+                                      positiveMarks: "1",
+                                      negativeMarks: "0",
+                                      questionStatus:
+                                        "published",
+                                    },
+                                  ]
+                            );
+
+                            navigate(
+                              "/admin/content/mock-tests/add"
+                            );
+                          }}
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          className="backButton"
+                          onClick={async () => {
+                            const newStatus =
+                              test.status === "published"
+                                ? "unpublished"
+                                : "published";
+
+                            await updateDoc(
+                              doc(db, "contentItems", test.id),
+                              {
+                                status: newStatus,
+                                updatedAt: new Date(),
+                              }
+                            );
+
+                            await loadContentItemsFromFirestore();
+
+                            alert(
+                              newStatus === "published"
+                                ? "Mock test published successfully ✅"
+                                : "Mock test unpublished successfully ✅"
+                            );
+                          }}
+                        >
+                          {test.status === "published"
+                            ? "Unpublish"
+                            : "Publish"}
+                        </button>
+
+                        <button
+                          className="deleteContentButton"
+                          onClick={() => {
+                            if (
+                              window.confirm(
+                                `Delete "${test.title}" permanently?\n\nThis action cannot be undone.`
+                              )
+                            ) {
+                              handleDeleteLocalContentItem(test.id);
+                            }
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </>
+          );
+        })()}
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/mock-tests/chapters"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        {(() => {
+          const mockTests = universalContent.filter(
+            (item) => item.section === "mockTest"
+          );
+
+          const chapters = [
+            ...new Set(
+              mockTests
+                .map((test) => test.chapter)
+                .filter(Boolean)
+            ),
+          ];
+
+          return (
+            <>
+              <div className="sectionHeader">
+                <span className="badge">
+                  MOCK TEST CHAPTERS
+                </span>
+
+                <h1>Mock Test Chapter Library</h1>
+
+                <p>
+                  Browse all chapters and open their mock tests.
+                </p>
+              </div>
+
+              <div className="contentStudioForm">
+                <div className="contentStudioActions">
+                  <button
+                    className="backButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests")
+                    }
+                  >
+                    ← Back to Mock Tests Manager
+                  </button>
+
+                  <button
+                    className="publishButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests/add")
+                    }
+                  >
+                    + Add Mock Test
+                  </button>
+                </div>
+              </div>
+
+              <div className="contentStudioList">
+                <h3>All Mock Test Chapters</h3>
+
+                {chapters.length === 0 ? (
+                  <div className="contentStudioItem">
+                    <strong>No chapters found.</strong>
+                    <p>
+                      Add mock tests first to generate chapters.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="contentStudioGrid">
+                    {chapters.map((chapterName) => {
+                      const chapterTests = mockTests.filter(
+                        (test) =>
+                          test.chapter === chapterName
+                      );
+
+                      return (
+                        <button
+                          key={chapterName}
+                          className="publishButton"
+                          onClick={() =>
+                            navigate(
+                              `/admin/content/mock-tests/chapters/${encodeURIComponent(
+                                chapterName
+                              )}`
+                            )
+                          }
+                        >
+                          {chapterName}
+                          <br />
+                          <small>
+                            {chapterTests.length} Test
+                            {chapterTests.length > 1 ? "s" : ""}
+                          </small>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </>
+          );
+        })()}
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/mock-tests/chapters/:chapterName"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        {(() => {
+          const routeParts = location.pathname.split("/");
+
+          const activeChapter = decodeURIComponent(
+            routeParts[5] || ""
+          );
+
+          const mockTests = universalContent.filter(
+            (item) =>
+              item.section === "mockTest" &&
+              item.chapter === activeChapter
+          );
+
+          return (
+            <>
+              <div className="sectionHeader">
+                <span className="badge">
+                  MOCK TEST CHAPTER
+                </span>
+
+                <h1>{activeChapter}</h1>
+
+                <p>
+                  Browse all tests inside this chapter.
+                </p>
+              </div>
+
+              <div className="contentStudioForm">
+                <div className="contentStudioActions">
+                  <button
+                    className="backButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests/chapters")
+                    }
+                  >
+                    ← Back to Chapters
+                  </button>
+
+                  <button
+                    className="publishButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests/add")
+                    }
+                  >
+                    + Add Mock Test
+                  </button>
+                </div>
+              </div>
+
+              <div className="contentStudioList">
+                <h3>Tests in {activeChapter}</h3>
+
+                {mockTests.length === 0 ? (
+                  <div className="contentStudioItem">
+                    <strong>No tests found.</strong>
+
+                    <p>
+                      Add mock tests first.
+                    </p>
+                  </div>
+                ) : (
+                  mockTests.map((test) => (
+                    <div
+                      className="contentStudioItem"
+                      key={test.id}
+                    >
+                      <strong>{test.title}</strong>
+
+                      <p>
+                        {test.planType || "FREE"} •{" "}
+                        {test.subject || "No Subject"} •{" "}
+                        {test.chapter || "No Chapter"} •{" "}
+                        {test.testType || "Mock Test"} •{" "}
+                        {test.status || "draft"}
+                      </p>
+
+                      <p>
+                        {test.questions?.length || 0} Questions •{" "}
+                        {test.duration || 0} min •{" "}
+                        {test.examType || "CTET/TET"}
+                      </p>
+
+                      <div className="contentStudioActions">
+                        <button
+                          className="publishButton"
+                          onClick={() =>
+                            navigate(
+                              `/admin/content/mock-tests/preview/${test.id}`
+                            )
+                          }
+                        >
+                          Preview
+                        </button>
+
+                        <button
+                          className="publishButton"
+                          onClick={() => {
+                            setEditingMockTestId(test.id);
+
+                            setMockTestForm({
+                              title: test.title || "",
+                              planType: test.planType || "FREE",
+                              subject: test.subject || "",
+                              chapter: test.chapter || "",
+                              examType: test.examType || "CTET",
+                              testType:
+                                test.testType || "Chapter Test",
+                              duration:
+                                test.duration?.toString() || "30",
+                              totalQuestions:
+                                test.totalQuestions?.toString() ||
+                                "10",
+                              marksPerQuestion:
+                                test.marksPerQuestion?.toString() ||
+                                "1",
+                              negativeMarks:
+                                test.negativeMarks?.toString() ||
+                                "0",
+                              status:
+                                test.status || "published",
+                            });
+
+                            setMockTestQuestionsForm(
+                              test.questions?.length
+                                ? test.questions
+                                : [
+                                    {
+                                      question: "",
+                                      option1: "",
+                                      option2: "",
+                                      option3: "",
+                                      option4: "",
+                                      answer: "",
+                                      explanation: "",
+                                      level: "Easy",
+                                      questionType:
+                                        "Single Correct",
+                                      language: "English",
+                                      tag: "",
+                                      positiveMarks: "1",
+                                      negativeMarks: "0",
+                                      questionStatus:
+                                        "published",
+                                    },
+                                  ]
+                            );
+
+                            navigate(
+                              "/admin/content/mock-tests/add"
+                            );
+                          }}
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          className="backButton"
+                          onClick={async () => {
+                            const newStatus =
+                              test.status === "published"
+                                ? "unpublished"
+                                : "published";
+
+                            await updateDoc(
+                              doc(db, "contentItems", test.id),
+                              {
+                                status: newStatus,
+                                updatedAt: new Date(),
+                              }
+                            );
+
+                            await loadContentItemsFromFirestore();
+
+                            alert(
+                              newStatus === "published"
+                                ? "Mock test published successfully ✅"
+                                : "Mock test unpublished successfully ✅"
+                            );
+                          }}
+                        >
+                          {test.status === "published"
+                            ? "Unpublish"
+                            : "Publish"}
+                        </button>
+
+                        <button
+                          className="deleteContentButton"
+                          onClick={() => {
+                            if (
+                              window.confirm(
+                                `Delete "${test.title}" permanently?\n\nThis action cannot be undone.`
+                              )
+                            ) {
+                              handleDeleteLocalContentItem(test.id);
+                            }
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </>
+          );
+        })()}
+      </section>
+    ) : null
+  }
+/>
+
+<Route
   path="/admin/content/mock-tests/question-bank"
   element={
     requireAdmin() ? (
@@ -9661,6 +10329,935 @@ questionStatus: "published",
                     </div>
                   ))
                 )}
+              </div>
+            </>
+          );
+        })()}
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/mock-tests/test-series"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        {(() => {
+          const mockTests = universalContent.filter(
+            (item) => item.section === "mockTest"
+          );
+
+          const testTypes = [
+            ...new Set(
+              mockTests
+                .map((test) => test.testType || "Mock Test")
+                .filter(Boolean)
+            ),
+          ];
+
+          return (
+            <>
+              <div className="sectionHeader">
+                <span className="badge">
+                  TEST SERIES
+                </span>
+
+                <h1>Mock Test Series</h1>
+
+                <p>
+                  Organize AspireNest mock tests by chapter tests,
+                  sectional tests, full length tests, PYQ practice,
+                  and daily practice sets.
+                </p>
+              </div>
+
+              <div className="contentStudioForm">
+                <div className="contentStudioActions">
+                  <button
+                    className="backButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests")
+                    }
+                  >
+                    ← Back to Mock Tests Manager
+                  </button>
+
+                  <button
+                    className="publishButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests/add")
+                    }
+                  >
+                    + Add Mock Test
+                  </button>
+                </div>
+              </div>
+
+              <div className="contentStudioList">
+                <h3>Available Test Series</h3>
+
+                {testTypes.length === 0 ? (
+                  <div className="contentStudioItem">
+                    <strong>No test series found.</strong>
+                    <p>
+                      Add mock tests first to generate test series.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="contentStudioGrid">
+                    {testTypes.map((typeName) => {
+                      const typeTests = mockTests.filter(
+                        (test) =>
+                          (test.testType || "Mock Test") ===
+                          typeName
+                      );
+
+                      return (
+                        <button
+                          key={typeName}
+                          className="publishButton"
+                          onClick={() =>
+                            navigate(
+                              `/admin/content/mock-tests/test-series/${encodeURIComponent(
+                                typeName
+                              )}`
+                            )
+                          }
+                        >
+                          {typeName}
+                          <br />
+                          <small>
+                            {typeTests.length} Test
+                            {typeTests.length > 1 ? "s" : ""}
+                          </small>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </>
+          );
+        })()}
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/mock-tests/test-series/:seriesName"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        {(() => {
+          const routeParts = location.pathname.split("/");
+
+          const activeSeries = decodeURIComponent(
+            routeParts[5] || ""
+          );
+
+          const seriesTests = universalContent.filter(
+            (item) =>
+              item.section === "mockTest" &&
+              (item.testType || "Mock Test") === activeSeries
+          );
+
+          return (
+            <>
+              <div className="sectionHeader">
+                <span className="badge">
+                  TEST SERIES DETAIL
+                </span>
+
+                <h1>{activeSeries}</h1>
+
+                <p>
+                  Browse all mock tests inside this test series.
+                </p>
+              </div>
+
+              <div className="contentStudioForm">
+                <div className="contentStudioActions">
+                  <button
+                    className="backButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests/test-series")
+                    }
+                  >
+                    ← Back to Test Series
+                  </button>
+
+                  <button
+                    className="publishButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests/add")
+                    }
+                  >
+                    + Add Mock Test
+                  </button>
+                </div>
+              </div>
+
+              <div className="contentStudioList">
+                <h3>Tests in {activeSeries}</h3>
+
+                {seriesTests.length === 0 ? (
+                  <div className="contentStudioItem">
+                    <strong>No tests found.</strong>
+                    <p>
+                      Add mock tests under this test series first.
+                    </p>
+                  </div>
+                ) : (
+                  seriesTests.map((test) => (
+                    <div
+                      className="contentStudioItem"
+                      key={test.id}
+                    >
+                      <strong>{test.title}</strong>
+
+                      <p>
+                        {test.planType || "FREE"} •{" "}
+                        {test.subject || "No Subject"} •{" "}
+                        {test.chapter || "No Chapter"} •{" "}
+                        {test.testType || "Mock Test"} •{" "}
+                        {test.status || "draft"}
+                      </p>
+
+                      <p>
+                        {test.questions?.length || 0} Questions •{" "}
+                        {test.duration || 0} min •{" "}
+                        {test.examType || "CTET/TET"}
+                      </p>
+
+                      <div className="contentStudioActions">
+                        <button
+                          className="publishButton"
+                          onClick={() =>
+                            navigate(
+                              `/admin/content/mock-tests/preview/${test.id}`
+                            )
+                          }
+                        >
+                          Preview
+                        </button>
+
+                        <button
+                          className="publishButton"
+                          onClick={() => {
+                            setEditingMockTestId(test.id);
+
+                            setMockTestForm({
+                              title: test.title || "",
+                              planType: test.planType || "FREE",
+                              subject: test.subject || "",
+                              chapter: test.chapter || "",
+                              examType: test.examType || "CTET",
+                              testType:
+                                test.testType || "Chapter Test",
+                              duration:
+                                test.duration?.toString() || "30",
+                              totalQuestions:
+                                test.totalQuestions?.toString() ||
+                                "10",
+                              marksPerQuestion:
+                                test.marksPerQuestion?.toString() ||
+                                "1",
+                              negativeMarks:
+                                test.negativeMarks?.toString() ||
+                                "0",
+                              status:
+                                test.status || "published",
+                            });
+
+                            setMockTestQuestionsForm(
+                              test.questions?.length
+                                ? test.questions
+                                : [
+                                    {
+                                      question: "",
+                                      option1: "",
+                                      option2: "",
+                                      option3: "",
+                                      option4: "",
+                                      answer: "",
+                                      explanation: "",
+                                      level: "Easy",
+                                      questionType:
+                                        "Single Correct",
+                                      language: "English",
+                                      tag: "",
+                                      positiveMarks: "1",
+                                      negativeMarks: "0",
+                                      questionStatus:
+                                        "published",
+                                    },
+                                  ]
+                            );
+
+                            navigate(
+                              "/admin/content/mock-tests/add"
+                            );
+                          }}
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          className="backButton"
+                          onClick={async () => {
+                            const newStatus =
+                              test.status === "published"
+                                ? "unpublished"
+                                : "published";
+
+                            await updateDoc(
+                              doc(db, "contentItems", test.id),
+                              {
+                                status: newStatus,
+                                updatedAt: new Date(),
+                              }
+                            );
+
+                            await loadContentItemsFromFirestore();
+
+                            alert(
+                              newStatus === "published"
+                                ? "Mock test published successfully ✅"
+                                : "Mock test unpublished successfully ✅"
+                            );
+                          }}
+                        >
+                          {test.status === "published"
+                            ? "Unpublish"
+                            : "Publish"}
+                        </button>
+
+                        <button
+                          className="deleteContentButton"
+                          onClick={() => {
+                            if (
+                              window.confirm(
+                                `Delete "${test.title}" permanently?\n\nThis action cannot be undone.`
+                              )
+                            ) {
+                              handleDeleteLocalContentItem(test.id);
+                            }
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </>
+          );
+        })()}
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/mock-tests/published"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        {(() => {
+          const publishedMockTests = universalContent.filter(
+            (item) =>
+              item.section === "mockTest" &&
+              item.status === "published"
+          );
+
+          return (
+            <>
+              <div className="sectionHeader">
+                <span className="badge">
+                  PUBLISHED MOCK TESTS
+                </span>
+
+                <h1>Published Mock Tests</h1>
+
+                <p>
+                  Review all student-ready published mock tests
+                  with quick preview, edit, unpublish, and delete actions.
+                </p>
+              </div>
+
+              <div className="contentStudioForm">
+                <div className="contentStudioActions">
+                  <button
+                    className="backButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests")
+                    }
+                  >
+                    ← Back to Mock Tests Manager
+                  </button>
+
+                  <button
+                    className="publishButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests/add")
+                    }
+                  >
+                    + Add Mock Test
+                  </button>
+                </div>
+              </div>
+
+              <div className="contentStudioList">
+                <h3>Student-Visible Tests</h3>
+
+                {publishedMockTests.length === 0 ? (
+                  <div className="contentStudioItem">
+                    <strong>No published tests found.</strong>
+                    <p>
+                      Publish mock tests from Manage Mock Tests first.
+                    </p>
+                  </div>
+                ) : (
+                  publishedMockTests.map((test) => (
+                    <div
+                      className="contentStudioItem"
+                      key={test.id}
+                    >
+                      <strong>{test.title}</strong>
+
+                      <p>
+                        {test.planType || "FREE"} •{" "}
+                        {test.subject || "No Subject"} •{" "}
+                        {test.chapter || "No Chapter"} •{" "}
+                        {test.testType || "Mock Test"}
+                      </p>
+
+                      <p>
+                        {test.questions?.length || 0} Questions •{" "}
+                        {test.duration || 0} min •{" "}
+                        {test.examType || "CTET/TET"}
+                      </p>
+
+                      <div className="contentStudioActions">
+                        <button
+                          className="publishButton"
+                          onClick={() =>
+                            navigate(
+                              `/admin/content/mock-tests/preview/${test.id}`
+                            )
+                          }
+                        >
+                          Preview
+                        </button>
+
+                        <button
+                          className="publishButton"
+                          onClick={() => {
+                            setEditingMockTestId(test.id);
+
+                            setMockTestForm({
+                              title: test.title || "",
+                              planType: test.planType || "FREE",
+                              subject: test.subject || "",
+                              chapter: test.chapter || "",
+                              examType: test.examType || "CTET",
+                              testType:
+                                test.testType || "Chapter Test",
+                              duration:
+                                test.duration?.toString() || "30",
+                              totalQuestions:
+                                test.totalQuestions?.toString() ||
+                                "10",
+                              marksPerQuestion:
+                                test.marksPerQuestion?.toString() ||
+                                "1",
+                              negativeMarks:
+                                test.negativeMarks?.toString() ||
+                                "0",
+                              status:
+                                test.status || "published",
+                            });
+
+                            setMockTestQuestionsForm(
+                              test.questions?.length
+                                ? test.questions
+                                : [
+                                    {
+                                      question: "",
+                                      option1: "",
+                                      option2: "",
+                                      option3: "",
+                                      option4: "",
+                                      answer: "",
+                                      explanation: "",
+                                      level: "Easy",
+                                      questionType:
+                                        "Single Correct",
+                                      language: "English",
+                                      tag: "",
+                                      positiveMarks: "1",
+                                      negativeMarks: "0",
+                                      questionStatus:
+                                        "published",
+                                    },
+                                  ]
+                            );
+
+                            navigate(
+                              "/admin/content/mock-tests/add"
+                            );
+                          }}
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          className="backButton"
+                          onClick={async () => {
+                            await updateDoc(
+                              doc(db, "contentItems", test.id),
+                              {
+                                status: "unpublished",
+                                updatedAt: new Date(),
+                              }
+                            );
+
+                            await loadContentItemsFromFirestore();
+
+                            alert(
+                              "Mock test unpublished successfully ✅"
+                            );
+                          }}
+                        >
+                          Unpublish
+                        </button>
+
+                        <button
+                          className="deleteContentButton"
+                          onClick={() => {
+                            if (
+                              window.confirm(
+                                `Delete "${test.title}" permanently?\n\nStudents may lose access to this published test.\n\nThis action cannot be undone.`
+                              )
+                            ) {
+                              handleDeleteLocalContentItem(test.id);
+                            }
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </>
+          );
+        })()}
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/mock-tests/results"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        {(() => {
+          const mockTests = universalContent.filter(
+            (item) => item.section === "mockTest"
+          );
+
+          const mockResults = universalContent.filter(
+            (item) => item.section === "mockResult"
+          );
+
+          const totalAttempts = mockResults.length;
+
+          const averageScore =
+            totalAttempts > 0
+              ? Math.round(
+                  mockResults.reduce(
+                    (sum, result) =>
+                      sum + Number(result.score || 0),
+                    0
+                  ) / totalAttempts
+                )
+              : 0;
+
+          const averageAccuracy =
+            totalAttempts > 0
+              ? Math.round(
+                  mockResults.reduce(
+                    (sum, result) =>
+                      sum + Number(result.accuracy || 0),
+                    0
+                  ) / totalAttempts
+                )
+              : 0;
+
+          return (
+            <>
+              <div className="sectionHeader">
+                <span className="badge">
+                  RESULTS ANALYTICS
+                </span>
+
+                <h1>Mock Test Results Analytics</h1>
+
+                <p>
+                  Track attempts, scores, accuracy, weak chapters,
+                  leaderboard performance, and student progress.
+                </p>
+              </div>
+
+              <div className="contentStudioForm">
+                <div className="contentStudioActions">
+                  <button
+                    className="backButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests")
+                    }
+                  >
+                    ← Back to Mock Tests Manager
+                  </button>
+
+                  <button
+                    className="publishButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests/published")
+                    }
+                  >
+                    View Published Tests
+                  </button>
+                </div>
+              </div>
+
+              <div className="contentStudioList">
+                <h3>Overview Dashboard</h3>
+
+                <div className="contentStudioGrid">
+                  <div className="contentStudioItem">
+                    <strong>Total Tests</strong>
+                    <p>{mockTests.length}</p>
+                  </div>
+
+                  <div className="contentStudioItem">
+                    <strong>Total Attempts</strong>
+                    <p>{totalAttempts}</p>
+                  </div>
+
+                  <div className="contentStudioItem">
+                    <strong>Average Score</strong>
+                    <p>{averageScore}</p>
+                  </div>
+
+                  <div className="contentStudioItem">
+                    <strong>Average Accuracy</strong>
+                    <p>{averageAccuracy}%</p>
+                  </div>
+                </div>
+              </div>
+
+
+              <div className="contentStudioList">
+  <h3>Leaderboard</h3>
+
+  {mockResults.length === 0 ? (
+    <div className="contentStudioItem">
+      <strong>No leaderboard data yet.</strong>
+      <p>
+        Leaderboard will appear after students attempt mock tests.
+      </p>
+    </div>
+  ) : (
+    [...mockResults]
+      .sort(
+        (a, b) =>
+          Number(b.score || 0) - Number(a.score || 0)
+      )
+      .slice(0, 10)
+      .map((result, index) => (
+        <div
+          className="contentStudioItem"
+          key={result.id || index}
+        >
+          <strong>
+            #{index + 1}{" "}
+            {result.studentName ||
+              result.studentEmail ||
+              "Student"}
+          </strong>
+
+          <p>
+            {result.testTitle || "Mock Test"} • Score:{" "}
+            {result.score || 0} • Accuracy:{" "}
+            {result.accuracy || 0}%
+          </p>
+
+          <p>
+            Attempts: {result.attempts || 1} • Correct:{" "}
+            {result.correct || 0} • Wrong:{" "}
+            {result.wrong || 0} • Skipped:{" "}
+            {result.skipped || 0}
+          </p>
+        </div>
+      ))
+  )}
+</div>
+              <div className="contentStudioList">
+                <h3>Test-wise Performance</h3>
+
+                {mockTests.length === 0 ? (
+
+                  <div className="contentStudioItem">
+                    <strong>No mock tests found.</strong>
+                    <p>
+                      Add mock tests first to generate analytics.
+                    </p>
+                  </div>
+                ) : (
+                  mockTests.map((test) => {
+                    const testResults = mockResults.filter(
+                      (result) =>
+                        result.testId === test.id
+                    );
+
+                    const testAvgScore =
+                      testResults.length > 0
+                        ? Math.round(
+                            testResults.reduce(
+                              (sum, result) =>
+                                sum + Number(result.score || 0),
+                              0
+                            ) / testResults.length
+                          )
+                        : 0;
+
+                    const testAvgAccuracy =
+                      testResults.length > 0
+                        ? Math.round(
+                            testResults.reduce(
+                              (sum, result) =>
+                                sum +
+                                Number(result.accuracy || 0),
+                              0
+                            ) / testResults.length
+                          )
+                        : 0;
+
+                    return (
+                      <div
+                        className="contentStudioItem"
+                        key={test.id}
+                      >
+                        <strong>{test.title}</strong>
+
+                        <p>
+                          {test.planType || "FREE"} •{" "}
+                          {test.subject || "No Subject"} •{" "}
+                          {test.chapter || "No Chapter"} •{" "}
+                          {test.testType || "Mock Test"}
+                        </p>
+
+                        <p>
+                          Attempts: {testResults.length} • Avg Score:{" "}
+                          {testAvgScore} • Avg Accuracy:{" "}
+                          {testAvgAccuracy}%
+                        </p>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+              
+
+              <div className="contentStudioList">
+  <h3>Student-wise Results</h3>
+
+  {mockResults.length === 0 ? (
+    <div className="contentStudioItem">
+      <strong>No student results yet.</strong>
+      <p>
+        Results will appear here after students attempt
+        mock tests.
+      </p>
+    </div>
+  ) : (
+    mockResults.map((result) => (
+      <div
+        className="contentStudioItem"
+        key={result.id}
+      >
+        <strong>
+          {result.studentName ||
+            result.studentEmail ||
+            "Student"}
+        </strong>
+
+        <p>
+          {result.testTitle || "Mock Test"} •{" "}
+          Score: {result.score || 0} •{" "}
+          Accuracy: {result.accuracy || 0}%
+        </p>
+
+        <p>
+          Correct: {result.correct || 0} •{" "}
+          Wrong: {result.wrong || 0} •{" "}
+          Skipped: {result.skipped || 0}
+        </p>
+
+        <p>
+          Time Taken: {result.timeTaken || 0} min •{" "}
+          Attempted At:{" "}
+          {result.createdAt?.toDate
+            ? result.createdAt.toDate().toLocaleString()
+            : "Not available"}
+        </p>
+      </div>
+    ))
+  )}
+</div>
+
+<div className="contentStudioList">
+  <h3>Weak Chapters Analytics</h3>
+
+  {mockResults.length === 0 ? (
+    <div className="contentStudioItem">
+      <strong>No weak chapter data yet.</strong>
+      <p>
+        Weak chapter analytics will appear after students
+        attempt mock tests.
+      </p>
+    </div>
+  ) : (
+    [
+      ...new Map(
+        mockResults
+          .filter((result) => result.chapter)
+          .map((result) => [
+            result.chapter,
+            {
+              chapter: result.chapter,
+              subject: result.subject || "Unknown Subject",
+              attempts: mockResults.filter(
+                (item) => item.chapter === result.chapter
+              ).length,
+              averageAccuracy: Math.round(
+                mockResults
+                  .filter((item) => item.chapter === result.chapter)
+                  .reduce(
+                    (sum, item) =>
+                      sum + Number(item.accuracy || 0),
+                    0
+                  ) /
+                  mockResults.filter(
+                    (item) => item.chapter === result.chapter
+                  ).length
+              ),
+            },
+          ])
+      ).values(),
+    ]
+      .sort(
+        (a, b) =>
+          Number(a.averageAccuracy || 0) -
+          Number(b.averageAccuracy || 0)
+      )
+      .map((chapterItem) => (
+        <div
+          className="contentStudioItem"
+          key={chapterItem.chapter}
+        >
+          <strong>{chapterItem.chapter}</strong>
+
+          <p>
+            {chapterItem.subject} • Attempts:{" "}
+            {chapterItem.attempts}
+          </p>
+
+          <p>
+            Average Accuracy:{" "}
+            {chapterItem.averageAccuracy || 0}%
+          </p>
+        </div>
+      ))
+  )}
+</div>
+
+<div className="contentStudioList">
+  <h3>Top Performers</h3>
+
+  {mockResults.length === 0 ? (
+    <div className="contentStudioItem">
+      <strong>No top performers yet.</strong>
+
+      <p>
+        Top performers will appear after students
+        attempt mock tests.
+      </p>
+    </div>
+  ) : (
+    [...mockResults]
+      .sort(
+        (a, b) =>
+          Number(b.score || 0) -
+          Number(a.score || 0)
+      )
+      .slice(0, 3)
+      .map((result, index) => (
+        <div
+          className="contentStudioItem"
+          key={result.id || index}
+        >
+          <strong>
+            {index === 0
+              ? "🥇 Rank #1"
+              : index === 1
+              ? "🥈 Rank #2"
+              : "🥉 Rank #3"}
+          </strong>
+
+          <p>
+            {result.studentName ||
+              result.studentEmail ||
+              "Student"}
+          </p>
+
+          <p>
+            Score: {result.score || 0}
+            {" • "}
+            Accuracy: {result.accuracy || 0}%
+          </p>
+
+          <p>
+            Correct: {result.correct || 0}
+            {" • "}
+            Wrong: {result.wrong || 0}
+            {" • "}
+            Skipped: {result.skipped || 0}
+          </p>
+        </div>
+      ))
+  )}
+</div>
+
+              <div className="contentStudioList">
+                <h3>Future AI Insights</h3>
+
+                <div className="contentStudioItem">
+                  <strong>Coming Next</strong>
+
+                  <p>
+                    Weak chapters, leaderboard, time analysis,
+                    retry suggestions, and AI learning recommendations
+                    will connect here after student attempt engine.
+                  </p>
+                </div>
               </div>
             </>
           );
