@@ -472,6 +472,42 @@ const fallbackCurrentAffairs = [
   },
 ];
 
+const [mockTestForm, setMockTestForm] = useState({
+  title: "",
+  planType: "FREE",
+  subject: "",
+  chapter: "",
+  examType: "CTET",
+  testType: "Chapter Test",
+  duration: "30",
+  totalQuestions: "10",
+  marksPerQuestion: "1",
+  negativeMarks: "0",
+  status: "published",
+});
+
+const [mockTestQuestionsForm, setMockTestQuestionsForm] = useState([
+  {
+    question: "",
+    option1: "",
+    option2: "",
+    option3: "",
+    option4: "",
+    answer: "",
+    explanation: "",
+    level: "Easy",
+questionType: "Single Correct",
+language: "English",
+tag: "",
+positiveMarks: "1",
+negativeMarks: "0",
+questionStatus: "published",
+  },
+]);
+
+const [editingMockTestId, setEditingMockTestId] = useState(null);
+const [mockTestPlanFilter, setMockTestPlanFilter] = useState("ALL");
+
 const [videoForm, setVideoForm] = useState({
   title: "",
   planType: "",
@@ -484,6 +520,109 @@ const [videoForm, setVideoForm] = useState({
   status: "published",
   sourceType: "YOUTUBE_PUBLIC",
 });
+
+const handleSaveMockTest = async () => {
+  try {
+    if (
+      !mockTestForm.title.trim() ||
+      !mockTestForm.planType ||
+      !mockTestForm.subject.trim() ||
+      !mockTestForm.chapter.trim()
+    ) {
+      alert("Please fill Title, Plan, Subject, and Chapter");
+      return;
+    }
+
+    const validQuestions = mockTestQuestionsForm.filter(
+      (q) =>
+        q.question.trim() &&
+        q.option1.trim() &&
+        q.option2.trim() &&
+        q.option3.trim() &&
+        q.option4.trim() &&
+        q.answer.trim()
+    );
+
+    if (validQuestions.length === 0) {
+      alert("Please add at least one complete question");
+      return;
+    }
+
+    const mockPayload = {
+      title: mockTestForm.title.trim(),
+      section: "mockTest",
+      contentType: "MOCK",
+      planType: mockTestForm.planType,
+      subject: mockTestForm.subject.trim(),
+      chapter: mockTestForm.chapter.trim(),
+      examType: mockTestForm.examType,
+      testType: mockTestForm.testType,
+      duration: mockTestForm.duration,
+      totalQuestions: validQuestions.length,
+      marksPerQuestion: mockTestForm.marksPerQuestion,
+      negativeMarks: mockTestForm.negativeMarks,
+      status: mockTestForm.status,
+      questions: validQuestions,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    if (editingMockTestId) {
+      await updateDoc(
+        doc(db, "contentItems", editingMockTestId),
+        mockPayload
+      );
+
+      alert("Mock Test updated successfully 🧠");
+    } else {
+      await addDoc(collection(db, "contentItems"), mockPayload);
+
+      alert("Mock Test saved successfully 🧠");
+    }
+
+    await loadContentItemsFromFirestore();
+
+    setMockTestForm({
+      title: "",
+      planType: "FREE",
+      subject: "",
+      chapter: "",
+      examType: "CTET",
+      testType: "Chapter Test",
+      duration: "30",
+      totalQuestions: "10",
+      marksPerQuestion: "1",
+      negativeMarks: "0",
+      status: "published",
+    });
+
+    setMockTestQuestionsForm([
+      {
+        question: "",
+        option1: "",
+        option2: "",
+        option3: "",
+        option4: "",
+        answer: "",
+        explanation: "",
+        level: "Easy",
+questionType: "Single Correct",
+language: "English",
+tag: "",
+positiveMarks: "1",
+negativeMarks: "0",
+questionStatus: "published",
+      },
+    ]);
+
+    setEditingMockTestId(null);
+
+    navigate("/admin/content/mock-tests/manage");
+  } catch (error) {
+    console.error("Mock Test save error:", error);
+    alert(error.message);
+  }
+};
 
 const handleSaveVideo = async () => {
   try {
@@ -7490,43 +7629,1153 @@ This action cannot be undone.`
     requireAdmin() ? (
       <section className="coursePages">
         <div className="sectionHeader">
-          <span className="badge">
-            Mock Test CMS
-          </span>
+          <span className="badge">MOCK TEST CMS</span>
 
-          <h1>
-            Mock Tests Manager
-          </h1>
+          <h1>Mock Tests Manager</h1>
 
           <p>
-            Manage CTET/TET mock tests,
-            subjects, difficulty levels,
-            question banks, answers, and
-            student practice systems.
+            Manage CTET/TET mock tests, plan-wise test series,
+            subjects, chapters, question banks, answers, results,
+            and student practice systems.
           </p>
         </div>
 
-        <div className="subjectHubGrid">
-          <button>FREE Mock Tests</button>
+        <div className="contentStudioForm">
+          <div className="contentStudioGrid">
+            <button
+              onClick={() =>
+                navigate("/admin/content/mock-tests/add")
+              }
+            >
+              ➕ Add Mock Test
+            </button>
 
-          <button>BASIC Mock Tests</button>
+            <button
+              onClick={() =>
+                navigate("/admin/content/mock-tests/manage")
+              }
+            >
+              📂 Manage Mock Tests
+            </button>
 
-          <button>PREMIUM Mock Tests</button>
+            <button
+              onClick={() =>
+                navigate("/admin/content/mock-tests/plan/FREE")
+              }
+            >
+              FREE Mock Tests
+            </button>
 
-          <button>MENTORSHIP Mock Tests</button>
+            <button
+              onClick={() =>
+                navigate("/admin/content/mock-tests/plan/BASIC")
+              }
+            >
+              BASIC Mock Tests
+            </button>
 
-          <button>Question Bank</button>
+            <button
+              onClick={() =>
+                navigate("/admin/content/mock-tests/plan/PREMIUM")
+              }
+            >
+              PREMIUM Mock Tests
+            </button>
 
-          <button>Test Results</button>
+            <button
+              onClick={() =>
+                navigate("/admin/content/mock-tests/plan/MENTORSHIP")
+              }
+            >
+              MENTORSHIP Mock Tests
+            </button>
 
+            <button
+              onClick={() =>
+                navigate("/admin/content/mock-tests/subjects")
+              }
+            >
+              📚 Subjects
+            </button>
+
+            <button
+              onClick={() =>
+                navigate("/admin/content/mock-tests/chapters")
+              }
+            >
+              📖 Chapters
+            </button>
+
+            <button
+              onClick={() =>
+                navigate("/admin/content/mock-tests/question-bank")
+              }
+            >
+              🧠 Question Bank
+            </button>
+
+            <button
+              onClick={() =>
+                navigate("/admin/content/mock-tests/test-series")
+              }
+            >
+              🧪 Test Series
+            </button>
+
+            <button
+              onClick={() =>
+                navigate("/admin/content/mock-tests/published")
+              }
+            >
+              ✅ Published Tests
+            </button>
+
+            <button
+              onClick={() =>
+                navigate("/admin/content/mock-tests/results")
+              }
+            >
+              📊 Test Results
+            </button>
+
+            <button
+              onClick={() =>
+                navigate("/admin/content")
+              }
+            >
+              ← Back to Content Studio
+            </button>
+          </div>
+        </div>
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/mock-tests/add"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">
+            {editingMockTestId
+              ? "EDIT MOCK TEST"
+              : "ADD MOCK TEST"}
+          </span>
+
+          <h1>
+            {editingMockTestId
+              ? "Edit Mock Test"
+              : "Add New Mock Test"}
+          </h1>
+
+          <p>
+            Create CTET/TET mock tests with plan access,
+            subject, chapter, timing, marks, answers,
+            explanations, and publish status.
+          </p>
+        </div>
+
+        <div className="contentStudioForm">
+          <div className="contentStudioGrid">
+            <input
+              type="text"
+              placeholder="Mock Test Title"
+              value={mockTestForm.title}
+              onChange={(e) =>
+                setMockTestForm({
+                  ...mockTestForm,
+                  title: e.target.value,
+                })
+              }
+            />
+
+            <select
+              value={mockTestForm.planType}
+              onChange={(e) =>
+                setMockTestForm({
+                  ...mockTestForm,
+                  planType: e.target.value,
+                })
+              }
+            >
+              <option value="FREE">FREE</option>
+              <option value="BASIC">BASIC</option>
+              <option value="PREMIUM">PREMIUM</option>
+              <option value="MENTORSHIP">MENTORSHIP</option>
+            </select>
+
+            <input
+              type="text"
+              list="mockSubjectSuggestions"
+              placeholder="Select or type Subject"
+              value={mockTestForm.subject}
+              onChange={(e) =>
+                setMockTestForm({
+                  ...mockTestForm,
+                  subject: e.target.value,
+                  chapter: "",
+                })
+              }
+            />
+
+            <datalist id="mockSubjectSuggestions">
+              {[
+                ...new Set([
+                  ...notesSubjectsList
+                    .map((subject) => subject.name)
+                    .filter(Boolean),
+
+                  ...universalContent
+                    .map((item) => item.subject)
+                    .filter(Boolean),
+                ]),
+              ]
+                .map((name) => name.trim())
+                .filter((name) => {
+                  if (!name) return false;
+                  if (name.length < 2) return false;
+                  if (/^[a-zA-Z0-9]{15,}$/.test(name)) return false;
+
+                  return true;
+                })
+                .filter(
+                  (name, index, array) =>
+                    array.findIndex(
+                      (item) =>
+                        item.toLowerCase() ===
+                        name.toLowerCase()
+                    ) === index
+                )
+                .map((name) => (
+                  <option key={name} value={name} />
+                ))}
+            </datalist>
+
+            <input
+              type="text"
+              list="mockChapterSuggestions"
+              placeholder={
+                mockTestForm.subject
+                  ? "Select or type Chapter / Topic"
+                  : "Select subject first"
+              }
+              value={mockTestForm.chapter}
+              onChange={(e) =>
+                setMockTestForm({
+                  ...mockTestForm,
+                  chapter: e.target.value,
+                })
+              }
+              disabled={!mockTestForm.subject}
+            />
+
+            <datalist id="mockChapterSuggestions">
+              {notesChaptersList
+                .filter((chapter) => {
+                  const selectedSubject =
+                    mockTestForm.subject
+                      ?.toString()
+                      .trim()
+                      .toLowerCase();
+
+                  const chapterSubjectName =
+                    chapter.subjectName
+                      ?.toString()
+                      .trim()
+                      .toLowerCase();
+
+                  const chapterSubjectId =
+                    chapter.subjectId
+                      ?.toString()
+                      .trim()
+                      .toLowerCase();
+
+                  return (
+                    chapterSubjectName === selectedSubject ||
+                    chapterSubjectId === selectedSubject
+                  );
+                })
+                .map((chapter) => (
+                  <option
+                    key={chapter.id}
+                    value={chapter.name}
+                  />
+                ))}
+            </datalist>
+
+            <select
+              value={mockTestForm.examType}
+              onChange={(e) =>
+                setMockTestForm({
+                  ...mockTestForm,
+                  examType: e.target.value,
+                })
+              }
+            >
+              <option value="CTET">CTET</option>
+              <option value="TET">TET</option>
+              <option value="CTET/TET">CTET/TET</option>
+            </select>
+
+            <select
+              value={mockTestForm.testType}
+              onChange={(e) =>
+                setMockTestForm({
+                  ...mockTestForm,
+                  testType: e.target.value,
+                })
+              }
+            >
+              <option value="Chapter Test">Chapter Test</option>
+              <option value="Sectional Test">Sectional Test</option>
+              <option value="Full Length Test">Full Length Test</option>
+              <option value="PYQ Practice">PYQ Practice</option>
+              <option value="Daily Practice">Daily Practice</option>
+            </select>
+
+            <input
+              type="number"
+              placeholder="Duration in minutes"
+              value={mockTestForm.duration}
+              onChange={(e) =>
+                setMockTestForm({
+                  ...mockTestForm,
+                  duration: e.target.value,
+                })
+              }
+            />
+
+            <input
+              type="number"
+              placeholder="Marks Per Question"
+              value={mockTestForm.marksPerQuestion}
+              onChange={(e) =>
+                setMockTestForm({
+                  ...mockTestForm,
+                  marksPerQuestion: e.target.value,
+                })
+              }
+            />
+
+            <input
+              type="number"
+              placeholder="Negative Marks"
+              value={mockTestForm.negativeMarks}
+              onChange={(e) =>
+                setMockTestForm({
+                  ...mockTestForm,
+                  negativeMarks: e.target.value,
+                })
+              }
+            />
+
+            <select
+              value={mockTestForm.status}
+              onChange={(e) =>
+                setMockTestForm({
+                  ...mockTestForm,
+                  status: e.target.value,
+                })
+              }
+            >
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+              <option value="unpublished">Unpublished</option>
+            </select>
+          </div>
+          <div className="contentStudioList">
+  <h3>Question Builder</h3>
+
+  {mockTestQuestionsForm.map((questionItem, questionIndex) => (
+    <div
+      className="contentStudioItem"
+      key={questionIndex}
+    >
+      <strong>Question {questionIndex + 1}</strong>
+
+      <div className="contentStudioGrid">
+        <textarea
+          placeholder="Enter question"
+          value={questionItem.question}
+          onChange={(e) => {
+            const updatedQuestions = [
+              ...mockTestQuestionsForm,
+            ];
+
+            updatedQuestions[questionIndex].question =
+              e.target.value;
+
+            setMockTestQuestionsForm(updatedQuestions);
+          }}
+        />
+
+        <input
+          type="text"
+          placeholder="Option A"
+          value={questionItem.option1}
+          onChange={(e) => {
+            const updatedQuestions = [
+              ...mockTestQuestionsForm,
+            ];
+
+            updatedQuestions[questionIndex].option1 =
+              e.target.value;
+
+            setMockTestQuestionsForm(updatedQuestions);
+          }}
+        />
+
+        <input
+          type="text"
+          placeholder="Option B"
+          value={questionItem.option2}
+          onChange={(e) => {
+            const updatedQuestions = [
+              ...mockTestQuestionsForm,
+            ];
+
+            updatedQuestions[questionIndex].option2 =
+              e.target.value;
+
+            setMockTestQuestionsForm(updatedQuestions);
+          }}
+        />
+
+        <input
+          type="text"
+          placeholder="Option C"
+          value={questionItem.option3}
+          onChange={(e) => {
+            const updatedQuestions = [
+              ...mockTestQuestionsForm,
+            ];
+
+            updatedQuestions[questionIndex].option3 =
+              e.target.value;
+
+            setMockTestQuestionsForm(updatedQuestions);
+          }}
+        />
+
+        <input
+          type="text"
+          placeholder="Option D"
+          value={questionItem.option4}
+          onChange={(e) => {
+            const updatedQuestions = [
+              ...mockTestQuestionsForm,
+            ];
+
+            updatedQuestions[questionIndex].option4 =
+              e.target.value;
+
+            setMockTestQuestionsForm(updatedQuestions);
+          }}
+        />
+
+        <select
+          value={questionItem.answer}
+          onChange={(e) => {
+            const updatedQuestions = [
+              ...mockTestQuestionsForm,
+            ];
+
+            updatedQuestions[questionIndex].answer =
+              e.target.value;
+
+            setMockTestQuestionsForm(updatedQuestions);
+          }}
+        >
+          <option value="">Correct Answer</option>
+          <option value="option1">Option A</option>
+          <option value="option2">Option B</option>
+          <option value="option3">Option C</option>
+          <option value="option4">Option D</option>
+        </select>
+
+        <textarea
+          placeholder="Explanation / Solution"
+          value={questionItem.explanation}
+          onChange={(e) => {
+            const updatedQuestions = [
+              ...mockTestQuestionsForm,
+            ];
+
+            updatedQuestions[questionIndex].explanation =
+              e.target.value;
+
+            setMockTestQuestionsForm(updatedQuestions);
+          }}
+        />
+
+        <select
+          value={questionItem.level}
+          onChange={(e) => {
+            const updatedQuestions = [
+              ...mockTestQuestionsForm,
+            ];
+
+            updatedQuestions[questionIndex].level =
+              e.target.value;
+
+            setMockTestQuestionsForm(updatedQuestions);
+          }}
+        >
+          <option value="Easy">Easy</option>
+          <option value="Medium">Medium</option>
+          <option value="Hard">Hard</option>
+        </select>
+      </div>
+
+      <select
+  value={questionItem.questionType}
+  onChange={(e) => {
+    const updatedQuestions = [
+      ...mockTestQuestionsForm,
+    ];
+
+    updatedQuestions[questionIndex].questionType =
+      e.target.value;
+
+    setMockTestQuestionsForm(updatedQuestions);
+  }}
+>
+  <option value="Single Correct">
+    Single Correct
+  </option>
+
+  <option value="Multiple Correct">
+    Multiple Correct
+  </option>
+
+  <option value="True/False">
+    True / False
+  </option>
+
+  <option value="Assertion Reason">
+    Assertion Reason
+  </option>
+</select>
+
+<select
+  value={questionItem.language}
+  onChange={(e) => {
+    const updatedQuestions = [
+      ...mockTestQuestionsForm,
+    ];
+
+    updatedQuestions[questionIndex].language =
+      e.target.value;
+
+    setMockTestQuestionsForm(updatedQuestions);
+  }}
+>
+  <option value="English">
+    English
+  </option>
+
+  <option value="Hindi">
+    Hindi
+  </option>
+
+  <option value="Gujarati">
+    Gujarati
+  </option>
+
+  <option value="Bilingual">
+    Bilingual
+  </option>
+</select>
+
+<input
+  type="text"
+  placeholder="Topic Tag"
+  value={questionItem.tag}
+  onChange={(e) => {
+    const updatedQuestions = [
+      ...mockTestQuestionsForm,
+    ];
+
+    updatedQuestions[questionIndex].tag =
+      e.target.value;
+
+    setMockTestQuestionsForm(updatedQuestions);
+  }}
+/>
+
+<input
+  type="number"
+  placeholder="Positive Marks"
+  value={questionItem.positiveMarks}
+  onChange={(e) => {
+    const updatedQuestions = [
+      ...mockTestQuestionsForm,
+    ];
+
+    updatedQuestions[questionIndex].positiveMarks =
+      e.target.value;
+
+    setMockTestQuestionsForm(updatedQuestions);
+  }}
+/>
+
+<input
+  type="number"
+  placeholder="Negative Marks"
+  value={questionItem.negativeMarks}
+  onChange={(e) => {
+    const updatedQuestions = [
+      ...mockTestQuestionsForm,
+    ];
+
+    updatedQuestions[questionIndex].negativeMarks =
+      e.target.value;
+
+    setMockTestQuestionsForm(updatedQuestions);
+  }}
+/>
+
+<select
+  value={questionItem.questionStatus}
+  onChange={(e) => {
+    const updatedQuestions = [
+      ...mockTestQuestionsForm,
+    ];
+
+    updatedQuestions[questionIndex].questionStatus =
+      e.target.value;
+
+    setMockTestQuestionsForm(updatedQuestions);
+  }}
+>
+  <option value="draft">
+    Draft
+  </option>
+
+  <option value="approved">
+    Approved
+  </option>
+
+  <option value="published">
+    Published
+  </option>
+</select>
+
+      <div className="contentStudioActions">
+        {mockTestQuestionsForm.length > 1 && (
           <button
+            className="deleteContentButton"
+            onClick={() => {
+              const updatedQuestions =
+                mockTestQuestionsForm.filter(
+                  (_, index) => index !== questionIndex
+                );
+
+              setMockTestQuestionsForm(updatedQuestions);
+            }}
+          >
+            Delete Question
+          </button>
+        )}
+      </div>
+    </div>
+  ))}
+
+  <div className="contentStudioActions">
+    <button
+      className="publishButton"
+      onClick={() =>
+        setMockTestQuestionsForm([
+          ...mockTestQuestionsForm,
+          {
+            question: "",
+            option1: "",
+            option2: "",
+            option3: "",
+            option4: "",
+            answer: "",
+            explanation: "",
+            level: "Easy",
+questionType: "Single Correct",
+language: "English",
+tag: "",
+positiveMarks: "1",
+negativeMarks: "0",
+questionStatus: "published",
+          },
+        ])
+      }
+    >
+      + Add Question
+    </button>
+
+    <button
+      className="publishButton"
+      onClick={handleSaveMockTest}
+    >
+      {editingMockTestId
+        ? "Update Mock Test"
+        : "Save Mock Test"}
+    </button>
+
+    <button
+      className="backButton"
+      onClick={() =>
+        navigate("/admin/content/mock-tests")
+      }
+    >
+      ← Back to Mock Tests
+    </button>
+  </div>
+</div>
+        </div>
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/mock-tests/manage"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">
+            MANAGE MOCK TESTS
+          </span>
+
+          <h1>Manage Mock Tests</h1>
+
+          <p>
+            Review, edit, publish, unpublish,
+            preview, and delete all saved CTET/TET
+            mock tests from one professional manager.
+          </p>
+        </div>
+
+        <div className="contentStudioForm">
+          <div className="contentStudioGrid">
+            <button
+              onClick={() =>
+                setMockTestPlanFilter("ALL")
+              }
+            >
+              ALL
+            </button>
+
+            <button
+              onClick={() =>
+                setMockTestPlanFilter("FREE")
+              }
+            >
+              FREE
+            </button>
+
+            <button
+              onClick={() =>
+                setMockTestPlanFilter("BASIC")
+              }
+            >
+              BASIC
+            </button>
+
+            <button
+              onClick={() =>
+                setMockTestPlanFilter("PREMIUM")
+              }
+            >
+              PREMIUM
+            </button>
+
+            <button
+              onClick={() =>
+                setMockTestPlanFilter("MENTORSHIP")
+              }
+            >
+              MENTORSHIP
+            </button>
+          </div>
+        </div>
+
+        <div className="contentStudioList">
+          <h3>Saved Mock Tests</h3>
+
+          {universalContent.filter(
+            (item) =>
+              item.section === "mockTest" &&
+              (mockTestPlanFilter === "ALL" ||
+                item.planType === mockTestPlanFilter)
+          ).length === 0 ? (
+            <div className="contentStudioItem">
+              <strong>No mock tests found.</strong>
+              <p>
+                Add your first mock test from the Add Mock Test page.
+              </p>
+            </div>
+          ) : (
+            universalContent
+              .filter(
+                (item) =>
+                  item.section === "mockTest" &&
+                  (mockTestPlanFilter === "ALL" ||
+                    item.planType === mockTestPlanFilter)
+              )
+              .map((test) => (
+                <div
+                  className="contentStudioItem"
+                  key={test.id}
+                >
+                  <strong>{test.title}</strong>
+
+                  <p>
+                    {test.planType || "FREE"} •{" "}
+                    {test.subject || "No Subject"} •{" "}
+                    {test.chapter || "No Chapter"} •{" "}
+                    {test.testType || "Mock Test"} •{" "}
+                    {test.status || "draft"}
+                  </p>
+
+                  <p>
+                    {test.questions?.length || 0} Questions •{" "}
+                    {test.duration || 0} min •{" "}
+                    {test.examType || "CTET/TET"}
+                  </p>
+
+                  <div className="contentStudioActions">
+                    <button
+                      className="publishButton"
+                      onClick={() => {
+                        setEditingMockTestId(test.id);
+
+                        setMockTestForm({
+                          title: test.title || "",
+                          planType: test.planType || "FREE",
+                          subject: test.subject || "",
+                          chapter: test.chapter || "",
+                          examType: test.examType || "CTET",
+                          testType:
+                            test.testType || "Chapter Test",
+                          duration:
+                            test.duration?.toString() || "30",
+                          totalQuestions:
+                            test.totalQuestions?.toString() ||
+                            "10",
+                          marksPerQuestion:
+                            test.marksPerQuestion?.toString() ||
+                            "1",
+                          negativeMarks:
+                            test.negativeMarks?.toString() ||
+                            "0",
+                          status:
+                            test.status || "published",
+                        });
+
+                        setMockTestQuestionsForm(
+                          test.questions?.length
+                            ? test.questions
+                            : [
+                                {
+                                  question: "",
+                                  option1: "",
+                                  option2: "",
+                                  option3: "",
+                                  option4: "",
+                                  answer: "",
+                                  explanation: "",
+                                  level: "Easy",
+                                  questionType:
+                                    "Single Correct",
+                                  language: "English",
+                                  tag: "",
+                                  positiveMarks: "1",
+                                  negativeMarks: "0",
+                                  questionStatus:
+                                    "published",
+                                },
+                              ]
+                        );
+
+                        navigate(
+                          "/admin/content/mock-tests/add"
+                        );
+                      }}
+                    >
+                      Edit
+                    </button>
+
+                    <button
+  className="backButton"
+  onClick={() =>
+    navigate(
+      `/admin/content/mock-tests/preview/${test.id}`
+    )
+  }
+>
+  Preview
+</button>
+
+                    <button
+                      className="backButton"
+                      onClick={async () => {
+                        const newStatus =
+                          test.status === "published"
+                            ? "unpublished"
+                            : "published";
+
+                        await updateDoc(
+                          doc(db, "contentItems", test.id),
+                          {
+                            status: newStatus,
+                            updatedAt: new Date(),
+                          }
+                        );
+
+                        await loadContentItemsFromFirestore();
+
+                        alert(
+                          newStatus === "published"
+                            ? "Mock test published successfully ✅"
+                            : "Mock test unpublished successfully ✅"
+                        );
+                      }}
+                    >
+                      {test.status === "published"
+                        ? "Unpublish"
+                        : "Publish"}
+                    </button>
+
+                    <button
+                      className="deleteContentButton"
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            `Delete "${test.title}" permanently?\n\nStudents may lose access to this mock test.\n\nThis action cannot be undone.`
+                          )
+                        ) {
+                          handleDeleteLocalContentItem(test.id);
+                        }
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))
+          )}
+        </div>
+
+        <div className="contentStudioActions">
+          <button
+            className="publishButton"
             onClick={() =>
-              navigate("/admin/content")
+              navigate("/admin/content/mock-tests/add")
             }
           >
-            ← Back to Content Studio
+            + Add Mock Test
+          </button>
+
+          <button
+            className="backButton"
+            onClick={() =>
+              navigate("/admin/content/mock-tests")
+            }
+          >
+            ← Back to Mock Tests Manager
           </button>
         </div>
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/mock-tests/preview/:testId"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        {(() => {
+          const testId = location.pathname
+            .split("/")
+            .pop();
+
+          const previewTest = universalContent.find(
+            (item) =>
+              item.id === testId &&
+              item.section === "mockTest"
+          );
+
+          if (!previewTest) {
+            return (
+              <>
+                <div className="sectionHeader">
+                  <span className="badge">
+                    MOCK TEST PREVIEW
+                  </span>
+
+                  <h1>Test Not Found</h1>
+
+                  <p>
+                    This mock test may have been deleted
+                    or not loaded yet.
+                  </p>
+                </div>
+
+                <button
+                  className="backButton"
+                  onClick={() =>
+                    navigate(
+                      "/admin/content/mock-tests/manage"
+                    )
+                  }
+                >
+                  ← Back to Manage Mock Tests
+                </button>
+              </>
+            );
+          }
+
+          return (
+            <>
+              <div className="sectionHeader">
+                <span className="badge">
+                  MOCK TEST PREVIEW
+                </span>
+
+                <h1>{previewTest.title}</h1>
+
+                <p>
+                  {previewTest.planType} •{" "}
+                  {previewTest.subject} •{" "}
+                  {previewTest.chapter} •{" "}
+                  {previewTest.testType} •{" "}
+                  {previewTest.duration} min
+                </p>
+              </div>
+
+              <div className="contentStudioList">
+                {previewTest.questions?.map(
+                  (questionItem, index) => (
+                    <div
+                      className="contentStudioItem"
+                      key={index}
+                    >
+                      <strong>
+                        Q{index + 1}.{" "}
+                        {questionItem.question}
+                      </strong>
+
+                      <p>A. {questionItem.option1}</p>
+                      <p>B. {questionItem.option2}</p>
+                      <p>C. {questionItem.option3}</p>
+                      <p>D. {questionItem.option4}</p>
+
+                      <p>
+                        <strong>Correct:</strong>{" "}
+                        {questionItem.answer}
+                      </p>
+
+                      <p>
+                        <strong>Explanation:</strong>{" "}
+                        {questionItem.explanation ||
+                          "No explanation added."}
+                      </p>
+
+                      <p>
+                        {questionItem.level || "Easy"} •{" "}
+                        {questionItem.questionType ||
+                          "Single Correct"}{" "}
+                        •{" "}
+                        {questionItem.language || "English"}{" "}
+                        •{" "}
+                        {questionItem.tag || "No Tag"}
+                      </p>
+                    </div>
+                  )
+                )}
+              </div>
+
+              <div className="contentStudioActions">
+                <button
+                  className="publishButton"
+                  onClick={() => {
+                    setEditingMockTestId(previewTest.id);
+
+                    setMockTestForm({
+                      title: previewTest.title || "",
+                      planType:
+                        previewTest.planType || "FREE",
+                      subject: previewTest.subject || "",
+                      chapter: previewTest.chapter || "",
+                      examType:
+                        previewTest.examType || "CTET",
+                      testType:
+                        previewTest.testType ||
+                        "Chapter Test",
+                      duration:
+                        previewTest.duration?.toString() ||
+                        "30",
+                      totalQuestions:
+                        previewTest.totalQuestions?.toString() ||
+                        "10",
+                      marksPerQuestion:
+                        previewTest.marksPerQuestion?.toString() ||
+                        "1",
+                      negativeMarks:
+                        previewTest.negativeMarks?.toString() ||
+                        "0",
+                      status:
+                        previewTest.status || "published",
+                    });
+
+                    setMockTestQuestionsForm(
+                      previewTest.questions?.length
+                        ? previewTest.questions
+                        : [
+                            {
+                              question: "",
+                              option1: "",
+                              option2: "",
+                              option3: "",
+                              option4: "",
+                              answer: "",
+                              explanation: "",
+                              level: "Easy",
+                              questionType:
+                                "Single Correct",
+                              language: "English",
+                              tag: "",
+                              positiveMarks: "1",
+                              negativeMarks: "0",
+                              questionStatus:
+                                "published",
+                            },
+                          ]
+                    );
+
+                    navigate(
+                      "/admin/content/mock-tests/add"
+                    );
+                  }}
+                >
+                  Edit Test
+                </button>
+
+                <button
+                  className="backButton"
+                  onClick={() =>
+                    navigate(
+                      "/admin/content/mock-tests/manage"
+                    )
+                  }
+                >
+                  ← Back to Manage
+                </button>
+              </div>
+            </>
+          );
+        })()}
       </section>
     ) : null
   }
@@ -10010,7 +11259,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
         className="btnLink"
         onClick={() => {
           setSelectedCourse(null);
-          navigate("/subjects/ctet-tet/pricing");
+          navigate("/ctet-tet/pricing");
         }}
       >
         View Plans & Enroll
