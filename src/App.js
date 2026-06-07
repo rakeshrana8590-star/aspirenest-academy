@@ -591,6 +591,11 @@ const [mockTestSearch, setMockTestSearch] = useState("");
 const [mockTestStatusFilter, setMockTestStatusFilter] = useState("ALL");
 const [mockTestExamFilter, setMockTestExamFilter] = useState("ALL");
 const [mockTestSortMode, setMockTestSortMode] = useState("LATEST");
+const [questionBankSearch, setQuestionBankSearch] = useState("");
+const [questionBankSubjectFilter, setQuestionBankSubjectFilter] = useState("ALL");
+const [questionBankChapterFilter, setQuestionBankChapterFilter] = useState("ALL");
+const [questionBankDifficultyFilter, setQuestionBankDifficultyFilter] = useState("ALL");
+const [questionBankItems, setQuestionBankItems] = useState([]);
 
 const [videoForm, setVideoForm] = useState({
   title: "",
@@ -735,6 +740,12 @@ const handleSaveMockTest = async () => {
       return;
     }
 
+    const bankQuestions =
+    publishedQuestions.filter(
+      (q) =>
+        q.saveToQuestionBank === "yes"
+    );
+
     const totalQuestions = publishedQuestions.length;
 
     const totalMarks = publishedQuestions.reduce(
@@ -791,6 +802,49 @@ const handleSaveMockTest = async () => {
       updatedAt: new Date(),
     };
 
+    if (bankQuestions.length > 0) {
+      for (const question of bankQuestions) {
+        const questionBankKey =
+          `${finalExamType}-${finalSubject}-${finalChapter}-${question.question}`
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+            .slice(0, 180);
+    
+        const existingQuestions = await getDocs(
+          query(
+            collection(db, "questionBank"),
+            where(
+              "questionBankKey",
+              "==",
+              questionBankKey
+            )
+          )
+        );
+    
+        if (existingQuestions.empty) {
+          await addDoc(
+            collection(db, "questionBank"),
+            {
+              ...question,
+    
+              questionBankKey,
+    
+              sourceExamTitle: finalTitle,
+              sourceExamType: finalExamType,
+              sourceTestType: finalTestType,
+              sourceSubject: finalSubject,
+              sourceChapter: finalChapter,
+    
+              section: "questionBank",
+    
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            }
+          );
+        }
+      }
+    }
+
     if (editingMockTestId) {
       await updateDoc(doc(db, "contentItems", editingMockTestId), {
         ...mockPayload,
@@ -844,6 +898,7 @@ examLanguage: "English",
         passingMarks: "0",
 
         questionStatus: "published",
+        saveToQuestionBank: "yes",
       },
     ]);
 
@@ -1768,6 +1823,7 @@ if (expiryDate && expiryDate < new Date()) {
 
   React.useEffect(() => {
     loadContentItemsFromFirestore();
+    loadQuestionBankFromFirestore();
     loadNotesSubjectsFromFirestore();
     loadNotesChaptersFromFirestore();
   }, []);
@@ -2439,6 +2495,23 @@ subjectName:
         "Error loading contentItems:",
         error
       );
+    }
+  };
+
+  const loadQuestionBankFromFirestore = async () => {
+    try {
+      const bankSnapshot = await getDocs(
+        collection(db, "questionBank")
+      );
+  
+      const bankData = bankSnapshot.docs.map((bankDoc) => ({
+        id: bankDoc.id,
+        ...bankDoc.data(),
+      }));
+  
+      setQuestionBankItems(bankData);
+    } catch (error) {
+      console.error("Question bank load error:", error);
     }
   };
 
@@ -7945,6 +8018,16 @@ This action cannot be undone.`
             </button>
 
             <button
+  onClick={() => {
+    navigate(
+      "/admin/content/mock-tests/question-bank"
+    );
+  }}
+>
+  📚 Question Bank
+</button>
+
+            <button
               onClick={() =>
                 navigate("/admin/content/mock-tests/manage")
               }
@@ -9088,6 +9171,7 @@ This action cannot be undone.`
                       negativeMarks:
                         mockTestForm.negativeMarks || "0",
                       questionStatus: "published",
+                      saveToQuestionBank: "yes",
                     },
                   ])
                 }
@@ -9436,6 +9520,7 @@ examInstructions:
                                   negativeMarks: "0",
                                   questionStatus:
                                     "published",
+                                    saveToQuestionBank: "yes",
                                 },
                               ]
                         );
@@ -9665,6 +9750,132 @@ examInstructions:
           >
             ← Back to Mock Tests Manager
           </button>
+        </div>
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/mock-tests/question-bank"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">QUESTION BANK</span>
+
+          <h1>Examination Question Bank</h1>
+
+          <p>
+            Search, filter, and manage reusable questions saved from
+            examination tests.
+          </p>
+        </div>
+
+        <div className="contentStudioForm">
+          <div className="contentStudioGrid">
+            <input
+              type="text"
+              placeholder="Search questions..."
+              value={questionBankSearch}
+              onChange={(e) =>
+                setQuestionBankSearch(e.target.value)
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Filter Subject or ALL"
+              value={questionBankSubjectFilter}
+              onChange={(e) =>
+                setQuestionBankSubjectFilter(e.target.value)
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Filter Chapter or ALL"
+              value={questionBankChapterFilter}
+              onChange={(e) =>
+                setQuestionBankChapterFilter(e.target.value)
+              }
+            />
+
+            <select
+              value={questionBankDifficultyFilter}
+              onChange={(e) =>
+                setQuestionBankDifficultyFilter(e.target.value)
+              }
+            >
+              <option value="ALL">All Difficulty</option>
+              <option value="Easy">Easy</option>
+              <option value="Medium">Medium</option>
+              <option value="Hard">Hard</option>
+            </select>
+          </div>
+
+          <div className="contentStudioList">
+            {questionBankItems
+              .filter((question) => {
+                const searchText =
+                  questionBankSearch.trim().toLowerCase();
+
+                const matchesSearch =
+                  !searchText ||
+                  question.question
+                    ?.toLowerCase()
+                    .includes(searchText) ||
+                  question.tag
+                    ?.toLowerCase()
+                    .includes(searchText);
+
+                const matchesSubject =
+                  questionBankSubjectFilter === "ALL" ||
+                  question.sourceSubject ===
+                    questionBankSubjectFilter;
+
+                const matchesChapter =
+                  questionBankChapterFilter === "ALL" ||
+                  question.sourceChapter ===
+                    questionBankChapterFilter;
+
+                const matchesDifficulty =
+                  questionBankDifficultyFilter === "ALL" ||
+                  question.level ===
+                    questionBankDifficultyFilter;
+
+                return (
+                  matchesSearch &&
+                  matchesSubject &&
+                  matchesChapter &&
+                  matchesDifficulty
+                );
+              })
+              .map((question) => (
+                <div
+                  className="contentStudioItem"
+                  key={question.id}
+                >
+                  <strong>{question.question}</strong>
+
+                  <p>
+                    {question.sourceExamType || "Exam"} •{" "}
+                    {question.sourceSubject || "Subject"} •{" "}
+                    {question.sourceChapter || "Chapter"} •{" "}
+                    {question.level || "Easy"}
+                  </p>
+
+                  <p>
+                    A. {question.option1} • B. {question.option2} •
+                    C. {question.option3} • D. {question.option4}
+                  </p>
+
+                  <p>
+                    Answer: {question.answer || "Not set"}
+                  </p>
+                </div>
+              ))}
+          </div>
         </div>
       </section>
     ) : null
