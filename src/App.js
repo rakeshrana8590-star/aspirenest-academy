@@ -587,6 +587,10 @@ questionStatus: "published",
 
 const [editingMockTestId, setEditingMockTestId] = useState(null);
 const [mockTestPlanFilter, setMockTestPlanFilter] = useState("ALL");
+const [mockTestSearch, setMockTestSearch] = useState("");
+const [mockTestStatusFilter, setMockTestStatusFilter] = useState("ALL");
+const [mockTestExamFilter, setMockTestExamFilter] = useState("ALL");
+const [mockTestSortMode, setMockTestSortMode] = useState("LATEST");
 
 const [videoForm, setVideoForm] = useState({
   title: "",
@@ -852,7 +856,48 @@ examLanguage: "English",
   }
 };
 
+const handleImportMockTestJson = async (event) => {
+  try {
+    const file = event.target.files?.[0];
 
+    if (!file) return;
+
+    const fileText = await file.text();
+
+    const importedTest = JSON.parse(fileText);
+
+    if (!importedTest.title || !importedTest.questions?.length) {
+      alert("Invalid exam JSON file");
+      return;
+    }
+
+    const importPayload = {
+      ...importedTest,
+      title: `${importedTest.title} - Imported`,
+      section: "mockTest",
+      contentType: "MOCK",
+      status: "draft",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    delete importPayload.id;
+
+    await addDoc(
+      collection(db, "contentItems"),
+      importPayload
+    );
+
+    await loadContentItemsFromFirestore();
+
+    alert("Exam imported successfully as Draft ✅");
+
+    event.target.value = "";
+  } catch (error) {
+    console.error("Import exam JSON error:", error);
+    alert("Invalid JSON file or import failed");
+  }
+};
 
 const handleSaveVideo = async () => {
   try {
@@ -9141,12 +9186,37 @@ This action cannot be undone.`
         <div className="contentStudioList">
           <h3>Saved Mock Tests</h3>
 
-          {universalContent.filter(
-            (item) =>
-              item.section === "mockTest" &&
-              (mockTestPlanFilter === "ALL" ||
-                item.planType === mockTestPlanFilter)
-          ).length === 0 ? (
+          {universalContent
+  .filter((item) => {
+    const searchText =
+      mockTestSearch.trim().toLowerCase();
+
+    const matchesSearch =
+      !searchText ||
+      item.title?.toLowerCase().includes(searchText) ||
+      item.subject?.toLowerCase().includes(searchText) ||
+      item.chapter?.toLowerCase().includes(searchText);
+
+    const matchesPlan =
+      mockTestPlanFilter === "ALL" ||
+      item.planType === mockTestPlanFilter;
+
+    const matchesStatus =
+      mockTestStatusFilter === "ALL" ||
+      item.status === mockTestStatusFilter;
+
+    const matchesExam =
+      mockTestExamFilter === "ALL" ||
+      item.examType === mockTestExamFilter;
+
+    return (
+      item.section === "mockTest" &&
+      matchesSearch &&
+      matchesPlan &&
+      matchesStatus &&
+      matchesExam
+    );
+  }).length === 0 ? (
             <div className="contentStudioItem">
               <strong>No mock tests found.</strong>
               <p>
@@ -9155,13 +9225,52 @@ This action cannot be undone.`
             </div>
           ) : (
             universalContent
-              .filter(
-                (item) =>
-                  item.section === "mockTest" &&
-                  (mockTestPlanFilter === "ALL" ||
-                    item.planType === mockTestPlanFilter)
-              )
-              .map((test) => (
+            .filter((item) => {
+              const searchText =
+                mockTestSearch.trim().toLowerCase();
+          
+              const matchesSearch =
+                !searchText ||
+                item.title?.toLowerCase().includes(searchText) ||
+                item.subject?.toLowerCase().includes(searchText) ||
+                item.chapter?.toLowerCase().includes(searchText);
+          
+              const matchesPlan =
+                mockTestPlanFilter === "ALL" ||
+                item.planType === mockTestPlanFilter;
+          
+              const matchesStatus =
+                mockTestStatusFilter === "ALL" ||
+                item.status === mockTestStatusFilter;
+          
+              const matchesExam =
+                mockTestExamFilter === "ALL" ||
+                item.examType === mockTestExamFilter;
+          
+              return (
+                item.section === "mockTest" &&
+                matchesSearch &&
+                matchesPlan &&
+                matchesStatus &&
+                matchesExam
+              );
+            })
+            .sort((a, b) => {
+              const firstDate =
+                a.createdAt?.seconds ||
+                a.updatedAt?.seconds ||
+                0;
+          
+              const secondDate =
+                b.createdAt?.seconds ||
+                b.updatedAt?.seconds ||
+                0;
+          
+              return mockTestSortMode === "OLDEST"
+                ? firstDate - secondDate
+                : secondDate - firstDate;
+            })
+            .map((test) => (
                 <div
                   className="contentStudioItem"
                   key={test.id}
@@ -9184,6 +9293,60 @@ This action cannot be undone.`
   {test.examDifficulty || "Mixed"} •{" "}
   {test.examLanguage || "English"} •{" "}
   {test.examType || "CTET/TET"}
+</p>
+
+<p>
+  Attempt:
+  {" "}
+  {test.attemptLimit || "unlimited"}
+
+  {" • "}
+
+  Result:
+  {" "}
+  {test.resultPublishMode || "instant"}
+
+  {" • "}
+
+  Navigation:
+  {" "}
+  {test.navigationMode || "free"}
+</p>
+
+<p>
+  Shuffle Q:
+  {" "}
+  {test.shuffleQuestions || "no"}
+
+  {" • "}
+
+  Shuffle Options:
+  {" "}
+  {test.shuffleOptions || "no"}
+
+  {" • "}
+
+  Calculator:
+  {" "}
+  {test.calculatorAllowed || "no"}
+</p>
+
+<p>
+  Pause:
+  {" "}
+  {test.allowPause || "yes"}
+
+  {" • "}
+
+  Start:
+  {" "}
+  {test.examStartDate || "Not scheduled"}
+
+  {" • "}
+
+  End:
+  {" "}
+  {test.examEndDate || "Not scheduled"}
 </p>
 
                   <div className="contentStudioActions">
@@ -9294,6 +9457,144 @@ examInstructions:
   }
 >
   Preview
+</button>
+
+<button
+  className="publishButton"
+  onClick={async () => {
+    try {
+      const duplicatePayload = {
+        ...test,
+        title: `${test.title || "Untitled Test"} - Copy`,
+        status: "draft",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      delete duplicatePayload.id;
+
+      await addDoc(
+        collection(db, "contentItems"),
+        duplicatePayload
+      );
+
+      await loadContentItemsFromFirestore();
+
+      alert("Duplicate test created as Draft ✅");
+    } catch (error) {
+      console.error("Duplicate test error:", error);
+      alert(error.message);
+    }
+  }}
+>
+  Duplicate
+</button>
+
+<button
+  className="publishButton"
+  onClick={async () => {
+    try {
+      const nextStatus =
+        test.status === "published"
+          ? "unpublished"
+          : "published";
+
+      await updateDoc(doc(db, "contentItems", test.id), {
+        status: nextStatus,
+        updatedAt: new Date(),
+      });
+
+      await loadContentItemsFromFirestore();
+
+      alert(
+        nextStatus === "published"
+          ? "Test published successfully ✅"
+          : "Test unpublished successfully ✅"
+      );
+    } catch (error) {
+      console.error("Publish toggle error:", error);
+      alert(error.message);
+    }
+  }}
+>
+  {test.status === "published"
+    ? "Unpublish"
+    : "Publish"}
+</button>
+
+<button
+  className="deleteContentButton"
+  onClick={async () => {
+    const confirmArchive = window.confirm(
+      "Archive this test? It will be hidden from students but not permanently deleted."
+    );
+
+    if (!confirmArchive) return;
+
+    try {
+      await updateDoc(doc(db, "contentItems", test.id), {
+        status: "archived",
+        updatedAt: new Date(),
+      });
+
+      await loadContentItemsFromFirestore();
+
+      alert("Test archived successfully ✅");
+    } catch (error) {
+      console.error("Archive test error:", error);
+      alert(error.message);
+    }
+  }}
+>
+  Archive
+</button>
+
+<button
+  className="backButton"
+  onClick={() => {
+    const examLink = `${window.location.origin}/ctet-tet/mock-tests/start/${test.id}`;
+
+    navigator.clipboard.writeText(examLink);
+
+    alert("Exam link copied ✅");
+  }}
+>
+  Copy Link
+</button>
+
+<button
+  className="backButton"
+  onClick={() => {
+    const jsonData = JSON.stringify(
+      test,
+      null,
+      2
+    );
+
+    const blob = new Blob(
+      [jsonData],
+      {
+        type: "application/json",
+      }
+    );
+
+    const url =
+      URL.createObjectURL(blob);
+
+    const link =
+      document.createElement("a");
+
+    link.href = url;
+
+    link.download =
+      `${test.title || "mock-test"}.json`;
+
+    link.click();
+
+    URL.revokeObjectURL(url);
+  }}
+>
+  Export JSON
 </button>
 
                     <button
@@ -9788,13 +10089,49 @@ examInstructions:
           );
 
           const chapterMockTests =
-            universalContent.filter(
-              (item) =>
-                item.section === "mockTest" &&
-                (item.planType || "FREE") === activePlan &&
-                item.subject === activeSubject &&
-                item.chapter === activeChapter
-            );
+  universalContent
+    .filter(
+      (item) =>
+        item.section === "mockTest" &&
+        (item.planType || "FREE") === activePlan &&
+        item.subject === activeSubject &&
+        item.chapter === activeChapter
+    )
+    .filter((test) => {
+      const searchText =
+        mockTestSearch.trim().toLowerCase();
+
+      const matchesSearch =
+        !searchText ||
+        test.title?.toLowerCase().includes(searchText) ||
+        test.subject?.toLowerCase().includes(searchText) ||
+        test.chapter?.toLowerCase().includes(searchText);
+
+      const matchesStatus =
+        mockTestStatusFilter === "ALL" ||
+        test.status === mockTestStatusFilter;
+
+      const matchesExam =
+        mockTestExamFilter === "ALL" ||
+        test.examType === mockTestExamFilter;
+
+      return matchesSearch && matchesStatus && matchesExam;
+    })
+    .sort((a, b) => {
+      const firstDate =
+        a.createdAt?.seconds ||
+        a.updatedAt?.seconds ||
+        0;
+
+      const secondDate =
+        b.createdAt?.seconds ||
+        b.updatedAt?.seconds ||
+        0;
+
+      return mockTestSortMode === "OLDEST"
+        ? firstDate - secondDate
+        : secondDate - firstDate;
+    });
 
           return (
             <>
@@ -9839,6 +10176,105 @@ examInstructions:
 
               <div className="contentStudioList">
                 <h3>Mock Tests in {activeChapter}</h3>
+
+                <div className="contentStudioGrid">
+
+                <label className="publishButton">
+
+Import JSON
+
+<input
+  type="file"
+  accept=".json"
+  style={{ display: "none" }}
+  onChange={handleImportMockTestJson}
+/>
+
+</label>
+
+<input
+  type="text"
+  placeholder="Search Test Title..."
+  value={mockTestSearch}
+  onChange={(e) =>
+    setMockTestSearch(e.target.value)
+  }
+/>
+
+<select
+  value={mockTestStatusFilter}
+  onChange={(e) =>
+    setMockTestStatusFilter(e.target.value)
+  }
+>
+  <option value="ALL">
+    All Status
+  </option>
+
+  <option value="published">
+    Published
+  </option>
+
+  <option value="draft">
+    Draft
+  </option>
+
+  <option value="unpublished">
+    Unpublished
+  </option>
+
+  <option value="archived">
+    Archived
+  </option>
+</select>
+
+<select
+  value={mockTestExamFilter}
+  onChange={(e) =>
+    setMockTestExamFilter(e.target.value)
+  }
+>
+  <option value="ALL">
+    All Exams
+  </option>
+
+  <option value="CTET">
+    CTET
+  </option>
+
+  <option value="TET">
+    TET
+  </option>
+
+  <option value="SSC">
+    SSC
+  </option>
+
+  <option value="UPSC">
+    UPSC
+  </option>
+
+  <option value="NEET">
+    NEET
+  </option>
+</select>
+
+<select
+  value={mockTestSortMode}
+  onChange={(e) =>
+    setMockTestSortMode(e.target.value)
+  }
+>
+  <option value="LATEST">
+    Latest First
+  </option>
+
+  <option value="OLDEST">
+    Oldest First
+  </option>
+</select>
+
+</div>
 
                 {chapterMockTests.length === 0 ? (
                   <div className="contentStudioItem">
