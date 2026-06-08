@@ -595,6 +595,9 @@ const [mockTestStatusFilter, setMockTestStatusFilter] = useState("ALL");
 const [mockTestExamFilter, setMockTestExamFilter] = useState("ALL");
 const [mockTestSortMode, setMockTestSortMode] = useState("LATEST");
 const [activeMockActionMenu, setActiveMockActionMenu] = useState(null);
+const [selectedMockTestIds, setSelectedMockTestIds] = useState([]);
+const [mockTestPage, setMockTestPage] = useState(1);
+const mockTestsPerPage = 5;
 const [questionBankSearch, setQuestionBankSearch] = useState("");
 const [questionBankSubjectFilter, setQuestionBankSubjectFilter] = useState("ALL");
 const [questionBankChapterFilter, setQuestionBankChapterFilter] = useState("ALL");
@@ -9685,6 +9688,165 @@ This action cannot be undone.`
   </div>
 </div>
 
+<div className="mockBulkActionsBar">
+
+<div className="mockSelectedCount">
+  Selected:
+  {" "}
+  {selectedMockTestIds.length}
+</div>
+
+<button
+  className="backButton"
+  onClick={() => {
+    const visibleMockTestIds = universalContent
+    .filter((item) => {
+      const searchText =
+        mockTestSearch.trim().toLowerCase();
+  
+      const matchesSearch =
+        !searchText ||
+        item.title?.toLowerCase().includes(searchText) ||
+        item.subject?.toLowerCase().includes(searchText) ||
+        item.chapter?.toLowerCase().includes(searchText);
+  
+      const matchesPlan =
+        mockTestPlanFilter === "ALL" ||
+        item.planType === mockTestPlanFilter;
+  
+      const matchesStatus =
+        mockTestStatusFilter === "ALL" ||
+        item.status === mockTestStatusFilter;
+  
+      const matchesExam =
+        mockTestExamFilter === "ALL" ||
+        item.examType === mockTestExamFilter;
+  
+      return (
+        item.section === "mockTest" &&
+        matchesSearch &&
+        matchesPlan &&
+        matchesStatus &&
+        matchesExam
+      );
+    })
+    .map((item) => item.id);
+
+    setSelectedMockTestIds(visibleMockTestIds);
+  }}
+>
+  Select All
+</button>
+
+<button
+  className="backButton"
+  onClick={() => setSelectedMockTestIds([])}
+>
+  Clear Selection
+</button>
+
+<button
+  className="backButton"
+  onClick={async () => {
+    if (selectedMockTestIds.length === 0) {
+      alert("Please select at least one mock test");
+      return;
+    }
+
+    for (const testId of selectedMockTestIds) {
+      await updateDoc(doc(db, "contentItems", testId), {
+        status: "published",
+        updatedAt: new Date(),
+      });
+    }
+
+    await loadContentItemsFromFirestore();
+    setSelectedMockTestIds([]);
+
+    alert("Selected mock tests published ✅");
+  }}
+>
+  Publish Selected
+</button>
+
+<button
+  className="backButton"
+  onClick={async () => {
+    if (selectedMockTestIds.length === 0) {
+      alert("Please select at least one mock test");
+      return;
+    }
+
+    for (const testId of selectedMockTestIds) {
+      await updateDoc(doc(db, "contentItems", testId), {
+        status: "unpublished",
+        updatedAt: new Date(),
+      });
+    }
+
+    await loadContentItemsFromFirestore();
+    setSelectedMockTestIds([]);
+
+    alert("Selected mock tests unpublished ✅");
+  }}
+>
+  Unpublish Selected
+</button>
+
+<button
+  className="backButton"
+  onClick={async () => {
+    if (selectedMockTestIds.length === 0) {
+      alert("Please select at least one mock test");
+      return;
+    }
+
+    for (const testId of selectedMockTestIds) {
+      await updateDoc(doc(db, "contentItems", testId), {
+        status: "archived",
+        updatedAt: new Date(),
+      });
+    }
+
+    await loadContentItemsFromFirestore();
+
+    setSelectedMockTestIds([]);
+
+    alert("Selected mock tests archived ✅");
+  }}
+>
+  Archive Selected
+</button>
+
+<button
+  className="dangerButton"
+  onClick={async () => {
+    if (selectedMockTestIds.length === 0) {
+      alert("Please select at least one mock test");
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      `Delete ${selectedMockTestIds.length} selected mock test(s) permanently?\n\nThis action cannot be undone.`
+    );
+
+    if (!confirmDelete) return;
+
+    for (const testId of selectedMockTestIds) {
+      await deleteDoc(doc(db, "contentItems", testId));
+    }
+
+    await loadContentItemsFromFirestore();
+
+    setSelectedMockTestIds([]);
+
+    alert("Selected mock tests deleted permanently ✅");
+  }}
+>
+  Delete Selected
+</button>
+</div>
+
         <div className="contentStudioList">
           <h3>Saved Mock Tests</h3>
 
@@ -9772,12 +9934,37 @@ This action cannot be undone.`
                 ? firstDate - secondDate
                 : secondDate - firstDate;
             })
+            .slice(
+              (mockTestPage - 1) * mockTestsPerPage,
+              mockTestPage * mockTestsPerPage
+            )
             .map((test) => (
                 <div
                   className="contentStudioItem"
                   key={test.id}
                 >
-                  <strong>{test.title}</strong>
+                  <input
+  type="checkbox"
+  checked={selectedMockTestIds.includes(test.id)}
+  onChange={(e) => {
+    if (e.target.checked) {
+      setSelectedMockTestIds([
+        ...selectedMockTestIds,
+        test.id,
+      ]);
+    } else {
+      setSelectedMockTestIds(
+        selectedMockTestIds.filter(
+          (id) => id !== test.id
+        )
+      );
+    }
+  }}
+/>
+<strong>
+  {test.isFeatured && "⭐ "}
+  {test.title}
+</strong>
                   <div className="mockTestInfoBlock">
   <div className="mockTestPrimaryMeta">
     <span>{test.planType || "FREE"}</span>
@@ -9875,6 +10062,30 @@ This action cannot be undone.`
   </div>
 </div>
 </div>
+
+<div className="mockTestMetaSection">
+  <h5>Audit</h5>
+
+  <div className="mockTestMetaGrid">
+    <span>
+      📅 Created:{" "}
+      {test.createdAt?.seconds
+        ? new Date(
+            test.createdAt.seconds * 1000
+          ).toLocaleDateString()
+        : "Not available"}
+    </span>
+    <span>
+  🕒 Updated:{" "}
+  {test.updatedAt?.seconds
+    ? new Date(
+        test.updatedAt.seconds * 1000
+      ).toLocaleDateString()
+    : "Not available"}
+</span>
+  </div>
+</div>
+
 <div className="contentStudioActions mockTestCompactActions">
 
 <button
@@ -10072,6 +10283,34 @@ This action cannot be undone.`
         </button>
 
         <button
+  onClick={async () => {
+    try {
+      await updateDoc(
+        doc(db, "contentItems", test.id),
+        {
+          isFeatured: !test.isFeatured,
+          updatedAt: new Date(),
+        }
+      );
+
+      await loadContentItemsFromFirestore();
+      setActiveMockActionMenu(null);
+
+      alert(
+        test.isFeatured
+          ? "Test removed from featured ✅"
+          : "Test marked as featured ✅"
+      );
+    } catch (error) {
+      console.error("Featured toggle error:", error);
+      alert(error.message);
+    }
+  }}
+>
+  {test.isFeatured ? "Unfeature" : "Feature"}
+</button>
+
+        <button
           onClick={async () => {
             const confirmArchive = window.confirm(
               "Archive this test? It will be hidden from students but not permanently deleted."
@@ -10139,6 +10378,130 @@ This action cannot be undone.`
         </button>
 
         <button
+  onClick={async () => {
+    const weeklyPayload = {
+      ...test,
+      title: `${test.title || "Mock Test"} - Weekly Test`,
+      testType: "Weekly Test",
+      status: "draft",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    delete weeklyPayload.id;
+
+    await addDoc(
+      collection(db, "contentItems"),
+      weeklyPayload
+    );
+
+    await loadContentItemsFromFirestore();
+    setActiveMockActionMenu(null);
+
+    alert("Weekly Test copy created as Draft ✅");
+  }}
+>
+  Create Weekly Test Copy
+</button>
+
+<button
+  onClick={async () => {
+    const ctetPaper1Payload = {
+      ...test,
+      title: `${test.title || "Mock Test"} - CTET Paper 1`,
+      examType: "CTET",
+      testType: "Full Mock Test",
+      subject: "ALL SUBJECTS",
+      chapter: "Complete Paper",
+      status: "draft",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    delete ctetPaper1Payload.id;
+
+    await addDoc(
+      collection(db, "contentItems"),
+      ctetPaper1Payload
+    );
+
+    await loadContentItemsFromFirestore();
+    setActiveMockActionMenu(null);
+
+    alert("CTET Paper-1 copy created as Draft ✅");
+  }}
+>
+  Create CTET Paper-1 Copy
+</button>
+
+<button
+  onClick={async () => {
+    const ctetPaper2Payload = {
+      ...test,
+      title: `${test.title || "Mock Test"} - CTET Paper 2`,
+      examType: "CTET",
+      testType: "Full Mock Test",
+      subject: "ALL SUBJECTS",
+      chapter: "Complete Paper",
+      status: "draft",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    delete ctetPaper2Payload.id;
+
+    await addDoc(
+      collection(db, "contentItems"),
+      ctetPaper2Payload
+    );
+
+    await loadContentItemsFromFirestore();
+    setActiveMockActionMenu(null);
+
+    alert("CTET Paper-2 copy created as Draft ✅");
+  }}
+>
+  Create CTET Paper-2 Copy
+</button>
+
+<button
+  onClick={async () => {
+    const scholarshipPayload = {
+      ...test,
+      title: `${test.title || "Mock Test"} - Scholarship Exam`,
+      examType: "Custom Exam",
+      testType: "Live Exam",
+      subject: "ALL SUBJECTS",
+      chapter: "Complete Paper",
+      planType: "FREE",
+      scheduleType: "dateTime",
+      leaderboardMode: "liveLeaderboard",
+      fullscreenMode: "yes",
+      tabSwitchDetection: "yes",
+      copyPasteProtection: "yes",
+      autoSubmitOnViolation: "yes",
+      status: "draft",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    delete scholarshipPayload.id;
+
+    await addDoc(
+      collection(db, "contentItems"),
+      scholarshipPayload
+    );
+
+    await loadContentItemsFromFirestore();
+    setActiveMockActionMenu(null);
+
+    alert("Scholarship Exam copy created as Draft ✅");
+  }}
+>
+  Create Scholarship Exam Copy
+</button>
+
+        <button
           className="dangerMenuButton"
           onClick={() => {
             if (
@@ -10163,7 +10526,106 @@ This action cannot be undone.`
           )}
         </div>
 
+        <div className="mockPaginationBar">
+  <button
+    className="backButton"
+    disabled={mockTestPage === 1}
+    onClick={() =>
+      setMockTestPage((prev) => Math.max(prev - 1, 1))
+    }
+  >
+    ← Previous
+  </button>
+
+  <span>
+    Page {mockTestPage}
+  </span>
+
+  <button
+  className="backButton"
+  disabled={
+    mockTestPage >=
+    Math.ceil(
+      universalContent.filter(
+        (item) => item.section === "mockTest"
+      ).length / mockTestsPerPage
+    )
+  }
+  onClick={() => setMockTestPage((prev) => prev + 1)}
+>
+  Next →
+</button>
+</div>
+
         <div className="contentStudioActions">
+ 
+        <input
+  type="file"
+  accept=".json"
+  id="mockJsonImportInput"
+  style={{ display: "none" }}
+  onChange={(e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = async (event) => {
+      try {
+        const importedTest = JSON.parse(
+          event.target.result
+        );
+    
+        const importPayload = {
+          ...importedTest,
+          title: `${
+            importedTest.title ||
+            "Imported Mock Test"
+          } - Imported`,
+          section: "mockTest",
+          status: "draft",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+    
+        delete importPayload.id;
+    
+        await addDoc(
+          collection(db, "contentItems"),
+          importPayload
+        );
+    
+        await loadContentItemsFromFirestore();
+    
+        alert("Mock test imported as Draft ✅");
+      } catch (error) {
+        console.error(
+          "Import JSON error:",
+          error
+        );
+    
+        alert(
+          "Invalid JSON file or import failed ❌"
+        );
+      }
+    };
+
+    reader.readAsText(file);
+  }}
+/>
+
+<button
+  className="backButton"
+  onClick={() =>
+    document
+      .getElementById("mockJsonImportInput")
+      ?.click()
+  }
+>
+  Import JSON
+</button>
+
           <button
             className="publishButton"
             onClick={() =>
