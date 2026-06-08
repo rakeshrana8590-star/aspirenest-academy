@@ -23637,3 +23637,597 @@ button {
   font-size: 1.25rem !important;
   letter-spacing: 1px !important;
 }
+
+.mockTestCompactActions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.mockActionMenuWrap {
+  position: relative;
+  display: inline-block;
+}
+
+.mockActionDropdown {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  z-index: 50;
+  min-width: 220px;
+  padding: 10px;
+  background: #111827;
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mockActionDropdown button {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  padding: 12px 14px;
+  border-radius: 12px;
+  text-align: left;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.mockActionDropdown button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.mockActionDropdown .dangerMenuButton {
+  color: #fecaca;
+}
+.mockTestInfoBlock {
+  margin-top: 14px;
+  max-width: 760px;
+}
+
+.mockTestPrimaryMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.mockTestPrimaryMeta span {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.mockTestMetaGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 820px;
+}
+
+.mockTestMetaGrid span {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  padding: 8px 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+.mockTestPrimaryMeta .mockStatusBadge {
+  border-color: transparent;
+}
+
+.mockStatusBadge.statusPublished {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.mockStatusBadge.statusDraft {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.mockStatusBadge.statusUnpublished {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.mockStatusBadge.statusArchived {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.contentStudioItem {
+  position: relative;
+}
+
+.contentStudioItem .mockTestCompactActions {
+  position: absolute;
+  top: 34px;
+  right: 28px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.contentStudioItem .mockTestInfoBlock {
+  max-width: calc(100% - 360px);
+}
+
+@media (max-width: 900px) {
+  .contentStudioItem .mockTestCompactActions {
+    position: static;
+    margin-top: 18px;
+    justify-content: flex-start;
+  }
+
+  .contentStudioItem .mockTestInfoBlock {
+    max-width: 100%;
+  }
+}
+.mockTestMetaSection {
+  margin-top: 14px;
+}
+
+.mockTestMetaSection h5 {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .5px;
+}
+.contentStudioItem .mockTestCompactActions {
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 170px;
+}
+
+.contentStudioItem .mockTestCompactActions > button,
+.contentStudioItem .mockActionMenuWrap > button {
+  width: 100%;
+  justify-content: center;
+}
+
+.contentStudioItem .mockActionDropdown {
+  top: 0;
+  right: 105%;
+}
+
+/* Mock Test Add Page Polish */
+.coursePages .contentStudioForm textarea {
+  width: 100%;
+  min-height: 84px;
+  resize: vertical;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  background: #f8fafc;
+  padding: 18px 20px;
+  font-size: 15px;
+  color: #111827;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.coursePages .contentStudioForm textarea:focus {
+  border-color: #fb923c;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(251, 146, 60, 0.12);
+}
+
+.coursePages .contentStudioForm label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.coursePages .contentStudioForm .contentStudioGrid > div {
+  width: 100%;
+}
+
+.coursePages .contentStudioList .contentStudioItem textarea {
+  min-height: 72px;
+}
+/* Phase 1 Mock Test Builder Premium Polish */
+.coursePages .contentStudioForm {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 34px;
+  box-shadow: 0 30px 90px rgba(15, 23, 42, 0.08);
+}
+
+.coursePages .contentStudioList {
+  margin-top: 42px;
+  background: linear-gradient(180deg, #ffffff 0%, #fff7ed 100%);
+  border-radius: 32px;
+  border: 1px solid #fed7aa;
+  padding: 32px;
+}
+
+.coursePages .contentStudioList .contentStudioItem {
+  background: #ffffff;
+  border-radius: 28px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.07);
+}
+
+.coursePages .contentStudioList .contentStudioItem strong {
+  display: inline-flex;
+  background: #111827;
+  color: #ffffff;
+  padding: 10px 16px;
+  border-radius: 999px;
+  margin-bottom: 18px;
+}
+
+.coursePages .contentStudioActions {
+  margin-top: 28px;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.coursePages .contentStudioActions button {
+  min-height: 52px;
+  border-radius: 999px;
+  font-weight: 900;
+}
+/* Mock Test Phase 1 - Premium Builder Console */
+.coursePages .contentStudioForm {
+  position: relative;
+  overflow: hidden;
+}
+
+.coursePages .contentStudioForm::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(251, 146, 60, 0.10), transparent 30%),
+    radial-gradient(circle at 90% 60%, rgba(15, 23, 42, 0.06), transparent 28%);
+}
+
+.coursePages .contentStudioGrid {
+  position: relative;
+  z-index: 1;
+}
+
+.coursePages .contentStudioGrid input,
+.coursePages .contentStudioGrid select,
+.coursePages .contentStudioGrid textarea {
+  min-height: 58px;
+  border-radius: 20px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+  transition: all 0.2s ease;
+}
+
+.coursePages .contentStudioGrid input:focus,
+.coursePages .contentStudioGrid select:focus,
+.coursePages .contentStudioGrid textarea:focus {
+  background: #ffffff;
+  border-color: #fb923c;
+  box-shadow: 0 0 0 5px rgba(251, 146, 60, 0.12);
+}
+
+.coursePages .contentStudioList {
+  position: relative;
+  overflow: hidden;
+}
+
+.coursePages .contentStudioList::before {
+  content: "EXAM BUILDER";
+  position: absolute;
+  top: 22px;
+  right: 28px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1.4px;
+  color: rgba(194, 65, 12, 0.16);
+}
+
+.coursePages .contentStudioList .contentStudioItem {
+  padding: 34px;
+}
+
+.coursePages .contentStudioList .contentStudioItem strong {
+  font-size: 17px;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.18);
+}
+
+.coursePages .contentStudioActions {
+  position: relative;
+  z-index: 2;
+}
+
+.coursePages .contentStudioActions .publishButton {
+  background: #111827;
+  color: #ffffff;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+}
+
+.coursePages .contentStudioActions .backButton {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+/* Phase 1 Final Command Bar + Builder Polish */
+.coursePages .contentStudioList {
+  padding-bottom: 42px;
+}
+
+.coursePages .contentStudioList .contentStudioActions {
+  margin-top: 34px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 28px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+}
+
+.coursePages .contentStudioList .contentStudioActions .publishButton:first-child {
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #e2e8f0;
+}
+
+.coursePages .contentStudioList .contentStudioActions .publishButton:nth-child(2) {
+  background: linear-gradient(135deg, #111827, #020617);
+  color: #ffffff;
+  border: none;
+  transform: scale(1.02);
+}
+
+.coursePages .contentStudioList .contentStudioActions .publishButton:nth-child(2)::before {
+  content: "✓ ";
+}
+
+.coursePages .contentStudioList .contentStudioActions .backButton {
+  background: #fff7ed;
+  color: #9a3412;
+  border: 1px solid #fed7aa;
+}
+
+.coursePages .contentStudioList .contentStudioItem {
+  border: 1px solid rgba(226, 232, 240, 0.95);
+}
+
+.coursePages .contentStudioList .contentStudioItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.10);
+}
+/* Phase 1 Section Identity Polish */
+.coursePages .contentStudioForm > .sectionHeader {
+  position: relative;
+  z-index: 2;
+  padding: 22px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, #ffffff 0%, #fff7ed 100%);
+  border: 1px solid #fed7aa;
+  margin-bottom: 28px;
+}
+
+.coursePages .contentStudioList > .sectionHeader {
+  position: relative;
+  z-index: 2;
+  padding: 24px 20px 28px;
+  margin-bottom: 24px;
+  border-radius: 28px;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+}
+
+.coursePages .contentStudioList > .sectionHeader h2 {
+  font-size: clamp(34px, 4vw, 54px);
+}
+
+.coursePages .contentStudioList > .sectionHeader p {
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+/* Phase 1 Final Premium Input + Command Polish */
+.coursePages .contentStudioGrid input:hover,
+.coursePages .contentStudioGrid select:hover,
+.coursePages .contentStudioGrid textarea:hover {
+  background: #ffffff;
+  border-color: #fdba74;
+  transform: translateY(-1px);
+}
+
+.coursePages .contentStudioGrid textarea {
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.coursePages .contentStudioList .contentStudioActions {
+  position: sticky;
+  bottom: 18px;
+  backdrop-filter: blur(16px);
+}
+
+.coursePages .contentStudioList .contentStudioActions .publishButton:nth-child(2) {
+  min-width: 260px;
+  letter-spacing: 0.2px;
+}
+
+.coursePages .contentStudioList .contentStudioActions button:hover {
+  transform: translateY(-2px);
+}
+
+.mockManageStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 18px;
+  margin: 28px 0;
+}
+
+.mockManageStatCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 26px;
+  padding: 22px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.07);
+}
+
+.mockManageStatCard span {
+  display: block;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.mockManageStatCard strong {
+  font-size: 32px;
+  color: #111827;
+}
+
+@media (max-width: 800px) {
+  .mockManageStatsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+
+/* FIX: Mock test manage action buttons back to top-right */
+.contentStudioItem {
+  position: relative !important;
+}
+
+.contentStudioItem .mockTestCompactActions {
+  position: absolute !important;
+  top: 44px !important;
+  right: 42px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+  width: auto !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.contentStudioItem .mockTestCompactActions > button,
+.contentStudioItem .mockTestCompactActions .mockActionMenuWrap > button {
+  width: auto !important;
+  min-width: 110px !important;
+  height: 48px !important;
+  padding: 0 22px !important;
+  border-radius: 999px !important;
+  white-space: nowrap !important;
+}
+
+.contentStudioItem .mockActionMenuWrap {
+  position: relative !important;
+  width: auto !important;
+}
+
+.contentStudioItem .mockActionDropdown {
+  position: absolute !important;
+  top: 58px !important;
+  right: 0 !important;
+  width: 230px !important;
+  z-index: 9999 !important;
+}
+
+@media (max-width: 900px) {
+  .contentStudioItem .mockTestCompactActions {
+    position: static !important;
+    margin-top: 24px !important;
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+  }
+}
+
+/* FIX: Mock test manage action buttons vertical premium stack */
+
+.contentStudioItem {
+  position: relative !important;
+}
+
+.contentStudioItem .mockTestCompactActions {
+  position: absolute !important;
+  top: 44px !important;
+  right: 42px !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  align-items: flex-end !important;
+  justify-content: flex-start !important;
+
+  gap: 16px !important;
+
+  width: auto !important;
+  max-width: none !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.contentStudioItem .mockTestCompactActions > button,
+.contentStudioItem
+  .mockTestCompactActions
+  .mockActionMenuWrap
+  > button {
+  width: 160px !important;
+  min-width: 160px !important;
+
+  height: 52px !important;
+
+  padding: 0 22px !important;
+
+  border-radius: 999px !important;
+
+  white-space: nowrap !important;
+}
+
+.contentStudioItem .mockActionMenuWrap {
+  position: relative !important;
+  width: auto !important;
+}
+
+.contentStudioItem .mockActionDropdown {
+  position: absolute !important;
+
+  top: 58px !important;
+  right: 0 !important;
+
+  width: 230px !important;
+
+  z-index: 9999 !important;
+}
+
+@media (max-width: 900px) {
+  .contentStudioItem .mockTestCompactActions {
+    position: static !important;
+
+    margin-top: 24px !important;
+
+    align-items: flex-start !important;
+
+    flex-wrap: nowrap !important;
+  }
+}

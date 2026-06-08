@@ -546,23 +546,25 @@ const [mockTestForm, setMockTestForm] = useState({
   marksPerQuestion: "1",
   negativeMarks: "0",
   passingMarks: "0",
+
   examDifficulty: "Mixed",
   examLanguage: "English",
-  allowPause: "yes",
-calculatorAllowed: "no",
-examStartDate: "",
-examEndDate: "",
-examInstructions: "",
+
   attemptLimit: "unlimited",
-resultPublishMode: "instant",
-shuffleQuestions: "no",
-shuffleOptions: "no",
-navigationMode: "free",
-allowPause: "yes",
-calculatorAllowed: "no",
-examStartDate: "",
-examEndDate: "",
-examInstructions: "",
+  resultPublishMode: "instant",
+
+  shuffleQuestions: "no",
+  shuffleOptions: "no",
+
+  navigationMode: "free",
+
+  allowPause: "yes",
+  calculatorAllowed: "no",
+
+  examStartDate: "",
+  examEndDate: "",
+  examInstructions: "",
+
   status: "published",
 });
 
@@ -582,6 +584,7 @@ tag: "",
 positiveMarks: "1",
 negativeMarks: "0",
 questionStatus: "published",
+saveToQuestionBank: "yes",
   },
 ]);
 
@@ -591,6 +594,7 @@ const [mockTestSearch, setMockTestSearch] = useState("");
 const [mockTestStatusFilter, setMockTestStatusFilter] = useState("ALL");
 const [mockTestExamFilter, setMockTestExamFilter] = useState("ALL");
 const [mockTestSortMode, setMockTestSortMode] = useState("LATEST");
+const [activeMockActionMenu, setActiveMockActionMenu] = useState(null);
 const [questionBankSearch, setQuestionBankSearch] = useState("");
 const [questionBankSubjectFilter, setQuestionBankSubjectFilter] = useState("ALL");
 const [questionBankChapterFilter, setQuestionBankChapterFilter] = useState("ALL");
@@ -788,9 +792,47 @@ const handleSaveMockTest = async () => {
     navigationMode: mockTestForm.navigationMode || "free",
     allowPause: mockTestForm.allowPause || "yes",
     calculatorAllowed: mockTestForm.calculatorAllowed || "no",
-    examStartDate: mockTestForm.examStartDate || "",
-    examEndDate: mockTestForm.examEndDate || "",
-    examInstructions: mockTestForm.examInstructions?.trim() || "",
+    scheduleType:
+  mockTestForm.scheduleType || "alwaysAvailable",
+
+  timerMode:
+  mockTestForm.timerMode || "globalTimer",
+
+  leaderboardMode:
+  mockTestForm.leaderboardMode || "disabled",
+
+  fullscreenMode:
+  mockTestForm.fullscreenMode || "no",
+
+tabSwitchDetection:
+  mockTestForm.tabSwitchDetection || "no",
+
+copyPasteProtection:
+  mockTestForm.copyPasteProtection || "no",
+
+autoSubmitOnViolation:
+  mockTestForm.autoSubmitOnViolation || "no",
+
+  questionSource:
+  mockTestForm.questionSource || "manual",
+
+autoSubmitOnTimeUp:
+  mockTestForm.autoSubmitOnTimeUp || "yes",
+
+examStartDate:
+  mockTestForm.examStartDate || "",
+
+examStartTime:
+  mockTestForm.examStartTime || "",
+
+examEndDate:
+  mockTestForm.examEndDate || "",
+
+examEndTime:
+  mockTestForm.examEndTime || "",
+
+examInstructions:
+  mockTestForm.examInstructions?.trim() || "",
 
       totalQuestions,
       totalMarks,
@@ -877,6 +919,30 @@ const handleSaveMockTest = async () => {
       passingMarks: "0",
 examDifficulty: "Mixed",
 examLanguage: "English",
+attemptLimit: "unlimited",
+resultPublishMode: "instant",
+shuffleQuestions: "no",
+shuffleOptions: "no",
+navigationMode: "free",
+allowPause: "yes",
+calculatorAllowed: "no",
+scheduleType: "alwaysAvailable",
+timerMode: "globalTimer",
+leaderboardMode: "disabled",
+fullscreenMode: "no",
+
+tabSwitchDetection: "no",
+
+copyPasteProtection: "no",
+
+autoSubmitOnViolation: "no",
+questionSource: "manual",
+autoSubmitOnTimeUp: "yes",
+examStartDate: "",
+examStartTime: "",
+examEndDate: "",
+examEndTime: "",
+examInstructions: "",
       status: "published",
     });
 
@@ -8763,37 +8829,299 @@ This action cannot be undone.`
 
 <div>
   <label>
-    Exam Start Date
+    Question Source
   </label>
 
-  <input
-    type="datetime-local"
-    value={mockTestForm.examStartDate}
+  <select
+    value={mockTestForm.questionSource}
     onChange={(e) =>
       setMockTestForm({
         ...mockTestForm,
-        examStartDate: e.target.value,
+        questionSource: e.target.value,
       })
     }
-  />
+  >
+    <option value="manual">
+      Manual
+    </option>
+
+    <option value="questionBank">
+      Question Bank
+    </option>
+
+    <option value="imported">
+      Imported
+    </option>
+
+    <option value="aiGenerated">
+      AI Generated
+    </option>
+
+    <option value="pyq">
+      PYQ
+    </option>
+  </select>
 </div>
 
 <div>
   <label>
-    Exam End Date
+    Fullscreen Mode
   </label>
 
-  <input
-    type="datetime-local"
-    value={mockTestForm.examEndDate}
+  <select
+    value={mockTestForm.fullscreenMode}
     onChange={(e) =>
       setMockTestForm({
         ...mockTestForm,
-        examEndDate: e.target.value,
+        fullscreenMode: e.target.value,
       })
     }
-  />
+  >
+    <option value="no">No</option>
+    <option value="yes">Required</option>
+  </select>
 </div>
+
+<div>
+  <label>
+    Tab Switch Detection
+  </label>
+
+  <select
+    value={mockTestForm.tabSwitchDetection}
+    onChange={(e) =>
+      setMockTestForm({
+        ...mockTestForm,
+        tabSwitchDetection: e.target.value,
+      })
+    }
+  >
+    <option value="no">
+  Disabled
+</option>
+
+<option value="yes">
+  Enabled
+</option>
+  </select>
+</div>
+
+<div>
+  <label>
+    Copy / Paste Protection
+  </label>
+
+  <select
+    value={mockTestForm.copyPasteProtection}
+    onChange={(e) =>
+      setMockTestForm({
+        ...mockTestForm,
+        copyPasteProtection: e.target.value,
+      })
+    }
+  >
+    <option value="no">
+      Disabled
+    </option>
+
+    <option value="yes">
+      Enabled
+    </option>
+  </select>
+</div>
+
+<div>
+  <label>
+    Auto Submit On Violation
+  </label>
+
+  <select
+    value={mockTestForm.autoSubmitOnViolation}
+    onChange={(e) =>
+      setMockTestForm({
+        ...mockTestForm,
+        autoSubmitOnViolation: e.target.value,
+      })
+    }
+  >
+    <option value="no">No</option>
+    <option value="yes">Yes</option>
+  </select>
+</div>
+
+<div>
+  <label>
+    Leaderboard Mode
+  </label>
+
+  <select
+    value={mockTestForm.leaderboardMode}
+    onChange={(e) =>
+      setMockTestForm({
+        ...mockTestForm,
+        leaderboardMode: e.target.value,
+      })
+    }
+  >
+    <option value="disabled">
+      Disabled
+    </option>
+
+    <option value="liveLeaderboard">
+      Live Leaderboard
+    </option>
+
+    <option value="finalLeaderboard">
+      Final Leaderboard
+    </option>
+
+    <option value="globalLeaderboard">
+      Global Leaderboard
+    </option>
+
+    <option value="courseLeaderboard">
+      Course Leaderboard
+    </option>
+
+    <option value="subjectLeaderboard">
+      Subject Leaderboard
+    </option>
+
+    <option value="stateLeaderboard">
+      State Leaderboard
+    </option>
+
+    <option value="batchLeaderboard">
+      Batch Leaderboard
+    </option>
+  </select>
+</div>
+
+<div>
+  <label>
+    Timer Mode
+  </label>
+
+  <select
+    value={mockTestForm.timerMode}
+    onChange={(e) =>
+      setMockTestForm({
+        ...mockTestForm,
+        timerMode: e.target.value,
+      })
+    }
+  >
+    <option value="globalTimer">
+      Global Timer
+    </option>
+
+    <option value="perQuestionTimer">
+      Per Question Timer
+    </option>
+
+    <option value="noTimer">
+      No Timer
+    </option>
+  </select>
+</div>
+
+<div>
+  <label>
+    Auto Submit On Time Up
+  </label>
+
+  <select
+    value={mockTestForm.autoSubmitOnTimeUp}
+    onChange={(e) =>
+      setMockTestForm({
+        ...mockTestForm,
+        autoSubmitOnTimeUp: e.target.value,
+      })
+    }
+  >
+    <option value="yes">
+      Yes
+    </option>
+
+    <option value="no">
+      No
+    </option>
+  </select>
+</div>
+
+<div>
+  <label>
+    Schedule Type
+  </label>
+
+  <select
+    value={mockTestForm.scheduleType}
+    onChange={(e) =>
+      setMockTestForm({
+        ...mockTestForm,
+        scheduleType: e.target.value,
+      })
+    }
+  >
+    <option value="alwaysAvailable">
+      Always Available
+    </option>
+
+    <option value="dateOnly">
+      Date Only
+    </option>
+
+    <option value="dateTime">
+      Date + Time
+    </option>
+  </select>
+</div>
+
+{mockTestForm.scheduleType !== "alwaysAvailable" && (
+  <div>
+    <label>
+      Exam Start Date
+    </label>
+
+    <input
+      type={
+        mockTestForm.scheduleType === "dateOnly"
+          ? "date"
+          : "datetime-local"
+      }
+      value={mockTestForm.examStartDate}
+      onChange={(e) =>
+        setMockTestForm({
+          ...mockTestForm,
+          examStartDate: e.target.value,
+        })
+      }
+    />
+  </div>
+)}
+
+{mockTestForm.scheduleType !== "alwaysAvailable" && (
+  <div>
+    <label>
+      Exam End Date
+    </label>
+
+    <input
+      type={
+        mockTestForm.scheduleType === "dateOnly"
+          ? "date"
+          : "datetime-local"
+      }
+      value={mockTestForm.examEndDate}
+      onChange={(e) =>
+        setMockTestForm({
+          ...mockTestForm,
+          examEndDate: e.target.value,
+        })
+      }
+    />
+  </div>
+)}
 
 <div>
   <label>
@@ -9204,6 +9532,7 @@ This action cannot be undone.`
   }
 />
 
+
 <Route
   path="/admin/content/mock-tests/manage"
   element={
@@ -9225,6 +9554,43 @@ This action cannot be undone.`
 
         <div className="contentStudioForm">
           <div className="contentStudioGrid">
+
+          <input
+  type="text"
+  placeholder="Search by title, subject, or chapter"
+  value={mockTestSearch}
+  onChange={(e) => setMockTestSearch(e.target.value)}
+/>
+
+<select
+  value={mockTestStatusFilter}
+  onChange={(e) => setMockTestStatusFilter(e.target.value)}
+>
+  <option value="ALL">All Status</option>
+  <option value="published">Published</option>
+  <option value="unpublished">Unpublished</option>
+  <option value="draft">Draft</option>
+  <option value="archived">Archived</option>
+</select>
+
+<select
+  value={mockTestExamFilter}
+  onChange={(e) => setMockTestExamFilter(e.target.value)}
+>
+  <option value="ALL">All Exams</option>
+  <option value="CTET">CTET</option>
+  <option value="TET">TET</option>
+  <option value="CTET/TET">CTET/TET</option>
+</select>
+
+<select
+  value={mockTestSortMode}
+  onChange={(e) => setMockTestSortMode(e.target.value)}
+>
+  <option value="LATEST">Latest First</option>
+  <option value="OLDEST">Oldest First</option>
+</select>
+
             <button
               onClick={() =>
                 setMockTestPlanFilter("ALL")
@@ -9266,6 +9632,58 @@ This action cannot be undone.`
             </button>
           </div>
         </div>
+
+        <div className="mockManageStatsGrid">
+  <div className="mockManageStatCard">
+    <span>Total Tests</span>
+    <strong>
+      {
+        universalContent.filter(
+          (item) => item.section === "mockTest"
+        ).length
+      }
+    </strong>
+  </div>
+
+  <div className="mockManageStatCard">
+    <span>Published</span>
+    <strong>
+      {
+        universalContent.filter(
+          (item) =>
+            item.section === "mockTest" &&
+            item.status === "published"
+        ).length
+      }
+    </strong>
+  </div>
+
+  <div className="mockManageStatCard">
+    <span>Draft</span>
+    <strong>
+      {
+        universalContent.filter(
+          (item) =>
+            item.section === "mockTest" &&
+            item.status === "draft"
+        ).length
+      }
+    </strong>
+  </div>
+
+  <div className="mockManageStatCard">
+    <span>Archived</span>
+    <strong>
+      {
+        universalContent.filter(
+          (item) =>
+            item.section === "mockTest" &&
+            item.status === "archived"
+        ).length
+      }
+    </strong>
+  </div>
+</div>
 
         <div className="contentStudioList">
           <h3>Saved Mock Tests</h3>
@@ -9360,373 +9778,386 @@ This action cannot be undone.`
                   key={test.id}
                 >
                   <strong>{test.title}</strong>
-
-                  <p>
-                    {test.planType || "FREE"} •{" "}
-                    {test.subject || "No Subject"} •{" "}
-                    {test.chapter || "No Chapter"} •{" "}
-                    {test.testType || "Mock Test"} •{" "}
-                    {test.status || "draft"}
-                  </p>
-
-                  <p>
-  {test.totalQuestions || test.questions?.length || 0} Questions •{" "}
-  {test.duration || test.durationMinutes || 0} min •{" "}
-  {test.totalMarks || 0} Marks •{" "}
-  Passing: {test.passingMarks || 0} •{" "}
-  {test.examDifficulty || "Mixed"} •{" "}
-  {test.examLanguage || "English"} •{" "}
-  {test.examType || "CTET/TET"}
-</p>
-
-<p>
-  Attempt:
-  {" "}
-  {test.attemptLimit || "unlimited"}
-
-  {" • "}
-
-  Result:
-  {" "}
-  {test.resultPublishMode || "instant"}
-
-  {" • "}
-
-  Navigation:
-  {" "}
-  {test.navigationMode || "free"}
-</p>
-
-<p>
-  Shuffle Q:
-  {" "}
-  {test.shuffleQuestions || "no"}
-
-  {" • "}
-
-  Shuffle Options:
-  {" "}
-  {test.shuffleOptions || "no"}
-
-  {" • "}
-
-  Calculator:
-  {" "}
-  {test.calculatorAllowed || "no"}
-</p>
-
-<p>
-  Pause:
-  {" "}
-  {test.allowPause || "yes"}
-
-  {" • "}
-
-  Start:
-  {" "}
-  {test.examStartDate || "Not scheduled"}
-
-  {" • "}
-
-  End:
-  {" "}
-  {test.examEndDate || "Not scheduled"}
-</p>
-
-                  <div className="contentStudioActions">
-                    <button
-                      className="publishButton"
-                      onClick={() => {
-                        setEditingMockTestId(test.id);
-
-                        setMockTestForm({
-                          title: test.title || "",
-                          planType: test.planType || "FREE",
-                          subject: test.subject || "",
-                          chapter: test.chapter || "",
-                          examType: test.examType || "CTET",
-                          testType:
-                            test.testType || "Chapter Test",
-                          duration:
-                            test.duration?.toString() || "30",
-                          totalQuestions:
-                            test.totalQuestions?.toString() ||
-                            "10",
-                          marksPerQuestion:
-                            test.marksPerQuestion?.toString() ||
-                            "1",
-                          negativeMarks:
-                            test.negativeMarks?.toString() ||
-                            "0",
-                            passingMarks:
-  test.passingMarks?.toString() || "0",
-
-examDifficulty:
-  test.examDifficulty || "Mixed",
-
-examLanguage:
-  test.examLanguage || "English",
-  attemptLimit:
-  test.attemptLimit || "unlimited",
-
-resultPublishMode:
-  test.resultPublishMode || "instant",
-
-shuffleQuestions:
-  test.shuffleQuestions || "no",
-
-shuffleOptions:
-  test.shuffleOptions || "no",
-
-navigationMode:
-  test.navigationMode || "free",
-
-allowPause:
-  test.allowPause || "yes",
-
-calculatorAllowed:
-  test.calculatorAllowed || "no",
-
-examStartDate:
-  test.examStartDate || "",
-
-examEndDate:
-  test.examEndDate || "",
-
-examInstructions:
-  test.examInstructions || "",
-                          status:
-                            test.status || "published",
-                        });
-
-                        setMockTestQuestionsForm(
-                          test.questions?.length
-                            ? test.questions
-                            : [
-                                {
-                                  question: "",
-                                  option1: "",
-                                  option2: "",
-                                  option3: "",
-                                  option4: "",
-                                  answer: "",
-                                  explanation: "",
-                                  level: "Easy",
-                                  questionType:
-                                    "Single Correct",
-                                  language: "English",
-                                  tag: "",
-                                  positiveMarks: "1",
-                                  negativeMarks: "0",
-                                  questionStatus:
-                                    "published",
-                                    saveToQuestionBank: "yes",
-                                },
-                              ]
-                        );
-
-                        navigate(
-                          "/admin/content/mock-tests/add"
-                        );
-                      }}
-                    >
-                      Edit
-                    </button>
-
-                    <button
-  className="backButton"
-  onClick={() =>
-    navigate(
-      `/admin/content/mock-tests/preview/${test.id}`
-    )
-  }
+                  <div className="mockTestInfoBlock">
+  <div className="mockTestPrimaryMeta">
+    <span>{test.planType || "FREE"}</span>
+    <span>{test.subject || "No Subject"}</span>
+    <span>{test.chapter || "No Chapter"}</span>
+    <span>{test.testType || "Mock Test"}</span>
+    <span
+  className={`mockStatusBadge ${
+    test.status === "published"
+      ? "statusPublished"
+      : test.status === "draft"
+      ? "statusDraft"
+      : test.status === "archived"
+      ? "statusArchived"
+      : "statusUnpublished"
+  }`}
 >
-  Preview
-</button>
+  {test.status || "draft"}
+</span>
+  </div>
+
+  <div className="mockTestMetaSection">
+  <h5>Overview</h5>
+
+  <div className="mockTestMetaGrid">
+    <span>
+      📋 {test.totalQuestions || test.questions?.length || 0} Questions
+    </span>
+
+    <span>
+      ⏱ {test.duration || test.durationMinutes || 0} min
+    </span>
+
+    <span>
+      🎯 {test.totalMarks || 0} Marks
+    </span>
+
+    <span>
+      ✅ Passing: {test.passingMarks || 0}
+    </span>
+  </div>
+</div>
+
+<div className="mockTestMetaSection">
+  <h5>Configuration</h5>
+
+  <div className="mockTestMetaGrid">
+    <span>📊 {test.examDifficulty || "Mixed"}</span>
+
+    <span>🌐 {test.examLanguage || "English"}</span>
+
+    <span>📝 {test.examType || "CTET/TET"}</span>
+
+    <span>
+      🔄 Attempt: {test.attemptLimit || "unlimited"}
+    </span>
+
+    <span>
+      ⚡ Result: {test.resultPublishMode || "instant"}
+    </span>
+
+    <span>
+      🧭 Navigation: {test.navigationMode || "free"}
+    </span>
+
+    <span>
+      🔀 Shuffle Q: {test.shuffleQuestions || "no"}
+    </span>
+
+    <span>
+      🎲 Options: {test.shuffleOptions || "no"}
+    </span>
+
+    <span>
+      🧮 Calculator: {test.calculatorAllowed || "no"}
+    </span>
+
+    <span>
+      ⏸ Pause: {test.allowPause || "yes"}
+    </span>
+  </div>
+</div>
+
+<div className="mockTestMetaSection">
+  <h5>Schedule</h5>
+
+  <div className="mockTestMetaGrid">
+    <span>
+      🚀 Start: {test.examStartDate || "Not scheduled"}
+    </span>
+
+    <span>
+      🏁 End: {test.examEndDate || "Not scheduled"}
+    </span>
+  </div>
+</div>
+</div>
+<div className="contentStudioActions mockTestCompactActions">
 
 <button
   className="publishButton"
-  onClick={async () => {
-    try {
-      const duplicatePayload = {
-        ...test,
-        title: `${test.title || "Untitled Test"} - Copy`,
-        status: "draft",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+  onClick={() => {
+    setEditingMockTestId(test.id);
 
-      delete duplicatePayload.id;
+    setMockTestForm({
+      title: test.title || "",
+      planType: test.planType || "FREE",
+      subject: test.subject || "",
+      chapter: test.chapter || "",
+      examType: test.examType || "CTET",
+      testType: test.testType || "Chapter Test",
+      duration: test.duration?.toString() || "30",
+      totalQuestions:
+        test.totalQuestions?.toString() || "10",
+      marksPerQuestion:
+        test.marksPerQuestion?.toString() || "1",
+      negativeMarks:
+        test.negativeMarks?.toString() || "0",
+      passingMarks:
+        test.passingMarks?.toString() || "0",
+      examDifficulty:
+        test.examDifficulty || "Mixed",
+      examLanguage:
+        test.examLanguage || "English",
+      attemptLimit:
+        test.attemptLimit || "unlimited",
+      resultPublishMode:
+        test.resultPublishMode || "instant",
+      shuffleQuestions:
+        test.shuffleQuestions || "no",
+      shuffleOptions:
+        test.shuffleOptions || "no",
+      navigationMode:
+        test.navigationMode || "free",
+      allowPause:
+        test.allowPause || "yes",
+      calculatorAllowed:
+        test.calculatorAllowed || "no",
+      scheduleType:
+        test.scheduleType || "alwaysAvailable",
+      timerMode:
+        test.timerMode || "globalTimer",
+      autoSubmitOnTimeUp:
+        test.autoSubmitOnTimeUp || "yes",
+      leaderboardMode:
+        test.leaderboardMode || "disabled",
+      fullscreenMode:
+        test.fullscreenMode || "no",
+      tabSwitchDetection:
+        test.tabSwitchDetection || "no",
+      copyPasteProtection:
+        test.copyPasteProtection || "no",
+      autoSubmitOnViolation:
+        test.autoSubmitOnViolation || "no",
+      questionSource:
+        test.questionSource || "manual",
+      examStartDate:
+        test.examStartDate || "",
+      examStartTime:
+        test.examStartTime || "",
+      examEndDate:
+        test.examEndDate || "",
+      examEndTime:
+        test.examEndTime || "",
+      examInstructions:
+        test.examInstructions || "",
+      status:
+        test.status || "published",
+    });
 
-      await addDoc(
-        collection(db, "contentItems"),
-        duplicatePayload
-      );
-
-      await loadContentItemsFromFirestore();
-
-      alert("Duplicate test created as Draft ✅");
-    } catch (error) {
-      console.error("Duplicate test error:", error);
-      alert(error.message);
-    }
-  }}
->
-  Duplicate
-</button>
-
-<button
-  className="publishButton"
-  onClick={async () => {
-    try {
-      const nextStatus =
-        test.status === "published"
-          ? "unpublished"
-          : "published";
-
-      await updateDoc(doc(db, "contentItems", test.id), {
-        status: nextStatus,
-        updatedAt: new Date(),
-      });
-
-      await loadContentItemsFromFirestore();
-
-      alert(
-        nextStatus === "published"
-          ? "Test published successfully ✅"
-          : "Test unpublished successfully ✅"
-      );
-    } catch (error) {
-      console.error("Publish toggle error:", error);
-      alert(error.message);
-    }
-  }}
->
-  {test.status === "published"
-    ? "Unpublish"
-    : "Publish"}
-</button>
-
-<button
-  className="deleteContentButton"
-  onClick={async () => {
-    const confirmArchive = window.confirm(
-      "Archive this test? It will be hidden from students but not permanently deleted."
+    setMockTestQuestionsForm(
+      test.questions?.length
+        ? test.questions
+        : [
+            {
+              question: "",
+              option1: "",
+              option2: "",
+              option3: "",
+              option4: "",
+              answer: "",
+              explanation: "",
+              level: "Easy",
+              questionType: "Single Correct",
+              language: "English",
+              tag: "",
+              positiveMarks: "1",
+              negativeMarks: "0",
+              questionStatus: "published",
+              saveToQuestionBank: "yes",
+            },
+          ]
     );
 
-    if (!confirmArchive) return;
+    navigate("/admin/content/mock-tests/add");
+  }}
+>
+  Edit
+</button>
 
-    try {
-      await updateDoc(doc(db, "contentItems", test.id), {
-        status: "archived",
-        updatedAt: new Date(),
-      });
-
-      await loadContentItemsFromFirestore();
-
-      alert("Test archived successfully ✅");
-    } catch (error) {
-      console.error("Archive test error:", error);
-      alert(error.message);
+  <button
+    className="backButton"
+    onClick={() =>
+      navigate(
+        `/admin/content/mock-tests/preview/${test.id}`
+      )
     }
-  }}
->
-  Archive
-</button>
+  >
+    Preview
+  </button>
 
-<button
-  className="backButton"
-  onClick={() => {
-    const examLink = `${window.location.origin}/ctet-tet/mock-tests/start/${test.id}`;
-
-    navigator.clipboard.writeText(examLink);
-
-    alert("Exam link copied ✅");
-  }}
->
-  Copy Link
-</button>
-
-<button
-  className="backButton"
-  onClick={() => {
-    const jsonData = JSON.stringify(
-      test,
-      null,
-      2
-    );
-
-    const blob = new Blob(
-      [jsonData],
-      {
-        type: "application/json",
+  <div className="mockActionMenuWrap">
+    <button
+      className="backButton"
+      onClick={() =>
+        setActiveMockActionMenu(
+          activeMockActionMenu === test.id
+            ? null
+            : test.id
+        )
       }
-    );
+    >
+      Actions ▾
+    </button>
 
-    const url =
-      URL.createObjectURL(blob);
+    {activeMockActionMenu === test.id && (
+      <div className="mockActionDropdown">
+        <button
+          onClick={async () => {
+            try {
+              const duplicatePayload = {
+                ...test,
+                title: `${test.title || "Untitled Test"} - Copy`,
+                status: "draft",
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              };
 
-    const link =
-      document.createElement("a");
+              delete duplicatePayload.id;
 
-    link.href = url;
+              await addDoc(
+                collection(db, "contentItems"),
+                duplicatePayload
+              );
 
-    link.download =
-      `${test.title || "mock-test"}.json`;
+              await loadContentItemsFromFirestore();
+              setActiveMockActionMenu(null);
 
-    link.click();
+              alert("Duplicate test created as Draft ✅");
+            } catch (error) {
+              console.error("Duplicate test error:", error);
+              alert(error.message);
+            }
+          }}
+        >
+          Duplicate
+        </button>
 
-    URL.revokeObjectURL(url);
-  }}
->
-  Export JSON
-</button>
+        <button
+          onClick={async () => {
+            try {
+              const nextStatus =
+                test.status === "published"
+                  ? "unpublished"
+                  : "published";
 
-                    <button
-                      className="backButton"
-                      onClick={async () => {
-                        const newStatus =
-                          test.status === "published"
-                            ? "unpublished"
-                            : "published";
+              await updateDoc(
+                doc(db, "contentItems", test.id),
+                {
+                  status: nextStatus,
+                  updatedAt: new Date(),
+                }
+              );
 
-                        await updateDoc(
-                          doc(db, "contentItems", test.id),
-                          {
-                            status: newStatus,
-                            updatedAt: new Date(),
-                          }
-                        );
+              await loadContentItemsFromFirestore();
+              setActiveMockActionMenu(null);
 
-                        await loadContentItemsFromFirestore();
+              alert(
+                nextStatus === "published"
+                  ? "Test published successfully ✅"
+                  : "Test unpublished successfully ✅"
+              );
+            } catch (error) {
+              console.error("Publish toggle error:", error);
+              alert(error.message);
+            }
+          }}
+        >
+          {test.status === "published"
+            ? "Unpublish"
+            : "Publish"}
+        </button>
 
-                        alert(
-                          newStatus === "published"
-                            ? "Mock test published successfully ✅"
-                            : "Mock test unpublished successfully ✅"
-                        );
-                      }}
-                    >
-                      {test.status === "published"
-                        ? "Unpublish"
-                        : "Publish"}
-                    </button>
+        <button
+          onClick={async () => {
+            const confirmArchive = window.confirm(
+              "Archive this test? It will be hidden from students but not permanently deleted."
+            );
 
-                    <button
-                      className="deleteContentButton"
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            `Delete "${test.title}" permanently?\n\nStudents may lose access to this mock test.\n\nThis action cannot be undone.`
-                          )
-                        ) {
-                          handleDeleteLocalContentItem(test.id);
-                        }
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </div>
+            if (!confirmArchive) return;
+
+            try {
+              await updateDoc(
+                doc(db, "contentItems", test.id),
+                {
+                  status: "archived",
+                  updatedAt: new Date(),
+                }
+              );
+
+              await loadContentItemsFromFirestore();
+              setActiveMockActionMenu(null);
+
+              alert("Test archived successfully ✅");
+            } catch (error) {
+              console.error("Archive test error:", error);
+              alert(error.message);
+            }
+          }}
+        >
+          Archive
+        </button>
+
+        <button
+          onClick={() => {
+            const examLink = `${window.location.origin}/ctet-tet/mock-tests/start/${test.id}`;
+
+            navigator.clipboard.writeText(examLink);
+            setActiveMockActionMenu(null);
+
+            alert("Exam link copied ✅");
+          }}
+        >
+          Copy Link
+        </button>
+
+        <button
+          onClick={() => {
+            const jsonData = JSON.stringify(test, null, 2);
+
+            const blob = new Blob([jsonData], {
+              type: "application/json",
+            });
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+
+            link.href = url;
+            link.download =
+              `${test.title || "mock-test"}.json`;
+
+            link.click();
+
+            URL.revokeObjectURL(url);
+            setActiveMockActionMenu(null);
+          }}
+        >
+          Export JSON
+        </button>
+
+        <button
+          className="dangerMenuButton"
+          onClick={() => {
+            if (
+              window.confirm(
+                `Delete "${test.title}" permanently?\n\nStudents may lose access to this mock test.\n\nThis action cannot be undone.`
+              )
+            ) {
+              handleDeleteLocalContentItem(test.id);
+              setActiveMockActionMenu(null);
+            }
+          }}
+        >
+          Delete
+        </button>
+      </div>
+    )}
+  </div>
+</div>
+
                 </div>
               ))
           )}
