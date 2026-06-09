@@ -48,6 +48,7 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import React, { useState, useEffect } from 'react';
+import { createPortal } from "react-dom";
 import {
   BrowserRouter,
   Routes,
@@ -595,6 +596,42 @@ const [mockTestStatusFilter, setMockTestStatusFilter] = useState("ALL");
 const [mockTestExamFilter, setMockTestExamFilter] = useState("ALL");
 const [mockTestSortMode, setMockTestSortMode] = useState("LATEST");
 const [activeMockActionMenu, setActiveMockActionMenu] = useState(null);
+const [mockMenuPosition, setMockMenuPosition] =
+  useState(null);
+
+const [mockMenuTest, setMockMenuTest] =
+  useState(null);
+  const openMockActionPortal = (event, test) => {
+    const rect =
+      event.currentTarget.getBoundingClientRect();
+  
+    setMockMenuPosition({
+      top: rect.bottom + 8,
+      left: rect.left,
+    });
+  
+    setMockMenuTest(test);
+  };
+  
+  const closeMockActionPortal = () => {
+    setMockMenuPosition(null);
+    setMockMenuTest(null);
+  };
+  useEffect(() => {
+    if (!mockMenuPosition) return;
+  
+    const handleCloseOnMove = () => {
+      closeMockActionPortal();
+    };
+  
+    window.addEventListener("scroll", handleCloseOnMove, true);
+    window.addEventListener("resize", handleCloseOnMove);
+  
+    return () => {
+      window.removeEventListener("scroll", handleCloseOnMove, true);
+      window.removeEventListener("resize", handleCloseOnMove);
+    };
+  }, [mockMenuPosition]);
 const [selectedMockTestIds, setSelectedMockTestIds] = useState([]);
 const [mockTestPage, setMockTestPage] = useState(1);
 const mockTestsPerPage = 5;
@@ -630,6 +667,16 @@ useEffect(() => {
 
   localStorage.removeItem("reusedQuestionForMockTest");
 }, [location.pathname]);
+useEffect(() => {
+  setMockTestPage(1);
+  setSelectedMockTestIds([]);
+}, [
+  mockTestSearch,
+  mockTestPlanFilter,
+  mockTestStatusFilter,
+  mockTestExamFilter,
+  mockTestSortMode,
+]);
 const handleSaveMockTest = async () => {
   try {
     const finalTitle = mockTestForm.title?.trim();
@@ -9673,91 +9720,29 @@ This action cannot be undone.`
         </div>
 
         <div className="mockManageStatsGrid">
-  <div className="mockManageStatCard">
-    <span>Total Tests</span>
-    <strong>
-      {
-        universalContent.filter(
-          (item) => item.section === "mockTest"
-        ).length
-      }
-    </strong>
-  </div>
-
-  <div className="mockManageStatCard">
-    <span>Published</span>
-    <strong>
-      {
-        universalContent.filter(
-          (item) =>
-            item.section === "mockTest" &&
-            item.status === "published"
-        ).length
-      }
-    </strong>
-  </div>
-
-  <div className="mockManageStatCard">
-    <span>Draft</span>
-    <strong>
-      {
-        universalContent.filter(
-          (item) =>
-            item.section === "mockTest" &&
-            item.status === "draft"
-        ).length
-      }
-    </strong>
-  </div>
-
-  <div className="mockManageStatCard">
-    <span>Archived</span>
-    <strong>
-      {
-        universalContent.filter(
-          (item) =>
-            item.section === "mockTest" &&
-            item.status === "archived"
-        ).length
-      }
-    </strong>
-  </div>
-</div>
-
-<div className="mockBulkActionsBar">
-
-<div className="mockSelectedCount">
-  Selected:
-  {" "}
-  {selectedMockTestIds.length}
-</div>
-
-<button
-  className="backButton"
-  onClick={() => {
-    const visibleMockTestIds = universalContent
-    .filter((item) => {
+  {(() => {
+    const filteredStatsTests = universalContent.filter((item) => {
       const searchText =
         mockTestSearch.trim().toLowerCase();
-  
+
       const matchesSearch =
         !searchText ||
         item.title?.toLowerCase().includes(searchText) ||
         item.subject?.toLowerCase().includes(searchText) ||
         item.chapter?.toLowerCase().includes(searchText);
-  
+
       const matchesPlan =
         mockTestPlanFilter === "ALL" ||
         item.planType === mockTestPlanFilter;
-  
+
       const matchesStatus =
         mockTestStatusFilter === "ALL" ||
         item.status === mockTestStatusFilter;
-  
+
       const matchesExam =
         mockTestExamFilter === "ALL" ||
         item.examType === mockTestExamFilter;
-  
+
       return (
         item.section === "mockTest" &&
         matchesSearch &&
@@ -9765,20 +9750,118 @@ This action cannot be undone.`
         matchesStatus &&
         matchesExam
       );
-    })
-    .map((item) => item.id);
+    });
+
+    return (
+      <>
+        <div className="mockManageStatCard">
+          <span>Filtered Tests</span>
+          <strong>{filteredStatsTests.length}</strong>
+        </div>
+
+        <div className="mockManageStatCard">
+          <span>Published</span>
+          <strong>
+            {
+              filteredStatsTests.filter(
+                (item) => item.status === "published"
+              ).length
+            }
+          </strong>
+        </div>
+
+        <div className="mockManageStatCard">
+          <span>Draft</span>
+          <strong>
+            {
+              filteredStatsTests.filter(
+                (item) => item.status === "draft"
+              ).length
+            }
+          </strong>
+        </div>
+
+        <div className="mockManageStatCard">
+          <span>Archived</span>
+          <strong>
+            {
+              filteredStatsTests.filter(
+                (item) => item.status === "archived"
+              ).length
+            }
+          </strong>
+        </div>
+      </>
+    );
+  })()}
+</div>
+
+<div className="mockBulkActionsBar">
+
+<div className="mockSelectedCount">
+  <span>Selected Tests</span>
+  <strong>{selectedMockTestIds.length}</strong>
+</div>
+
+<button
+  className="backButton"
+  onClick={() => {
+    const visibleMockTestIds = universalContent
+      .filter((item) => {
+        const searchText =
+          mockTestSearch.trim().toLowerCase();
+
+        const matchesSearch =
+          !searchText ||
+          item.title?.toLowerCase().includes(searchText) ||
+          item.subject?.toLowerCase().includes(searchText) ||
+          item.chapter?.toLowerCase().includes(searchText);
+
+        const matchesPlan =
+          mockTestPlanFilter === "ALL" ||
+          item.planType === mockTestPlanFilter;
+
+        const matchesStatus =
+          mockTestStatusFilter === "ALL" ||
+          item.status === mockTestStatusFilter;
+
+        const matchesExam =
+          mockTestExamFilter === "ALL" ||
+          item.examType === mockTestExamFilter;
+
+        return (
+          item.section === "mockTest" &&
+          matchesSearch &&
+          matchesPlan &&
+          matchesStatus &&
+          matchesExam
+        );
+      })
+      .sort((a, b) => {
+        const firstDate =
+          a.createdAt?.seconds ||
+          a.updatedAt?.seconds ||
+          0;
+
+        const secondDate =
+          b.createdAt?.seconds ||
+          b.updatedAt?.seconds ||
+          0;
+
+        return mockTestSortMode === "OLDEST"
+          ? firstDate - secondDate
+          : secondDate - firstDate;
+      })
+      .slice(
+        (mockTestPage - 1) * mockTestsPerPage,
+        mockTestPage * mockTestsPerPage
+      )
+      .map((item) => item.id);
 
     setSelectedMockTestIds(visibleMockTestIds);
   }}
 >
   Select All
-</button>
-
-<button
-  className="backButton"
-  onClick={() => setSelectedMockTestIds([])}
->
-  Clear Selection
 </button>
 
 <button
@@ -9884,6 +9967,45 @@ This action cannot be undone.`
 </div>
 
         <div className="contentStudioList">
+        <h3>⭐ Featured Mock Tests</h3>
+
+{universalContent
+  .filter(
+    (item) =>
+      item.section === "mockTest" &&
+      item.isFeatured === true
+  )
+  .length === 0 ? (
+  <div className="contentStudioItem">
+    <strong>No featured mock tests.</strong>
+
+    <p>
+      Mark any important test as Featured to
+      highlight it here.
+    </p>
+  </div>
+) : (
+  universalContent
+    .filter(
+      (item) =>
+        item.section === "mockTest" &&
+        item.isFeatured === true
+    )
+    .map((test) => (
+      <div
+        className="contentStudioItem"
+        key={test.id}
+      >
+        <strong>
+          ⭐ {test.title}
+        </strong>
+
+        <p>
+          {test.subject} • {test.chapter}
+        </p>
+      </div>
+    ))
+)}
           <h3>Saved Mock Tests</h3>
 
           {universalContent
@@ -9917,12 +10039,37 @@ This action cannot be undone.`
       matchesExam
     );
   }).length === 0 ? (
-            <div className="contentStudioItem">
-              <strong>No mock tests found.</strong>
-              <p>
-                Add your first mock test from the Add Mock Test page.
-              </p>
-            </div>
+    <div className="contentStudioItem mockEmptyStateCard">
+    <strong>No mock tests found.</strong>
+  
+    <p>
+      No tests match your current search or filters.
+      Try changing filters or create a new mock test.
+    </p>
+  
+    <div className="contentStudioActions">
+      <button
+        className="publishButton"
+        onClick={() =>
+          navigate("/admin/content/mock-tests/add")
+        }
+      >
+        + Create Mock Test
+      </button>
+  
+      <button
+        className="backButton"
+        onClick={() => {
+          setMockTestSearch("");
+          setMockTestStatusFilter("ALL");
+          setMockTestExamFilter("ALL");
+          setMockTestPlanFilter("ALL");
+        }}
+      >
+        Clear Filters
+      </button>
+    </div>
+  </div>
           ) : (
             universalContent
             .filter((item) => {
@@ -10246,326 +10393,16 @@ This action cannot be undone.`
   >
     Preview
   </button>
-
   <div className="mockActionMenuWrap">
-    <button
-      className="backButton"
-      onClick={() =>
-        setActiveMockActionMenu(
-          activeMockActionMenu === test.id
-            ? null
-            : test.id
-        )
-      }
-    >
-      Actions ▾
-    </button>
-
-    {activeMockActionMenu === test.id && (
-      <div className="mockActionDropdown">
-        <button
-          onClick={async () => {
-            try {
-              const duplicatePayload = {
-                ...test,
-                title: `${test.title || "Untitled Test"} - Copy`,
-                status: "draft",
-                createdAt: new Date(),
-                updatedAt: new Date(),
-              };
-
-              delete duplicatePayload.id;
-
-              await addDoc(
-                collection(db, "contentItems"),
-                duplicatePayload
-              );
-
-              await loadContentItemsFromFirestore();
-              setActiveMockActionMenu(null);
-
-              alert("Duplicate test created as Draft ✅");
-            } catch (error) {
-              console.error("Duplicate test error:", error);
-              alert(error.message);
-            }
-          }}
-        >
-          Duplicate
-        </button>
-
-        <button
-          onClick={async () => {
-            try {
-              const nextStatus =
-                test.status === "published"
-                  ? "unpublished"
-                  : "published";
-
-              await updateDoc(
-                doc(db, "contentItems", test.id),
-                {
-                  status: nextStatus,
-                  updatedAt: new Date(),
-                }
-              );
-
-              await loadContentItemsFromFirestore();
-              setActiveMockActionMenu(null);
-
-              alert(
-                nextStatus === "published"
-                  ? "Test published successfully ✅"
-                  : "Test unpublished successfully ✅"
-              );
-            } catch (error) {
-              console.error("Publish toggle error:", error);
-              alert(error.message);
-            }
-          }}
-        >
-          {test.status === "published"
-            ? "Unpublish"
-            : "Publish"}
-        </button>
-
-        <button
-  onClick={async () => {
-    try {
-      await updateDoc(
-        doc(db, "contentItems", test.id),
-        {
-          isFeatured: !test.isFeatured,
-          updatedAt: new Date(),
-        }
-      );
-
-      await loadContentItemsFromFirestore();
-      setActiveMockActionMenu(null);
-
-      alert(
-        test.isFeatured
-          ? "Test removed from featured ✅"
-          : "Test marked as featured ✅"
-      );
-    } catch (error) {
-      console.error("Featured toggle error:", error);
-      alert(error.message);
+  <button
+    className="backButton"
+    onClick={(event) =>
+      openMockActionPortal(event, test)
     }
-  }}
->
-  {test.isFeatured ? "Unfeature" : "Feature"}
-</button>
-
-        <button
-          onClick={async () => {
-            const confirmArchive = window.confirm(
-              "Archive this test? It will be hidden from students but not permanently deleted."
-            );
-
-            if (!confirmArchive) return;
-
-            try {
-              await updateDoc(
-                doc(db, "contentItems", test.id),
-                {
-                  status: "archived",
-                  updatedAt: new Date(),
-                }
-              );
-
-              await loadContentItemsFromFirestore();
-              setActiveMockActionMenu(null);
-
-              alert("Test archived successfully ✅");
-            } catch (error) {
-              console.error("Archive test error:", error);
-              alert(error.message);
-            }
-          }}
-        >
-          Archive
-        </button>
-
-        <button
-          onClick={() => {
-            const examLink = `${window.location.origin}/ctet-tet/mock-tests/start/${test.id}`;
-
-            navigator.clipboard.writeText(examLink);
-            setActiveMockActionMenu(null);
-
-            alert("Exam link copied ✅");
-          }}
-        >
-          Copy Link
-        </button>
-
-        <button
-          onClick={() => {
-            const jsonData = JSON.stringify(test, null, 2);
-
-            const blob = new Blob([jsonData], {
-              type: "application/json",
-            });
-
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-
-            link.href = url;
-            link.download =
-              `${test.title || "mock-test"}.json`;
-
-            link.click();
-
-            URL.revokeObjectURL(url);
-            setActiveMockActionMenu(null);
-          }}
-        >
-          Export JSON
-        </button>
-
-        <button
-  onClick={async () => {
-    const weeklyPayload = {
-      ...test,
-      title: `${test.title || "Mock Test"} - Weekly Test`,
-      testType: "Weekly Test",
-      status: "draft",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    delete weeklyPayload.id;
-
-    await addDoc(
-      collection(db, "contentItems"),
-      weeklyPayload
-    );
-
-    await loadContentItemsFromFirestore();
-    setActiveMockActionMenu(null);
-
-    alert("Weekly Test copy created as Draft ✅");
-  }}
->
-  Create Weekly Test Copy
-</button>
-
-<button
-  onClick={async () => {
-    const ctetPaper1Payload = {
-      ...test,
-      title: `${test.title || "Mock Test"} - CTET Paper 1`,
-      examType: "CTET",
-      testType: "Full Mock Test",
-      subject: "ALL SUBJECTS",
-      chapter: "Complete Paper",
-      status: "draft",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    delete ctetPaper1Payload.id;
-
-    await addDoc(
-      collection(db, "contentItems"),
-      ctetPaper1Payload
-    );
-
-    await loadContentItemsFromFirestore();
-    setActiveMockActionMenu(null);
-
-    alert("CTET Paper-1 copy created as Draft ✅");
-  }}
->
-  Create CTET Paper-1 Copy
-</button>
-
-<button
-  onClick={async () => {
-    const ctetPaper2Payload = {
-      ...test,
-      title: `${test.title || "Mock Test"} - CTET Paper 2`,
-      examType: "CTET",
-      testType: "Full Mock Test",
-      subject: "ALL SUBJECTS",
-      chapter: "Complete Paper",
-      status: "draft",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    delete ctetPaper2Payload.id;
-
-    await addDoc(
-      collection(db, "contentItems"),
-      ctetPaper2Payload
-    );
-
-    await loadContentItemsFromFirestore();
-    setActiveMockActionMenu(null);
-
-    alert("CTET Paper-2 copy created as Draft ✅");
-  }}
->
-  Create CTET Paper-2 Copy
-</button>
-
-<button
-  onClick={async () => {
-    const scholarshipPayload = {
-      ...test,
-      title: `${test.title || "Mock Test"} - Scholarship Exam`,
-      examType: "Custom Exam",
-      testType: "Live Exam",
-      subject: "ALL SUBJECTS",
-      chapter: "Complete Paper",
-      planType: "FREE",
-      scheduleType: "dateTime",
-      leaderboardMode: "liveLeaderboard",
-      fullscreenMode: "yes",
-      tabSwitchDetection: "yes",
-      copyPasteProtection: "yes",
-      autoSubmitOnViolation: "yes",
-      status: "draft",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    delete scholarshipPayload.id;
-
-    await addDoc(
-      collection(db, "contentItems"),
-      scholarshipPayload
-    );
-
-    await loadContentItemsFromFirestore();
-    setActiveMockActionMenu(null);
-
-    alert("Scholarship Exam copy created as Draft ✅");
-  }}
->
-  Create Scholarship Exam Copy
-</button>
-
-        <button
-          className="dangerMenuButton"
-          onClick={() => {
-            if (
-              window.confirm(
-                `Delete "${test.title}" permanently?\n\nStudents may lose access to this mock test.\n\nThis action cannot be undone.`
-              )
-            ) {
-              handleDeleteLocalContentItem(test.id);
-              setActiveMockActionMenu(null);
-            }
-          }}
-        >
-          Delete
-        </button>
-      </div>
-    )}
-  </div>
+  >
+    Actions ▾
+  </button>
+</div>
 </div>
 
                 </div>
@@ -10573,36 +10410,103 @@ This action cannot be undone.`
           )}
         </div>
 
-        <div className="mockPaginationBar">
-  <button
-    className="backButton"
-    disabled={mockTestPage === 1}
-    onClick={() =>
-      setMockTestPage((prev) => Math.max(prev - 1, 1))
-    }
-  >
-    ← Previous
-  </button>
 
-  <span>
-    Page {mockTestPage}
-  </span>
+        {
+  Math.ceil(
+    universalContent.filter((item) => {
+      const searchText =
+        mockTestSearch.trim().toLowerCase();
 
-  <button
-  className="backButton"
-  disabled={
-    mockTestPage >=
-    Math.ceil(
-      universalContent.filter(
-        (item) => item.section === "mockTest"
-      ).length / mockTestsPerPage
-    )
-  }
-  onClick={() => setMockTestPage((prev) => prev + 1)}
->
-  Next →
-</button>
-</div>
+      const matchesSearch =
+        !searchText ||
+        item.title?.toLowerCase().includes(searchText) ||
+        item.subject?.toLowerCase().includes(searchText) ||
+        item.chapter?.toLowerCase().includes(searchText);
+
+      const matchesPlan =
+        mockTestPlanFilter === "ALL" ||
+        item.planType === mockTestPlanFilter;
+
+      const matchesStatus =
+        mockTestStatusFilter === "ALL" ||
+        item.status === mockTestStatusFilter;
+
+      const matchesExam =
+        mockTestExamFilter === "ALL" ||
+        item.examType === mockTestExamFilter;
+
+      return (
+        item.section === "mockTest" &&
+        matchesSearch &&
+        matchesPlan &&
+        matchesStatus &&
+        matchesExam
+      );
+    }).length / mockTestsPerPage
+  ) > 1 && (
+    <div className="mockPaginationBar">
+      <button
+        className="backButton"
+        disabled={mockTestPage === 1}
+        onClick={() =>
+          setMockTestPage((prev) =>
+            Math.max(prev - 1, 1)
+          )
+        }
+      >
+        ← Previous
+      </button>
+
+      <span>
+        Page {mockTestPage}
+      </span>
+
+      <button
+        className="backButton"
+        disabled={
+          mockTestPage >=
+          Math.ceil(
+            universalContent.filter((item) => {
+              const searchText =
+                mockTestSearch.trim().toLowerCase();
+
+              const matchesSearch =
+                !searchText ||
+                item.title?.toLowerCase().includes(searchText) ||
+                item.subject?.toLowerCase().includes(searchText) ||
+                item.chapter?.toLowerCase().includes(searchText);
+
+              const matchesPlan =
+                mockTestPlanFilter === "ALL" ||
+                item.planType === mockTestPlanFilter;
+
+              const matchesStatus =
+                mockTestStatusFilter === "ALL" ||
+                item.status === mockTestStatusFilter;
+
+              const matchesExam =
+                mockTestExamFilter === "ALL" ||
+                item.examType === mockTestExamFilter;
+
+              return (
+                item.section === "mockTest" &&
+                matchesSearch &&
+                matchesPlan &&
+                matchesStatus &&
+                matchesExam
+              );
+            }).length / mockTestsPerPage
+          )
+        }
+        onClick={() =>
+          setMockTestPage((prev) => prev + 1)
+        }
+      >
+        Next →
+      </button>
+    </div>
+  )
+}
 
         <div className="contentStudioActions">
  
@@ -17212,7 +17116,46 @@ handleSaveUniversalContent={handleSaveUniversalContent}
     </section>
   }
 />
+
 </Routes>
+
+{mockMenuPosition &&
+  mockMenuTest &&
+  createPortal(
+    <div
+      className="mockPortalBackdrop"
+      onClick={closeMockActionPortal}
+    >
+      <div
+        className="mockPortalMenu"
+        style={{
+          position: "fixed",
+          top: `${mockMenuPosition.top}px`,
+          left: `${mockMenuPosition.left}px`,
+          zIndex: 999999,
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+     <button>📋 Duplicate</button>
+
+<div className="mockPortalMenuDivider" />
+
+<button>🚀 Publish / Unpublish</button>
+<button>⭐ Feature / Remove Feature</button>
+<button>📦 Archive</button>
+
+<div className="mockPortalMenuDivider" />
+
+<button>🔗 Copy Link</button>
+<button>📤 Export JSON</button>
+
+<div className="mockPortalMenuDivider" />
+
+<button className="dangerMenuButton">🗑 Delete</button>
+      </div>
+    </div>,
+    document.body
+  )}
 </main>
 
 {selectedCourse && (

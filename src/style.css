@@ -24330,3 +24330,78 @@ button {
   font-weight: 600;
   line-height: 1.45;
 }
+
+.mockPortalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: transparent;
+}
+
+.mockPortalMenu {
+  position: fixed;
+  width: 232px;
+  padding: 7px;
+  border-radius: 16px;
+  background: #0b1120;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  box-shadow:
+    0 24px 64px rgba(15, 23, 42, 0.34),
+    0 8px 24px rgba(15, 23, 42, 0.22);
+  display: flex;
+  flex-direction: column;
+}
+
+.mockPortalMenu button {
+  appearance: none;
+  -webkit-appearance: none;
+
+  width: 100%;
+  height: 34px;
+
+  padding: 0 10px;
+
+  border: none !important;
+  outline: none;
+  border-radius: 8px !important;
+
+  background: transparent !important;
+  box-shadow: none !important;
+
+  color: #f8fafc;
+
+  font-size: 12.5px;
+  font-weight: 800;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background 0.14s ease,
+    color 0.14s ease,
+    transform 0.14s ease;
+}
+
+.mockPortalMenu button:hover {
+  background: rgba(255, 255, 255, 0.07) !important;
+}
+
+.mockPortalMenu button:active {
+  transform: scale(0.985);
+}
+
+.mockPortalMenuDivider {
+  height: 1px;
+  background: rgba(148, 163, 184, 0.14);
+  margin: 6px 4px;
+}
+
+.mockPortalMenu .dangerMenuButton {
+  color: #fca5a5;
+}
+
+.mockPortalMenu .dangerMenuButton:hover {
+  background: rgba(239, 68, 68, 0.14) !important;
+  color: #ffffff;
+}
