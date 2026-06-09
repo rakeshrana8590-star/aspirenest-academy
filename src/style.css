@@ -24273,3 +24273,60 @@ button {
   font-weight: 900;
   color: #111827;
 }
+
+/* PHASE 3 — Question Bank Premium Polish */
+
+.questionBankTopRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.questionBankPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: fit-content;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.questionBankMetaGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin: 18px 0 12px;
+}
+
+.questionBankMetaGrid span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.questionOptionGrid {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.questionOptionGrid div {
+  color: #334155;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.45;
+}

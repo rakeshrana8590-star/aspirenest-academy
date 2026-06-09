@@ -617,6 +617,19 @@ const [videoForm, setVideoForm] = useState({
   sourceType: "YOUTUBE_PUBLIC",
 });
 
+useEffect(() => {
+  const reusedQuestion = localStorage.getItem(
+    "reusedQuestionForMockTest"
+  );
+
+  if (!reusedQuestion) return;
+
+  setMockTestQuestionsForm([
+    JSON.parse(reusedQuestion),
+  ]);
+
+  localStorage.removeItem("reusedQuestionForMockTest");
+}, [location.pathname]);
 const handleSaveMockTest = async () => {
   try {
     const finalTitle = mockTestForm.title?.trim();
@@ -718,6 +731,7 @@ const handleSaveMockTest = async () => {
             ? negativeMarks
             : finalNegativeMarks,
         questionStatus: q.questionStatus || "published",
+        saveToQuestionBank: q.saveToQuestionBank || "yes",
       };
     });
 
@@ -9442,6 +9456,8 @@ This action cannot be undone.`
       setMockTestQuestionsForm(updatedQuestions);
     }}
   >
+
+
     <option value="draft">
       Draft
     </option>
@@ -9454,6 +9470,26 @@ This action cannot be undone.`
       Published
     </option>
   </select>
+
+  <label>Save To Question Bank</label>
+
+<select
+  value={questionItem.saveToQuestionBank}
+  onChange={(e) => {
+    const updatedQuestions = [
+      ...mockTestQuestionsForm,
+    ];
+
+    updatedQuestions[questionIndex].saveToQuestionBank =
+      e.target.value;
+
+    setMockTestQuestionsForm(updatedQuestions);
+  }}
+>
+  <option value="yes">Save To Question Bank</option>
+  <option value="no">Do Not Save To Question Bank</option>
+</select>
+
 
 </div>
 
@@ -10067,21 +10103,32 @@ This action cannot be undone.`
   <h5>Audit</h5>
 
   <div className="mockTestMetaGrid">
-    <span>
-      📅 Created:{" "}
-      {test.createdAt?.seconds
-        ? new Date(
-            test.createdAt.seconds * 1000
-          ).toLocaleDateString()
-        : "Not available"}
-    </span>
-    <span>
+  <span>
+  📅 Created:{" "}
+  {test.createdAt?.toDate?.().toLocaleString(
+    "en-GB",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    }
+  ) || "-"}
+</span>
+
+<span>
   🕒 Updated:{" "}
-  {test.updatedAt?.seconds
-    ? new Date(
-        test.updatedAt.seconds * 1000
-      ).toLocaleDateString()
-    : "Not available"}
+  {test.updatedAt?.toDate?.().toLocaleString(
+    "en-GB",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    }
+  ) || "-"}
 </span>
   </div>
 </div>
@@ -10649,6 +10696,7 @@ This action cannot be undone.`
   }
 />
 
+
 <Route
   path="/admin/content/mock-tests/question-bank"
   element={
@@ -10660,39 +10708,111 @@ This action cannot be undone.`
           <h1>Examination Question Bank</h1>
 
           <p>
-            Search, filter, and manage reusable questions saved from
-            examination tests.
+            Search, filter, review, export, and reuse saved
+            examination questions from one professional question bank.
           </p>
+        </div>
+
+        <div className="mockManageStatsGrid">
+          <div className="mockManageStatCard">
+            <span>Total Questions</span>
+            <strong>{questionBankItems.length}</strong>
+          </div>
+
+          <div className="mockManageStatCard">
+            <span>Easy</span>
+            <strong>
+              {
+                questionBankItems.filter(
+                  (q) => q.level === "Easy"
+                ).length
+              }
+            </strong>
+          </div>
+
+          <div className="mockManageStatCard">
+            <span>Medium</span>
+            <strong>
+              {
+                questionBankItems.filter(
+                  (q) => q.level === "Medium"
+                ).length
+              }
+            </strong>
+          </div>
+
+          <div className="mockManageStatCard">
+            <span>Hard</span>
+            <strong>
+              {
+                questionBankItems.filter(
+                  (q) => q.level === "Hard"
+                ).length
+              }
+            </strong>
+          </div>
         </div>
 
         <div className="contentStudioForm">
           <div className="contentStudioGrid">
             <input
               type="text"
-              placeholder="Search questions..."
+              placeholder="Search by question or tag"
               value={questionBankSearch}
               onChange={(e) =>
                 setQuestionBankSearch(e.target.value)
               }
             />
 
-            <input
-              type="text"
-              placeholder="Filter Subject or ALL"
-              value={questionBankSubjectFilter}
-              onChange={(e) =>
-                setQuestionBankSubjectFilter(e.target.value)
-              }
-            />
+<select
+  value={questionBankSubjectFilter}
+  onChange={(e) =>
+    setQuestionBankSubjectFilter(e.target.value)
+  }
+>
+  <option value="ALL">All Subjects</option>
 
-            <input
-              type="text"
-              placeholder="Filter Chapter or ALL"
-              value={questionBankChapterFilter}
-              onChange={(e) =>
-                setQuestionBankChapterFilter(e.target.value)
-              }
-            />
+  {[
+    ...new Set(
+      questionBankItems.map(
+        (item) =>
+          item.sourceSubject || item.subject
+      )
+    ),
+  ]
+    .filter(Boolean)
+    .sort()
+    .map((subject) => (
+      <option key={subject} value={subject}>
+        {subject}
+      </option>
+    ))}
+</select>
+
+<select
+  value={questionBankChapterFilter}
+  onChange={(e) =>
+    setQuestionBankChapterFilter(e.target.value)
+  }
+>
+  <option value="ALL">All Chapters</option>
+
+  {[
+    ...new Set(
+      questionBankItems.map(
+        (item) =>
+          item.sourceChapter || item.chapter
+      )
+    ),
+  ]
+    .filter(Boolean)
+    .sort()
+    .map((chapter) => (
+      <option key={chapter} value={chapter}>
+        {chapter}
+      </option>
+    ))}
+</select>
 
             <select
               value={questionBankDifficultyFilter}
@@ -10706,9 +10826,57 @@ This action cannot be undone.`
               <option value="Hard">Hard</option>
             </select>
           </div>
+        </div>
 
-          <div className="contentStudioList">
-            {questionBankItems
+        <div className="contentStudioList questionBankList">
+          <h3>Saved Questions</h3>
+
+          {questionBankItems
+            .filter((question) => {
+              const searchText =
+                questionBankSearch.trim().toLowerCase();
+
+              const matchesSearch =
+                !searchText ||
+                question.question
+                  ?.toLowerCase()
+                  .includes(searchText) ||
+                question.tag
+                  ?.toLowerCase()
+                  .includes(searchText);
+
+              const matchesSubject =
+                questionBankSubjectFilter === "ALL" ||
+                question.sourceSubject ===
+                  questionBankSubjectFilter ||
+                question.subject === questionBankSubjectFilter;
+
+              const matchesChapter =
+                questionBankChapterFilter === "ALL" ||
+                question.sourceChapter ===
+                  questionBankChapterFilter ||
+                question.chapter === questionBankChapterFilter;
+
+              const matchesDifficulty =
+                questionBankDifficultyFilter === "ALL" ||
+                question.level ===
+                  questionBankDifficultyFilter;
+
+              return (
+                matchesSearch &&
+                matchesSubject &&
+                matchesChapter &&
+                matchesDifficulty
+              );
+            }).length === 0 ? (
+            <div className="contentStudioItem">
+              <strong>No questions found.</strong>
+              <p>
+                Add questions from Add Examination Test first.
+              </p>
+            </div>
+          ) : (
+            questionBankItems
               .filter((question) => {
                 const searchText =
                   questionBankSearch.trim().toLowerCase();
@@ -10725,12 +10893,14 @@ This action cannot be undone.`
                 const matchesSubject =
                   questionBankSubjectFilter === "ALL" ||
                   question.sourceSubject ===
-                    questionBankSubjectFilter;
+                    questionBankSubjectFilter ||
+                  question.subject === questionBankSubjectFilter;
 
                 const matchesChapter =
                   questionBankChapterFilter === "ALL" ||
                   question.sourceChapter ===
-                    questionBankChapterFilter;
+                    questionBankChapterFilter ||
+                  question.chapter === questionBankChapterFilter;
 
                 const matchesDifficulty =
                   questionBankDifficultyFilter === "ALL" ||
@@ -10746,29 +10916,137 @@ This action cannot be undone.`
               })
               .map((question) => (
                 <div
-                  className="contentStudioItem"
+                  className="contentStudioItem questionBankCard"
                   key={question.id}
                 >
-                  <strong>{question.question}</strong>
+               <div className="questionBankTopRow">
+  <span className="questionBankPill">
+    {question.level || "Easy"}
+  </span>
 
-                  <p>
-                    {question.sourceExamType || "Exam"} •{" "}
-                    {question.sourceSubject || "Subject"} •{" "}
-                    {question.sourceChapter || "Chapter"} •{" "}
-                    {question.level || "Easy"}
-                  </p>
+  <span className="questionBankPill">
+    {question.questionType || "Single Correct"}
+  </span>
 
-                  <p>
-                    A. {question.option1} • B. {question.option2} •
-                    C. {question.option3} • D. {question.option4}
-                  </p>
+  <span className="questionBankPill">
+    {question.language || "English"}
+  </span>
+</div>
 
-                  <p>
-                    Answer: {question.answer || "Not set"}
-                  </p>
+                  <strong>
+                    {question.question || "Untitled Question"}
+                  </strong>
+
+                  <div className="questionBankMetaGrid">
+  <span>📝 {question.sourceExamType || "Exam"}</span>
+
+  <span>
+    📚 {question.sourceSubject || question.subject || "Subject"}
+  </span>
+
+  <span>
+    📖 {question.sourceChapter || question.chapter || "Chapter"}
+  </span>
+
+  {question.tag && (
+    <span>🏷 {question.tag}</span>
+  )}
+</div>
+                  <div className="questionOptionGrid">
+  <div>A. {question.option1 || "-"}</div>
+  <div>B. {question.option2 || "-"}</div>
+  <div>C. {question.option3 || "-"}</div>
+  <div>D. {question.option4 || "-"}</div>
+</div>
+
+                  <div className="questionBankAnswerBox">
+                  <strong>
+  Answer:{" "}
+  {question.answer === "option1"
+    ? `A. ${question.option1 || "-"}`
+    : question.answer === "option2"
+    ? `B. ${question.option2 || "-"}`
+    : question.answer === "option3"
+    ? `C. ${question.option3 || "-"}`
+    : question.answer === "option4"
+    ? `D. ${question.option4 || "-"}`
+    : question.answer || "Not set"}
+</strong>
+
+                    <p>
+                      {question.explanation ||
+                        "No explanation added yet."}
+                    </p>
+                  </div>
+
+                  <div className="contentStudioActions">
+                    <button
+                      className="backButton"
+                      onClick={() =>
+                        navigator.clipboard.writeText(
+                          JSON.stringify(question, null, 2)
+                        )
+                      }
+                    >
+                      Copy JSON
+                    </button>
+
+                    <button
+  className="backButton"
+  onClick={() => {
+    localStorage.setItem(
+      "reusedQuestionForMockTest",
+      JSON.stringify({
+        question: question.question || "",
+        option1: question.option1 || "",
+        option2: question.option2 || "",
+        option3: question.option3 || "",
+        option4: question.option4 || "",
+        answer: question.answer || "",
+        explanation: question.explanation || "",
+        level: question.level || "Easy",
+        questionType:
+          question.questionType || "Single Correct",
+        language: question.language || "English",
+        tag: question.tag || "",
+        positiveMarks: question.positiveMarks || "1",
+        negativeMarks: question.negativeMarks || "0",
+        questionStatus: "published",
+        saveToQuestionBank: "no",
+      })
+    );
+
+
+    navigate("/admin/content/mock-tests/add");
+  }}
+>
+  Reuse Question
+</button>
+                
+                  </div>
                 </div>
-              ))}
-          </div>
+              ))
+          )}
+        </div>
+
+        <div className="contentStudioActions">
+          <button
+            className="publishButton"
+            onClick={() =>
+              navigate("/admin/content/mock-tests/add")
+            }
+          >
+            + Add Examination Test
+          </button>
+
+          <button
+            className="backButton"
+            onClick={() =>
+              navigate("/admin/content/mock-tests/manage")
+            }
+          >
+            ← Back to Manage Tests
+          </button>
         </div>
       </section>
     ) : null
@@ -10857,9 +11135,17 @@ This action cannot be undone.`
                       <p>D. {questionItem.option4}</p>
 
                       <p>
-                        <strong>Correct:</strong>{" "}
-                        {questionItem.answer}
-                      </p>
+  <strong>Correct:</strong>{" "}
+  {questionItem.answer === "option1"
+    ? `A. ${questionItem.option1 || "-"}`
+    : questionItem.answer === "option2"
+    ? `B. ${questionItem.option2 || "-"}`
+    : questionItem.answer === "option3"
+    ? `C. ${questionItem.option3 || "-"}`
+    : questionItem.answer === "option4"
+    ? `D. ${questionItem.option4 || "-"}`
+    : questionItem.answer || "Not set"}
+</p>
 
                       <p>
                         <strong>Explanation:</strong>{" "}
@@ -12319,124 +12605,7 @@ Import JSON
   }
 />
 
-<Route
-  path="/admin/content/mock-tests/question-bank"
-  element={
-    requireAdmin() ? (
-      <section className="coursePages">
-        {(() => {
-          const mockTests = universalContent.filter(
-            (item) => item.section === "mockTest"
-          );
 
-          const questionBankQuestions =
-            mockTests.flatMap((test) =>
-              (test.questions || []).map((question, index) => ({
-                ...question,
-                testId: test.id,
-                testTitle: test.title,
-                planType: test.planType,
-                subject: test.subject,
-                chapter: test.chapter,
-                questionNumber: index + 1,
-              }))
-            );
-
-          const subjects = [
-            ...new Set(
-              questionBankQuestions
-                .map((question) => question.subject)
-                .filter(Boolean)
-            ),
-          ];
-
-          return (
-            <>
-              <div className="sectionHeader">
-                <span className="badge">
-                  QUESTION BANK
-                </span>
-
-                <h1>Mock Test Question Bank</h1>
-
-                <p>
-                  Browse all questions grouped by subject and chapter.
-                  Future AI explanations, PYQ pools, and adaptive
-                  tests will use this bank.
-                </p>
-              </div>
-
-              <div className="contentStudioForm">
-                <div className="contentStudioActions">
-                  <button
-                    className="backButton"
-                    onClick={() =>
-                      navigate("/admin/content/mock-tests")
-                    }
-                  >
-                    ← Back to Mock Tests Manager
-                  </button>
-
-                  <button
-                    className="publishButton"
-                    onClick={() =>
-                      navigate("/admin/content/mock-tests/add")
-                    }
-                  >
-                    + Add Mock Test
-                  </button>
-                </div>
-              </div>
-
-              <div className="contentStudioList">
-                <h3>Subjects in Question Bank</h3>
-
-                {subjects.length === 0 ? (
-                  <div className="contentStudioItem">
-                    <strong>No questions found.</strong>
-                    <p>
-                      Add mock tests with questions first.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="contentStudioGrid">
-                    {subjects.map((subjectName) => {
-                      const subjectQuestionCount =
-                        questionBankQuestions.filter(
-                          (question) =>
-                            question.subject === subjectName
-                        ).length;
-
-                      return (
-                        <button
-                          key={subjectName}
-                          className="publishButton"
-                          onClick={() =>
-                            navigate(
-                              `/admin/content/mock-tests/question-bank/${encodeURIComponent(
-                                subjectName
-                              )}`
-                            )
-                          }
-                        >
-                          {subjectName}
-                          <br />
-                          <small>
-                            {subjectQuestionCount} Questions
-                          </small>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </>
-          );
-        })()}
-      </section>
-    ) : null
-  }
-/>
 
 <Route
   path="/admin/content/mock-tests/question-bank/:subjectName"
@@ -12631,8 +12800,17 @@ Import JSON
                       <p>D. {question.option4}</p>
 
                       <p>
-                        <strong>Correct:</strong> {question.answer}
-                      </p>
+  <strong>Correct:</strong>{" "}
+  {question.answer === "option1"
+    ? `A. ${question.option1 || "-"}`
+    : question.answer === "option2"
+    ? `B. ${question.option2 || "-"}`
+    : question.answer === "option3"
+    ? `C. ${question.option3 || "-"}`
+    : question.answer === "option4"
+    ? `D. ${question.option4 || "-"}`
+    : question.answer || "Not set"}
+</p>
 
                       <p>
                         <strong>Explanation:</strong>{" "}
