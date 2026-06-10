@@ -24418,3 +24418,478 @@ button {
   border-color: #f97316 !important;
   color: #ffffff !important;
 }
+
+
+/* ===============================
+   RESULTS ANALYTICS - STRIPE STYLE
+================================ */
+
+.resultsAnalyticsPage {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-top: 20px;
+}
+
+.resultsAnalyticsPage .sectionHeader {
+  margin-bottom: 18px;
+}
+
+.resultsTopBar {
+  max-width: 960px;
+  margin: 20px auto 40px;
+  padding: 18px;
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.08);
+}
+
+.resultsKpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin: 24px auto 32px;
+  position: relative;
+  z-index: 2;
+}
+
+.resultsKpiCard {
+  padding: 22px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 24px;
+  background: linear-gradient(180deg, #ffffff, #fbfbfd);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.resultsKpiCard span {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.resultsKpiCard strong {
+  display: block;
+  margin-top: 12px;
+  font-size: 2.35rem;
+  line-height: 1;
+  color: #0f172a;
+}
+
+.resultsKpiCard small {
+  display: block;
+  margin-top: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.resultsSection {
+  margin: 26px auto;
+  padding: 26px;
+  border: 1px solid rgba(249, 115, 22, 0.28);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(249, 115, 22, 0.08), transparent 34%),
+    #ffffff;
+  box-shadow: 0 30px 90px rgba(15, 23, 42, 0.07);
+}
+
+.resultsSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.resultsSectionHeader h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #0f172a;
+}
+
+.resultsSectionHeader span {
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #f8fafc;
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: #64748b;
+}
+
+.resultsCompactGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.resultsMetricCard,
+.resultsStudentCard,
+.resultsWeakCard,
+.resultsEmptyCard {
+  padding: 20px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.06);
+}
+
+.resultsMetricCard strong,
+.resultsStudentCard strong,
+.resultsWeakCard strong {
+  display: block;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.resultsMetricCard p,
+.resultsStudentCard p,
+.resultsWeakCard p {
+  margin: 8px 0 0;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.resultsMiniStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.resultsMiniStats span {
+  padding: 8px 11px;
+  border-radius: 999px;
+  background: #f8fafc;
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: #334155;
+}
+
+.resultsStudentCard {
+  position: relative;
+  padding-right: 92px;
+}
+
+.resultsScoreBadge {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  min-width: 56px;
+  padding: 10px 12px;
+  text-align: center;
+  border-radius: 16px;
+  background: #0f172a;
+  color: #ffffff;
+  font-weight: 950;
+}
+
+.resultsWeakCard {
+  border-color: rgba(249, 115, 22, 0.35);
+  background: linear-gradient(180deg, #fff, #fff7ed);
+}
+
+.resultsEmptyCard {
+  color: #64748b;
+  font-weight: 800;
+}
+
+@media (max-width: 900px) {
+  .resultsKpiGrid,
+  .resultsCompactGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .resultsSection {
+    padding: 20px;
+  }
+
+  .resultsStudentCard {
+    padding-right: 20px;
+  }
+
+  .resultsScoreBadge {
+    position: static;
+    margin-top: 14px;
+    display: inline-block;
+  }
+}
+
+/* ===============================
+   MOCK TEST LEADERBOARD - STRIPE / LEETCODE STYLE
+================================ */
+
+.leaderboardPage {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-top: 20px;
+}
+
+.leaderboardPage .sectionHeader {
+  margin-bottom: 18px;
+}
+
+.leaderboardTopBar {
+  max-width: 960px;
+  margin: 20px auto 40px;
+  padding: 18px;
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.08);
+}
+
+.leaderboardKpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin: 24px auto 32px;
+}
+
+.leaderboardKpiCard {
+  padding: 22px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 24px;
+  background: linear-gradient(180deg, #ffffff, #fbfbfd);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+}
+
+.leaderboardKpiCard span {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.leaderboardKpiCard strong {
+  display: block;
+  margin-top: 12px;
+  font-size: 2.35rem;
+  line-height: 1;
+  color: #0f172a;
+}
+
+.leaderboardKpiCard small {
+  display: block;
+  margin-top: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.leaderboardPodium,
+.leaderboardSection {
+  margin: 26px auto;
+  padding: 26px;
+  border: 1px solid rgba(249, 115, 22, 0.28);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(249, 115, 22, 0.08), transparent 34%),
+    #ffffff;
+  box-shadow: 0 30px 90px rgba(15, 23, 42, 0.07);
+}
+
+.leaderboardSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.leaderboardSectionHeader h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #0f172a;
+}
+
+.leaderboardSectionHeader span {
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #f8fafc;
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: #64748b;
+}
+
+.leaderboardPodiumGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.leaderboardPodiumCard,
+.leaderboardSubjectCard,
+.leaderboardRecentCard,
+.leaderboardEmptyCard {
+  padding: 20px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.06);
+}
+
+.leaderboardPodiumCard {
+  position: relative;
+  overflow: hidden;
+}
+
+.leaderboardPodiumCard.rank1 {
+  border-color: rgba(245, 158, 11, 0.45);
+  background: linear-gradient(180deg, #ffffff, #fffbeb);
+}
+
+.leaderboardPodiumCard.rank2 {
+  border-color: rgba(148, 163, 184, 0.45);
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+.leaderboardPodiumCard.rank3 {
+  border-color: rgba(217, 119, 6, 0.35);
+  background: linear-gradient(180deg, #ffffff, #fff7ed);
+}
+
+.leaderboardRankBadge {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 14px;
+  border-radius: 16px;
+  background: #0f172a;
+  font-size: 1.4rem;
+}
+
+.leaderboardPodiumCard strong,
+.leaderboardSubjectCard strong,
+.leaderboardRecentCard strong {
+  display: block;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.leaderboardPodiumCard p,
+.leaderboardSubjectCard p,
+.leaderboardRecentCard p {
+  margin: 8px 0 0;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.leaderboardMiniStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.leaderboardMiniStats span {
+  padding: 8px 11px;
+  border-radius: 999px;
+  background: #f8fafc;
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: #334155;
+}
+
+.leaderboardTable {
+  display: grid;
+  gap: 12px;
+}
+
+.leaderboardRow {
+  display: grid;
+  grid-template-columns: 80px 1fr 110px 120px 110px;
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.05);
+}
+
+.leaderboardRank {
+  width: 54px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #0f172a;
+  color: #ffffff;
+  font-weight: 950;
+}
+
+.leaderboardStudent strong {
+  display: block;
+  color: #0f172a;
+}
+
+.leaderboardStudent span {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.leaderboardScore strong {
+  display: block;
+  color: #0f172a;
+}
+
+.leaderboardScore span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #94a3b8;
+}
+
+.leaderboardCompactGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.leaderboardSubjectCard {
+  border-color: rgba(59, 130, 246, 0.18);
+}
+
+.leaderboardRecentCard {
+  border-color: rgba(34, 197, 94, 0.18);
+}
+
+.leaderboardEmptyCard {
+  color: #64748b;
+  font-weight: 800;
+}
+
+@media (max-width: 900px) {
+  .leaderboardKpiGrid,
+  .leaderboardPodiumGrid,
+  .leaderboardCompactGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .leaderboardRow {
+    grid-template-columns: 1fr;
+  }
+
+  .leaderboardRank {
+    width: auto;
+  }
+
+  .leaderboardPodium,
+  .leaderboardSection {
+    padding: 20px;
+  }
+}

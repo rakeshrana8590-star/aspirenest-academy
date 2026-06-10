@@ -8338,7 +8338,7 @@ This action cannot be undone.`
                 navigate("/admin/content/mock-tests/add")
               }
             >
-              ➕ Add Mock Test
+              ➕ Add Examination
             </button>
 
             <button
@@ -8440,6 +8440,15 @@ This action cannot be undone.`
   }
 >
   🏆 Leaderboard
+</button>
+
+<button
+  className="contentStudioBtn"
+  onClick={() =>
+    navigate("/admin/content/mock-tests/analytics")
+  }
+>
+  📈 Analytics
 </button>
 
             <button
@@ -14036,23 +14045,20 @@ Import JSON
   path="/admin/content/mock-tests/results"
   element={
     requireAdmin() ? (
-      <section className="coursePages">
+      <section className="coursePages resultsAnalyticsPage">
         {(() => {
           const mockTests = universalContent.filter(
             (item) => item.section === "mockTest"
           );
 
-          const leaderboardResults =
-            mockLeaderboardEntries || [];
-
-          const totalAttempts = leaderboardResults.length;
+          const attemptResults = mockResults || [];
+          const totalAttempts = attemptResults.length;
 
           const averageScore =
             totalAttempts > 0
               ? Math.round(
-                  leaderboardResults.reduce(
-                    (sum, result) =>
-                      sum + Number(result.score || 0),
+                  attemptResults.reduce(
+                    (sum, result) => sum + Number(result.score || 0),
                     0
                   ) / totalAttempts
                 )
@@ -14061,155 +14067,123 @@ Import JSON
           const averageAccuracy =
             totalAttempts > 0
               ? Math.round(
-                  leaderboardResults.reduce(
-                    (sum, result) =>
-                      sum + Number(result.accuracy || 0),
+                  attemptResults.reduce(
+                    (sum, result) => sum + Number(result.accuracy || 0),
                     0
                   ) / totalAttempts
                 )
               : 0;
 
-          const rankedResults = [...leaderboardResults].sort(
+          const weakChapters = [
+            ...new Map(
+              attemptResults
+                .filter((result) => result.chapter)
+                .map((result) => {
+                  const chapterResults = attemptResults.filter(
+                    (item) => item.chapter === result.chapter
+                  );
+
+                  return [
+                    result.chapter,
+                    {
+                      chapter: result.chapter,
+                      subject: result.subject || "Unknown Subject",
+                      attempts: chapterResults.length,
+                      averageAccuracy: Math.round(
+                        chapterResults.reduce(
+                          (sum, item) => sum + Number(item.accuracy || 0),
+                          0
+                        ) / chapterResults.length
+                      ),
+                    },
+                  ];
+                })
+            ).values(),
+          ].sort(
             (a, b) =>
-              Number(b.percentage || 0) -
-                Number(a.percentage || 0) ||
-              Number(b.score || 0) - Number(a.score || 0)
+              Number(a.averageAccuracy || 0) -
+              Number(b.averageAccuracy || 0)
           );
 
           return (
             <>
               <div className="sectionHeader">
-                <span className="badge">
-                  RESULTS ANALYTICS
-                </span>
-
+                <span className="badge">RESULTS ANALYTICS</span>
                 <h1>Mock Test Results Analytics</h1>
-
                 <p>
-                  Track leaderboard results, student performance,
-                  score, accuracy, weak chapters, and ranking.
+                  Stripe-style performance dashboard for attempts,
+                  accuracy, tests, students, and weak chapters.
                 </p>
               </div>
 
-              <div className="contentStudioForm">
-                <div className="contentStudioActions">
-                  <button
-                    className="backButton"
-                    onClick={() =>
-                      navigate("/admin/content/mock-tests")
-                    }
-                  >
-                    ← Back to Mock Tests Manager
-                  </button>
+              <div className="resultsTopBar">
+                <button
+                  className="backButton"
+                  onClick={() => navigate("/admin/content/mock-tests")}
+                >
+                  ← Back
+                </button>
 
-                  <button
-                    className="publishButton"
-                    onClick={() =>
-                      navigate("/admin/content/mock-tests/published")
-                    }
-                  >
-                    View Published Tests
-                  </button>
+                <button
+                  className="publishButton"
+                  onClick={() =>
+                    navigate("/admin/content/mock-tests/published")
+                  }
+                >
+                  Published Tests
+                </button>
 
-                  <button
-                    className="backButton"
-                    onClick={loadMockLeaderboardEntries}
-                  >
-                    Refresh Results
-                  </button>
+                <button
+                  className="backButton"
+                  onClick={async () => {
+                    await loadLeaderboard();
+
+                    if (user?.email) {
+                      await loadUserMockResults(user.email);
+                    }
+                  }}
+                >
+                  Refresh
+                </button>
+              </div>
+
+              <div className="resultsKpiGrid">
+                <div className="resultsKpiCard">
+                  <span>Total Tests</span>
+                  <strong>{mockTests.length}</strong>
+                  <small>Created exams</small>
+                </div>
+
+                <div className="resultsKpiCard">
+                  <span>Total Attempts</span>
+                  <strong>{totalAttempts}</strong>
+                  <small>Saved results</small>
+                </div>
+
+                <div className="resultsKpiCard">
+                  <span>Average Score</span>
+                  <strong>{averageScore}</strong>
+                  <small>Across attempts</small>
+                </div>
+
+                <div className="resultsKpiCard">
+                  <span>Average Accuracy</span>
+                  <strong>{averageAccuracy}%</strong>
+                  <small>Student accuracy</small>
                 </div>
               </div>
 
-              <div className="contentStudioList">
-                <h3>Overview Dashboard</h3>
-
-                <div className="contentStudioGrid">
-                  <div className="contentStudioItem">
-                    <strong>Total Tests</strong>
-                    <p>{mockTests.length}</p>
-                  </div>
-
-                  <div className="contentStudioItem">
-                    <strong>Total Attempts</strong>
-                    <p>{totalAttempts}</p>
-                  </div>
-
-                  <div className="contentStudioItem">
-                    <strong>Average Score</strong>
-                    <p>{averageScore}</p>
-                  </div>
-
-                  <div className="contentStudioItem">
-                    <strong>Average Accuracy</strong>
-                    <p>{averageAccuracy}%</p>
-                  </div>
+              <div className="resultsSection">
+                <div className="resultsSectionHeader">
+                  <h3>Test-wise Performance</h3>
+                  <span>{mockTests.length} tests</span>
                 </div>
-              </div>
 
-              <div className="contentStudioList">
-                <h3>Leaderboard</h3>
-
-                {rankedResults.length === 0 ? (
-                  <div className="contentStudioItem">
-                    <strong>No leaderboard data yet.</strong>
-                    <p>
-                      Leaderboard will appear after students save
-                      their mock test result.
-                    </p>
-                  </div>
-                ) : (
-                  rankedResults.slice(0, 10).map((result, index) => (
-                    <div
-                      className="contentStudioItem"
-                      key={result.id || index}
-                    >
-                      <strong>
-                        #{index + 1}{" "}
-                        {result.studentName ||
-                          result.studentEmail ||
-                          "Student"}
-                      </strong>
-
-                      <p>
-                        {result.testTitle || "Mock Test"} •{" "}
-                        {result.subject || "Subject"} •{" "}
-                        {result.chapter || "Chapter"}
-                      </p>
-
-                      <p>
-                        Score: {result.score || 0}/
-                        {result.totalMarks || 0} • Percentage:{" "}
-                        {result.percentage || 0}% • Accuracy:{" "}
-                        {result.accuracy || 0}%
-                      </p>
-
-                      <p>
-                        Mode: {result.leaderboardMode || "disabled"} •
-                        Correct: {result.correctCount || 0} • Wrong:{" "}
-                        {result.wrongCount || 0} • Skipped:{" "}
-                        {result.skippedCount || 0}
-                      </p>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              <div className="contentStudioList">
-                <h3>Test-wise Performance</h3>
-
-                {mockTests.length === 0 ? (
-                  <div className="contentStudioItem">
-                    <strong>No mock tests found.</strong>
-                    <p>
-                      Add mock tests first to generate analytics.
-                    </p>
-                  </div>
-                ) : (
-                  mockTests.map((test) => {
-                    const testResults =
-                      leaderboardResults.filter(
-                        (result) => result.testId === test.id
-                      );
+                <div className="resultsCompactGrid">
+                  {mockTests.map((test) => {
+                    const testResults = attemptResults.filter(
+                      (result) => result.testId === test.id
+                    );
 
                     const testAvgScore =
                       testResults.length > 0
@@ -14227,212 +14201,109 @@ Import JSON
                         ? Math.round(
                             testResults.reduce(
                               (sum, result) =>
-                                sum +
-                                Number(result.accuracy || 0),
+                                sum + Number(result.accuracy || 0),
                               0
                             ) / testResults.length
                           )
                         : 0;
 
                     return (
-                      <div
-                        className="contentStudioItem"
-                        key={test.id}
-                      >
+                      <div className="resultsMetricCard" key={test.id}>
                         <strong>{test.title}</strong>
-
                         <p>
                           {test.planType || "FREE"} •{" "}
-                          {test.subject || "No Subject"} •{" "}
-                          {test.chapter || "No Chapter"} •{" "}
-                          {test.testType || "Mock Test"}
+                          {test.subject || "Subject"} •{" "}
+                          {test.chapter || "Chapter"}
                         </p>
 
-                        <p>
-                          Attempts: {testResults.length} • Avg Score:{" "}
-                          {testAvgScore} • Avg Accuracy:{" "}
-                          {testAvgAccuracy}%
-                        </p>
+                        <div className="resultsMiniStats">
+                          <span>Attempts {testResults.length}</span>
+                          <span>Score {testAvgScore}</span>
+                          <span>Accuracy {testAvgAccuracy}%</span>
+                        </div>
                       </div>
                     );
-                  })
-                )}
+                  })}
+                </div>
               </div>
 
-              <div className="contentStudioList">
-                <h3>Student-wise Results</h3>
+              <div className="resultsSection">
+                <div className="resultsSectionHeader">
+                  <h3>Student-wise Results</h3>
+                  <span>{attemptResults.length} attempts</span>
+                </div>
 
-                {leaderboardResults.length === 0 ? (
-                  <div className="contentStudioItem">
-                    <strong>No student results yet.</strong>
-                    <p>
-                      Results will appear here after students save
-                      leaderboard attempts.
-                    </p>
+                {attemptResults.length === 0 ? (
+                  <div className="resultsEmptyCard">
+                    No student results yet.
                   </div>
                 ) : (
-                  leaderboardResults.map((result) => (
-                    <div
-                      className="contentStudioItem"
-                      key={result.id}
-                    >
-                      <strong>
-                        {result.studentName ||
-                          result.studentEmail ||
-                          "Student"}
-                      </strong>
-
-                      <p>
-                        {result.testTitle || "Mock Test"} •{" "}
-                        Score: {result.score || 0}/
-                        {result.totalMarks || 0} •{" "}
-                        Percentage: {result.percentage || 0}% •{" "}
-                        Accuracy: {result.accuracy || 0}%
-                      </p>
-
-                      <p>
-                        Correct: {result.correctCount || 0} •{" "}
-                        Wrong: {result.wrongCount || 0} •{" "}
-                        Skipped: {result.skippedCount || 0}
-                      </p>
-
-                      <p>
-                        Attempted At:{" "}
-                        {result.createdAt?.toDate
-                          ? result.createdAt
-                              .toDate()
-                              .toLocaleString()
-                          : "Not available"}
-                      </p>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              <div className="contentStudioList">
-                <h3>Weak Chapters Analytics</h3>
-
-                {leaderboardResults.length === 0 ? (
-                  <div className="contentStudioItem">
-                    <strong>No weak chapter data yet.</strong>
-                    <p>
-                      Weak chapter analytics will appear after
-                      leaderboard attempts.
-                    </p>
-                  </div>
-                ) : (
-                  [
-                    ...new Map(
-                      leaderboardResults
-                        .filter((result) => result.chapter)
-                        .map((result) => {
-                          const chapterResults =
-                            leaderboardResults.filter(
-                              (item) =>
-                                item.chapter === result.chapter
-                            );
-
-                          return [
-                            result.chapter,
-                            {
-                              chapter: result.chapter,
-                              subject:
-                                result.subject ||
-                                "Unknown Subject",
-                              attempts: chapterResults.length,
-                              averageAccuracy: Math.round(
-                                chapterResults.reduce(
-                                  (sum, item) =>
-                                    sum +
-                                    Number(item.accuracy || 0),
-                                  0
-                                ) / chapterResults.length
-                              ),
-                            },
-                          ];
-                        })
-                    ).values(),
-                  ]
-                    .sort(
-                      (a, b) =>
-                        Number(a.averageAccuracy || 0) -
-                        Number(b.averageAccuracy || 0)
-                    )
-                    .map((chapterItem) => (
+                  <div className="resultsCompactGrid">
+                    {attemptResults.map((result, index) => (
                       <div
-                        className="contentStudioItem"
+                        className="resultsStudentCard"
+                        key={result.id || index}
+                      >
+                        <div>
+                          <strong>
+                            {result.studentName ||
+                              result.studentEmail ||
+                              result.email ||
+                              "Student"}
+                          </strong>
+
+                          <p>{result.testTitle || "Mock Test"}</p>
+                        </div>
+
+                        <div className="resultsScoreBadge">
+                          {result.percentage || 0}%
+                        </div>
+
+                        <div className="resultsMiniStats">
+                          <span>
+                            Score {result.score || 0}/
+                            {result.totalMarks || 0}
+                          </span>
+                          <span>Correct {result.correctCount || 0}</span>
+                          <span>Wrong {result.wrongCount || 0}</span>
+                          <span>Skipped {result.skippedCount || 0}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="resultsSection">
+                <div className="resultsSectionHeader">
+                  <h3>Weak Chapters Analytics</h3>
+                  <span>{weakChapters.length} chapters</span>
+                </div>
+
+                {weakChapters.length === 0 ? (
+                  <div className="resultsEmptyCard">
+                    No weak chapter data yet.
+                  </div>
+                ) : (
+                  <div className="resultsCompactGrid">
+                    {weakChapters.map((chapterItem) => (
+                      <div
+                        className="resultsWeakCard"
                         key={chapterItem.chapter}
                       >
                         <strong>{chapterItem.chapter}</strong>
+                        <p>{chapterItem.subject}</p>
 
-                        <p>
-                          {chapterItem.subject} • Attempts:{" "}
-                          {chapterItem.attempts}
-                        </p>
-
-                        <p>
-                          Average Accuracy:{" "}
-                          {chapterItem.averageAccuracy || 0}%
-                        </p>
+                        <div className="resultsMiniStats">
+                          <span>Attempts {chapterItem.attempts}</span>
+                          <span>
+                            Avg Accuracy {chapterItem.averageAccuracy || 0}%
+                          </span>
+                        </div>
                       </div>
-                    ))
-                )}
-              </div>
-
-              <div className="contentStudioList">
-                <h3>Top Performers</h3>
-
-                {rankedResults.length === 0 ? (
-                  <div className="contentStudioItem">
-                    <strong>No top performers yet.</strong>
-                    <p>
-                      Top performers will appear after students save
-                      leaderboard results.
-                    </p>
+                    ))}
                   </div>
-                ) : (
-                  rankedResults.slice(0, 3).map((result, index) => (
-                    <div
-                      className="contentStudioItem"
-                      key={result.id || index}
-                    >
-                      <strong>
-                        {index === 0
-                          ? "🥇 Rank #1"
-                          : index === 1
-                          ? "🥈 Rank #2"
-                          : "🥉 Rank #3"}
-                      </strong>
-
-                      <p>
-                        {result.studentName ||
-                          result.studentEmail ||
-                          "Student"}
-                      </p>
-
-                      <p>
-                        Score: {result.score || 0}/
-                        {result.totalMarks || 0} • Percentage:{" "}
-                        {result.percentage || 0}% • Accuracy:{" "}
-                        {result.accuracy || 0}%
-                      </p>
-                    </div>
-                  ))
                 )}
-              </div>
-
-              <div className="contentStudioList">
-                <h3>Future AI Insights</h3>
-
-                <div className="contentStudioItem">
-                  <strong>Coming Next</strong>
-
-                  <p>
-                    Time analysis, retry suggestions, AI learning
-                    recommendations, and deep weak-area diagnosis
-                    will connect after attempt storage is finalized.
-                  </p>
-                </div>
               </div>
             </>
           );
@@ -14446,129 +14317,309 @@ Import JSON
   path="/admin/content/mock-tests/leaderboard"
   element={
     requireAdmin() ? (
-      <section className="coursePages">
-        <div className="sectionHeader">
-          <span className="badge">
-            LEADERBOARD
-          </span>
+      <section className="coursePages leaderboardPage">
+        {(() => {
+          const leaderboardEntries = mockLeaderboardEntries || [];
 
-          <h1>Mock Test Leaderboard</h1>
+          const rankedEntries = [...leaderboardEntries].sort(
+            (a, b) =>
+              Number(b.percentage || 0) -
+                Number(a.percentage || 0) ||
+              Number(b.score || 0) - Number(a.score || 0)
+          );
 
-          <p>
-            Top student rankings across all mock tests.
-          </p>
-        </div>
+          const totalRankedStudents = new Set(
+            rankedEntries.map(
+              (entry) =>
+                entry.studentEmail ||
+                entry.email ||
+                entry.studentName
+            )
+          ).size;
 
-        <div className="contentStudioActions">
-          <button
-            className="backButton"
-            onClick={() =>
-              navigate("/admin/content/mock-tests")
-            }
-          >
-            ← Back to Mock Tests
-          </button>
-        </div>
+          const highestScore =
+            rankedEntries.length > 0
+              ? Math.max(
+                  ...rankedEntries.map((entry) =>
+                    Number(entry.score || 0)
+                  )
+                )
+              : 0;
 
-        <div className="contentStudioList">
-          <h3>Top Rankings</h3>
+          const averageAccuracy =
+            rankedEntries.length > 0
+              ? Math.round(
+                  rankedEntries.reduce(
+                    (sum, entry) =>
+                      sum + Number(entry.accuracy || 0),
+                    0
+                  ) / rankedEntries.length
+                )
+              : 0;
 
-          {mockLeaderboardEntries.length === 0 ? (
-            <div className="contentStudioItem">
-              <strong>
-                No leaderboard entries yet.
-              </strong>
-            </div>
-          ) : (
-            [...mockLeaderboardEntries]
-              .sort(
-                (a, b) =>
-                  Number(b.percentage || 0) -
-                    Number(a.percentage || 0) ||
-                  Number(b.score || 0) -
-                    Number(a.score || 0)
-              )
-              .map((result, index) => (
-                <div
-                  className="contentStudioItem"
-                  key={result.id}
+          const topPerformer = rankedEntries[0];
+
+          const subjectLeaders = [
+            ...new Map(
+              rankedEntries
+                .filter((entry) => entry.subject)
+                .map((entry) => [entry.subject, entry])
+            ).values(),
+          ];
+
+          return (
+            <>
+              <div className="sectionHeader">
+                <span className="badge">LEADERBOARD</span>
+
+                <h1>Mock Test Leaderboard</h1>
+
+                <p>
+                  Stripe-style ranking dashboard for top performers,
+                  accuracy leaders, subject champions, and recent
+                  leaderboard entries.
+                </p>
+              </div>
+
+              <div className="leaderboardTopBar">
+                <button
+                  className="backButton"
+                  onClick={() =>
+                    navigate("/admin/content/mock-tests")
+                  }
                 >
-                  <strong>
-                    #{index + 1}{" "}
-                    {result.studentName ||
-                      result.studentEmail}
-                  </strong>
+                  ← Back
+                </button>
 
-                  <p>
-                    {result.testTitle}
-                  </p>
+                <button
+                  className="publishButton"
+                  onClick={loadMockLeaderboardEntries}
+                >
+                  Refresh Leaderboard
+                </button>
 
-                  <p>
-                    Score: {result.score}/
-                    {result.totalMarks}
-                  </p>
+                <button
+                  className="backButton"
+                  onClick={() =>
+                    navigate("/admin/content/mock-tests/results")
+                  }
+                >
+                  View Results
+                </button>
+              </div>
 
-                  <p>
-                    Percentage:
-                    {result.percentage}%
-                  </p>
-
-                  <p>
-                    Accuracy:
-                    {result.accuracy}%
-                  </p>
+              <div className="leaderboardKpiGrid">
+                <div className="leaderboardKpiCard">
+                  <span>Ranked Students</span>
+                  <strong>{totalRankedStudents}</strong>
+                  <small>Unique students</small>
                 </div>
-              ))
-          )}
-        </div>
-      </section>
-    ) : null
-  }
-/>
 
-<Route
-  path="/admin/content/courses"
-  element={
-    requireAdmin() ? (
-      <section className="coursePages">
-        <div className="sectionHeader">
-          <span className="badge">
-            Courses CMS
-          </span>
+                <div className="leaderboardKpiCard">
+                  <span>Total Entries</span>
+                  <strong>{rankedEntries.length}</strong>
+                  <small>Leaderboard saves</small>
+                </div>
 
-          <h1>
-            Courses Manager
-          </h1>
+                <div className="leaderboardKpiCard">
+                  <span>Highest Score</span>
+                  <strong>{highestScore}</strong>
+                  <small>Best score</small>
+                </div>
 
-          <p>
-            Manage CTET/TET courses,
-            modules, lessons, study paths,
-            mentor guidance, and future
-            subject-wise learning programs.
-          </p>
-        </div>
+                <div className="leaderboardKpiCard">
+                  <span>Avg Accuracy</span>
+                  <strong>{averageAccuracy}%</strong>
+                  <small>Across ranked entries</small>
+                </div>
+              </div>
 
-        <div className="subjectHubGrid">
-          <button>CTET Courses</button>
+              <div className="leaderboardPodium">
+                <div className="leaderboardSectionHeader">
+                  <h3>Top 3 Podium</h3>
+                  <span>Champions</span>
+                </div>
 
-          <button>TET Courses</button>
+                {rankedEntries.length === 0 ? (
+                  <div className="leaderboardEmptyCard">
+                    No leaderboard entries yet.
+                  </div>
+                ) : (
+                  <div className="leaderboardPodiumGrid">
+                    {rankedEntries.slice(0, 3).map((entry, index) => (
+                      <div
+                        className={`leaderboardPodiumCard rank${
+                          index + 1
+                        }`}
+                        key={entry.id || index}
+                      >
+                        <div className="leaderboardRankBadge">
+                          {index === 0
+                            ? "🥇"
+                            : index === 1
+                            ? "🥈"
+                            : "🥉"}
+                        </div>
 
-          <button>Course Modules</button>
+                        <strong>
+                          {entry.studentName ||
+                            entry.studentEmail ||
+                            entry.email ||
+                            "Student"}
+                        </strong>
 
-          <button>Lessons</button>
+                        <p>{entry.testTitle || "Mock Test"}</p>
 
-          <button>Study Materials</button>
+                        <div className="leaderboardMiniStats">
+                          <span>
+                            Score {entry.score || 0}/
+                            {entry.totalMarks || 0}
+                          </span>
+                          <span>{entry.percentage || 0}%</span>
+                          <span>Accuracy {entry.accuracy || 0}%</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-          <button>Mentor Guidance</button>
+              <div className="leaderboardSection">
+                <div className="leaderboardSectionHeader">
+                  <h3>Global Rankings</h3>
+                  <span>{rankedEntries.length} entries</span>
+                </div>
 
-          <button
-            onClick={() =>
-              navigate("/admin/content")
-            }
-          >
-            ← Back to Content Studio
-          </button>
-        </div>
+                {rankedEntries.length === 0 ? (
+                  <div className="leaderboardEmptyCard">
+                    Leaderboard will appear after students save
+                    results for tests where leaderboard mode is
+                    enabled.
+                  </div>
+                ) : (
+                  <div className="leaderboardTable">
+                    {rankedEntries.map((entry, index) => (
+                      <div
+                        className="leaderboardRow"
+                        key={entry.id || index}
+                      >
+                        <div className="leaderboardRank">
+                          #{index + 1}
+                        </div>
+
+                        <div className="leaderboardStudent">
+                          <strong>
+                            {entry.studentName ||
+                              entry.studentEmail ||
+                              entry.email ||
+                              "Student"}
+                          </strong>
+
+                          <span>
+                            {entry.testTitle || "Mock Test"} •{" "}
+                            {entry.subject || "Subject"} •{" "}
+                            {entry.chapter || "Chapter"}
+                          </span>
+                        </div>
+
+                        <div className="leaderboardScore">
+                          <strong>
+                            {entry.score || 0}/{entry.totalMarks || 0}
+                          </strong>
+                          <span>Score</span>
+                        </div>
+
+                        <div className="leaderboardScore">
+                          <strong>{entry.percentage || 0}%</strong>
+                          <span>Percentage</span>
+                        </div>
+
+                        <div className="leaderboardScore">
+                          <strong>{entry.accuracy || 0}%</strong>
+                          <span>Accuracy</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="leaderboardSection">
+                <div className="leaderboardSectionHeader">
+                  <h3>Subject-wise Leaders</h3>
+                  <span>{subjectLeaders.length} subjects</span>
+                </div>
+
+                {subjectLeaders.length === 0 ? (
+                  <div className="leaderboardEmptyCard">
+                    Subject leaders will appear after leaderboard
+                    entries are available.
+                  </div>
+                ) : (
+                  <div className="leaderboardCompactGrid">
+                    {subjectLeaders.map((entry, index) => (
+                      <div
+                        className="leaderboardSubjectCard"
+                        key={`${entry.subject}-${index}`}
+                      >
+                        <strong>{entry.subject}</strong>
+
+                        <p>
+                          {entry.studentName ||
+                            entry.studentEmail ||
+                            entry.email ||
+                            "Student"}
+                        </p>
+
+                        <div className="leaderboardMiniStats">
+                          <span>{entry.percentage || 0}%</span>
+                          <span>Score {entry.score || 0}</span>
+                          <span>Accuracy {entry.accuracy || 0}%</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="leaderboardSection">
+                <div className="leaderboardSectionHeader">
+                  <h3>Recent Winners</h3>
+                  <span>Latest ranked entries</span>
+                </div>
+
+                {rankedEntries.length === 0 ? (
+                  <div className="leaderboardEmptyCard">
+                    No recent winners yet.
+                  </div>
+                ) : (
+                  <div className="leaderboardCompactGrid">
+                    {rankedEntries.slice(0, 6).map((entry, index) => (
+                      <div
+                        className="leaderboardRecentCard"
+                        key={entry.id || index}
+                      >
+                        <strong>
+                          {entry.studentName ||
+                            entry.studentEmail ||
+                            entry.email ||
+                            "Student"}
+                        </strong>
+
+                        <p>{entry.testTitle || "Mock Test"}</p>
+
+                        <div className="leaderboardMiniStats">
+                          <span>{entry.percentage || 0}%</span>
+                          <span>{entry.accuracy || 0}% accuracy</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          );
+        })()}
       </section>
     ) : null
   }
@@ -18297,126 +18348,141 @@ handleSaveUniversalContent={handleSaveUniversalContent}
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <button
-          onClick={() => {
-            setEditingMockTestId(mockMenuTest.id);
+       <button
+  onClick={() => {
+    if (!mockMenuTest?.id) return;
 
-            setMockTestForm({
-              title: mockMenuTest.title || "",
-              planType: mockMenuTest.planType || "FREE",
-              subject: mockMenuTest.subject || "",
-              chapter: mockMenuTest.chapter || "",
-              examType: mockMenuTest.examType || "CTET",
-              testType: mockMenuTest.testType || "Chapter Test",
-              duration:
-                mockMenuTest.duration?.toString() ||
-                mockMenuTest.durationMinutes?.toString() ||
-                "30",
-              totalQuestions:
-                mockMenuTest.totalQuestions?.toString() ||
-                mockMenuTest.questions?.length?.toString() ||
-                "10",
-              marksPerQuestion:
-                mockMenuTest.marksPerQuestion?.toString() || "1",
-              negativeMarks:
-                mockMenuTest.negativeMarks?.toString() || "0",
-              passingMarks:
-                mockMenuTest.passingMarks?.toString() || "0",
-              examDifficulty: mockMenuTest.examDifficulty || "Mixed",
-              examLanguage: mockMenuTest.examLanguage || "English",
-              attemptLimit: mockMenuTest.attemptLimit || "unlimited",
-              resultPublishMode:
-                mockMenuTest.resultPublishMode || "instant",
-              shuffleQuestions: mockMenuTest.shuffleQuestions || "no",
-              shuffleOptions: mockMenuTest.shuffleOptions || "no",
-              navigationMode: mockMenuTest.navigationMode || "free",
-              allowPause: mockMenuTest.allowPause || "yes",
-              calculatorAllowed:
-                mockMenuTest.calculatorAllowed || "no",
-              questionSource: mockMenuTest.questionSource || "manual",
-              fullscreenMode: mockMenuTest.fullscreenMode || "no",
-              tabSwitchDetection:
-                mockMenuTest.tabSwitchDetection || "no",
-              copyPasteProtection:
-                mockMenuTest.copyPasteProtection || "no",
-              autoSubmitOnViolation:
-                mockMenuTest.autoSubmitOnViolation || "no",
-              leaderboardMode:
-                mockMenuTest.leaderboardMode || "disabled",
-              timerMode: mockMenuTest.timerMode || "globalTimer",
-              perQuestionTimeValue:
-                mockMenuTest.perQuestionTimeValue || "1",
-              perQuestionTimeUnit:
-                mockMenuTest.perQuestionTimeUnit || "min",
-              autoSubmitOnTimeUp:
-                mockMenuTest.autoSubmitOnTimeUp || "yes",
-              scheduleType:
-                mockMenuTest.scheduleType || "alwaysAvailable",
-              examStartDate: mockMenuTest.examStartDate || "",
-              examStartTime: mockMenuTest.examStartTime || "",
-              examEndDate: mockMenuTest.examEndDate || "",
-              examEndTime: mockMenuTest.examEndTime || "",
-              recurringMode: mockMenuTest.recurringMode || "none",
-              weeklyTestDay: mockMenuTest.weeklyTestDay || "",
-              monthlyTestDate: mockMenuTest.monthlyTestDate || "",
-              liveEventMode: mockMenuTest.liveEventMode || "no",
-              scholarshipMode: mockMenuTest.scholarshipMode || "no",
-              examInstructions:
-                mockMenuTest.examInstructions || "",
-              status: mockMenuTest.status || "published",
-            });
+    setEditingMockTestId(mockMenuTest.id);
 
-            setMockTestQuestionsForm(
-              mockMenuTest.questions?.length
-                ? mockMenuTest.questions.map((question) => ({
-                    question: question.question || "",
-                    option1: question.option1 || "",
-                    option2: question.option2 || "",
-                    option3: question.option3 || "",
-                    option4: question.option4 || "",
-                    answer: question.answer || "",
-                    explanation: question.explanation || "",
-                    level: question.level || "Easy",
-                    questionType:
-                      question.questionType || "Single Correct",
-                    language: question.language || "English",
-                    tag: question.tag || "",
-                    positiveMarks:
-                      question.positiveMarks?.toString() || "1",
-                    negativeMarks:
-                      question.negativeMarks?.toString() || "0",
-                    questionStatus:
-                      question.questionStatus || "published",
-                    saveToQuestionBank:
-                      question.saveToQuestionBank || "yes",
-                  }))
-                : [
-                    {
-                      question: "",
-                      option1: "",
-                      option2: "",
-                      option3: "",
-                      option4: "",
-                      answer: "",
-                      explanation: "",
-                      level: "Easy",
-                      questionType: "Single Correct",
-                      language: "English",
-                      tag: "",
-                      positiveMarks: "1",
-                      negativeMarks: "0",
-                      questionStatus: "published",
-                      saveToQuestionBank: "yes",
-                    },
-                  ]
-            );
+    setMockTestForm({
+      title: mockMenuTest.title || "",
+      planType: mockMenuTest.planType || "FREE",
+      subject: mockMenuTest.subject || "",
+      chapter: mockMenuTest.chapter || "",
+      examType: mockMenuTest.examType || "CTET",
+      testType: mockMenuTest.testType || "Chapter Test",
 
-            closeMockActionPortal();
-            navigate("/admin/content/mock-tests/add");
-          }}
-        >
-          ✏ Edit
-        </button>
+      duration:
+        mockMenuTest.duration?.toString() ||
+        mockMenuTest.durationMinutes?.toString() ||
+        "30",
+
+      totalQuestions:
+        mockMenuTest.totalQuestions?.toString() ||
+        mockMenuTest.questions?.length?.toString() ||
+        "10",
+
+      marksPerQuestion:
+        mockMenuTest.marksPerQuestion?.toString() || "1",
+
+      negativeMarks:
+        mockMenuTest.negativeMarks?.toString() || "0",
+
+      passingMarks:
+        mockMenuTest.passingMarks?.toString() || "0",
+
+      examDifficulty: mockMenuTest.examDifficulty || "Mixed",
+      examLanguage: mockMenuTest.examLanguage || "English",
+
+      attemptLimit: mockMenuTest.attemptLimit || "unlimited",
+      resultPublishMode: mockMenuTest.resultPublishMode || "instant",
+
+      shuffleQuestions: mockMenuTest.shuffleQuestions || "no",
+      shuffleOptions: mockMenuTest.shuffleOptions || "no",
+
+      navigationMode: mockMenuTest.navigationMode || "free",
+      allowPause: mockMenuTest.allowPause || "yes",
+      calculatorAllowed: mockMenuTest.calculatorAllowed || "no",
+
+      questionSource: mockMenuTest.questionSource || "manual",
+
+      fullscreenMode: mockMenuTest.fullscreenMode || "no",
+      tabSwitchDetection: mockMenuTest.tabSwitchDetection || "no",
+      copyPasteProtection: mockMenuTest.copyPasteProtection || "no",
+      autoSubmitOnViolation:
+        mockMenuTest.autoSubmitOnViolation || "no",
+
+      leaderboardMode:
+        mockMenuTest.leaderboardMode || "disabled",
+
+      timerMode: mockMenuTest.timerMode || "globalTimer",
+      perQuestionTimeValue:
+        mockMenuTest.perQuestionTimeValue || "1",
+      perQuestionTimeUnit:
+        mockMenuTest.perQuestionTimeUnit || "min",
+      autoSubmitOnTimeUp:
+        mockMenuTest.autoSubmitOnTimeUp || "yes",
+
+      scheduleType:
+        mockMenuTest.scheduleType || "alwaysAvailable",
+      examStartDate: mockMenuTest.examStartDate || "",
+      examStartTime: mockMenuTest.examStartTime || "",
+      examEndDate: mockMenuTest.examEndDate || "",
+      examEndTime: mockMenuTest.examEndTime || "",
+
+      recurringMode: mockMenuTest.recurringMode || "none",
+      weeklyTestDay: mockMenuTest.weeklyTestDay || "",
+      monthlyTestDate: mockMenuTest.monthlyTestDate || "",
+
+      liveEventMode: mockMenuTest.liveEventMode || "no",
+      scholarshipMode: mockMenuTest.scholarshipMode || "no",
+
+      examInstructions: mockMenuTest.examInstructions || "",
+
+      status: mockMenuTest.status || "published",
+    });
+
+    setMockTestQuestionsForm(
+      mockMenuTest.questions?.length
+        ? mockMenuTest.questions.map((question) => ({
+            question: question.question || "",
+            option1: question.option1 || "",
+            option2: question.option2 || "",
+            option3: question.option3 || "",
+            option4: question.option4 || "",
+            answer: question.answer || "",
+            explanation: question.explanation || "",
+            level: question.level || "Easy",
+            questionType:
+              question.questionType || "Single Correct",
+            language: question.language || "English",
+            tag: question.tag || "",
+            positiveMarks:
+              question.positiveMarks?.toString() || "1",
+            negativeMarks:
+              question.negativeMarks?.toString() || "0",
+            questionStatus:
+              question.questionStatus || "published",
+            saveToQuestionBank:
+              question.saveToQuestionBank || "yes",
+          }))
+        : [
+            {
+              question: "",
+              option1: "",
+              option2: "",
+              option3: "",
+              option4: "",
+              answer: "",
+              explanation: "",
+              level: "Easy",
+              questionType: "Single Correct",
+              language: "English",
+              tag: "",
+              positiveMarks: "1",
+              negativeMarks: "0",
+              questionStatus: "published",
+              saveToQuestionBank: "yes",
+            },
+          ]
+    );
+
+    closeMockActionPortal();
+    navigate("/admin/content/mock-tests/add");
+  }}
+>
+  ✏ Edit
+</button>
 
         <div className="mockPortalMenuDivider" />
 
@@ -18523,7 +18589,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 
         <button
           onClick={async () => {
-            const testLink = `${window.location.origin}/ctet-tet/mock-tests/start/${mockMenuTest.id}`;
+            const testLink = `${window.location.origin}/ctet-tet/mock-tests/attempt/${mockMenuTest.id}`;
 
             await navigator.clipboard.writeText(testLink);
             closeMockActionPortal();
