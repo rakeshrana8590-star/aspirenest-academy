@@ -117,12 +117,16 @@ export default function App() {
   };
 
   React.useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: "instant",
-    });
-  }, [location.pathname]);
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+  }, []);
+  
+  React.useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [location.key, location.pathname]);
   const [darkMode, setDarkMode] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -326,10 +330,16 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
         setMockExamTimeLeft((prev) => {
           const current = prev[testId] ?? 1800;
     
+          if (current <= 0) {
+            return {
+              ...prev,
+              [testId]: 0,
+            };
+          }
+    
           return {
             ...prev,
-            [testId]:
-              current > 0 ? current - 1 : 0,
+            [testId]: current - 1,
           };
         });
       }, 1000);
@@ -379,7 +389,7 @@ const [contentLoading, setContentLoading] = useState(false);
       if (hasPlanAccess(requiredPlan)) {
         navigate(`/${sectionName}`);
       } else {
-        navigate("/subjects/ctet-tet/pricing");;
+        navigate("/ctet-tet/pricing");;
       }
     };
   
@@ -404,6 +414,7 @@ const [paymentProof, setPaymentProof] = useState("");
 const [adminPaymentProof, setAdminPaymentProof] = useState("");
 const [paymentLoading, setPaymentLoading] = useState(false);
 const [leaderboard, setLeaderboard] = useState([]);
+const [mockLeaderboardEntries, setMockLeaderboardEntries] = useState([]);
 const [mockQuestions, setMockQuestions] = useState([]);
 const [selectedSubject, setSelectedSubject] = useState("CDP");
 const [adminQuestion, setAdminQuestion] = useState("");
@@ -679,6 +690,117 @@ useEffect(() => {
 ]);
 const handleSaveMockTest = async () => {
   try {
+    if (!mockTestForm.title.trim()) {
+      alert("Please enter test title");
+      return;
+    }
+    
+    if (!mockTestForm.subject.trim()) {
+      alert("Please select subject");
+      return;
+    }
+    
+    if (!mockTestForm.chapter.trim()) {
+      alert("Please enter chapter");
+      return;
+    }
+    
+    if (mockTestQuestionsForm.length === 0) {
+      alert("Please add at least one question");
+      return;
+    }
+    
+    if (
+      Number(mockTestForm.totalQuestions) !==
+      mockTestQuestionsForm.length
+    ) {
+      alert(
+        `Total Questions (${mockTestForm.totalQuestions}) and actual questions (${mockTestQuestionsForm.length}) do not match`
+      );
+      return;
+    }
+    
+    for (const [index, question] of mockTestQuestionsForm.entries()) {
+      if (!question.question?.trim()) {
+        alert(`Question ${index + 1} is empty`);
+        return;
+      }
+    
+      if (
+        !question.option1?.trim() ||
+        !question.option2?.trim() ||
+        !question.option3?.trim() ||
+        !question.option4?.trim()
+      ) {
+        alert(
+          `All four options are required in Question ${index + 1}`
+        );
+        return;
+      }
+    
+      if (!question.answer) {
+        alert(
+          `Please select correct answer for Question ${index + 1}`
+        );
+        return;
+      }
+    }
+    
+    if (
+      mockTestForm.scheduleType === "dateTime" &&
+      (
+        !mockTestForm.examStartDate ||
+        !mockTestForm.examStartTime
+      )
+    ) {
+      alert(
+        "Please select exam start date and time"
+      );
+      return;
+    }
+    
+    if (
+      mockTestForm.recurringMode === "weekly" &&
+      !mockTestForm.weeklyTestDay
+    ) {
+      alert(
+        "Please select weekly test day"
+      );
+      return;
+    }
+    
+    if (
+      mockTestForm.recurringMode === "monthly" &&
+      !mockTestForm.monthlyTestDate
+    ) {
+      alert(
+        "Please select monthly test date"
+      );
+      return;
+    }
+    const confirmSave = window.confirm(
+      `
+    Title: ${mockTestForm.title}
+    
+    Subject: ${mockTestForm.subject}
+    
+    Chapter: ${mockTestForm.chapter}
+    
+    Questions: ${mockTestQuestionsForm.length}
+    
+    Duration: ${mockTestForm.duration} min
+    
+    Plan: ${mockTestForm.planType}
+    
+    Type: ${mockTestForm.testType}
+    
+    Do you want to save this paper?
+    `
+    );
+    
+    if (!confirmSave) {
+      return;
+    }
     const finalTitle = mockTestForm.title?.trim();
     const finalPlan = mockTestForm.planType || "FREE";
     const finalExamType = mockTestForm.examType || "CTET";
@@ -859,8 +981,30 @@ const handleSaveMockTest = async () => {
     scheduleType:
   mockTestForm.scheduleType || "alwaysAvailable",
 
+  recurringMode:
+  mockTestForm.recurringMode || "none",
+
+weeklyTestDay:
+  mockTestForm.weeklyTestDay || "",
+
+monthlyTestDate:
+  mockTestForm.monthlyTestDate || "",
+
+  liveEventMode:
+  mockTestForm.liveEventMode || "no",
+
+scholarshipMode:
+  mockTestForm.scholarshipMode || "no",
+
+
   timerMode:
   mockTestForm.timerMode || "globalTimer",
+
+  perQuestionTimeValue:
+  mockTestForm.perQuestionTimeValue || "1",
+
+perQuestionTimeUnit:
+  mockTestForm.perQuestionTimeUnit || "min",
 
   leaderboardMode:
   mockTestForm.leaderboardMode || "disabled",
@@ -976,37 +1120,55 @@ examInstructions:
       chapter: "",
       examType: "CTET",
       testType: "Chapter Test",
+    
       duration: "30",
       totalQuestions: "10",
       marksPerQuestion: "1",
       negativeMarks: "0",
       passingMarks: "0",
-examDifficulty: "Mixed",
-examLanguage: "English",
-attemptLimit: "unlimited",
-resultPublishMode: "instant",
-shuffleQuestions: "no",
-shuffleOptions: "no",
-navigationMode: "free",
-allowPause: "yes",
-calculatorAllowed: "no",
-scheduleType: "alwaysAvailable",
-timerMode: "globalTimer",
-leaderboardMode: "disabled",
-fullscreenMode: "no",
-
-tabSwitchDetection: "no",
-
-copyPasteProtection: "no",
-
-autoSubmitOnViolation: "no",
-questionSource: "manual",
-autoSubmitOnTimeUp: "yes",
-examStartDate: "",
-examStartTime: "",
-examEndDate: "",
-examEndTime: "",
-examInstructions: "",
+    
+      examDifficulty: "Mixed",
+      examLanguage: "English",
+    
+      attemptLimit: "unlimited",
+      resultPublishMode: "instant",
+    
+      shuffleQuestions: "no",
+      shuffleOptions: "no",
+    
+      navigationMode: "free",
+      allowPause: "yes",
+      calculatorAllowed: "no",
+    
+      questionSource: "manual",
+    
+      fullscreenMode: "no",
+      tabSwitchDetection: "no",
+      copyPasteProtection: "no",
+      autoSubmitOnViolation: "no",
+    
+      leaderboardMode: "disabled",
+    
+      timerMode: "globalTimer",
+      perQuestionTimeValue: "1",
+      perQuestionTimeUnit: "min",
+      autoSubmitOnTimeUp: "yes",
+    
+      scheduleType: "alwaysAvailable",
+      examStartDate: "",
+      examStartTime: "",
+      examEndDate: "",
+      examEndTime: "",
+    
+      recurringMode: "none",
+      weeklyTestDay: "",
+      monthlyTestDate: "",
+    
+      liveEventMode: "no",
+      scholarshipMode: "no",
+    
+      examInstructions: "",
+    
       status: "published",
     });
 
@@ -1333,6 +1495,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
       if (isAdmin(verifiedUser)) {
         setTimeout(() => {
           loadLeaderboard();
+          loadMockLeaderboardEntries();
           loadPaymentHistory(verifiedUser);
           loadPaymentRequests();
         }, 600);
@@ -1509,7 +1672,7 @@ setEnquiries([]);
       accessType !== "FREE" &&
       !hasPlanAccess(accessType)
     ) {
-      navigate("/subjects/ctet-tet/pricing");
+      navigate("/ctet-tet/pricing");
   
       alert(
         `This content requires ${accessType} membership access.`
@@ -1801,6 +1964,24 @@ if (expiryDate && expiryDate < new Date()) {
       alert(error.message);
     }
   };
+
+  const loadMockLeaderboardEntries = async () => {
+    try {
+      const snapshot = await getDocs(
+        collection(db, "mockLeaderboard")
+      );
+  
+      const data = snapshot.docs.map((docItem) => ({
+        id: docItem.id,
+        ...docItem.data(),
+      }));
+  
+      setMockLeaderboardEntries(data);
+    } catch (error) {
+      console.error("Mock leaderboard load error:", error);
+    }
+  };
+
   const loadMockQuestions = async (
     subject = selectedSubject
   ) => {
@@ -3346,40 +3527,9 @@ const studyTimeMessage =
     return () => clearTimeout(timer);
   }, [mockStarted, showResult, timeLeft]);
 
-  useEffect(() => {
-    const attemptPath = "/ctet-tet/mock-tests/attempt/";
+
   
-    if (!location.pathname.includes(attemptPath)) return;
-  
-    const testId = decodeURIComponent(
-      location.pathname.split("/")[4] || ""
-    );
-  
-    if (!testId) return;
-  
-    setMockExamStartedAt((prev) => ({
-      ...prev,
-      [testId]: prev[testId] || Date.now(),
-    }));
-  
-    setMockExamTimeLeft((prev) => ({
-      ...prev,
-      [testId]: prev[testId] ?? 1800,
-    }));
-  
-    const timer = setInterval(() => {
-      setMockExamTimeLeft((prev) => {
-        const current = prev[testId] ?? 1800;
-  
-        return {
-          ...prev,
-          [testId]: current > 0 ? current - 1 : 0,
-        };
-      });
-    }, 1000);
-  
-    return () => clearInterval(timer);
-  }, [location.pathname]);
+
 
   if (authLoading) {
     return (
@@ -3499,7 +3649,7 @@ return (
 </nav>
 </header>
 <main className="appShell">
-  <Routes>
+<Routes key={location.key || location.pathname}>
 
 
 
@@ -3932,7 +4082,7 @@ return (
   <div className="buttons">
   <button
     className="btnLink"
-    onClick={() => navigate("/subjects/ctet-tet/courses")}
+    onClick={() => navigate("/ctet-tet/courses")}
   >
     Explore Courses
   </button>
@@ -4249,7 +4399,7 @@ isAdmin={isAdmin}
 
       <div
   className="freeCard"
-  onClick={() => navigate("/subjects/ctet-tet/mock-tests")}
+  onClick={() => navigate("/ctet-tet/mock-tests")}
 >
         📝 Free Mock Test
       </div>
@@ -4329,7 +4479,7 @@ isAdmin={isAdmin}
 
     <div className="footerLinks">
       <h3>Quick Links</h3>
-      <button onClick={() => navigate("/subjects/ctet-tet/courses")}>
+      <button onClick={() => navigate("/ctet-tet/courses")}>
   Courses
 </button>
 <button onClick={() => navigate("/cdp")}>
@@ -4338,7 +4488,7 @@ isAdmin={isAdmin}
 <button onClick={() => navigate("/resources")}>
   Free Resources
 </button>
-      <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
+      <button onClick={() => navigate("/ctet-tet/pricing")}>
   Pricing
 </button>
     </div>
@@ -4376,7 +4526,7 @@ isAdmin={isAdmin}
       </div>
 
       <div className="courseGrid">
-        <button onClick={() => navigate("/subjects/ctet-tet")}>
+        <button onClick={() => navigate("/ctet-tet")}>
           🧑‍🏫 CTET / TET
         </button>
 
@@ -4403,7 +4553,7 @@ isAdmin={isAdmin}
 
 
 <Route
-  path="/subjects/ctet-tet"
+  path="/ctet-tet"
   element={
     <section className="coursePages subjectHubPage">
       <div className="sectionHeader">
@@ -4420,7 +4570,7 @@ isAdmin={isAdmin}
       <div className="subjectHubGrid">
 <div
   className="subjectHubCard"
-  onClick={() => navigate("/subjects/ctet-tet/courses")}
+  onClick={() => navigate("/ctet-tet/courses")}
 >
   <div className="subjectHubIcon">📚</div>
 
@@ -4466,7 +4616,7 @@ isAdmin={isAdmin}
 
 <div
   className="subjectHubCard"
-  onClick={() => navigate("/subjects/ctet-tet/mock-tests")}
+  onClick={() => navigate("/ctet-tet/mock-tests")}
 >
   <div className="subjectHubIcon">📝</div>
 
@@ -4496,7 +4646,7 @@ isAdmin={isAdmin}
 
 <div
   className="subjectHubCard"
-  onClick={() => navigate("/subjects/ctet-tet/pricing")}
+  onClick={() => navigate("/ctet-tet/pricing")}
 >
   <div className="subjectHubIcon">💎</div>
 
@@ -4550,11 +4700,11 @@ isAdmin={isAdmin}
           📘 CTET Notes
         </button>
 
-        <button onClick={() => navigate("/subjects/ctet-tet/mock-tests")}>
+        <button onClick={() => navigate("/ctet-tet/mock-tests")}>
           📝 CTET Mock Tests
         </button>
 
-        <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
+        <button onClick={() => navigate("/ctet-tet/pricing")}>
           💎 Premium Plans
         </button>
       </div>
@@ -4583,11 +4733,11 @@ isAdmin={isAdmin}
           📘 TET Notes
         </button>
 
-        <button onClick={() => navigate("/subjects/ctet-tet/mock-tests")}>
+        <button onClick={() => navigate("/ctet-tet/mock-tests")}>
           📝 TET Mock Tests
         </button>
 
-        <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
+        <button onClick={() => navigate("/ctet-tet/pricing")}>
           💎 Premium Plans
         </button>
       </div>
@@ -4618,11 +4768,11 @@ isAdmin={isAdmin}
           📚 TET Notes
         </button>
 
-        <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
+        <button onClick={() => navigate("/ctet-tet/pricing")}>
           💎 Unlock Premium Notes
         </button>
 
-        <button onClick={() => navigate("/subjects/ctet-tet")}>
+        <button onClick={() => navigate("/ctet-tet")}>
           🔙 Back to CTET/TET Hub
         </button>
       </div>
@@ -4657,7 +4807,7 @@ isAdmin={isAdmin}
           📊 Performance Dashboard
         </button>
 
-        <button onClick={() => navigate("/subjects/ctet-tet")}>
+        <button onClick={() => navigate("/ctet-tet")}>
           🔙 Back to CTET/TET Hub
         </button>
       </div>
@@ -4692,7 +4842,7 @@ isAdmin={isAdmin}
           📰 March Current Affairs
         </button>
 
-        <button onClick={() => navigate("/subjects/ctet-tet")}>
+        <button onClick={() => navigate("/ctet-tet")}>
           🔙 Back to CTET/TET Hub
         </button>
       </div>
@@ -4728,7 +4878,7 @@ isAdmin={isAdmin}
           📢 Premium Notes Updated
         </button>
 
-        <button onClick={() => navigate("/subjects/ctet-tet")}>
+        <button onClick={() => navigate("/ctet-tet")}>
           🔙 Back to CTET/TET Hub
         </button>
       </div>
@@ -4764,7 +4914,7 @@ isAdmin={isAdmin}
           MENTORSHIP — Personal Guidance
         </button>
 
-        <button onClick={() => navigate("/subjects/ctet-tet")}>
+        <button onClick={() => navigate("/ctet-tet")}>
           🔙 Back to CTET/TET Hub
         </button>
       </div>
@@ -6185,7 +6335,7 @@ This action cannot be undone.`
           </span>
 
           <h1>
-            {window.location.pathname.split("/").pop()} Notes Library
+            {location.pathname.split("/").pop()} Notes Library
           </h1>
 
           <p>
@@ -6205,7 +6355,7 @@ This action cannot be undone.`
           </button>
 
           <h3>
-            {window.location.pathname.split("/").pop()} Plan Content
+            {location.pathname.split("/").pop()} Plan Content
           </h3>
 
           <div className="contentStudioList">
@@ -6213,7 +6363,7 @@ This action cannot be undone.`
 
             {(() => {
               const activePlan =
-                window.location.pathname.split("/").pop();
+                location.pathname.split("/").pop();
 
               const subjectsInPlan = [
                 ...new Set(
@@ -6273,7 +6423,7 @@ This action cannot be undone.`
 
           <h1>
             {decodeURIComponent(
-              window.location.pathname.split("/").pop()
+              location.pathname.split("/").pop()
             )}
           </h1>
 
@@ -6285,7 +6435,10 @@ This action cannot be undone.`
         <div className="contentStudioForm">
           <button
             className="backButton"
-            onClick={() => navigate(-1)}
+            onClick={() => {
+              const parts = location.pathname.split("/");
+              navigate(`/admin/content/notes/plan/${parts[4]}`);
+            }}
           >
             ← Back to Plan Library
           </button>
@@ -6293,7 +6446,7 @@ This action cannot be undone.`
           <h3>
             Chapters in{" "}
             {decodeURIComponent(
-              window.location.pathname.split("/").pop()
+              location.pathname.split("/").pop()
             )}
           </h3>
 
@@ -6304,10 +6457,10 @@ This action cannot be undone.`
                   .filter(
                     (note) =>
                       note.planType ===
-                        window.location.pathname.split("/").slice(-2)[0] &&
+                        location.pathname.split("/").slice(-2)[0] &&
                       note.subject ===
                         decodeURIComponent(
-                          window.location.pathname.split("/").pop()
+                          location.pathname.split("/").pop()
                         )
                   )
                   .map((note) => note.chapter)
@@ -6323,10 +6476,10 @@ This action cannot be undone.`
                       .filter(
                         (note) =>
                           note.planType ===
-                            window.location.pathname.split("/").slice(-2)[0] &&
+                            location.pathname.split("/").slice(-2)[0] &&
                           note.subject ===
                             decodeURIComponent(
-                              window.location.pathname.split("/").pop()
+                              location.pathname.split("/").pop()
                             )
                       )
                       .map((note) => note.chapter)
@@ -6339,9 +6492,9 @@ This action cannot be undone.`
                   onClick={() =>
                     navigate(
                       `/admin/content/notes/plan/${
-                        window.location.pathname.split("/").slice(-2)[0]
+                        location.pathname.split("/").slice(-2)[0]
                       }/${
-                        window.location.pathname.split("/").pop()
+                        location.pathname.split("/").pop()
                       }/${encodeURIComponent(chapterName)}`
                     )
                   }
@@ -6370,7 +6523,7 @@ This action cannot be undone.`
 
           <h1>
             {decodeURIComponent(
-              window.location.pathname.split("/").pop()
+              location.pathname.split("/").pop()
             )}
           </h1>
 
@@ -6382,7 +6535,10 @@ This action cannot be undone.`
         <div className="contentStudioForm">
           <button
             className="backButton"
-            onClick={() => navigate(-1)}
+            onClick={() => {
+              const parts = location.pathname.split("/");
+              navigate(`/admin/content/notes/plan/${parts[4]}/${parts[5]}`);
+            }}
           >
             ← Back to Subject
           </button>
@@ -6394,14 +6550,14 @@ This action cannot be undone.`
               .filter(
                 (note) =>
                   note.planType ===
-                    window.location.pathname.split("/").slice(-3)[0] &&
+                    location.pathname.split("/").slice(-3)[0] &&
                   note.subject ===
                     decodeURIComponent(
-                      window.location.pathname.split("/").slice(-2)[0]
+                      location.pathname.split("/").slice(-2)[0]
                     ) &&
                   note.chapter ===
                     decodeURIComponent(
-                      window.location.pathname.split("/").pop()
+                      location.pathname.split("/").pop()
                     )
               )
               .length === 0 ? (
@@ -6411,14 +6567,14 @@ This action cannot be undone.`
                 .filter(
                   (note) =>
                     note.planType ===
-                      window.location.pathname.split("/").slice(-3)[0] &&
+                      location.pathname.split("/").slice(-3)[0] &&
                     note.subject ===
                       decodeURIComponent(
-                        window.location.pathname.split("/").slice(-2)[0]
+                        location.pathname.split("/").slice(-2)[0]
                       ) &&
                     note.chapter ===
                       decodeURIComponent(
-                        window.location.pathname.split("/").pop()
+                        location.pathname.split("/").pop()
                       )
                 )
                 .map((note) => (
@@ -6864,7 +7020,7 @@ This action cannot be undone.`
               .trim()
               .replace(/\s+/g, "-");
 
-          const activeMonthId = window.location.pathname
+          const activeMonthId = location.pathname
             .split("/")
             .pop();
 
@@ -7773,7 +7929,7 @@ This action cannot be undone.`
           <button
   onClick={() =>
     navigate(
-      `/admin/content/videos/subjects/${encodeURIComponent(
+      `/admin/content/videos/${encodeURIComponent(
         subjectName
       )}`
     )
@@ -7795,7 +7951,7 @@ This action cannot be undone.`
 />
 
 <Route
-  path="/admin/content/videos/subjects/:subjectName"
+  path="/admin/content/videos/:subjectName"
   element={
     <section className="coursePages">
       <div className="sectionHeader">
@@ -7866,7 +8022,7 @@ This action cannot be undone.`
           <button
             onClick={() =>
               navigate(
-                `/admin/content/videos/subjects/${encodeURIComponent(
+                `/admin/content/videos/${encodeURIComponent(
                   activeVideoSubjectName
                 )}/${encodeURIComponent(chapterName)}`
               )
@@ -7887,7 +8043,7 @@ This action cannot be undone.`
 />
 
 <Route
-  path="/admin/content/videos/subjects/:subjectName/:chapterName"
+  path="/admin/content/videos/:subjectName/:chapterName"
   element={
     requireAdmin() ? (
       <section className="coursePages">
@@ -7906,7 +8062,7 @@ This action cannot be undone.`
           <button
             onClick={() =>
               navigate(
-                `/admin/content/videos/subjects/${decodeURIComponent(
+                `/admin/content/videos/${decodeURIComponent(
                   location.pathname.split("/").slice(-2)[0]
                 )}`
               )
@@ -8213,13 +8369,7 @@ This action cannot be undone.`
               📖 Chapters
             </button>
 
-            <button
-              onClick={() =>
-                navigate("/admin/content/mock-tests/question-bank")
-              }
-            >
-              🧠 Question Bank
-            </button>
+       
 
             <button
               onClick={() =>
@@ -8244,6 +8394,15 @@ This action cannot be undone.`
             >
               📊 Test Results
             </button>
+
+            <button
+  className="contentStudioBtn"
+  onClick={() =>
+    navigate("/admin/content/mock-tests/leaderboard")
+  }
+>
+  🏆 Leaderboard
+</button>
 
             <button
               onClick={() =>
@@ -9088,7 +9247,55 @@ This action cannot be undone.`
     </option>
   </select>
 </div>
+{mockTestForm.timerMode === "perQuestionTimer" && (
+  <>
+    <div>
+      <label>
+        Time Value
+      </label>
 
+      <input
+        type="number"
+        min="1"
+        value={mockTestForm.perQuestionTimeValue}
+        onChange={(e) =>
+          setMockTestForm({
+            ...mockTestForm,
+            perQuestionTimeValue: e.target.value,
+          })
+        }
+      />
+    </div>
+
+    <div>
+      <label>
+        Time Unit
+      </label>
+
+      <select
+        value={mockTestForm.perQuestionTimeUnit}
+        onChange={(e) =>
+          setMockTestForm({
+            ...mockTestForm,
+            perQuestionTimeUnit: e.target.value,
+          })
+        }
+      >
+        <option value="sec">
+          Seconds
+        </option>
+
+        <option value="min">
+          Minutes
+        </option>
+
+        <option value="hr">
+          Hours
+        </option>
+      </select>
+    </div>
+  </>
+)}
 <div>
   <label>
     Auto Submit On Time Up
@@ -9186,6 +9393,154 @@ This action cannot be undone.`
     />
   </div>
 )}
+
+<div>
+  <label>
+    Recurring Mode
+  </label>
+
+  <select
+    value={mockTestForm.recurringMode}
+    onChange={(e) =>
+      setMockTestForm({
+        ...mockTestForm,
+        recurringMode: e.target.value,
+      })
+    }
+  >
+    <option value="none">
+      No Recurring
+    </option>
+
+    <option value="weekly">
+      Weekly Test
+    </option>
+
+    <option value="monthly">
+      Monthly Test
+    </option>
+  </select>
+</div>
+
+{mockTestForm.recurringMode === "weekly" && (
+  <div>
+    <label>
+      Weekly Test Day
+    </label>
+
+    <select
+      value={mockTestForm.weeklyTestDay}
+      onChange={(e) =>
+        setMockTestForm({
+          ...mockTestForm,
+          weeklyTestDay: e.target.value,
+        })
+      }
+    >
+      <option value="">
+        Select Day
+      </option>
+
+      <option value="Sunday">
+        Sunday
+      </option>
+
+      <option value="Monday">
+        Monday
+      </option>
+
+      <option value="Tuesday">
+        Tuesday
+      </option>
+
+      <option value="Wednesday">
+        Wednesday
+      </option>
+
+      <option value="Thursday">
+        Thursday
+      </option>
+
+      <option value="Friday">
+        Friday
+      </option>
+
+      <option value="Saturday">
+        Saturday
+      </option>
+    </select>
+  </div>
+)}
+
+{mockTestForm.recurringMode === "monthly" && (
+  
+  <div>
+    <label>
+      Monthly Test Date
+    </label>
+
+    <input
+      type="number"
+      min="1"
+      max="31"
+      value={mockTestForm.monthlyTestDate}
+      onChange={(e) =>
+        setMockTestForm({
+          ...mockTestForm,
+          monthlyTestDate: e.target.value,
+        })
+      }
+    />
+  </div>
+)}
+
+<div>
+  <label>
+    Live Event Mode
+  </label>
+
+  <select
+    value={mockTestForm.liveEventMode}
+    onChange={(e) =>
+      setMockTestForm({
+        ...mockTestForm,
+        liveEventMode: e.target.value,
+      })
+    }
+  >
+    <option value="no">
+      Normal Test
+    </option>
+
+    <option value="yes">
+      Live Event
+    </option>
+  </select>
+</div>
+
+<div>
+  <label>
+    Scholarship Exam Mode
+  </label>
+
+  <select
+    value={mockTestForm.scholarshipMode}
+    onChange={(e) =>
+      setMockTestForm({
+        ...mockTestForm,
+        scholarshipMode: e.target.value,
+      })
+    }
+  >
+    <option value="no">
+      Disabled
+    </option>
+
+    <option value="yes">
+      Enabled
+    </option>
+  </select>
+</div>
 
 <div>
   <label>
@@ -9543,26 +9898,116 @@ This action cannot be undone.`
                 </div>
 
                 <div className="contentStudioActions">
-                  {mockTestQuestionsForm.length > 1 && (
-                    <button
-                      className="deleteContentButton"
-                      onClick={() => {
-                        const updatedQuestions =
-                          mockTestQuestionsForm.filter(
-                            (_, index) => index !== questionIndex
-                          );
+  <button
+    className="backButton"
+    disabled={questionIndex === 0}
+    onClick={() => {
+      const updatedQuestions = [...mockTestQuestionsForm];
+      const currentQuestion = updatedQuestions[questionIndex];
 
-                        setMockTestQuestionsForm(updatedQuestions);
-                      }}
-                    >
-                      Delete Question
-                    </button>
-                  )}
-                </div>
+      updatedQuestions[questionIndex] =
+        updatedQuestions[questionIndex - 1];
+
+      updatedQuestions[questionIndex - 1] = currentQuestion;
+
+      setMockTestQuestionsForm(updatedQuestions);
+    }}
+  >
+    ↑ Move Up
+  </button>
+
+  <button
+    className="backButton"
+    disabled={questionIndex === mockTestQuestionsForm.length - 1}
+    onClick={() => {
+      const updatedQuestions = [...mockTestQuestionsForm];
+      const currentQuestion = updatedQuestions[questionIndex];
+
+      updatedQuestions[questionIndex] =
+        updatedQuestions[questionIndex + 1];
+
+      updatedQuestions[questionIndex + 1] = currentQuestion;
+
+      setMockTestQuestionsForm(updatedQuestions);
+    }}
+  >
+    ↓ Move Down
+  </button>
+
+  <button
+    className="backButton"
+    onClick={() => {
+      const duplicatedQuestion = {
+        ...mockTestQuestionsForm[questionIndex],
+        question: `${mockTestQuestionsForm[questionIndex].question || ""} Copy`,
+        saveToQuestionBank: "no",
+      };
+
+      const updatedQuestions = [...mockTestQuestionsForm];
+
+      updatedQuestions.splice(
+        questionIndex + 1,
+        0,
+        duplicatedQuestion
+      );
+
+      setMockTestQuestionsForm(updatedQuestions);
+    }}
+  >
+    Duplicate Question
+  </button>
+
+  {mockTestQuestionsForm.length > 1 && (
+    <button
+      className="deleteContentButton"
+      onClick={() => {
+        const updatedQuestions = mockTestQuestionsForm.filter(
+          (_, index) => index !== questionIndex
+        );
+
+        setMockTestQuestionsForm(updatedQuestions);
+      }}
+    >
+      Delete Question
+    </button>
+  )}
+</div>
               </div>
             ))}
 
             <div className="contentStudioActions">
+            <button
+  className="dangerButton"
+  onClick={() => {
+    const confirmClear = window.confirm(
+      "Clear all questions and start again?"
+    );
+
+    if (!confirmClear) return;
+
+    setMockTestQuestionsForm([
+      {
+        question: "",
+        option1: "",
+        option2: "",
+        option3: "",
+        option4: "",
+        answer: "",
+        explanation: "",
+        level: "Easy",
+        questionType: "Single Correct",
+        language: "English",
+        tag: "",
+        positiveMarks: mockTestForm.marksPerQuestion || "1",
+        negativeMarks: mockTestForm.negativeMarks || "0",
+        questionStatus: "published",
+        saveToQuestionBank: "yes",
+      },
+    ]);
+  }}
+>
+  Clear All Questions
+</button>
               <button
                 className="publishButton"
                 onClick={() =>
@@ -9862,6 +10307,15 @@ This action cannot be undone.`
   }}
 >
   Select All
+</button>
+
+<button
+  className="backButton"
+  onClick={() => {
+    setSelectedMockTestIds([]);
+  }}
+>
+  Clear Selected
 </button>
 
 <button
@@ -10281,107 +10735,6 @@ This action cannot be undone.`
 </div>
 
 <div className="contentStudioActions mockTestCompactActions">
-
-<button
-  className="publishButton"
-  onClick={() => {
-    setEditingMockTestId(test.id);
-
-    setMockTestForm({
-      title: test.title || "",
-      planType: test.planType || "FREE",
-      subject: test.subject || "",
-      chapter: test.chapter || "",
-      examType: test.examType || "CTET",
-      testType: test.testType || "Chapter Test",
-      duration: test.duration?.toString() || "30",
-      totalQuestions:
-        test.totalQuestions?.toString() || "10",
-      marksPerQuestion:
-        test.marksPerQuestion?.toString() || "1",
-      negativeMarks:
-        test.negativeMarks?.toString() || "0",
-      passingMarks:
-        test.passingMarks?.toString() || "0",
-      examDifficulty:
-        test.examDifficulty || "Mixed",
-      examLanguage:
-        test.examLanguage || "English",
-      attemptLimit:
-        test.attemptLimit || "unlimited",
-      resultPublishMode:
-        test.resultPublishMode || "instant",
-      shuffleQuestions:
-        test.shuffleQuestions || "no",
-      shuffleOptions:
-        test.shuffleOptions || "no",
-      navigationMode:
-        test.navigationMode || "free",
-      allowPause:
-        test.allowPause || "yes",
-      calculatorAllowed:
-        test.calculatorAllowed || "no",
-      scheduleType:
-        test.scheduleType || "alwaysAvailable",
-      timerMode:
-        test.timerMode || "globalTimer",
-      autoSubmitOnTimeUp:
-        test.autoSubmitOnTimeUp || "yes",
-      leaderboardMode:
-        test.leaderboardMode || "disabled",
-      fullscreenMode:
-        test.fullscreenMode || "no",
-      tabSwitchDetection:
-        test.tabSwitchDetection || "no",
-      copyPasteProtection:
-        test.copyPasteProtection || "no",
-      autoSubmitOnViolation:
-        test.autoSubmitOnViolation || "no",
-      questionSource:
-        test.questionSource || "manual",
-      examStartDate:
-        test.examStartDate || "",
-      examStartTime:
-        test.examStartTime || "",
-      examEndDate:
-        test.examEndDate || "",
-      examEndTime:
-        test.examEndTime || "",
-      examInstructions:
-        test.examInstructions || "",
-      status:
-        test.status || "published",
-    });
-
-    setMockTestQuestionsForm(
-      test.questions?.length
-        ? test.questions
-        : [
-            {
-              question: "",
-              option1: "",
-              option2: "",
-              option3: "",
-              option4: "",
-              answer: "",
-              explanation: "",
-              level: "Easy",
-              questionType: "Single Correct",
-              language: "English",
-              tag: "",
-              positiveMarks: "1",
-              negativeMarks: "0",
-              questionStatus: "published",
-              saveToQuestionBank: "yes",
-            },
-          ]
-    );
-
-    navigate("/admin/content/mock-tests/add");
-  }}
->
-  Edit
-</button>
 
   <button
     className="backButton"
@@ -10963,9 +11316,7 @@ This action cannot be undone.`
     requireAdmin() ? (
       <section className="coursePages">
         {(() => {
-          const testId = location.pathname
-            .split("/")
-            .pop();
+          const testId = location.pathname.split("/").pop();
 
           const previewTest = universalContent.find(
             (item) =>
@@ -10977,24 +11328,19 @@ This action cannot be undone.`
             return (
               <>
                 <div className="sectionHeader">
-                  <span className="badge">
-                    MOCK TEST PREVIEW
-                  </span>
+                  <span className="badge">MOCK TEST PREVIEW</span>
 
                   <h1>Test Not Found</h1>
 
                   <p>
-                    This mock test may have been deleted
-                    or not loaded yet.
+                    This mock test may have been deleted or not loaded yet.
                   </p>
                 </div>
 
                 <button
                   className="backButton"
                   onClick={() =>
-                    navigate(
-                      "/admin/content/mock-tests/manage"
-                    )
+                    navigate("/admin/content/mock-tests/manage")
                   }
                 >
                   ← Back to Manage Mock Tests
@@ -11003,72 +11349,102 @@ This action cannot be undone.`
             );
           }
 
+          const safeQuestions =
+            previewTest.questions?.length > 0
+              ? previewTest.questions.map((question) => ({
+                  question: question.question || "",
+                  option1: question.option1 || "",
+                  option2: question.option2 || "",
+                  option3: question.option3 || "",
+                  option4: question.option4 || "",
+                  answer: question.answer || "",
+                  explanation: question.explanation || "",
+                  level: question.level || "Easy",
+                  questionType:
+                    question.questionType || "Single Correct",
+                  language: question.language || "English",
+                  tag: question.tag || "",
+                  positiveMarks:
+                    question.positiveMarks?.toString() || "1",
+                  negativeMarks:
+                    question.negativeMarks?.toString() || "0",
+                  questionStatus:
+                    question.questionStatus || "published",
+                  saveToQuestionBank:
+                    question.saveToQuestionBank || "yes",
+                }))
+              : [
+                  {
+                    question: "",
+                    option1: "",
+                    option2: "",
+                    option3: "",
+                    option4: "",
+                    answer: "",
+                    explanation: "",
+                    level: "Easy",
+                    questionType: "Single Correct",
+                    language: "English",
+                    tag: "",
+                    positiveMarks: "1",
+                    negativeMarks: "0",
+                    questionStatus: "published",
+                    saveToQuestionBank: "yes",
+                  },
+                ];
+
           return (
             <>
               <div className="sectionHeader">
-                <span className="badge">
-                  MOCK TEST PREVIEW
-                </span>
+                <span className="badge">MOCK TEST PREVIEW</span>
 
                 <h1>{previewTest.title}</h1>
 
                 <p>
-                  {previewTest.planType} •{" "}
-                  {previewTest.subject} •{" "}
-                  {previewTest.chapter} •{" "}
-                  {previewTest.testType} •{" "}
-                  {previewTest.duration} min
+                  {previewTest.planType} • {previewTest.subject} •{" "}
+                  {previewTest.chapter} • {previewTest.testType} •{" "}
+                  {previewTest.duration || previewTest.durationMinutes} min
                 </p>
               </div>
 
               <div className="contentStudioList">
-                {previewTest.questions?.map(
-                  (questionItem, index) => (
-                    <div
-                      className="contentStudioItem"
-                      key={index}
-                    >
-                      <strong>
-                        Q{index + 1}.{" "}
-                        {questionItem.question}
-                      </strong>
+                {safeQuestions.map((questionItem, index) => (
+                  <div className="contentStudioItem" key={index}>
+                    <strong>
+                      Q{index + 1}. {questionItem.question}
+                    </strong>
 
-                      <p>A. {questionItem.option1}</p>
-                      <p>B. {questionItem.option2}</p>
-                      <p>C. {questionItem.option3}</p>
-                      <p>D. {questionItem.option4}</p>
+                    <p>A. {questionItem.option1}</p>
+                    <p>B. {questionItem.option2}</p>
+                    <p>C. {questionItem.option3}</p>
+                    <p>D. {questionItem.option4}</p>
 
-                      <p>
-  <strong>Correct:</strong>{" "}
-  {questionItem.answer === "option1"
-    ? `A. ${questionItem.option1 || "-"}`
-    : questionItem.answer === "option2"
-    ? `B. ${questionItem.option2 || "-"}`
-    : questionItem.answer === "option3"
-    ? `C. ${questionItem.option3 || "-"}`
-    : questionItem.answer === "option4"
-    ? `D. ${questionItem.option4 || "-"}`
-    : questionItem.answer || "Not set"}
-</p>
+                    <p>
+                      <strong>Correct:</strong>{" "}
+                      {questionItem.answer === "option1"
+                        ? `A. ${questionItem.option1 || "-"}`
+                        : questionItem.answer === "option2"
+                        ? `B. ${questionItem.option2 || "-"}`
+                        : questionItem.answer === "option3"
+                        ? `C. ${questionItem.option3 || "-"}`
+                        : questionItem.answer === "option4"
+                        ? `D. ${questionItem.option4 || "-"}`
+                        : questionItem.answer || "Not set"}
+                    </p>
 
-                      <p>
-                        <strong>Explanation:</strong>{" "}
-                        {questionItem.explanation ||
-                          "No explanation added."}
-                      </p>
+                    <p>
+                      <strong>Explanation:</strong>{" "}
+                      {questionItem.explanation ||
+                        "No explanation added."}
+                    </p>
 
-                      <p>
-                        {questionItem.level || "Easy"} •{" "}
-                        {questionItem.questionType ||
-                          "Single Correct"}{" "}
-                        •{" "}
-                        {questionItem.language || "English"}{" "}
-                        •{" "}
-                        {questionItem.tag || "No Tag"}
-                      </p>
-                    </div>
-                  )
-                )}
+                    <p>
+                      {questionItem.level} • {questionItem.questionType} •{" "}
+                      {questionItem.language} •{" "}
+                      {questionItem.tag || "No Tag"}
+                    </p>
+                  </div>
+                ))}
               </div>
 
               <div className="contentStudioActions">
@@ -11079,59 +11455,128 @@ This action cannot be undone.`
 
                     setMockTestForm({
                       title: previewTest.title || "",
-                      planType:
-                        previewTest.planType || "FREE",
+                      planType: previewTest.planType || "FREE",
                       subject: previewTest.subject || "",
                       chapter: previewTest.chapter || "",
-                      examType:
-                        previewTest.examType || "CTET",
+                      examType: previewTest.examType || "CTET",
                       testType:
-                        previewTest.testType ||
-                        "Chapter Test",
+                        previewTest.testType || "Chapter Test",
+
                       duration:
                         previewTest.duration?.toString() ||
+                        previewTest.durationMinutes?.toString() ||
                         "30",
+
                       totalQuestions:
                         previewTest.totalQuestions?.toString() ||
+                        previewTest.questions?.length?.toString() ||
                         "10",
+
                       marksPerQuestion:
-                        previewTest.marksPerQuestion?.toString() ||
-                        "1",
+                        previewTest.marksPerQuestion?.toString() || "1",
+
                       negativeMarks:
-                        previewTest.negativeMarks?.toString() ||
-                        "0",
-                      status:
-                        previewTest.status || "published",
+                        previewTest.negativeMarks?.toString() || "0",
+
+                      passingMarks:
+                        previewTest.passingMarks?.toString() || "0",
+
+                      examDifficulty:
+                        previewTest.examDifficulty || "Mixed",
+
+                      examLanguage:
+                        previewTest.examLanguage || "English",
+
+                      attemptLimit:
+                        previewTest.attemptLimit || "unlimited",
+
+                      resultPublishMode:
+                        previewTest.resultPublishMode || "instant",
+
+                      shuffleQuestions:
+                        previewTest.shuffleQuestions || "no",
+
+                      shuffleOptions:
+                        previewTest.shuffleOptions || "no",
+
+                      navigationMode:
+                        previewTest.navigationMode || "free",
+
+                      allowPause:
+                        previewTest.allowPause || "yes",
+
+                      calculatorAllowed:
+                        previewTest.calculatorAllowed || "no",
+
+                      questionSource:
+                        previewTest.questionSource || "manual",
+
+                      fullscreenMode:
+                        previewTest.fullscreenMode || "no",
+
+                      tabSwitchDetection:
+                        previewTest.tabSwitchDetection || "no",
+
+                      copyPasteProtection:
+                        previewTest.copyPasteProtection || "no",
+
+                      autoSubmitOnViolation:
+                        previewTest.autoSubmitOnViolation || "no",
+
+                      leaderboardMode:
+                        previewTest.leaderboardMode || "disabled",
+
+                      timerMode:
+                        previewTest.timerMode || "globalTimer",
+
+                      perQuestionTimeValue:
+                        previewTest.perQuestionTimeValue || "1",
+
+                      perQuestionTimeUnit:
+                        previewTest.perQuestionTimeUnit || "min",
+
+                      autoSubmitOnTimeUp:
+                        previewTest.autoSubmitOnTimeUp || "yes",
+
+                      scheduleType:
+                        previewTest.scheduleType || "alwaysAvailable",
+
+                      examStartDate:
+                        previewTest.examStartDate || "",
+
+                      examStartTime:
+                        previewTest.examStartTime || "",
+
+                      examEndDate:
+                        previewTest.examEndDate || "",
+
+                      examEndTime:
+                        previewTest.examEndTime || "",
+
+                      recurringMode:
+                        previewTest.recurringMode || "none",
+
+                      weeklyTestDay:
+                        previewTest.weeklyTestDay || "",
+
+                      monthlyTestDate:
+                        previewTest.monthlyTestDate || "",
+
+                      liveEventMode:
+                        previewTest.liveEventMode || "no",
+
+                      scholarshipMode:
+                        previewTest.scholarshipMode || "no",
+
+                      examInstructions:
+                        previewTest.examInstructions || "",
+
+                      status: previewTest.status || "published",
                     });
 
-                    setMockTestQuestionsForm(
-                      previewTest.questions?.length
-                        ? previewTest.questions
-                        : [
-                            {
-                              question: "",
-                              option1: "",
-                              option2: "",
-                              option3: "",
-                              option4: "",
-                              answer: "",
-                              explanation: "",
-                              level: "Easy",
-                              questionType:
-                                "Single Correct",
-                              language: "English",
-                              tag: "",
-                              positiveMarks: "1",
-                              negativeMarks: "0",
-                              questionStatus:
-                                "published",
-                            },
-                          ]
-                    );
+                    setMockTestQuestionsForm(safeQuestions);
 
-                    navigate(
-                      "/admin/content/mock-tests/add"
-                    );
+                    navigate("/admin/content/mock-tests/add");
                   }}
                 >
                   Edit Test
@@ -11140,9 +11585,7 @@ This action cannot be undone.`
                 <button
                   className="backButton"
                   onClick={() =>
-                    navigate(
-                      "/admin/content/mock-tests/manage"
-                    )
+                    navigate("/admin/content/mock-tests/manage")
                   }
                 >
                   ← Back to Manage
@@ -11155,6 +11598,7 @@ This action cannot be undone.`
     ) : null
   }
 />
+
 
 <Route
   path="/admin/content/mock-tests/plan/:planType"
@@ -11813,7 +12257,7 @@ Import JSON
                           className="publishButton"
                           onClick={() =>
                             navigate(
-                              `/admin/content/mock-tests/subjects/${encodeURIComponent(
+                              `/admin/content/mock-tests/${encodeURIComponent(
                                 subjectName
                               )}`
                             )
@@ -11842,7 +12286,7 @@ Import JSON
 />
 
 <Route
-  path="/admin/content/mock-tests/subjects/:subjectName"
+  path="/admin/content/mock-tests/:subjectName"
   element={
     requireAdmin() ? (
       <section className="coursePages">
@@ -11928,7 +12372,7 @@ Import JSON
                           className="publishButton"
                           onClick={() =>
                             navigate(
-                              `/admin/content/mock-tests/subjects/${encodeURIComponent(
+                              `/admin/content/mock-tests/${encodeURIComponent(
                                 activeSubject
                               )}/${encodeURIComponent(
                                 chapterName
@@ -11959,7 +12403,7 @@ Import JSON
 />
 
 <Route
-  path="/admin/content/mock-tests/subjects/:subjectName/:chapterName"
+  path="/admin/content/mock-tests/:subjectName/:chapterName"
   element={
     requireAdmin() ? (
       <section className="coursePages">
@@ -12002,7 +12446,7 @@ Import JSON
                     className="backButton"
                     onClick={() =>
                       navigate(
-                        `/admin/content/mock-tests/subjects/${encodeURIComponent(
+                        `/admin/content/mock-tests/${encodeURIComponent(
                           activeSubject
                         )}`
                       )
@@ -13274,16 +13718,15 @@ Import JSON
             (item) => item.section === "mockTest"
           );
 
-          const mockResults = universalContent.filter(
-            (item) => item.section === "mockResult"
-          );
+          const leaderboardResults =
+            mockLeaderboardEntries || [];
 
-          const totalAttempts = mockResults.length;
+          const totalAttempts = leaderboardResults.length;
 
           const averageScore =
             totalAttempts > 0
               ? Math.round(
-                  mockResults.reduce(
+                  leaderboardResults.reduce(
                     (sum, result) =>
                       sum + Number(result.score || 0),
                     0
@@ -13294,13 +13737,20 @@ Import JSON
           const averageAccuracy =
             totalAttempts > 0
               ? Math.round(
-                  mockResults.reduce(
+                  leaderboardResults.reduce(
                     (sum, result) =>
                       sum + Number(result.accuracy || 0),
                     0
                   ) / totalAttempts
                 )
               : 0;
+
+          const rankedResults = [...leaderboardResults].sort(
+            (a, b) =>
+              Number(b.percentage || 0) -
+                Number(a.percentage || 0) ||
+              Number(b.score || 0) - Number(a.score || 0)
+          );
 
           return (
             <>
@@ -13312,8 +13762,8 @@ Import JSON
                 <h1>Mock Test Results Analytics</h1>
 
                 <p>
-                  Track attempts, scores, accuracy, weak chapters,
-                  leaderboard performance, and student progress.
+                  Track leaderboard results, student performance,
+                  score, accuracy, weak chapters, and ranking.
                 </p>
               </div>
 
@@ -13335,6 +13785,13 @@ Import JSON
                     }
                   >
                     View Published Tests
+                  </button>
+
+                  <button
+                    className="backButton"
+                    onClick={loadMockLeaderboardEntries}
+                  >
+                    Refresh Results
                   </button>
                 </div>
               </div>
@@ -13365,57 +13822,58 @@ Import JSON
                 </div>
               </div>
 
-
               <div className="contentStudioList">
-  <h3>Leaderboard</h3>
+                <h3>Leaderboard</h3>
 
-  {mockResults.length === 0 ? (
-    <div className="contentStudioItem">
-      <strong>No leaderboard data yet.</strong>
-      <p>
-        Leaderboard will appear after students attempt mock tests.
-      </p>
-    </div>
-  ) : (
-    [...mockResults]
-      .sort(
-        (a, b) =>
-          Number(b.score || 0) - Number(a.score || 0)
-      )
-      .slice(0, 10)
-      .map((result, index) => (
-        <div
-          className="contentStudioItem"
-          key={result.id || index}
-        >
-          <strong>
-            #{index + 1}{" "}
-            {result.studentName ||
-              result.studentEmail ||
-              "Student"}
-          </strong>
+                {rankedResults.length === 0 ? (
+                  <div className="contentStudioItem">
+                    <strong>No leaderboard data yet.</strong>
+                    <p>
+                      Leaderboard will appear after students save
+                      their mock test result.
+                    </p>
+                  </div>
+                ) : (
+                  rankedResults.slice(0, 10).map((result, index) => (
+                    <div
+                      className="contentStudioItem"
+                      key={result.id || index}
+                    >
+                      <strong>
+                        #{index + 1}{" "}
+                        {result.studentName ||
+                          result.studentEmail ||
+                          "Student"}
+                      </strong>
 
-          <p>
-            {result.testTitle || "Mock Test"} • Score:{" "}
-            {result.score || 0} • Accuracy:{" "}
-            {result.accuracy || 0}%
-          </p>
+                      <p>
+                        {result.testTitle || "Mock Test"} •{" "}
+                        {result.subject || "Subject"} •{" "}
+                        {result.chapter || "Chapter"}
+                      </p>
 
-          <p>
-            Attempts: {result.attempts || 1} • Correct:{" "}
-            {result.correct || 0} • Wrong:{" "}
-            {result.wrong || 0} • Skipped:{" "}
-            {result.skipped || 0}
-          </p>
-        </div>
-      ))
-  )}
-</div>
+                      <p>
+                        Score: {result.score || 0}/
+                        {result.totalMarks || 0} • Percentage:{" "}
+                        {result.percentage || 0}% • Accuracy:{" "}
+                        {result.accuracy || 0}%
+                      </p>
+
+                      <p>
+                        Mode: {result.leaderboardMode || "disabled"} •
+                        Correct: {result.correctCount || 0} • Wrong:{" "}
+                        {result.wrongCount || 0} • Skipped:{" "}
+                        {result.skippedCount || 0}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+
               <div className="contentStudioList">
                 <h3>Test-wise Performance</h3>
 
                 {mockTests.length === 0 ? (
-
                   <div className="contentStudioItem">
                     <strong>No mock tests found.</strong>
                     <p>
@@ -13424,10 +13882,10 @@ Import JSON
                   </div>
                 ) : (
                   mockTests.map((test) => {
-                    const testResults = mockResults.filter(
-                      (result) =>
-                        result.testId === test.id
-                    );
+                    const testResults =
+                      leaderboardResults.filter(
+                        (result) => result.testId === test.id
+                      );
 
                     const testAvgScore =
                       testResults.length > 0
@@ -13476,177 +13934,168 @@ Import JSON
                   })
                 )}
               </div>
-              
 
               <div className="contentStudioList">
-  <h3>Student-wise Results</h3>
+                <h3>Student-wise Results</h3>
 
-  {mockResults.length === 0 ? (
-    <div className="contentStudioItem">
-      <strong>No student results yet.</strong>
-      <p>
-        Results will appear here after students attempt
-        mock tests.
-      </p>
-    </div>
-  ) : (
-    mockResults.map((result) => (
-      <div
-        className="contentStudioItem"
-        key={result.id}
-      >
-        <strong>
-          {result.studentName ||
-            result.studentEmail ||
-            "Student"}
-        </strong>
+                {leaderboardResults.length === 0 ? (
+                  <div className="contentStudioItem">
+                    <strong>No student results yet.</strong>
+                    <p>
+                      Results will appear here after students save
+                      leaderboard attempts.
+                    </p>
+                  </div>
+                ) : (
+                  leaderboardResults.map((result) => (
+                    <div
+                      className="contentStudioItem"
+                      key={result.id}
+                    >
+                      <strong>
+                        {result.studentName ||
+                          result.studentEmail ||
+                          "Student"}
+                      </strong>
 
-        <p>
-          {result.testTitle || "Mock Test"} •{" "}
-          Score: {result.score || 0} •{" "}
-          Accuracy: {result.accuracy || 0}%
-        </p>
+                      <p>
+                        {result.testTitle || "Mock Test"} •{" "}
+                        Score: {result.score || 0}/
+                        {result.totalMarks || 0} •{" "}
+                        Percentage: {result.percentage || 0}% •{" "}
+                        Accuracy: {result.accuracy || 0}%
+                      </p>
 
-        <p>
-          Correct: {result.correct || 0} •{" "}
-          Wrong: {result.wrong || 0} •{" "}
-          Skipped: {result.skipped || 0}
-        </p>
+                      <p>
+                        Correct: {result.correctCount || 0} •{" "}
+                        Wrong: {result.wrongCount || 0} •{" "}
+                        Skipped: {result.skippedCount || 0}
+                      </p>
 
-        <p>
-          Time Taken: {result.timeTaken || 0} min •{" "}
-          Attempted At:{" "}
-          {result.createdAt?.toDate
-            ? result.createdAt.toDate().toLocaleString()
-            : "Not available"}
-        </p>
-      </div>
-    ))
-  )}
-</div>
+                      <p>
+                        Attempted At:{" "}
+                        {result.createdAt?.toDate
+                          ? result.createdAt
+                              .toDate()
+                              .toLocaleString()
+                          : "Not available"}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
 
-<div className="contentStudioList">
-  <h3>Weak Chapters Analytics</h3>
+              <div className="contentStudioList">
+                <h3>Weak Chapters Analytics</h3>
 
-  {mockResults.length === 0 ? (
-    <div className="contentStudioItem">
-      <strong>No weak chapter data yet.</strong>
-      <p>
-        Weak chapter analytics will appear after students
-        attempt mock tests.
-      </p>
-    </div>
-  ) : (
-    [
-      ...new Map(
-        mockResults
-          .filter((result) => result.chapter)
-          .map((result) => [
-            result.chapter,
-            {
-              chapter: result.chapter,
-              subject: result.subject || "Unknown Subject",
-              attempts: mockResults.filter(
-                (item) => item.chapter === result.chapter
-              ).length,
-              averageAccuracy: Math.round(
-                mockResults
-                  .filter((item) => item.chapter === result.chapter)
-                  .reduce(
-                    (sum, item) =>
-                      sum + Number(item.accuracy || 0),
-                    0
-                  ) /
-                  mockResults.filter(
-                    (item) => item.chapter === result.chapter
-                  ).length
-              ),
-            },
-          ])
-      ).values(),
-    ]
-      .sort(
-        (a, b) =>
-          Number(a.averageAccuracy || 0) -
-          Number(b.averageAccuracy || 0)
-      )
-      .map((chapterItem) => (
-        <div
-          className="contentStudioItem"
-          key={chapterItem.chapter}
-        >
-          <strong>{chapterItem.chapter}</strong>
+                {leaderboardResults.length === 0 ? (
+                  <div className="contentStudioItem">
+                    <strong>No weak chapter data yet.</strong>
+                    <p>
+                      Weak chapter analytics will appear after
+                      leaderboard attempts.
+                    </p>
+                  </div>
+                ) : (
+                  [
+                    ...new Map(
+                      leaderboardResults
+                        .filter((result) => result.chapter)
+                        .map((result) => {
+                          const chapterResults =
+                            leaderboardResults.filter(
+                              (item) =>
+                                item.chapter === result.chapter
+                            );
 
-          <p>
-            {chapterItem.subject} • Attempts:{" "}
-            {chapterItem.attempts}
-          </p>
+                          return [
+                            result.chapter,
+                            {
+                              chapter: result.chapter,
+                              subject:
+                                result.subject ||
+                                "Unknown Subject",
+                              attempts: chapterResults.length,
+                              averageAccuracy: Math.round(
+                                chapterResults.reduce(
+                                  (sum, item) =>
+                                    sum +
+                                    Number(item.accuracy || 0),
+                                  0
+                                ) / chapterResults.length
+                              ),
+                            },
+                          ];
+                        })
+                    ).values(),
+                  ]
+                    .sort(
+                      (a, b) =>
+                        Number(a.averageAccuracy || 0) -
+                        Number(b.averageAccuracy || 0)
+                    )
+                    .map((chapterItem) => (
+                      <div
+                        className="contentStudioItem"
+                        key={chapterItem.chapter}
+                      >
+                        <strong>{chapterItem.chapter}</strong>
 
-          <p>
-            Average Accuracy:{" "}
-            {chapterItem.averageAccuracy || 0}%
-          </p>
-        </div>
-      ))
-  )}
-</div>
+                        <p>
+                          {chapterItem.subject} • Attempts:{" "}
+                          {chapterItem.attempts}
+                        </p>
 
-<div className="contentStudioList">
-  <h3>Top Performers</h3>
+                        <p>
+                          Average Accuracy:{" "}
+                          {chapterItem.averageAccuracy || 0}%
+                        </p>
+                      </div>
+                    ))
+                )}
+              </div>
 
-  {mockResults.length === 0 ? (
-    <div className="contentStudioItem">
-      <strong>No top performers yet.</strong>
+              <div className="contentStudioList">
+                <h3>Top Performers</h3>
 
-      <p>
-        Top performers will appear after students
-        attempt mock tests.
-      </p>
-    </div>
-  ) : (
-    [...mockResults]
-      .sort(
-        (a, b) =>
-          Number(b.score || 0) -
-          Number(a.score || 0)
-      )
-      .slice(0, 3)
-      .map((result, index) => (
-        <div
-          className="contentStudioItem"
-          key={result.id || index}
-        >
-          <strong>
-            {index === 0
-              ? "🥇 Rank #1"
-              : index === 1
-              ? "🥈 Rank #2"
-              : "🥉 Rank #3"}
-          </strong>
+                {rankedResults.length === 0 ? (
+                  <div className="contentStudioItem">
+                    <strong>No top performers yet.</strong>
+                    <p>
+                      Top performers will appear after students save
+                      leaderboard results.
+                    </p>
+                  </div>
+                ) : (
+                  rankedResults.slice(0, 3).map((result, index) => (
+                    <div
+                      className="contentStudioItem"
+                      key={result.id || index}
+                    >
+                      <strong>
+                        {index === 0
+                          ? "🥇 Rank #1"
+                          : index === 1
+                          ? "🥈 Rank #2"
+                          : "🥉 Rank #3"}
+                      </strong>
 
-          <p>
-            {result.studentName ||
-              result.studentEmail ||
-              "Student"}
-          </p>
+                      <p>
+                        {result.studentName ||
+                          result.studentEmail ||
+                          "Student"}
+                      </p>
 
-          <p>
-            Score: {result.score || 0}
-            {" • "}
-            Accuracy: {result.accuracy || 0}%
-          </p>
-
-          <p>
-            Correct: {result.correct || 0}
-            {" • "}
-            Wrong: {result.wrong || 0}
-            {" • "}
-            Skipped: {result.skipped || 0}
-          </p>
-        </div>
-      ))
-  )}
-</div>
+                      <p>
+                        Score: {result.score || 0}/
+                        {result.totalMarks || 0} • Percentage:{" "}
+                        {result.percentage || 0}% • Accuracy:{" "}
+                        {result.accuracy || 0}%
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
 
               <div className="contentStudioList">
                 <h3>Future AI Insights</h3>
@@ -13655,15 +14104,99 @@ Import JSON
                   <strong>Coming Next</strong>
 
                   <p>
-                    Weak chapters, leaderboard, time analysis,
-                    retry suggestions, and AI learning recommendations
-                    will connect here after student attempt engine.
+                    Time analysis, retry suggestions, AI learning
+                    recommendations, and deep weak-area diagnosis
+                    will connect after attempt storage is finalized.
                   </p>
                 </div>
               </div>
             </>
           );
         })()}
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/mock-tests/leaderboard"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages">
+        <div className="sectionHeader">
+          <span className="badge">
+            LEADERBOARD
+          </span>
+
+          <h1>Mock Test Leaderboard</h1>
+
+          <p>
+            Top student rankings across all mock tests.
+          </p>
+        </div>
+
+        <div className="contentStudioActions">
+          <button
+            className="backButton"
+            onClick={() =>
+              navigate("/admin/content/mock-tests")
+            }
+          >
+            ← Back to Mock Tests
+          </button>
+        </div>
+
+        <div className="contentStudioList">
+          <h3>Top Rankings</h3>
+
+          {mockLeaderboardEntries.length === 0 ? (
+            <div className="contentStudioItem">
+              <strong>
+                No leaderboard entries yet.
+              </strong>
+            </div>
+          ) : (
+            [...mockLeaderboardEntries]
+              .sort(
+                (a, b) =>
+                  Number(b.percentage || 0) -
+                    Number(a.percentage || 0) ||
+                  Number(b.score || 0) -
+                    Number(a.score || 0)
+              )
+              .map((result, index) => (
+                <div
+                  className="contentStudioItem"
+                  key={result.id}
+                >
+                  <strong>
+                    #{index + 1}{" "}
+                    {result.studentName ||
+                      result.studentEmail}
+                  </strong>
+
+                  <p>
+                    {result.testTitle}
+                  </p>
+
+                  <p>
+                    Score: {result.score}/
+                    {result.totalMarks}
+                  </p>
+
+                  <p>
+                    Percentage:
+                    {result.percentage}%
+                  </p>
+
+                  <p>
+                    Accuracy:
+                    {result.accuracy}%
+                  </p>
+                </div>
+              ))
+          )}
+        </div>
       </section>
     ) : null
   }
@@ -14501,7 +15034,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   }
 />
 <Route
-  path="/subjects/ctet-tet/courses"
+  path="/ctet-tet/courses"
   element={
     <section className="coursePages coursesMasterPage">
       <div className="sectionHeader">
@@ -14538,7 +15071,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 
         <div
           className="coursePathCard"
-          onClick={() => navigate("/subjects/ctet-tet")}
+          onClick={() => navigate("/ctet-tet")}
         >
           <div className="coursePathIcon">🔙</div>
           <h3>Back to Hub</h3>
@@ -16035,6 +16568,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
         )
         .map((test) => {
           const questions = test.questions || [];
+
           const currentQuestionIndex =
             mockAttemptCurrentIndex?.[test.id] || 0;
 
@@ -16083,15 +16617,78 @@ handleSaveUniversalContent={handleSaveUniversalContent}
             (_, index) => mockAttemptAnswers?.[test.id]?.[index]
           ).length;
 
-          const markedCount = questions.filter(
-            (_, index) => mockMarkedQuestions?.[test.id]?.[index]
-          ).length;
+          const getTimerSeconds = (value, unit) => {
+            const numericValue = Number(value || 1);
 
-          const timeLeft = mockExamTimeLeft?.[test.id] ?? 1800;
+            if (unit === "hr") return numericValue * 60 * 60;
+            if (unit === "min") return numericValue * 60;
+
+            return numericValue;
+          };
+
+          const isNoTimer =
+            test.timerMode === "noTimer";
+
+          const isPerQuestionTimer =
+            test.timerMode === "perQuestionTimer";
+
+          const timerLabel =
+            isPerQuestionTimer ? "Question Time" : "Time Left";
+
+          const defaultTimerSeconds =
+            isPerQuestionTimer
+              ? getTimerSeconds(
+                  test.perQuestionTimeValue,
+                  test.perQuestionTimeUnit
+                )
+              : Number(test.duration || 30) * 60;
+
+          const timeLeft = isNoTimer
+            ? 0
+            : mockExamTimeLeft?.[test.id] ?? defaultTimerSeconds;
+
+          const resetQuestionTimer = () => {
+            if (!isPerQuestionTimer) return;
+
+            setMockExamTimeLeft((prev) => ({
+              ...prev,
+              [test.id]: defaultTimerSeconds,
+            }));
+          };
 
           const formattedTime = `${String(
             Math.floor(timeLeft / 60)
-          ).padStart(2, "0")}:${String(timeLeft % 60).padStart(2, "0")}`;
+          ).padStart(2, "0")}:${String(timeLeft % 60).padStart(
+            2,
+            "0"
+          )}`;
+
+          const handleTimerEnd = () => {
+            if (isNoTimer) return;
+          
+            if (isPerQuestionTimer) {
+              if (currentQuestionIndex < questions.length - 1) {
+                setMockAttemptCurrentIndex((prev) => ({
+                  ...prev,
+                  [test.id]: currentQuestionIndex + 1,
+                }));
+          
+                resetQuestionTimer();
+                return;
+              }
+          
+              navigate(`/ctet-tet/mock-tests/result/${test.id}`);
+              return;
+            }
+          
+            navigate(`/ctet-tet/mock-tests/result/${test.id}`);
+          };
+          
+          if (!isNoTimer && timeLeft === 0) {
+            setTimeout(() => {
+              handleTimerEnd();
+            }, 0);
+          }
 
           return (
             <div className="premiumExamShell" key={test.id}>
@@ -16117,56 +16714,72 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                 </div>
 
                 <div className="examTopStats">
-  <div className="timerStat">
-    <span>Time Left</span>
-    <strong>{formattedTime}</strong>
-  </div>
+                  {!isNoTimer && (
+                    <div className="timerStat">
+                      <span>{timerLabel}</span>
+                      <strong>{formattedTime}</strong>
+                    </div>
+                  )}
 
-  <div>
-    <span>Question</span>
-    <strong>
-      {currentQuestionIndex + 1}/{questions.length}
-    </strong>
-  </div>
+                  <div>
+                    <span>Question</span>
+                    <strong>
+                      {currentQuestionIndex + 1}/{questions.length}
+                    </strong>
+                  </div>
 
-  <div>
-    <span>Answered</span>
-    <strong>{answeredCount}</strong>
-  </div>
+                  <div>
+                    <span>Answered</span>
+                    <strong>{answeredCount}</strong>
+                  </div>
 
-  <button
-    type="button"
-    className="examSubmitBtn"
-    onClick={() =>
-      navigate(`/ctet-tet/mock-tests/result/${test.id}`)
-    }
-  >
-    Submit
-  </button>
-</div>
+                  <button
+  type="button"
+  className="examSubmitBtn"
+  onClick={() => {
+    const finalAnswers =
+      mockAttemptAnswers?.[test.id] || {};
+
+    localStorage.setItem(
+      `mockAttemptAnswers_${test.id}`,
+      JSON.stringify(finalAnswers)
+    );
+
+    navigate(
+      `/ctet-tet/mock-tests/result/${test.id}`
+    );
+  }}
+>
+  Submit
+</button>
+                </div>
               </div>
 
               <div className="premiumExamGrid">
                 <main className="premiumQuestionWorkspace">
-                <div className="compactQuestionStatus">
-  <span>
-    Q{currentQuestionIndex + 1} of {questions.length}
-  </span>
+                  <div className="compactQuestionStatus">
+                    <span>
+                      Q{currentQuestionIndex + 1} of {questions.length}
+                    </span>
 
-  <strong
-    className={
-      selectedAnswerKey ? "statusAnswered" : "statusPending"
-    }
-  >
-    {selectedAnswerKey ? "Answered" : "Not Answered"}
-  </strong>
+                    <strong
+                      className={
+                        selectedAnswerKey
+                          ? "statusAnswered"
+                          : "statusPending"
+                      }
+                    >
+                      {selectedAnswerKey ? "Answered" : "Not Answered"}
+                    </strong>
 
-  <span>
-    {mockMarkedQuestions?.[test.id]?.[currentQuestionIndex]
-      ? "Marked for Review"
-      : "Not Marked"}
-  </span>
-</div>
+                    <span>
+                      {mockMarkedQuestions?.[test.id]?.[
+                        currentQuestionIndex
+                      ]
+                        ? "Marked for Review"
+                        : "Not Marked"}
+                    </span>
+                  </div>
 
                   {questions.length === 0 ? (
                     <div className="examEmptyState">
@@ -16195,15 +16808,22 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                                 ? "premiumOption selectedPremiumOption"
                                 : "premiumOption"
                             }
-                            onClick={() =>
+                            onClick={() => {
+                              const updatedAnswers = {
+                                ...(mockAttemptAnswers?.[test.id] || {}),
+                                [currentQuestionIndex]: option.key,
+                              };
+                            
                               setMockAttemptAnswers((prev) => ({
                                 ...prev,
-                                [test.id]: {
-                                  ...(prev[test.id] || {}),
-                                  [currentQuestionIndex]: option.key,
-                                },
-                              }))
-                            }
+                                [test.id]: updatedAnswers,
+                              }));
+                            
+                              localStorage.setItem(
+                                `mockAttemptAnswers_${test.id}`,
+                                JSON.stringify(updatedAnswers)
+                              );
+                            }}
                           >
                             <span className="optionLetter">
                               {option.label}
@@ -16217,76 +16837,101 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                       </div>
 
                       <div className="premiumExamControls finalExamControls">
-  <button
-    type="button"
-    disabled={
-      currentQuestionIndex === 0
-    }
-    onClick={() =>
-      setMockAttemptCurrentIndex((prev) => ({
-        ...prev,
-        [test.id]: currentQuestionIndex - 1,
-      }))
-    }
-  >
-    Previous
-  </button>
+                        <button
+                          type="button"
+                          className="examControlBtn secondary"
+                          disabled={currentQuestionIndex === 0}
+                          onClick={() =>
+                            setMockAttemptCurrentIndex((prev) => ({
+                              ...prev,
+                              [test.id]: currentQuestionIndex - 1,
+                            }))
+                          }
+                        >
+                          ← Previous
+                        </button>
 
-  <button
-    type="button"
-    className="clearBtn"
-    onClick={() =>
-      setMockAttemptAnswers((prev) => ({
-        ...prev,
-        [test.id]: {
-          ...(prev[test.id] || {}),
-          [currentQuestionIndex]: "",
-        },
-      }))
-    }
-  >
-    Clear
-  </button>
+                        <button
+                          type="button"
+                          className="examControlBtn ghost"
+                          onClick={() => {
+                            const updatedAnswers = {
+                              ...(mockAttemptAnswers?.[test.id] || {}),
+                              [currentQuestionIndex]: "",
+                            };
+                          
+                            setMockAttemptAnswers((prev) => ({
+                              ...prev,
+                              [test.id]: updatedAnswers,
+                            }));
+                          
+                            localStorage.setItem(
+                              `mockAttemptAnswers_${test.id}`,
+                              JSON.stringify(updatedAnswers)
+                            );
+                          }}
+                        >
+                          Clear Response
+                        </button>
 
-  <button
-    type="button"
-    className="markReviewBtn"
-    onClick={() =>
-      setMockMarkedQuestions((prev) => ({
-        ...prev,
-        [test.id]: {
-          ...(prev[test.id] || {}),
-          [currentQuestionIndex]:
-            !prev?.[test.id]?.[currentQuestionIndex],
-        },
-      }))
-    }
-  >
-    Mark for Review
-  </button>
+                        <button
+                          type="button"
+                          className="examControlBtn review"
+                          onClick={() => {
+                            setMockMarkedQuestions((prev) => ({
+                              ...prev,
+                              [test.id]: {
+                                ...(prev[test.id] || {}),
+                                [currentQuestionIndex]:
+                                  !prev?.[test.id]?.[
+                                    currentQuestionIndex
+                                  ],
+                              },
+                            }));
 
-  <button
-  type="button"
-  className="saveNextBtn"
-  onClick={() => {
-    if (
-      currentQuestionIndex <
-      questions.length - 1
-    ) {
-      setMockAttemptCurrentIndex((prev) => ({
-        ...prev,
-        [test.id]:
-          currentQuestionIndex + 1,
-      }));
-    }
-  }}
->
-  {currentQuestionIndex ===
-  questions.length - 1
-    ? "Last Question"
-    : "Save & Next"}
-</button>
-</div>
+                            if (
+                              currentQuestionIndex <
+                              questions.length - 1
+                            ) {
+                              setMockAttemptCurrentIndex((prev) => ({
+                                ...prev,
+                                [test.id]: currentQuestionIndex + 1,
+                              }));
+
+                              resetQuestionTimer();
+                            }
+                          }}
+                        >
+                          Mark for Review & Next
+                        </button>
+
+                        <button
+                          type="button"
+                          className="examControlBtn primary"
+                          onClick={() => {
+                            if (
+                              currentQuestionIndex ===
+                              questions.length - 1
+                            ) {
+                              navigate(
+                                `/ctet-tet/mock-tests/result/${test.id}`
+                              );
+                              return;
+                            }
+
+                            setMockAttemptCurrentIndex((prev) => ({
+                              ...prev,
+                              [test.id]: currentQuestionIndex + 1,
+                            }));
+
+                            resetQuestionTimer();
+                          }}
+                        >
+                          {currentQuestionIndex === questions.length - 1
+                            ? "Submit Test"
+                            : "Save & Next"}
+                        </button>
+                      </div>
                     </>
                   )}
                 </main>
@@ -16303,10 +16948,16 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                     {questions.map((_, index) => {
                       const isCurrent =
                         index === currentQuestionIndex;
+
                       const isAnswered =
-                        mockAttemptAnswers?.[test.id]?.[index];
+                        Boolean(
+                          mockAttemptAnswers?.[test.id]?.[index]
+                        );
+
                       const isMarked =
-                        mockMarkedQuestions?.[test.id]?.[index];
+                        Boolean(
+                          mockMarkedQuestions?.[test.id]?.[index]
+                        );
 
                       return (
                         <button
@@ -16314,16 +16965,18 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                           key={index}
                           className={[
                             "paletteNumber",
-                            isCurrent ? "paletteCurrent" : "",
                             isAnswered ? "paletteAnswered" : "",
                             isMarked ? "paletteMarked" : "",
+                            isCurrent ? "paletteCurrent" : "",
                           ].join(" ")}
-                          onClick={() =>
+                          onClick={() => {
                             setMockAttemptCurrentIndex((prev) => ({
                               ...prev,
                               [test.id]: index,
-                            }))
-                          }
+                            }));
+
+                            resetQuestionTimer();
+                          }}
                         >
                           {index + 1}
                         </button>
@@ -16360,15 +17013,20 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                     </p>
 
                     <button
-                      type="button"
-                      onClick={() =>
-                        navigate(
-                          `/ctet-tet/mock-tests/result/${test.id}`
-                        )
-                      }
-                    >
-                      Submit Test
-                    </button>
+  type="button"
+  onClick={() => {
+    localStorage.setItem(
+      `mockAttemptAnswers_${test.id}`,
+      JSON.stringify(mockAttemptAnswers[test.id] || {})
+    );
+
+    navigate(
+      `/ctet-tet/mock-tests/result/${test.id}`
+    );
+  }}
+>
+  Submit Test
+</button>
                   </div>
                 </aside>
               </div>
@@ -16393,14 +17051,26 @@ handleSaveUniversalContent={handleSaveUniversalContent}
           const questions = test.questions || [];
           const totalQuestions = questions.length;
 
+          const storedAttemptAnswers = JSON.parse(
+            localStorage.getItem(`mockAttemptAnswers_${test.id}`) || "{}"
+          );
+          
+          const liveAttemptAnswers =
+          mockAttemptAnswers?.[test.id] || {};
+        
+        const attemptAnswers =
+          Object.keys(liveAttemptAnswers).length > 0
+            ? liveAttemptAnswers
+            : storedAttemptAnswers;
+
           const correctCount = questions.filter(
             (question, index) =>
-              mockAttemptAnswers[index] &&
-              mockAttemptAnswers[index] === question.answer
+              attemptAnswers[index] &&
+              attemptAnswers[index] === question.answer
           ).length;
 
           const skippedCount = questions.filter(
-            (_, index) => !mockAttemptAnswers[index]
+            (_, index) => !attemptAnswers[index]
           ).length;
 
           const wrongCount =
@@ -16410,6 +17080,137 @@ handleSaveUniversalContent={handleSaveUniversalContent}
             totalQuestions > 0
               ? Math.round((correctCount / totalQuestions) * 100)
               : 0;
+
+          const totalMarks =
+            Number(test.totalMarks) ||
+            totalQuestions * Number(test.marksPerQuestion || 1);
+
+          const score =
+            questions.reduce((sum, question, index) => {
+              const selected = attemptAnswers[index];
+
+              if (!selected) return sum;
+
+              if (selected === question.answer) {
+                return sum + Number(question.positiveMarks || test.marksPerQuestion || 1);
+              }
+
+              return sum - Number(question.negativeMarks || test.negativeMarks || 0);
+            }, 0);
+
+          const percentage =
+            totalMarks > 0
+              ? Math.round((score / totalMarks) * 100)
+              : 0;
+
+              const leaderboardEnabled =
+              test.leaderboardMode &&
+              test.leaderboardMode !== "disabled";
+            
+            const canShowLeaderboardButton =
+              leaderboardEnabled || isAdmin(user);
+              const saveToLeaderboard = async () => {
+                if (!user?.email) {
+                  alert("Please login to save result");
+                  return;
+                }
+              
+                const attemptKey = `${test.id}_${user.email}`;
+              
+                const existingResult = await getDocs(
+                  query(
+                    collection(db, "mockResults"),
+                    where("attemptKey", "==", attemptKey)
+                  )
+                );
+              
+                if (existingResult.empty) {
+                  await addDoc(collection(db, "mockResults"), {
+                    attemptKey,
+              
+                    testId: test.id,
+                    testTitle: test.title || "",
+              
+                    email: user.email,
+                    studentEmail: user.email,
+                    studentName: fullName || user.email,
+              
+                    subject: test.subject || "",
+                    chapter: test.chapter || "",
+                    planType: test.planType || "FREE",
+                    examType: test.examType || "",
+                    testType: test.testType || "",
+              
+                    score,
+                    totalMarks,
+                    percentage,
+                    accuracy,
+              
+                    correctCount,
+                    wrongCount,
+                    skippedCount,
+                    totalQuestions,
+              
+                    createdAt: new Date(),
+                  });
+                }
+              
+                if (leaderboardEnabled) {
+                  const leaderboardKey = `${test.id}_${user.email}_${test.leaderboardMode}`;
+              
+                  const existingLeaderboard = await getDocs(
+                    query(
+                      collection(db, "mockLeaderboard"),
+                      where("leaderboardKey", "==", leaderboardKey)
+                    )
+                  );
+              
+                  if (existingLeaderboard.empty) {
+                    await addDoc(collection(db, "mockLeaderboard"), {
+                      leaderboardKey,
+                      leaderboardMode: test.leaderboardMode,
+              
+                      testId: test.id,
+                      testTitle: test.title || "",
+              
+                      studentEmail: user.email,
+                      studentName: fullName || user.email,
+              
+                      subject: test.subject || "",
+                      chapter: test.chapter || "",
+                      planType: test.planType || "FREE",
+                      examType: test.examType || "",
+                      testType: test.testType || "",
+              
+                      score,
+                      totalMarks,
+                      percentage,
+                      accuracy,
+              
+                      correctCount,
+                      wrongCount,
+                      skippedCount,
+                      totalQuestions,
+              
+                      rankScore: percentage,
+                      rankTieBreakerScore: score,
+              
+                      createdAt: new Date(),
+                    });
+                  }
+                }
+              
+                await loadUserMockResults(user.email);
+                await loadLeaderboard();
+                await loadMockLeaderboardEntries();
+              
+                alert(
+                  leaderboardEnabled
+                    ? "Result and leaderboard saved ✅"
+                    : "Result saved ✅ Leaderboard is disabled for this test"
+                );
+              };
+            
 
           return (
             <div key={test.id}>
@@ -16441,7 +17242,17 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 
                   <p>Skipped: {skippedCount}</p>
 
+                  <p>
+                    Score: {score} / {totalMarks}
+                  </p>
+
                   <span>Accuracy: {accuracy}%</span>
+
+                  {canShowLeaderboardButton && (
+                    <p>
+                      Leaderboard: {test.leaderboardMode}
+                    </p>
+                  )}
 
                   <button
                     className="btnLink"
@@ -16453,6 +17264,17 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                   >
                     Review Answers
                   </button>
+                  {canShowLeaderboardButton && (
+                    <button
+  className="btnLink"
+  onClick={async () => {
+    await saveToLeaderboard();
+    navigate("/admin/content/mock-tests/leaderboard");
+  }}
+>
+  Save to Leaderboard
+</button>
+)}
                 </div>
 
                 <div className="pdfMiniCard">
@@ -16461,13 +17283,13 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                   <h3>Performance</h3>
 
                   <p>
-                    Score: {correctCount} / {totalQuestions}
+                    Percentage: {percentage}%
                   </p>
 
                   <span>
-                    {accuracy >= 80
+                    {percentage >= 80
                       ? "Excellent"
-                      : accuracy >= 50
+                      : percentage >= 50
                       ? "Good Attempt"
                       : "Needs Revision"}
                   </span>
@@ -16487,6 +17309,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   }
 />
 
+
 <Route
   path="/ctet-tet/mock-tests/review/:testId"
   element={
@@ -16497,72 +17320,86 @@ handleSaveUniversalContent={handleSaveUniversalContent}
             test.section === "mockTest" &&
             test.id === activeResultAttemptId
         )
-        .map((test) => (
-          <div key={test.id}>
-            <button onClick={() => navigate(-1)}>
-              ← Back to Result
-            </button>
+        .map((test) => {
+          const storedAttemptAnswers = JSON.parse(
+            localStorage.getItem(`mockAttemptAnswers_${test.id}`) || "{}"
+          );
 
-            <span className="notesSubjectRouteBadge">
-              ANSWER REVIEW
-            </span>
+          const liveAttemptAnswers =
+            mockAttemptAnswers?.[test.id] || {};
 
-            <h1>{test.title}</h1>
+          const attemptAnswers =
+            Object.keys(liveAttemptAnswers).length > 0
+              ? liveAttemptAnswers
+              : storedAttemptAnswers;
 
-            <p>Review your answers, correct answers, and explanations.</p>
+          return (
+            <div key={test.id}>
+              <button onClick={() => navigate(-1)}>
+                ← Back to Result
+              </button>
 
-            <div className="pdfShelfRow">
-              {(test.questions || []).map((question, index) => {
-                const userAnswer = mockAttemptAnswers[index];
-                const isCorrect = userAnswer === question.answer;
-                const isSkipped = !userAnswer;
+              <span className="notesSubjectRouteBadge">
+                ANSWER REVIEW
+              </span>
 
-                return (
-                  <div className="pdfMiniCard" key={index}>
-                    <div className="pdfIcon">
-                      {isSkipped ? "⏭️" : isCorrect ? "✅" : "❌"}
-                    </div>
+              <h1>{test.title}</h1>
 
-                    <h3>Question {index + 1}</h3>
+              <p>
+                Review your answers, correct answers, and explanations.
+              </p>
 
-                    <p>{question.question}</p>
+              <div className="pdfShelfRow">
+                {(test.questions || []).map((question, index) => {
+                  const userAnswer = attemptAnswers[index];
+                  const isCorrect = userAnswer === question.answer;
+                  const isSkipped = !userAnswer;
 
-                    <p>
-                      Your Answer:{" "}
-                      <strong>{userAnswer || "Not Attempted"}</strong>
-                    </p>
+                  return (
+                    <div className="pdfMiniCard" key={index}>
+                      <div className="pdfIcon">
+                        {isSkipped ? "⏭️" : isCorrect ? "✅" : "❌"}
+                      </div>
 
-                    <p>
-                      Correct Answer:{" "}
-                      <strong>{question.answer}</strong>
-                    </p>
+                      <h3>Question {index + 1}</h3>
 
-                    <span>
-                      {isSkipped
-                        ? "Skipped"
-                        : isCorrect
-                        ? "Correct"
-                        : "Wrong"}
-                    </span>
+                      <p>{question.question}</p>
 
-                    {question.explanation && (
                       <p>
-                        Explanation: {question.explanation}
+                        Your Answer:{" "}
+                        <strong>{userAnswer || "Not Attempted"}</strong>
                       </p>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
 
-            <button
-              className="btnLink"
-              onClick={() => navigate("/ctet-tet/mock-tests/history")}
-            >
-              My Attempts History
-            </button>
-          </div>
-        ))}
+                      <p>
+                        Correct Answer:{" "}
+                        <strong>{question.answer}</strong>
+                      </p>
+
+                      <span>
+                        {isSkipped
+                          ? "Skipped"
+                          : isCorrect
+                          ? "Correct"
+                          : "Wrong"}
+                      </span>
+
+                      {question.explanation && (
+                        <p>Explanation: {question.explanation}</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <button
+                className="btnLink"
+                onClick={() => navigate("/ctet-tet/mock-tests/history")}
+              >
+                My Attempts History
+              </button>
+            </div>
+          );
+        })}
     </section>
   }
 />
@@ -16904,7 +17741,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
         const formatSlug = (value = "") =>
           value.toString().toLowerCase().trim().replace(/\s+/g, "-");
 
-        const activeMonthId = window.location.pathname.split("/").pop();
+        const activeMonthId = location.pathname.split("/").pop();
 
         const publishedCurrentAffairs = [
           ...universalCurrentAffairs,
@@ -17136,22 +17973,297 @@ handleSaveUniversalContent={handleSaveUniversalContent}
         }}
         onClick={(e) => e.stopPropagation()}
       >
-     <button>📋 Duplicate</button>
+        <button
+          onClick={() => {
+            setEditingMockTestId(mockMenuTest.id);
 
-<div className="mockPortalMenuDivider" />
+            setMockTestForm({
+              title: mockMenuTest.title || "",
+              planType: mockMenuTest.planType || "FREE",
+              subject: mockMenuTest.subject || "",
+              chapter: mockMenuTest.chapter || "",
+              examType: mockMenuTest.examType || "CTET",
+              testType: mockMenuTest.testType || "Chapter Test",
+              duration:
+                mockMenuTest.duration?.toString() ||
+                mockMenuTest.durationMinutes?.toString() ||
+                "30",
+              totalQuestions:
+                mockMenuTest.totalQuestions?.toString() ||
+                mockMenuTest.questions?.length?.toString() ||
+                "10",
+              marksPerQuestion:
+                mockMenuTest.marksPerQuestion?.toString() || "1",
+              negativeMarks:
+                mockMenuTest.negativeMarks?.toString() || "0",
+              passingMarks:
+                mockMenuTest.passingMarks?.toString() || "0",
+              examDifficulty: mockMenuTest.examDifficulty || "Mixed",
+              examLanguage: mockMenuTest.examLanguage || "English",
+              attemptLimit: mockMenuTest.attemptLimit || "unlimited",
+              resultPublishMode:
+                mockMenuTest.resultPublishMode || "instant",
+              shuffleQuestions: mockMenuTest.shuffleQuestions || "no",
+              shuffleOptions: mockMenuTest.shuffleOptions || "no",
+              navigationMode: mockMenuTest.navigationMode || "free",
+              allowPause: mockMenuTest.allowPause || "yes",
+              calculatorAllowed:
+                mockMenuTest.calculatorAllowed || "no",
+              questionSource: mockMenuTest.questionSource || "manual",
+              fullscreenMode: mockMenuTest.fullscreenMode || "no",
+              tabSwitchDetection:
+                mockMenuTest.tabSwitchDetection || "no",
+              copyPasteProtection:
+                mockMenuTest.copyPasteProtection || "no",
+              autoSubmitOnViolation:
+                mockMenuTest.autoSubmitOnViolation || "no",
+              leaderboardMode:
+                mockMenuTest.leaderboardMode || "disabled",
+              timerMode: mockMenuTest.timerMode || "globalTimer",
+              perQuestionTimeValue:
+                mockMenuTest.perQuestionTimeValue || "1",
+              perQuestionTimeUnit:
+                mockMenuTest.perQuestionTimeUnit || "min",
+              autoSubmitOnTimeUp:
+                mockMenuTest.autoSubmitOnTimeUp || "yes",
+              scheduleType:
+                mockMenuTest.scheduleType || "alwaysAvailable",
+              examStartDate: mockMenuTest.examStartDate || "",
+              examStartTime: mockMenuTest.examStartTime || "",
+              examEndDate: mockMenuTest.examEndDate || "",
+              examEndTime: mockMenuTest.examEndTime || "",
+              recurringMode: mockMenuTest.recurringMode || "none",
+              weeklyTestDay: mockMenuTest.weeklyTestDay || "",
+              monthlyTestDate: mockMenuTest.monthlyTestDate || "",
+              liveEventMode: mockMenuTest.liveEventMode || "no",
+              scholarshipMode: mockMenuTest.scholarshipMode || "no",
+              examInstructions:
+                mockMenuTest.examInstructions || "",
+              status: mockMenuTest.status || "published",
+            });
 
-<button>🚀 Publish / Unpublish</button>
-<button>⭐ Feature / Remove Feature</button>
-<button>📦 Archive</button>
+            setMockTestQuestionsForm(
+              mockMenuTest.questions?.length
+                ? mockMenuTest.questions.map((question) => ({
+                    question: question.question || "",
+                    option1: question.option1 || "",
+                    option2: question.option2 || "",
+                    option3: question.option3 || "",
+                    option4: question.option4 || "",
+                    answer: question.answer || "",
+                    explanation: question.explanation || "",
+                    level: question.level || "Easy",
+                    questionType:
+                      question.questionType || "Single Correct",
+                    language: question.language || "English",
+                    tag: question.tag || "",
+                    positiveMarks:
+                      question.positiveMarks?.toString() || "1",
+                    negativeMarks:
+                      question.negativeMarks?.toString() || "0",
+                    questionStatus:
+                      question.questionStatus || "published",
+                    saveToQuestionBank:
+                      question.saveToQuestionBank || "yes",
+                  }))
+                : [
+                    {
+                      question: "",
+                      option1: "",
+                      option2: "",
+                      option3: "",
+                      option4: "",
+                      answer: "",
+                      explanation: "",
+                      level: "Easy",
+                      questionType: "Single Correct",
+                      language: "English",
+                      tag: "",
+                      positiveMarks: "1",
+                      negativeMarks: "0",
+                      questionStatus: "published",
+                      saveToQuestionBank: "yes",
+                    },
+                  ]
+            );
 
-<div className="mockPortalMenuDivider" />
+            closeMockActionPortal();
+            navigate("/admin/content/mock-tests/add");
+          }}
+        >
+          ✏ Edit
+        </button>
 
-<button>🔗 Copy Link</button>
-<button>📤 Export JSON</button>
+        <div className="mockPortalMenuDivider" />
 
-<div className="mockPortalMenuDivider" />
+        <button
+          onClick={async () => {
+            const confirmClone = window.confirm(
+              `Create a duplicate copy of "${mockMenuTest.title}" as Draft?`
+            );
 
-<button className="dangerMenuButton">🗑 Delete</button>
+            if (!confirmClone) return;
+
+            const clonePayload = {
+              ...mockMenuTest,
+              title: `${mockMenuTest.title || "Mock Test"} - Copy`,
+              status: "draft",
+              isFeatured: false,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              clonedFrom: mockMenuTest.id,
+            };
+
+            delete clonePayload.id;
+
+            await addDoc(collection(db, "contentItems"), clonePayload);
+            await loadContentItemsFromFirestore();
+
+            closeMockActionPortal();
+            alert("Mock test duplicated as Draft ✅");
+          }}
+        >
+          📋 Duplicate
+        </button>
+
+        <div className="mockPortalMenuDivider" />
+
+        <button
+          onClick={async () => {
+            const nextStatus =
+              mockMenuTest.status === "published"
+                ? "unpublished"
+                : "published";
+
+            await updateDoc(doc(db, "contentItems", mockMenuTest.id), {
+              status: nextStatus,
+              updatedAt: new Date(),
+            });
+
+            await loadContentItemsFromFirestore();
+            closeMockActionPortal();
+
+            alert(
+              nextStatus === "published"
+                ? "Mock test published ✅"
+                : "Mock test unpublished ✅"
+            );
+          }}
+        >
+          🚀 Publish / Unpublish
+        </button>
+
+        <button
+          onClick={async () => {
+            await updateDoc(doc(db, "contentItems", mockMenuTest.id), {
+              isFeatured: !mockMenuTest.isFeatured,
+              updatedAt: new Date(),
+            });
+
+            await loadContentItemsFromFirestore();
+            closeMockActionPortal();
+
+            alert(
+              !mockMenuTest.isFeatured
+                ? "Mock test marked as featured ⭐"
+                : "Mock test removed from featured"
+            );
+          }}
+        >
+          ⭐ Feature / Remove Feature
+        </button>
+
+        <button
+          onClick={async () => {
+            const confirmArchive = window.confirm(
+              `Archive "${mockMenuTest.title}"?`
+            );
+
+            if (!confirmArchive) return;
+
+            await updateDoc(doc(db, "contentItems", mockMenuTest.id), {
+              status: "archived",
+              updatedAt: new Date(),
+            });
+
+            await loadContentItemsFromFirestore();
+            closeMockActionPortal();
+
+            alert("Mock test archived ✅");
+          }}
+        >
+          📦 Archive
+        </button>
+
+        <div className="mockPortalMenuDivider" />
+
+        <button
+          onClick={async () => {
+            const testLink = `${window.location.origin}/ctet-tet/mock-tests/start/${mockMenuTest.id}`;
+
+            await navigator.clipboard.writeText(testLink);
+            closeMockActionPortal();
+
+            alert("Student test link copied ✅");
+          }}
+        >
+          🔗 Copy Link
+        </button>
+
+        <button
+          onClick={() => {
+            const exportPayload = {
+              ...mockMenuTest,
+              exportedAt: new Date().toISOString(),
+              exportedFrom: "AspireNest Academy",
+            };
+
+            const jsonBlob = new Blob(
+              [JSON.stringify(exportPayload, null, 2)],
+              { type: "application/json" }
+            );
+
+            const downloadUrl = URL.createObjectURL(jsonBlob);
+
+            const downloadLink = document.createElement("a");
+            downloadLink.href = downloadUrl;
+            downloadLink.download = `${(
+              mockMenuTest.title || "mock-test"
+            )
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")}.json`;
+
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+            URL.revokeObjectURL(downloadUrl);
+            closeMockActionPortal();
+          }}
+        >
+          📤 Export JSON
+        </button>
+
+        <div className="mockPortalMenuDivider" />
+
+        <button
+          className="dangerMenuButton"
+          onClick={async () => {
+            const confirmDelete = window.confirm(
+              `Delete "${mockMenuTest.title}" permanently?\n\nThis action cannot be undone.`
+            );
+
+            if (!confirmDelete) return;
+
+            await deleteDoc(doc(db, "contentItems", mockMenuTest.id));
+            await loadContentItemsFromFirestore();
+
+            closeMockActionPortal();
+            alert("Mock test deleted permanently ✅");
+          }}
+        >
+          🗑 Delete
+        </button>
       </div>
     </div>,
     document.body
@@ -17486,7 +18598,7 @@ ${paymentProof}
 
 <div
   className="learningHubCard"
-  onClick={() => navigate("/subjects/ctet-tet/courses")}
+  onClick={() => navigate("/ctet-tet/courses")}
 >
   <div className="learningHubIcon">📖</div>
 
@@ -17592,7 +18704,7 @@ Premium
 
 <div
   className="learningHubCard"
-  onClick={() => navigate("/subjects/ctet-tet/pricing")}
+  onClick={() => navigate("/ctet-tet/pricing")}
 >
   <div className="learningHubIcon">👑</div>
 
@@ -17675,7 +18787,7 @@ Premium
           <li>🎯 PYQ Practice</li>
         </ul>
 
-        <button onClick={() => navigate("/subjects/ctet-tet/courses")}>
+        <button onClick={() => navigate("/ctet-tet/courses")}>
   Explore Courses
 </button>
       </div>
@@ -17692,7 +18804,7 @@ Premium
           <li>🏆 Mentorship Support</li>
         </ul>
 
-        <button onClick={() => navigate("/subjects/ctet-tet/pricing")}>
+        <button onClick={() => navigate("/ctet-tet/pricing")}>
           Join Premium
         </button>
       </div>
@@ -17740,7 +18852,7 @@ Premium
             <div className="popupButtons">
             <button
   className="btnLink"
-  onClick={() => navigate("/subjects/ctet-tet/pricing")}
+  onClick={() => navigate("/ctet-tet/pricing")}
 >
   Join Course
 </button>
@@ -17930,7 +19042,7 @@ Premium
 
             <button
   className="btnLink"
-  onClick={() => navigate("/subjects/ctet-tet/courses")}
+  onClick={() => navigate("/ctet-tet/courses")}
 >
   Explore Courses
 </button>
@@ -17950,7 +19062,7 @@ Premium
 
             <button
   className="btnLink"
-  onClick={() => navigate("/subjects/ctet-tet/pricing")}
+  onClick={() => navigate("/ctet-tet/pricing")}
 >
   Join Premium
 </button>

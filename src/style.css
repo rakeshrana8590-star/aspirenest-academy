@@ -23245,6 +23245,8 @@ button {
   font-weight: 850 !important;
 }
 
+
+
 .dot {
   width: 11px !important;
   height: 11px !important;
@@ -24404,4 +24406,15 @@ button {
 .mockPortalMenu .dangerMenuButton:hover {
   background: rgba(239, 68, 68, 0.14) !important;
   color: #ffffff;
+}
+.paletteCurrent.paletteAnswered {
+  background: #16a34a !important;
+  border-color: #f97316 !important;
+  color: #ffffff !important;
+}
+
+.paletteCurrent.paletteMarked {
+  background: #7c3aed !important;
+  border-color: #f97316 !important;
+  color: #ffffff !important;
 }
