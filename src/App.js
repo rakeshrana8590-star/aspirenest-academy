@@ -651,6 +651,8 @@ const [questionBankSubjectFilter, setQuestionBankSubjectFilter] = useState("ALL"
 const [questionBankChapterFilter, setQuestionBankChapterFilter] = useState("ALL");
 const [questionBankDifficultyFilter, setQuestionBankDifficultyFilter] = useState("ALL");
 const [questionBankItems, setQuestionBankItems] = useState([]);
+const [editingQuestionBankId, setEditingQuestionBankId] = useState(null);
+const [selectedQuestionBankIds, setSelectedQuestionBankIds] = useState([]);
 
 const [videoForm, setVideoForm] = useState({
   title: "",
@@ -672,12 +674,40 @@ useEffect(() => {
 
   if (!reusedQuestion) return;
 
+  const parsedQuestion = JSON.parse(reusedQuestion);
+
   setMockTestQuestionsForm([
-    JSON.parse(reusedQuestion),
+    {
+      question: parsedQuestion.question || "",
+      option1: parsedQuestion.option1 || "",
+      option2: parsedQuestion.option2 || "",
+      option3: parsedQuestion.option3 || "",
+      option4: parsedQuestion.option4 || "",
+      answer: parsedQuestion.answer || "",
+      explanation: parsedQuestion.explanation || "",
+      level: parsedQuestion.level || "Easy",
+      questionType:
+        parsedQuestion.questionType || "Single Correct",
+      language: parsedQuestion.language || "English",
+      tag: parsedQuestion.tag || "",
+      positiveMarks: parsedQuestion.positiveMarks || "1",
+      negativeMarks: parsedQuestion.negativeMarks || "0",
+      questionStatus:
+        parsedQuestion.questionStatus || "published",
+      saveToQuestionBank:
+        parsedQuestion.saveToQuestionBank || "yes",
+    },
   ]);
+
+  if (parsedQuestion.editingQuestionBankId) {
+    setEditingQuestionBankId(
+      parsedQuestion.editingQuestionBankId
+    );
+  }
 
   localStorage.removeItem("reusedQuestionForMockTest");
 }, [location.pathname]);
+
 useEffect(() => {
   setMockTestPage(1);
   setSelectedMockTestIds([]);
@@ -1060,39 +1090,47 @@ examInstructions:
             .replace(/\s+/g, "-")
             .slice(0, 180);
     
-        const existingQuestions = await getDocs(
-          query(
-            collection(db, "questionBank"),
-            where(
-              "questionBankKey",
-              "==",
-              questionBankKey
-            )
-          )
-        );
+        const questionBankPayload = {
+          ...question,
     
-        if (existingQuestions.empty) {
-          await addDoc(
-            collection(db, "questionBank"),
-            {
-              ...question,
+          questionBankKey,
     
-              questionBankKey,
+          sourceExamTitle: finalTitle,
+          sourceExamType: finalExamType,
+          sourceTestType: finalTestType,
+          sourceSubject: finalSubject,
+          sourceChapter: finalChapter,
     
-              sourceExamTitle: finalTitle,
-              sourceExamType: finalExamType,
-              sourceTestType: finalTestType,
-              sourceSubject: finalSubject,
-              sourceChapter: finalChapter,
+          section: "questionBank",
     
-              section: "questionBank",
+          updatedAt: new Date(),
+        };
     
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            }
+        if (editingQuestionBankId) {
+          await updateDoc(
+            doc(db, "questionBank", editingQuestionBankId),
+            questionBankPayload
           );
+    
+          setEditingQuestionBankId(null);
+        } else {
+          const existingQuestions = await getDocs(
+            query(
+              collection(db, "questionBank"),
+              where("questionBankKey", "==", questionBankKey)
+            )
+          );
+    
+          if (existingQuestions.empty) {
+            await addDoc(collection(db, "questionBank"), {
+              ...questionBankPayload,
+              createdAt: new Date(),
+            });
+          }
         }
       }
+    
+      await loadQuestionBankFromFirestore();
     }
 
     if (editingMockTestId) {
@@ -10326,6 +10364,18 @@ This action cannot be undone.`
       return;
     }
 
+    const selectedCount = selectedMockTestIds.length;
+
+    const confirmBulkAction = window.confirm(
+      `You are about to publish ${selectedCount} selected mock test(s).
+
+Do you want to continue?`
+    );
+
+    if (!confirmBulkAction) {
+      return;
+    }
+
     for (const testId of selectedMockTestIds) {
       await updateDoc(doc(db, "contentItems", testId), {
         status: "published",
@@ -10334,6 +10384,7 @@ This action cannot be undone.`
     }
 
     await loadContentItemsFromFirestore();
+
     setSelectedMockTestIds([]);
 
     alert("Selected mock tests published ✅");
@@ -10350,6 +10401,18 @@ This action cannot be undone.`
       return;
     }
 
+    const selectedCount = selectedMockTestIds.length;
+
+    const confirmBulkAction = window.confirm(
+      `You are about to unpublish ${selectedCount} selected mock test(s).
+
+Do you want to continue?`
+    );
+
+    if (!confirmBulkAction) {
+      return;
+    }
+
     for (const testId of selectedMockTestIds) {
       await updateDoc(doc(db, "contentItems", testId), {
         status: "unpublished",
@@ -10358,6 +10421,7 @@ This action cannot be undone.`
     }
 
     await loadContentItemsFromFirestore();
+
     setSelectedMockTestIds([]);
 
     alert("Selected mock tests unpublished ✅");
@@ -10371,6 +10435,18 @@ This action cannot be undone.`
   onClick={async () => {
     if (selectedMockTestIds.length === 0) {
       alert("Please select at least one mock test");
+      return;
+    }
+
+    const selectedCount = selectedMockTestIds.length;
+
+    const confirmBulkAction = window.confirm(
+      `You are about to archive ${selectedCount} selected mock test(s).
+
+Do you want to continue?`
+    );
+
+    if (!confirmBulkAction) {
       return;
     }
 
@@ -10645,6 +10721,45 @@ This action cannot be undone.`
   </div>
 </div>
 
+<div className="mockTestMetaSection">
+  <h5>Performance</h5>
+
+  {(() => {
+    const testResults = mockResults.filter(
+      (result) => result.testId === test.id
+    );
+
+    const attempts = testResults.length;
+
+    const averageScore =
+      attempts > 0
+        ? (
+            testResults.reduce(
+              (sum, result) => sum + Number(result.score || 0),
+              0
+            ) / attempts
+          ).toFixed(1)
+        : "0";
+
+    const averageAccuracy =
+      attempts > 0
+        ? (
+            testResults.reduce(
+              (sum, result) => sum + Number(result.accuracy || 0),
+              0
+            ) / attempts
+          ).toFixed(1)
+        : "0";
+
+    return (
+      <div className="mockTestMetaGrid">
+        <span>👥 Attempts: {attempts}</span>
+        <span>🏆 Avg Score: {averageScore}</span>
+        <span>🎯 Avg Accuracy: {averageAccuracy}%</span>
+      </div>
+    );
+  })()}
+</div>
 <div className="mockTestMetaSection">
   <h5>Configuration</h5>
 
@@ -11082,6 +11197,143 @@ This action cannot be undone.`
               <option value="Medium">Medium</option>
               <option value="Hard">Hard</option>
             </select>
+            <button
+  className="backButton"
+  onClick={() => {
+    setQuestionBankSearch("");
+    setQuestionBankSubjectFilter("ALL");
+    setQuestionBankChapterFilter("ALL");
+    setQuestionBankDifficultyFilter("ALL");
+  }}
+>
+  Clear Filters
+</button>
+<button
+  className="publishButton"
+  onClick={() => {
+    const exportPayload = filteredQuestionBank.map(
+      (question) => ({
+        ...question,
+        exportedAt: new Date().toISOString(),
+      })
+    );
+
+    const jsonBlob = new Blob(
+      [JSON.stringify(exportPayload, null, 2)],
+      {
+        type: "application/json",
+      }
+    );
+
+    const downloadUrl =
+      URL.createObjectURL(jsonBlob);
+
+    const downloadLink =
+      document.createElement("a");
+
+    downloadLink.href = downloadUrl;
+
+    downloadLink.download =
+      "question-bank-export.json";
+
+    document.body.appendChild(downloadLink);
+
+    downloadLink.click();
+
+    document.body.removeChild(downloadLink);
+
+    URL.revokeObjectURL(downloadUrl);
+  }}
+>
+  Export JSON
+</button>
+
+<button
+  className="backButton"
+  onClick={() => {
+    setSelectedQuestionBankIds(
+      filteredQuestionBank.map((question) => question.id)
+    );
+  }}
+>
+  Select All
+</button>
+
+<button
+  className="backButton"
+  onClick={() => {
+    setSelectedQuestionBankIds([]);
+  }}
+>
+  Clear Selected
+</button>
+
+<button
+  className="dangerButton"
+  onClick={async () => {
+    if (selectedQuestionBankIds.length === 0) {
+      alert("Please select at least one question");
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      `Delete ${selectedQuestionBankIds.length} selected question(s)?`
+    );
+
+    if (!confirmDelete) return;
+
+    for (const questionId of selectedQuestionBankIds) {
+      await deleteDoc(doc(db, "questionBank", questionId));
+    }
+
+    await loadQuestionBankFromFirestore();
+
+    setSelectedQuestionBankIds([]);
+
+    alert("Selected questions deleted ✅");
+  }}
+>
+  Bulk Delete
+</button>
+
+<button
+  className="publishButton"
+  onClick={() => {
+    if (selectedQuestionBankIds.length === 0) {
+      alert("Please select at least one question");
+      return;
+    }
+
+    const selectedQuestions = questionBankItems.filter((question) =>
+      selectedQuestionBankIds.includes(question.id)
+    );
+
+    const exportPayload = selectedQuestions.map((question) => ({
+      ...question,
+      exportedAt: new Date().toISOString(),
+    }));
+
+    const jsonBlob = new Blob(
+      [JSON.stringify(exportPayload, null, 2)],
+      { type: "application/json" }
+    );
+
+    const downloadUrl = URL.createObjectURL(jsonBlob);
+
+    const downloadLink = document.createElement("a");
+    downloadLink.href = downloadUrl;
+    downloadLink.download = "selected-question-bank-export.json";
+
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+
+    URL.revokeObjectURL(downloadUrl);
+  }}
+>
+  Bulk Export
+</button>
+
           </div>
         </div>
 
@@ -11176,6 +11428,26 @@ This action cannot be undone.`
                   className="contentStudioItem questionBankCard"
                   key={question.id}
                 >
+
+<input
+  type="checkbox"
+  checked={selectedQuestionBankIds.includes(question.id)}
+  onChange={(e) => {
+    if (e.target.checked) {
+      setSelectedQuestionBankIds([
+        ...selectedQuestionBankIds,
+        question.id,
+      ]);
+    } else {
+      setSelectedQuestionBankIds(
+        selectedQuestionBankIds.filter(
+          (id) => id !== question.id
+        )
+      );
+    }
+  }}
+/>
+
                <div className="questionBankTopRow">
   <span className="questionBankPill">
     {question.level || "Easy"}
@@ -11251,6 +11523,40 @@ This action cannot be undone.`
                     <button
   className="backButton"
   onClick={() => {
+    setEditingQuestionBankId(question.id);
+
+    localStorage.setItem(
+      "reusedQuestionForMockTest",
+      JSON.stringify({
+        question: question.question || "",
+        option1: question.option1 || "",
+        option2: question.option2 || "",
+        option3: question.option3 || "",
+        option4: question.option4 || "",
+        answer: question.answer || "",
+        explanation: question.explanation || "",
+        level: question.level || "Easy",
+        questionType:
+          question.questionType || "Single Correct",
+        language: question.language || "English",
+        tag: question.tag || "",
+        positiveMarks: question.positiveMarks || "1",
+        negativeMarks: question.negativeMarks || "0",
+        questionStatus: "published",
+        saveToQuestionBank: "yes",
+        editingQuestionBankId: question.id,
+      })
+    );
+
+    navigate("/admin/content/mock-tests/add");
+  }}
+>
+  Edit Question
+</button>
+
+                    <button
+  className="backButton"
+  onClick={() => {
     localStorage.setItem(
       "reusedQuestionForMockTest",
       JSON.stringify({
@@ -11279,7 +11585,25 @@ This action cannot be undone.`
 >
   Reuse Question
 </button>
-                
+<button
+  className="dangerButton"
+  onClick={async () => {
+    const confirmDelete = window.confirm(
+      "Delete this question permanently from Question Bank?"
+    );
+
+    if (!confirmDelete) return;
+
+    await deleteDoc(doc(db, "questionBank", question.id));
+
+    await loadQuestionBankFromFirestore();
+
+    alert("Question deleted from Question Bank ✅");
+  }}
+>
+  Delete Question
+</button>
+
                   </div>
                 </div>
               ))
