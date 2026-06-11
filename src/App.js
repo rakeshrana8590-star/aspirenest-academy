@@ -90,6 +90,10 @@ export default function App() {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const isExamAttemptPage = location.pathname.includes(
+    "/ctet-tet/mock-tests/attempt/"
+  );
+
 
   const [notesScrollState, setNotesScrollState] = React.useState({});
 
@@ -4895,33 +4899,35 @@ return (
             </div>
           }
         >
-<header className="cleanHeader">
-  <div className="cleanBrand">
-    <AspireNestLogo />
-  </div>
+{!isExamAttemptPage && (
+  <header className="cleanHeader">
+    <div className="cleanBrand">
+      <AspireNestLogo />
+    </div>
 
-  <nav className="cleanNav">
-  {!user ? (
-    <button
-      className="cleanHeaderBtn"
-      onClick={() => navigate("/login")}
-    >
-      Login
-    </button>
-  ) : (
-    <button
-      className="cleanHeaderSwitch"
-      onClick={handleLogout}
-      title="Click to logout"
-    >
-      <span className="switchDot"></span>
-      <span>
-        {isAdmin(user) ? "Admin ON" : "Student ON"}
-      </span>
-    </button>
-  )}
-</nav>
-</header>
+    <nav className="cleanNav">
+      {!user ? (
+        <button
+          className="cleanHeaderBtn"
+          onClick={() => navigate("/login")}
+        >
+          Login
+        </button>
+      ) : (
+        <button
+          className="cleanHeaderSwitch"
+          onClick={handleLogout}
+          title="Click to logout"
+        >
+          <span className="switchDot"></span>
+          <span>
+            {isAdmin(user) ? "Admin ON" : "Student ON"}
+          </span>
+        </button>
+      )}
+    </nav>
+  </header>
+)}
 <main className="appShell">
 <Routes key={location.key || location.pathname}>
 
@@ -18340,373 +18346,322 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 
           return (
             <div className="premiumExamShell" key={test.id}>
-              <div className="premiumExamTop">
-                <button
-                  type="button"
-                  className="examGhostBtn"
-                  onClick={() => navigate(-1)}
-                >
-                  ← Back
-                </button>
-
-                <div className="examTitleBlock">
-                  <span className="examMiniBadge">
-                    {test.planType} MOCK TEST
-                  </span>
-
-                  <h1>{test.title}</h1>
-
-                  <p>
-                    {test.subject} · {test.chapter}
-                  </p>
-                </div>
-
-                <div className="examTopStats">
-                  {!isNoTimer && (
-                    <div className="timerStat">
-                      <span>{timerLabel}</span>
-                      <strong>{formattedTime}</strong>
-                    </div>
-                  )}
-
-                  <div>
-                    <span>Question</span>
-                    <strong>
-                      {currentQuestionIndex + 1}/{questions.length}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>Answered</span>
-                    <strong>{answeredCount}</strong>
-                  </div>
-
-                  <button
+              <div className="premiumExamTop examHeaderCompact">
+              <button
   type="button"
-  className="examSubmitBtn"
-  onClick={() => {
-    const finalAnswers =
-      mockAttemptAnswers?.[test.id] || {};
-
-    localStorage.setItem(
-      `mockAttemptAnswers_${test.id}`,
-      JSON.stringify(finalAnswers)
-    );
-
-    navigate(
-      `/ctet-tet/mock-tests/result/${test.id}`
-    );
-  }}
+  className="examGhostBtn"
+  onClick={() => navigate(-1)}
 >
-  Submit
+  ← Back
 </button>
-                </div>
+
+<div className="examTitleBlock compactExamTitleBlock">
+  <span className="examMiniBadge">
+    {test.planType} • {test.testType}
+  </span>
+
+  <h1>{test.title}</h1>
+
+  <p>
+    {test.subject} · {test.chapter}
+  </p>
+</div>
+
+<div className="examTopStats compactExamStats">
+  {!isNoTimer && (
+    <div className="timerStat">
+      <span>{timerLabel}</span>
+      <strong>{formattedTime}</strong>
+    </div>
+  )}
+
+  <div>
+    <span>Q</span>
+    <strong>
+      {currentQuestionIndex + 1}/{questions.length}
+    </strong>
+  </div>
+
+  <div>
+    <span>Done</span>
+    <strong>{answeredCount}</strong>
+  </div>
+
+  <button
+    type="button"
+    className="examSubmitBtn"
+    onClick={() => {
+      const finalAnswers =
+        mockAttemptAnswers?.[test.id] || {};
+
+      localStorage.setItem(
+        `mockAttemptAnswers_${test.id}`,
+        JSON.stringify(finalAnswers)
+      );
+
+      navigate(`/ctet-tet/mock-tests/result/${test.id}`);
+    }}
+  >
+    Submit
+  </button>
+</div>
               </div>
 
               <div className="premiumExamGrid">
-                <main className="premiumQuestionWorkspace">
-                  <div className="compactQuestionStatus">
-                    <span>
-                      Q{currentQuestionIndex + 1} of {questions.length}
-                    </span>
+  <main className="premiumQuestionWorkspace aspireExamMain">
+    {questions.length === 0 ? (
+      <div className="examEmptyState">
+        <h2>No Questions Found</h2>
+        <p>This mock test does not have questions yet.</p>
+      </div>
+    ) : (
+      <>
 
-                    <strong
-                      className={
-                        selectedAnswerKey
-                          ? "statusAnswered"
-                          : "statusPending"
-                      }
-                    >
-                      {selectedAnswerKey ? "Answered" : "Not Answered"}
-                    </strong>
+<div className="examRefStatusRow">
+  <span className="examRefPill dark">
+    Q{currentQuestionIndex + 1} of {questions.length}
+  </span>
 
-                    <span>
-                      {mockMarkedQuestions?.[test.id]?.[
-                        currentQuestionIndex
-                      ]
-                        ? "Marked for Review"
-                        : "Not Marked"}
-                    </span>
-                  </div>
+  <span className={selectedAnswerKey ? "examRefPill green" : "examRefPill orange"}>
+    {selectedAnswerKey ? "Answered" : "Not Answered"}
+  </span>
 
-                  {questions.length === 0 ? (
-                    <div className="examEmptyState">
-                      <h2>No Questions Found</h2>
-                      <p>
-                        This mock test does not have questions yet.
-                      </p>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="premiumQuestionCard">
-                        <span className="questionNumberPill">
-                          Q{currentQuestionIndex + 1}
-                        </span>
+  <span
+    className={
+      mockMarkedQuestions?.[test.id]?.[currentQuestionIndex]
+        ? "examRefPill purple"
+        : "examRefPill light"
+    }
+  >
+    {mockMarkedQuestions?.[test.id]?.[currentQuestionIndex]
+      ? "Marked for Review"
+      : "Not Marked"}
+  </span>
 
-                        <h2>{currentQuestion?.question}</h2>
-                      </div>
-
-                      <div className="premiumOptionList">
-                        {optionList.map((option) => (
-                          <button
-                            type="button"
-                            key={option.key}
-                            className={
-                              selectedAnswerKey === option.key
-                                ? "premiumOption selectedPremiumOption"
-                                : "premiumOption"
-                            }
-                            onClick={() => {
-                              const updatedAnswers = {
-                                ...(mockAttemptAnswers?.[test.id] || {}),
-                                [currentQuestionIndex]: option.key,
-                              };
-                            
-                              setMockAttemptAnswers((prev) => ({
-                                ...prev,
-                                [test.id]: updatedAnswers,
-                              }));
-                            
-                              localStorage.setItem(
-                                `mockAttemptAnswers_${test.id}`,
-                                JSON.stringify(updatedAnswers)
-                              );
-                            }}
-                          >
-                            <span className="optionLetter">
-                              {option.label}
-                            </span>
-
-                            <span className="optionText">
-                              {option.text}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-
-                      <div className="premiumExamControls finalExamControls">
-                        <button
-                          type="button"
-                          className="examControlBtn secondary"
-                          disabled={currentQuestionIndex === 0}
-                          onClick={() =>
-                            setMockAttemptCurrentIndex((prev) => ({
-                              ...prev,
-                              [test.id]: currentQuestionIndex - 1,
-                            }))
-                          }
-                        >
-                          ← Previous
-                        </button>
-
-                        <button
-                          type="button"
-                          className="examControlBtn ghost"
-                          onClick={() => {
-                            const updatedAnswers = {
-                              ...(mockAttemptAnswers?.[test.id] || {}),
-                              [currentQuestionIndex]: "",
-                            };
-                          
-                            setMockAttemptAnswers((prev) => ({
-                              ...prev,
-                              [test.id]: updatedAnswers,
-                            }));
-                          
-                            localStorage.setItem(
-                              `mockAttemptAnswers_${test.id}`,
-                              JSON.stringify(updatedAnswers)
-                            );
-                          }}
-                        >
-                          Clear Response
-                        </button>
-
-                        <button
-                          type="button"
-                          className="examControlBtn review"
-                          onClick={() => {
-                            setMockMarkedQuestions((prev) => ({
-                              ...prev,
-                              [test.id]: {
-                                ...(prev[test.id] || {}),
-                                [currentQuestionIndex]:
-                                  !prev?.[test.id]?.[
-                                    currentQuestionIndex
-                                  ],
-                              },
-                            }));
-
-                            if (
-                              currentQuestionIndex <
-                              questions.length - 1
-                            ) {
-                              setMockAttemptCurrentIndex((prev) => ({
-                                ...prev,
-                                [test.id]: currentQuestionIndex + 1,
-                              }));
-
-                              resetQuestionTimer();
-                            }
-                          }}
-                        >
-                          Mark for Review & Next
-                        </button>
-
-                        <button
-                          type="button"
-                          className="examControlBtn primary"
-                          onClick={() => {
-                            if (
-                              currentQuestionIndex ===
-                              questions.length - 1
-                            ) {
-                              navigate(
-                                `/ctet-tet/mock-tests/result/${test.id}`
-                              );
-                              return;
-                            }
-
-                            setMockAttemptCurrentIndex((prev) => ({
-                              ...prev,
-                              [test.id]: currentQuestionIndex + 1,
-                            }));
-
-                            resetQuestionTimer();
-                          }}
-                        >
-                          {currentQuestionIndex === questions.length - 1
-                            ? "Submit Test"
-                            : "Save & Next"}
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </main>
-
-                <aside className="premiumPalettePanel">
-                  <div className="paletteHeader">
-                    <h3>Question Palette</h3>
-                    <p>
-                      {answeredCount}/{questions.length} answered
-                    </p>
-                  </div>
-
-                  <div className="paletteRanges">
-  {paletteRanges.map((range) => (
-    <button
-      key={range.start}
-      type="button"
-      className={
-        finalPaletteRangeStart === range.start
-          ? "paletteRangeBtn active"
-          : "paletteRangeBtn"
-      }
-      onClick={() => {
-        setMockPaletteRangeStart((prev) => ({
-          ...prev,
-          [test.id]: range.start,
-        }));
-      }}
-    >
-      {range.label}
-    </button>
-  ))}
+  <span className="examRefPill light">Not Visited</span>
 </div>
 
-                  <div className="premiumPaletteGrid">
-                  {paletteRangeQuestions.map((_, rangeIndex) => {
-  const index = finalPaletteRangeStart + rangeIndex;
+<div className="examRefQuestionCard">
+  <div className="examRefQuestionTitle">
+    <span>{currentQuestionIndex + 1}</span>
 
-  const isCurrent =
-    index === currentQuestionIndex;
+    <h2>{currentQuestion?.question}</h2>
+  </div>
+</div>
 
-  const isAnswered =
-    Boolean(
-      mockAttemptAnswers?.[test.id]?.[index]
-    );
+   
 
-  const isMarked =
-    Boolean(
-      mockMarkedQuestions?.[test.id]?.[index]
-    );
+        <div className="aspireOptionList">
+          {optionList.map((option) => (
+            <button
+              type="button"
+              key={option.key}
+              className={
+                selectedAnswerKey === option.key
+                  ? "aspireOption selectedAspireOption"
+                  : "aspireOption"
+              }
+              onClick={() => {
+                const updatedAnswers = {
+                  ...(mockAttemptAnswers?.[test.id] || {}),
+                  [currentQuestionIndex]: option.key,
+                };
 
-  return (
-    <button
-      type="button"
-      key={index}
-      className={[
-        "paletteNumber",
-        isAnswered ? "paletteAnswered" : "",
-        isMarked ? "paletteMarked" : "",
-        isCurrent ? "paletteCurrent" : "",
-      ].join(" ")}
-      onClick={() => {
-        setMockAttemptCurrentIndex((prev) => ({
-          ...prev,
-          [test.id]: index,
-        }));
+                setMockAttemptAnswers((prev) => ({
+                  ...prev,
+                  [test.id]: updatedAnswers,
+                }));
 
-        setMockPaletteRangeStart((prev) => ({
-          ...prev,
-          [test.id]: finalPaletteRangeStart,
-        }));
+                localStorage.setItem(
+                  `mockAttemptAnswers_${test.id}`,
+                  JSON.stringify(updatedAnswers)
+                );
+              }}
+            >
+              <span>{option.label}</span>
+              <p>{option.text}</p>
+            </button>
+          ))}
+        </div>
 
-        resetQuestionTimer();
-      }}
-    >
-      {index + 1}
-    </button>
-  );
-})}
-                  </div>
+        <div className="aspireExamActionBar">
+          <button
+            type="button"
+            className="examControlBtn secondary"
+            disabled={currentQuestionIndex === 0}
+            onClick={() =>
+              setMockAttemptCurrentIndex((prev) => ({
+                ...prev,
+                [test.id]: currentQuestionIndex - 1,
+              }))
+            }
+          >
+            ← Previous
+          </button>
 
-                  <div className="paletteSummary">
-                    <div>
-                      <span className="dot answeredDot"></span>
-                      Answered
-                    </div>
+          <button
+            type="button"
+            className="examControlBtn ghost"
+            onClick={() => {
+              const updatedAnswers = {
+                ...(mockAttemptAnswers?.[test.id] || {}),
+                [currentQuestionIndex]: "",
+              };
 
-                    <div>
-                      <span className="dot pendingDot"></span>
-                      Not Answered
-                    </div>
+              setMockAttemptAnswers((prev) => ({
+                ...prev,
+                [test.id]: updatedAnswers,
+              }));
 
-                    <div>
-                      <span className="dot markedDot"></span>
-                      Marked
-                    </div>
+              localStorage.setItem(
+                `mockAttemptAnswers_${test.id}`,
+                JSON.stringify(updatedAnswers)
+              );
+            }}
+          >
+            Clear Response
+          </button>
 
-                    <div>
-                      <span className="dot currentDot"></span>
-                      Current
-                    </div>
-                  </div>
+          <button
+            type="button"
+            className="examControlBtn review"
+            onClick={() => {
+              setMockMarkedQuestions((prev) => ({
+                ...prev,
+                [test.id]: {
+                  ...(prev[test.id] || {}),
+                  [currentQuestionIndex]:
+                    !prev?.[test.id]?.[currentQuestionIndex],
+                },
+              }));
+            
+              if (currentQuestionIndex < questions.length - 1) {
+                setMockAttemptCurrentIndex((prev) => ({
+                  ...prev,
+                  [test.id]: currentQuestionIndex + 1,
+                }));
+            
+                resetQuestionTimer();
+              }
+            }}
+          >
+            Mark for Review & Next
+          </button>
 
-                  <div className="examFinalBox">
-                    <h4>Ready to submit?</h4>
-                    <p>
-                      Review your answers before final submission.
-                    </p>
+          <button
+            type="button"
+            className="examControlBtn primary"
+            onClick={() => {
+              if (currentQuestionIndex === questions.length - 1) {
+                navigate(`/ctet-tet/mock-tests/result/${test.id}`);
+                return;
+              }
 
-                    <button
-  type="button"
-  onClick={() => {
-    localStorage.setItem(
-      `mockAttemptAnswers_${test.id}`,
-      JSON.stringify(mockAttemptAnswers[test.id] || {})
-    );
+              setMockAttemptCurrentIndex((prev) => ({
+                ...prev,
+                [test.id]: currentQuestionIndex + 1,
+              }));
 
-    navigate(
-      `/ctet-tet/mock-tests/result/${test.id}`
-    );
-  }}
->
-  Submit Test
-</button>
-                  </div>
-                </aside>
-              </div>
+              resetQuestionTimer();
+            }}
+          >
+            {currentQuestionIndex === questions.length - 1
+              ? "Submit Test"
+              : "Save & Next"}
+          </button>
+        </div>
+      </>
+    )}
+  </main>
+
+  <aside className="premiumPalettePanel aspireExamSide">
+    <div className="paletteHeader">
+      <h3>Question Palette</h3>
+      <p>{answeredCount}/{questions.length} answered</p>
+    </div>
+
+    <div className="paletteRanges">
+      {paletteRanges.map((range) => (
+        <button
+          key={range.start}
+          type="button"
+          className={
+            finalPaletteRangeStart === range.start
+              ? "paletteRangeBtn active"
+              : "paletteRangeBtn"
+          }
+          onClick={() => {
+            setMockPaletteRangeStart((prev) => ({
+              ...prev,
+              [test.id]: range.start,
+            }));
+          }}
+        >
+          {range.label}
+        </button>
+      ))}
+    </div>
+
+    <div className="premiumPaletteGrid">
+      {paletteRangeQuestions.map((_, rangeIndex) => {
+        const index = finalPaletteRangeStart + rangeIndex;
+        const isCurrent = index === currentQuestionIndex;
+        const isAnswered = Boolean(mockAttemptAnswers?.[test.id]?.[index]);
+        const isMarked = Boolean(mockMarkedQuestions?.[test.id]?.[index]);
+
+        return (
+          <button
+            type="button"
+            key={index}
+            className={[
+              "paletteNumber",
+              isAnswered ? "paletteAnswered" : "",
+              isMarked ? "paletteMarked" : "",
+              isCurrent ? "paletteCurrent" : "",
+            ].join(" ")}
+            onClick={() => {
+              setMockAttemptCurrentIndex((prev) => ({
+                ...prev,
+                [test.id]: index,
+              }));
+
+              resetQuestionTimer();
+            }}
+          >
+            {index + 1}
+          </button>
+        );
+      })}
+    </div>
+
+    <div className="paletteSummary">
+      <div><span className="dot answeredDot"></span>Answered</div>
+      <div><span className="dot pendingDot"></span>Not Answered</div>
+      <div><span className="dot markedDot"></span>Marked</div>
+      <div><span className="dot currentDot"></span>Current</div>
+    </div>
+
+    <div className="examFinalBox">
+      <h4>Ready to submit?</h4>
+      <p>Review your answers before final submission.</p>
+
+      <button
+        type="button"
+        onClick={() => {
+          localStorage.setItem(
+            `mockAttemptAnswers_${test.id}`,
+            JSON.stringify(mockAttemptAnswers[test.id] || {})
+          );
+
+          navigate(`/ctet-tet/mock-tests/result/${test.id}`);
+        }}
+      >
+        Submit Test
+      </button>
+    </div>
+  </aside>
+</div>
+
             </div>
           );
         })}
