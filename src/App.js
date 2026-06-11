@@ -1,6 +1,13 @@
 import { auth, db } from "./firebase";
 import { storage } from "./firebase";
 import { QRCodeCanvas } from "qrcode.react";
+import * as XLSX from "xlsx";
+import dayjs from "dayjs";
+import { v4 as uuidv4 } from "uuid";
+import toast, { Toaster } from "react-hot-toast";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import html2canvas from "html2canvas";
 
 
 import {
@@ -300,6 +307,8 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
     const [mockAttemptAnswers, setMockAttemptAnswers] = useState({});
     const [mockAttemptCurrentIndex, setMockAttemptCurrentIndex] = useState({});
     const [mockMarkedQuestions, setMockMarkedQuestions] = useState({});
+    const [mockPaletteRangeStart, setMockPaletteRangeStart] =
+  useState({});
     const [mockExamStartedAt, setMockExamStartedAt] = useState({});
     const [mockExamTimeLeft, setMockExamTimeLeft] = useState({});
 
@@ -644,6 +653,7 @@ const [mockMenuTest, setMockMenuTest] =
     };
   }, [mockMenuPosition]);
 const [selectedMockTestIds, setSelectedMockTestIds] = useState([]);
+const [mockImportXlsxUrl, setMockImportXlsxUrl] = useState("");
 const [mockTestPage, setMockTestPage] = useState(1);
 const mockTestsPerPage = 5;
 const [questionBankSearch, setQuestionBankSearch] = useState("");
@@ -1390,6 +1400,1123 @@ const handleImportMockTestJson = async (event) => {
   } catch (error) {
     console.error("Import exam JSON error:", error);
     alert("Invalid JSON file or import failed");
+  }
+};
+
+
+
+const handleExportMockTestCsv = (test) => {
+  try {
+    if (!test) {
+      alert("No mock test selected for CSV export");
+      return;
+    }
+
+    const cleanText = (value = "") =>
+      value
+        ?.toString()
+        .replace(/\r?\n|\r/g, " ")
+        .replace(/\s+/g, " ")
+        .trim() || "";
+
+    const safeCsvValue = (value = "") => {
+      const text = cleanText(value).replace(/"/g, '""');
+      return `"${text}"`;
+    };
+
+    const questions = test.questions || [];
+
+    if (questions.length === 0) {
+      alert("No questions found in this mock test");
+      return;
+    }
+
+    const headers = [
+      "Test Title",
+      "Plan",
+      "Exam Type",
+      "Test Type",
+      "Subject",
+      "Chapter",
+      "Duration Minutes",
+      "Total Questions",
+      "Question Number",
+      "Question",
+      "Option A",
+      "Option B",
+      "Option C",
+      "Option D",
+      "Correct Answer",
+      "Explanation",
+      "Difficulty Level",
+      "Language",
+      "Positive Marks",
+      "Negative Marks",
+      "Question Status",
+    ];
+
+    const rows = questions.map((question, index) => [
+      test.title || "",
+      test.planType || "FREE",
+      test.examType || "",
+      test.testType || "",
+      test.subject || "",
+      test.chapter || "",
+      test.duration || test.durationMinutes || "",
+      test.totalQuestions || questions.length,
+      question.questionNumber || index + 1,
+      question.question || "",
+      question.option1 || "",
+      question.option2 || "",
+      question.option3 || "",
+      question.option4 || "",
+      question.answer || "",
+      question.explanation || "",
+      question.level || "",
+      question.language || "",
+      question.positiveMarks || test.marksPerQuestion || "",
+      question.negativeMarks || test.negativeMarks || "0",
+      question.questionStatus || test.status || "",
+    ]);
+
+    const csvContent = [
+      headers.map(safeCsvValue).join(","),
+      ...rows.map((row) =>
+        row.map(safeCsvValue).join(",")
+      ),
+    ].join("\n");
+
+    const csvBlob = new Blob(["\uFEFF" + csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const downloadUrl = URL.createObjectURL(csvBlob);
+
+    const safeFileName = (test.title || "mock-test")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+    const downloadLink = document.createElement("a");
+    downloadLink.href = downloadUrl;
+    downloadLink.download = `${safeFileName}-questions.csv`;
+
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+
+    URL.revokeObjectURL(downloadUrl);
+  } catch (error) {
+    console.error("Export CSV error:", error);
+    alert("CSV export failed");
+  }
+};
+
+const handleExportMockTestExcel = (test) => {
+  try {
+    if (!test) {
+      alert("No mock test selected for Excel export");
+      return;
+    }
+
+    const questions = test.questions || [];
+
+    if (questions.length === 0) {
+      alert("No questions found in this mock test");
+      return;
+    }
+
+    const escapeHtml = (value = "") =>
+      value
+        ?.toString()
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;") || "";
+
+    const headers = [
+      "Test Title",
+      "Plan",
+      "Exam Type",
+      "Test Type",
+      "Subject",
+      "Chapter",
+      "Duration Minutes",
+      "Total Questions",
+      "Question Number",
+      "Question",
+      "Option A",
+      "Option B",
+      "Option C",
+      "Option D",
+      "Correct Answer",
+      "Explanation",
+      "Difficulty Level",
+      "Language",
+      "Positive Marks",
+      "Negative Marks",
+      "Question Status",
+    ];
+
+    const rows = questions.map((question, index) => [
+      test.title || "",
+      test.planType || "FREE",
+      test.examType || "",
+      test.testType || "",
+      test.subject || "",
+      test.chapter || "",
+      test.duration || test.durationMinutes || "",
+      test.totalQuestions || questions.length,
+      question.questionNumber || index + 1,
+      question.question || "",
+      question.option1 || "",
+      question.option2 || "",
+      question.option3 || "",
+      question.option4 || "",
+      question.answer || "",
+      question.explanation || "",
+      question.level || "",
+      question.language || "",
+      question.positiveMarks || test.marksPerQuestion || "",
+      question.negativeMarks || test.negativeMarks || "0",
+      question.questionStatus || test.status || "",
+    ]);
+
+    const tableHtml = `
+      <html>
+        <head>
+          <meta charset="UTF-8" />
+        </head>
+        <body>
+          <table border="1">
+            <thead>
+              <tr>
+                ${headers.map((h) => `<th>${escapeHtml(h)}</th>`).join("")}
+              </tr>
+            </thead>
+            <tbody>
+              ${rows
+                .map(
+                  (row) => `
+                    <tr>
+                      ${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}
+                    </tr>
+                  `
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+
+    const excelBlob = new Blob([tableHtml], {
+      type: "application/vnd.ms-excel;charset=utf-8;",
+    });
+
+    const downloadUrl = URL.createObjectURL(excelBlob);
+
+    const safeFileName = (test.title || "mock-test")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+    const downloadLink = document.createElement("a");
+    downloadLink.href = downloadUrl;
+    downloadLink.download = `${safeFileName}-questions.xls`;
+
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+
+    URL.revokeObjectURL(downloadUrl);
+  } catch (error) {
+    console.error("Export Excel error:", error);
+    alert("Excel export failed");
+  }
+};
+
+const handleExportMockTestXlsx = (test) => {
+  try {
+    if (!test) {
+      alert("No mock test selected for XLSX export");
+      return;
+    }
+
+    const questions = test.questions || [];
+
+    if (questions.length === 0) {
+      alert("No questions found in this mock test");
+      return;
+    }
+
+    const rows = questions.map((question, index) => ({
+      "Test Title": test.title || "",
+      Plan: test.planType || "FREE",
+      "Exam Type": test.examType || "",
+      "Test Type": test.testType || "",
+      Subject: test.subject || "",
+      Chapter: test.chapter || "",
+      "Duration Minutes":
+        test.duration || test.durationMinutes || "",
+      "Total Questions":
+        test.totalQuestions || questions.length,
+      "Question Number":
+        question.questionNumber || index + 1,
+      Question: question.question || "",
+      "Option A": question.option1 || "",
+      "Option B": question.option2 || "",
+      "Option C": question.option3 || "",
+      "Option D": question.option4 || "",
+      "Correct Answer": question.answer || "",
+      Explanation: question.explanation || "",
+      "Difficulty Level": question.level || "",
+      Language: question.language || "",
+      "Positive Marks":
+        question.positiveMarks ||
+        test.marksPerQuestion ||
+        "",
+      "Negative Marks":
+        question.negativeMarks ||
+        test.negativeMarks ||
+        "0",
+      "Question Status":
+        question.questionStatus || test.status || "",
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+
+    worksheet["!cols"] = [
+      { wch: 28 },
+      { wch: 12 },
+      { wch: 14 },
+      { wch: 18 },
+      { wch: 28 },
+      { wch: 28 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 60 },
+      { wch: 32 },
+      { wch: 32 },
+      { wch: 32 },
+      { wch: 32 },
+      { wch: 22 },
+      { wch: 60 },
+      { wch: 18 },
+      { wch: 14 },
+      { wch: 16 },
+      { wch: 16 },
+      { wch: 18 },
+    ];
+
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      "Questions"
+    );
+
+    const safeFileName = (test.title || "mock-test")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+    XLSX.writeFile(
+      workbook,
+      `${safeFileName}-questions.xlsx`
+    );
+  } catch (error) {
+    console.error("Export XLSX error:", error);
+    alert("XLSX export failed");
+  }
+};
+
+const handleDownloadMockTestXlsxTemplate = () => {
+  const testInfoRows = [
+    { Field: "Test Title", Value: "Sample CTET Subject Test" },
+    { Field: "Plan", Value: "PREMIUM" },
+    { Field: "Exam Type", Value: "CTET" },
+    { Field: "Test Type", Value: "Subject Test" },
+    { Field: "Subject", Value: "Child Development & Pedagogy" },
+    { Field: "Chapter", Value: "Complete CDP" },
+    { Field: "Duration Minutes", Value: 200 },
+    { Field: "Total Questions", Value: 2 },
+    { Field: "Marks Per Question", Value: 1 },
+    { Field: "Negative Marks", Value: 0 },
+    { Field: "Passing Marks", Value: 0 },
+    { Field: "Exam Difficulty", Value: "Mixed" },
+    { Field: "Exam Language", Value: "English" },
+    { Field: "Attempt Limit", Value: "unlimited" },
+    { Field: "Result Publish Mode", Value: "instant" },
+    { Field: "Shuffle Questions", Value: "no" },
+    { Field: "Shuffle Options", Value: "no" },
+    { Field: "Navigation Mode", Value: "free" },
+    { Field: "Allow Pause", Value: "yes" },
+    { Field: "Calculator Allowed", Value: "no" },
+    { Field: "Question Source", Value: "xlsxImport" },
+    { Field: "Fullscreen Mode", Value: "no" },
+    { Field: "Tab Switch Detection", Value: "no" },
+    { Field: "Copy Paste Protection", Value: "no" },
+    { Field: "Auto Submit On Violation", Value: "no" },
+    { Field: "Leaderboard Mode", Value: "disabled" },
+    { Field: "Timer Mode", Value: "globalTimer" },
+    { Field: "Per Question Time Value", Value: 1 },
+    { Field: "Per Question Time Unit", Value: "min" },
+    { Field: "Auto Submit On Time Up", Value: "yes" },
+    { Field: "Schedule Type", Value: "alwaysAvailable" },
+    { Field: "Exam Start Date", Value: "" },
+    { Field: "Exam Start Time", Value: "" },
+    { Field: "Exam End Date", Value: "" },
+    { Field: "Exam End Time", Value: "" },
+    { Field: "Recurring Mode", Value: "none" },
+    { Field: "Weekly Test Day", Value: "" },
+    { Field: "Monthly Test Date", Value: "" },
+    { Field: "Live Event Mode", Value: "no" },
+    { Field: "Scholarship Mode", Value: "no" },
+    { Field: "Exam Instructions", Value: "" },
+    { Field: "Status", Value: "draft" },
+  ];
+
+  const questionRows = [
+    {
+      "Question Number": 1,
+      Question: "Sample question text",
+      "Option A": "Option A",
+      "Option B": "Option B",
+      "Option C": "Option C",
+      "Option D": "Option D",
+      "Correct Answer": "Option A",
+      Explanation: "Sample explanation",
+      "Difficulty Level": "Easy",
+      "Question Type": "Single Correct",
+      Language: "English",
+      Tag: "",
+      "Positive Marks": 1,
+      "Negative Marks": 0,
+      "Question Status": "published",
+      "Save To Question Bank": "yes",
+    },
+  ];
+
+  const testInfoSheet = XLSX.utils.json_to_sheet(testInfoRows);
+  const questionsSheet = XLSX.utils.json_to_sheet(questionRows);
+
+  testInfoSheet["!cols"] = [{ wch: 35 }, { wch: 45 }];
+  questionsSheet["!cols"] = [
+    { wch: 18 },
+    { wch: 70 },
+    { wch: 32 },
+    { wch: 32 },
+    { wch: 32 },
+    { wch: 32 },
+    { wch: 22 },
+    { wch: 65 },
+    { wch: 18 },
+    { wch: 20 },
+    { wch: 16 },
+    { wch: 20 },
+    { wch: 16 },
+    { wch: 16 },
+    { wch: 20 },
+    { wch: 22 },
+  ];
+
+  const workbook = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(workbook, testInfoSheet, "Test Info");
+  XLSX.utils.book_append_sheet(workbook, questionsSheet, "Questions");
+
+  XLSX.writeFile(workbook, "mock-test-two-sheet-import-template.xlsx");
+};
+
+const handleDownloadMockTestCsvTemplate = () => {
+  const headers = [
+    "Test Title",
+    "Plan",
+    "Exam Type",
+    "Test Type",
+    "Subject",
+    "Chapter",
+    "Duration Minutes",
+    "Question Number",
+    "Question",
+    "Option A",
+    "Option B",
+    "Option C",
+    "Option D",
+    "Correct Answer",
+    "Explanation",
+    "Difficulty Level",
+    "Language",
+    "Positive Marks",
+    "Negative Marks",
+    "Question Status",
+  ];
+
+  const sampleRow = [
+    "Sample CTET Test",
+    "FREE",
+    "CTET",
+    "Chapter Test",
+    "Child Development & Pedagogy",
+    "Growth and Development",
+    "30",
+    "1",
+    "Sample question text",
+    "Option A",
+    "Option B",
+    "Option C",
+    "Option D",
+    "Option A",
+    "Sample explanation",
+    "Easy",
+    "English",
+    "1",
+    "0",
+    "published",
+  ];
+
+  const safeCsvValue = (value = "") =>
+    `"${value.toString().replace(/"/g, '""')}"`;
+
+  const csvContent = [
+    headers.map(safeCsvValue).join(","),
+    sampleRow.map(safeCsvValue).join(","),
+  ].join("\n");
+
+  const csvBlob = new Blob(["\uFEFF" + csvContent], {
+    type: "text/csv;charset=utf-8;",
+  });
+
+  const downloadUrl = URL.createObjectURL(csvBlob);
+
+  const downloadLink = document.createElement("a");
+  downloadLink.href = downloadUrl;
+  downloadLink.download = "mock-test-import-template.csv";
+
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
+
+  URL.revokeObjectURL(downloadUrl);
+};
+
+const handleImportMockTestXlsx = async (event) => {
+  try {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    const data = await file.arrayBuffer();
+
+    const workbook = XLSX.read(data, {
+      type: "array",
+    });
+
+    const testInfoSheet = workbook.Sheets["Test Info"];
+    const questionsSheet = workbook.Sheets["Questions"];
+
+    if (!testInfoSheet || !questionsSheet) {
+      alert(
+        "Invalid template. File must contain 'Test Info' and 'Questions' sheets."
+      );
+      event.target.value = "";
+      return;
+    }
+
+    const testInfoRows = XLSX.utils.sheet_to_json(testInfoSheet, {
+      defval: "",
+    });
+
+    const questionRows = XLSX.utils.sheet_to_json(questionsSheet, {
+      defval: "",
+    });
+
+    if (!testInfoRows.length) {
+      alert("Test Info sheet is empty.");
+      event.target.value = "";
+      return;
+    }
+
+    if (!questionRows.length) {
+      alert("Questions sheet is empty.");
+      event.target.value = "";
+      return;
+    }
+
+    if (questionRows.length > 200) {
+      alert("Maximum 200 questions allowed per import for storage safety.");
+      event.target.value = "";
+      return;
+    }
+
+    const testInfo = testInfoRows.reduce((acc, row) => {
+      const field = row.Field?.toString().trim();
+      const value = row.Value;
+
+      if (field) {
+        acc[field] = value;
+      }
+
+      return acc;
+    }, {});
+
+    const requiredQuestionColumns = [
+      "Question",
+      "Option A",
+      "Option B",
+      "Option C",
+      "Option D",
+      "Correct Answer",
+    ];
+
+    const firstQuestionRow = questionRows[0];
+
+    const missingQuestionColumns =
+      requiredQuestionColumns.filter(
+        (column) => !(column in firstQuestionRow)
+      );
+
+    if (missingQuestionColumns.length > 0) {
+      alert(
+        `Missing required question column(s): ${missingQuestionColumns.join(
+          ", "
+        )}`
+      );
+      event.target.value = "";
+      return;
+    }
+
+    const importedQuestions = questionRows.map((row, index) => ({
+      questionNumber: Number(row["Question Number"] || index + 1),
+      question: row["Question"]?.toString().trim() || "",
+      option1: row["Option A"]?.toString().trim() || "",
+      option2: row["Option B"]?.toString().trim() || "",
+      option3: row["Option C"]?.toString().trim() || "",
+      option4: row["Option D"]?.toString().trim() || "",
+      answer: row["Correct Answer"]?.toString().trim() || "",
+      explanation: row["Explanation"]?.toString().trim() || "",
+      level:
+        row["Difficulty Level"]?.toString().trim() ||
+        testInfo["Exam Difficulty"]?.toString().trim() ||
+        "Easy",
+      questionType:
+        row["Question Type"]?.toString().trim() ||
+        "Single Correct",
+      language:
+        row["Language"]?.toString().trim() ||
+        testInfo["Exam Language"]?.toString().trim() ||
+        "English",
+      tag: row["Tag"]?.toString().trim() || "",
+      positiveMarks: Number(
+        row["Positive Marks"] ||
+          testInfo["Marks Per Question"] ||
+          1
+      ),
+      negativeMarks: Number(
+        row["Negative Marks"] ||
+          testInfo["Negative Marks"] ||
+          0
+      ),
+      questionStatus:
+        row["Question Status"]?.toString().trim() ||
+        "published",
+      saveToQuestionBank:
+        row["Save To Question Bank"]?.toString().trim() ||
+        "yes",
+    }));
+
+    const invalidQuestionIndex = importedQuestions.findIndex(
+      (q) =>
+        !q.question ||
+        !q.option1 ||
+        !q.option2 ||
+        !q.option3 ||
+        !q.option4 ||
+        !q.answer
+    );
+
+    if (invalidQuestionIndex !== -1) {
+      alert(
+        `Question ${invalidQuestionIndex + 1} is incomplete. Import cancelled.`
+      );
+      event.target.value = "";
+      return;
+    }
+
+    const title =
+      testInfo["Test Title"]?.toString().trim() ||
+      "Imported XLSX Mock Test";
+
+    const totalQuestions = importedQuestions.length;
+
+    const totalMarks = importedQuestions.reduce(
+      (sum, q) => sum + Number(q.positiveMarks || 0),
+      0
+    );
+
+    const confirmImport = window.confirm(
+      `Import this Excel file as Draft?\n\nTitle: ${title}\nQuestions: ${totalQuestions}\nMarks: ${totalMarks}\n\nExisting tests will not be overwritten.`
+    );
+
+    if (!confirmImport) {
+      event.target.value = "";
+      return;
+    }
+
+    const importPayload = {
+      title: `${title} - Imported`,
+      section: "mockTest",
+      contentType: "MOCK",
+
+      planType: testInfo["Plan"]?.toString().trim() || "FREE",
+      examType: testInfo["Exam Type"]?.toString().trim() || "CTET",
+      testType:
+        testInfo["Test Type"]?.toString().trim() ||
+        "Chapter Test",
+
+      subject: testInfo["Subject"]?.toString().trim() || "",
+      chapter: testInfo["Chapter"]?.toString().trim() || "",
+
+      duration: Number(testInfo["Duration Minutes"] || 30),
+      durationMinutes: Number(testInfo["Duration Minutes"] || 30),
+
+      totalQuestions,
+      marksPerQuestion: Number(
+        testInfo["Marks Per Question"] || 1
+      ),
+      negativeMarks: Number(testInfo["Negative Marks"] || 0),
+      passingMarks: Number(testInfo["Passing Marks"] || 0),
+
+      examDifficulty:
+        testInfo["Exam Difficulty"]?.toString().trim() ||
+        "Mixed",
+
+      examLanguage:
+        testInfo["Exam Language"]?.toString().trim() ||
+        "English",
+
+      attemptLimit:
+        testInfo["Attempt Limit"]?.toString().trim() ||
+        "unlimited",
+
+      resultPublishMode:
+        testInfo["Result Publish Mode"]?.toString().trim() ||
+        "instant",
+
+      shuffleQuestions:
+        testInfo["Shuffle Questions"]?.toString().trim() ||
+        "no",
+
+      shuffleOptions:
+        testInfo["Shuffle Options"]?.toString().trim() ||
+        "no",
+
+      navigationMode:
+        testInfo["Navigation Mode"]?.toString().trim() ||
+        "free",
+
+      allowPause:
+        testInfo["Allow Pause"]?.toString().trim() ||
+        "yes",
+
+      calculatorAllowed:
+        testInfo["Calculator Allowed"]?.toString().trim() ||
+        "no",
+
+      questionSource:
+        testInfo["Question Source"]?.toString().trim() ||
+        "xlsxImport",
+
+      fullscreenMode:
+        testInfo["Fullscreen Mode"]?.toString().trim() ||
+        "no",
+
+      tabSwitchDetection:
+        testInfo["Tab Switch Detection"]?.toString().trim() ||
+        "no",
+
+      copyPasteProtection:
+        testInfo["Copy Paste Protection"]?.toString().trim() ||
+        "no",
+
+      autoSubmitOnViolation:
+        testInfo["Auto Submit On Violation"]?.toString().trim() ||
+        "no",
+
+      leaderboardMode:
+        testInfo["Leaderboard Mode"]?.toString().trim() ||
+        "disabled",
+
+      timerMode:
+        testInfo["Timer Mode"]?.toString().trim() ||
+        "globalTimer",
+
+      perQuestionTimeValue:
+        testInfo["Per Question Time Value"]?.toString().trim() ||
+        "1",
+
+      perQuestionTimeUnit:
+        testInfo["Per Question Time Unit"]?.toString().trim() ||
+        "min",
+
+      autoSubmitOnTimeUp:
+        testInfo["Auto Submit On Time Up"]?.toString().trim() ||
+        "yes",
+
+      scheduleType:
+        testInfo["Schedule Type"]?.toString().trim() ||
+        "alwaysAvailable",
+
+      examStartDate:
+        testInfo["Exam Start Date"]?.toString().trim() || "",
+
+      examStartTime:
+        testInfo["Exam Start Time"]?.toString().trim() || "",
+
+      examEndDate:
+        testInfo["Exam End Date"]?.toString().trim() || "",
+
+      examEndTime:
+        testInfo["Exam End Time"]?.toString().trim() || "",
+
+      recurringMode:
+        testInfo["Recurring Mode"]?.toString().trim() ||
+        "none",
+
+      weeklyTestDay:
+        testInfo["Weekly Test Day"]?.toString().trim() || "",
+
+      monthlyTestDate:
+        testInfo["Monthly Test Date"]?.toString().trim() || "",
+
+      liveEventMode:
+        testInfo["Live Event Mode"]?.toString().trim() ||
+        "no",
+
+      scholarshipMode:
+        testInfo["Scholarship Mode"]?.toString().trim() ||
+        "no",
+
+      examInstructions:
+        testInfo["Exam Instructions"]?.toString().trim() || "",
+
+      status: "draft",
+
+      totalMarks,
+      questions: importedQuestions,
+
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    await addDoc(collection(db, "contentItems"), importPayload);
+
+    await loadContentItemsFromFirestore();
+
+    alert("Two-sheet Excel mock test imported safely as Draft ✅");
+
+    event.target.value = "";
+  } catch (error) {
+    console.error("Import XLSX error:", error);
+    alert("Excel import failed. Please check template format.");
+    event.target.value = "";
+  }
+};
+
+const convertGoogleDriveUrlToDownloadUrl = (url = "") => {
+  const fileIdMatch =
+    url.match(/\/d\/([^/]+)/) ||
+    url.match(/[?&]id=([^&]+)/);
+
+  if (!fileIdMatch?.[1]) {
+    return url;
+  }
+
+  return `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`;
+};
+
+const handleImportMockTestXlsxFromUrl = async () => {
+  try {
+    if (!mockImportXlsxUrl.trim()) {
+      alert("Please paste Google Drive XLSX URL");
+      return;
+    }
+
+    const downloadUrl = convertGoogleDriveUrlToDownloadUrl(
+      mockImportXlsxUrl.trim()
+    );
+
+    const response = await fetch(downloadUrl);
+
+    if (!response.ok) {
+      alert(
+        "Unable to fetch XLSX from URL. Please make sure the file is public/shared."
+      );
+      return;
+    }
+
+    const data = await response.arrayBuffer();
+
+    const workbook = XLSX.read(data, {
+      type: "array",
+    });
+
+    const testInfoSheet = workbook.Sheets["Test Info"];
+    const questionsSheet = workbook.Sheets["Questions"];
+
+    if (!testInfoSheet || !questionsSheet) {
+      alert(
+        "Invalid template. File must contain 'Test Info' and 'Questions' sheets."
+      );
+      return;
+    }
+
+    const testInfoRows = XLSX.utils.sheet_to_json(testInfoSheet, {
+      defval: "",
+    });
+
+    const questionRows = XLSX.utils.sheet_to_json(questionsSheet, {
+      defval: "",
+    });
+
+    if (!testInfoRows.length || !questionRows.length) {
+      alert("Excel file has empty Test Info or Questions sheet.");
+      return;
+    }
+
+    if (questionRows.length > 200) {
+      alert("Maximum 200 questions allowed per import for storage safety.");
+      return;
+    }
+
+    const testInfo = testInfoRows.reduce((acc, row) => {
+      const field = row.Field?.toString().trim();
+      const value = row.Value;
+
+      if (field) {
+        acc[field] = value;
+      }
+
+      return acc;
+    }, {});
+
+    const requiredQuestionColumns = [
+      "Question",
+      "Option A",
+      "Option B",
+      "Option C",
+      "Option D",
+      "Correct Answer",
+    ];
+
+    const missingQuestionColumns =
+      requiredQuestionColumns.filter(
+        (column) => !(column in questionRows[0])
+      );
+
+    if (missingQuestionColumns.length > 0) {
+      alert(
+        `Missing required question column(s): ${missingQuestionColumns.join(
+          ", "
+        )}`
+      );
+      return;
+    }
+
+    const importedQuestions = questionRows.map((row, index) => ({
+      questionNumber: Number(row["Question Number"] || index + 1),
+      question: row["Question"]?.toString().trim() || "",
+      option1: row["Option A"]?.toString().trim() || "",
+      option2: row["Option B"]?.toString().trim() || "",
+      option3: row["Option C"]?.toString().trim() || "",
+      option4: row["Option D"]?.toString().trim() || "",
+      answer: row["Correct Answer"]?.toString().trim() || "",
+      explanation: row["Explanation"]?.toString().trim() || "",
+      level:
+        row["Difficulty Level"]?.toString().trim() ||
+        testInfo["Exam Difficulty"]?.toString().trim() ||
+        "Easy",
+      questionType:
+        row["Question Type"]?.toString().trim() ||
+        "Single Correct",
+      language:
+        row["Language"]?.toString().trim() ||
+        testInfo["Exam Language"]?.toString().trim() ||
+        "English",
+      tag: row["Tag"]?.toString().trim() || "",
+      positiveMarks: Number(
+        row["Positive Marks"] ||
+          testInfo["Marks Per Question"] ||
+          1
+      ),
+      negativeMarks: Number(
+        row["Negative Marks"] ||
+          testInfo["Negative Marks"] ||
+          0
+      ),
+      questionStatus:
+        row["Question Status"]?.toString().trim() ||
+        "published",
+      saveToQuestionBank:
+        row["Save To Question Bank"]?.toString().trim() ||
+        "yes",
+    }));
+
+    const invalidQuestionIndex = importedQuestions.findIndex(
+      (q) =>
+        !q.question ||
+        !q.option1 ||
+        !q.option2 ||
+        !q.option3 ||
+        !q.option4 ||
+        !q.answer
+    );
+
+    if (invalidQuestionIndex !== -1) {
+      alert(
+        `Question ${invalidQuestionIndex + 1} is incomplete. Import cancelled.`
+      );
+      return;
+    }
+
+    const title =
+      testInfo["Test Title"]?.toString().trim() ||
+      "Imported Drive XLSX Mock Test";
+
+    const totalQuestions = importedQuestions.length;
+
+    const totalMarks = importedQuestions.reduce(
+      (sum, q) => sum + Number(q.positiveMarks || 0),
+      0
+    );
+
+    const confirmImport = window.confirm(
+      `Import this Google Drive XLSX as Draft?\n\nTitle: ${title}\nQuestions: ${totalQuestions}\nMarks: ${totalMarks}\n\nExisting tests will not be overwritten.`
+    );
+
+    if (!confirmImport) return;
+
+    const importPayload = {
+      title: `${title} - Imported`,
+      section: "mockTest",
+      contentType: "MOCK",
+
+      planType: testInfo["Plan"]?.toString().trim() || "FREE",
+      examType: testInfo["Exam Type"]?.toString().trim() || "CTET",
+      testType:
+        testInfo["Test Type"]?.toString().trim() ||
+        "Chapter Test",
+
+      subject: testInfo["Subject"]?.toString().trim() || "",
+      chapter: testInfo["Chapter"]?.toString().trim() || "",
+
+      duration: Number(testInfo["Duration Minutes"] || 30),
+      durationMinutes: Number(testInfo["Duration Minutes"] || 30),
+
+      totalQuestions,
+      marksPerQuestion: Number(testInfo["Marks Per Question"] || 1),
+      negativeMarks: Number(testInfo["Negative Marks"] || 0),
+      passingMarks: Number(testInfo["Passing Marks"] || 0),
+
+      examDifficulty:
+        testInfo["Exam Difficulty"]?.toString().trim() || "Mixed",
+      examLanguage:
+        testInfo["Exam Language"]?.toString().trim() || "English",
+
+      attemptLimit:
+        testInfo["Attempt Limit"]?.toString().trim() || "unlimited",
+      resultPublishMode:
+        testInfo["Result Publish Mode"]?.toString().trim() || "instant",
+
+      shuffleQuestions:
+        testInfo["Shuffle Questions"]?.toString().trim() || "no",
+      shuffleOptions:
+        testInfo["Shuffle Options"]?.toString().trim() || "no",
+
+      navigationMode:
+        testInfo["Navigation Mode"]?.toString().trim() || "free",
+      allowPause:
+        testInfo["Allow Pause"]?.toString().trim() || "yes",
+      calculatorAllowed:
+        testInfo["Calculator Allowed"]?.toString().trim() || "no",
+
+      questionSource: "googleDriveXlsxUrl",
+      sourceXlsxUrl: mockImportXlsxUrl.trim(),
+
+      fullscreenMode:
+        testInfo["Fullscreen Mode"]?.toString().trim() || "no",
+      tabSwitchDetection:
+        testInfo["Tab Switch Detection"]?.toString().trim() || "no",
+      copyPasteProtection:
+        testInfo["Copy Paste Protection"]?.toString().trim() || "no",
+      autoSubmitOnViolation:
+        testInfo["Auto Submit On Violation"]?.toString().trim() || "no",
+
+      leaderboardMode:
+        testInfo["Leaderboard Mode"]?.toString().trim() || "disabled",
+
+      timerMode:
+        testInfo["Timer Mode"]?.toString().trim() || "globalTimer",
+      perQuestionTimeValue:
+        testInfo["Per Question Time Value"]?.toString().trim() || "1",
+      perQuestionTimeUnit:
+        testInfo["Per Question Time Unit"]?.toString().trim() || "min",
+      autoSubmitOnTimeUp:
+        testInfo["Auto Submit On Time Up"]?.toString().trim() || "yes",
+
+      scheduleType:
+        testInfo["Schedule Type"]?.toString().trim() ||
+        "alwaysAvailable",
+      examStartDate:
+        testInfo["Exam Start Date"]?.toString().trim() || "",
+      examStartTime:
+        testInfo["Exam Start Time"]?.toString().trim() || "",
+      examEndDate:
+        testInfo["Exam End Date"]?.toString().trim() || "",
+      examEndTime:
+        testInfo["Exam End Time"]?.toString().trim() || "",
+
+      recurringMode:
+        testInfo["Recurring Mode"]?.toString().trim() || "none",
+      weeklyTestDay:
+        testInfo["Weekly Test Day"]?.toString().trim() || "",
+      monthlyTestDate:
+        testInfo["Monthly Test Date"]?.toString().trim() || "",
+
+      liveEventMode:
+        testInfo["Live Event Mode"]?.toString().trim() || "no",
+      scholarshipMode:
+        testInfo["Scholarship Mode"]?.toString().trim() || "no",
+
+      examInstructions:
+        testInfo["Exam Instructions"]?.toString().trim() || "",
+
+      status: "draft",
+
+      totalMarks,
+      questions: importedQuestions,
+
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    await addDoc(collection(db, "contentItems"), importPayload);
+
+    await loadContentItemsFromFirestore();
+
+    setMockImportXlsxUrl("");
+
+    alert("Google Drive XLSX imported safely as Draft ✅");
+  } catch (error) {
+    console.error("Import XLSX from URL error:", error);
+
+    alert(
+      "Google Drive import failed. If Drive blocks direct access, download the file and use Import XLSX."
+    );
   }
 };
 
@@ -11101,57 +12228,15 @@ Do you want to continue?`
   accept=".json"
   id="mockJsonImportInput"
   style={{ display: "none" }}
-  onChange={(e) => {
-    const file = e.target.files?.[0];
-
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = async (event) => {
-      try {
-        const importedTest = JSON.parse(
-          event.target.result
-        );
-    
-        const importPayload = {
-          ...importedTest,
-          title: `${
-            importedTest.title ||
-            "Imported Mock Test"
-          } - Imported`,
-          section: "mockTest",
-          status: "draft",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-    
-        delete importPayload.id;
-    
-        await addDoc(
-          collection(db, "contentItems"),
-          importPayload
-        );
-    
-        await loadContentItemsFromFirestore();
-    
-        alert("Mock test imported as Draft ✅");
-      } catch (error) {
-        console.error(
-          "Import JSON error:",
-          error
-        );
-    
-        alert(
-          "Invalid JSON file or import failed ❌"
-        );
-      }
-    };
-
-    reader.readAsText(file);
-  }}
+  onChange={handleImportMockTestJson}
 />
-
+<input
+  type="file"
+  accept=".xlsx,.xls"
+  id="mockXlsxImportInput"
+  style={{ display: "none" }}
+  onChange={handleImportMockTestXlsx}
+/>
 <button
   className="backButton"
   onClick={() =>
@@ -11161,6 +12246,44 @@ Do you want to continue?`
   }
 >
   Import JSON
+</button>
+<button
+  className="backButton"
+  onClick={() =>
+    document
+      .getElementById("mockXlsxImportInput")
+      ?.click()
+  }
+>
+  Import XLSX
+</button>
+
+<input
+  type="url"
+  className="contentStudioInput"
+  placeholder="Paste Google Drive XLSX URL"
+  value={mockImportXlsxUrl}
+  onChange={(e) =>
+    setMockImportXlsxUrl(e.target.value)
+  }
+/>
+
+<button
+  className="publishButton"
+  onClick={() => {
+    alert(
+      "Google Drive direct import needs backend Cloud Function.\n\nFor now: Download XLSX from Drive, then use Import XLSX."
+    );
+  }}
+>
+  Drive Import Info
+</button>
+
+<button
+  className="publishButton"
+  onClick={handleDownloadMockTestXlsxTemplate}
+>
+  Download XLSX Template
 </button>
 
           <button
@@ -11326,6 +12449,7 @@ Do you want to continue?`
 >
   Clear Filters
 </button>
+
 <button
   className="publishButton"
   onClick={() => {
@@ -11365,6 +12489,8 @@ Do you want to continue?`
 >
   Export JSON
 </button>
+
+
 
 <button
   className="backButton"
@@ -17101,6 +18227,44 @@ handleSaveUniversalContent={handleSaveUniversalContent}
             (_, index) => mockAttemptAnswers?.[test.id]?.[index]
           ).length;
 
+          const palettePageSize = 25;
+
+          const activePaletteRangeStart =
+            mockPaletteRangeStart?.[test.id] || 0;
+          
+          const currentRangeStart =
+            Math.floor(currentQuestionIndex / palettePageSize) *
+            palettePageSize;
+          
+          const finalPaletteRangeStart =
+            activePaletteRangeStart === currentRangeStart
+              ? activePaletteRangeStart
+              : currentRangeStart;
+          
+          const paletteRangeQuestions = questions.slice(
+            finalPaletteRangeStart,
+            finalPaletteRangeStart + palettePageSize
+          );
+          
+          const paletteRanges = Array.from(
+            {
+              length: Math.ceil(questions.length / palettePageSize),
+            },
+            (_, rangeIndex) => {
+              const start = rangeIndex * palettePageSize;
+              const end = Math.min(
+                start + palettePageSize,
+                questions.length
+              );
+          
+              return {
+                start,
+                end,
+                label: `${start + 1}-${end}`,
+              };
+            }
+          );
+
           const getTimerSeconds = (value, unit) => {
             const numericValue = Number(value || 1);
 
@@ -17428,44 +18592,73 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                     </p>
                   </div>
 
+                  <div className="paletteRanges">
+  {paletteRanges.map((range) => (
+    <button
+      key={range.start}
+      type="button"
+      className={
+        finalPaletteRangeStart === range.start
+          ? "paletteRangeBtn active"
+          : "paletteRangeBtn"
+      }
+      onClick={() => {
+        setMockPaletteRangeStart((prev) => ({
+          ...prev,
+          [test.id]: range.start,
+        }));
+      }}
+    >
+      {range.label}
+    </button>
+  ))}
+</div>
+
                   <div className="premiumPaletteGrid">
-                    {questions.map((_, index) => {
-                      const isCurrent =
-                        index === currentQuestionIndex;
+                  {paletteRangeQuestions.map((_, rangeIndex) => {
+  const index = finalPaletteRangeStart + rangeIndex;
 
-                      const isAnswered =
-                        Boolean(
-                          mockAttemptAnswers?.[test.id]?.[index]
-                        );
+  const isCurrent =
+    index === currentQuestionIndex;
 
-                      const isMarked =
-                        Boolean(
-                          mockMarkedQuestions?.[test.id]?.[index]
-                        );
+  const isAnswered =
+    Boolean(
+      mockAttemptAnswers?.[test.id]?.[index]
+    );
 
-                      return (
-                        <button
-                          type="button"
-                          key={index}
-                          className={[
-                            "paletteNumber",
-                            isAnswered ? "paletteAnswered" : "",
-                            isMarked ? "paletteMarked" : "",
-                            isCurrent ? "paletteCurrent" : "",
-                          ].join(" ")}
-                          onClick={() => {
-                            setMockAttemptCurrentIndex((prev) => ({
-                              ...prev,
-                              [test.id]: index,
-                            }));
+  const isMarked =
+    Boolean(
+      mockMarkedQuestions?.[test.id]?.[index]
+    );
 
-                            resetQuestionTimer();
-                          }}
-                        >
-                          {index + 1}
-                        </button>
-                      );
-                    })}
+  return (
+    <button
+      type="button"
+      key={index}
+      className={[
+        "paletteNumber",
+        isAnswered ? "paletteAnswered" : "",
+        isMarked ? "paletteMarked" : "",
+        isCurrent ? "paletteCurrent" : "",
+      ].join(" ")}
+      onClick={() => {
+        setMockAttemptCurrentIndex((prev) => ({
+          ...prev,
+          [test.id]: index,
+        }));
+
+        setMockPaletteRangeStart((prev) => ({
+          ...prev,
+          [test.id]: finalPaletteRangeStart,
+        }));
+
+        resetQuestionTimer();
+      }}
+    >
+      {index + 1}
+    </button>
+  );
+})}
                   </div>
 
                   <div className="paletteSummary">
@@ -18679,27 +19872,59 @@ navigate(
           ⭐ Feature / Remove Feature
         </button>
 
-        <button
-          onClick={async () => {
-            const confirmArchive = window.confirm(
-              `Archive "${mockMenuTest.title}"?`
-            );
+        {mockMenuTest.status === "archived" ? (
+  <button
+    onClick={async () => {
+      if (!mockMenuTest?.id) return;
 
-            if (!confirmArchive) return;
+      const confirmRestore = window.confirm(
+        `Restore "${mockMenuTest.title}" back to Unpublished?`
+      );
 
-            await updateDoc(doc(db, "contentItems", mockMenuTest.id), {
-              status: "archived",
-              updatedAt: new Date(),
-            });
+      if (!confirmRestore) return;
 
-            await loadContentItemsFromFirestore();
-            closeMockActionPortal();
+      await updateDoc(doc(db, "contentItems", mockMenuTest.id), {
+        status: "unpublished",
+        updatedAt: new Date(),
+        restoredAt: new Date(),
+      });
 
-            alert("Mock test archived ✅");
-          }}
-        >
-          📦 Archive
-        </button>
+      await loadContentItemsFromFirestore();
+      closeMockActionPortal();
+
+      alert("Mock test restored successfully ✅");
+    }}
+  >
+    📂 Restore / Unarchive
+  </button>
+) : (
+  <button
+    onClick={async () => {
+      if (!mockMenuTest?.id) return;
+
+      const confirmArchive = window.confirm(
+        `Archive "${mockMenuTest.title}"?\n\nArchived tests stay saved in admin but should not appear to students.`
+      );
+
+      if (!confirmArchive) return;
+
+      await updateDoc(doc(db, "contentItems", mockMenuTest.id), {
+        status: "archived",
+        updatedAt: new Date(),
+        archivedAt: new Date(),
+      });
+
+      await loadContentItemsFromFirestore();
+      closeMockActionPortal();
+
+      alert("Mock test archived successfully ✅");
+    }}
+  >
+    📦 Archive
+  </button>
+)}
+
+        
 
         <div className="mockPortalMenuDivider" />
 
@@ -18749,6 +19974,35 @@ navigate(
         >
           📤 Export JSON
         </button>
+
+        <button
+  type="button"
+  onClick={() => {
+    handleExportMockTestCsv(mockMenuTest);
+    closeMockActionPortal();
+  }}
+>
+  📊 Export CSV
+</button>
+
+<button
+  type="button"
+  onClick={() => {
+    handleExportMockTestExcel(mockMenuTest);
+    closeMockActionPortal();
+  }}
+>
+  📗 Export Excel
+</button>
+<button
+  type="button"
+  onClick={() => {
+    handleExportMockTestXlsx(mockMenuTest);
+    closeMockActionPortal();
+  }}
+>
+  📘 Export XLSX
+</button>
 
         <div className="mockPortalMenuDivider" />
 
