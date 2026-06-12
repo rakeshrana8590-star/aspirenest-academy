@@ -24785,4 +24785,731 @@ button {
   }
 }
 
+/* ASPIRENEST FINAL CBT EXAM UI - LOCKED */
 
+body:has(.premiumExamPage) {
+  overflow: hidden !important;
+}
+
+body:has(.premiumExamPage) header,
+body:has(.premiumExamPage) .siteHeader,
+body:has(.premiumExamPage) .appHeader,
+body:has(.premiumExamPage) .mainHeader {
+  display: none !important;
+}
+
+.premiumExamPage {
+  height: 100vh !important;
+  padding: 6px 12px !important;
+  background: #f6f8fb !important;
+  overflow: hidden !important;
+}
+
+.premiumExamShell {
+  height: calc(100vh - 12px) !important;
+  max-width: 1540px !important;
+  margin: 0 auto !important;
+  display: grid !important;
+  grid-template-rows: 92px minmax(0, 1fr) !important;
+  gap: 10px !important;
+}
+
+.premiumExamTop {
+  height: 92px !important;
+  padding: 12px 20px !important;
+  display: grid !important;
+  grid-template-columns: 190px 1fr auto !important;
+  align-items: center !important;
+  gap: 22px !important;
+  background: #fff !important;
+  border: 1px solid #e3e8f0 !important;
+  border-radius: 22px !important;
+}
+
+.premiumExamBrand {
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  border-right: 1px solid #e5e7eb !important;
+}
+
+.compactExamTitleBlock h1 {
+  font-size: 24px !important;
+  margin: 0 0 6px !important;
+  color: #101828 !important;
+}
+
+.compactExamTitleBlock p {
+  margin: 0 !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #64748b !important;
+}
+
+.compactExamStats {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.compactExamStats > div {
+  min-width: 112px !important;
+  height: 66px !important;
+  padding: 10px 14px !important;
+  border: 1px solid #e3e8f0 !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+}
+
+.compactExamStats span {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #667085 !important;
+}
+
+.compactExamStats strong {
+  display: block !important;
+  font-size: 20px !important;
+  color: #101828 !important;
+}
+
+.timerStat strong {
+  color: #f97316 !important;
+}
+
+.examSubmitBtn {
+  height: 66px !important;
+  padding: 0 30px !important;
+  border-radius: 20px !important;
+  background: #0f172a !important;
+  color: #fff !important;
+  font-size: 16px !important;
+  font-weight: 900 !important;
+}
+
+.premiumExamGrid {
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 390px !important;
+  gap: 14px !important;
+  overflow: hidden !important;
+}
+
+.premiumQuestionWorkspace,
+.aspireExamMain {
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.examAttemptCardPro {
+  height: 100% !important;
+  padding: 18px !important;
+  background: #fff !important;
+  border: 1px solid #e3e8f0 !important;
+  border-radius: 24px !important;
+  display: grid !important;
+  grid-template-rows: auto auto minmax(0, 1fr) auto !important;
+  gap: 12px !important;
+  overflow: hidden !important;
+}
+
+.examRefStatusRow {
+  display: flex !important;
+  gap: 12px !important;
+  flex-wrap: wrap !important;
+}
+
+.examRefPill {
+  padding: 9px 18px !important;
+  border-radius: 16px !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+}
+
+.examQuestionBlockPro {
+  display: grid !important;
+  grid-template-columns: 46px 1fr !important;
+  gap: 14px !important;
+  padding: 18px !important;
+  border: 1px solid #e3e8f0 !important;
+  border-radius: 22px !important;
+  background: #fff !important;
+}
+
+.examQuestionNoPro {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 50% !important;
+  background: #0f172a !important;
+  color: #fff !important;
+  display: grid !important;
+  place-items: center !important;
+  font-weight: 900 !important;
+}
+
+.premiumExamPage .examQuestionBlockPro h2 {
+  margin: 0 !important;
+  font-size: 18px !important;
+  line-height: 1.65 !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  max-height: 130px !important;
+  overflow-y: auto !important;
+}
+
+.premiumExamPage .aspireOptionList {
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: grid !important;
+  grid-template-rows: repeat(4, 1fr) !important;
+  gap: 10px !important;
+  margin: 0 !important;
+}
+
+.premiumExamPage .aspireOption {
+  min-height: 0 !important;
+  padding: 10px 18px !important;
+  border-radius: 18px !important;
+  border: 1px solid #e3e8f0 !important;
+  background: #fff !important;
+  display: grid !important;
+  grid-template-columns: 42px 1fr !important;
+  align-items: center !important;
+  text-align: left !important;
+}
+
+.premiumExamPage .aspireOption span {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  background: #eef2f7 !important;
+  color: #0f172a !important;
+  display: grid !important;
+  place-items: center !important;
+  font-weight: 900 !important;
+  font-size: 15px !important;
+}
+
+.premiumExamPage .aspireOption p {
+  margin: 0 !important;
+  font-size: 15px !important;
+  line-height: 1.3 !important;
+  font-weight: 750 !important;
+  color: #111827 !important;
+  text-align: left !important;
+}
+
+.selectedAspireOption {
+  border-color: #f97316 !important;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.15) !important;
+}
+
+.aspireExamActionBar {
+  padding-top: 10px !important;
+  border-top: 1px solid #e5e7eb !important;
+  display: grid !important;
+  grid-template-columns: 1fr 1.25fr 1.55fr 1.25fr !important;
+  gap: 12px !important;
+}
+
+.examControlBtn {
+  height: 48px !important;
+  border-radius: 16px !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+}
+
+.premiumPalettePanel {
+  height: 100% !important;
+  padding: 18px !important;
+  background: #fff !important;
+  border: 1px solid #e3e8f0 !important;
+  border-radius: 24px !important;
+  display: grid !important;
+  grid-template-rows: auto auto minmax(0, 1fr) auto auto !important;
+  gap: 12px !important;
+  overflow: hidden !important;
+}
+
+.paletteHeader h3 {
+  margin: 0 0 6px !important;
+  font-size: 20px !important;
+}
+
+.paletteHeader p {
+  margin: 0 !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: #64748b !important;
+}
+
+.paletteRanges {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+.paletteRangeBtn {
+  height: 36px !important;
+  padding: 0 18px !important;
+  border-radius: 999px !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+}
+
+.premiumPaletteGrid {
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  display: grid !important;
+  grid-template-columns: repeat(5, 1fr) !important;
+  align-content: start !important;
+  gap: 10px !important;
+}
+
+.paletteNumber {
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 14px !important;
+  font-size: 16px !important;
+  font-weight: 900 !important;
+}
+
+.paletteSummary {
+  padding: 12px !important;
+  border: 1px solid #e3e8f0 !important;
+  border-radius: 16px !important;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 10px !important;
+}
+
+.examFinalBox {
+  padding: 16px !important;
+  border-radius: 20px !important;
+  background: #0f172a !important;
+}
+
+.examFinalBox h4 {
+  margin: 0 0 6px !important;
+  color: #fff !important;
+}
+
+.examFinalBox p {
+  margin: 0 0 12px !important;
+  color: #cbd5e1 !important;
+}
+
+.examFinalBox button {
+  width: 100% !important;
+  height: 52px !important;
+  border-radius: 16px !important;
+  background: #f97316 !important;
+  color: #fff !important;
+  font-weight: 900 !important;
+}
+body:has(.premiumExamPage) .chatWidget,
+body:has(.premiumExamPage) .floatingChatButton,
+body:has(.premiumExamPage) .chatBubble {
+  display: none !important;
+}
+.examControlBtn.primary {
+  background: #f97316 !important;
+  color: white !important;
+}
+
+.examControlBtn.review {
+  background: white !important;
+  color: #7c3aed !important;
+  border: 2px solid #7c3aed !important;
+}
+/* STATUS PILLS FINAL */
+
+.examRefStatusRow {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  flex-wrap: wrap !important;
+}
+
+.examRefPill {
+  min-height: 40px !important;
+  padding: 0 20px !important;
+  border-radius: 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.examRefPill.dark {
+  background: #0f172a !important;
+  color: #fff !important;
+  border-color: #0f172a !important;
+}
+
+.examRefPill.success {
+  background: #ecfdf3 !important;
+  color: #15803d !important;
+  border-color: #bbf7d0 !important;
+}
+
+.examRefPill.warning {
+  background: #fff3e0 !important;
+  color: #c2410c !important;
+  border-color: #fed7aa !important;
+}
+
+.examRefPill.review {
+  background: #f3e8ff !important;
+  color: #6d28d9 !important;
+  border-color: #ddd6fe !important;
+}
+
+.examRefPill.neutral {
+  background: #fff !important;
+  color: #64748b !important;
+  border-color: #e5e7eb !important;
+}
+/* EXAM PAGE DISTRACTION FREE */
+body:has(.premiumExamPage) .chatWidget,
+body:has(.premiumExamPage) .floatingChatButton,
+body:has(.premiumExamPage) .chatBubble,
+body:has(.premiumExamPage) .whatsappFloat,
+body:has(.premiumExamPage) .whatsappButton {
+  display: none !important;
+}
+/* PALETTE COMPACT 25 QUESTIONS FIT */
+
+.premiumPalettePanel {
+  gap: 8px !important;
+}
+
+.paletteRanges {
+  gap: 6px !important;
+}
+
+.paletteRangeBtn {
+  height: 30px !important;
+  padding: 0 13px !important;
+  font-size: 12px !important;
+  border-radius: 999px !important;
+}
+
+.premiumPaletteGrid {
+  min-height: 258px !important;
+  max-height: 258px !important;
+  overflow-y: auto !important;
+  grid-template-columns: repeat(5, 1fr) !important;
+  gap: 7px !important;
+  padding-right: 4px !important;
+}
+
+.paletteNumber {
+  width: 43px !important;
+  height: 43px !important;
+  border-radius: 12px !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+}
+
+.paletteSummary {
+  padding: 9px 10px !important;
+  gap: 7px !important;
+}
+
+.paletteSummary div {
+  font-size: 12px !important;
+  font-weight: 800 !important;
+}
+
+.examFinalBox {
+  padding: 13px !important;
+}
+
+.examFinalBox h4 {
+  font-size: 15px !important;
+}
+
+.examFinalBox p {
+  font-size: 12px !important;
+  margin-bottom: 10px !important;
+}
+
+.examFinalBox button {
+  height: 44px !important;
+}
+/* PALETTE FINAL DENSITY FIX */
+
+.premiumPalettePanel {
+  grid-template-rows: auto auto 230px auto auto !important;
+  gap: 10px !important;
+  padding: 18px !important;
+}
+
+.paletteRanges {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 7px !important;
+}
+
+.paletteRangeBtn {
+  width: 100% !important;
+  height: 32px !important;
+  padding: 0 8px !important;
+  font-size: 12px !important;
+}
+
+.premiumPaletteGrid {
+  height: 230px !important;
+  min-height: 230px !important;
+  max-height: 230px !important;
+  overflow: hidden !important;
+  display: grid !important;
+  grid-template-columns: repeat(5, 1fr) !important;
+  grid-template-rows: repeat(5, 1fr) !important;
+  gap: 7px !important;
+  padding: 0 !important;
+}
+
+.paletteNumber {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  border-radius: 11px !important;
+  font-size: 14px !important;
+  justify-self: center !important;
+  align-self: center !important;
+}
+
+.paletteSummary {
+  margin: 0 !important;
+  padding: 10px 12px !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 8px 12px !important;
+}
+
+.paletteSummary div {
+  font-size: 12px !important;
+  white-space: nowrap !important;
+}
+/* RIGHT PALETTE ALIGN + COMPACT POLISH */
+
+.premiumExamGrid {
+  align-items: stretch !important;
+}
+
+.premiumPalettePanel {
+  margin-top: 0 !important;
+  align-self: stretch !important;
+  height: 100% !important;
+  padding: 14px 16px !important;
+  gap: 8px !important;
+  grid-template-rows: auto auto 205px auto 128px !important;
+}
+
+.paletteHeader h3 {
+  font-size: 18px !important;
+  margin-bottom: 4px !important;
+}
+
+.paletteHeader p {
+  font-size: 13px !important;
+}
+
+.paletteRanges {
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 6px !important;
+}
+
+.paletteRangeBtn {
+  height: 28px !important;
+  font-size: 11.5px !important;
+  padding: 0 6px !important;
+}
+
+.premiumPaletteGrid {
+  height: 205px !important;
+  min-height: 205px !important;
+  max-height: 205px !important;
+  gap: 6px !important;
+  align-content: start !important;
+}
+
+.paletteNumber {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  min-height: 34px !important;
+  border-radius: 10px !important;
+  font-size: 13px !important;
+}
+
+.paletteSummary {
+  padding: 8px 10px !important;
+  gap: 6px 10px !important;
+}
+
+.paletteSummary div {
+  font-size: 11.5px !important;
+}
+
+.examFinalBox {
+  padding: 12px 14px !important;
+}
+
+.examFinalBox h4 {
+  font-size: 14px !important;
+}
+
+.examFinalBox p {
+  font-size: 11.5px !important;
+  margin-bottom: 8px !important;
+}
+
+.examFinalBox button {
+  height: 40px !important;
+  font-size: 14px !important;
+}
+/* QUESTION READABILITY FINAL FIX */
+
+.examQuestionBlockPro {
+  grid-template-columns: 40px 1fr !important;
+  gap: 18px !important;
+  padding: 22px 24px !important;
+}
+
+.examQuestionNoPro {
+  width: 36px !important;
+  height: 36px !important;
+  font-size: 15px !important;
+}
+
+.premiumExamPage .examQuestionBlockPro h2 {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  line-height: 1.75 !important;
+  letter-spacing: -0.2px !important;
+  color: #111827 !important;
+  max-height: 150px !important;
+}
+
+.premiumExamPage .aspireOption {
+  min-height: 58px !important;
+  padding: 12px 18px !important;
+}
+
+.premiumExamPage .aspireOption p {
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  line-height: 1.55 !important;
+}
+
+.premiumExamPage .aspireOption span {
+  width: 38px !important;
+  height: 38px !important;
+  font-size: 16px !important;
+}
+/* FINAL EXAM NO-CUT FIX */
+
+.examAttemptCardPro {
+  grid-template-rows: auto auto auto auto !important;
+  overflow: visible !important;
+}
+
+.premiumQuestionWorkspace,
+.aspireExamMain {
+  overflow: visible !important;
+}
+
+.premiumExamPage .aspireOptionList {
+  overflow: visible !important;
+  display: grid !important;
+  grid-template-rows: none !important;
+  gap: 10px !important;
+}
+
+.premiumExamPage .aspireOption {
+  min-height: 52px !important;
+  height: auto !important;
+  padding: 10px 18px !important;
+}
+
+.aspireExamActionBar {
+  margin-top: 8px !important;
+  padding-top: 10px !important;
+}
+
+.premiumPalettePanel {
+  grid-template-rows: auto auto 190px auto auto !important;
+  overflow: hidden !important;
+}
+
+.premiumPaletteGrid {
+  height: 190px !important;
+  min-height: 190px !important;
+  max-height: 190px !important;
+}
+
+.paletteNumber {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  font-size: 12.5px !important;
+}
+
+.examFinalBox {
+  padding: 10px 12px !important;
+}
+
+.examFinalBox button {
+  height: 38px !important;
+}
+/* RIGHT PALETTE HEADER SPACE FIX */
+
+.premiumPalettePanel {
+  grid-template-rows: 46px auto 190px auto auto !important;
+  gap: 8px !important;
+}
+
+.paletteHeader {
+  display: grid !important;
+  grid-template-columns: 1fr auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.paletteHeader h3 {
+  margin: 0 !important;
+  font-size: 18px !important;
+}
+
+.paletteHeader p {
+  margin: 0 !important;
+  font-size: 12px !important;
+  padding: 6px 10px !important;
+  border-radius: 999px !important;
+  background: #f1f5f9 !important;
+  white-space: nowrap !important;
+}
+
+.paletteRanges {
+  margin-top: 0 !important;
+}
+
+.examFinalBox {
+  padding: 12px !important;
+}
+
+.examFinalBox::after {
+  content: "🔒 You can submit only once.";
+  display: block;
+  margin-top: 8px;
+  text-align: center;
+  font-size: 11px;
+  color: #cbd5e1;
+}
