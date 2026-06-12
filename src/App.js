@@ -316,6 +316,202 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
   const [paletteFilter, setPaletteFilter] = useState("all");
     const [mockExamStartedAt, setMockExamStartedAt] = useState({});
     const [mockExamTimeLeft, setMockExamTimeLeft] = useState({});
+    const [mockAttemptState, setMockAttemptState] = useState({});
+    const getAttemptStorageKey = (testId) =>
+  `aspireExamAttempt_${testId}`;
+
+  const createDefaultAttemptState = (test, defaultTimeLeft = 0) => ({
+    testId: test?.id || "",
+    currentIndex: 0,
+    answers: {},
+    marked: {},
+    visited: { 0: true },
+    paletteRangeStart: 0,
+    timeLeft: defaultTimeLeft,
+    startedAt: Date.now(),
+    submittedAt: null,
+    isSubmitted: false,
+  });
+
+  const saveAttemptState = (testId, state) => {
+    if (!testId || !state) return;
+  
+    localStorage.setItem(
+      getAttemptStorageKey(testId),
+      JSON.stringify(state)
+    );
+  };
+
+  const restoreAttemptState = (test, defaultTimeLeft = 0) => {
+    if (!test?.id) {
+      return createDefaultAttemptState(test, defaultTimeLeft);
+    }
+  
+    try {
+      const saved = localStorage.getItem(
+        getAttemptStorageKey(test.id)
+      );
+  
+      if (!saved) {
+        return createDefaultAttemptState(test, defaultTimeLeft);
+      }
+  
+      return {
+        ...createDefaultAttemptState(test, defaultTimeLeft),
+        ...JSON.parse(saved),
+        testId: test.id,
+      };
+    } catch {
+      return createDefaultAttemptState(test, defaultTimeLeft);
+    }
+  };
+
+  const updateAttemptState = (testId, updater) => {
+    if (!testId || typeof updater !== "function") return;
+  
+    setMockAttemptState((prev) => {
+      const currentState = prev[testId] || {};
+      const nextState = updater(currentState);
+  
+      saveAttemptState(testId, nextState);
+  
+      return {
+        ...prev,
+        [testId]: nextState,
+      };
+    });
+  };
+
+  const goToAttemptQuestion = (testId, index, paletteRangeStart = 0) => {
+    updateAttemptState(testId, (state) => {
+      const nextState = {
+        ...state,
+        currentIndex: index,
+        paletteRangeStart,
+        visited: {
+          ...(state.visited || {}),
+          [index]: true,
+        },
+      };
+  
+      return nextState;
+    });
+  };
+
+  const selectAttemptAnswer = (testId, index, optionKey) => {
+    updateAttemptState(testId, (state) => {
+      const nextState = {
+        ...state,
+        currentIndex: index,
+        answers: {
+          ...(state.answers || {}),
+          [index]: optionKey,
+        },
+        visited: {
+          ...(state.visited || {}),
+          [index]: true,
+        },
+      };
+  
+      return nextState;
+    });
+  };
+
+  const clearAttemptResponse = (testId, index) => {
+    updateAttemptState(testId, (state) => {
+      const nextAnswers = {
+        ...(state.answers || {}),
+        [index]: "",
+      };
+  
+      const nextMarked = {
+        ...(state.marked || {}),
+        [index]: false,
+      };
+  
+      return {
+        ...state,
+        currentIndex: index,
+        answers: nextAnswers,
+        marked: nextMarked,
+        visited: {
+          ...(state.visited || {}),
+          [index]: true,
+        },
+      };
+    });
+  };
+
+  const markAttemptForReviewAndNext = (
+    testId,
+    index,
+    totalQuestions
+  ) => {
+    updateAttemptState(testId, (state) => {
+      const nextIndex =
+        index < totalQuestions - 1 ? index + 1 : index;
+  
+      return {
+        ...state,
+        currentIndex: nextIndex,
+        marked: {
+          ...(state.marked || {}),
+          [index]: true,
+        },
+        visited: {
+          ...(state.visited || {}),
+          [index]: true,
+          [nextIndex]: true,
+        },
+        paletteRangeStart:
+          Math.floor(nextIndex / 25) * 25,
+      };
+    });
+  };
+
+  const saveAttemptAndNext = (
+    testId,
+    index,
+    totalQuestions
+  ) => {
+    updateAttemptState(testId, (state) => {
+      const nextIndex =
+        index < totalQuestions - 1 ? index + 1 : index;
+  
+      return {
+        ...state,
+        currentIndex: nextIndex,
+        marked: {
+          ...(state.marked || {}),
+          [index]: false,
+        },
+        visited: {
+          ...(state.visited || {}),
+          [index]: true,
+          [nextIndex]: true,
+        },
+        paletteRangeStart:
+          Math.floor(nextIndex / 25) * 25,
+      };
+    });
+  };
+
+  const submitAttemptState = (testId) => {
+    updateAttemptState(testId, (state) => ({
+      ...state,
+      submittedAt: Date.now(),
+      isSubmitted: true,
+    }));
+  };
+
+  const updateAttemptTimeLeft = (testId, timeLeft) => {
+    updateAttemptState(testId, (state) => ({
+      ...state,
+      timeLeft,
+    }));
+  };
+
+
 
     useEffect(() => {
       const attemptPath = "/ctet-tet/mock-tests/attempt/";
