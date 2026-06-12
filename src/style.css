@@ -24785,6 +24785,7 @@ button {
   }
 }
 
+
 /* ASPIRENEST FINAL CBT EXAM UI - LOCKED */
 
 body:has(.premiumExamPage) {
@@ -25500,6 +25501,7 @@ body:has(.premiumExamPage) .whatsappButton {
 .examFinalBox button {
   height: 38px !important;
 }
+
 /* RIGHT PALETTE HEADER SPACE FIX */
 
 .premiumPalettePanel {
@@ -25594,81 +25596,145 @@ body:has(.premiumExamPage) .whatsappButton {
   content: "✓ Answered";
   color: #16a34a !important;
 }
-/* PALETTE CURRENT QUESTION STRONG RING */
+/* ===== PHASE 4 FINAL LOCK: PALETTE + RIGHT PANEL + SUBMIT ===== */
 
-.paletteNumber.paletteCurrent {
-  position: relative !important;
-  outline: 3px solid #f97316 !important;
-  outline-offset: 3px !important;
-  border: 2px solid #ffffff !important;
-  box-shadow: 0 0 0 6px rgba(249, 115, 22, 0.16) !important;
+.premiumPalettePanel {
+  display: grid !important;
+  grid-template-rows: auto auto auto auto auto !important;
+  gap: 10px !important;
+  overflow: visible !important;
+  padding: 16px !important;
 }
-
-.paletteNumber.paletteCurrent::after {
-  content: "";
-  position: absolute;
-  width: 7px;
-  height: 7px;
-  right: -5px;
-  top: -5px;
-  border-radius: 50%;
-  background: #f97316;
-}
-/* PALETTE 3-DIGIT NUMBER FIX */
 
 .premiumPaletteGrid {
-  grid-template-columns: repeat(5, 42px) !important;
-  justify-content: space-between !important;
-  gap: 8px !important;
+  display: grid !important;
+  grid-template-columns: repeat(5, 1fr) !important;
+  gap: 9px !important;
+  margin: 8px 0 !important;
+  overflow: visible !important;
+  max-height: none !important;
 }
 
 .paletteNumber {
-  width: 42px !important;
-  height: 36px !important;
-  min-width: 42px !important;
-  min-height: 36px !important;
-  font-size: 12px !important;
-  padding: 0 !important;
-  overflow: visible !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  border-radius: 12px !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid #d8e0ea !important;
+  background: #eef2f7 !important;
+  color: #111827 !important;
+  box-shadow: none !important;
 }
-/* EXAM QUICK SUMMARY POLISH */
+
+.paletteNumber.paletteAnswered {
+  background: #16a34a !important;
+  color: #ffffff !important;
+  border-color: #16a34a !important;
+}
+
+.paletteNumber.paletteMarked {
+  background: #7c3aed !important;
+  color: #ffffff !important;
+  border-color: #7c3aed !important;
+}
+
+.paletteNumber.paletteAnsweredReview {
+  background: linear-gradient(135deg, #16a34a 0 50%, #7c3aed 50% 100%) !important;
+  color: #ffffff !important;
+  border-color: #7c3aed !important;
+}
+
+.paletteNumber.paletteNotAnswered {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border-color: #cbd5e1 !important;
+}
+
+.paletteNumber.paletteNotVisited {
+  background: #eef2f7 !important;
+  color: #111827 !important;
+  border-color: #d8e0ea !important;
+}
+
+.paletteNumber.paletteCurrent {
+  outline: 2px solid #f97316 !important;
+  outline-offset: 2px !important;
+  box-shadow: none !important;
+}
+
+.paletteRangeBtn.active {
+  background: #f97316 !important;
+  border-color: #f97316 !important;
+  color: #ffffff !important;
+}
 
 .examQuickSummary {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
-  gap: 8px !important;
-  padding: 8px !important;
+  gap: 10px !important;
+  padding: 10px !important;
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 18px !important;
+  overflow: visible !important;
 }
 
 .examQuickItem {
-  min-height: 42px !important;
-  border-radius: 14px !important;
-  border: 1px solid #dbe3ee !important;
+  min-height: 46px !important;
   background: #ffffff !important;
-  color: #0f172a !important;
+  border: 1px solid #dbe3ee !important;
+  border-radius: 14px !important;
   display: grid !important;
-  grid-template-columns: 12px auto 1fr !important;
+  grid-template-columns: 12px 36px 1fr !important;
   align-items: center !important;
-  gap: 6px !important;
+  gap: 8px !important;
   padding: 8px 10px !important;
-  cursor: pointer !important;
-  font-weight: 800 !important;
+  color: #0f172a !important;
+  overflow: hidden !important;
 }
 
 .examQuickItem strong {
-  font-size: 15px !important;
+  font-size: 18px !important;
   line-height: 1 !important;
+  color: #0f172a !important;
 }
 
 .examQuickItem small {
   font-size: 11px !important;
-  color: #64748b !important;
   font-weight: 800 !important;
+  color: #64748b !important;
   white-space: nowrap !important;
 }
 
-.examQuickItem .dot {
+.examQuickItem .dot,
+.dot {
   width: 9px !important;
   height: 9px !important;
-  flex: 0 0 9px !important;
+  border-radius: 50% !important;
 }
+
+.dot.answeredDot { background: #16a34a !important; }
+.dot.markedDot { background: #7c3aed !important; }
+
+.dot.pendingDot {
+  background: #ffffff !important;
+  border: 1px solid #94a3b8 !important;
+}
+
+.dot.notVisitedDot {
+  background: #eef2f7 !important;
+  border: 1px solid #94a3b8 !important;
+}
+
+.examFinalBox {
+  padding: 14px 14px 18px !important;
+  overflow: visible !important;
+  margin-bottom: 0 !important;
+}
+
+
+
