@@ -314,6 +314,8 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
     const [mockPaletteRangeStart, setMockPaletteRangeStart] =
   useState({});
   const [paletteFilter, setPaletteFilter] = useState("all");
+  const [submitConfirmTestId, setSubmitConfirmTestId] =
+  useState(null);
     const [mockExamStartedAt, setMockExamStartedAt] = useState({});
     const [mockExamTimeLeft, setMockExamTimeLeft] = useState({});
     const [mockAttemptState, setMockAttemptState] = useState({});
@@ -584,24 +586,266 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
             ? 0
             : currentState.timeLeft - 1;
   
-        const nextState = {
-          ...currentState,
-          timeLeft: nextTime,
-        };
-  
-        saveAttemptState(testId, nextState);
-  
-        return {
-          ...prev,
-          [testId]: nextState,
-        };
+            const shouldAutoSubmit =
+            currentState.timeLeft <= 1 && nextTime === 0;
+          
+          const nextState = {
+            ...currentState,
+            timeLeft: nextTime,
+            submittedAt: shouldAutoSubmit
+              ? Date.now()
+              : currentState.submittedAt,
+            isSubmitted: shouldAutoSubmit
+              ? true
+              : currentState.isSubmitted,
+          };
+          
+          saveAttemptState(testId, nextState);
+          
+          if (shouldAutoSubmit) {
+            toast.success(
+              "Time is over. Test submitted automatically ✅"
+            );
+          
+            setTimeout(() => {
+              navigate(`/ctet-tet/mock-tests/result/${testId}`);
+            }, 300);
+          }
+          
+          return {
+            ...prev,
+            [testId]: nextState,
+          };
       });
     }, 1000);
   
     return () => clearInterval(timer);
   }, [location.pathname, universalContent]);
 
+  useEffect(() => {
+    const attemptPath = "/ctet-tet/mock-tests/attempt/";
+  
+    if (!location.pathname.includes(attemptPath)) return;
+  
+    const testId = decodeURIComponent(
+      location.pathname.split("/")[4] || ""
+    );
+  
+    const activeState = mockAttemptState?.[testId];
+  
+    if (activeState?.isSubmitted) return;
+  
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue =
+        "Your mock test is still running. Are you sure you want to leave?";
+    };
+  
+    window.addEventListener("beforeunload", handleBeforeUnload);
+  
+    return () => {
+      window.removeEventListener(
+        "beforeunload",
+        handleBeforeUnload
+      );
+    };
+  }, [location.pathname, mockAttemptState]);
 
+  useEffect(() => {
+    const attemptPath = "/ctet-tet/mock-tests/attempt/";
+  
+    if (!location.pathname.includes(attemptPath)) return;
+  
+    const testId = decodeURIComponent(
+      location.pathname.split("/")[4] || ""
+    );
+  
+    const activeState = mockAttemptState?.[testId];
+  
+    if (activeState?.isSubmitted) return;
+  
+    const handleVisibilityChange = () => {
+      if (!document.hidden) return;
+  
+      updateAttemptState(testId, (state) => ({
+        ...state,
+        violations: {
+          ...(state.violations || {}),
+          tabSwitchCount:
+            Number(state.violations?.tabSwitchCount || 0) + 1,
+          lastTabSwitchAt: Date.now(),
+        },
+      }));
+  
+      toast.error(
+        "Tab switch detected. Please stay on the exam screen."
+      );
+    };
+  
+    document.addEventListener(
+      "visibilitychange",
+      handleVisibilityChange
+    );
+  
+    return () => {
+      document.removeEventListener(
+        "visibilitychange",
+        handleVisibilityChange
+      );
+    };
+  }, [location.pathname, mockAttemptState]);
+
+  useEffect(() => {
+    const attemptPath = "/ctet-tet/mock-tests/attempt/";
+  
+    if (!location.pathname.includes(attemptPath)) return;
+  
+    const testId = decodeURIComponent(
+      location.pathname.split("/")[4] || ""
+    );
+  
+    const activeState = mockAttemptState?.[testId];
+  
+    if (activeState?.isSubmitted) return;
+  
+    const blockExamAction = (event) => {
+      event.preventDefault();
+  
+      toast.error(
+        "This action is blocked during the mock test."
+      );
+    };
+  
+    document.addEventListener("copy", blockExamAction);
+    document.addEventListener("paste", blockExamAction);
+    document.addEventListener("cut", blockExamAction);
+    document.addEventListener("contextmenu", blockExamAction);
+  
+    return () => {
+      document.removeEventListener("copy", blockExamAction);
+      document.removeEventListener("paste", blockExamAction);
+      document.removeEventListener("cut", blockExamAction);
+      document.removeEventListener(
+        "contextmenu",
+        blockExamAction
+      );
+    };
+  }, [location.pathname, mockAttemptState]);
+
+
+  useEffect(() => {
+    const attemptPath = "/ctet-tet/mock-tests/attempt/";
+  
+    if (!location.pathname.includes(attemptPath)) return;
+  
+    const testId = decodeURIComponent(
+      location.pathname.split("/")[4] || ""
+    );
+  
+    const activeState = mockAttemptState?.[testId];
+  
+    if (activeState?.isSubmitted) return;
+  
+    const handleFullscreenChange = () => {
+      if (document.fullscreenElement) return;
+  
+      updateAttemptState(testId, (state) => ({
+        ...state,
+        violations: {
+          ...(state.violations || {}),
+          fullscreenExitCount:
+            Number(state.violations?.fullscreenExitCount || 0) + 1,
+          lastFullscreenExitAt: Date.now(),
+        },
+      }));
+  
+      toast.error(
+        "Fullscreen exited. Please stay in exam mode."
+      );
+    };
+  
+    document.addEventListener(
+      "fullscreenchange",
+      handleFullscreenChange
+    );
+  
+    return () => {
+      document.removeEventListener(
+        "fullscreenchange",
+        handleFullscreenChange
+      );
+    };
+  }, [location.pathname, mockAttemptState]);
+
+  useEffect(() => {
+    const attemptPath = "/ctet-tet/mock-tests/attempt/";
+  
+    if (!location.pathname.includes(attemptPath)) return;
+  
+    if (document.fullscreenElement) return;
+  
+    const enterFullscreen = async () => {
+      try {
+        await document.documentElement.requestFullscreen();
+      } catch (error) {
+        console.log("Fullscreen request skipped");
+      }
+    };
+  
+    enterFullscreen();
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const attemptPath = "/ctet-tet/mock-tests/attempt/";
+  
+    if (!location.pathname.includes(attemptPath)) return;
+  
+    const testId = decodeURIComponent(
+      location.pathname.split("/")[4] || ""
+    );
+  
+    const activeState = mockAttemptState?.[testId];
+  
+    if (activeState?.isSubmitted) return;
+  
+    const blockKeyboardShortcuts = (event) => {
+      const key = event.key?.toLowerCase();
+  
+      const blockedCtrlKeys =
+        event.ctrlKey &&
+        ["c", "v", "x", "a", "s", "p"].includes(key);
+  
+      const blockedKeys =
+        key === "f12" || key === "printscreen";
+  
+      if (!blockedCtrlKeys && !blockedKeys) return;
+  
+      event.preventDefault();
+  
+      updateAttemptState(testId, (state) => ({
+        ...state,
+        violations: {
+          ...(state.violations || {}),
+          shortcutBlockCount:
+            Number(state.violations?.shortcutBlockCount || 0) + 1,
+          lastShortcutBlockedAt: Date.now(),
+        },
+      }));
+  
+      toast.error(
+        "Keyboard shortcut blocked during the mock test."
+      );
+    };
+  
+    document.addEventListener("keydown", blockKeyboardShortcuts);
+  
+    return () => {
+      document.removeEventListener(
+        "keydown",
+        blockKeyboardShortcuts
+      );
+    };
+  }, [location.pathname, mockAttemptState]);
 
 const [contentLoading, setContentLoading] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
@@ -654,6 +898,85 @@ const [contentLoading, setContentLoading] = useState(false);
       hierarchy[requiredPlan]
     );
   };
+  const getMockTestScheduleStatus = (test) => {
+    if (!test) {
+      return "EXPIRED";
+    }
+  
+    const scheduleType = test.scheduleType || "alwaysAvailable";
+  
+    if (scheduleType === "alwaysAvailable") {
+      return "AVAILABLE";
+    }
+  
+    const now = new Date();
+  
+    const startDateTime =
+      test.examStartDate && test.examStartTime
+        ? new Date(`${test.examStartDate}T${test.examStartTime}`)
+        : test.examStartDate
+        ? new Date(`${test.examStartDate}T00:00`)
+        : null;
+  
+    const endDateTime =
+      test.examEndDate && test.examEndTime
+        ? new Date(`${test.examEndDate}T${test.examEndTime}`)
+        : test.examEndDate
+        ? new Date(`${test.examEndDate}T23:59`)
+        : null;
+  
+    if (startDateTime && now < startDateTime) {
+      return "UPCOMING";
+    }
+  
+    if (endDateTime && now > endDateTime) {
+      return "EXPIRED";
+    }
+  
+    
+  };
+  const getMockTestAccessStatus = (test) => {
+    if (!test) {
+      return "NOT_FOUND";
+    }
+  
+    if (test.status !== "published") {
+      return "UNPUBLISHED";
+    }
+  
+    if (!user) {
+      return "LOGIN_REQUIRED";
+    }
+  
+    if (
+      test.planType &&
+      !hasPlanAccess(test.planType)
+    ) {
+      return "PLAN_LOCKED";
+    }
+  
+    if (
+      membershipExpiry &&
+      new Date(membershipExpiry) < new Date()
+    ) {
+      return "EXPIRED_MEMBERSHIP";
+    }
+  
+    const scheduleStatus = getMockTestScheduleStatus(test);
+
+  
+
+if (scheduleStatus === "UPCOMING") {
+  return "UPCOMING";
+}
+
+if (scheduleStatus === "EXPIRED") {
+  return "EXPIRED";
+}
+
+return "AVAILABLE";
+  };
+
   const [activePlan, setActivePlan] = useState("FREE");
   const adminEmail = "aspirenestplatform@gmail.com";
   const isAdmin = (currentUser = user) =>
@@ -933,6 +1256,45 @@ useEffect(() => {
   const editId = new URLSearchParams(location.search).get(
     "editId"
   );
+
+  const reusedQuestionRaw = localStorage.getItem(
+    "reusedQuestionForMockTest"
+  );
+  
+  if (reusedQuestionRaw) {
+    try {
+      const reusedQuestion = JSON.parse(reusedQuestionRaw);
+  
+      setMockTestQuestionsForm((prev) => [
+        ...prev,
+        {
+          question: reusedQuestion.question || "",
+          option1: reusedQuestion.option1 || "",
+          option2: reusedQuestion.option2 || "",
+          option3: reusedQuestion.option3 || "",
+          option4: reusedQuestion.option4 || "",
+          answer: reusedQuestion.answer || "",
+          explanation: reusedQuestion.explanation || "",
+          level: reusedQuestion.level || "Easy",
+          questionType:
+            reusedQuestion.questionType || "Single Correct",
+          language: reusedQuestion.language || "English",
+          tag: reusedQuestion.tag || "",
+          positiveMarks:
+            reusedQuestion.positiveMarks?.toString() || "1",
+          negativeMarks:
+            reusedQuestion.negativeMarks?.toString() || "0",
+          questionStatus:
+            reusedQuestion.questionStatus || "published",
+          saveToQuestionBank: "no",
+        },
+      ]);
+  
+      localStorage.removeItem("reusedQuestionForMockTest");
+    } catch {
+      localStorage.removeItem("reusedQuestionForMockTest");
+    }
+  }
 
   if (!editId) return;
 
@@ -2194,8 +2556,12 @@ const handleImportMockTestXlsx = async (event) => {
       return;
     }
 
-    if (questionRows.length > 200) {
-      alert("Maximum 200 questions allowed per import for storage safety.");
+    const MAX_IMPORT_QUESTIONS = 1000;
+
+    if (questionRows.length > MAX_IMPORT_QUESTIONS) {
+      alert(
+        `Maximum ${MAX_IMPORT_QUESTIONS} questions allowed per import. Please split bigger exams into parts.`
+      );
       event.target.value = "";
       return;
     }
@@ -2299,7 +2665,29 @@ const handleImportMockTestXlsx = async (event) => {
       "Imported XLSX Mock Test";
 
     const totalQuestions = importedQuestions.length;
-
+    
+    const declaredTotalQuestions = Number(
+      testInfo["Total Questions"] || totalQuestions
+    );
+    
+    if (
+      Number.isFinite(declaredTotalQuestions) &&
+      declaredTotalQuestions > 0 &&
+      declaredTotalQuestions !== totalQuestions
+    ) {
+      alert(
+        `Total Questions mismatch.
+    
+    Test Info says: ${declaredTotalQuestions}
+    
+    Questions sheet has: ${totalQuestions}
+    
+    Please fix the Excel file and import again.`
+      );
+    
+      event.target.value = "";
+      return;
+    }
     const totalMarks = importedQuestions.reduce(
       (sum, q) => sum + Number(q.positiveMarks || 0),
       0
@@ -2535,8 +2923,12 @@ const handleImportMockTestXlsxFromUrl = async () => {
       return;
     }
 
-    if (questionRows.length > 200) {
-      alert("Maximum 200 questions allowed per import for storage safety.");
+    const MAX_IMPORT_QUESTIONS = 1000;
+
+    if (questionRows.length > MAX_IMPORT_QUESTIONS) {
+      alert(
+        `Maximum ${MAX_IMPORT_QUESTIONS} questions allowed per import. Please split bigger exams into parts.`
+      );
       return;
     }
 
@@ -2635,6 +3027,28 @@ const handleImportMockTestXlsxFromUrl = async () => {
       "Imported Drive XLSX Mock Test";
 
     const totalQuestions = importedQuestions.length;
+
+    const declaredTotalQuestions = Number(
+      testInfo["Total Questions"] || totalQuestions
+    );
+    
+    if (
+      Number.isFinite(declaredTotalQuestions) &&
+      declaredTotalQuestions > 0 &&
+      declaredTotalQuestions !== totalQuestions
+    ) {
+      alert(
+        `Total Questions mismatch.
+    
+    Test Info says: ${declaredTotalQuestions}
+    
+    Questions sheet has: ${totalQuestions}
+    
+    Please fix the Excel file and import again.`
+      );
+    
+      return;
+    }
 
     const totalMarks = importedQuestions.reduce(
       (sum, q) => sum + Number(q.positiveMarks || 0),
@@ -15797,6 +16211,7 @@ Import JSON
   }
 />
 
+
 <Route
   path="/admin/content/mock-tests/leaderboard"
   element={
@@ -15805,51 +16220,103 @@ Import JSON
         {(() => {
           const leaderboardEntries = mockLeaderboardEntries || [];
 
-          const rankedEntries = [...leaderboardEntries].sort(
+          const sortedEntries = [...leaderboardEntries].sort(
             (a, b) =>
               Number(b.percentage || 0) -
                 Number(a.percentage || 0) ||
               Number(b.score || 0) - Number(a.score || 0)
           );
 
-          const totalRankedStudents = new Set(
-            rankedEntries.map(
-              (entry) =>
+          const bestByStudent = Object.values(
+            sortedEntries.reduce((acc, entry) => {
+              const key =
                 entry.studentEmail ||
                 entry.email ||
-                entry.studentName
-            )
-          ).size;
+                entry.studentName ||
+                `student-${entry.id}`;
+
+              const current = acc[key];
+
+              if (
+                !current ||
+                Number(entry.percentage || 0) >
+                  Number(current.percentage || 0) ||
+                (Number(entry.percentage || 0) ===
+                  Number(current.percentage || 0) &&
+                  Number(entry.score || 0) >
+                    Number(current.score || 0))
+              ) {
+                acc[key] = entry;
+              }
+
+              return acc;
+            }, {})
+          ).sort(
+            (a, b) =>
+              Number(b.percentage || 0) -
+                Number(a.percentage || 0) ||
+              Number(b.score || 0) - Number(a.score || 0)
+          );
+
+          const totalRankedStudents = bestByStudent.length;
 
           const highestScore =
-            rankedEntries.length > 0
+            bestByStudent.length > 0
               ? Math.max(
-                  ...rankedEntries.map((entry) =>
+                  ...bestByStudent.map((entry) =>
                     Number(entry.score || 0)
                   )
                 )
               : 0;
 
           const averageAccuracy =
-            rankedEntries.length > 0
+            bestByStudent.length > 0
               ? Math.round(
-                  rankedEntries.reduce(
+                  bestByStudent.reduce(
                     (sum, entry) =>
                       sum + Number(entry.accuracy || 0),
                     0
-                  ) / rankedEntries.length
+                  ) / bestByStudent.length
                 )
               : 0;
 
-          const topPerformer = rankedEntries[0];
+          const subjectLeaders = Object.values(
+            sortedEntries
+              .filter((entry) => entry.subject)
+              .reduce((acc, entry) => {
+                const key = entry.subject;
 
-          const subjectLeaders = [
-            ...new Map(
-              rankedEntries
-                .filter((entry) => entry.subject)
-                .map((entry) => [entry.subject, entry])
-            ).values(),
-          ];
+                const current = acc[key];
+
+                if (
+                  !current ||
+                  Number(entry.percentage || 0) >
+                    Number(current.percentage || 0) ||
+                  (Number(entry.percentage || 0) ===
+                    Number(current.percentage || 0) &&
+                    Number(entry.score || 0) >
+                      Number(current.score || 0))
+                ) {
+                  acc[key] = entry;
+                }
+
+                return acc;
+              }, {})
+          );
+
+          const recentWinners = [...leaderboardEntries]
+            .sort((a, b) => {
+              const dateA = a.createdAt?.toDate
+                ? a.createdAt.toDate()
+                : new Date(a.createdAt || 0);
+
+              const dateB = b.createdAt?.toDate
+                ? b.createdAt.toDate()
+                : new Date(b.createdAt || 0);
+
+              return dateB - dateA;
+            })
+            .slice(0, 6);
 
           return (
             <>
@@ -15859,9 +16326,8 @@ Import JSON
                 <h1>Mock Test Leaderboard</h1>
 
                 <p>
-                  Stripe-style ranking dashboard for top performers,
-                  accuracy leaders, subject champions, and recent
-                  leaderboard entries.
+                  Rank top students, subject champions, and latest
+                  leaderboard entries from real mock test attempts.
                 </p>
               </div>
 
@@ -15896,13 +16362,13 @@ Import JSON
                 <div className="leaderboardKpiCard">
                   <span>Ranked Students</span>
                   <strong>{totalRankedStudents}</strong>
-                  <small>Unique students</small>
+                  <small>Unique best scores</small>
                 </div>
 
                 <div className="leaderboardKpiCard">
                   <span>Total Entries</span>
-                  <strong>{rankedEntries.length}</strong>
-                  <small>Leaderboard saves</small>
+                  <strong>{leaderboardEntries.length}</strong>
+                  <small>All leaderboard saves</small>
                 </div>
 
                 <div className="leaderboardKpiCard">
@@ -15914,23 +16380,23 @@ Import JSON
                 <div className="leaderboardKpiCard">
                   <span>Avg Accuracy</span>
                   <strong>{averageAccuracy}%</strong>
-                  <small>Across ranked entries</small>
+                  <small>Unique ranked students</small>
                 </div>
               </div>
 
               <div className="leaderboardPodium">
                 <div className="leaderboardSectionHeader">
                   <h3>Top 3 Podium</h3>
-                  <span>Champions</span>
+                  <span>Unique champions</span>
                 </div>
 
-                {rankedEntries.length === 0 ? (
+                {bestByStudent.length === 0 ? (
                   <div className="leaderboardEmptyCard">
                     No leaderboard entries yet.
                   </div>
                 ) : (
                   <div className="leaderboardPodiumGrid">
-                    {rankedEntries.slice(0, 3).map((entry, index) => (
+                    {bestByStudent.slice(0, 3).map((entry, index) => (
                       <div
                         className={`leaderboardPodiumCard rank${
                           index + 1
@@ -15960,7 +16426,9 @@ Import JSON
                             {entry.totalMarks || 0}
                           </span>
                           <span>{entry.percentage || 0}%</span>
-                          <span>Accuracy {entry.accuracy || 0}%</span>
+                          <span>
+                            Accuracy {entry.accuracy || 0}%
+                          </span>
                         </div>
                       </div>
                     ))}
@@ -15971,18 +16439,17 @@ Import JSON
               <div className="leaderboardSection">
                 <div className="leaderboardSectionHeader">
                   <h3>Global Rankings</h3>
-                  <span>{rankedEntries.length} entries</span>
+                  <span>{bestByStudent.length} students</span>
                 </div>
 
-                {rankedEntries.length === 0 ? (
+                {bestByStudent.length === 0 ? (
                   <div className="leaderboardEmptyCard">
-                    Leaderboard will appear after students save
-                    results for tests where leaderboard mode is
-                    enabled.
+                    Leaderboard will appear after students submit
+                    leaderboard-enabled tests.
                   </div>
                 ) : (
                   <div className="leaderboardTable">
-                    {rankedEntries.map((entry, index) => (
+                    {bestByStudent.map((entry, index) => (
                       <div
                         className="leaderboardRow"
                         key={entry.id || index}
@@ -16008,7 +16475,8 @@ Import JSON
 
                         <div className="leaderboardScore">
                           <strong>
-                            {entry.score || 0}/{entry.totalMarks || 0}
+                            {entry.score || 0}/
+                            {entry.totalMarks || 0}
                           </strong>
                           <span>Score</span>
                         </div>
@@ -16058,7 +16526,9 @@ Import JSON
                         <div className="leaderboardMiniStats">
                           <span>{entry.percentage || 0}%</span>
                           <span>Score {entry.score || 0}</span>
-                          <span>Accuracy {entry.accuracy || 0}%</span>
+                          <span>
+                            Accuracy {entry.accuracy || 0}%
+                          </span>
                         </div>
                       </div>
                     ))}
@@ -16072,13 +16542,13 @@ Import JSON
                   <span>Latest ranked entries</span>
                 </div>
 
-                {rankedEntries.length === 0 ? (
+                {recentWinners.length === 0 ? (
                   <div className="leaderboardEmptyCard">
                     No recent winners yet.
                   </div>
                 ) : (
                   <div className="leaderboardCompactGrid">
-                    {rankedEntries.slice(0, 6).map((entry, index) => (
+                    {recentWinners.map((entry, index) => (
                       <div
                         className="leaderboardRecentCard"
                         key={entry.id || index}
@@ -16094,7 +16564,430 @@ Import JSON
 
                         <div className="leaderboardMiniStats">
                           <span>{entry.percentage || 0}%</span>
-                          <span>{entry.accuracy || 0}% accuracy</span>
+                          <span>
+                            {entry.accuracy || 0}% accuracy
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          );
+        })()}
+      </section>
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/mock-tests/analytics"
+  element={
+    requireAdmin() ? (
+      <section className="coursePages resultsAnalyticsPage">
+        {(() => {
+          const attemptResults = mockResults || [];
+
+          const mockTests = universalContent.filter(
+            (item) => item.section === "mockTest"
+          );
+
+          const totalAttempts = attemptResults.length;
+
+          const totalStudents = new Set(
+            attemptResults.map(
+              (result) =>
+                result.studentEmail || result.email || "Unknown"
+            )
+          ).size;
+
+          const averageScore =
+            totalAttempts > 0
+              ? Math.round(
+                  attemptResults.reduce(
+                    (sum, result) =>
+                      sum + Number(result.score || 0),
+                    0
+                  ) / totalAttempts
+                )
+              : 0;
+
+          const averageAccuracy =
+            totalAttempts > 0
+              ? Math.round(
+                  attemptResults.reduce(
+                    (sum, result) =>
+                      sum + Number(result.accuracy || result.percentage || 0),
+                    0
+                  ) / totalAttempts
+                )
+              : 0;
+
+          const averagePercentage =
+            totalAttempts > 0
+              ? Math.round(
+                  attemptResults.reduce(
+                    (sum, result) =>
+                      sum + Number(result.percentage || 0),
+                    0
+                  ) / totalAttempts
+                )
+              : 0;
+
+          const passedAttempts = attemptResults.filter(
+            (result) =>
+              Number(result.percentage || 0) >=
+              Number(result.passingMarks || 0)
+          ).length;
+
+          const passRate =
+            totalAttempts > 0
+              ? Math.round((passedAttempts / totalAttempts) * 100)
+              : 0;
+
+          const testAnalytics = mockTests
+            .map((test) => {
+              const testResults = attemptResults.filter(
+                (result) => result.testId === test.id
+              );
+
+              const avgAccuracy =
+                testResults.length > 0
+                  ? Math.round(
+                      testResults.reduce(
+                        (sum, result) =>
+                          sum +
+                          Number(
+                            result.accuracy ||
+                              result.percentage ||
+                              0
+                          ),
+                        0
+                      ) / testResults.length
+                    )
+                  : 0;
+
+              const avgScore =
+                testResults.length > 0
+                  ? Math.round(
+                      testResults.reduce(
+                        (sum, result) =>
+                          sum + Number(result.score || 0),
+                        0
+                      ) / testResults.length
+                    )
+                  : 0;
+
+              return {
+                ...test,
+                attempts: testResults.length,
+                avgAccuracy,
+                avgScore,
+              };
+            })
+            .sort((a, b) => b.attempts - a.attempts);
+
+          const weakChapters = Object.values(
+            attemptResults.reduce((acc, result) => {
+              const key = `${result.subject || "Subject"}-${
+                result.chapter || "Chapter"
+              }`;
+
+              if (!acc[key]) {
+                acc[key] = {
+                  subject: result.subject || "Subject",
+                  chapter: result.chapter || "Chapter",
+                  attempts: 0,
+                  totalAccuracy: 0,
+                };
+              }
+
+              acc[key].attempts += 1;
+              acc[key].totalAccuracy += Number(
+                result.accuracy || result.percentage || 0
+              );
+
+              return acc;
+            }, {})
+          )
+            .map((item) => ({
+              ...item,
+              averageAccuracy: Math.round(
+                item.totalAccuracy / item.attempts
+              ),
+            }))
+            .sort(
+              (a, b) => a.averageAccuracy - b.averageAccuracy
+            )
+            .slice(0, 6);
+
+          const topPerformers = [...attemptResults]
+            .sort(
+              (a, b) =>
+                Number(b.percentage || 0) -
+                Number(a.percentage || 0)
+            )
+            .slice(0, 6);
+
+          const recentAttempts = [...attemptResults]
+            .sort((a, b) => {
+              const dateA = a.createdAt?.toDate
+                ? a.createdAt.toDate()
+                : new Date(a.createdAt || 0);
+
+              const dateB = b.createdAt?.toDate
+                ? b.createdAt.toDate()
+                : new Date(b.createdAt || 0);
+
+              return dateB - dateA;
+            })
+            .slice(0, 8);
+
+          return (
+            <>
+              <div className="sectionHeader">
+                <span className="badge">
+                  MOCK TEST ANALYTICS
+                </span>
+
+                <h1>Mock Test Analytics</h1>
+
+                <p>
+                  Track attempts, accuracy, weak chapters,
+                  top performers, and test-wise performance.
+                </p>
+              </div>
+
+              <div className="mockManageStatsGrid">
+                <div className="mockManageStatCard">
+                  <span>Total Attempts</span>
+                  <strong>{totalAttempts}</strong>
+                </div>
+
+                <div className="mockManageStatCard">
+                  <span>Total Students</span>
+                  <strong>{totalStudents}</strong>
+                </div>
+
+                <div className="mockManageStatCard">
+                  <span>Average Score</span>
+                  <strong>{averageScore}</strong>
+                </div>
+
+                <div className="mockManageStatCard">
+                  <span>Average Accuracy</span>
+                  <strong>{averageAccuracy}%</strong>
+                </div>
+
+                <div className="mockManageStatCard">
+                  <span>Average Percentage</span>
+                  <strong>{averagePercentage}%</strong>
+                </div>
+
+                <div className="mockManageStatCard">
+                  <span>Pass Rate</span>
+                  <strong>{passRate}%</strong>
+                </div>
+              </div>
+
+              <div className="contentStudioForm">
+                <div className="contentStudioActions">
+                  <button
+                    className="backButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests")
+                    }
+                  >
+                    ← Back to Mock Tests
+                  </button>
+
+                  <button
+                    className="publishButton"
+                    onClick={() =>
+                      navigate("/admin/content/mock-tests/results")
+                    }
+                  >
+                    View Detailed Results
+                  </button>
+
+                  <button
+                    className="publishButton"
+                    onClick={() =>
+                      navigate(
+                        "/admin/content/mock-tests/leaderboard"
+                      )
+                    }
+                  >
+                    View Leaderboard
+                  </button>
+                </div>
+              </div>
+
+              <div className="resultsSection">
+                <div className="resultsSectionHeader">
+                  <h3>Test-wise Performance</h3>
+                  <span>{testAnalytics.length} tests</span>
+                </div>
+
+                {testAnalytics.length === 0 ? (
+                  <div className="resultsEmptyCard">
+                    No mock tests found.
+                  </div>
+                ) : (
+                  <div className="resultsCompactGrid">
+                    {testAnalytics.map((test) => (
+                      <div
+                        className="resultsMetricCard"
+                        key={test.id}
+                      >
+                        <strong>{test.title}</strong>
+
+                        <p>
+                          {test.planType || "FREE"} •{" "}
+                          {test.subject || "Subject"} •{" "}
+                          {test.chapter || "Chapter"}
+                        </p>
+
+                        <div className="resultsMiniStats">
+                          <span>Attempts {test.attempts}</span>
+                          <span>Avg Score {test.avgScore}</span>
+                          <span>
+                            Avg Accuracy {test.avgAccuracy}%
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="resultsSection">
+                <div className="resultsSectionHeader">
+                  <h3>Weak Chapters</h3>
+                  <span>{weakChapters.length} chapters</span>
+                </div>
+
+                {weakChapters.length === 0 ? (
+                  <div className="resultsEmptyCard">
+                    No weak chapter data yet.
+                  </div>
+                ) : (
+                  <div className="resultsCompactGrid">
+                    {weakChapters.map((item) => (
+                      <div
+                        className="resultsWeakCard"
+                        key={`${item.subject}-${item.chapter}`}
+                      >
+                        <strong>{item.chapter}</strong>
+                        <p>{item.subject}</p>
+
+                        <div className="resultsMiniStats">
+                          <span>Attempts {item.attempts}</span>
+                          <span>
+                            Avg Accuracy {item.averageAccuracy}%
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="resultsSection">
+                <div className="resultsSectionHeader">
+                  <h3>Top Performers</h3>
+                  <span>{topPerformers.length} students</span>
+                </div>
+
+                {topPerformers.length === 0 ? (
+                  <div className="resultsEmptyCard">
+                    No performers yet.
+                  </div>
+                ) : (
+                  <div className="resultsCompactGrid">
+                    {topPerformers.map((result, index) => (
+                      <div
+                        className="resultsStudentCard"
+                        key={result.id || index}
+                      >
+                        <div>
+                          <strong>
+                            #{index + 1}{" "}
+                            {result.studentName ||
+                              result.studentEmail ||
+                              result.email ||
+                              "Student"}
+                          </strong>
+
+                          <p>{result.testTitle || "Mock Test"}</p>
+                        </div>
+
+                        <div className="resultsScoreBadge">
+                          {result.percentage || 0}%
+                        </div>
+
+                        <div className="resultsMiniStats">
+                          <span>
+                            Score {result.score || 0}/
+                            {result.totalMarks || 0}
+                          </span>
+                          <span>
+                            Accuracy{" "}
+                            {result.accuracy ||
+                              result.percentage ||
+                              0}
+                            %
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="resultsSection">
+                <div className="resultsSectionHeader">
+                  <h3>Recent Attempts</h3>
+                  <span>{recentAttempts.length} latest</span>
+                </div>
+
+                {recentAttempts.length === 0 ? (
+                  <div className="resultsEmptyCard">
+                    No recent attempts yet.
+                  </div>
+                ) : (
+                  <div className="resultsCompactGrid">
+                    {recentAttempts.map((result, index) => (
+                      <div
+                        className="resultsStudentCard"
+                        key={result.id || index}
+                      >
+                        <div>
+                          <strong>
+                            {result.studentName ||
+                              result.studentEmail ||
+                              result.email ||
+                              "Student"}
+                          </strong>
+
+                          <p>{result.testTitle || "Mock Test"}</p>
+                        </div>
+
+                        <div className="resultsScoreBadge">
+                          {result.percentage || 0}%
+                        </div>
+
+                        <div className="resultsMiniStats">
+                          <span>
+                            Correct {result.correctCount || 0}
+                          </span>
+                          <span>
+                            Wrong {result.wrongCount || 0}
+                          </span>
+                          <span>
+                            Skipped {result.skippedCount || 0}
+                          </span>
                         </div>
                       </div>
                     ))}
@@ -18155,6 +19048,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   }
 />
 
+
 <Route
   path="/ctet-tet/mock-tests/plan/:plan"
   element={
@@ -18270,6 +19164,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   }
 />
 
+
 <Route
   path="/ctet-tet/mock-tests/plan/:plan/:subjectId/:chapterId"
   element={
@@ -18355,62 +19250,204 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   path="/ctet-tet/mock-tests/start/:testId"
   element={
     <section className="notesSubjectRoutePage">
-      {universalContent
-        .filter(
-          (test) =>
-            test.section === "mockTest" &&
-            test.id === activeStartMockTestId
-        )
-        .map((test) => (
+      {(() => {
+        const test = universalContent.find(
+          (item) =>
+            item.section === "mockTest" &&
+            item.id === activeStartMockTestId
+        );
+
+        const accessStatus = getMockTestAccessStatus(test);
+  
+        if (accessStatus === "NOT_FOUND") {
+          return (
+            <div className="pdfMiniCard">
+              <h3>Test not found</h3>
+              <p>This mock test is not available anymore.</p>
+              <button
+                className="btnLink"
+                onClick={() => navigate("/ctet-tet/mock-tests")}
+              >
+                Back to Mock Tests
+              </button>
+            </div>
+          );
+        }
+
+        if (accessStatus === "UNPUBLISHED") {
+          return (
+            <div className="pdfMiniCard">
+              <h3>Test unavailable</h3>
+              <p>This mock test is not published yet.</p>
+              <button
+                className="btnLink"
+                onClick={() => navigate("/ctet-tet/mock-tests")}
+              >
+                Back to Mock Tests
+              </button>
+            </div>
+          );
+        }
+
+        if (accessStatus === "LOGIN_REQUIRED") {
+          return (
+            <div className="pdfMiniCard">
+              <h3>Login required</h3>
+              <p>Please login before starting this mock test.</p>
+              <button
+                className="btnLink"
+                onClick={() => navigate("/login")}
+              >
+                Login to Continue
+              </button>
+            </div>
+          );
+        }
+
+        if (
+          accessStatus === "PLAN_LOCKED" ||
+          accessStatus === "EXPIRED_MEMBERSHIP"
+        ) {
+          return (
+            <div className="pdfMiniCard">
+              <h3>Plan required</h3>
+              <p>
+                This mock test needs {test.planType || "PREMIUM"} access.
+              </p>
+              <button
+                className="btnLink"
+                onClick={() => navigate("/ctet-tet/pricing")}
+              >
+                View Pricing
+              </button>
+            </div>
+          );
+        }
+        if (accessStatus === "UPCOMING") {
+          return (
+            <div className="pdfMiniCard">
+              <h3>Test upcoming</h3>
+        
+              <p>
+                This mock test is scheduled for a future date or time.
+              </p>
+        
+              <button
+                className="btnLink"
+                onClick={() => navigate("/ctet-tet/mock-tests")}
+              >
+                Back to Mock Tests
+              </button>
+            </div>
+          );
+        }
+        
+        if (accessStatus === "EXPIRED") {
+          return (
+            <div className="pdfMiniCard">
+              <h3>Test expired</h3>
+        
+              <p>
+                This mock test window is closed.
+              </p>
+        
+              <button
+                className="btnLink"
+                onClick={() => navigate("/ctet-tet/mock-tests")}
+              >
+                Back to Mock Tests
+              </button>
+            </div>
+          );
+        }
+        const savedStartAttempt = JSON.parse(
+          localStorage.getItem(getAttemptStorageKey(test.id)) || "{}"
+        );
+        
+        const hasStartedAttempt =
+          savedStartAttempt?.startedAt &&
+          !savedStartAttempt?.isSubmitted;
+        
+        const hasSubmittedAttempt =
+          savedStartAttempt?.isSubmitted;
+
+        const totalQuestions = test.questions?.length || 0;
+        const durationText =
+          test.durationMinutes || test.duration || "Not specified";
+        const marksPerQuestion = Number(test.marksPerQuestion || 1);
+        const negativeMarks = Number(test.negativeMarks || 0);
+        const totalMarks =
+          Number(test.totalMarks) || totalQuestions * marksPerQuestion;
+        const passingMarks = Number(test.passingMarks || 0);
+        const scheduleStatus = getMockTestScheduleStatus(test);
+        
+        return (
           <div key={test.id}>
             <button onClick={() => navigate(-1)}>
               ← Back to Tests
             </button>
-
+        
             <span className="notesSubjectRouteBadge">
               MOCK TEST START
             </span>
-
+        
             <h1>{test.title}</h1>
-
+        
             <p>
               {test.planType} · {test.subject} · {test.chapter}
             </p>
-
+        
             <div className="pdfShelfRow">
               <div className="pdfMiniCard">
                 <div className="pdfIcon">📝</div>
-
-                <h3>Test Details</h3>
-
-                <p>
-                  Type: {test.testType || "Mock Test"}
-                </p>
-
-                <p>
-                  Duration: {test.duration || "Not specified"}
-                </p>
-
-                <p>
-                  Questions: {test.questions?.length || 0}
-                </p>
-
-                <span>{test.planType}</span>
-
+        
+                <h3>Exam Overview</h3>
+        
+                <p>Type: {test.testType || "Mock Test"}</p>
+                <p>Questions: {totalQuestions}</p>
+                <p>Duration: {durationText} minutes</p>
+                <p>Total Marks: {totalMarks}</p>
+                <p>Marks per Question: {marksPerQuestion}</p>
+                <p>Negative Marks: {negativeMarks}</p>
+                <p>Passing Marks: {passingMarks || "Not set"}</p>
+        
+                <span>
+                  {test.planType} · {scheduleStatus}
+                </span>
+              </div>
+        
+              <div className="pdfMiniCard">
+                <div className="pdfIcon">📋</div>
+        
+                <h3>Instructions</h3>
+        
+                <p>Read every question carefully before answering.</p>
+                <p>Your timer will start after clicking Begin Test.</p>
+                <p>You can mark questions for review during the test.</p>
+                <p>Submit is required before result and review unlock.</p>
+                <p>Do not refresh the page during active attempt.</p>
+        
                 <button
                   className="btnLink"
                   onClick={() =>
                     navigate(
-                      `/ctet-tet/mock-tests/attempt/${test.id}`
+                      hasSubmittedAttempt
+                        ? `/ctet-tet/mock-tests/result/${test.id}`
+                        : `/ctet-tet/mock-tests/attempt/${test.id}`
                     )
                   }
                 >
-                  Begin Test
+                  {hasSubmittedAttempt
+  ? "View Result"
+  : hasStartedAttempt
+  ? "Resume Test"
+  : "Begin Test"}
                 </button>
               </div>
             </div>
           </div>
-        ))}
+        );
+      })()}
     </section>
   }
 />
@@ -18420,13 +19457,114 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   path="/ctet-tet/mock-tests/attempt/:testId"
   element={
     <section className="premiumExamPage">
-      {universalContent
-        .filter(
-          (test) =>
-            test.section === "mockTest" &&
-            test.id === activeStartMockTestId
-        )
-        .map((test) => {
+   {(() => {
+  const test = universalContent.find(
+    (item) =>
+      item.section === "mockTest" &&
+      item.id === activeStartMockTestId
+  );
+
+  const accessStatus = getMockTestAccessStatus(test);
+
+  if (accessStatus === "NOT_FOUND") {
+    return (
+      <div className="pdfMiniCard">
+        <h3>Test not found</h3>
+        <p>This mock test is not available anymore.</p>
+        <button
+          className="btnLink"
+          onClick={() => navigate("/ctet-tet/mock-tests")}
+        >
+          Back to Mock Tests
+        </button>
+      </div>
+    );
+  }
+
+  if (accessStatus === "UNPUBLISHED") {
+    return (
+      <div className="pdfMiniCard">
+        <h3>Test unavailable</h3>
+        <p>This mock test is not published yet.</p>
+        <button
+          className="btnLink"
+          onClick={() => navigate("/ctet-tet/mock-tests")}
+        >
+          Back to Mock Tests
+        </button>
+      </div>
+    );
+  }
+
+  if (accessStatus === "LOGIN_REQUIRED") {
+    return (
+      <div className="pdfMiniCard">
+        <h3>Login required</h3>
+        <p>Please login before attempting this mock test.</p>
+        <button
+          className="btnLink"
+          onClick={() => navigate("/login")}
+        >
+          Login to Continue
+        </button>
+      </div>
+    );
+  }
+
+  if (
+    accessStatus === "PLAN_LOCKED" ||
+    accessStatus === "EXPIRED_MEMBERSHIP"
+  ) {
+    return (
+      <div className="pdfMiniCard">
+        <h3>Plan required</h3>
+        <p>This mock test needs {test.planType || "PREMIUM"} access.</p>
+        <button
+          className="btnLink"
+          onClick={() => navigate("/ctet-tet/pricing")}
+        >
+          View Pricing
+        </button>
+      </div>
+    );
+  }
+  if (accessStatus === "UPCOMING") {
+    return (
+      <div className="pdfMiniCard">
+        <h3>Test upcoming</h3>
+  
+        <p>
+          This mock test is scheduled for a future date or time.
+        </p>
+  
+        <button
+          className="btnLink"
+          onClick={() => navigate("/ctet-tet/mock-tests")}
+        >
+          Back to Mock Tests
+        </button>
+      </div>
+    );
+  }
+  
+  if (accessStatus === "EXPIRED") {
+    return (
+      <div className="pdfMiniCard">
+        <h3>Test expired</h3>
+  
+        <p>
+          This mock test window is closed.
+        </p>
+  
+        <button
+          className="btnLink"
+          onClick={() => navigate("/ctet-tet/mock-tests")}
+        >
+          Back to Mock Tests
+        </button>
+      </div>
+    );
+  }
           const questions = test.questions || [];
 
           const getTimerSeconds = (value, unit) => {
@@ -18629,13 +19767,103 @@ handleSaveUniversalContent={handleSaveUniversalContent}
               ].filter((option) => option.text)
             : [];
 
-          const submitAttempt = () => {
-            submitAttemptState(test.id);
-            navigate(`/ctet-tet/mock-tests/result/${test.id}`);
-          };
+            const submitAttempt = () => {
+              setSubmitConfirmTestId(test.id);
+            };
+
+            const confirmFinalSubmit = () => {
+              const finalState = {
+                ...attemptState,
+                submittedAt: Date.now(),
+                isSubmitted: true,
+              };
+            
+              saveAttemptState(test.id, finalState);
+            
+              setMockAttemptState((prev) => ({
+                ...prev,
+                [test.id]: finalState,
+              }));
+            
+              setSubmitConfirmTestId(null);
+            
+              toast.success("Test submitted successfully ✅");
+            
+              navigate(`/ctet-tet/mock-tests/result/${test.id}`);
+            };
+            
+            const cancelFinalSubmit = () => {
+              setSubmitConfirmTestId(null);
+            };
+
+            const totalViolationCount =
+  Number(attemptState.violations?.tabSwitchCount || 0) +
+  Number(attemptState.violations?.fullscreenExitCount || 0);
+
+const shouldForceSubmit = totalViolationCount >= 5;
+
+if (shouldForceSubmit && !attemptState.isSubmitted) {
+  const finalState = {
+    ...attemptState,
+    submittedAt: Date.now(),
+    isSubmitted: true,
+    forceSubmittedReason: "Violation limit exceeded",
+  };
+
+  saveAttemptState(test.id, finalState);
+
+  setMockAttemptState((prev) => ({
+    ...prev,
+    [test.id]: finalState,
+  }));
+
+  toast.error("Violation limit exceeded. Test auto-submitted.");
+
+  setTimeout(() => {
+    navigate(`/ctet-tet/mock-tests/result/${test.id}`);
+  }, 300);
+
+  return null;
+}
 
           return (
             <div className="premiumExamShell" key={test.id}>
+              {submitConfirmTestId === test.id && (
+  <div className="mockPortalBackdrop">
+    <div className="mockPortalMenu examSubmitConfirmModal">
+      <h3>Submit Test?</h3>
+
+      <p>
+        Answered: {answeredCount}/{questions.length}
+      </p>
+
+      <p>Review: {markedCount}</p>
+      <p>Not Answered: {notAnsweredCount}</p>
+      <p>Not Visited: {notVisitedCount}</p>
+
+      <p>
+        After submission, your attempt will be locked and result
+        will be generated.
+      </p>
+
+      <button
+        type="button"
+        className="examControlBtn primary"
+        onClick={confirmFinalSubmit}
+      >
+        Yes, Submit Test
+      </button>
+
+      <button
+        type="button"
+        className="examControlBtn secondary"
+        onClick={cancelFinalSubmit}
+      >
+        Continue Exam
+      </button>
+    </div>
+  </div>
+)}
               <div className="premiumExamTop examHeaderCompact">
                 <div className="premiumExamBrand">
                   <AspireNestLogo />
@@ -18985,6 +20213,27 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                     </button>
                   </div>
 
+                  {(Number(attemptState.violations?.tabSwitchCount || 0) > 0 ||
+  Number(attemptState.violations?.fullscreenExitCount || 0) > 0) && (
+  <div className="examFinalBox">
+    <h4>Exam Warning</h4>
+
+    <p>
+      Tab switches detected:{" "}
+      {Number(attemptState.violations?.tabSwitchCount || 0)}
+    </p>
+
+    <p>
+      Fullscreen exits:{" "}
+      {Number(attemptState.violations?.fullscreenExitCount || 0)}
+    </p>
+
+    <span className="notesSubjectTag">
+      Stay on exam screen
+    </span>
+  </div>
+)}
+
                   <div className="examFinalBox">
                     <h4>Ready to submit?</h4>
                     <p>
@@ -18999,36 +20248,161 @@ handleSaveUniversalContent={handleSaveUniversalContent}
               </div>
             </div>
           );
-        })}
-    </section>
-  }
-/>
+        })()}
+      </section>
+    }
+  />
+
 
 <Route
   path="/ctet-tet/mock-tests/result/:testId"
   element={
     <section className="notesSubjectRoutePage">
-      {universalContent
-        .filter(
-          (test) =>
-            test.section === "mockTest" &&
-            test.id === activeResultAttemptId
-        )
-        .map((test) => {
+    {(() => {
+  const test = universalContent.find(
+    (item) =>
+      item.section === "mockTest" &&
+      item.id === activeResultAttemptId
+  );
+
+  const accessStatus = getMockTestAccessStatus(test);
+
+  if (accessStatus === "NOT_FOUND") {
+    return (
+      <div className="pdfMiniCard">
+        <h3>Result not found</h3>
+        <p>This mock test result is not available anymore.</p>
+        <button
+          className="btnLink"
+          onClick={() => navigate("/ctet-tet/mock-tests")}
+        >
+          Back to Mock Tests
+        </button>
+      </div>
+    );
+  }
+
+  if (accessStatus === "UNPUBLISHED") {
+    return (
+      <div className="pdfMiniCard">
+        <h3>Result unavailable</h3>
+        <p>This mock test is not published right now.</p>
+        <button
+          className="btnLink"
+          onClick={() => navigate("/ctet-tet/mock-tests")}
+        >
+          Back to Mock Tests
+        </button>
+      </div>
+    );
+  }
+
+  if (accessStatus === "LOGIN_REQUIRED") {
+    return (
+      <div className="pdfMiniCard">
+        <h3>Login required</h3>
+        <p>Please login to view your result.</p>
+        <button
+          className="btnLink"
+          onClick={() => navigate("/login")}
+        >
+          Login to Continue
+        </button>
+      </div>
+    );
+  }
+
+  if (
+    accessStatus === "PLAN_LOCKED" ||
+    accessStatus === "EXPIRED_MEMBERSHIP"
+  ) {
+    return (
+      <div className="pdfMiniCard">
+        <h3>Plan required</h3>
+        <p>This result needs {test.planType || "PREMIUM"} access.</p>
+        <button
+          className="btnLink"
+          onClick={() => navigate("/ctet-tet/pricing")}
+        >
+          View Pricing
+        </button>
+      </div>
+    );
+  }
+  if (accessStatus === "UPCOMING") {
+    return (
+      <div className="pdfMiniCard">
+        <h3>Test upcoming</h3>
+  
+        <p>
+          This mock test is scheduled for a future date or time.
+        </p>
+  
+        <button
+          className="btnLink"
+          onClick={() => navigate("/ctet-tet/mock-tests")}
+        >
+          Back to Mock Tests
+        </button>
+      </div>
+    );
+  }
+  
+  if (accessStatus === "EXPIRED") {
+    return (
+      <div className="pdfMiniCard">
+        <h3>Test expired</h3>
+  
+        <p>
+          This mock test window is closed.
+        </p>
+  
+        <button
+          className="btnLink"
+          onClick={() => navigate("/ctet-tet/mock-tests")}
+        >
+          Back to Mock Tests
+        </button>
+      </div>
+    );
+  }
           const questions = test.questions || [];
           const totalQuestions = questions.length;
 
-          const storedAttemptAnswers = JSON.parse(
+          const savedAttemptState = JSON.parse(
+            localStorage.getItem(getAttemptStorageKey(test.id)) || "{}"
+          );
+          if (!savedAttemptState?.isSubmitted) {
+            return (
+              <div className="pdfMiniCard">
+                <h3>Result locked</h3>
+                <p>Please submit the mock test before viewing result.</p>
+                <button
+                  className="btnLink"
+                  onClick={() =>
+                    navigate(`/ctet-tet/mock-tests/attempt/${test.id}`)
+                  }
+                >
+                  Continue Test
+                </button>
+              </div>
+            );
+          }
+          const newStoredAnswers = savedAttemptState?.answers || {};
+
+          const oldStoredAnswers = JSON.parse(
             localStorage.getItem(`mockAttemptAnswers_${test.id}`) || "{}"
           );
-          
+
           const liveAttemptAnswers =
-          mockAttemptAnswers?.[test.id] || {};
-        
-        const attemptAnswers =
-          Object.keys(liveAttemptAnswers).length > 0
-            ? liveAttemptAnswers
-            : storedAttemptAnswers;
+            mockAttemptState?.[test.id]?.answers || {};
+
+          const attemptAnswers =
+            Object.keys(liveAttemptAnswers).length > 0
+              ? liveAttemptAnswers
+              : Object.keys(newStoredAnswers).length > 0
+              ? newStoredAnswers
+              : oldStoredAnswers;
 
           const correctCount = questions.filter(
             (question, index) =>
@@ -19052,139 +20426,184 @@ handleSaveUniversalContent={handleSaveUniversalContent}
             Number(test.totalMarks) ||
             totalQuestions * Number(test.marksPerQuestion || 1);
 
-          const score =
-            questions.reduce((sum, question, index) => {
-              const selected = attemptAnswers[index];
+          const score = questions.reduce((sum, question, index) => {
+            const selected = attemptAnswers[index];
 
-              if (!selected) return sum;
+            if (!selected) return sum;
 
-              if (selected === question.answer) {
-                return sum + Number(question.positiveMarks || test.marksPerQuestion || 1);
-              }
+            if (selected === question.answer) {
+              return (
+                sum +
+                Number(
+                  question.positiveMarks ||
+                    test.marksPerQuestion ||
+                    1
+                )
+              );
+            }
 
-              return sum - Number(question.negativeMarks || test.negativeMarks || 0);
-            }, 0);
+            return (
+              sum -
+              Number(
+                question.negativeMarks ||
+                  test.negativeMarks ||
+                  0
+              )
+            );
+          }, 0);
 
           const percentage =
             totalMarks > 0
               ? Math.round((score / totalMarks) * 100)
               : 0;
 
-              const leaderboardEnabled =
-              test.leaderboardMode &&
-              test.leaderboardMode !== "disabled";
-            
-            const canShowLeaderboardButton =
-              leaderboardEnabled || isAdmin(user);
-              const saveToLeaderboard = async () => {
+          const leaderboardEnabled =
+            test.leaderboardMode &&
+            test.leaderboardMode !== "disabled";
+
+          const canShowLeaderboardButton =
+            leaderboardEnabled || isAdmin(user);
+
+            const saveToLeaderboard = async (showAlert = true) => {
+              try {
                 if (!user?.email) {
-                  alert("Please login to save result");
-                  return;
+                  if (showAlert) {
+                    alert("Please login to save result");
+                  }
+                  return false;
                 }
-              
+            
                 const attemptKey = `${test.id}_${user.email}`;
-              
+            
                 const existingResult = await getDocs(
                   query(
                     collection(db, "mockResults"),
                     where("attemptKey", "==", attemptKey)
                   )
                 );
-              
+            
                 if (existingResult.empty) {
                   await addDoc(collection(db, "mockResults"), {
                     attemptKey,
-              
+            
                     testId: test.id,
                     testTitle: test.title || "",
-              
+            
                     email: user.email,
                     studentEmail: user.email,
                     studentName: fullName || user.email,
-              
+            
                     subject: test.subject || "",
                     chapter: test.chapter || "",
                     planType: test.planType || "FREE",
                     examType: test.examType || "",
                     testType: test.testType || "",
-              
+            
                     score,
                     totalMarks,
                     percentage,
                     accuracy,
-              
+            
                     correctCount,
                     wrongCount,
                     skippedCount,
                     totalQuestions,
-              
+            
                     createdAt: new Date(),
                   });
                 }
-              
+            
                 if (leaderboardEnabled) {
                   const leaderboardKey = `${test.id}_${user.email}_${test.leaderboardMode}`;
-              
+            
                   const existingLeaderboard = await getDocs(
                     query(
                       collection(db, "mockLeaderboard"),
                       where("leaderboardKey", "==", leaderboardKey)
                     )
                   );
-              
+            
                   if (existingLeaderboard.empty) {
                     await addDoc(collection(db, "mockLeaderboard"), {
                       leaderboardKey,
                       leaderboardMode: test.leaderboardMode,
-              
+            
                       testId: test.id,
                       testTitle: test.title || "",
-              
+            
                       studentEmail: user.email,
                       studentName: fullName || user.email,
-              
+            
                       subject: test.subject || "",
                       chapter: test.chapter || "",
                       planType: test.planType || "FREE",
                       examType: test.examType || "",
                       testType: test.testType || "",
-              
+            
                       score,
                       totalMarks,
                       percentage,
                       accuracy,
-              
+            
                       correctCount,
                       wrongCount,
                       skippedCount,
                       totalQuestions,
-              
+            
                       rankScore: percentage,
                       rankTieBreakerScore: score,
-              
+            
                       createdAt: new Date(),
                     });
                   }
                 }
-              
+            
                 await loadUserMockResults(user.email);
                 await loadLeaderboard();
                 await loadMockLeaderboardEntries();
-              
-                alert(
-                  leaderboardEnabled
-                    ? "Result and leaderboard saved ✅"
-                    : "Result saved ✅ Leaderboard is disabled for this test"
-                );
-              };
             
+                if (showAlert) {
+                  alert(
+                    leaderboardEnabled
+                      ? "Result and leaderboard saved ✅"
+                      : "Result saved ✅ Leaderboard is disabled for this test"
+                  );
+                }
+            
+                return true;
+              } catch (error) {
+                console.error("Save mock result error:", error);
+            
+                if (showAlert) {
+                  alert("Result save failed. Please try again.");
+                }
+            
+                return false;
+              }
+            };
+       
+            const AutoSaveMockResult = () => {
+              React.useEffect(() => {
+                if (!test?.id || !user?.email) return;
+            
+                const autoSaveKey = `mockResultAutoSaved_${test.id}_${user.email}`;
+            
+                if (sessionStorage.getItem(autoSaveKey)) {
+                  return;
+                }
+            
+                sessionStorage.setItem(autoSaveKey, "yes");
+            
+                saveToLeaderboard(false);
+              }, [test?.id, user?.email]);
+            
+              return null;
+            };
+
+        
 
           return (
             <div key={test.id}>
-              <button onClick={() => navigate(-1)}>
-                ← Back to Attempt
-              </button>
-
               <span className="notesSubjectRouteBadge">
                 MOCK TEST RESULT
               </span>
@@ -19202,11 +20621,8 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                   <h3>Score Summary</h3>
 
                   <p>Total Questions: {totalQuestions}</p>
-
                   <p>Correct: {correctCount}</p>
-
                   <p>Wrong: {wrongCount}</p>
-
                   <p>Skipped: {skippedCount}</p>
 
                   <p>
@@ -19217,7 +20633,8 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 
                   {canShowLeaderboardButton && (
                     <p>
-                      Leaderboard: {test.leaderboardMode}
+                      Leaderboard:{" "}
+                      {test.leaderboardMode || "disabled"}
                     </p>
                   )}
 
@@ -19231,17 +20648,15 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                   >
                     Review Answers
                   </button>
+                  <AutoSaveMockResult />
                   {canShowLeaderboardButton && (
-                    <button
-  className="btnLink"
-  onClick={async () => {
-    await saveToLeaderboard();
-    navigate("/admin/content/mock-tests/leaderboard");
-  }}
->
-  Save to Leaderboard
-</button>
-)}
+                  <button
+                  className="btnLink"
+                  onClick={() => saveToLeaderboard(true)}
+                >
+                  Sync Result
+                </button>
+                  )}
                 </div>
 
                 <div className="pdfMiniCard">
@@ -19249,9 +20664,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 
                   <h3>Performance</h3>
 
-                  <p>
-                    Percentage: {percentage}%
-                  </p>
+                  <p>Percentage: {percentage}%</p>
 
                   <span>
                     {percentage >= 80
@@ -19263,7 +20676,9 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 
                   <button
                     className="btnLink"
-                    onClick={() => navigate("/ctet-tet/mock-tests")}
+                    onClick={() =>
+                      navigate("/ctet-tet/mock-tests")
+                    }
                   >
                     Back to Mock Tests
                   </button>
@@ -19271,26 +20686,156 @@ handleSaveUniversalContent={handleSaveUniversalContent}
               </div>
             </div>
           );
-        })}
-    </section>
-  }
-/>
-
+        })()}
+      </section>
+    }
+  />
 
 <Route
   path="/ctet-tet/mock-tests/review/:testId"
   element={
     <section className="notesSubjectRoutePage">
-      {universalContent
-        .filter(
-          (test) =>
-            test.section === "mockTest" &&
-            test.id === activeResultAttemptId
-        )
-        .map((test) => {
-          const storedAttemptAnswers = JSON.parse(
+    {(() => {
+  const test = universalContent.find(
+    (item) =>
+      item.section === "mockTest" &&
+      item.id === activeResultAttemptId
+  );
+
+  const accessStatus = getMockTestAccessStatus(test);
+
+  if (accessStatus === "NOT_FOUND") {
+    return (
+      <div className="pdfMiniCard">
+        <h3>Review not found</h3>
+        <p>This review is not available anymore.</p>
+        <button
+          className="btnLink"
+          onClick={() => navigate("/ctet-tet/mock-tests")}
+        >
+          Back to Mock Tests
+        </button>
+      </div>
+    );
+  }
+
+  if (accessStatus === "UNPUBLISHED") {
+    return (
+      <div className="pdfMiniCard">
+        <h3>Review unavailable</h3>
+        <p>This mock test is not published.</p>
+        <button
+          className="btnLink"
+          onClick={() => navigate("/ctet-tet/mock-tests")}
+        >
+          Back to Mock Tests
+        </button>
+      </div>
+    );
+  }
+
+  if (accessStatus === "LOGIN_REQUIRED") {
+    return (
+      <div className="pdfMiniCard">
+        <h3>Login required</h3>
+        <p>Please login to view review.</p>
+        <button
+          className="btnLink"
+          onClick={() => navigate("/login")}
+        >
+          Login to Continue
+        </button>
+      </div>
+    );
+  }
+
+  if (
+    accessStatus === "PLAN_LOCKED" ||
+    accessStatus === "EXPIRED_MEMBERSHIP"
+  ) {
+    return (
+      <div className="pdfMiniCard">
+        <h3>Plan required</h3>
+        <p>
+          This review needs {test.planType || "PREMIUM"} access.
+        </p>
+        <button
+          className="btnLink"
+          onClick={() => navigate("/ctet-tet/pricing")}
+        >
+          View Pricing
+        </button>
+      </div>
+    );
+  }
+      
+  if (accessStatus === "UPCOMING") {
+    return (
+      <div className="pdfMiniCard">
+        <h3>Test upcoming</h3>
+  
+        <p>
+          This mock test is scheduled for a future date or time.
+        </p>
+  
+        <button
+          className="btnLink"
+          onClick={() => navigate("/ctet-tet/mock-tests")}
+        >
+          Back to Mock Tests
+        </button>
+      </div>
+    );
+  }
+  
+  if (accessStatus === "EXPIRED") {
+    return (
+      <div className="pdfMiniCard">
+        <h3>Test expired</h3>
+  
+        <p>
+          This mock test window is closed.
+        </p>
+  
+        <button
+          className="btnLink"
+          onClick={() => navigate("/ctet-tet/mock-tests")}
+        >
+          Back to Mock Tests
+        </button>
+      </div>
+    );
+  }
+          const storedAttemptState = JSON.parse(
+            localStorage.getItem(`aspireExamAttempt_${test.id}`) || "{}"
+          );
+          if (!storedAttemptState?.isSubmitted) {
+            return (
+              <div className="pdfMiniCard">
+                <h3>Review locked</h3>
+          
+                <p>
+                  Please submit the mock test before viewing
+                  solutions.
+                </p>
+          
+                <button
+                  className="btnLink"
+                  onClick={() =>
+                    navigate(
+                      `/ctet-tet/mock-tests/attempt/${test.id}`
+                    )
+                  }
+                >
+                  Continue Test
+                </button>
+              </div>
+            );
+          }
+          const storedLegacyAnswers = JSON.parse(
             localStorage.getItem(`mockAttemptAnswers_${test.id}`) || "{}"
           );
+          const storedNewAnswers = storedAttemptState?.answers || {};
 
           const liveAttemptAnswers =
             mockAttemptAnswers?.[test.id] || {};
@@ -19298,11 +20843,48 @@ handleSaveUniversalContent={handleSaveUniversalContent}
           const attemptAnswers =
             Object.keys(liveAttemptAnswers).length > 0
               ? liveAttemptAnswers
-              : storedAttemptAnswers;
+              : Object.keys(storedNewAnswers).length > 0
+              ? storedNewAnswers
+              : storedLegacyAnswers;
+
+          const questions = test.questions || [];
+
+          const correctCount = questions.filter(
+            (question, index) =>
+              attemptAnswers[index] &&
+              attemptAnswers[index] === question.answer
+          ).length;
+
+          const skippedCount = questions.filter(
+            (_, index) => !attemptAnswers[index]
+          ).length;
+
+          const wrongCount =
+            questions.length - correctCount - skippedCount;
+
+          const getOptionLabel = (answerKey = "") => {
+            const optionMap = {
+              option1: "A",
+              option2: "B",
+              option3: "C",
+              option4: "D",
+            };
+
+            return optionMap[answerKey] || answerKey || "—";
+          };
+
+          const getOptionText = (question, answerKey) => {
+            if (!answerKey) return "Not Attempted";
+
+            return question?.[answerKey] || answerKey || "Not Attempted";
+          };
 
           return (
             <div key={test.id}>
-              <button onClick={() => navigate(-1)}>
+              <button
+                className="btnLink"
+                onClick={() => navigate(-1)}
+              >
                 ← Back to Result
               </button>
 
@@ -19316,60 +20898,179 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                 Review your answers, correct answers, and explanations.
               </p>
 
-              <div className="pdfShelfRow">
-                {(test.questions || []).map((question, index) => {
+              <div className="reviewSummaryGrid">
+                <div>
+                  <strong>{questions.length}</strong>
+                  <span>Total</span>
+                </div>
+
+                <div>
+                  <strong>{correctCount}</strong>
+                  <span>Correct</span>
+                </div>
+
+                <div>
+                  <strong>{wrongCount}</strong>
+                  <span>Wrong</span>
+                </div>
+
+                <div>
+                  <strong>{skippedCount}</strong>
+                  <span>Skipped</span>
+                </div>
+              </div>
+              <div className="reviewQuestionPalette">
+  {questions.map((question, index) => {
+    const userAnswer = attemptAnswers[index];
+    const isCorrect =
+      userAnswer && userAnswer === question.answer;
+    const isSkipped = !userAnswer;
+
+    return (
+      <a
+        key={index}
+        href={`#review-q-${index + 1}`}
+        className={`reviewPaletteDot ${
+          isSkipped
+            ? "isSkipped"
+            : isCorrect
+            ? "isCorrect"
+            : "isWrong"
+        }`}
+      >
+        {index + 1}
+      </a>
+    );
+  })}
+</div>
+              <div className="reviewAnswerGrid">
+                {questions.map((question, index) => {
                   const userAnswer = attemptAnswers[index];
-                  const isCorrect = userAnswer === question.answer;
+                  const isCorrect =
+                    userAnswer && userAnswer === question.answer;
                   const isSkipped = !userAnswer;
 
                   return (
-                    <div className="pdfMiniCard" key={index}>
-                      <div className="pdfIcon">
-                        {isSkipped ? "⏭️" : isCorrect ? "✅" : "❌"}
-                      </div>
-
-                      <h3>Question {index + 1}</h3>
-
-                      <p>{question.question}</p>
-
-                      <p>
-                        Your Answer:{" "}
-                        <strong>{userAnswer || "Not Attempted"}</strong>
-                      </p>
-
-                      <p>
-                        Correct Answer:{" "}
-                        <strong>{question.answer}</strong>
-                      </p>
-
-                      <span>
-                        {isSkipped
-                          ? "Skipped"
+                    <details
+                    id={`review-q-${index + 1}`}
+                      className={`reviewAnswerCard ${
+                        isSkipped
+                          ? "isSkipped"
                           : isCorrect
-                          ? "Correct"
-                          : "Wrong"}
-                      </span>
+                          ? "isCorrect"
+                          : "isWrong"
+                      }`}
+                      key={index}
+                    >
+                      <summary>
+                        <div className="reviewQuestionTop">
+                          <span className="reviewQuestionNo">
+                            Q{index + 1}
+                          </span>
 
-                      {question.explanation && (
-                        <p>Explanation: {question.explanation}</p>
-                      )}
-                    </div>
+                          <span className="reviewStatusPill">
+                            {isSkipped
+                              ? "Skipped"
+                              : isCorrect
+                              ? "Correct"
+                              : "Wrong"}
+                          </span>
+                        </div>
+
+                        <div className="reviewAnswerLine">
+                          <span>
+                            Your:{" "}
+                            <strong>
+                              {isSkipped
+                                ? "—"
+                                : getOptionLabel(userAnswer)}
+                            </strong>
+                          </span>
+
+                          <span>
+                            Correct:{" "}
+                            <strong>
+                              {getOptionLabel(question.answer)}
+                            </strong>
+                          </span>
+                        </div>
+                        <p className="reviewQuestionPreview">
+  {question.question?.length > 120
+    ? `${question.question.slice(0, 120)}...`
+    : question.question}
+</p>
+                      </summary>
+
+                      <div className="reviewQuestionBody">
+                        <p className="reviewQuestionText">
+                          {question.question}
+                        </p>
+
+                        <div className="reviewOptionsList">
+                          {["option1", "option2", "option3", "option4"].map(
+                            (optionKey) => (
+                              <div
+                                key={optionKey}
+                                className={`reviewOptionItem ${
+                                  question.answer === optionKey
+                                    ? "correctOption"
+                                    : userAnswer === optionKey
+                                    ? "selectedOption"
+                                    : ""
+                                }`}
+                              >
+                                <strong>
+                                  {getOptionLabel(optionKey)}.
+                                </strong>{" "}
+                                {question[optionKey]}
+                              </div>
+                            )
+                          )}
+                        </div>
+
+                        <div className="reviewAnswerDetails">
+                          <p>
+                            Your Answer:{" "}
+                            <strong>
+                              {getOptionText(question, userAnswer)}
+                            </strong>
+                          </p>
+
+                          <p>
+                            Correct Answer:{" "}
+                            <strong>
+                              {getOptionText(question, question.answer)}
+                            </strong>
+                          </p>
+                        </div>
+
+                        {question.explanation && (
+                          <div className="reviewExplanation">
+                            <strong>Explanation:</strong>
+                            <p>{question.explanation}</p>
+                          </div>
+                        )}
+                      </div>
+                    </details>
                   );
                 })}
               </div>
 
               <button
                 className="btnLink"
-                onClick={() => navigate("/ctet-tet/mock-tests/history")}
+                onClick={() =>
+                  navigate("/ctet-tet/mock-tests/history")
+                }
               >
                 My Attempts History
               </button>
             </div>
           );
-        })}
+        })()}
     </section>
   }
 />
+
 
 <Route
   path="/ctet-tet/mock-tests/history"
@@ -19558,6 +21259,8 @@ handleSaveUniversalContent={handleSaveUniversalContent}
     </section>
   }
 />
+
+
 
 
 <Route
