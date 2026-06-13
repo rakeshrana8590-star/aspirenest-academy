@@ -325,6 +325,12 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
   const createDefaultAttemptState = (test, defaultTimeLeft = 0) => ({
     testId: test?.id || "",
     currentIndex: 0,
+    questionOrder:
+    test?.shuffleQuestions === "yes"
+      ? shuffleMockArray(
+          (test?.questions || []).map((_, index) => index)
+        )
+      : (test?.questions || []).map((_, index) => index),
     answers: {},
     marked: {},
     visited: { 0: true },
@@ -977,6 +983,27 @@ if (scheduleStatus === "EXPIRED") {
 return "AVAILABLE";
   };
 
+  const getMockTestRules = (test) => ({
+    navigationMode: test?.navigationMode || "free",
+    shuffleQuestions: test?.shuffleQuestions || "no",
+    shuffleOptions: test?.shuffleOptions || "no",
+    allowPause: test?.allowPause || "yes",
+    calculatorAllowed: test?.calculatorAllowed || "no",
+  });
+  const shuffleMockArray = (items = []) => {
+    const clonedItems = [...items];
+  
+    for (let index = clonedItems.length - 1; index > 0; index -= 1) {
+      const randomIndex = Math.floor(Math.random() * (index + 1));
+  
+      [clonedItems[index], clonedItems[randomIndex]] = [
+        clonedItems[randomIndex],
+        clonedItems[index],
+      ];
+    }
+  
+    return clonedItems;
+  };
   const [activePlan, setActivePlan] = useState("FREE");
   const adminEmail = "aspirenestplatform@gmail.com";
   const isAdmin = (currentUser = user) =>
@@ -19381,6 +19408,11 @@ handleSaveUniversalContent={handleSaveUniversalContent}
         const passingMarks = Number(test.passingMarks || 0);
         const scheduleStatus = getMockTestScheduleStatus(test);
         
+        const startPageRules = getMockTestRules(test);
+
+        const isPauseAllowed =
+          startPageRules.allowPause === "yes";
+
         return (
           <div key={test.id}>
             <button onClick={() => navigate(-1)}>
@@ -19429,17 +19461,28 @@ handleSaveUniversalContent={handleSaveUniversalContent}
         
                 <button
                   className="btnLink"
-                  onClick={() =>
-                    navigate(
-                      hasSubmittedAttempt
-                        ? `/ctet-tet/mock-tests/result/${test.id}`
-                        : `/ctet-tet/mock-tests/attempt/${test.id}`
-                    )
-                  }
+                  onClick={() => {
+                    if (hasSubmittedAttempt) {
+                      navigate(`/ctet-tet/mock-tests/result/${test.id}`);
+                      return;
+                    }
+                  
+                    if (hasStartedAttempt && !isPauseAllowed) {
+                      localStorage.removeItem(getAttemptStorageKey(test.id));
+                  
+                      setMockAttemptState((prev) => {
+                        const next = { ...prev };
+                        delete next[test.id];
+                        return next;
+                      });
+                    }
+                  
+                    navigate(`/ctet-tet/mock-tests/attempt/${test.id}`);
+                  }}
                 >
                   {hasSubmittedAttempt
   ? "View Result"
-  : hasStartedAttempt
+  : hasStartedAttempt && isPauseAllowed
   ? "Resume Test"
   : "Begin Test"}
                 </button>
@@ -19566,6 +19609,19 @@ handleSaveUniversalContent={handleSaveUniversalContent}
     );
   }
           const questions = test.questions || [];
+          const mockRules = getMockTestRules(test);
+
+          const isSequentialNavigation =
+            mockRules.navigationMode === "sequential";
+          
+          const isCalculatorAllowed =
+            mockRules.calculatorAllowed === "yes";
+
+            const shouldShuffleQuestions =
+            mockRules.shuffleQuestions === "yes";
+
+            const shouldShuffleOptions =
+            mockRules.shuffleOptions === "yes";
 
           const getTimerSeconds = (value, unit) => {
             const numericValue = Number(value || 1);
@@ -19600,8 +19656,17 @@ handleSaveUniversalContent={handleSaveUniversalContent}
               ? attemptState.currentIndex
               : 0;
 
-          const currentQuestion =
-            questions[currentQuestionIndex];
+              const orderedQuestionIndexes =
+              attemptState.questionOrder?.length
+                ? attemptState.questionOrder
+                : questions.map((_, index) => index);
+            
+            const actualQuestionIndex =
+              orderedQuestionIndexes[currentQuestionIndex] ??
+              currentQuestionIndex;
+            
+            const currentQuestion =
+              questions[actualQuestionIndex];
 
           const selectedAnswerKey =
             attemptState.answers?.[currentQuestionIndex] || "";
@@ -19721,7 +19786,15 @@ handleSaveUniversalContent={handleSaveUniversalContent}
             const firstRangeStart =
               Math.floor(firstIndex / palettePageSize) *
               palettePageSize;
-
+              if (
+                isSequentialNavigation &&
+                firstIndex > currentQuestionIndex + 1
+              ) {
+                toast.error(
+                  "Sequential navigation is enabled. Please continue in order."
+                );
+                return;
+              }
             goToAttemptQuestion(
               test.id,
               firstIndex,
@@ -19764,7 +19837,11 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                     currentQuestion.option4 ||
                     currentQuestion.options?.[3],
                 },
-              ].filter((option) => option.text)
+              ]
+              .filter((option) => option.text)
+              .sort(() =>
+                shouldShuffleOptions ? Math.random() - 0.5 : 0
+              )
             : [];
 
             const submitAttempt = () => {
@@ -19981,7 +20058,7 @@ if (shouldForceSubmit && !attemptState.isSubmitted) {
                             onClick={() => {
                               selectAttemptAnswer(
                                 test.id,
-                                currentQuestionIndex,
+                                actualQuestionIndex,
                                 option.key
                               );
                             }}
@@ -20021,7 +20098,7 @@ if (shouldForceSubmit && !attemptState.isSubmitted) {
                           onClick={() => {
                             clearAttemptResponse(
                               test.id,
-                              currentQuestionIndex
+                              actualQuestionIndex
                             );
                           }}
                         >
@@ -20034,7 +20111,7 @@ if (shouldForceSubmit && !attemptState.isSubmitted) {
                           onClick={() => {
                             markAttemptForReviewAndNext(
                               test.id,
-                              currentQuestionIndex,
+                              actualQuestionIndex,
                               questions.length
                             );
 
@@ -20058,7 +20135,7 @@ if (shouldForceSubmit && !attemptState.isSubmitted) {
 
                             saveAttemptAndNext(
                               test.id,
-                              currentQuestionIndex,
+                              actualQuestionIndex,
                               questions.length
                             );
 
@@ -20096,7 +20173,25 @@ if (shouldForceSubmit && !attemptState.isSubmitted) {
                         }
                         onClick={() => {
                           setPaletteFilter("all");
-                        
+                          setPaletteFilter("all");
+
+                          if (
+                            isSequentialNavigation &&
+                            range.start > currentQuestionIndex + 1
+                          ) {
+                            toast.error(
+                              "Sequential navigation is enabled. Please continue in order."
+                            );
+                            return;
+                          }
+                          
+                          goToAttemptQuestion(
+                            test.id,
+                            range.start,
+                            range.start
+                          );
+                          
+                          resetQuestionTimer();
                           goToAttemptQuestion(
                             test.id,
                             range.start,
@@ -20148,12 +20243,22 @@ if (shouldForceSubmit && !attemptState.isSubmitted) {
         onClick={() => {
           setPaletteFilter("all");
 
+          if (
+            isSequentialNavigation &&
+            index > currentQuestionIndex + 1
+          ) {
+            toast.error(
+              "Sequential navigation is enabled. Please continue in order."
+            );
+            return;
+          }
+          
           goToAttemptQuestion(
             test.id,
             index,
             Math.floor(index / 25) * 25
           );
-
+          
           resetQuestionTimer();
         }}
       >
@@ -20233,7 +20338,28 @@ if (shouldForceSubmit && !attemptState.isSubmitted) {
     </span>
   </div>
 )}
+{isCalculatorAllowed && (
+  <div className="examFinalBox">
+    <h4>Calculator</h4>
 
+    <p>
+      Calculator is allowed for this mock test.
+    </p>
+
+    <button
+      type="button"
+      className="btnLink"
+      onClick={() =>
+        window.open(
+          "https://www.google.com/search?q=calculator",
+          "_blank"
+        )
+      }
+    >
+      Open Calculator
+    </button>
+  </div>
+)}
                   <div className="examFinalBox">
                     <h4>Ready to submit?</h4>
                     <p>
