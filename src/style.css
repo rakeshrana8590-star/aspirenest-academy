@@ -25596,38 +25596,113 @@ body:has(.premiumExamPage) .whatsappButton {
   content: "✓ Answered";
   color: #16a34a !important;
 }
-/* ===== PHASE 4 FINAL LOCK: PALETTE + RIGHT PANEL + SUBMIT ===== */
+/* ===== FINAL RIGHT PALETTE NO-OVERLAP FIX ===== */
 
 .premiumPalettePanel {
+  height: 100% !important;
+  min-height: 0 !important;
   display: grid !important;
-  grid-template-rows: auto auto auto auto auto !important;
-  gap: 10px !important;
-  overflow: visible !important;
-  padding: 16px !important;
+  grid-template-rows: 44px auto 176px auto 118px !important;
+  gap: 8px !important;
+  padding: 14px 16px !important;
+  overflow: hidden !important;
+}
+
+.paletteHeader {
+  min-height: 0 !important;
+}
+
+.paletteRanges {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 6px !important;
+}
+
+.paletteRangeBtn {
+  height: 28px !important;
+  padding: 0 6px !important;
+  font-size: 11.5px !important;
 }
 
 .premiumPaletteGrid {
+  height: 176px !important;
+  min-height: 176px !important;
+  max-height: 176px !important;
   display: grid !important;
   grid-template-columns: repeat(5, 1fr) !important;
-  gap: 9px !important;
-  margin: 8px 0 !important;
-  overflow: visible !important;
-  max-height: none !important;
+  grid-template-rows: repeat(5, 1fr) !important;
+  gap: 5px !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  align-content: start !important;
 }
 
 .paletteNumber {
-  height: 38px !important;
-  min-width: 38px !important;
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  min-height: 30px !important;
+  border-radius: 9px !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  justify-self: center !important;
+  align-self: center !important;
+}
+
+.examQuickSummary,
+.paletteSummary {
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 6px !important;
+  padding: 8px !important;
+  overflow: hidden !important;
+}
+
+.examQuickItem {
+  min-height: 38px !important;
+  grid-template-columns: 10px 28px 1fr !important;
+  gap: 6px !important;
+  padding: 6px 8px !important;
   border-radius: 12px !important;
+}
+
+.examQuickItem strong {
+  font-size: 16px !important;
+}
+
+.examQuickItem small {
+  font-size: 10.5px !important;
+  white-space: nowrap !important;
+}
+
+.examFinalBox {
+  height: 118px !important;
+  min-height: 118px !important;
+  padding: 10px 12px !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+}
+
+.examFinalBox h4 {
   font-size: 14px !important;
-  font-weight: 900 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border: 1px solid #d8e0ea !important;
-  background: #eef2f7 !important;
-  color: #111827 !important;
-  box-shadow: none !important;
+  margin: 0 0 4px !important;
+}
+
+.examFinalBox p {
+  font-size: 11px !important;
+  margin: 0 0 8px !important;
+}
+
+.examFinalBox button {
+  height: 36px !important;
+  font-size: 13px !important;
+}
+
+.examFinalBox::after {
+  margin-top: 6px !important;
+  font-size: 10.5px !important;
 }
 
 .paletteNumber.paletteAnswered {
@@ -25663,7 +25738,6 @@ body:has(.premiumExamPage) .whatsappButton {
 .paletteNumber.paletteCurrent {
   outline: 2px solid #f97316 !important;
   outline-offset: 2px !important;
-  box-shadow: none !important;
 }
 
 .paletteRangeBtn.active {
@@ -25671,70 +25745,231 @@ body:has(.premiumExamPage) .whatsappButton {
   border-color: #f97316 !important;
   color: #ffffff !important;
 }
+/* ===== FINAL PREMIUM PALETTE POLISH ===== */
 
-.examQuickSummary {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr !important;
-  gap: 10px !important;
-  padding: 10px !important;
-  background: #f8fafc !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 18px !important;
-  overflow: visible !important;
+/* Answered + Review */
+.paletteNumber.paletteAnsweredReview {
+  background: #7c3aed !important;
+  color: #ffffff !important;
+  border: 2px solid #16a34a !important;
 }
 
+/* Summary cards */
 .examQuickItem {
-  min-height: 46px !important;
+  min-height: 50px !important;
   background: #ffffff !important;
-  border: 1px solid #dbe3ee !important;
+  border: 1px solid #e2e8f0 !important;
   border-radius: 14px !important;
-  display: grid !important;
-  grid-template-columns: 12px 36px 1fr !important;
+
+  display: flex !important;
   align-items: center !important;
-  gap: 8px !important;
-  padding: 8px 10px !important;
+  gap: 10px !important;
+
+  padding: 0 14px !important;
+
+  box-shadow:
+    0 1px 2px rgba(15,23,42,.04),
+    0 4px 12px rgba(15,23,42,.05) !important;
+}
+
+.examQuickItem strong {
+  font-size: 20px !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
   color: #0f172a !important;
-  overflow: hidden !important;
+}
+
+.examQuickItem small {
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  color: #64748b !important;
+}
+
+/* Colored dots */
+.dot.answeredDot {
+  background: #16a34a !important;
+}
+
+.dot.markedDot {
+  background: #7c3aed !important;
+}
+
+.dot.pendingDot {
+  background: #ffffff !important;
+  border: 2px solid #94a3b8 !important;
+}
+
+.dot.notVisitedDot {
+  background: #e2e8f0 !important;
+  border: 2px solid #cbd5e1 !important;
+}
+
+/* Submit card premium */
+.examFinalBox {
+  border-radius: 22px !important;
+
+  box-shadow:
+    0 8px 30px rgba(15,23,42,.12) !important;
+}
+
+.examFinalBox button {
+  border-radius: 16px !important;
+
+  box-shadow:
+    0 8px 20px rgba(249,115,22,.25) !important;
+}
+
+/* Current question border */
+.paletteNumber.paletteCurrent {
+  outline: 2px solid #f97316 !important;
+  outline-offset: 2px !important;
+  box-shadow: none !important;
+}
+
+/* ===== FINAL PALETTE PREMIUM POLISH V2 ===== */
+
+/* Summary cards vertical hierarchy */
+.examQuickItem {
+  min-height: 58px !important;
+  display: grid !important;
+  grid-template-columns: 12px auto 1fr !important;
+  align-items: center !important;
+  gap: 10px !important;
 }
 
 .examQuickItem strong {
   font-size: 18px !important;
   line-height: 1 !important;
+  font-weight: 900 !important;
   color: #0f172a !important;
 }
 
 .examQuickItem small {
+  display: block !important;
   font-size: 11px !important;
   font-weight: 800 !important;
   color: #64748b !important;
-  white-space: nowrap !important;
+  margin-top: 2px !important;
 }
 
-.examQuickItem .dot,
-.dot {
-  width: 9px !important;
-  height: 9px !important;
-  border-radius: 50% !important;
+/* Current question only glow, no heavy border */
+.paletteNumber.paletteCurrent {
+  outline: none !important;
+  border: 2px solid #f97316 !important;
+
+  box-shadow:
+    0 0 0 3px rgba(249,115,22,.18),
+    0 4px 12px rgba(249,115,22,.15) !important;
+
+  z-index: 5 !important;
 }
 
-.dot.answeredDot { background: #16a34a !important; }
-.dot.markedDot { background: #7c3aed !important; }
+/* Answered + Review + Current */
+.paletteNumber.paletteAnsweredReview.paletteCurrent {
+  border: 2px solid #f97316 !important;
 
-.dot.pendingDot {
+  box-shadow:
+    0 0 0 3px rgba(249,115,22,.18),
+    0 4px 12px rgba(249,115,22,.15) !important;
+}
+
+/* Current green question */
+.paletteNumber.paletteAnswered.paletteCurrent {
+  border: 2px solid #f97316 !important;
+
+  box-shadow:
+    0 0 0 3px rgba(249,115,22,.18),
+    0 4px 12px rgba(249,115,22,.15) !important;
+}
+
+/* Current purple question */
+.paletteNumber.paletteMarked.paletteCurrent {
+  border: 2px solid #f97316 !important;
+
+  box-shadow:
+    0 0 0 3px rgba(249,115,22,.18),
+    0 4px 12px rgba(249,115,22,.15) !important;
+}
+
+/* Slightly premium submit card */
+.examFinalBox {
+  background: linear-gradient(
+    180deg,
+    #0f172a 0%,
+    #111c38 100%
+  ) !important;
+}
+/* ===== FINAL RIGHT PANEL MICRO POLISH ===== */
+
+.examQuickSummary {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  gap: 10px !important;
+}
+
+.examQuickItem {
   background: #ffffff !important;
-  border: 1px solid #94a3b8 !important;
+  border: 1px solid #e8edf5 !important;
+  border-radius: 18px !important;
+
+  box-shadow:
+    0 1px 2px rgba(15,23,42,.04),
+    0 6px 20px rgba(15,23,42,.06) !important;
 }
 
-.dot.notVisitedDot {
-  background: #eef2f7 !important;
-  border: 1px solid #94a3b8 !important;
+.examQuickItem strong {
+  font-size: 18px !important;
+  font-weight: 900 !important;
+}
+
+.examQuickItem small {
+  font-size: 12px !important;
+  font-weight: 800 !important;
+}
+
+.paletteNumber {
+  transition: all .18s ease !important;
+}
+
+.paletteNumber:hover {
+  transform: translateY(-1px);
 }
 
 .examFinalBox {
-  padding: 14px 14px 18px !important;
-  overflow: visible !important;
-  margin-bottom: 0 !important;
+  box-shadow:
+    0 12px 32px rgba(15,23,42,.18) !important;
 }
 
+/* ===== LIGHT BLUE RIGHT PANEL BACKGROUND ===== */
 
+.premiumPalettePanel {
+  background: #eef6ff !important;
+  border: 1px solid #d8e8ff !important;
+}
+
+.examQuickSummary {
+  background: transparent !important;
+}
+
+.examQuickItem {
+  background: rgba(255,255,255,0.9) !important;
+}
+
+.paletteNumber.paletteNotVisited {
+  background: #f8fbff !important;
+}
+
+.paletteNumber.paletteNotAnswered {
+  background: #ffffff !important;
+}
+
+.paletteHeader h3 {
+  color: #0f172a !important;
+}
+
+.paletteHeader p {
+  background: #dbeafe !important;
+  color: #475569 !important;
+}
 
