@@ -19234,7 +19234,15 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                   .trim()
                   .toLowerCase()
           )
-          .map((test) => (
+          .map((test) => {
+            const savedCardAttempt = JSON.parse(
+              localStorage.getItem(getAttemptStorageKey(test.id)) || "{}"
+            );
+          
+            const hasSubmittedCardAttempt =
+              savedCardAttempt?.isSubmitted;
+          
+            return (
             <div className="pdfMiniCard" key={test.id}>
               <div className="pdfIcon">📝</div>
 
@@ -19260,14 +19268,17 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                   }
 
                   navigate(
-                    `/ctet-tet/mock-tests/start/${test.id}`
+                    hasSubmittedCardAttempt
+                      ? `/ctet-tet/mock-tests/result/${test.id}`
+                      : `/ctet-tet/mock-tests/start/${test.id}`
                   );
                 }}
               >
-                Start Test
+                {hasSubmittedCardAttempt ? "View Result" : "Start Test"}
               </button>
             </div>
-          ))}
+            );
+          })}
       </div>
     </section>
   }
@@ -19651,6 +19662,29 @@ handleSaveUniversalContent={handleSaveUniversalContent}
             mockAttemptState?.[test.id] ||
             createDefaultAttemptState(test, defaultTimerSeconds);
 
+            if (attemptState?.isSubmitted) {
+              return (
+                <div className="pdfMiniCard">
+                  <h3>Test already submitted</h3>
+            
+                  <p>
+                    Your attempt is locked. Please view your result.
+                  </p>
+            
+                  <button
+                    className="btnLink"
+                    onClick={() =>
+                      navigate(
+                        `/ctet-tet/mock-tests/result/${test.id}`
+                      )
+                    }
+                  >
+                    View Result
+                  </button>
+                </div>
+              );
+            }
+
             const currentQuestionIndex =
             Number.isInteger(attemptState.currentIndex)
               ? attemptState.currentIndex
@@ -19668,8 +19702,8 @@ handleSaveUniversalContent={handleSaveUniversalContent}
             const currentQuestion =
               questions[actualQuestionIndex];
 
-          const selectedAnswerKey =
-            attemptState.answers?.[currentQuestionIndex] || "";
+              const selectedAnswerKey =
+              attemptState.answers?.[actualQuestionIndex] || "";
 
           const timeLeft = isNoTimer
             ? 0
@@ -20530,58 +20564,77 @@ if (shouldForceSubmit && !attemptState.isSubmitted) {
               ? newStoredAnswers
               : oldStoredAnswers;
 
-          const correctCount = questions.filter(
-            (question, index) =>
-              attemptAnswers[index] &&
-              attemptAnswers[index] === question.answer
-          ).length;
+              const questionOrder =
+  savedAttemptState?.questionOrder?.length
+    ? savedAttemptState.questionOrder
+    : questions.map((_, index) => index);
 
-          const skippedCount = questions.filter(
-            (_, index) => !attemptAnswers[index]
-          ).length;
+    const resultQuestions = questionOrder
+  .map((actualQuestionIndex) => questions[actualQuestionIndex])
+  .filter(Boolean);
 
-          const wrongCount =
-            totalQuestions - correctCount - skippedCount;
+const correctCount = resultQuestions.filter(
+  (question, index) => {
+    const actualQuestionIndex = questionOrder[index];
 
-          const accuracy =
-            totalQuestions > 0
-              ? Math.round((correctCount / totalQuestions) * 100)
-              : 0;
+    return (
+      attemptAnswers[actualQuestionIndex] &&
+      attemptAnswers[actualQuestionIndex] === question.answer
+    );
+  }
+).length;
 
-          const totalMarks =
-            Number(test.totalMarks) ||
-            totalQuestions * Number(test.marksPerQuestion || 1);
+const skippedCount = resultQuestions.filter(
+  (_, index) => {
+    const actualQuestionIndex = questionOrder[index];
 
-          const score = questions.reduce((sum, question, index) => {
-            const selected = attemptAnswers[index];
+    return !attemptAnswers[actualQuestionIndex];
+  }
+).length;
 
-            if (!selected) return sum;
+const wrongCount =
+  totalQuestions - correctCount - skippedCount;
 
-            if (selected === question.answer) {
-              return (
-                sum +
-                Number(
-                  question.positiveMarks ||
-                    test.marksPerQuestion ||
-                    1
-                )
-              );
-            }
+const accuracy =
+  totalQuestions > 0
+    ? Math.round((correctCount / totalQuestions) * 100)
+    : 0;
 
-            return (
-              sum -
-              Number(
-                question.negativeMarks ||
-                  test.negativeMarks ||
-                  0
-              )
-            );
-          }, 0);
+const totalMarks =
+  Number(test.totalMarks) ||
+  totalQuestions * Number(test.marksPerQuestion || 1);
 
-          const percentage =
-            totalMarks > 0
-              ? Math.round((score / totalMarks) * 100)
-              : 0;
+const score = resultQuestions.reduce((sum, question, index) => {
+  const actualQuestionIndex = questionOrder[index];
+  const selected = attemptAnswers[actualQuestionIndex];
+
+  if (!selected) return sum;
+
+  if (selected === question.answer) {
+    return (
+      sum +
+      Number(
+        question.positiveMarks ||
+          test.marksPerQuestion ||
+          1
+      )
+    );
+  }
+
+  return (
+    sum -
+    Number(
+      question.negativeMarks ||
+        test.negativeMarks ||
+        0
+    )
+  );
+}, 0);
+
+const percentage =
+  totalMarks > 0
+    ? Math.round((score / totalMarks) * 100)
+    : 0;
 
           const leaderboardEnabled =
             test.leaderboardMode &&
@@ -20817,6 +20870,7 @@ if (shouldForceSubmit && !attemptState.isSubmitted) {
     }
   />
 
+
 <Route
   path="/ctet-tet/mock-tests/review/:testId"
   element={
@@ -20975,18 +21029,36 @@ if (shouldForceSubmit && !attemptState.isSubmitted) {
 
           const questions = test.questions || [];
 
-          const correctCount = questions.filter(
-            (question, index) =>
-              attemptAnswers[index] &&
-              attemptAnswers[index] === question.answer
-          ).length;
+          const questionOrder =
+          storedAttemptState?.questionOrder?.length
+            ? storedAttemptState.questionOrder
+            : questions.map((_, index) => index);
+        
+        const reviewQuestions = questionOrder
+          .map((actualQuestionIndex) => questions[actualQuestionIndex])
+          .filter(Boolean);
 
-          const skippedCount = questions.filter(
-            (_, index) => !attemptAnswers[index]
+          const correctCount = reviewQuestions.filter(
+            (question, index) => {
+              const actualQuestionIndex = questionOrder[index];
+          
+              return (
+                attemptAnswers[actualQuestionIndex] &&
+                attemptAnswers[actualQuestionIndex] === question.answer
+              );
+            }
           ).length;
-
+          
+          const skippedCount = reviewQuestions.filter(
+            (_, index) => {
+              const actualQuestionIndex = questionOrder[index];
+          
+              return !attemptAnswers[actualQuestionIndex];
+            }
+          ).length;
+          
           const wrongCount =
-            questions.length - correctCount - skippedCount;
+            reviewQuestions.length - correctCount - skippedCount;
 
           const getOptionLabel = (answerKey = "") => {
             const optionMap = {
@@ -21046,8 +21118,9 @@ if (shouldForceSubmit && !attemptState.isSubmitted) {
                 </div>
               </div>
               <div className="reviewQuestionPalette">
-  {questions.map((question, index) => {
-    const userAnswer = attemptAnswers[index];
+              {reviewQuestions.map((question, index) => {
+  const actualQuestionIndex = questionOrder[index];
+  const userAnswer = attemptAnswers[actualQuestionIndex];
     const isCorrect =
       userAnswer && userAnswer === question.answer;
     const isSkipped = !userAnswer;
@@ -21070,8 +21143,10 @@ if (shouldForceSubmit && !attemptState.isSubmitted) {
   })}
 </div>
               <div className="reviewAnswerGrid">
-                {questions.map((question, index) => {
-                  const userAnswer = attemptAnswers[index];
+              {reviewQuestions.map((question, index) => {
+  const actualQuestionIndex = questionOrder[index];
+  const userAnswer =
+  attemptAnswers[actualQuestionIndex];
                   const isCorrect =
                     userAnswer && userAnswer === question.answer;
                   const isSkipped = !userAnswer;
