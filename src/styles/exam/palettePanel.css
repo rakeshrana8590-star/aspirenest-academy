@@ -188,3 +188,95 @@
     background: #e2e8f0 !important;
     border: 2px solid #cbd5e1 !important;
   }
+
+  /* FINAL PALETTE PREMIUM POLISH */
+
+.paletteNumber.paletteAnsweredReview {
+    background: #7c3aed !important;
+    color: #ffffff !important;
+    border: 2px solid #16a34a !important;
+  }
+  
+  .examQuickSummary {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    gap: 10px !important;
+  }
+  
+  .examQuickItem {
+    min-height: 58px !important;
+    display: grid !important;
+    grid-template-columns: 12px auto 1fr !important;
+    align-items: center !important;
+    gap: 10px !important;
+    background: rgba(255,255,255,0.9) !important;
+    border: 1px solid #e8edf5 !important;
+    border-radius: 18px !important;
+    box-shadow:
+      0 1px 2px rgba(15,23,42,.04),
+      0 6px 20px rgba(15,23,42,.06) !important;
+  }
+  
+  .examQuickItem strong {
+    font-size: 18px !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+    color: #0f172a !important;
+  }
+  
+  .examQuickItem small {
+    display: block !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    color: #64748b !important;
+    margin-top: 2px !important;
+  }
+  
+  .paletteNumber {
+    transition: all .18s ease !important;
+  }
+  
+  .paletteNumber:hover {
+    transform: translateY(-1px);
+  }
+  
+  .paletteNumber.paletteCurrent {
+    outline: none !important;
+    border: 2px solid #f97316 !important;
+    box-shadow:
+      0 0 0 3px rgba(249,115,22,.18),
+      0 4px 12px rgba(249,115,22,.15) !important;
+    z-index: 5 !important;
+  }
+  
+  .paletteNumber.paletteAnsweredReview.paletteCurrent,
+  .paletteNumber.paletteAnswered.paletteCurrent,
+  .paletteNumber.paletteMarked.paletteCurrent {
+    border: 2px solid #f97316 !important;
+    box-shadow:
+      0 0 0 3px rgba(249,115,22,.18),
+      0 4px 12px rgba(249,115,22,.15) !important;
+  }
+  
+  .premiumPalettePanel {
+    background: #eef6ff !important;
+    border: 1px solid #d8e8ff !important;
+  }
+  
+  .paletteNumber.paletteNotVisited {
+    background: #f8fbff !important;
+  }
+  
+  .paletteNumber.paletteNotAnswered {
+    background: #ffffff !important;
+  }
+  
+  .paletteHeader h3 {
+    color: #0f172a !important;
+  }
+  
+  .paletteHeader p {
+    background: #dbeafe !important;
+    color: #475569 !important;
+  }

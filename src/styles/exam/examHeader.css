@@ -127,3 +127,12 @@ body:has(.premiumExamPage) {
     font-size: 16px !important;
     font-weight: 900 !important;
   }
+  /* EXAM DISTRACTION FREE */
+
+body:has(.premiumExamPage) .chatWidget,
+body:has(.premiumExamPage) .floatingChatButton,
+body:has(.premiumExamPage) .chatBubble,
+body:has(.premiumExamPage) .whatsappFloat,
+body:has(.premiumExamPage) .whatsappButton {
+  display: none !important;
+}
