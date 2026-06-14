@@ -71,6 +71,11 @@ import AppDashboard from "./components/AppDashboard.jsx";
 import ExamHeader from "./components/exam/ExamHeader.jsx";
 import PalettePanel from "./components/exam/PalettePanel.jsx";
 import QuestionWorkspace from "./components/exam/QuestionWorkspace.jsx";
+import {
+  getFilteredQuestionIndexes,
+  formatExamTime,
+  getExamQuestionCounts,
+} from "./components/exam/examUtils.js";
 import './style.css';
 import "./styles/exam/examHeader.css";
 import "./styles/exam/questionWorkspace.css";
@@ -19719,33 +19724,15 @@ handleSaveUniversalContent={handleSaveUniversalContent}
             ? 0
             : attemptState.timeLeft ?? defaultTimerSeconds;
 
-          const formattedTime = `${String(
-            Math.floor(timeLeft / 60)
-          ).padStart(2, "0")}:${String(timeLeft % 60).padStart(
-            2,
-            "0"
-          )}`;
+            const formattedTime = formatExamTime(timeLeft);
 
-          const answeredCount = questions.filter(
-            (_, index) => attemptState.answers?.[index]
-          ).length;
-
-          const markedCount = questions.filter(
-            (_, index) => attemptState.marked?.[index]
-          ).length;
-
-          const visitedCount = questions.filter(
-            (_, index) => attemptState.visited?.[index]
-          ).length;
-
-          const notAnsweredCount = questions.filter(
-            (_, index) =>
-              attemptState.visited?.[index] &&
-              !attemptState.answers?.[index]
-          ).length;
-
-          const notVisitedCount =
-            questions.length - visitedCount;
+            const {
+              answeredCount,
+              markedCount,
+              visitedCount,
+              notAnsweredCount,
+              notVisitedCount,
+            } = getExamQuestionCounts(questions, attemptState);
 
           const palettePageSize = 25;
 
@@ -19775,39 +19762,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
             }
           );
 
-          const getFilteredIndexes = (filterType) => {
-            return questions
-              .map((_, index) => index)
-              .filter((index) => {
-                const isAnswered = Boolean(
-                  attemptState.answers?.[index]
-                );
-                const isMarked = Boolean(
-                  attemptState.marked?.[index]
-                );
-                const isVisited = Boolean(
-                  attemptState.visited?.[index]
-                );
-
-                if (filterType === "answered") {
-                  return isAnswered;
-                }
-
-                if (filterType === "review") {
-                  return isMarked;
-                }
-
-                if (filterType === "notAnswered") {
-                  return isVisited && !isAnswered;
-                }
-
-                if (filterType === "notVisited") {
-                  return !isVisited;
-                }
-
-                return true;
-              });
-          };
+      
 
           const visiblePaletteIndexes =
             paletteFilter === "all"
@@ -19817,10 +19772,18 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                     finalPaletteRangeStart,
                     finalPaletteRangeStart + palettePageSize
                   )
-              : getFilteredIndexes(paletteFilter).slice(0, 25);
+              : getFilteredQuestionIndexes(
+  questions,
+  attemptState,
+  paletteFilter
+).slice(0, 25);
 
           const jumpToFirstFilteredQuestion = (filterType) => {
-            const indexes = getFilteredIndexes(filterType);
+            const indexes = getFilteredQuestionIndexes(
+  questions,
+  attemptState,
+  filterType
+);
 
             setPaletteFilter(filterType);
 

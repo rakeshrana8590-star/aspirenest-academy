@@ -1,6 +1,7 @@
 import SummaryCards from "./SummaryCards.jsx";
 import WarningCard from "./WarningCard.jsx";
 import SubmitCard from "./SubmitCard.jsx";
+import { getPaletteStatusClass } from "./examUtils.js";
 
 export default function PalettePanel({
   totalQuestions,
@@ -20,30 +21,6 @@ export default function PalettePanel({
   onOpenStatus,
   onSubmit,
 }) {
-  const getPaletteStatusClass = (index) => {
-    const isAnswered = Boolean(attemptState.answers?.[index]);
-    const isMarked = Boolean(attemptState.marked?.[index]);
-    const isVisited = Boolean(attemptState.visited?.[index]);
-
-    if (isAnswered && isMarked) {
-      return "paletteAnsweredReview";
-    }
-
-    if (!isAnswered && isMarked) {
-      return "paletteMarked";
-    }
-
-    if (isAnswered && !isMarked) {
-      return "paletteAnswered";
-    }
-
-    if (isVisited && !isAnswered) {
-      return "paletteNotAnswered";
-    }
-
-    return "paletteNotVisited";
-  };
-
   return (
     <aside className="premiumPalettePanel aspireExamSide">
       <div className="paletteHeader">
@@ -81,7 +58,7 @@ export default function PalettePanel({
               key={index}
               className={[
                 "paletteNumber",
-                getPaletteStatusClass(index),
+                getPaletteStatusClass(attemptState, index),
                 isCurrent ? "paletteCurrent" : "",
               ].join(" ")}
               onClick={() => onQuestionSelect(index)}
