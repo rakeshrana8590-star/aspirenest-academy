@@ -68,7 +68,16 @@ import {
 } from "react-router-dom";
 import AspireNestLogo from "./components/AspireNestLogo.jsx";
 import AppDashboard from "./components/AppDashboard.jsx";
+import ExamHeader from "./components/exam/ExamHeader.jsx";
+import PalettePanel from "./components/exam/PalettePanel.jsx";
+import QuestionWorkspace from "./components/exam/QuestionWorkspace.jsx";
 import './style.css';
+import "./styles/exam/examHeader.css";
+import "./styles/exam/questionWorkspace.css";
+import "./styles/exam/actionBar.css";
+import "./styles/exam/palettePanel.css";
+import "./styles/exam/warningCard.css";
+import "./styles/exam/submitCard.css";
 import {
   CONTENT_SECTIONS,
   CONTENT_STATUS,
@@ -19978,473 +19987,133 @@ if (shouldForceSubmit && !attemptState.isSubmitted) {
     </div>
   </div>
 )}
-              <div className="premiumExamTop examHeaderCompact">
-                <div className="premiumExamBrand">
-                  <AspireNestLogo />
-                </div>
 
-                <div className="examTitleBlock compactExamTitleBlock">
-                  <h1>{test.title}</h1>
-                  <p>
-                    {test.subject} · {test.chapter}
-                  </p>
-                </div>
-
-                <div className="examTopStats compactExamStats">
-                <div className="candidateExamPanel">
-  <span>Candidate</span>
-  <strong>{fullName || user?.email || "Student"}</strong>
-</div>
-                  {!isNoTimer && (
-                    <div className="timerStat">
-                      <span>{timerLabel}</span>
-                      <strong>⏱ {formattedTime}</strong>
-                    </div>
-                  )}
-
-                  <div>
-                    <span>Question</span>
-                    <strong>
-                      {currentQuestionIndex + 1}/{questions.length}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>Answered</span>
-                    <strong>{answeredCount}</strong>
-                  </div>
-
-                  <button
-                    type="button"
-                    className="examSubmitBtn"
-                    onClick={submitAttempt}
-                  >
-                    Submit Test
-                  </button>
-                </div>
-              </div>
+<ExamHeader
+  test={test}
+  candidateName={fullName || user?.email || "Student"}
+  isNoTimer={isNoTimer}
+  timerLabel={timerLabel}
+  formattedTime={formattedTime}
+  currentQuestionNumber={currentQuestionIndex + 1}
+  totalQuestions={questions.length}
+  answeredCount={answeredCount}
+  onSubmit={submitAttempt}
+/>
 
               <div className="premiumExamGrid">
-                <main className="premiumQuestionWorkspace aspireExamMain">
-                  {questions.length === 0 ? (
-                    <div className="examEmptyState">
-                      <h2>No Questions Found</h2>
-                      <p>
-                        This mock test does not have questions yet.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="examAttemptCardPro">
-                      <div className="examRefStatusRow">
-                        <span className="examRefPill dark">
-                          Q{currentQuestionIndex + 1} of{" "}
-                          {questions.length}
-                        </span>
-
-                        <span
-                          className={
-                            selectedAnswerKey
-                              ? "examRefPill success"
-                              : "examRefPill warning"
-                          }
-                        >
-                          {selectedAnswerKey
-                            ? "Answered"
-                            : "Not Answered"}
-                        </span>
-
-                        <span
-                          className={
-                            attemptState.marked?.[
-                              currentQuestionIndex
-                            ]
-                              ? "examRefPill review"
-                              : "examRefPill neutral"
-                          }
-                        >
-                          {attemptState.marked?.[
-                            currentQuestionIndex
-                          ]
-                            ? "Marked for Review"
-                            : "Not Marked"}
-                        </span>
-
-                        <span className="examRefPill neutral">
-                          Current Question
-                        </span>
-                      </div>
-
-                      <div className="examZoomControls">
-  <button
-    type="button"
-    onClick={() =>
-      setExamFontScale((prev) => Math.max(0.9, prev - 0.1))
-    }
-  >
-    A−
-  </button>
-
-  <button
-    type="button"
-    onClick={() => setExamFontScale(1)}
-  >
-    A
-  </button>
-
-  <button
-    type="button"
-    onClick={() =>
-      setExamFontScale((prev) => Math.min(1.3, prev + 0.1))
-    }
-  >
-    A+
-  </button>
-</div>
-
-<div
-  className="examQuestionBlockPro"
-  style={{ fontSize: `${examFontScale}em` }}
->
-                        <div className="examQuestionNoPro">
-                          {currentQuestionIndex + 1}
-                        </div>
-
-                        <h2>{currentQuestion?.question}</h2>
-                      </div>
-
-                      <div
-  className="aspireOptionList"
-  style={{ fontSize: `${examFontScale}em` }}
->
-                        {optionList.map((option) => (
-                          <button
-                            type="button"
-                            key={option.key}
-                            className={[
-                              "aspireOption",
-                              selectedAnswerKey === option.key
-                                ? "selectedAspireOption"
-                                : "",
-                            ].join(" ")}
-                            aria-pressed={
-                              selectedAnswerKey === option.key
-                            }
-                            onClick={() => {
-                              selectAttemptAnswer(
-                                test.id,
-                                actualQuestionIndex,
-                                option.key
-                              );
-                            }}
-                          >
-                            <span>{option.label}</span>
-                            <p>{option.text}</p>
-                          </button>
-                        ))}
-                      </div>
-
-                      <div className="aspireExamActionBar">
-                        <button
-                          type="button"
-                          className="examControlBtn secondary"
-                          disabled={currentQuestionIndex === 0}
-                          onClick={() => {
-                            const prevIndex = Math.max(
-                              0,
-                              currentQuestionIndex - 1
-                            );
-
-                            goToAttemptQuestion(
-                              test.id,
-                              prevIndex,
-                              Math.floor(prevIndex / 25) * 25
-                            );
-
-                            resetQuestionTimer();
-                          }}
-                        >
-                          ← Previous
-                        </button>
-
-                        <button
-                          type="button"
-                          className="examControlBtn ghost"
-                          onClick={() => {
-                            clearAttemptResponse(
-                              test.id,
-                              actualQuestionIndex
-                            );
-                          }}
-                        >
-                          Clear Response
-                        </button>
-
-                        <button
-                          type="button"
-                          className="examControlBtn review"
-                          onClick={() => {
-                            markAttemptForReviewAndNext(
-                              test.id,
-                              actualQuestionIndex,
-                              questions.length
-                            );
-
-                            resetQuestionTimer();
-                          }}
-                        >
-                          Mark for Review & Next
-                        </button>
-
-                        <button
-                          type="button"
-                          className="examControlBtn primary"
-                          onClick={() => {
-                            if (
-                              currentQuestionIndex ===
-                              questions.length - 1
-                            ) {
-                              submitAttempt();
-                              return;
-                            }
-
-                            saveAttemptAndNext(
-                              test.id,
-                              actualQuestionIndex,
-                              questions.length
-                            );
-
-                            resetQuestionTimer();
-                          }}
-                        >
-                          {currentQuestionIndex ===
-                          questions.length - 1
-                            ? "Submit Test"
-                            : "Save & Next"}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </main>
-
-                <aside className="premiumPalettePanel aspireExamSide">
-                  <div className="paletteHeader">
-                    <h3>Question Palette</h3>
-                    <p>
-                      {answeredCount}/{questions.length} answered
-                    </p>
-                  </div>
-
-                  <div className="paletteRanges">
-                    {paletteRanges.map((range) => (
-                      <button
-                        key={range.start}
-                        type="button"
-                        className={
-                          finalPaletteRangeStart === range.start &&
-                          paletteFilter === "all"
-                            ? "paletteRangeBtn active"
-                            : "paletteRangeBtn"
-                        }
-                        onClick={() => {
-                          setPaletteFilter("all");
-                          setPaletteFilter("all");
-
-                          if (
-                            isSequentialNavigation &&
-                            range.start > currentQuestionIndex + 1
-                          ) {
-                            toast.error(
-                              "Sequential navigation is enabled. Please continue in order."
-                            );
-                            return;
-                          }
-                          
-                          goToAttemptQuestion(
-                            test.id,
-                            range.start,
-                            range.start
-                          );
-                          
-                          resetQuestionTimer();
-                          goToAttemptQuestion(
-                            test.id,
-                            range.start,
-                            range.start
-                          );
-                        
-                          resetQuestionTimer();
-                        }}
-                      >
-                        {range.label}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="premiumPaletteGrid">
-  {visiblePaletteIndexes.map((index) => {
-    const isCurrent = index === currentQuestionIndex;
-    const isAnswered = Boolean(attemptState.answers?.[index]);
-    const isMarked = Boolean(attemptState.marked?.[index]);
-    const isVisited = Boolean(attemptState.visited?.[index]);
-
-    let paletteStatusClass = "paletteNotVisited";
-
-    if (isVisited && !isAnswered) {
-      paletteStatusClass = "paletteNotAnswered";
-    }
-
-    if (isAnswered && !isMarked) {
-      paletteStatusClass = "paletteAnswered";
-    }
-
-    if (!isAnswered && isMarked) {
-      paletteStatusClass = "paletteMarked";
-    }
-
-    if (isAnswered && isMarked) {
-      paletteStatusClass = "paletteAnsweredReview";
-    }
-
-    return (
-      <button
-        type="button"
-        key={index}
-        className={[
-          "paletteNumber",
-          paletteStatusClass,
-          isCurrent ? "paletteCurrent" : "",
-        ].join(" ")}
-        onClick={() => {
-          setPaletteFilter("all");
-
-          if (
-            isSequentialNavigation &&
-            index > currentQuestionIndex + 1
-          ) {
-            toast.error(
-              "Sequential navigation is enabled. Please continue in order."
-            );
-            return;
-          }
-          
-          goToAttemptQuestion(
-            test.id,
-            index,
-            Math.floor(index / 25) * 25
-          );
-          
-          resetQuestionTimer();
-        }}
-      >
-        {index + 1}
-      </button>
+              <QuestionWorkspace
+  questions={questions}
+  currentQuestion={currentQuestion}
+  currentQuestionIndex={currentQuestionIndex}
+  selectedAnswerKey={selectedAnswerKey}
+  isMarked={Boolean(attemptState.marked?.[currentQuestionIndex])}
+  optionList={optionList}
+  examFontScale={examFontScale}
+  onDecreaseFont={() =>
+    setExamFontScale((prev) => Math.max(0.9, prev - 0.1))
+  }
+  onResetFont={() => setExamFontScale(1)}
+  onIncreaseFont={() =>
+    setExamFontScale((prev) => Math.min(1.3, prev + 0.1))
+  }
+  onSelectOption={(optionKey) => {
+    selectAttemptAnswer(
+      test.id,
+      actualQuestionIndex,
+      optionKey
     );
-  })}
-</div>
+  }}
+  isFirstQuestion={currentQuestionIndex === 0}
+  isLastQuestion={currentQuestionIndex === questions.length - 1}
+  onPrevious={() => {
+    const prevIndex = Math.max(0, currentQuestionIndex - 1);
 
-                  <div className="paletteSummary examQuickSummary">
-                    <button
-                      type="button"
-                      className="examQuickItem"
-                      onClick={() =>
-                        jumpToFirstFilteredQuestion("answered")
-                      }
-                    >
-                      <span className="dot answeredDot"></span>
-                      <strong>{answeredCount}</strong>
-                      <small>Answered</small>
-                    </button>
+    goToAttemptQuestion(
+      test.id,
+      prevIndex,
+      Math.floor(prevIndex / 25) * 25
+    );
 
-                    <button
-                      type="button"
-                      className="examQuickItem"
-                      onClick={() =>
-                        jumpToFirstFilteredQuestion("review")
-                      }
-                    >
-                      <span className="dot markedDot"></span>
-                      <strong>{markedCount}</strong>
-                      <small>Review</small>
-                    </button>
+    resetQuestionTimer();
+  }}
+  onClearResponse={() => {
+    clearAttemptResponse(test.id, actualQuestionIndex);
+  }}
+  onMarkForReviewAndNext={() => {
+    markAttemptForReviewAndNext(
+      test.id,
+      actualQuestionIndex,
+      questions.length
+    );
 
-                    <button
-                      type="button"
-                      className="examQuickItem"
-                      onClick={() =>
-                        jumpToFirstFilteredQuestion("notAnswered")
-                      }
-                    >
-                      <span className="dot pendingDot"></span>
-                      <strong>{notAnsweredCount}</strong>
-                      <small>Not Answered</small>
-                    </button>
+    resetQuestionTimer();
+  }}
+  onSaveAndNext={() => {
+    saveAttemptAndNext(
+      test.id,
+      actualQuestionIndex,
+      questions.length
+    );
 
-                    <button
-                      type="button"
-                      className="examQuickItem"
-                      onClick={() =>
-                        jumpToFirstFilteredQuestion("notVisited")
-                      }
-                    >
-                      <span className="dot notVisitedDot"></span>
-                      <strong>{notVisitedCount}</strong>
-                      <small>Not Visited</small>
-                    </button>
-                  </div>
+    resetQuestionTimer();
+  }}
+  onSubmit={submitAttempt}
+/>
 
-                  {(Number(attemptState.violations?.tabSwitchCount || 0) > 0 ||
-  Number(attemptState.violations?.fullscreenExitCount || 0) > 0) && (
-  <div className="examFinalBox">
-    <h4>Exam Warning</h4>
+                <PalettePanel
+  totalQuestions={questions.length}
+  answeredCount={answeredCount}
+  markedCount={markedCount}
+  notAnsweredCount={notAnsweredCount}
+  notVisitedCount={notVisitedCount}
+  paletteRanges={paletteRanges}
+  finalPaletteRangeStart={finalPaletteRangeStart}
+  paletteFilter={paletteFilter}
+  visiblePaletteIndexes={visiblePaletteIndexes}
+  currentQuestionIndex={currentQuestionIndex}
+  attemptState={attemptState}
+  isCalculatorAllowed={isCalculatorAllowed}
+  onRangeSelect={(rangeStart) => {
+    setPaletteFilter("all");
 
-    <p>
-      Tab switches detected:{" "}
-      {Number(attemptState.violations?.tabSwitchCount || 0)}
-    </p>
+    if (
+      isSequentialNavigation &&
+      rangeStart > currentQuestionIndex + 1
+    ) {
+      toast.error(
+        "Sequential navigation is enabled. Please continue in order."
+      );
+      return;
+    }
 
-    <p>
-      Fullscreen exits:{" "}
-      {Number(attemptState.violations?.fullscreenExitCount || 0)}
-    </p>
+    goToAttemptQuestion(test.id, rangeStart, rangeStart);
 
-    <span className="notesSubjectTag">
-      Stay on exam screen
-    </span>
-  </div>
-)}
-{isCalculatorAllowed && (
-  <div className="examFinalBox">
-    <h4>Calculator</h4>
+    resetQuestionTimer();
+  }}
+  onQuestionSelect={(index) => {
+    setPaletteFilter("all");
 
-    <p>
-      Calculator is allowed for this mock test.
-    </p>
+    if (
+      isSequentialNavigation &&
+      index > currentQuestionIndex + 1
+    ) {
+      toast.error(
+        "Sequential navigation is enabled. Please continue in order."
+      );
+      return;
+    }
 
-    <button
-      type="button"
-      className="btnLink"
-      onClick={() =>
-        window.open(
-          "https://www.google.com/search?q=calculator",
-          "_blank"
-        )
-      }
-    >
-      Open Calculator
-    </button>
-  </div>
-)}
-                  <div className="examFinalBox">
-                    <h4>Ready to submit?</h4>
-                    <p>
-                      Review your answers before final submission.
-                    </p>
+    goToAttemptQuestion(
+      test.id,
+      index,
+      Math.floor(index / 25) * 25
+    );
 
-                    <button type="button" onClick={submitAttempt}>
-                      Submit Test
-                    </button>
-                  </div>
-                </aside>
+    resetQuestionTimer();
+  }}
+  onOpenStatus={jumpToFirstFilteredQuestion}
+  onSubmit={submitAttempt}
+/>
               </div>
             </div>
           );

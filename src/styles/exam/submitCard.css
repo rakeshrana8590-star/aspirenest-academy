@@ -1,0 +1,48 @@
+/* ASPIRENEST EXAM SUBMIT / FINAL CARD */
+
+.examFinalBox {
+    height: 118px !important;
+    min-height: 118px !important;
+    padding: 10px 12px !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    border-radius: 22px !important;
+    background: #0f172a !important;
+    color: #ffffff !important;
+    box-shadow:
+      0 8px 30px rgba(15, 23, 42, 0.12) !important;
+  }
+  
+  .examFinalBox h4 {
+    font-size: 14px !important;
+    margin: 0 0 4px !important;
+    color: #ffffff !important;
+  }
+  
+  .examFinalBox p {
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+    margin: 0 0 8px !important;
+    color: #cbd5e1 !important;
+  }
+  
+  .examFinalBox button {
+    width: 100% !important;
+    height: 36px !important;
+    border-radius: 16px !important;
+    background: #f97316 !important;
+    color: #ffffff !important;
+    font-size: 13px !important;
+    font-weight: 900 !important;
+    box-shadow:
+      0 8px 20px rgba(249, 115, 22, 0.25) !important;
+  }
+  
+  .examFinalBox::after {
+    content: "🔒 You can submit only once.";
+    display: block;
+    margin-top: 6px !important;
+    text-align: center;
+    font-size: 10.5px !important;
+    color: #cbd5e1;
+  }

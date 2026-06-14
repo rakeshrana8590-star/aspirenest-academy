@@ -1,0 +1,47 @@
+/* ASPIRENEST EXAM ACTION BAR */
+
+.aspireExamActionBar {
+    margin-top: 8px !important;
+    padding-top: 10px !important;
+    border-top: 1px solid #e5e7eb !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1.25fr 1.55fr 1.25fr !important;
+    gap: 12px !important;
+  }
+  
+  .examControlBtn {
+    height: 48px !important;
+    border-radius: 16px !important;
+    font-size: 14px !important;
+    font-weight: 900 !important;
+  }
+  
+  .examControlBtn:disabled {
+    opacity: 0.45 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+  }
+  
+  .examControlBtn.secondary {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+  
+  .examControlBtn.ghost {
+    background: #ffffff !important;
+    color: #334155 !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+  
+  .examControlBtn.review {
+    background: #f3e8ff !important;
+    color: #6d28d9 !important;
+    border: 1px solid #ddd6fe !important;
+  }
+  
+  .examControlBtn.primary {
+    background: #0f172a !important;
+    color: #ffffff !important;
+    border: 1px solid #0f172a !important;
+  }

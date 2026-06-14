@@ -1,0 +1,129 @@
+/* ASPIRENEST EXAM SHELL + HEADER */
+
+body:has(.premiumExamPage) {
+    overflow: hidden !important;
+  }
+  
+  body:has(.premiumExamPage) header,
+  body:has(.premiumExamPage) .siteHeader,
+  body:has(.premiumExamPage) .appHeader,
+  body:has(.premiumExamPage) .mainHeader {
+    display: none !important;
+  }
+  
+  .premiumExamPage {
+    height: 100vh !important;
+    padding: 6px 12px !important;
+    background: #f6f8fb !important;
+    overflow: hidden !important;
+  }
+  
+  .premiumExamShell {
+    height: calc(100vh - 12px) !important;
+    max-width: 1540px !important;
+    margin: 0 auto !important;
+    display: grid !important;
+    grid-template-rows: 92px minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+  
+  .premiumExamTop {
+    height: 92px !important;
+    padding: 12px 20px !important;
+    display: grid !important;
+    grid-template-columns: 190px 1fr auto !important;
+    align-items: center !important;
+    gap: 22px !important;
+    background: #fff !important;
+    border: 1px solid #e3e8f0 !important;
+    border-radius: 22px !important;
+  }
+  
+  .premiumExamBrand {
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    border-right: 1px solid #e5e7eb !important;
+  }
+  
+  .compactExamTitleBlock h1 {
+    font-size: 24px !important;
+    margin: 0 0 6px !important;
+    color: #101828 !important;
+  }
+  
+  .compactExamTitleBlock p {
+    margin: 0 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #64748b !important;
+  }
+  
+  .compactExamStats {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+  
+  .compactExamStats > div {
+    min-width: 112px !important;
+    height: 66px !important;
+    padding: 10px 14px !important;
+    border: 1px solid #e3e8f0 !important;
+    border-radius: 16px !important;
+    background: #fff !important;
+  }
+  
+  .compactExamStats span {
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    color: #667085 !important;
+  }
+  
+  .compactExamStats strong {
+    display: block !important;
+    font-size: 20px !important;
+    color: #101828 !important;
+  }
+  
+  .candidateExamPanel {
+    min-width: 150px;
+    padding: 8px 12px;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.06);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+  }
+  
+  .candidateExamPanel span {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  
+  .candidateExamPanel strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 900;
+    color: #0f172a;
+    max-width: 210px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .timerStat strong {
+    color: #f97316 !important;
+  }
+  
+  .examSubmitBtn {
+    height: 66px !important;
+    padding: 0 30px !important;
+    border-radius: 20px !important;
+    background: #0f172a !important;
+    color: #fff !important;
+    font-size: 16px !important;
+    font-weight: 900 !important;
+  }

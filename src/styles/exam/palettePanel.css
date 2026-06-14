@@ -1,0 +1,190 @@
+/* ASPIRENEST EXAM PALETTE PANEL */
+
+.premiumPalettePanel {
+    height: 100% !important;
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-rows: 44px auto 176px auto 118px !important;
+    gap: 8px !important;
+    padding: 14px 16px !important;
+    overflow: hidden !important;
+    background: #eef6ff !important;
+    border: 1px solid #d8e8ff !important;
+    border-radius: 24px !important;
+  }
+  
+  .paletteHeader {
+    min-height: 0 !important;
+  }
+  
+  .paletteHeader h3 {
+    margin: 0 0 4px !important;
+    font-size: 18px !important;
+    color: #0f172a !important;
+  }
+  
+  .paletteHeader p {
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    height: 22px !important;
+    padding: 0 10px !important;
+    border-radius: 999px !important;
+    background: #dbeafe !important;
+    color: #475569 !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+  }
+  
+  .paletteRanges {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 6px !important;
+  }
+  
+  .paletteRangeBtn {
+    width: 100% !important;
+    height: 28px !important;
+    padding: 0 6px !important;
+    border-radius: 999px !important;
+    border: 1px solid #d8e0ea !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 11.5px !important;
+    font-weight: 900 !important;
+  }
+  
+  .paletteRangeBtn.active {
+    background: #f97316 !important;
+    border-color: #f97316 !important;
+    color: #ffffff !important;
+  }
+  
+  .premiumPaletteGrid {
+    height: 176px !important;
+    min-height: 176px !important;
+    max-height: 176px !important;
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    grid-template-rows: repeat(5, 1fr) !important;
+    gap: 5px !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    align-content: start !important;
+  }
+  
+  .paletteNumber {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    min-height: 30px !important;
+    border-radius: 9px !important;
+    border: 1px solid #d8e0ea !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    justify-self: center !important;
+    align-self: center !important;
+  }
+  
+  .paletteNumber.paletteAnswered {
+    background: #16a34a !important;
+    color: #ffffff !important;
+    border-color: #16a34a !important;
+  }
+  
+  .paletteNumber.paletteMarked {
+    background: #7c3aed !important;
+    color: #ffffff !important;
+    border-color: #7c3aed !important;
+  }
+  
+  .paletteNumber.paletteAnsweredReview {
+    background: #7c3aed !important;
+    color: #ffffff !important;
+    border: 2px solid #16a34a !important;
+  }
+  
+  .paletteNumber.paletteNotAnswered {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border-color: #cbd5e1 !important;
+  }
+  
+  .paletteNumber.paletteNotVisited {
+    background: #f8fbff !important;
+    color: #111827 !important;
+    border-color: #d8e0ea !important;
+  }
+  
+  .paletteNumber.paletteCurrent {
+    outline: 2px solid #f97316 !important;
+    outline-offset: 2px !important;
+  }
+  
+  .examQuickSummary,
+  .paletteSummary {
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    padding: 8px !important;
+    overflow: hidden !important;
+    background: transparent !important;
+    border: 1px solid #e3e8f0 !important;
+    border-radius: 16px !important;
+  }
+  
+  .examQuickItem {
+    min-height: 38px !important;
+    display: grid !important;
+    grid-template-columns: 10px 28px 1fr !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 8px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.04),
+      0 4px 12px rgba(15, 23, 42, 0.05) !important;
+  }
+  
+  .examQuickItem strong {
+    font-size: 16px !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+    color: #0f172a !important;
+  }
+  
+  .examQuickItem small {
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+    color: #64748b !important;
+    white-space: nowrap !important;
+  }
+  
+  .dot {
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 999px !important;
+    display: inline-block !important;
+  }
+  
+  .dot.answeredDot {
+    background: #16a34a !important;
+  }
+  
+  .dot.markedDot {
+    background: #7c3aed !important;
+  }
+  
+  .dot.pendingDot {
+    background: #ffffff !important;
+    border: 2px solid #94a3b8 !important;
+  }
+  
+  .dot.notVisitedDot {
+    background: #e2e8f0 !important;
+    border: 2px solid #cbd5e1 !important;
+  }
