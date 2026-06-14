@@ -74,8 +74,15 @@ import QuestionWorkspace from "./components/exam/QuestionWorkspace.jsx";
 import {
   getFilteredQuestionIndexes,
   formatExamTime,
+  getExamTimerSeconds,
   getExamQuestionCounts,
 } from "./components/exam/examUtils.js";
+import {
+  createDefaultAttemptState,
+  saveAttemptState,
+  restoreAttemptState,
+} from "./components/exam/examAttemptStorage.js";
+import { useExamAttemptState } from "./components/exam/useExamAttemptState.js";
 import './style.css';
 import "./styles/exam/examHeader.css";
 import "./styles/exam/questionWorkspace.css";
@@ -323,225 +330,27 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
     decodeURIComponent(location.pathname.split("/")[4] || "");
 
     const [mockAttemptAnswers, setMockAttemptAnswers] = useState({});
-    const [mockAttemptCurrentIndex, setMockAttemptCurrentIndex] = useState({});
-    const [mockMarkedQuestions, setMockMarkedQuestions] = useState({});
-    const [mockPaletteRangeStart, setMockPaletteRangeStart] =
-  useState({});
+   
+    
+   
   const [paletteFilter, setPaletteFilter] = useState("all");
   const [submitConfirmTestId, setSubmitConfirmTestId] =
   useState(null);
   const [examFontScale, setExamFontScale] = useState(1);
-    const [mockExamStartedAt, setMockExamStartedAt] = useState({});
-    const [mockExamTimeLeft, setMockExamTimeLeft] = useState({});
-    const [mockAttemptState, setMockAttemptState] = useState({});
-    const getAttemptStorageKey = (testId) =>
-  `aspireExamAttempt_${testId}`;
-
-  const createDefaultAttemptState = (test, defaultTimeLeft = 0) => ({
-    testId: test?.id || "",
-    currentIndex: 0,
-    questionOrder:
-    test?.shuffleQuestions === "yes"
-      ? shuffleMockArray(
-          (test?.questions || []).map((_, index) => index)
-        )
-      : (test?.questions || []).map((_, index) => index),
-    answers: {},
-    marked: {},
-    visited: { 0: true },
-    paletteRangeStart: 0,
-    timeLeft: defaultTimeLeft,
-    startedAt: Date.now(),
-    submittedAt: null,
-    isSubmitted: false,
-  });
-
-  const saveAttemptState = (testId, state) => {
-    if (!testId || !state) return;
-  
-    localStorage.setItem(
-      getAttemptStorageKey(testId),
-      JSON.stringify(state)
-    );
-  };
-
-  const restoreAttemptState = (test, defaultTimeLeft = 0) => {
-    if (!test?.id) {
-      return createDefaultAttemptState(test, defaultTimeLeft);
-    }
-  
-    try {
-      const saved = localStorage.getItem(
-        getAttemptStorageKey(test.id)
-      );
-  
-      if (!saved) {
-        return createDefaultAttemptState(test, defaultTimeLeft);
-      }
-  
-      return {
-        ...createDefaultAttemptState(test, defaultTimeLeft),
-        ...JSON.parse(saved),
-        testId: test.id,
-      };
-    } catch {
-      return createDefaultAttemptState(test, defaultTimeLeft);
-    }
-  };
-
-  const updateAttemptState = (testId, updater) => {
-    if (!testId || typeof updater !== "function") return;
-  
-    setMockAttemptState((prev) => {
-      const activeTest = universalContent.find(
-        (item) =>
-          item.section === "mockTest" &&
-          item.id === testId
-      );
-  
-      const currentState =
-        prev[testId] ||
-        restoreAttemptState(activeTest, 0);
-  
-      const nextState = updater(currentState);
-  
-      saveAttemptState(testId, nextState);
-  
-      return {
-        ...prev,
-        [testId]: nextState,
-      };
-    });
-  };
-
-  const goToAttemptQuestion = (testId, index, paletteRangeStart = 0) => {
-    updateAttemptState(testId, (state) => {
-      const nextState = {
-        ...state,
-        currentIndex: index,
-        paletteRangeStart,
-        visited: {
-          ...(state.visited || {}),
-          [index]: true,
-        },
-      };
-  
-      return nextState;
-    });
-  };
-
-  const selectAttemptAnswer = (testId, index, optionKey) => {
-    updateAttemptState(testId, (state) => {
-      const nextState = {
-        ...state,
-        currentIndex: index,
-        answers: {
-          ...(state.answers || {}),
-          [index]: optionKey,
-        },
-        visited: {
-          ...(state.visited || {}),
-          [index]: true,
-        },
-      };
-  
-      return nextState;
-    });
-  };
-
-  const clearAttemptResponse = (testId, index) => {
-    updateAttemptState(testId, (state) => {
-      const nextAnswers = {
-        ...(state.answers || {}),
-        [index]: "",
-      };
-  
-      const nextMarked = {
-        ...(state.marked || {}),
-        [index]: false,
-      };
-  
-      return {
-        ...state,
-        currentIndex: index,
-        answers: nextAnswers,
-        marked: nextMarked,
-        visited: {
-          ...(state.visited || {}),
-          [index]: true,
-        },
-      };
-    });
-  };
-
-  const markAttemptForReviewAndNext = (
-    testId,
-    index,
-    totalQuestions
-  ) => {
-    updateAttemptState(testId, (state) => {
-      const nextIndex =
-        index < totalQuestions - 1 ? index + 1 : index;
-  
-      return {
-        ...state,
-        currentIndex: nextIndex,
-        marked: {
-          ...(state.marked || {}),
-          [index]: true,
-        },
-        visited: {
-          ...(state.visited || {}),
-          [index]: true,
-          [nextIndex]: true,
-        },
-        paletteRangeStart:
-          Math.floor(nextIndex / 25) * 25,
-      };
-    });
-  };
-
-  const saveAttemptAndNext = (
-    testId,
-    index,
-    totalQuestions
-  ) => {
-    updateAttemptState(testId, (state) => {
-      const nextIndex =
-        index < totalQuestions - 1 ? index + 1 : index;
-  
-      return {
-        ...state,
-        currentIndex: nextIndex,
-        marked: {
-          ...(state.marked || {}),
-          [index]: false,
-        },
-        visited: {
-          ...(state.visited || {}),
-          [index]: true,
-          [nextIndex]: true,
-        },
-        paletteRangeStart:
-          Math.floor(nextIndex / 25) * 25,
-      };
-    });
-  };
-
-  const submitAttemptState = (testId) => {
-    updateAttemptState(testId, (state) => ({
-      ...state,
-      submittedAt: Date.now(),
-      isSubmitted: true,
-    }));
-  };
-
-  const updateAttemptTimeLeft = (testId, timeLeft) => {
-    updateAttemptState(testId, (state) => ({
-      ...state,
-      timeLeft,
-    }));
-  };
+    
+   
+    const {
+      mockAttemptState,
+      setMockAttemptState,
+      updateAttemptState,
+      goToAttemptQuestion,
+      selectAttemptAnswer,
+      clearAttemptResponse,
+      markAttemptForReviewAndNext,
+      saveAttemptAndNext,
+      submitAttemptState,
+      updateAttemptTimeLeft,
+    } = useExamAttemptState(universalContent);
 
   useEffect(() => {
     const attemptPath = "/ctet-tet/mock-tests/attempt/";
@@ -554,34 +363,9 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
   
     if (!testId) return;
   
-    const activeTimerTest = universalContent.find(
-      (item) =>
-        item.section === "mockTest" &&
-        item.id === testId
-    );
-  
     if (!activeTimerTest) return;
-  
-    const getTimerSeconds = (value, unit) => {
-      const numericValue = Number(value || 1);
-  
-      if (unit === "hr") return numericValue * 60 * 60;
-      if (unit === "min") return numericValue * 60;
-  
-      return numericValue;
-    };
-  
-    const defaultTimeLeft =
-      activeTimerTest.timerMode === "perQuestionTimer"
-        ? getTimerSeconds(
-            activeTimerTest.perQuestionTimeValue,
-            activeTimerTest.perQuestionTimeUnit
-          )
-        : Number(
-            activeTimerTest.durationMinutes ||
-              activeTimerTest.duration ||
-              30
-          ) * 60;
+
+    const defaultTimeLeft = getExamTimerSeconds(activeTimerTest);
   
     const restoredState = restoreAttemptState(
       activeTimerTest,
@@ -19649,29 +19433,15 @@ handleSaveUniversalContent={handleSaveUniversalContent}
             const shouldShuffleOptions =
             mockRules.shuffleOptions === "yes";
 
-          const getTimerSeconds = (value, unit) => {
-            const numericValue = Number(value || 1);
-            if (unit === "hr") return numericValue * 60 * 60;
-            if (unit === "min") return numericValue * 60;
-            return numericValue;
-          };
-
-          const isNoTimer = test.timerMode === "noTimer";
-          const isPerQuestionTimer =
-            test.timerMode === "perQuestionTimer";
-
-          const timerLabel = isPerQuestionTimer
-            ? "Question Time"
-            : "Time Left";
-
-          const defaultTimerSeconds = isPerQuestionTimer
-            ? getTimerSeconds(
-                test.perQuestionTimeValue,
-                test.perQuestionTimeUnit
-              )
-            : Number(
-                test.durationMinutes || test.duration || 30
-              ) * 60;
+            const isNoTimer = test.timerMode === "noTimer";
+            const isPerQuestionTimer =
+              test.timerMode === "perQuestionTimer";
+            
+            const timerLabel = isPerQuestionTimer
+              ? "Question Time"
+              : "Time Left";
+            
+            const defaultTimerSeconds = getExamTimerSeconds(test);
 
           const attemptState =
             mockAttemptState?.[test.id] ||

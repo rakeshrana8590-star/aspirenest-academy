@@ -53,7 +53,7 @@ export const getPaletteStatusClass = (attemptState = {}, index) => {
         return true;
       });
   };
-
+  
   export const formatExamTime = (seconds = 0) => {
     const safeSeconds = Math.max(0, Number(seconds || 0));
   
@@ -64,7 +64,27 @@ export const getPaletteStatusClass = (attemptState = {}, index) => {
       remainingSeconds
     ).padStart(2, "0")}`;
   };
-
+  
+  export const getExamTimerSeconds = (test = {}) => {
+    const getTimerSeconds = (value, unit) => {
+      const numericValue = Number(value || 1);
+  
+      if (unit === "hr") return numericValue * 60 * 60;
+      if (unit === "min") return numericValue * 60;
+  
+      return numericValue;
+    };
+  
+    if (test.timerMode === "perQuestionTimer") {
+      return getTimerSeconds(
+        test.perQuestionTimeValue,
+        test.perQuestionTimeUnit
+      );
+    }
+  
+    return Number(test.durationMinutes || test.duration || 30) * 60;
+  };
+  
   export const getExamQuestionCounts = (
     questions = [],
     attemptState = {}
