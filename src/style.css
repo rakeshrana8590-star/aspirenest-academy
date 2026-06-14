@@ -24874,6 +24874,34 @@ body:has(.premiumExamPage) .mainHeader {
   color: #101828 !important;
 }
 
+.candidateExamPanel {
+  min-width: 150px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.candidateExamPanel span {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.candidateExamPanel strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 900;
+  color: #0f172a;
+  max-width: 210px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .timerStat strong {
   color: #f97316 !important;
 }
@@ -25161,6 +25189,29 @@ body:has(.premiumExamPage) .chatBubble {
   align-items: center !important;
   gap: 14px !important;
   flex-wrap: wrap !important;
+}
+
+.examZoomControls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.examZoomControls button {
+  width: 36px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #0f172a;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.examZoomControls button:hover {
+  border-color: #fb923c;
+  color: #f97316;
 }
 
 .examRefPill {
@@ -25505,8 +25556,9 @@ body:has(.premiumExamPage) .whatsappButton {
 /* RIGHT PALETTE HEADER SPACE FIX */
 
 .premiumPalettePanel {
-  grid-template-rows: 46px auto 190px auto auto !important;
-  gap: 8px !important;
+  grid-template-rows: auto auto auto auto auto !important;
+  gap: 14px !important;
+  align-content: start !important;
 }
 
 .paletteHeader {

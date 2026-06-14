@@ -316,6 +316,7 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
   const [paletteFilter, setPaletteFilter] = useState("all");
   const [submitConfirmTestId, setSubmitConfirmTestId] =
   useState(null);
+  const [examFontScale, setExamFontScale] = useState(1);
     const [mockExamStartedAt, setMockExamStartedAt] = useState({});
     const [mockExamTimeLeft, setMockExamTimeLeft] = useState({});
     const [mockAttemptState, setMockAttemptState] = useState({});
@@ -19911,7 +19912,9 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   Number(attemptState.violations?.tabSwitchCount || 0) +
   Number(attemptState.violations?.fullscreenExitCount || 0);
 
-const shouldForceSubmit = totalViolationCount >= 5;
+  const shouldForceSubmit =
+  test.autoSubmitOnViolation === "yes" &&
+  totalViolationCount >= 5;
 
 if (shouldForceSubmit && !attemptState.isSubmitted) {
   const finalState = {
@@ -19988,6 +19991,10 @@ if (shouldForceSubmit && !attemptState.isSubmitted) {
                 </div>
 
                 <div className="examTopStats compactExamStats">
+                <div className="candidateExamPanel">
+  <span>Candidate</span>
+  <strong>{fullName || user?.email || "Student"}</strong>
+</div>
                   {!isNoTimer && (
                     <div className="timerStat">
                       <span>{timerLabel}</span>
@@ -20067,7 +20074,37 @@ if (shouldForceSubmit && !attemptState.isSubmitted) {
                         </span>
                       </div>
 
-                      <div className="examQuestionBlockPro">
+                      <div className="examZoomControls">
+  <button
+    type="button"
+    onClick={() =>
+      setExamFontScale((prev) => Math.max(0.9, prev - 0.1))
+    }
+  >
+    A−
+  </button>
+
+  <button
+    type="button"
+    onClick={() => setExamFontScale(1)}
+  >
+    A
+  </button>
+
+  <button
+    type="button"
+    onClick={() =>
+      setExamFontScale((prev) => Math.min(1.3, prev + 0.1))
+    }
+  >
+    A+
+  </button>
+</div>
+
+<div
+  className="examQuestionBlockPro"
+  style={{ fontSize: `${examFontScale}em` }}
+>
                         <div className="examQuestionNoPro">
                           {currentQuestionIndex + 1}
                         </div>
@@ -20075,7 +20112,10 @@ if (shouldForceSubmit && !attemptState.isSubmitted) {
                         <h2>{currentQuestion?.question}</h2>
                       </div>
 
-                      <div className="aspireOptionList">
+                      <div
+  className="aspireOptionList"
+  style={{ fontSize: `${examFontScale}em` }}
+>
                         {optionList.map((option) => (
                           <button
                             type="button"
