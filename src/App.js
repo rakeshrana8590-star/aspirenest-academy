@@ -78,11 +78,13 @@ import {
   getExamQuestionCounts,
 } from "./components/exam/examUtils.js";
 import {
+  getAttemptStorageKey,
   createDefaultAttemptState,
   saveAttemptState,
   restoreAttemptState,
 } from "./components/exam/examAttemptStorage.js";
 import { useExamAttemptState } from "./components/exam/useExamAttemptState.js";
+import { useExamTimer } from "./components/exam/useExamTimer.js";
 import './style.css';
 import "./styles/exam/examHeader.css";
 import "./styles/exam/questionWorkspace.css";
@@ -352,80 +354,12 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
       updateAttemptTimeLeft,
     } = useExamAttemptState(universalContent);
 
-  useEffect(() => {
-    const attemptPath = "/ctet-tet/mock-tests/attempt/";
-  
-    if (!location.pathname.includes(attemptPath)) return;
-  
-    const testId = decodeURIComponent(
-      location.pathname.split("/")[4] || ""
-    );
-  
-    if (!testId) return;
-  
-    if (!activeTimerTest) return;
-
-    const defaultTimeLeft = getExamTimerSeconds(activeTimerTest);
-  
-    const restoredState = restoreAttemptState(
-      activeTimerTest,
-      defaultTimeLeft
-    );
-  
-    setMockAttemptState((prev) => ({
-      ...prev,
-      [testId]: restoredState,
-    }));
-  
-    const timer = setInterval(() => {
-      setMockAttemptState((prev) => {
-        const currentState =
-          prev[testId] || restoredState;
-  
-        if (currentState.isSubmitted) {
-          return prev;
-        }
-  
-        const nextTime =
-          currentState.timeLeft <= 0
-            ? 0
-            : currentState.timeLeft - 1;
-  
-            const shouldAutoSubmit =
-            currentState.timeLeft <= 1 && nextTime === 0;
-          
-          const nextState = {
-            ...currentState,
-            timeLeft: nextTime,
-            submittedAt: shouldAutoSubmit
-              ? Date.now()
-              : currentState.submittedAt,
-            isSubmitted: shouldAutoSubmit
-              ? true
-              : currentState.isSubmitted,
-          };
-          
-          saveAttemptState(testId, nextState);
-          
-          if (shouldAutoSubmit) {
-            toast.success(
-              "Time is over. Test submitted automatically ✅"
-            );
-          
-            setTimeout(() => {
-              navigate(`/ctet-tet/mock-tests/result/${testId}`);
-            }, 300);
-          }
-          
-          return {
-            ...prev,
-            [testId]: nextState,
-          };
-      });
-    }, 1000);
-  
-    return () => clearInterval(timer);
-  }, [location.pathname, universalContent]);
+    useExamTimer({
+      locationPathname: location.pathname,
+      universalContent,
+      setMockAttemptState,
+      navigate,
+    });
 
   useEffect(() => {
     const attemptPath = "/ctet-tet/mock-tests/attempt/";
