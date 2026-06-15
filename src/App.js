@@ -87,6 +87,7 @@ import ExamReviewRoute from "./components/exam/ExamReviewRoute.jsx";
 import ExamStartRoute from "./components/exam/ExamStartRoute.jsx";
 import StudentMockTestCard from "./components/exam/StudentMockTestCard.jsx";
 import {
+  createEmptyMockQuestion,
   buildMockTestFormFromTest,
   buildMockTestQuestionsFormFromTest,
 } from "./components/exam/mockTestFormUtils.js";
@@ -706,24 +707,8 @@ const [mockTestForm, setMockTestForm] = useState({
   status: "published",
 });
 
-const [mockTestQuestionsForm, setMockTestQuestionsForm] = useState([
-  {
-    question: "",
-    option1: "",
-    option2: "",
-    option3: "",
-    option4: "",
-    answer: "",
-    explanation: "",
-    level: "Easy",
-questionType: "Single Correct",
-language: "English",
-tag: "",
-positiveMarks: "1",
-negativeMarks: "0",
-questionStatus: "published",
-saveToQuestionBank: "yes",
-  },
+const [mockTestQuestionsForm, setMockTestQuestionsForm] = useState(() => [
+  createEmptyMockQuestion(),
 ]);
 
 const [editingMockTestId, setEditingMockTestId] = useState(null);
@@ -1366,23 +1351,8 @@ examInstructions:
 
     setMockTestQuestionsForm([
       {
-        question: "",
-        option1: "",
-        option2: "",
-        option3: "",
-        option4: "",
-        answer: "",
-        explanation: "",
-        level: "Easy",
-        questionType: "Single Correct",
-        language: "English",
-        tag: "",
-        positiveMarks: "1",
-        negativeMarks: "0",
+        ...createEmptyMockQuestion(),
         passingMarks: "0",
-
-        questionStatus: "published",
-        saveToQuestionBank: "yes",
       },
     ]);
 
@@ -11472,56 +11442,30 @@ This action cannot be undone.`
 
     setMockTestQuestionsForm([
       {
-        question: "",
-        option1: "",
-        option2: "",
-        option3: "",
-        option4: "",
-        answer: "",
-        explanation: "",
-        level: "Easy",
-        questionType: "Single Correct",
-        language: "English",
-        tag: "",
+        ...createEmptyMockQuestion(),
         positiveMarks: mockTestForm.marksPerQuestion || "1",
         negativeMarks: mockTestForm.negativeMarks || "0",
-        questionStatus: "published",
-        saveToQuestionBank: "yes",
       },
     ]);
   }}
 >
   Clear All Questions
 </button>
-              <button
-                className="publishButton"
-                onClick={() =>
-                  setMockTestQuestionsForm([
-                    ...mockTestQuestionsForm,
-                    {
-                      question: "",
-                      option1: "",
-                      option2: "",
-                      option3: "",
-                      option4: "",
-                      answer: "",
-                      explanation: "",
-                      level: "Easy",
-                      questionType: "Single Correct",
-                      language: "English",
-                      tag: "",
-                      positiveMarks:
-                        mockTestForm.marksPerQuestion || "1",
-                      negativeMarks:
-                        mockTestForm.negativeMarks || "0",
-                      questionStatus: "published",
-                      saveToQuestionBank: "yes",
-                    },
-                  ])
-                }
-              >
-                + Add Question
-              </button>
+<button
+  className="publishButton"
+  onClick={() =>
+    setMockTestQuestionsForm((prev) => [
+      ...prev,
+      {
+        ...createEmptyMockQuestion(),
+        positiveMarks: mockTestForm.marksPerQuestion || "1",
+        negativeMarks: mockTestForm.negativeMarks || "0",
+      },
+    ])
+  }
+>
+  + Add Question
+</button>
 
               <button
                 className="publishButton"

@@ -63,6 +63,15 @@ const getStatusBadgeClass = (status = "draft") => {
   return "";
 };
 
+const hasResourceValue = (resource = {}) => {
+  return Boolean(
+    resource.noteUrl ||
+      resource.videoUrl ||
+      resource.liveUrl ||
+      resource.mockId
+  );
+};
+
 export const AspirePathHero = ({
   eyebrow = "AspirePath",
   title = "Smart Study Roadmaps",
@@ -245,9 +254,7 @@ export const RoadmapCard = ({
       </div>
 
       <div className="aspirePathResourceRow">
-        <RoadmapBadge mode={mode}>
-          {roadmap.examType || "Exam"}
-        </RoadmapBadge>
+        <RoadmapBadge mode={mode}>{roadmap.examType || "Exam"}</RoadmapBadge>
 
         {roadmap.stream ? (
           <RoadmapBadge mode={mode}>{roadmap.stream}</RoadmapBadge>
@@ -258,7 +265,9 @@ export const RoadmapCard = ({
 
       <p className={`${shellPrefix}CardText`}>
         {startDate.full} → {endDate.full}
-        {roadmap.examDate ? ` • Exam: ${formatDateLabel(roadmap.examDate).full}` : ""}
+        {roadmap.examDate
+          ? ` • Exam: ${formatDateLabel(roadmap.examDate).full}`
+          : ""}
       </p>
 
       <RoadmapProgressBar value={progress} />
@@ -291,6 +300,43 @@ export const RoadmapDayDate = ({ date = "" }) => {
   );
 };
 
+export const RoadmapResourceButton = ({
+  children,
+  href = "",
+  onClick = null,
+}) => {
+  if (href && href.startsWith("/")) {
+    return (
+      <Link className="aspirePathResourceButton" to={href}>
+        {children}
+      </Link>
+    );
+  }
+
+  if (href) {
+    return (
+      <a
+        className="aspirePathResourceButton"
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+      >
+        {children}
+      </a>
+    );
+  }
+
+  return (
+    <button
+      className="aspirePathResourceButton"
+      type="button"
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
+};
+
 export const RoadmapTaskCard = ({
   task,
   completed = false,
@@ -299,6 +345,12 @@ export const RoadmapTaskCard = ({
   if (!task) return null;
 
   const hasTime = task.startTime || task.endTime;
+
+  const resourceLinks = Array.isArray(task.resourceLinks)
+    ? task.resourceLinks
+    : [];
+
+  const visibleResources = resourceLinks.filter(hasResourceValue);
 
   return (
     <div className="aspirePathTaskCard">
@@ -337,6 +389,42 @@ export const RoadmapTaskCard = ({
           </button>
         ) : null}
       </div>
+
+      {visibleResources.length > 0 ? (
+        <div className="aspirePathResourceRow">
+          {visibleResources.map((resource, index) => (
+            <React.Fragment
+              key={`${resource.resourceRowNumber || index}-${task.taskId}`}
+            >
+              {resource.noteUrl ? (
+                <RoadmapResourceButton href={resource.noteUrl}>
+                  📘 {resource.noteTitle || "Open Notes"}
+                </RoadmapResourceButton>
+              ) : null}
+
+              {resource.videoUrl ? (
+                <RoadmapResourceButton href={resource.videoUrl}>
+                  ▶️ {resource.videoTitle || "Watch Video"}
+                </RoadmapResourceButton>
+              ) : null}
+
+              {resource.liveUrl ? (
+                <RoadmapResourceButton href={resource.liveUrl}>
+                  🔴 Join Live
+                </RoadmapResourceButton>
+              ) : null}
+
+              {resource.mockId ? (
+                <RoadmapResourceButton
+                  href={`/ctet-tet/mock-tests/start/${resource.mockId}`}
+                >
+                  📝 {resource.mockTestTitle || "Start Mock"}
+                </RoadmapResourceButton>
+              ) : null}
+            </React.Fragment>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 };
@@ -383,35 +471,6 @@ export const RoadmapDayCard = ({
         </div>
       </div>
     </article>
-  );
-};
-
-export const RoadmapResourceButton = ({
-  children,
-  href = "",
-  onClick = null,
-}) => {
-  if (href) {
-    return (
-      <a
-        className="aspirePathResourceButton"
-        href={href}
-        target="_blank"
-        rel="noreferrer"
-      >
-        {children}
-      </a>
-    );
-  }
-
-  return (
-    <button
-      className="aspirePathResourceButton"
-      type="button"
-      onClick={onClick}
-    >
-      {children}
-    </button>
   );
 };
 
