@@ -1164,11 +1164,23 @@ export const RoadmapProgressRoute = () => {
                     <tbody>
                       {topStudents.map((student) => (
                         <tr key={student.userId}>
-                          <td>
-                            <strong>{student.userId}</strong>
-                            <br />
-                            {student.progressRecords} progress record(s)
-                          </td>
+                         <td>
+  <strong>
+  {student.studentName ||
+  student.studentEmail ||
+  `Student ${student.userId?.slice(0, 6) || ""}`}
+  </strong>
+  <br />
+  {student.studentEmail ? (
+    <>
+      {student.studentEmail}
+      <br />
+    </>
+  ) : null}
+  <span title={student.userId}>
+    {student.progressRecords} progress record(s)
+  </span>
+</td>
   
                           <td>
                             {student.completedTasks} /{" "}

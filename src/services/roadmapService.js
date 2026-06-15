@@ -443,6 +443,8 @@ import {
     completedTaskIds = [],
     progressPercent = 0,
     studentNote = "",
+    studentName = "",
+    studentEmail = "",
   }) => {
     if (!userId || !roadmapId || !dayId) {
       throw new Error("User ID, roadmap ID, and day ID are required.");
@@ -469,6 +471,8 @@ import {
         completedTaskIds,
         progressPercent: Number(progressPercent || 0),
         studentNote: studentNote?.trim() || "",
+        studentName: studentName?.trim() || "",
+        studentEmail: studentEmail?.trim() || "",
         updatedAt: serverTimestamp(),
       },
       { merge: true }
@@ -574,11 +578,21 @@ import {
       if (!map[userId]) {
         map[userId] = {
           userId,
+          studentName: item.studentName || "",
+          studentEmail: item.studentEmail || "",
           completedTaskIds: new Set(),
           completedDays: new Set(),
           touchedDays: new Set(),
           progressRecords: [],
         };
+      }
+      
+      if (item.studentName && !map[userId].studentName) {
+        map[userId].studentName = item.studentName;
+      }
+      
+      if (item.studentEmail && !map[userId].studentEmail) {
+        map[userId].studentEmail = item.studentEmail;
       }
   
       map[userId].progressRecords.push(item);
@@ -607,14 +621,16 @@ import {
             ? Math.min(100, Math.round((completedTasks / totalTasks) * 100))
             : 0;
   
-        return {
-          userId: student.userId,
-          completedTasks,
-          touchedDays: student.touchedDays.size,
-          completedDays: student.completedDays.size,
-          completionPercent,
-          progressRecords: student.progressRecords.length,
-        };
+            return {
+                userId: student.userId,
+                studentName: student.studentName || "",
+                studentEmail: student.studentEmail || "",
+                completedTasks,
+                touchedDays: student.touchedDays.size,
+                completedDays: student.completedDays.size,
+                completionPercent,
+                progressRecords: student.progressRecords.length,
+              };
       })
       .sort((a, b) => b.completionPercent - a.completionPercent);
   

@@ -90,6 +90,29 @@ const buildRoadmapMetrics = ({ roadmaps = [] }) => {
   ];
 };
 
+const getStudentIdentity = (user = {}) => {
+    const email =
+      user.email ||
+      user.studentEmail ||
+      user.emailAddress ||
+      user.userEmail ||
+      "";
+  
+    const name =
+      user.displayName ||
+      user.fullName ||
+      user.studentName ||
+      user.name ||
+      user.firstName ||
+      (email ? email.split("@")[0] : "") ||
+      "Student";
+  
+    return {
+      studentName: name,
+      studentEmail: email,
+    };
+  };
+
 const getDateKey = (date = new Date()) => {
     return date.toISOString().slice(0, 10);
   };
@@ -387,6 +410,7 @@ export const StudentRoadmapDetail = ({
       dayId: day.id,
       completedTaskIds: nextCompletedIds,
       progressPercent: nextProgressPercent,
+      ...getStudentIdentity(user),
     });
 
     await reloadProgress();
@@ -664,6 +688,7 @@ export const StudentRoadmapDay = ({
       dayId,
       completedTaskIds: nextCompletedIds,
       progressPercent: nextProgressPercent,
+      ...getStudentIdentity(user),
     });
 
     await reloadProgress();

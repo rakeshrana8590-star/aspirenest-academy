@@ -100,6 +100,9 @@ import {
   copyMockTestStartLink,
   deleteMockTest,
   exportMockTestJson,
+  exportMockTestCsv,
+  exportMockTestExcel,
+  exportMockTestXlsx,
 } from "./components/exam/mockTestAdminActions.js";
 import { useExamAttemptState } from "./components/exam/useExamAttemptState.js";
 import { useExamTimer } from "./components/exam/useExamTimer.js";
@@ -1331,334 +1334,10 @@ const handleImportMockTestJson = async (event) => {
 
 
 
-const handleExportMockTestCsv = (test) => {
-  try {
-    if (!test) {
-      alert("No mock test selected for CSV export");
-      return;
-    }
 
-    const cleanText = (value = "") =>
-      value
-        ?.toString()
-        .replace(/\r?\n|\r/g, " ")
-        .replace(/\s+/g, " ")
-        .trim() || "";
 
-    const safeCsvValue = (value = "") => {
-      const text = cleanText(value).replace(/"/g, '""');
-      return `"${text}"`;
-    };
 
-    const questions = test.questions || [];
 
-    if (questions.length === 0) {
-      alert("No questions found in this mock test");
-      return;
-    }
-
-    const headers = [
-      "Test Title",
-      "Plan",
-      "Exam Type",
-      "Test Type",
-      "Subject",
-      "Chapter",
-      "Duration Minutes",
-      "Total Questions",
-      "Question Number",
-      "Question",
-      "Option A",
-      "Option B",
-      "Option C",
-      "Option D",
-      "Correct Answer",
-      "Explanation",
-      "Difficulty Level",
-      "Language",
-      "Positive Marks",
-      "Negative Marks",
-      "Question Status",
-    ];
-
-    const rows = questions.map((question, index) => [
-      test.title || "",
-      test.planType || "FREE",
-      test.examType || "",
-      test.testType || "",
-      test.subject || "",
-      test.chapter || "",
-      test.duration || test.durationMinutes || "",
-      test.totalQuestions || questions.length,
-      question.questionNumber || index + 1,
-      question.question || "",
-      question.option1 || "",
-      question.option2 || "",
-      question.option3 || "",
-      question.option4 || "",
-      question.answer || "",
-      question.explanation || "",
-      question.level || "",
-      question.language || "",
-      question.positiveMarks || test.marksPerQuestion || "",
-      question.negativeMarks || test.negativeMarks || "0",
-      question.questionStatus || test.status || "",
-    ]);
-
-    const csvContent = [
-      headers.map(safeCsvValue).join(","),
-      ...rows.map((row) =>
-        row.map(safeCsvValue).join(",")
-      ),
-    ].join("\n");
-
-    const csvBlob = new Blob(["\uFEFF" + csvContent], {
-      type: "text/csv;charset=utf-8;",
-    });
-
-    const downloadUrl = URL.createObjectURL(csvBlob);
-
-    const safeFileName = (test.title || "mock-test")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-
-    const downloadLink = document.createElement("a");
-    downloadLink.href = downloadUrl;
-    downloadLink.download = `${safeFileName}-questions.csv`;
-
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-
-    URL.revokeObjectURL(downloadUrl);
-  } catch (error) {
-    console.error("Export CSV error:", error);
-    alert("CSV export failed");
-  }
-};
-
-const handleExportMockTestExcel = (test) => {
-  try {
-    if (!test) {
-      alert("No mock test selected for Excel export");
-      return;
-    }
-
-    const questions = test.questions || [];
-
-    if (questions.length === 0) {
-      alert("No questions found in this mock test");
-      return;
-    }
-
-    const escapeHtml = (value = "") =>
-      value
-        ?.toString()
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;") || "";
-
-    const headers = [
-      "Test Title",
-      "Plan",
-      "Exam Type",
-      "Test Type",
-      "Subject",
-      "Chapter",
-      "Duration Minutes",
-      "Total Questions",
-      "Question Number",
-      "Question",
-      "Option A",
-      "Option B",
-      "Option C",
-      "Option D",
-      "Correct Answer",
-      "Explanation",
-      "Difficulty Level",
-      "Language",
-      "Positive Marks",
-      "Negative Marks",
-      "Question Status",
-    ];
-
-    const rows = questions.map((question, index) => [
-      test.title || "",
-      test.planType || "FREE",
-      test.examType || "",
-      test.testType || "",
-      test.subject || "",
-      test.chapter || "",
-      test.duration || test.durationMinutes || "",
-      test.totalQuestions || questions.length,
-      question.questionNumber || index + 1,
-      question.question || "",
-      question.option1 || "",
-      question.option2 || "",
-      question.option3 || "",
-      question.option4 || "",
-      question.answer || "",
-      question.explanation || "",
-      question.level || "",
-      question.language || "",
-      question.positiveMarks || test.marksPerQuestion || "",
-      question.negativeMarks || test.negativeMarks || "0",
-      question.questionStatus || test.status || "",
-    ]);
-
-    const tableHtml = `
-      <html>
-        <head>
-          <meta charset="UTF-8" />
-        </head>
-        <body>
-          <table border="1">
-            <thead>
-              <tr>
-                ${headers.map((h) => `<th>${escapeHtml(h)}</th>`).join("")}
-              </tr>
-            </thead>
-            <tbody>
-              ${rows
-                .map(
-                  (row) => `
-                    <tr>
-                      ${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}
-                    </tr>
-                  `
-                )
-                .join("")}
-            </tbody>
-          </table>
-        </body>
-      </html>
-    `;
-
-    const excelBlob = new Blob([tableHtml], {
-      type: "application/vnd.ms-excel;charset=utf-8;",
-    });
-
-    const downloadUrl = URL.createObjectURL(excelBlob);
-
-    const safeFileName = (test.title || "mock-test")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-
-    const downloadLink = document.createElement("a");
-    downloadLink.href = downloadUrl;
-    downloadLink.download = `${safeFileName}-questions.xls`;
-
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-
-    URL.revokeObjectURL(downloadUrl);
-  } catch (error) {
-    console.error("Export Excel error:", error);
-    alert("Excel export failed");
-  }
-};
-
-const handleExportMockTestXlsx = (test) => {
-  try {
-    if (!test) {
-      alert("No mock test selected for XLSX export");
-      return;
-    }
-
-    const questions = test.questions || [];
-
-    if (questions.length === 0) {
-      alert("No questions found in this mock test");
-      return;
-    }
-
-    const rows = questions.map((question, index) => ({
-      "Test Title": test.title || "",
-      Plan: test.planType || "FREE",
-      "Exam Type": test.examType || "",
-      "Test Type": test.testType || "",
-      Subject: test.subject || "",
-      Chapter: test.chapter || "",
-      "Duration Minutes":
-        test.duration || test.durationMinutes || "",
-      "Total Questions":
-        test.totalQuestions || questions.length,
-      "Question Number":
-        question.questionNumber || index + 1,
-      Question: question.question || "",
-      "Option A": question.option1 || "",
-      "Option B": question.option2 || "",
-      "Option C": question.option3 || "",
-      "Option D": question.option4 || "",
-      "Correct Answer": question.answer || "",
-      Explanation: question.explanation || "",
-      "Difficulty Level": question.level || "",
-      Language: question.language || "",
-      "Positive Marks":
-        question.positiveMarks ||
-        test.marksPerQuestion ||
-        "",
-      "Negative Marks":
-        question.negativeMarks ||
-        test.negativeMarks ||
-        "0",
-      "Question Status":
-        question.questionStatus || test.status || "",
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(rows);
-
-    worksheet["!cols"] = [
-      { wch: 28 },
-      { wch: 12 },
-      { wch: 14 },
-      { wch: 18 },
-      { wch: 28 },
-      { wch: 28 },
-      { wch: 18 },
-      { wch: 18 },
-      { wch: 18 },
-      { wch: 60 },
-      { wch: 32 },
-      { wch: 32 },
-      { wch: 32 },
-      { wch: 32 },
-      { wch: 22 },
-      { wch: 60 },
-      { wch: 18 },
-      { wch: 14 },
-      { wch: 16 },
-      { wch: 16 },
-      { wch: 18 },
-    ];
-
-    const workbook = XLSX.utils.book_new();
-
-    XLSX.utils.book_append_sheet(
-      workbook,
-      worksheet,
-      "Questions"
-    );
-
-    const safeFileName = (test.title || "mock-test")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-
-    XLSX.writeFile(
-      workbook,
-      `${safeFileName}-questions.xlsx`
-    );
-  } catch (error) {
-    console.error("Export XLSX error:", error);
-    alert("XLSX export failed");
-  }
-};
 
 const handleDownloadMockTestXlsxTemplate = () => {
   const testInfoRows = [
@@ -19439,11 +19118,20 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   📤 Export JSON
 </button>
 
-        <button
+<button
   type="button"
   onClick={() => {
-    handleExportMockTestCsv(mockMenuTest);
+    const exported = exportMockTestCsv({
+      test: mockMenuTest,
+    });
+
     closeMockActionPortal();
+
+    alert(
+      exported
+        ? "Mock test CSV exported ✅"
+        : "No questions found for CSV export"
+    );
   }}
 >
   📊 Export CSV
@@ -19452,8 +19140,17 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 <button
   type="button"
   onClick={() => {
-    handleExportMockTestExcel(mockMenuTest);
+    const exported = exportMockTestExcel({
+      test: mockMenuTest,
+    });
+
     closeMockActionPortal();
+
+    alert(
+      exported
+        ? "Mock test Excel exported ✅"
+        : "No questions found for Excel export"
+    );
   }}
 >
   📗 Export Excel
@@ -19461,8 +19158,17 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 <button
   type="button"
   onClick={() => {
-    handleExportMockTestXlsx(mockMenuTest);
+    const exported = exportMockTestXlsx({
+      test: mockMenuTest,
+    });
+
     closeMockActionPortal();
+
+    alert(
+      exported
+        ? "Mock test XLSX exported ✅"
+        : "No questions found for XLSX export"
+    );
   }}
 >
   📘 Export XLSX
