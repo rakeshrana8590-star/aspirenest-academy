@@ -88,6 +88,7 @@ import ExamStartRoute from "./components/exam/ExamStartRoute.jsx";
 import StudentMockTestCard from "./components/exam/StudentMockTestCard.jsx";
 import {
   createEmptyMockQuestion,
+  createDefaultMockTestForm,
   buildMockTestFormFromTest,
   buildMockTestQuestionsFormFromTest,
 } from "./components/exam/mockTestFormUtils.js";
@@ -673,39 +674,9 @@ const fallbackCurrentAffairs = [
   },
 ];
 
-const [mockTestForm, setMockTestForm] = useState({
-  title: "",
-  planType: "FREE",
-  subject: "",
-  chapter: "",
-  examType: "CTET",
-  testType: "Chapter Test",
-  duration: "30",
-  totalQuestions: "10",
-  marksPerQuestion: "1",
-  negativeMarks: "0",
-  passingMarks: "0",
-
-  examDifficulty: "Mixed",
-  examLanguage: "English",
-
-  attemptLimit: "unlimited",
-  resultPublishMode: "instant",
-
-  shuffleQuestions: "no",
-  shuffleOptions: "no",
-
-  navigationMode: "free",
-
-  allowPause: "yes",
-  calculatorAllowed: "no",
-
-  examStartDate: "",
-  examEndDate: "",
-  examInstructions: "",
-
-  status: "published",
-});
+const [mockTestForm, setMockTestForm] = useState(() =>
+  createDefaultMockTestForm()
+);
 
 const [mockTestQuestionsForm, setMockTestQuestionsForm] = useState(() => [
   createEmptyMockQuestion(),
@@ -1288,66 +1259,7 @@ examInstructions:
       alert("Examination Test saved successfully ✅");
     }
 
-    await loadContentItemsFromFirestore();
-
-    setMockTestForm({
-      title: "",
-      planType: "FREE",
-      subject: "",
-      chapter: "",
-      examType: "CTET",
-      testType: "Chapter Test",
-    
-      duration: "30",
-      totalQuestions: "10",
-      marksPerQuestion: "1",
-      negativeMarks: "0",
-      passingMarks: "0",
-    
-      examDifficulty: "Mixed",
-      examLanguage: "English",
-    
-      attemptLimit: "unlimited",
-      resultPublishMode: "instant",
-    
-      shuffleQuestions: "no",
-      shuffleOptions: "no",
-    
-      navigationMode: "free",
-      allowPause: "yes",
-      calculatorAllowed: "no",
-    
-      questionSource: "manual",
-    
-      fullscreenMode: "no",
-      tabSwitchDetection: "no",
-      copyPasteProtection: "no",
-      autoSubmitOnViolation: "no",
-    
-      leaderboardMode: "disabled",
-    
-      timerMode: "globalTimer",
-      perQuestionTimeValue: "1",
-      perQuestionTimeUnit: "min",
-      autoSubmitOnTimeUp: "yes",
-    
-      scheduleType: "alwaysAvailable",
-      examStartDate: "",
-      examStartTime: "",
-      examEndDate: "",
-      examEndTime: "",
-    
-      recurringMode: "none",
-      weeklyTestDay: "",
-      monthlyTestDate: "",
-    
-      liveEventMode: "no",
-      scholarshipMode: "no",
-    
-      examInstructions: "",
-    
-      status: "published",
-    });
+    setMockTestForm(createDefaultMockTestForm());
 
     setMockTestQuestionsForm([
       {

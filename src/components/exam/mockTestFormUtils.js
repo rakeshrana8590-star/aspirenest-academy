@@ -16,6 +16,65 @@ export const createEmptyMockQuestion = () => ({
     saveToQuestionBank: "yes",
   });
   
+  export const createDefaultMockTestForm = () => ({
+    title: "",
+    planType: "FREE",
+    subject: "",
+    chapter: "",
+    examType: "CTET",
+    testType: "Chapter Test",
+  
+    duration: "30",
+    totalQuestions: "10",
+    marksPerQuestion: "1",
+    negativeMarks: "0",
+    passingMarks: "0",
+  
+    examDifficulty: "Mixed",
+    examLanguage: "English",
+  
+    attemptLimit: "unlimited",
+    resultPublishMode: "instant",
+  
+    shuffleQuestions: "no",
+    shuffleOptions: "no",
+  
+    navigationMode: "free",
+    allowPause: "yes",
+    calculatorAllowed: "no",
+  
+    questionSource: "manual",
+  
+    fullscreenMode: "no",
+    tabSwitchDetection: "no",
+    copyPasteProtection: "no",
+    autoSubmitOnViolation: "no",
+  
+    leaderboardMode: "disabled",
+  
+    timerMode: "globalTimer",
+    perQuestionTimeValue: "1",
+    perQuestionTimeUnit: "min",
+    autoSubmitOnTimeUp: "yes",
+  
+    scheduleType: "alwaysAvailable",
+    examStartDate: "",
+    examStartTime: "",
+    examEndDate: "",
+    examEndTime: "",
+  
+    recurringMode: "none",
+    weeklyTestDay: "",
+    monthlyTestDate: "",
+  
+    liveEventMode: "no",
+    scholarshipMode: "no",
+  
+    examInstructions: "",
+  
+    status: "published",
+  });
+  
   export const buildMockTestFormFromTest = (test = {}) => ({
     title: test.title || "",
     planType: test.planType || "FREE",
@@ -34,14 +93,9 @@ export const createEmptyMockQuestion = () => ({
       test.questions?.length?.toString() ||
       "10",
   
-    marksPerQuestion:
-      test.marksPerQuestion?.toString() || "1",
-  
-    negativeMarks:
-      test.negativeMarks?.toString() || "0",
-  
-    passingMarks:
-      test.passingMarks?.toString() || "0",
+    marksPerQuestion: test.marksPerQuestion?.toString() || "1",
+    negativeMarks: test.negativeMarks?.toString() || "0",
+    passingMarks: test.passingMarks?.toString() || "0",
   
     examDifficulty: test.examDifficulty || "Mixed",
     examLanguage: test.examLanguage || "English",
@@ -99,17 +153,12 @@ export const createEmptyMockQuestion = () => ({
           answer: question.answer || "",
           explanation: question.explanation || "",
           level: question.level || "Easy",
-          questionType:
-            question.questionType || "Single Correct",
+          questionType: question.questionType || "Single Correct",
           language: question.language || "English",
           tag: question.tag || "",
-          positiveMarks:
-            question.positiveMarks?.toString() || "1",
-          negativeMarks:
-            question.negativeMarks?.toString() || "0",
-          questionStatus:
-            question.questionStatus || "published",
-          saveToQuestionBank:
-            question.saveToQuestionBank || "yes",
+          positiveMarks: question.positiveMarks?.toString() || "1",
+          negativeMarks: question.negativeMarks?.toString() || "0",
+          questionStatus: question.questionStatus || "published",
+          saveToQuestionBank: question.saveToQuestionBank || "yes",
         }))
       : [createEmptyMockQuestion()];
