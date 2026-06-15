@@ -144,6 +144,91 @@ import {
       });
   };
   
+  const normalizeRoadmapDuplicateText = (value = "") => {
+    return value
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, " ");
+  };
+  
+  const buildRoadmapDuplicateSignature = (roadmap = {}) => {
+    return {
+      titleKey: normalizeRoadmapDuplicateText(roadmap.title),
+      examTypeKey: normalizeRoadmapDuplicateText(roadmap.examType),
+      startDateKey: normalizeDateValue(roadmap.startDate),
+      endDateKey: normalizeDateValue(roadmap.endDate),
+    };
+  };
+  
+  export const findDuplicateStudyRoadmaps = async ({
+    roadmap,
+    includeArchived = false,
+  } = {}) => {
+    const incomingSignature = buildRoadmapDuplicateSignature(roadmap);
+  
+    if (
+      !incomingSignature.titleKey ||
+      !incomingSignature.examTypeKey ||
+      !incomingSignature.startDateKey
+    ) {
+      return {
+        hasExactDuplicate: false,
+        hasPotentialDuplicate: false,
+        exactDuplicates: [],
+        potentialDuplicates: [],
+      };
+    }
+  
+    const existingRoadmaps = await loadStudyRoadmaps({
+      includeArchived: true,
+    });
+  
+    const activeRoadmaps = existingRoadmaps.filter((item) => {
+      if (item.id && roadmap?.id && item.id === roadmap.id) {
+        return false;
+      }
+  
+      if (!includeArchived && item.status === ROADMAP_STATUS.ARCHIVED) {
+        return false;
+      }
+  
+      return true;
+    });
+  
+    const exactDuplicates = activeRoadmaps.filter((item) => {
+      const existingSignature = buildRoadmapDuplicateSignature(item);
+  
+      return (
+        existingSignature.titleKey === incomingSignature.titleKey &&
+        existingSignature.examTypeKey === incomingSignature.examTypeKey &&
+        existingSignature.startDateKey === incomingSignature.startDateKey &&
+        existingSignature.endDateKey === incomingSignature.endDateKey
+      );
+    });
+  
+    const potentialDuplicates = activeRoadmaps.filter((item) => {
+      const existingSignature = buildRoadmapDuplicateSignature(item);
+  
+      const sameCore =
+        existingSignature.titleKey === incomingSignature.titleKey &&
+        existingSignature.examTypeKey === incomingSignature.examTypeKey &&
+        existingSignature.startDateKey === incomingSignature.startDateKey;
+  
+      const sameEndDate =
+        existingSignature.endDateKey === incomingSignature.endDateKey;
+  
+      return sameCore && !sameEndDate;
+    });
+  
+    return {
+      hasExactDuplicate: exactDuplicates.length > 0,
+      hasPotentialDuplicate: potentialDuplicates.length > 0,
+      exactDuplicates,
+      potentialDuplicates,
+    };
+  };
+
   export const loadPublishedStudyRoadmaps = async () => {
     return loadStudyRoadmaps({
       status: ROADMAP_STATUS.PUBLISHED,
@@ -257,6 +342,26 @@ import {
   };
   
   export const publishStudyRoadmap = async (roadmapId) => {
+    if (!roadmapId) {
+      throw new Error("Roadmap ID is required for publish.");
+    }
+  
+    const roadmap = await loadStudyRoadmapById(roadmapId);
+  
+    if (!roadmap) {
+      throw new Error("Roadmap not found for publish.");
+    }
+  
+    const duplicateAudit = await findDuplicateStudyRoadmaps({
+      roadmap,
+    });
+  
+    if (duplicateAudit.hasExactDuplicate) {
+      throw new Error(
+        "Exact duplicate roadmap found. Publish blocked to avoid duplicate live roadmaps."
+      );
+    }
+  
     return updateStudyRoadmap(roadmapId, {
       status: ROADMAP_STATUS.PUBLISHED,
       publishedAt: serverTimestamp(),
@@ -320,6 +425,7 @@ import {
   export const saveImportedRoadmapAsDraft = async ({
     roadmap,
     days = [],
+    allowPotentialDuplicate = false,
   }) => {
     if (!roadmap?.title?.trim()) {
       throw new Error("Roadmap title is required.");
@@ -328,6 +434,22 @@ import {
     if (!Array.isArray(days) || days.length === 0) {
       throw new Error("At least one roadmap day is required.");
     }
+
+    const duplicateAudit = await findDuplicateStudyRoadmaps({
+        roadmap,
+      });
+  
+      if (duplicateAudit.hasExactDuplicate) {
+        throw new Error(
+          "Exact duplicate roadmap already exists. Import blocked to avoid duplicate drafts."
+        );
+      }
+  
+      if (duplicateAudit.hasPotentialDuplicate && !allowPotentialDuplicate) {
+        throw new Error(
+          "Possible duplicate roadmap found. Please confirm before saving as a new draft."
+        );
+      }
   
     const roadmapRef = await addDoc(
       collection(db, ROADMAP_COLLECTIONS.ROADMAPS),

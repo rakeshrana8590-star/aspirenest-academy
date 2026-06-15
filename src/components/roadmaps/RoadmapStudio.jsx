@@ -8,6 +8,7 @@ import {
     loadStudyRoadmaps,
     loadStudyRoadmapWithDays,
     publishStudyRoadmap,
+    findDuplicateStudyRoadmaps,
     saveImportedRoadmapAsDraft,
     unpublishStudyRoadmap,
   } from "../../services/roadmapService";
@@ -255,6 +256,10 @@ export const RoadmapImportRoute = () => {
   const [importing, setImporting] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   const [saveMessage, setSaveMessage] = React.useState("");
+  const [duplicateAudit, setDuplicateAudit] = React.useState(null);
+  const [duplicateChecking, setDuplicateChecking] = React.useState(false);
+  const [allowDuplicateSave, setAllowDuplicateSave] = React.useState(false);
+
 
   const handleFileChange = async (event) => {
     const file = event.target.files?.[0];
@@ -262,6 +267,9 @@ export const RoadmapImportRoute = () => {
     setSaveMessage("");
     setImportResult(null);
     setSelectedFileName("");
+    setDuplicateAudit(null);
+    setDuplicateChecking(false);
+    setAllowDuplicateSave(false);
 
     if (!file) return;
 
@@ -272,8 +280,25 @@ export const RoadmapImportRoute = () => {
       const parsed = await parseRoadmapXlsxFile(file);
 
       setImportResult(parsed);
+      setAllowDuplicateSave(false);
+
+      if (parsed?.roadmap && parsed?.validation?.isValid) {
+        setDuplicateChecking(true);
+
+        try {
+          const audit = await findDuplicateStudyRoadmaps({
+            roadmap: parsed.roadmap,
+          });
+
+          setDuplicateAudit(audit);
+        } finally {
+          setDuplicateChecking(false);
+        }
+      }
     } catch (error) {
       console.error("Roadmap import parse error:", error);
+      setDuplicateAudit(null);
+      setAllowDuplicateSave(false);
 
       setImportResult({
         roadmap: null,
@@ -297,6 +322,20 @@ export const RoadmapImportRoute = () => {
       return;
     }
 
+    if (hasExactDuplicate) {
+        setSaveMessage(
+          "Exact duplicate roadmap found. This import is blocked to avoid accidental duplicate drafts."
+        );
+        return;
+      }
+  
+      if (hasPotentialDuplicate && !allowDuplicateSave) {
+        setSaveMessage(
+          "Possible duplicate roadmap found. Review the warning and confirm before saving as a new draft."
+        );
+        return;
+      }
+
     try {
       setSaving(true);
       setSaveMessage("");
@@ -304,6 +343,7 @@ export const RoadmapImportRoute = () => {
       const roadmapId = await saveImportedRoadmapAsDraft({
         roadmap: importResult.roadmap,
         days: importResult.days,
+        allowPotentialDuplicate: allowDuplicateSave,
       });
 
       setSaveMessage("Roadmap saved as draft successfully.");
@@ -318,6 +358,12 @@ export const RoadmapImportRoute = () => {
   };
 
   const validation = importResult?.validation;
+  const exactDuplicateRoadmaps = duplicateAudit?.exactDuplicates || [];
+const potentialDuplicateRoadmaps = duplicateAudit?.potentialDuplicates || [];
+const hasExactDuplicate = exactDuplicateRoadmaps.length > 0;
+const hasPotentialDuplicate = potentialDuplicateRoadmaps.length > 0;
+const needsDuplicateConfirm = hasPotentialDuplicate && !allowDuplicateSave;
+const saveBlockedByDuplicate = hasExactDuplicate || needsDuplicateConfirm;
 
   return (
     <RoadmapShell mode="admin">
@@ -468,6 +514,99 @@ export const RoadmapImportRoute = () => {
         </section>
       ) : null}
 
+{duplicateChecking ? (
+        <section className="roadmapStudioSection">
+          <RoadmapSectionHeader
+            mode="admin"
+            kicker="Duplicate Safety"
+            title="Checking existing roadmaps..."
+            text="Roadmap Studio is comparing this import with saved roadmaps before allowing draft save."
+          />
+        </section>
+      ) : duplicateAudit && (hasExactDuplicate || hasPotentialDuplicate) ? (
+        <section className="roadmapStudioSection">
+          <RoadmapSectionHeader
+            mode="admin"
+            kicker="Duplicate Safety"
+            title={
+              hasExactDuplicate
+                ? "Duplicate roadmap blocked"
+                : "Possible duplicate roadmap found"
+            }
+            text={
+              hasExactDuplicate
+                ? "A roadmap with the same title, exam type, start date, and end date already exists. This import is blocked."
+                : "A roadmap with the same title, exam type, and start date already exists. Confirm only if this should be saved as a separate draft."
+            }
+          />
+
+          <div className="roadmapStudioValidationGrid">
+            {hasExactDuplicate ? (
+              <RoadmapStudioMessage type="error">
+                <strong>Exact duplicate</strong>
+                <p className="roadmapStudioCardText">
+                  Save as Draft is blocked for exact duplicates.
+                </p>
+              </RoadmapStudioMessage>
+            ) : null}
+
+            {hasPotentialDuplicate ? (
+              <RoadmapStudioMessage type="warning">
+                <strong>Potential duplicate</strong>
+                <p className="roadmapStudioCardText">
+                  Same title, exam type, and start date found. End date may be
+                  different.
+                </p>
+              </RoadmapStudioMessage>
+            ) : null}
+
+            <RoadmapStudioMessage type={allowDuplicateSave ? "success" : "warning"}>
+              <strong>Save permission</strong>
+              <p className="roadmapStudioCardText">
+                {hasExactDuplicate
+                  ? "Blocked"
+                  : allowDuplicateSave
+                  ? "Confirmed for new draft save"
+                  : "Confirmation required"}
+              </p>
+            </RoadmapStudioMessage>
+          </div>
+
+          <div className="roadmapStudioImportPanel">
+            {[...exactDuplicateRoadmaps, ...potentialDuplicateRoadmaps].map(
+              (roadmap) => (
+                <p className="roadmapStudioCardText" key={roadmap.id}>
+                  ⚠️ {roadmap.title || "Untitled Roadmap"} •{" "}
+                  {roadmap.examType || "Exam"} • {formatDate(roadmap.startDate)} →{" "}
+                  {formatDate(roadmap.endDate)} • {roadmap.status || "draft"}
+                </p>
+              )
+            )}
+
+            {hasPotentialDuplicate && !hasExactDuplicate ? (
+              <div className="roadmapStudioHeroActions">
+                {allowDuplicateSave ? (
+                  <RoadmapBadge mode="admin">Duplicate save confirmed</RoadmapBadge>
+                ) : (
+                  <button
+                    className="roadmapStudioSecondaryBtn"
+                    type="button"
+                    onClick={() => {
+                      setAllowDuplicateSave(true);
+                      setSaveMessage(
+                        "Duplicate warning confirmed. You can now save this as a new draft."
+                      );
+                    }}
+                  >
+                    I understand, save as new draft
+                  </button>
+                )}
+              </div>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+
       {importResult?.roadmap ? (
         <section className="roadmapStudioSection">
           <RoadmapSectionHeader
@@ -479,7 +618,7 @@ export const RoadmapImportRoute = () => {
               <button
                 className="roadmapStudioPrimaryBtn"
                 type="button"
-                disabled={!validation?.isValid || saving}
+                disabled={!validation?.isValid || saving || duplicateChecking || saveBlockedByDuplicate}
                 onClick={handleSaveDraft}
               >
                 {saving ? "Saving..." : "Save as Draft"}
@@ -577,9 +716,14 @@ export const RoadmapManageRoute = () => {
   });
 
   const handlePublish = async (roadmapId) => {
-    await publishStudyRoadmap(roadmapId);
-    setActionMessage("Roadmap published successfully.");
-    await loadRoadmaps();
+    try {
+      await publishStudyRoadmap(roadmapId);
+      setActionMessage("Roadmap published successfully.");
+      await loadRoadmaps();
+    } catch (error) {
+      console.error("Publish roadmap error:", error);
+      setActionMessage(error.message || "Unable to publish roadmap.");
+    }
   };
 
   const handleUnpublish = async (roadmapId) => {

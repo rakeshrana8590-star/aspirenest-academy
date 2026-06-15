@@ -55,7 +55,7 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import React, { useState, useEffect } from 'react';
-import { createPortal } from "react-dom";
+
 import {
   Routes,
   Route,
@@ -87,23 +87,16 @@ import ExamResultRoute from "./components/exam/ExamResultRoute.jsx";
 import ExamReviewRoute from "./components/exam/ExamReviewRoute.jsx";
 import ExamStartRoute from "./components/exam/ExamStartRoute.jsx";
 import StudentMockTestCard from "./components/exam/StudentMockTestCard.jsx";
+import MockTestActionMenu from "./components/exam/MockTestActionMenu.jsx";
+import { deleteMockTest } from "./components/exam/mockTestAdminActions.js";
+
 import {
   createEmptyMockQuestion,
   createDefaultMockTestForm,
   buildMockTestFormFromTest,
   buildMockTestQuestionsFormFromTest,
 } from "./components/exam/mockTestFormUtils.js";
-import {
-  duplicateMockTestAsDraft,
-  updateMockTestStatus,
-  toggleMockTestFeatured,
-  copyMockTestStartLink,
-  deleteMockTest,
-  exportMockTestJson,
-  exportMockTestCsv,
-  exportMockTestExcel,
-  exportMockTestXlsx,
-} from "./components/exam/mockTestAdminActions.js";
+
 import { useExamAttemptState } from "./components/exam/useExamAttemptState.js";
 import { useExamTimer } from "./components/exam/useExamTimer.js";
 import { useExamSecurity } from "./components/exam/useExamSecurity.js";
@@ -11486,13 +11479,22 @@ Do you want to continue?`
     if (!confirmDelete) return;
 
     for (const testId of selectedMockTestIds) {
-      await deleteDoc(doc(db, "contentItems", testId));
+      const selectedTest = universalContent.find(
+        (item) => item.id === testId
+      );
+    
+      if (!selectedTest) continue;
+    
+      await deleteMockTest({
+        test: selectedTest,
+        reloadContent: async () => {},
+      });
     }
-
+    
     await loadContentItemsFromFirestore();
-
+    
     setSelectedMockTestIds([]);
-
+    
     alert("Selected mock tests deleted permanently ✅");
   }}
 >
@@ -18916,288 +18918,15 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 
 </Routes>
 
-{mockMenuPosition &&
-  mockMenuTest &&
-  createPortal(
-    <div
-      className="mockPortalBackdrop"
-      onClick={closeMockActionPortal}
-    >
-      <div
-        className="mockPortalMenu"
-        style={{
-          position: "fixed",
-          top: `${mockMenuPosition.top}px`,
-          left: `${mockMenuPosition.left}px`,
-          zIndex: 999999,
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-<button
-  onClick={() => {
-    if (!mockMenuTest?.id) return;
-
-    setEditingMockTestId(mockMenuTest.id);
-    setMockTestForm(buildMockTestFormFromTest(mockMenuTest));
-    setMockTestQuestionsForm(
-      buildMockTestQuestionsFormFromTest(mockMenuTest)
-    );
-
-    closeMockActionPortal();
-
-    localStorage.removeItem("reusedQuestionForMockTest");
-
-    navigate(
-      `/admin/content/mock-tests/add?editId=${mockMenuTest.id}`
-    );
-  }}
->
-  ✏ Edit
-</button>
-
-        <div className="mockPortalMenuDivider" />
-
-        <button
-  onClick={async () => {
-    const confirmClone = window.confirm(
-      `Create a duplicate copy of "${mockMenuTest.title}" as Draft?`
-    );
-
-    if (!confirmClone) return;
-
-    await duplicateMockTestAsDraft({
-      test: mockMenuTest,
-      reloadContent: loadContentItemsFromFirestore,
-    });
-
-    closeMockActionPortal();
-    alert("Mock test duplicated as Draft ✅");
-  }}
->
-  📋 Duplicate
-</button>
-
-        <div className="mockPortalMenuDivider" />
-        <button
-  onClick={async () => {
-    const nextStatus =
-      mockMenuTest.status === "published"
-        ? "unpublished"
-        : "published";
-
-    await updateMockTestStatus({
-      test: mockMenuTest,
-      status: nextStatus,
-      reloadContent: loadContentItemsFromFirestore,
-    });
-
-    closeMockActionPortal();
-
-    alert(
-      nextStatus === "published"
-        ? "Mock test published ✅"
-        : "Mock test unpublished ✅"
-    );
-  }}
->
-  🚀 Publish / Unpublish
-</button>
-
-<button
-  onClick={async () => {
-    await toggleMockTestFeatured({
-      test: mockMenuTest,
-      reloadContent: loadContentItemsFromFirestore,
-    });
-
-    closeMockActionPortal();
-
-    alert(
-      !mockMenuTest.isFeatured
-        ? "Mock test marked as featured ⭐"
-        : "Mock test removed from featured"
-    );
-  }}
->
-  ⭐ Feature / Remove Feature
-</button>
-
-{mockMenuTest.status === "archived" ? (
-  <button
-    onClick={async () => {
-      if (!mockMenuTest?.id) return;
-
-      const confirmRestore = window.confirm(
-        `Restore "${mockMenuTest.title}" back to Unpublished?`
-      );
-
-      if (!confirmRestore) return;
-
-      await updateMockTestStatus({
-        test: mockMenuTest,
-        status: "unpublished",
-        reloadContent: loadContentItemsFromFirestore,
-        extraFields: {
-          restoredAt: new Date(),
-        },
-      });
-
-      closeMockActionPortal();
-
-      alert("Mock test restored successfully ✅");
-    }}
-  >
-    📂 Restore / Unarchive
-  </button>
-) : (
-  <button
-    onClick={async () => {
-      if (!mockMenuTest?.id) return;
-
-      const confirmArchive = window.confirm(
-        `Archive "${mockMenuTest.title}"?\n\nArchived tests stay saved in admin but should not appear to students.`
-      );
-
-      if (!confirmArchive) return;
-
-      await updateMockTestStatus({
-        test: mockMenuTest,
-        status: "archived",
-        reloadContent: loadContentItemsFromFirestore,
-        extraFields: {
-          archivedAt: new Date(),
-        },
-      });
-
-      closeMockActionPortal();
-
-      alert("Mock test archived successfully ✅");
-    }}
-  >
-    📦 Archive
-  </button>
-)}
-
-        
-
-        <div className="mockPortalMenuDivider" />
-
-        <button
-  onClick={async () => {
-    const copied = await copyMockTestStartLink({
-      test: mockMenuTest,
-    });
-
-    closeMockActionPortal();
-
-    alert(
-      copied
-        ? "Mock test link copied ✅"
-        : "Unable to copy mock test link"
-    );
-  }}
->
-  🔗 Copy Link
-</button>
-
-<button
-  onClick={() => {
-    const exported = exportMockTestJson({
-      test: mockMenuTest,
-    });
-
-    closeMockActionPortal();
-
-    alert(
-      exported
-        ? "Mock test JSON exported ✅"
-        : "Unable to export mock test JSON"
-    );
-  }}
->
-  📤 Export JSON
-</button>
-
-<button
-  type="button"
-  onClick={() => {
-    const exported = exportMockTestCsv({
-      test: mockMenuTest,
-    });
-
-    closeMockActionPortal();
-
-    alert(
-      exported
-        ? "Mock test CSV exported ✅"
-        : "No questions found for CSV export"
-    );
-  }}
->
-  📊 Export CSV
-</button>
-
-<button
-  type="button"
-  onClick={() => {
-    const exported = exportMockTestExcel({
-      test: mockMenuTest,
-    });
-
-    closeMockActionPortal();
-
-    alert(
-      exported
-        ? "Mock test Excel exported ✅"
-        : "No questions found for Excel export"
-    );
-  }}
->
-  📗 Export Excel
-</button>
-<button
-  type="button"
-  onClick={() => {
-    const exported = exportMockTestXlsx({
-      test: mockMenuTest,
-    });
-
-    closeMockActionPortal();
-
-    alert(
-      exported
-        ? "Mock test XLSX exported ✅"
-        : "No questions found for XLSX export"
-    );
-  }}
->
-  📘 Export XLSX
-</button>
-
-        <div className="mockPortalMenuDivider" />
-
-        <button
-          className="dangerMenuButton"
-          onClick={async () => {
-            const confirmDelete = window.confirm(
-              `Delete "${mockMenuTest.title}" permanently?\n\nThis action cannot be undone.`
-            );
-
-            if (!confirmDelete) return;
-
-            await deleteDoc(doc(db, "contentItems", mockMenuTest.id));
-            await loadContentItemsFromFirestore();
-
-            closeMockActionPortal();
-            alert("Mock test deleted permanently ✅");
-          }}
-        >
-          🗑 Delete
-        </button>
-      </div>
-    </div>,
-    document.body
-  )}
+<MockTestActionMenu
+  position={mockMenuPosition}
+  test={mockMenuTest}
+  onClose={closeMockActionPortal}
+  reloadContent={loadContentItemsFromFirestore}
+  setEditingMockTestId={setEditingMockTestId}
+  setMockTestForm={setMockTestForm}
+  setMockTestQuestionsForm={setMockTestQuestionsForm}
+/>
 </main>
 
 {selectedCourse && (
