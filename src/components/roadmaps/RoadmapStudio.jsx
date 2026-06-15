@@ -762,6 +762,13 @@ export const RoadmapManageRoute = () => {
                         </Link>
 
                         <Link
+  className="roadmapStudioGhostBtn"
+  to={`/admin/content/roadmaps/resources/${roadmap.id}`}
+>
+  Resources
+</Link>
+
+                        <Link
                           className="roadmapStudioGhostBtn"
                           to={`/admin/content/roadmaps/progress/${roadmap.id}`}
                         >

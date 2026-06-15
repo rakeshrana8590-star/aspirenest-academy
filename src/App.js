@@ -79,6 +79,7 @@ import {
   RoadmapManageRoute,
   RoadmapScheduleRoute,
   RoadmapProgressRoute,
+  RoadmapResourcesRoute,
 } from "./components/roadmaps/RoadmapStudio.jsx";
 
 import ExamAttemptRoute from "./components/exam/ExamAttemptRoute.jsx";
@@ -92,6 +93,11 @@ import {
   buildMockTestFormFromTest,
   buildMockTestQuestionsFormFromTest,
 } from "./components/exam/mockTestFormUtils.js";
+import {
+  duplicateMockTestAsDraft,
+  updateMockTestStatus,
+  toggleMockTestFeatured,
+} from "./components/exam/mockTestAdminActions.js";
 import { useExamAttemptState } from "./components/exam/useExamAttemptState.js";
 import { useExamTimer } from "./components/exam/useExamTimer.js";
 import { useExamSecurity } from "./components/exam/useExamSecurity.js";
@@ -4975,6 +4981,15 @@ return (
     ) : null
   }
 />
+<Route
+  path="/admin/content/roadmaps/resources/:roadmapId"
+  element={
+    requireAdmin() ? (
+      <RoadmapResourcesRoute />
+    ) : null
+  }
+/>
+
 
 <Route
   path="/admin/content/roadmaps/progress/:roadmapId"
@@ -19257,83 +19272,71 @@ handleSaveUniversalContent={handleSaveUniversalContent}
         <div className="mockPortalMenuDivider" />
 
         <button
-          onClick={async () => {
-            const confirmClone = window.confirm(
-              `Create a duplicate copy of "${mockMenuTest.title}" as Draft?`
-            );
+  onClick={async () => {
+    const confirmClone = window.confirm(
+      `Create a duplicate copy of "${mockMenuTest.title}" as Draft?`
+    );
 
-            if (!confirmClone) return;
+    if (!confirmClone) return;
 
-            const clonePayload = {
-              ...mockMenuTest,
-              title: `${mockMenuTest.title || "Mock Test"} - Copy`,
-              status: "draft",
-              isFeatured: false,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              clonedFrom: mockMenuTest.id,
-            };
+    await duplicateMockTestAsDraft({
+      test: mockMenuTest,
+      reloadContent: loadContentItemsFromFirestore,
+    });
 
-            delete clonePayload.id;
-
-            await addDoc(collection(db, "contentItems"), clonePayload);
-            await loadContentItemsFromFirestore();
-
-            closeMockActionPortal();
-            alert("Mock test duplicated as Draft ✅");
-          }}
-        >
-          📋 Duplicate
-        </button>
+    closeMockActionPortal();
+    alert("Mock test duplicated as Draft ✅");
+  }}
+>
+  📋 Duplicate
+</button>
 
         <div className="mockPortalMenuDivider" />
-
         <button
-          onClick={async () => {
-            const nextStatus =
-              mockMenuTest.status === "published"
-                ? "unpublished"
-                : "published";
+  onClick={async () => {
+    const nextStatus =
+      mockMenuTest.status === "published"
+        ? "unpublished"
+        : "published";
 
-            await updateDoc(doc(db, "contentItems", mockMenuTest.id), {
-              status: nextStatus,
-              updatedAt: new Date(),
-            });
+    await updateMockTestStatus({
+      test: mockMenuTest,
+      status: nextStatus,
+      reloadContent: loadContentItemsFromFirestore,
+    });
 
-            await loadContentItemsFromFirestore();
-            closeMockActionPortal();
+    closeMockActionPortal();
 
-            alert(
-              nextStatus === "published"
-                ? "Mock test published ✅"
-                : "Mock test unpublished ✅"
-            );
-          }}
-        >
-          🚀 Publish / Unpublish
-        </button>
+    alert(
+      nextStatus === "published"
+        ? "Mock test published ✅"
+        : "Mock test unpublished ✅"
+    );
+  }}
+>
+  🚀 Publish / Unpublish
+</button>
 
-        <button
-          onClick={async () => {
-            await updateDoc(doc(db, "contentItems", mockMenuTest.id), {
-              isFeatured: !mockMenuTest.isFeatured,
-              updatedAt: new Date(),
-            });
+<button
+  onClick={async () => {
+    await toggleMockTestFeatured({
+      test: mockMenuTest,
+      reloadContent: loadContentItemsFromFirestore,
+    });
 
-            await loadContentItemsFromFirestore();
-            closeMockActionPortal();
+    closeMockActionPortal();
 
-            alert(
-              !mockMenuTest.isFeatured
-                ? "Mock test marked as featured ⭐"
-                : "Mock test removed from featured"
-            );
-          }}
-        >
-          ⭐ Feature / Remove Feature
-        </button>
+    alert(
+      !mockMenuTest.isFeatured
+        ? "Mock test marked as featured ⭐"
+        : "Mock test removed from featured"
+    );
+  }}
+>
+  ⭐ Feature / Remove Feature
+</button>
 
-        {mockMenuTest.status === "archived" ? (
+{mockMenuTest.status === "archived" ? (
   <button
     onClick={async () => {
       if (!mockMenuTest?.id) return;
@@ -19344,13 +19347,15 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 
       if (!confirmRestore) return;
 
-      await updateDoc(doc(db, "contentItems", mockMenuTest.id), {
+      await updateMockTestStatus({
+        test: mockMenuTest,
         status: "unpublished",
-        updatedAt: new Date(),
-        restoredAt: new Date(),
+        reloadContent: loadContentItemsFromFirestore,
+        extraFields: {
+          restoredAt: new Date(),
+        },
       });
 
-      await loadContentItemsFromFirestore();
       closeMockActionPortal();
 
       alert("Mock test restored successfully ✅");
@@ -19369,13 +19374,15 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 
       if (!confirmArchive) return;
 
-      await updateDoc(doc(db, "contentItems", mockMenuTest.id), {
+      await updateMockTestStatus({
+        test: mockMenuTest,
         status: "archived",
-        updatedAt: new Date(),
-        archivedAt: new Date(),
+        reloadContent: loadContentItemsFromFirestore,
+        extraFields: {
+          archivedAt: new Date(),
+        },
       });
 
-      await loadContentItemsFromFirestore();
       closeMockActionPortal();
 
       alert("Mock test archived successfully ✅");
