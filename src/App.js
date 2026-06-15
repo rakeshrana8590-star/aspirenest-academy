@@ -1,7 +1,7 @@
 import { auth, db } from "./firebase";
 import { storage } from "./firebase";
 import { QRCodeCanvas } from "qrcode.react";
-import * as XLSX from "xlsx";
+
 import dayjs from "dayjs";
 import { v4 as uuidv4 } from "uuid";
 import toast, { Toaster } from "react-hot-toast";
@@ -106,6 +106,12 @@ import {
   downloadMockTestXlsxTemplate,
   downloadMockTestCsvTemplate,
 } from "./components/exam/mockTestTemplateDownloads.js";
+import {
+  convertGoogleDriveUrlToDownloadUrl,
+  importMockTestJsonAsDraft,
+  buildMockTestImportPayloadFromRows,
+  readMockTestWorkbookRowsFromArrayBuffer,
+} from "./components/exam/mockTestImportUtils.js";
 import './style.css';
 import "./styles/exam/examHeader.css";
 import "./styles/exam/questionWorkspace.css";
@@ -1258,6 +1264,13 @@ examInstructions:
   }
 };
 
+
+
+
+
+
+
+
 const handleImportMockTestJson = async (event) => {
   try {
     const file = event.target.files?.[0];
@@ -1268,29 +1281,16 @@ const handleImportMockTestJson = async (event) => {
 
     const importedTest = JSON.parse(fileText);
 
-    if (!importedTest.title || !importedTest.questions?.length) {
+    const imported = await importMockTestJsonAsDraft({
+      importedTest,
+      reloadContent: loadContentItemsFromFirestore,
+    });
+
+    if (!imported) {
       alert("Invalid exam JSON file");
+      event.target.value = "";
       return;
     }
-
-    const importPayload = {
-      ...importedTest,
-      title: `${importedTest.title} - Imported`,
-      section: "mockTest",
-      contentType: "MOCK",
-      status: "draft",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    delete importPayload.id;
-
-    await addDoc(
-      collection(db, "contentItems"),
-      importPayload
-    );
-
-    await loadContentItemsFromFirestore();
 
     alert("Exam imported successfully as Draft ✅");
 
@@ -1298,15 +1298,9 @@ const handleImportMockTestJson = async (event) => {
   } catch (error) {
     console.error("Import exam JSON error:", error);
     alert("Invalid JSON file or import failed");
+    event.target.value = "";
   }
 };
-
-
-
-
-
-
-
 
 const handleDownloadMockTestXlsxTemplate = () => {
   downloadMockTestXlsxTemplate();
@@ -1324,180 +1318,30 @@ const handleImportMockTestXlsx = async (event) => {
 
     const data = await file.arrayBuffer();
 
-    const workbook = XLSX.read(data, {
-      type: "array",
+    const workbookRows = readMockTestWorkbookRowsFromArrayBuffer(data);
+
+    if (!workbookRows.ok) {
+      alert(workbookRows.message);
+      event.target.value = "";
+      return;
+    }
+    
+    const { testInfoRows, questionRows } = workbookRows;
+
+    const parsedImport = buildMockTestImportPayloadFromRows({
+      testInfoRows,
+      questionRows,
+      sourceType: "xlsxImport",
     });
 
-    const testInfoSheet = workbook.Sheets["Test Info"];
-    const questionsSheet = workbook.Sheets["Questions"];
-
-    if (!testInfoSheet || !questionsSheet) {
-      alert(
-        "Invalid template. File must contain 'Test Info' and 'Questions' sheets."
-      );
+    if (!parsedImport.ok) {
+      alert(parsedImport.message);
       event.target.value = "";
       return;
     }
-
-    const testInfoRows = XLSX.utils.sheet_to_json(testInfoSheet, {
-      defval: "",
-    });
-
-    const questionRows = XLSX.utils.sheet_to_json(questionsSheet, {
-      defval: "",
-    });
-
-    if (!testInfoRows.length) {
-      alert("Test Info sheet is empty.");
-      event.target.value = "";
-      return;
-    }
-
-    if (!questionRows.length) {
-      alert("Questions sheet is empty.");
-      event.target.value = "";
-      return;
-    }
-
-    const MAX_IMPORT_QUESTIONS = 1000;
-
-    if (questionRows.length > MAX_IMPORT_QUESTIONS) {
-      alert(
-        `Maximum ${MAX_IMPORT_QUESTIONS} questions allowed per import. Please split bigger exams into parts.`
-      );
-      event.target.value = "";
-      return;
-    }
-
-    const testInfo = testInfoRows.reduce((acc, row) => {
-      const field = row.Field?.toString().trim();
-      const value = row.Value;
-
-      if (field) {
-        acc[field] = value;
-      }
-
-      return acc;
-    }, {});
-
-    const requiredQuestionColumns = [
-      "Question",
-      "Option A",
-      "Option B",
-      "Option C",
-      "Option D",
-      "Correct Answer",
-    ];
-
-    const firstQuestionRow = questionRows[0];
-
-    const missingQuestionColumns =
-      requiredQuestionColumns.filter(
-        (column) => !(column in firstQuestionRow)
-      );
-
-    if (missingQuestionColumns.length > 0) {
-      alert(
-        `Missing required question column(s): ${missingQuestionColumns.join(
-          ", "
-        )}`
-      );
-      event.target.value = "";
-      return;
-    }
-
-    const importedQuestions = questionRows.map((row, index) => ({
-      questionNumber: Number(row["Question Number"] || index + 1),
-      question: row["Question"]?.toString().trim() || "",
-      option1: row["Option A"]?.toString().trim() || "",
-      option2: row["Option B"]?.toString().trim() || "",
-      option3: row["Option C"]?.toString().trim() || "",
-      option4: row["Option D"]?.toString().trim() || "",
-      answer: row["Correct Answer"]?.toString().trim() || "",
-      explanation: row["Explanation"]?.toString().trim() || "",
-      level:
-        row["Difficulty Level"]?.toString().trim() ||
-        testInfo["Exam Difficulty"]?.toString().trim() ||
-        "Easy",
-      questionType:
-        row["Question Type"]?.toString().trim() ||
-        "Single Correct",
-      language:
-        row["Language"]?.toString().trim() ||
-        testInfo["Exam Language"]?.toString().trim() ||
-        "English",
-      tag: row["Tag"]?.toString().trim() || "",
-      positiveMarks: Number(
-        row["Positive Marks"] ||
-          testInfo["Marks Per Question"] ||
-          1
-      ),
-      negativeMarks: Number(
-        row["Negative Marks"] ||
-          testInfo["Negative Marks"] ||
-          0
-      ),
-      questionStatus:
-        row["Question Status"]?.toString().trim() ||
-        "published",
-      saveToQuestionBank:
-        row["Save To Question Bank"]?.toString().trim() ||
-        "yes",
-    }));
-
-    const invalidQuestionIndex = importedQuestions.findIndex(
-      (q) =>
-        !q.question ||
-        !q.option1 ||
-        !q.option2 ||
-        !q.option3 ||
-        !q.option4 ||
-        !q.answer
-    );
-
-    if (invalidQuestionIndex !== -1) {
-      alert(
-        `Question ${invalidQuestionIndex + 1} is incomplete. Import cancelled.`
-      );
-      event.target.value = "";
-      return;
-    }
-
-    const title =
-      testInfo["Test Title"]?.toString().trim() ||
-      "Imported XLSX Mock Test";
-
-    const totalQuestions = importedQuestions.length;
-    
-    const declaredTotalQuestions = Number(
-      testInfo["Total Questions"] || totalQuestions
-    );
-    
-    if (
-      Number.isFinite(declaredTotalQuestions) &&
-      declaredTotalQuestions > 0 &&
-      declaredTotalQuestions !== totalQuestions
-    ) {
-      alert(
-        `Total Questions mismatch.
-    
-    Test Info says: ${declaredTotalQuestions}
-    
-    Questions sheet has: ${totalQuestions}
-    
-    Please fix the Excel file and import again.`
-      );
-    
-      event.target.value = "";
-      return;
-    }
-    const totalMarks = importedQuestions.reduce(
-      (sum, q) => sum + Number(q.positiveMarks || 0),
-      0
-    );
 
     const confirmImport = window.confirm(
-      `Import this Excel file as Draft?\n\nTitle: ${title}\nQuestions: ${totalQuestions}\nMarks: ${totalMarks}\n\nExisting tests will not be overwritten.`
+      `Import this Excel file as Draft?\n\nTitle: ${parsedImport.title}\nQuestions: ${parsedImport.totalQuestions}\nMarks: ${parsedImport.totalMarks}\n\nExisting tests will not be overwritten.`
     );
 
     if (!confirmImport) {
@@ -1505,153 +1349,10 @@ const handleImportMockTestXlsx = async (event) => {
       return;
     }
 
-    const importPayload = {
-      title: `${title} - Imported`,
-      section: "mockTest",
-      contentType: "MOCK",
-
-      planType: testInfo["Plan"]?.toString().trim() || "FREE",
-      examType: testInfo["Exam Type"]?.toString().trim() || "CTET",
-      testType:
-        testInfo["Test Type"]?.toString().trim() ||
-        "Chapter Test",
-
-      subject: testInfo["Subject"]?.toString().trim() || "",
-      chapter: testInfo["Chapter"]?.toString().trim() || "",
-
-      duration: Number(testInfo["Duration Minutes"] || 30),
-      durationMinutes: Number(testInfo["Duration Minutes"] || 30),
-
-      totalQuestions,
-      marksPerQuestion: Number(
-        testInfo["Marks Per Question"] || 1
-      ),
-      negativeMarks: Number(testInfo["Negative Marks"] || 0),
-      passingMarks: Number(testInfo["Passing Marks"] || 0),
-
-      examDifficulty:
-        testInfo["Exam Difficulty"]?.toString().trim() ||
-        "Mixed",
-
-      examLanguage:
-        testInfo["Exam Language"]?.toString().trim() ||
-        "English",
-
-      attemptLimit:
-        testInfo["Attempt Limit"]?.toString().trim() ||
-        "unlimited",
-
-      resultPublishMode:
-        testInfo["Result Publish Mode"]?.toString().trim() ||
-        "instant",
-
-      shuffleQuestions:
-        testInfo["Shuffle Questions"]?.toString().trim() ||
-        "no",
-
-      shuffleOptions:
-        testInfo["Shuffle Options"]?.toString().trim() ||
-        "no",
-
-      navigationMode:
-        testInfo["Navigation Mode"]?.toString().trim() ||
-        "free",
-
-      allowPause:
-        testInfo["Allow Pause"]?.toString().trim() ||
-        "yes",
-
-      calculatorAllowed:
-        testInfo["Calculator Allowed"]?.toString().trim() ||
-        "no",
-
-      questionSource:
-        testInfo["Question Source"]?.toString().trim() ||
-        "xlsxImport",
-
-      fullscreenMode:
-        testInfo["Fullscreen Mode"]?.toString().trim() ||
-        "no",
-
-      tabSwitchDetection:
-        testInfo["Tab Switch Detection"]?.toString().trim() ||
-        "no",
-
-      copyPasteProtection:
-        testInfo["Copy Paste Protection"]?.toString().trim() ||
-        "no",
-
-      autoSubmitOnViolation:
-        testInfo["Auto Submit On Violation"]?.toString().trim() ||
-        "no",
-
-      leaderboardMode:
-        testInfo["Leaderboard Mode"]?.toString().trim() ||
-        "disabled",
-
-      timerMode:
-        testInfo["Timer Mode"]?.toString().trim() ||
-        "globalTimer",
-
-      perQuestionTimeValue:
-        testInfo["Per Question Time Value"]?.toString().trim() ||
-        "1",
-
-      perQuestionTimeUnit:
-        testInfo["Per Question Time Unit"]?.toString().trim() ||
-        "min",
-
-      autoSubmitOnTimeUp:
-        testInfo["Auto Submit On Time Up"]?.toString().trim() ||
-        "yes",
-
-      scheduleType:
-        testInfo["Schedule Type"]?.toString().trim() ||
-        "alwaysAvailable",
-
-      examStartDate:
-        testInfo["Exam Start Date"]?.toString().trim() || "",
-
-      examStartTime:
-        testInfo["Exam Start Time"]?.toString().trim() || "",
-
-      examEndDate:
-        testInfo["Exam End Date"]?.toString().trim() || "",
-
-      examEndTime:
-        testInfo["Exam End Time"]?.toString().trim() || "",
-
-      recurringMode:
-        testInfo["Recurring Mode"]?.toString().trim() ||
-        "none",
-
-      weeklyTestDay:
-        testInfo["Weekly Test Day"]?.toString().trim() || "",
-
-      monthlyTestDate:
-        testInfo["Monthly Test Date"]?.toString().trim() || "",
-
-      liveEventMode:
-        testInfo["Live Event Mode"]?.toString().trim() ||
-        "no",
-
-      scholarshipMode:
-        testInfo["Scholarship Mode"]?.toString().trim() ||
-        "no",
-
-      examInstructions:
-        testInfo["Exam Instructions"]?.toString().trim() || "",
-
-      status: "draft",
-
-      totalMarks,
-      questions: importedQuestions,
-
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    await addDoc(collection(db, "contentItems"), importPayload);
+    await addDoc(
+      collection(db, "contentItems"),
+      parsedImport.importPayload
+    );
 
     await loadContentItemsFromFirestore();
 
@@ -1665,17 +1366,6 @@ const handleImportMockTestXlsx = async (event) => {
   }
 };
 
-const convertGoogleDriveUrlToDownloadUrl = (url = "") => {
-  const fileIdMatch =
-    url.match(/\/d\/([^/]+)/) ||
-    url.match(/[?&]id=([^&]+)/);
-
-  if (!fileIdMatch?.[1]) {
-    return url;
-  }
-
-  return `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`;
-};
 
 const handleImportMockTestXlsxFromUrl = async () => {
   try {
@@ -1684,9 +1374,9 @@ const handleImportMockTestXlsxFromUrl = async () => {
       return;
     }
 
-    const downloadUrl = convertGoogleDriveUrlToDownloadUrl(
-      mockImportXlsxUrl.trim()
-    );
+    const sourceXlsxUrl = mockImportXlsxUrl.trim();
+
+    const downloadUrl = convertGoogleDriveUrlToDownloadUrl(sourceXlsxUrl);
 
     const response = await fetch(downloadUrl);
 
@@ -1699,276 +1389,37 @@ const handleImportMockTestXlsxFromUrl = async () => {
 
     const data = await response.arrayBuffer();
 
-    const workbook = XLSX.read(data, {
-      type: "array",
+    const workbookRows = readMockTestWorkbookRowsFromArrayBuffer(data);
+
+    if (!workbookRows.ok) {
+      alert(workbookRows.message);
+      return;
+    }
+    
+    const { testInfoRows, questionRows } = workbookRows;
+
+    const parsedImport = buildMockTestImportPayloadFromRows({
+      testInfoRows,
+      questionRows,
+      sourceType: "googleDriveXlsxUrl",
+      sourceXlsxUrl,
     });
 
-    const testInfoSheet = workbook.Sheets["Test Info"];
-    const questionsSheet = workbook.Sheets["Questions"];
-
-    if (!testInfoSheet || !questionsSheet) {
-      alert(
-        "Invalid template. File must contain 'Test Info' and 'Questions' sheets."
-      );
+    if (!parsedImport.ok) {
+      alert(parsedImport.message);
       return;
     }
-
-    const testInfoRows = XLSX.utils.sheet_to_json(testInfoSheet, {
-      defval: "",
-    });
-
-    const questionRows = XLSX.utils.sheet_to_json(questionsSheet, {
-      defval: "",
-    });
-
-    if (!testInfoRows.length || !questionRows.length) {
-      alert("Excel file has empty Test Info or Questions sheet.");
-      return;
-    }
-
-    const MAX_IMPORT_QUESTIONS = 1000;
-
-    if (questionRows.length > MAX_IMPORT_QUESTIONS) {
-      alert(
-        `Maximum ${MAX_IMPORT_QUESTIONS} questions allowed per import. Please split bigger exams into parts.`
-      );
-      return;
-    }
-
-    const testInfo = testInfoRows.reduce((acc, row) => {
-      const field = row.Field?.toString().trim();
-      const value = row.Value;
-
-      if (field) {
-        acc[field] = value;
-      }
-
-      return acc;
-    }, {});
-
-    const requiredQuestionColumns = [
-      "Question",
-      "Option A",
-      "Option B",
-      "Option C",
-      "Option D",
-      "Correct Answer",
-    ];
-
-    const missingQuestionColumns =
-      requiredQuestionColumns.filter(
-        (column) => !(column in questionRows[0])
-      );
-
-    if (missingQuestionColumns.length > 0) {
-      alert(
-        `Missing required question column(s): ${missingQuestionColumns.join(
-          ", "
-        )}`
-      );
-      return;
-    }
-
-    const importedQuestions = questionRows.map((row, index) => ({
-      questionNumber: Number(row["Question Number"] || index + 1),
-      question: row["Question"]?.toString().trim() || "",
-      option1: row["Option A"]?.toString().trim() || "",
-      option2: row["Option B"]?.toString().trim() || "",
-      option3: row["Option C"]?.toString().trim() || "",
-      option4: row["Option D"]?.toString().trim() || "",
-      answer: row["Correct Answer"]?.toString().trim() || "",
-      explanation: row["Explanation"]?.toString().trim() || "",
-      level:
-        row["Difficulty Level"]?.toString().trim() ||
-        testInfo["Exam Difficulty"]?.toString().trim() ||
-        "Easy",
-      questionType:
-        row["Question Type"]?.toString().trim() ||
-        "Single Correct",
-      language:
-        row["Language"]?.toString().trim() ||
-        testInfo["Exam Language"]?.toString().trim() ||
-        "English",
-      tag: row["Tag"]?.toString().trim() || "",
-      positiveMarks: Number(
-        row["Positive Marks"] ||
-          testInfo["Marks Per Question"] ||
-          1
-      ),
-      negativeMarks: Number(
-        row["Negative Marks"] ||
-          testInfo["Negative Marks"] ||
-          0
-      ),
-      questionStatus:
-        row["Question Status"]?.toString().trim() ||
-        "published",
-      saveToQuestionBank:
-        row["Save To Question Bank"]?.toString().trim() ||
-        "yes",
-    }));
-
-    const invalidQuestionIndex = importedQuestions.findIndex(
-      (q) =>
-        !q.question ||
-        !q.option1 ||
-        !q.option2 ||
-        !q.option3 ||
-        !q.option4 ||
-        !q.answer
-    );
-
-    if (invalidQuestionIndex !== -1) {
-      alert(
-        `Question ${invalidQuestionIndex + 1} is incomplete. Import cancelled.`
-      );
-      return;
-    }
-
-    const title =
-      testInfo["Test Title"]?.toString().trim() ||
-      "Imported Drive XLSX Mock Test";
-
-    const totalQuestions = importedQuestions.length;
-
-    const declaredTotalQuestions = Number(
-      testInfo["Total Questions"] || totalQuestions
-    );
-    
-    if (
-      Number.isFinite(declaredTotalQuestions) &&
-      declaredTotalQuestions > 0 &&
-      declaredTotalQuestions !== totalQuestions
-    ) {
-      alert(
-        `Total Questions mismatch.
-    
-    Test Info says: ${declaredTotalQuestions}
-    
-    Questions sheet has: ${totalQuestions}
-    
-    Please fix the Excel file and import again.`
-      );
-    
-      return;
-    }
-
-    const totalMarks = importedQuestions.reduce(
-      (sum, q) => sum + Number(q.positiveMarks || 0),
-      0
-    );
 
     const confirmImport = window.confirm(
-      `Import this Google Drive XLSX as Draft?\n\nTitle: ${title}\nQuestions: ${totalQuestions}\nMarks: ${totalMarks}\n\nExisting tests will not be overwritten.`
+      `Import this Google Drive XLSX as Draft?\n\nTitle: ${parsedImport.title}\nQuestions: ${parsedImport.totalQuestions}\nMarks: ${parsedImport.totalMarks}\n\nExisting tests will not be overwritten.`
     );
 
     if (!confirmImport) return;
 
-    const importPayload = {
-      title: `${title} - Imported`,
-      section: "mockTest",
-      contentType: "MOCK",
-
-      planType: testInfo["Plan"]?.toString().trim() || "FREE",
-      examType: testInfo["Exam Type"]?.toString().trim() || "CTET",
-      testType:
-        testInfo["Test Type"]?.toString().trim() ||
-        "Chapter Test",
-
-      subject: testInfo["Subject"]?.toString().trim() || "",
-      chapter: testInfo["Chapter"]?.toString().trim() || "",
-
-      duration: Number(testInfo["Duration Minutes"] || 30),
-      durationMinutes: Number(testInfo["Duration Minutes"] || 30),
-
-      totalQuestions,
-      marksPerQuestion: Number(testInfo["Marks Per Question"] || 1),
-      negativeMarks: Number(testInfo["Negative Marks"] || 0),
-      passingMarks: Number(testInfo["Passing Marks"] || 0),
-
-      examDifficulty:
-        testInfo["Exam Difficulty"]?.toString().trim() || "Mixed",
-      examLanguage:
-        testInfo["Exam Language"]?.toString().trim() || "English",
-
-      attemptLimit:
-        testInfo["Attempt Limit"]?.toString().trim() || "unlimited",
-      resultPublishMode:
-        testInfo["Result Publish Mode"]?.toString().trim() || "instant",
-
-      shuffleQuestions:
-        testInfo["Shuffle Questions"]?.toString().trim() || "no",
-      shuffleOptions:
-        testInfo["Shuffle Options"]?.toString().trim() || "no",
-
-      navigationMode:
-        testInfo["Navigation Mode"]?.toString().trim() || "free",
-      allowPause:
-        testInfo["Allow Pause"]?.toString().trim() || "yes",
-      calculatorAllowed:
-        testInfo["Calculator Allowed"]?.toString().trim() || "no",
-
-      questionSource: "googleDriveXlsxUrl",
-      sourceXlsxUrl: mockImportXlsxUrl.trim(),
-
-      fullscreenMode:
-        testInfo["Fullscreen Mode"]?.toString().trim() || "no",
-      tabSwitchDetection:
-        testInfo["Tab Switch Detection"]?.toString().trim() || "no",
-      copyPasteProtection:
-        testInfo["Copy Paste Protection"]?.toString().trim() || "no",
-      autoSubmitOnViolation:
-        testInfo["Auto Submit On Violation"]?.toString().trim() || "no",
-
-      leaderboardMode:
-        testInfo["Leaderboard Mode"]?.toString().trim() || "disabled",
-
-      timerMode:
-        testInfo["Timer Mode"]?.toString().trim() || "globalTimer",
-      perQuestionTimeValue:
-        testInfo["Per Question Time Value"]?.toString().trim() || "1",
-      perQuestionTimeUnit:
-        testInfo["Per Question Time Unit"]?.toString().trim() || "min",
-      autoSubmitOnTimeUp:
-        testInfo["Auto Submit On Time Up"]?.toString().trim() || "yes",
-
-      scheduleType:
-        testInfo["Schedule Type"]?.toString().trim() ||
-        "alwaysAvailable",
-      examStartDate:
-        testInfo["Exam Start Date"]?.toString().trim() || "",
-      examStartTime:
-        testInfo["Exam Start Time"]?.toString().trim() || "",
-      examEndDate:
-        testInfo["Exam End Date"]?.toString().trim() || "",
-      examEndTime:
-        testInfo["Exam End Time"]?.toString().trim() || "",
-
-      recurringMode:
-        testInfo["Recurring Mode"]?.toString().trim() || "none",
-      weeklyTestDay:
-        testInfo["Weekly Test Day"]?.toString().trim() || "",
-      monthlyTestDate:
-        testInfo["Monthly Test Date"]?.toString().trim() || "",
-
-      liveEventMode:
-        testInfo["Live Event Mode"]?.toString().trim() || "no",
-      scholarshipMode:
-        testInfo["Scholarship Mode"]?.toString().trim() || "no",
-
-      examInstructions:
-        testInfo["Exam Instructions"]?.toString().trim() || "",
-
-      status: "draft",
-
-      totalMarks,
-      questions: importedQuestions,
-
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    await addDoc(collection(db, "contentItems"), importPayload);
+    await addDoc(
+      collection(db, "contentItems"),
+      parsedImport.importPayload
+    );
 
     await loadContentItemsFromFirestore();
 

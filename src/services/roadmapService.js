@@ -717,6 +717,204 @@ import {
     }));
   };
   
+  const ROADMAP_RECOMMENDATION_SECTIONS = {
+    NOTES: "notes",
+    VIDEOS: "recordedVideo",
+    MOCK_TESTS: "mockTest",
+  };
+  
+  const normalizeRoadmapRecommendationText = (value = "") => {
+    return value
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9\u0900-\u097F\s]+/g, " ")
+      .replace(/\s+/g, " ");
+  };
+  
+  const getRoadmapRecommendationTokens = (value = "") => {
+    return normalizeRoadmapRecommendationText(value)
+      .split(" ")
+      .map((item) => item.trim())
+      .filter((item) => item.length >= 3);
+  };
+  
+  const buildDayRecommendationSearchText = (day = {}) => {
+    const taskText = Array.isArray(day.tasks)
+      ? day.tasks
+          .map((task) =>
+            [
+              task.title,
+              task.description,
+              task.slot,
+              task.taskType,
+            ]
+              .filter(Boolean)
+              .join(" ")
+          )
+          .join(" ")
+      : "";
+  
+    return [
+      day.subject,
+      day.chapter,
+      day.focusArea,
+      day.dayType,
+      taskText,
+    ]
+      .filter(Boolean)
+      .join(" ");
+  };
+  
+  const scoreRoadmapRecommendationItem = ({ item, day }) => {
+    const daySearchText = buildDayRecommendationSearchText(day);
+    const dayTokens = getRoadmapRecommendationTokens(daySearchText);
+  
+    const itemText = [
+      item.title,
+      item.subject,
+      item.chapter,
+      item.course,
+      item.examType,
+      item.testType,
+      item.section,
+      item.contentType,
+    ]
+      .filter(Boolean)
+      .join(" ");
+  
+    const itemNormalized = normalizeRoadmapRecommendationText(itemText);
+  
+    let score = 0;
+  
+    const subjectKey = normalizeRoadmapRecommendationText(day.subject);
+    const chapterKey = normalizeRoadmapRecommendationText(day.chapter);
+    const focusKey = normalizeRoadmapRecommendationText(day.focusArea);
+  
+    if (subjectKey && itemNormalized.includes(subjectKey)) {
+      score += 40;
+    }
+  
+    if (chapterKey && itemNormalized.includes(chapterKey)) {
+      score += 40;
+    }
+  
+    if (focusKey && itemNormalized.includes(focusKey)) {
+      score += 25;
+    }
+  
+    dayTokens.forEach((token) => {
+      if (itemNormalized.includes(token)) {
+        score += 4;
+      }
+    });
+  
+    if (item.planType === "FREE") {
+      score += 2;
+    }
+  
+    return score;
+  };
+  
+  const mapContentItemToRoadmapRecommendation = (item = {}) => {
+    const type =
+      item.section === ROADMAP_RECOMMENDATION_SECTIONS.NOTES
+        ? "note"
+        : item.section === ROADMAP_RECOMMENDATION_SECTIONS.VIDEOS
+        ? "video"
+        : "mock";
+  
+    let href = "";
+  
+    if (type === "mock") {
+      href = `/ctet-tet/mock-tests/start/${item.id}`;
+    } else if (type === "video") {
+      href = `/ctet-tet/videos/watch/${item.id}`;
+    } else {
+      href =
+        item.fileUrl ||
+        item.pdfUrl ||
+        item.pdf ||
+        "";
+    }
+  
+    return {
+      id: item.id,
+      type,
+      title: item.title || "Recommended Resource",
+      subject: item.subject || "",
+      chapter: item.chapter || "",
+      planType: item.planType || "FREE",
+      href,
+      section: item.section || "",
+      contentType: item.contentType || "",
+    };
+  };
+  
+  export const loadRoadmapSmartRecommendations = async ({
+    day,
+    limit = 6,
+  } = {}) => {
+    if (!day) {
+      return {
+        notes: [],
+        videos: [],
+        mocks: [],
+        all: [],
+      };
+    }
+  
+    const contentQuery = query(
+      collection(db, "contentItems"),
+      where("status", "==", "published")
+    );
+  
+    const snapshot = await getDocs(contentQuery);
+  
+    const contentItems = snapshot.docs.map((item) => ({
+      id: item.id,
+      ...item.data(),
+    }));
+  
+    const allowedSections = [
+      ROADMAP_RECOMMENDATION_SECTIONS.NOTES,
+      ROADMAP_RECOMMENDATION_SECTIONS.VIDEOS,
+      ROADMAP_RECOMMENDATION_SECTIONS.MOCK_TESTS,
+    ];
+  
+    const scoredItems = contentItems
+      .filter((item) => allowedSections.includes(item.section))
+      .map((item) => ({
+        item,
+        score: scoreRoadmapRecommendationItem({
+          item,
+          day,
+        }),
+      }))
+      .filter((entry) => entry.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map((entry) => mapContentItemToRoadmapRecommendation(entry.item));
+  
+    const notes = scoredItems
+      .filter((item) => item.type === "note")
+      .slice(0, limit);
+  
+    const videos = scoredItems
+      .filter((item) => item.type === "video")
+      .slice(0, limit);
+  
+    const mocks = scoredItems
+      .filter((item) => item.type === "mock")
+      .slice(0, limit);
+  
+    return {
+      notes,
+      videos,
+      mocks,
+      all: [...notes, ...videos, ...mocks].slice(0, limit),
+    };
+  };
+
   export const buildRoadmapProgressAnalytics = ({
     days = [],
     progressItems = [],

@@ -67,6 +67,12 @@ export default function AppDashboard({
           action: () => navigate("/ctet-tet/current-affairs"),
         },
         {
+          Icon: Route,
+          title: "AspirePath",
+          text: "Daily smart roadmap with tasks, live sessions, mock tests and revision.",
+          action: () => navigate("/ctet-tet/roadmaps"),
+        },
+        {
           Icon: BarChart3,
           title: "My Progress",
           text: "Student dashboard, analytics and learning progress.",

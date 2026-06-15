@@ -6,6 +6,7 @@ import {
   getTodayRoadmapDay,
   getUpcomingRoadmapDays,
   loadPublishedStudyRoadmaps,
+  loadRoadmapSmartRecommendations,
   loadStudyRoadmapWithDays,
   loadUserRoadmapProgress,
   saveUserRoadmapDayProgress,
@@ -307,6 +308,7 @@ export const StudentRoadmapDetail = ({
 
   const [roadmap, setRoadmap] = React.useState(null);
   const [progressItems, setProgressItems] = React.useState([]);
+  const [smartRecommendations, setSmartRecommendations] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   const [loadError, setLoadError] = React.useState("");
 
@@ -602,6 +604,7 @@ export const StudentRoadmapDay = ({
 
   const [roadmap, setRoadmap] = React.useState(null);
   const [progressItems, setProgressItems] = React.useState([]);
+  const [smartRecommendations, setSmartRecommendations] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
 
   const reloadProgress = React.useCallback(async () => {
@@ -664,6 +667,45 @@ export const StudentRoadmapDay = ({
     progressItems,
     dayId,
   });
+
+  React.useEffect(() => {
+    let mounted = true;
+
+    const loadRecommendations = async () => {
+      if (!activeDay) {
+        setSmartRecommendations(null);
+        return;
+      }
+
+      try {
+        const recommendations = await loadRoadmapSmartRecommendations({
+          day: activeDay,
+          limit: 4,
+        });
+
+        if (mounted) {
+          setSmartRecommendations(recommendations);
+        }
+      } catch (error) {
+        console.error("Load roadmap smart recommendations error:", error);
+
+        if (mounted) {
+          setSmartRecommendations({
+            notes: [],
+            videos: [],
+            mocks: [],
+            all: [],
+          });
+        }
+      }
+    };
+
+    loadRecommendations();
+
+    return () => {
+      mounted = false;
+    };
+  }, [activeDay?.id]);
 
   const handleToggleTask = async (task) => {
     if (!user?.uid) {
@@ -776,6 +818,92 @@ export const StudentRoadmapDay = ({
               ))}
             </div>
           </section>
+
+          <section className="aspirePathSection">
+            <RoadmapSectionHeader
+              kicker="Smart Guide"
+              title="Recommended resources"
+              text="AspirePath matches this day’s subject, chapter, focus area, and tasks with available notes, videos, and mock tests."
+            />
+
+            {!smartRecommendations ? (
+              <RoadmapEmptyState
+                title="Checking recommendations..."
+                text="AspirePath is finding useful resources for this day."
+              />
+            ) : smartRecommendations.all?.length === 0 ? (
+              <RoadmapEmptyState
+                title="No smart recommendations yet"
+                text="Add matching notes, videos, or mock tests in Content Studio to enable recommendations for this day."
+              />
+            ) : (
+              <div className="aspirePathGrid">
+                {smartRecommendations.all.map((item) => (
+                  <article className="aspirePathCard" key={item.id}>
+                    <div className="aspirePathCardTop">
+                      <div>
+                        <h3 className="aspirePathCardTitle">
+                          {item.title}
+                        </h3>
+
+                        <p className="aspirePathCardText">
+                          {item.subject || activeDay.subject || "Subject"} •{" "}
+                          {item.chapter ||
+                            activeDay.chapter ||
+                            activeDay.focusArea ||
+                            "Recommended resource"}
+                        </p>
+                      </div>
+
+                      <RoadmapBadge>
+                        {item.type === "note"
+                          ? "Notes"
+                          : item.type === "video"
+                          ? "Video"
+                          : "Mock"}
+                      </RoadmapBadge>
+                    </div>
+
+                    <div className="aspirePathResourceRow">
+                      <RoadmapBadge>{item.planType || "FREE"}</RoadmapBadge>
+                      <RoadmapBadge>{item.contentType || item.section}</RoadmapBadge>
+                    </div>
+
+                    <div className="aspirePathHeroActions">
+                      {item.href ? (
+                        item.href.startsWith("/") ? (
+                          <Link
+                            className="aspirePathPrimaryBtn"
+                            to={item.href}
+                          >
+                            Open Recommendation
+                          </Link>
+                        ) : (
+                          <a
+                            className="aspirePathPrimaryBtn"
+                            href={item.href}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            Open Recommendation
+                          </a>
+                        )
+                      ) : (
+                        <button
+                          className="aspirePathSecondaryBtn"
+                          type="button"
+                          disabled
+                        >
+                          No Link Available
+                        </button>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+
         </>
       )}
     </RoadmapShell>
