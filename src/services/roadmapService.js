@@ -517,3 +517,166 @@ import {
       .filter((day) => normalizeDateValue(day.date) >= todayKey)
       .slice(0, limit);
   };
+
+  export const loadRoadmapProgressByRoadmapId = async (roadmapId) => {
+    if (!roadmapId) return [];
+  
+    const progressQuery = query(
+      collection(db, ROADMAP_COLLECTIONS.PROGRESS),
+      where("roadmapId", "==", roadmapId)
+    );
+  
+    const snapshot = await getDocs(progressQuery);
+  
+    return snapshot.docs.map((item) => ({
+      id: item.id,
+      ...item.data(),
+    }));
+  };
+  
+  export const buildRoadmapProgressAnalytics = ({
+    days = [],
+    progressItems = [],
+  }) => {
+    const safeDays = Array.isArray(days) ? days : [];
+    const safeProgressItems = Array.isArray(progressItems)
+      ? progressItems
+      : [];
+  
+    const totalTasks = safeDays.reduce((total, day) => {
+      return total + Number(day.tasks?.length || 0);
+    }, 0);
+  
+    const studentIds = [
+      ...new Set(
+        safeProgressItems
+          .map((item) => item.userId)
+          .filter(Boolean)
+      ),
+    ];
+  
+    const activeStudentCount = studentIds.length;
+  
+    const completedTaskCount = safeProgressItems.reduce((total, item) => {
+      return total + Number(item.completedTaskIds?.length || 0);
+    }, 0);
+  
+    const totalPossibleTasks = activeStudentCount * totalTasks;
+  
+    const overallCompletionPercent =
+      totalPossibleTasks > 0
+        ? Math.round((completedTaskCount / totalPossibleTasks) * 100)
+        : 0;
+  
+    const studentMap = safeProgressItems.reduce((map, item) => {
+      const userId = item.userId || "unknown-student";
+  
+      if (!map[userId]) {
+        map[userId] = {
+          userId,
+          completedTaskIds: new Set(),
+          completedDays: new Set(),
+          touchedDays: new Set(),
+          progressRecords: [],
+        };
+      }
+  
+      map[userId].progressRecords.push(item);
+      map[userId].touchedDays.add(item.dayId);
+  
+      const completedIds = Array.isArray(item.completedTaskIds)
+        ? item.completedTaskIds
+        : [];
+  
+      completedIds.forEach((taskId) => {
+        map[userId].completedTaskIds.add(taskId);
+      });
+  
+      if (Number(item.progressPercent || 0) >= 100) {
+        map[userId].completedDays.add(item.dayId);
+      }
+  
+      return map;
+    }, {});
+  
+    const studentAnalytics = Object.values(studentMap)
+      .map((student) => {
+        const completedTasks = student.completedTaskIds.size;
+        const completionPercent =
+          totalTasks > 0
+            ? Math.min(100, Math.round((completedTasks / totalTasks) * 100))
+            : 0;
+  
+        return {
+          userId: student.userId,
+          completedTasks,
+          touchedDays: student.touchedDays.size,
+          completedDays: student.completedDays.size,
+          completionPercent,
+          progressRecords: student.progressRecords.length,
+        };
+      })
+      .sort((a, b) => b.completionPercent - a.completionPercent);
+  
+    const dayAnalytics = safeDays.map((day) => {
+      const dayTasks = Array.isArray(day.tasks) ? day.tasks : [];
+      const dayProgressItems = safeProgressItems.filter(
+        (item) => item.dayId === day.id
+      );
+  
+      const studentsStarted = [
+        ...new Set(dayProgressItems.map((item) => item.userId).filter(Boolean)),
+      ].length;
+  
+      const completedTasksForDay = dayProgressItems.reduce((total, item) => {
+        return total + Number(item.completedTaskIds?.length || 0);
+      }, 0);
+  
+      const possibleTasksForDay = activeStudentCount * dayTasks.length;
+  
+      const dayCompletionPercent =
+        possibleTasksForDay > 0
+          ? Math.round((completedTasksForDay / possibleTasksForDay) * 100)
+          : 0;
+  
+      return {
+        dayId: day.id,
+        dayNumber: day.dayNumber || "",
+        date: day.date || "",
+        subject: day.subject || "",
+        chapter: day.chapter || "",
+        focusArea: day.focusArea || "",
+        dayType: day.dayType || "",
+        taskCount: dayTasks.length,
+        studentsStarted,
+        completedTasks: completedTasksForDay,
+        completionPercent: Math.min(100, dayCompletionPercent),
+      };
+    });
+  
+    const fullyCompletedStudents = studentAnalytics.filter(
+      (student) => student.completionPercent >= 100
+    ).length;
+  
+    const averageCompletionPercent =
+      studentAnalytics.length > 0
+        ? Math.round(
+            studentAnalytics.reduce((total, student) => {
+              return total + Number(student.completionPercent || 0);
+            }, 0) / studentAnalytics.length
+          )
+        : 0;
+  
+    return {
+      totalDays: safeDays.length,
+      totalTasks,
+      activeStudentCount,
+      completedTaskCount,
+      totalPossibleTasks,
+      overallCompletionPercent: Math.min(100, overallCompletionPercent),
+      averageCompletionPercent,
+      fullyCompletedStudents,
+      studentAnalytics,
+      dayAnalytics,
+    };
+  };

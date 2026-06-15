@@ -97,6 +97,8 @@ import {
   duplicateMockTestAsDraft,
   updateMockTestStatus,
   toggleMockTestFeatured,
+  copyMockTestStartLink,
+  deleteMockTest,
 } from "./components/exam/mockTestAdminActions.js";
 import { useExamAttemptState } from "./components/exam/useExamAttemptState.js";
 import { useExamTimer } from "./components/exam/useExamTimer.js";
@@ -9206,24 +9208,28 @@ This action cannot be undone.`
                       </button>
 
                       <button
-                        onClick={async () => {
-                          const confirmDelete = window.confirm(
-                            "Are you sure you want to delete this video?"
-                          );
+  className="dangerButton"
+  onClick={async () => {
+    if (!mockMenuTest?.id) return;
 
-                          if (!confirmDelete) return;
+    const confirmDelete = window.confirm(
+      `Delete "${mockMenuTest.title}" permanently?\n\nThis cannot be undone.`
+    );
 
-                          await deleteDoc(
-                            doc(db, "contentItems", video.id)
-                          );
+    if (!confirmDelete) return;
 
-                          alert("Video deleted successfully");
+    await deleteMockTest({
+      test: mockMenuTest,
+      reloadContent: loadContentItemsFromFirestore,
+    });
 
-                          await loadContentItemsFromFirestore();
-                        }}
-                      >
-                        🗑 Delete
-                      </button>
+    closeMockActionPortal();
+
+    alert("Mock test deleted successfully ✅");
+  }}
+>
+  🗑 Delete
+</button>
                     </div>
                   </div>
                 ))
@@ -19397,17 +19403,22 @@ handleSaveUniversalContent={handleSaveUniversalContent}
         <div className="mockPortalMenuDivider" />
 
         <button
-          onClick={async () => {
-            const testLink = `${window.location.origin}/ctet-tet/mock-tests/attempt/${mockMenuTest.id}`;
+  onClick={async () => {
+    const copied = await copyMockTestStartLink({
+      test: mockMenuTest,
+    });
 
-            await navigator.clipboard.writeText(testLink);
-            closeMockActionPortal();
+    closeMockActionPortal();
 
-            alert("Student test link copied ✅");
-          }}
-        >
-          🔗 Copy Link
-        </button>
+    alert(
+      copied
+        ? "Mock test link copied ✅"
+        : "Unable to copy mock test link"
+    );
+  }}
+>
+  🔗 Copy Link
+</button>
 
         <button
           onClick={() => {

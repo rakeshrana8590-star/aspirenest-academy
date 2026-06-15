@@ -1,6 +1,7 @@
 import {
     addDoc,
     collection,
+    deleteDoc,
     doc,
     updateDoc,
   } from "firebase/firestore";
@@ -69,6 +70,46 @@ export const updateMockTestStatus = async ({
       isFeatured: !test.isFeatured,
       updatedAt: new Date(),
     });
+  
+    if (typeof reloadContent === "function") {
+      await reloadContent();
+    }
+  
+    return true;
+  };
+
+  export const buildMockTestStartLink = ({
+    test,
+    origin = window.location.origin,
+  }) => {
+    if (!test?.id) {
+      return "";
+    }
+  
+    return `${origin}/ctet-tet/mock-tests/start/${test.id}`;
+  };
+  
+  export const copyMockTestStartLink = async ({ test }) => {
+    const link = buildMockTestStartLink({ test });
+  
+    if (!link) {
+      return false;
+    }
+  
+    await navigator.clipboard.writeText(link);
+  
+    return true;
+  };
+
+  export const deleteMockTest = async ({
+    test,
+    reloadContent,
+  }) => {
+    if (!test?.id) {
+      return false;
+    }
+  
+    await deleteDoc(doc(db, "contentItems", test.id));
   
     if (typeof reloadContent === "function") {
       await reloadContent();
