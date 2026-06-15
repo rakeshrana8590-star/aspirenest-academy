@@ -269,7 +269,7 @@ export const RoadmapCard = ({
     </article>
   );
 
-  if (to) {
+  if (to && !action) {
     return (
       <Link to={to} style={{ textDecoration: "none", color: "inherit" }}>
         {cardContent}

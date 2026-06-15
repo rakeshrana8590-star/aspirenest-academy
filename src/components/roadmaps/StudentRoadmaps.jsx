@@ -497,15 +497,12 @@ export const StudentRoadmapDetail = ({
                           color: "inherit",
                         }}
                       >
-                        <RoadmapDayCard
+                                            <RoadmapDayCard
                           day={day}
                           completedTaskIds={getCompletedTaskIdsForDay({
                             progressItems,
                             dayId: day.id,
                           })}
-                          onToggleTask={(task) =>
-                            handleToggleTask({ day, task })
-                          }
                         />
                       </Link>
                     ))}

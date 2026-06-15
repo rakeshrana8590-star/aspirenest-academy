@@ -86,7 +86,10 @@ import ExamResultRoute from "./components/exam/ExamResultRoute.jsx";
 import ExamReviewRoute from "./components/exam/ExamReviewRoute.jsx";
 import ExamStartRoute from "./components/exam/ExamStartRoute.jsx";
 import StudentMockTestCard from "./components/exam/StudentMockTestCard.jsx";
-
+import {
+  buildMockTestFormFromTest,
+  buildMockTestQuestionsFormFromTest,
+} from "./components/exam/mockTestFormUtils.js";
 import { useExamAttemptState } from "./components/exam/useExamAttemptState.js";
 import { useExamTimer } from "./components/exam/useExamTimer.js";
 import { useExamSecurity } from "./components/exam/useExamSecurity.js";
@@ -848,135 +851,14 @@ useEffect(() => {
       item.section === "mockTest"
   );
 
+  
+
   if (!editTest) return;
 
   setEditingMockTestId(editTest.id);
-
-  setMockTestForm({
-    title: editTest.title || "",
-    planType: editTest.planType || "FREE",
-    subject: editTest.subject || "",
-    chapter: editTest.chapter || "",
-    examType: editTest.examType || "CTET",
-    testType: editTest.testType || "Chapter Test",
-
-    duration:
-      editTest.duration?.toString() ||
-      editTest.durationMinutes?.toString() ||
-      "30",
-
-    totalQuestions:
-      editTest.totalQuestions?.toString() ||
-      editTest.questions?.length?.toString() ||
-      "10",
-
-    marksPerQuestion:
-      editTest.marksPerQuestion?.toString() || "1",
-
-    negativeMarks:
-      editTest.negativeMarks?.toString() || "0",
-
-    passingMarks:
-      editTest.passingMarks?.toString() || "0",
-
-    examDifficulty: editTest.examDifficulty || "Mixed",
-    examLanguage: editTest.examLanguage || "English",
-
-    attemptLimit: editTest.attemptLimit || "unlimited",
-    resultPublishMode:
-      editTest.resultPublishMode || "instant",
-
-    shuffleQuestions: editTest.shuffleQuestions || "no",
-    shuffleOptions: editTest.shuffleOptions || "no",
-
-    navigationMode: editTest.navigationMode || "free",
-    allowPause: editTest.allowPause || "yes",
-    calculatorAllowed:
-      editTest.calculatorAllowed || "no",
-
-    questionSource: editTest.questionSource || "manual",
-
-    fullscreenMode: editTest.fullscreenMode || "no",
-    tabSwitchDetection:
-      editTest.tabSwitchDetection || "no",
-    copyPasteProtection:
-      editTest.copyPasteProtection || "no",
-    autoSubmitOnViolation:
-      editTest.autoSubmitOnViolation || "no",
-
-    leaderboardMode:
-      editTest.leaderboardMode || "disabled",
-
-    timerMode: editTest.timerMode || "globalTimer",
-    perQuestionTimeValue:
-      editTest.perQuestionTimeValue || "1",
-    perQuestionTimeUnit:
-      editTest.perQuestionTimeUnit || "min",
-    autoSubmitOnTimeUp:
-      editTest.autoSubmitOnTimeUp || "yes",
-
-    scheduleType:
-      editTest.scheduleType || "alwaysAvailable",
-    examStartDate: editTest.examStartDate || "",
-    examStartTime: editTest.examStartTime || "",
-    examEndDate: editTest.examEndDate || "",
-    examEndTime: editTest.examEndTime || "",
-
-    recurringMode: editTest.recurringMode || "none",
-    weeklyTestDay: editTest.weeklyTestDay || "",
-    monthlyTestDate: editTest.monthlyTestDate || "",
-
-    liveEventMode: editTest.liveEventMode || "no",
-    scholarshipMode: editTest.scholarshipMode || "no",
-
-    examInstructions: editTest.examInstructions || "",
-
-    status: editTest.status || "published",
-  });
-
+  setMockTestForm(buildMockTestFormFromTest(editTest));
   setMockTestQuestionsForm(
-    editTest.questions?.length
-      ? editTest.questions.map((q) => ({
-          question: q.question || "",
-          option1: q.option1 || "",
-          option2: q.option2 || "",
-          option3: q.option3 || "",
-          option4: q.option4 || "",
-          answer: q.answer || "",
-          explanation: q.explanation || "",
-          level: q.level || "Easy",
-          questionType:
-            q.questionType || "Single Correct",
-          language: q.language || "English",
-          tag: q.tag || "",
-          positiveMarks:
-            q.positiveMarks?.toString() || "1",
-          negativeMarks:
-            q.negativeMarks?.toString() || "0",
-          questionStatus:
-            q.questionStatus || "published",
-          saveToQuestionBank:
-            q.saveToQuestionBank || "yes",
-        }))
-      : [
-          {
-            question: "",
-            option1: "",
-            option2: "",
-            option3: "",
-            option4: "",
-            answer: "",
-            explanation: "",
-            level: "Easy",
-            questionType: "Single Correct",
-            language: "English",
-            tag: "",
-            positiveMarks: "1",
-            negativeMarks: "0",
-            questionStatus: "published",
-            saveToQuestionBank: "yes",
-          },
-        ]
+    buildMockTestQuestionsFormFromTest(editTest)
   );
 }, [location.pathname, location.search, universalContent]);
 
@@ -6214,6 +6096,22 @@ isAdmin={isAdmin}
 
 <div
   className="subjectHubCard"
+  onClick={() => navigate("/ctet-tet/roadmaps")}
+>
+  <div className="subjectHubIcon">🛣️</div>
+
+  <h3>AspirePath</h3>
+
+  <p>
+    Follow smart study roadmaps with daily tasks, live sessions,
+    mock tests, revision, and progress tracking.
+  </p>
+
+  <span>Open Roadmaps →</span>
+</div>
+
+<div
+  className="subjectHubCard"
   onClick={() => navigate("/ctet-tet/pricing")}
 >
   <div className="subjectHubIcon">💎</div>
@@ -6944,6 +6842,16 @@ isAdmin={isAdmin}
           }
         >
           📢 Announcements
+        </button>
+
+        <button
+          onClick={() =>
+            navigate(
+              "/admin/content/roadmaps"
+            )
+          }
+        >
+          🛣️ Roadmap Studio
         </button>
 
         <button
@@ -19468,144 +19376,23 @@ handleSaveUniversalContent={handleSaveUniversalContent}
         }}
         onClick={(e) => e.stopPropagation()}
       >
-       <button
+<button
   onClick={() => {
     if (!mockMenuTest?.id) return;
 
     setEditingMockTestId(mockMenuTest.id);
-
-    setMockTestForm({
-      title: mockMenuTest.title || "",
-      planType: mockMenuTest.planType || "FREE",
-      subject: mockMenuTest.subject || "",
-      chapter: mockMenuTest.chapter || "",
-      examType: mockMenuTest.examType || "CTET",
-      testType: mockMenuTest.testType || "Chapter Test",
-
-      duration:
-        mockMenuTest.duration?.toString() ||
-        mockMenuTest.durationMinutes?.toString() ||
-        "30",
-
-      totalQuestions:
-        mockMenuTest.totalQuestions?.toString() ||
-        mockMenuTest.questions?.length?.toString() ||
-        "10",
-
-      marksPerQuestion:
-        mockMenuTest.marksPerQuestion?.toString() || "1",
-
-      negativeMarks:
-        mockMenuTest.negativeMarks?.toString() || "0",
-
-      passingMarks:
-        mockMenuTest.passingMarks?.toString() || "0",
-
-      examDifficulty: mockMenuTest.examDifficulty || "Mixed",
-      examLanguage: mockMenuTest.examLanguage || "English",
-
-      attemptLimit: mockMenuTest.attemptLimit || "unlimited",
-      resultPublishMode: mockMenuTest.resultPublishMode || "instant",
-
-      shuffleQuestions: mockMenuTest.shuffleQuestions || "no",
-      shuffleOptions: mockMenuTest.shuffleOptions || "no",
-
-      navigationMode: mockMenuTest.navigationMode || "free",
-      allowPause: mockMenuTest.allowPause || "yes",
-      calculatorAllowed: mockMenuTest.calculatorAllowed || "no",
-
-      questionSource: mockMenuTest.questionSource || "manual",
-
-      fullscreenMode: mockMenuTest.fullscreenMode || "no",
-      tabSwitchDetection: mockMenuTest.tabSwitchDetection || "no",
-      copyPasteProtection: mockMenuTest.copyPasteProtection || "no",
-      autoSubmitOnViolation:
-        mockMenuTest.autoSubmitOnViolation || "no",
-
-      leaderboardMode:
-        mockMenuTest.leaderboardMode || "disabled",
-
-      timerMode: mockMenuTest.timerMode || "globalTimer",
-      perQuestionTimeValue:
-        mockMenuTest.perQuestionTimeValue || "1",
-      perQuestionTimeUnit:
-        mockMenuTest.perQuestionTimeUnit || "min",
-      autoSubmitOnTimeUp:
-        mockMenuTest.autoSubmitOnTimeUp || "yes",
-
-      scheduleType:
-        mockMenuTest.scheduleType || "alwaysAvailable",
-      examStartDate: mockMenuTest.examStartDate || "",
-      examStartTime: mockMenuTest.examStartTime || "",
-      examEndDate: mockMenuTest.examEndDate || "",
-      examEndTime: mockMenuTest.examEndTime || "",
-
-      recurringMode: mockMenuTest.recurringMode || "none",
-      weeklyTestDay: mockMenuTest.weeklyTestDay || "",
-      monthlyTestDate: mockMenuTest.monthlyTestDate || "",
-
-      liveEventMode: mockMenuTest.liveEventMode || "no",
-      scholarshipMode: mockMenuTest.scholarshipMode || "no",
-
-      examInstructions: mockMenuTest.examInstructions || "",
-
-      status: mockMenuTest.status || "published",
-    });
-
+    setMockTestForm(buildMockTestFormFromTest(mockMenuTest));
     setMockTestQuestionsForm(
-      mockMenuTest.questions?.length
-        ? mockMenuTest.questions.map((question) => ({
-            question: question.question || "",
-            option1: question.option1 || "",
-            option2: question.option2 || "",
-            option3: question.option3 || "",
-            option4: question.option4 || "",
-            answer: question.answer || "",
-            explanation: question.explanation || "",
-            level: question.level || "Easy",
-            questionType:
-              question.questionType || "Single Correct",
-            language: question.language || "English",
-            tag: question.tag || "",
-            positiveMarks:
-              question.positiveMarks?.toString() || "1",
-            negativeMarks:
-              question.negativeMarks?.toString() || "0",
-            questionStatus:
-              question.questionStatus || "published",
-            saveToQuestionBank:
-              question.saveToQuestionBank || "yes",
-          }))
-        : [
-            {
-              question: "",
-              option1: "",
-              option2: "",
-              option3: "",
-              option4: "",
-              answer: "",
-              explanation: "",
-              level: "Easy",
-              questionType: "Single Correct",
-              language: "English",
-              tag: "",
-              positiveMarks: "1",
-              negativeMarks: "0",
-              questionStatus: "published",
-              saveToQuestionBank: "yes",
-            },
-          ]
+      buildMockTestQuestionsFormFromTest(mockMenuTest)
     );
 
     closeMockActionPortal();
 
-localStorage.removeItem(
-  "reusedQuestionForMockTest"
-);
+    localStorage.removeItem("reusedQuestionForMockTest");
 
-navigate(
-  `/admin/content/mock-tests/add?editId=${mockMenuTest.id}`
-);
+    navigate(
+      `/admin/content/mock-tests/add?editId=${mockMenuTest.id}`
+    );
   }}
 >
   ✏ Edit
