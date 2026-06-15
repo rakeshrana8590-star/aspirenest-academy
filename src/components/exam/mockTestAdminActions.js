@@ -117,3 +117,43 @@ export const updateMockTestStatus = async ({
   
     return true;
   };
+
+  const getSafeMockTestFileName = (title = "mock-test") =>
+  title
+    .toString()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "mock-test";
+
+export const exportMockTestJson = ({ test }) => {
+  if (!test?.id) {
+    return false;
+  }
+
+  const exportPayload = {
+    ...test,
+    exportedAt: new Date().toISOString(),
+    exportedFrom: "AspireNest Academy",
+  };
+
+  const jsonBlob = new Blob(
+    [JSON.stringify(exportPayload, null, 2)],
+    { type: "application/json" }
+  );
+
+  const downloadUrl = URL.createObjectURL(jsonBlob);
+
+  const downloadLink = document.createElement("a");
+  downloadLink.href = downloadUrl;
+  downloadLink.download = `${getSafeMockTestFileName(
+    test.title || "mock-test"
+  )}.json`;
+
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
+
+  URL.revokeObjectURL(downloadUrl);
+
+  return true;
+};

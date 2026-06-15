@@ -99,6 +99,7 @@ import {
   toggleMockTestFeatured,
   copyMockTestStartLink,
   deleteMockTest,
+  exportMockTestJson,
 } from "./components/exam/mockTestAdminActions.js";
 import { useExamAttemptState } from "./components/exam/useExamAttemptState.js";
 import { useExamTimer } from "./components/exam/useExamTimer.js";
@@ -19420,39 +19421,23 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   🔗 Copy Link
 </button>
 
-        <button
-          onClick={() => {
-            const exportPayload = {
-              ...mockMenuTest,
-              exportedAt: new Date().toISOString(),
-              exportedFrom: "AspireNest Academy",
-            };
+<button
+  onClick={() => {
+    const exported = exportMockTestJson({
+      test: mockMenuTest,
+    });
 
-            const jsonBlob = new Blob(
-              [JSON.stringify(exportPayload, null, 2)],
-              { type: "application/json" }
-            );
+    closeMockActionPortal();
 
-            const downloadUrl = URL.createObjectURL(jsonBlob);
-
-            const downloadLink = document.createElement("a");
-            downloadLink.href = downloadUrl;
-            downloadLink.download = `${(
-              mockMenuTest.title || "mock-test"
-            )
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, "-")}.json`;
-
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-
-            URL.revokeObjectURL(downloadUrl);
-            closeMockActionPortal();
-          }}
-        >
-          📤 Export JSON
-        </button>
+    alert(
+      exported
+        ? "Mock test JSON exported ✅"
+        : "Unable to export mock test JSON"
+    );
+  }}
+>
+  📤 Export JSON
+</button>
 
         <button
   type="button"
