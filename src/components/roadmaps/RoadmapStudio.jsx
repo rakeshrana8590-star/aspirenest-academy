@@ -1,0 +1,1074 @@
+import React from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  archiveStudyRoadmap,
+  deleteStudyRoadmapWithDays,
+  loadStudyRoadmaps,
+  loadStudyRoadmapWithDays,
+  publishStudyRoadmap,
+  saveImportedRoadmapAsDraft,
+  unpublishStudyRoadmap,
+} from "../../services/roadmapService";
+import {
+  downloadRoadmapXlsxTemplate,
+  parseRoadmapXlsxFile,
+} from "../../utils/roadmapImportUtils";
+import {
+  AspirePathHero,
+  RoadmapBadge,
+  RoadmapCard,
+  RoadmapDayCard,
+  RoadmapEmptyState,
+  RoadmapPlanBadge,
+  RoadmapSectionHeader,
+  RoadmapShell,
+  RoadmapStatusBadge,
+} from "./RoadmapShared";
+
+const formatDate = (dateValue = "") => {
+  if (!dateValue) return "Not set";
+
+  const date = new Date(`${dateValue}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) return dateValue;
+
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const buildStudioMetrics = (roadmaps = []) => {
+  const published = roadmaps.filter(
+    (roadmap) => roadmap.status === "published"
+  ).length;
+
+  const drafts = roadmaps.filter((roadmap) => roadmap.status === "draft").length;
+
+  const premium = roadmaps.filter(
+    (roadmap) =>
+      roadmap.planType === "PREMIUM" || roadmap.planType === "MENTORSHIP"
+  ).length;
+
+  return [
+    { value: roadmaps.length || 0, label: "Total Paths" },
+    { value: published || 0, label: "Published" },
+    { value: drafts || 0, label: "Drafts" },
+    { value: premium || 0, label: "Premium" },
+  ];
+};
+
+const groupDaysByWeek = (days = []) => {
+  return days.reduce((groups, day) => {
+    const weekNumber = Number(day.weekNumber || 1);
+
+    if (!groups[weekNumber]) {
+      groups[weekNumber] = [];
+    }
+
+    groups[weekNumber].push(day);
+
+    return groups;
+  }, {});
+};
+
+const RoadmapStudioMessage = ({ type = "info", children }) => {
+  if (!children) return null;
+
+  const cardClass =
+    type === "error"
+      ? "roadmapStudioValidationCard roadmapStudioValidationCardError"
+      : type === "warning"
+      ? "roadmapStudioValidationCard roadmapStudioValidationCardWarning"
+      : "roadmapStudioValidationCard roadmapStudioValidationCardSuccess";
+
+  return <div className={cardClass}>{children}</div>;
+};
+
+export const RoadmapStudioHome = () => {
+  const [roadmaps, setRoadmaps] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    let mounted = true;
+
+    const loadStudio = async () => {
+      try {
+        setLoading(true);
+
+        const items = await loadStudyRoadmaps({
+          includeArchived: false,
+        });
+
+        if (mounted) {
+          setRoadmaps(items);
+        }
+      } catch (error) {
+        console.error("Load Roadmap Studio error:", error);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadStudio();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const recentRoadmaps = roadmaps.slice(0, 3);
+
+  return (
+    <RoadmapShell mode="admin">
+      <AspirePathHero
+        mode="admin"
+        eyebrow="Roadmap Studio"
+        title="Build guided study paths"
+        subtitle="Create, import, validate, publish, and manage AspirePath roadmaps for students without hardcoding daily cards."
+        metrics={buildStudioMetrics(roadmaps)}
+        actions={
+          <>
+            <Link
+              className="roadmapStudioPrimaryBtn"
+              to="/admin/content/roadmaps/import"
+            >
+              Import Roadmap
+            </Link>
+
+            <Link
+              className="roadmapStudioSecondaryBtn"
+              to="/admin/content/roadmaps/manage"
+            >
+              Manage Roadmaps
+            </Link>
+
+            <button
+              className="roadmapStudioGhostBtn"
+              type="button"
+              onClick={downloadRoadmapXlsxTemplate}
+            >
+              Download Template
+            </button>
+          </>
+        }
+      />
+
+      <section className="roadmapStudioSection">
+        <RoadmapSectionHeader
+          mode="admin"
+          kicker="Studio Flow"
+          title="One import, complete student roadmap"
+          text="Roadmap Studio converts structured XLSX data into guided student timelines with daily tasks, live sessions, mock days, revision, and analytics-ready progress."
+        />
+
+        <div className="roadmapStudioGrid">
+          <article className="roadmapStudioCard">
+            <h3 className="roadmapStudioCardTitle">1. Import</h3>
+            <p className="roadmapStudioCardText">
+              Upload a clean XLSX roadmap template with Roadmap Info, Schedule,
+              and Resources sheets.
+            </p>
+          </article>
+
+          <article className="roadmapStudioCard">
+            <h3 className="roadmapStudioCardTitle">2. Validate</h3>
+            <p className="roadmapStudioCardText">
+              Check dates, duplicate days, missing tasks, wrong plan types, and
+              schedule quality before saving.
+            </p>
+          </article>
+
+          <article className="roadmapStudioCard">
+            <h3 className="roadmapStudioCardTitle">3. Publish</h3>
+            <p className="roadmapStudioCardText">
+              Save as draft, review schedule, then publish to student
+              AspirePath automatically.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section className="roadmapStudioSection">
+        <RoadmapSectionHeader
+          mode="admin"
+          kicker="Recent"
+          title="Latest roadmaps"
+          text="Recently created or imported roadmaps will appear here."
+          action={
+            <Link
+              className="roadmapStudioSecondaryBtn"
+              to="/admin/content/roadmaps/manage"
+            >
+              View All
+            </Link>
+          }
+        />
+
+        {loading ? (
+          <RoadmapEmptyState
+            mode="admin"
+            title="Loading roadmaps..."
+            text="Roadmap Studio is checking your saved paths."
+          />
+        ) : recentRoadmaps.length === 0 ? (
+          <RoadmapEmptyState
+            mode="admin"
+            title="No roadmaps yet"
+            text="Import your first XLSX roadmap to start building AspirePath."
+            action={
+              <Link
+                className="roadmapStudioPrimaryBtn"
+                to="/admin/content/roadmaps/import"
+              >
+                Import First Roadmap
+              </Link>
+            }
+          />
+        ) : (
+          <div className="roadmapStudioGrid">
+            {recentRoadmaps.map((roadmap) => (
+              <RoadmapCard
+                key={roadmap.id}
+                mode="admin"
+                roadmap={roadmap}
+                to={`/admin/content/roadmaps/schedule/${roadmap.id}`}
+                progress={0}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    </RoadmapShell>
+  );
+};
+
+export const RoadmapImportRoute = () => {
+  const navigate = useNavigate();
+  const [selectedFileName, setSelectedFileName] = React.useState("");
+  const [importResult, setImportResult] = React.useState(null);
+  const [importing, setImporting] = React.useState(false);
+  const [saving, setSaving] = React.useState(false);
+  const [saveMessage, setSaveMessage] = React.useState("");
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files?.[0];
+
+    setSaveMessage("");
+    setImportResult(null);
+    setSelectedFileName("");
+
+    if (!file) return;
+
+    try {
+      setImporting(true);
+      setSelectedFileName(file.name);
+
+      const parsed = await parseRoadmapXlsxFile(file);
+
+      setImportResult(parsed);
+    } catch (error) {
+      console.error("Roadmap import parse error:", error);
+
+      setImportResult({
+        roadmap: null,
+        days: [],
+        validation: {
+          isValid: false,
+          errors: [error.message || "Unable to parse roadmap file."],
+          warnings: [],
+          summary: {},
+        },
+      });
+    } finally {
+      setImporting(false);
+      event.target.value = "";
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    if (!importResult?.validation?.isValid) {
+      setSaveMessage("Fix validation errors before saving this roadmap.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setSaveMessage("");
+
+      const roadmapId = await saveImportedRoadmapAsDraft({
+        roadmap: importResult.roadmap,
+        days: importResult.days,
+      });
+
+      setSaveMessage("Roadmap saved as draft successfully.");
+
+      navigate(`/admin/content/roadmaps/schedule/${roadmapId}`);
+    } catch (error) {
+      console.error("Save imported roadmap error:", error);
+      setSaveMessage(error.message || "Unable to save roadmap as draft.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const validation = importResult?.validation;
+
+  return (
+    <RoadmapShell mode="admin">
+      <AspirePathHero
+        mode="admin"
+        eyebrow="Import Roadmap"
+        title="Create AspirePath from XLSX"
+        subtitle="Upload a structured roadmap file and Roadmap Studio will validate it before saving as a draft."
+        metrics={[
+          {
+            value: validation?.summary?.totalDays || 0,
+            label: "Days",
+          },
+          {
+            value: validation?.summary?.totalTasks || 0,
+            label: "Tasks",
+          },
+          {
+            value: validation?.summary?.mockDays || 0,
+            label: "Mock Days",
+          },
+          {
+            value: validation?.isValid ? "Ready" : "Check",
+            label: "Status",
+          },
+        ]}
+        actions={
+          <>
+            <button
+              className="roadmapStudioPrimaryBtn"
+              type="button"
+              onClick={downloadRoadmapXlsxTemplate}
+            >
+              Download Template
+            </button>
+
+            <Link
+              className="roadmapStudioSecondaryBtn"
+              to="/admin/content/roadmaps/manage"
+            >
+              Manage Roadmaps
+            </Link>
+          </>
+        }
+      />
+
+      <section className="roadmapStudioSection">
+        <RoadmapSectionHeader
+          mode="admin"
+          kicker="Upload"
+          title="Roadmap XLSX import"
+          text="Use the official AspirePath template. Required sheets: Roadmap Info and Schedule. Resources sheet is optional but recommended."
+        />
+
+        <div className="roadmapStudioImportPanel">
+          <label className="roadmapStudioDropzone">
+            <span className="roadmapStudioDropzoneIcon">⬆</span>
+            <strong>
+              {importing
+                ? "Reading file..."
+                : selectedFileName || "Choose AspirePath XLSX file"}
+            </strong>
+            <span className="roadmapStudioCardText">
+              Accepted format: .xlsx with Roadmap Info, Schedule, Resources
+              sheets.
+            </span>
+
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleFileChange}
+              style={{ display: "none" }}
+            />
+          </label>
+        </div>
+      </section>
+
+      {validation ? (
+        <section className="roadmapStudioSection">
+          <RoadmapSectionHeader
+            mode="admin"
+            kicker="Validation"
+            title={validation.isValid ? "Ready to save" : "Fix required issues"}
+            text="Roadmap Studio checks the file before Firestore save so broken student timelines are not published."
+          />
+
+          <div className="roadmapStudioValidationGrid">
+            <RoadmapStudioMessage type={validation.isValid ? "success" : "error"}>
+              <strong>Status</strong>
+              <p className="roadmapStudioCardText">
+                {validation.isValid
+                  ? "No blocking errors found."
+                  : "Blocking errors found. Please fix the XLSX and import again."}
+              </p>
+            </RoadmapStudioMessage>
+
+            <RoadmapStudioMessage type="warning">
+              <strong>Warnings</strong>
+              <p className="roadmapStudioCardText">
+                {validation.warnings?.length || 0} warning(s)
+              </p>
+            </RoadmapStudioMessage>
+
+            <RoadmapStudioMessage type="success">
+              <strong>Summary</strong>
+              <p className="roadmapStudioCardText">
+                {validation.summary?.totalDays || 0} days •{" "}
+                {validation.summary?.totalTasks || 0} tasks
+              </p>
+            </RoadmapStudioMessage>
+          </div>
+
+          {validation.errors?.length ? (
+            <div className="roadmapStudioSection">
+              <RoadmapSectionHeader
+                mode="admin"
+                kicker="Errors"
+                title="Blocking issues"
+              />
+
+              <div className="roadmapStudioImportPanel">
+                {validation.errors.map((error, index) => (
+                  <p className="roadmapStudioCardText" key={index}>
+                    ❌ {error}
+                  </p>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {validation.warnings?.length ? (
+            <div className="roadmapStudioSection">
+              <RoadmapSectionHeader
+                mode="admin"
+                kicker="Warnings"
+                title="Review before publishing"
+              />
+
+              <div className="roadmapStudioImportPanel">
+                {validation.warnings.map((warning, index) => (
+                  <p className="roadmapStudioCardText" key={index}>
+                    ⚠️ {warning}
+                  </p>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
+      {importResult?.roadmap ? (
+        <section className="roadmapStudioSection">
+          <RoadmapSectionHeader
+            mode="admin"
+            kicker="Preview"
+            title="Imported roadmap preview"
+            text="This is the draft that will be saved to Roadmap Studio."
+            action={
+              <button
+                className="roadmapStudioPrimaryBtn"
+                type="button"
+                disabled={!validation?.isValid || saving}
+                onClick={handleSaveDraft}
+              >
+                {saving ? "Saving..." : "Save as Draft"}
+              </button>
+            }
+          />
+
+          {saveMessage ? (
+            <div className="roadmapStudioImportPanel">
+              <p className="roadmapStudioCardText">{saveMessage}</p>
+            </div>
+          ) : null}
+
+          <RoadmapCard
+            mode="admin"
+            roadmap={{
+              ...importResult.roadmap,
+              totalDays: importResult.days?.length || 0,
+              status: "draft",
+            }}
+            progress={0}
+          />
+
+          <div className="roadmapStudioSection">
+            <RoadmapSectionHeader
+              mode="admin"
+              kicker="First Days"
+              title="Schedule sample"
+              text="First five days from the imported roadmap."
+            />
+
+            <div className="aspirePathDayGrid">
+              {(importResult.days || []).slice(0, 5).map((day, index) => (
+                <RoadmapDayCard
+                  key={`${day.date}-${index}`}
+                  day={{
+                    ...day,
+                    id: `${day.date}-${index}`,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+    </RoadmapShell>
+  );
+};
+
+export const RoadmapManageRoute = () => {
+  const [roadmaps, setRoadmaps] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [searchText, setSearchText] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState("ALL");
+  const [actionMessage, setActionMessage] = React.useState("");
+  const [pendingDelete, setPendingDelete] = React.useState(null);
+
+  const loadRoadmaps = React.useCallback(async () => {
+    try {
+      setLoading(true);
+
+      const items = await loadStudyRoadmaps({
+        includeArchived: true,
+      });
+
+      setRoadmaps(items);
+    } catch (error) {
+      console.error("Load roadmap manage error:", error);
+      setActionMessage("Unable to load roadmaps.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    loadRoadmaps();
+  }, [loadRoadmaps]);
+
+  const filteredRoadmaps = roadmaps.filter((roadmap) => {
+    const searchMatch = [
+      roadmap.title,
+      roadmap.examType,
+      roadmap.course,
+      roadmap.stream,
+      roadmap.mentorName,
+    ]
+      .join(" ")
+      .toLowerCase()
+      .includes(searchText.toLowerCase());
+
+    const statusMatch =
+      statusFilter === "ALL" || roadmap.status === statusFilter;
+
+    return searchMatch && statusMatch;
+  });
+
+  const handlePublish = async (roadmapId) => {
+    await publishStudyRoadmap(roadmapId);
+    setActionMessage("Roadmap published successfully.");
+    await loadRoadmaps();
+  };
+
+  const handleUnpublish = async (roadmapId) => {
+    await unpublishStudyRoadmap(roadmapId);
+    setActionMessage("Roadmap unpublished successfully.");
+    await loadRoadmaps();
+  };
+
+  const handleArchive = async (roadmapId) => {
+    await archiveStudyRoadmap(roadmapId);
+    setActionMessage("Roadmap archived successfully.");
+    await loadRoadmaps();
+  };
+
+  const handleDeleteConfirmed = async () => {
+    if (!pendingDelete?.id) return;
+
+    await deleteStudyRoadmapWithDays(pendingDelete.id);
+    setActionMessage("Roadmap deleted with its days and progress records.");
+    setPendingDelete(null);
+    await loadRoadmaps();
+  };
+
+  return (
+    <RoadmapShell mode="admin">
+      <AspirePathHero
+        mode="admin"
+        eyebrow="Manage Roadmaps"
+        title="Control every AspirePath"
+        subtitle="Search, publish, unpublish, archive, delete, and inspect all imported study roadmaps."
+        metrics={buildStudioMetrics(roadmaps)}
+        actions={
+          <>
+            <Link
+              className="roadmapStudioPrimaryBtn"
+              to="/admin/content/roadmaps/import"
+            >
+              Import New
+            </Link>
+
+            <button
+              className="roadmapStudioSecondaryBtn"
+              type="button"
+              onClick={downloadRoadmapXlsxTemplate}
+            >
+              Download Template
+            </button>
+          </>
+        }
+      />
+
+      <section className="roadmapStudioSection">
+        <div className="roadmapStudioToolbar">
+          <div className="roadmapStudioToolbarGroup">
+            <input
+              className="roadmapStudioInput"
+              type="search"
+              placeholder="Search roadmap, exam, stream, mentor..."
+              value={searchText}
+              onChange={(event) => setSearchText(event.target.value)}
+            />
+          </div>
+
+          <div className="roadmapStudioToolbarGroup">
+            <select
+              className="roadmapStudioSelect"
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+            >
+              <option value="ALL">All Status</option>
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="unpublished">Unpublished</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+        </div>
+
+        {actionMessage ? (
+          <div className="roadmapStudioImportPanel">
+            <p className="roadmapStudioCardText">{actionMessage}</p>
+          </div>
+        ) : null}
+
+        {pendingDelete ? (
+          <div className="roadmapStudioImportPanel">
+            <h3 className="roadmapStudioCardTitle">Confirm delete</h3>
+            <p className="roadmapStudioCardText">
+              This will permanently delete “{pendingDelete.title}”, its days,
+              and progress records.
+            </p>
+
+            <div className="roadmapStudioHeroActions">
+              <button
+                className="roadmapStudioDangerBtn"
+                type="button"
+                onClick={handleDeleteConfirmed}
+              >
+                Delete Permanently
+              </button>
+
+              <button
+                className="roadmapStudioSecondaryBtn"
+                type="button"
+                onClick={() => setPendingDelete(null)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {loading ? (
+          <RoadmapEmptyState
+            mode="admin"
+            title="Loading roadmaps..."
+            text="Roadmap Studio is loading all saved paths."
+          />
+        ) : filteredRoadmaps.length === 0 ? (
+          <RoadmapEmptyState
+            mode="admin"
+            title="No matching roadmaps"
+            text="Try clearing filters or import a new roadmap."
+          />
+        ) : (
+          <div className="roadmapStudioTableWrap">
+            <table className="roadmapStudioTable">
+              <thead>
+                <tr>
+                  <th>Roadmap</th>
+                  <th>Exam</th>
+                  <th>Plan</th>
+                  <th>Status</th>
+                  <th>Dates</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredRoadmaps.map((roadmap) => (
+                  <tr key={roadmap.id}>
+                    <td>
+                      <strong>{roadmap.title || "Untitled Roadmap"}</strong>
+                      <br />
+                      {roadmap.description || "No description"}
+                    </td>
+
+                    <td>
+                      {roadmap.examType || "Exam"}
+                      <br />
+                      {roadmap.stream || roadmap.course || "General"}
+                    </td>
+
+                    <td>
+                      <RoadmapPlanBadge
+                        mode="admin"
+                        planType={roadmap.planType}
+                      />
+                    </td>
+
+                    <td>
+                      <RoadmapStatusBadge
+                        mode="admin"
+                        status={roadmap.status}
+                      />
+                    </td>
+
+                    <td>
+                      {formatDate(roadmap.startDate)} →{" "}
+                      {formatDate(roadmap.endDate)}
+                      <br />
+                      Exam: {formatDate(roadmap.examDate)}
+                    </td>
+
+                    <td>
+                      <div className="roadmapStudioToolbarGroup">
+                        <Link
+                          className="roadmapStudioGhostBtn"
+                          to={`/admin/content/roadmaps/schedule/${roadmap.id}`}
+                        >
+                          Schedule
+                        </Link>
+
+                        <Link
+                          className="roadmapStudioGhostBtn"
+                          to={`/admin/content/roadmaps/progress/${roadmap.id}`}
+                        >
+                          Progress
+                        </Link>
+
+                        {roadmap.status === "published" ? (
+                          <button
+                            className="roadmapStudioSecondaryBtn"
+                            type="button"
+                            onClick={() => handleUnpublish(roadmap.id)}
+                          >
+                            Unpublish
+                          </button>
+                        ) : (
+                          <button
+                            className="roadmapStudioPrimaryBtn"
+                            type="button"
+                            onClick={() => handlePublish(roadmap.id)}
+                          >
+                            Publish
+                          </button>
+                        )}
+
+                        <button
+                          className="roadmapStudioSecondaryBtn"
+                          type="button"
+                          onClick={() => handleArchive(roadmap.id)}
+                        >
+                          Archive
+                        </button>
+
+                        <button
+                          className="roadmapStudioDangerBtn"
+                          type="button"
+                          onClick={() => setPendingDelete(roadmap)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+    </RoadmapShell>
+  );
+};
+
+export const RoadmapScheduleRoute = () => {
+  const { roadmapId } = useParams();
+  const [roadmap, setRoadmap] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    let mounted = true;
+
+    const loadSchedule = async () => {
+      try {
+        setLoading(true);
+
+        const item = await loadStudyRoadmapWithDays(roadmapId);
+
+        if (mounted) {
+          setRoadmap(item);
+        }
+      } catch (error) {
+        console.error("Load roadmap schedule error:", error);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadSchedule();
+
+    return () => {
+      mounted = false;
+    };
+  }, [roadmapId]);
+
+  const weekGroups = groupDaysByWeek(roadmap?.days || []);
+
+  return (
+    <RoadmapShell mode="admin">
+      {loading ? (
+        <RoadmapEmptyState
+          mode="admin"
+          title="Loading schedule..."
+          text="Roadmap Studio is loading this roadmap timeline."
+        />
+      ) : !roadmap ? (
+        <RoadmapEmptyState
+          mode="admin"
+          title="Roadmap not found"
+          text="This roadmap may have been deleted."
+        />
+      ) : (
+        <>
+          <AspirePathHero
+            mode="admin"
+            eyebrow="Schedule Review"
+            title={roadmap.title || "Roadmap Schedule"}
+            subtitle="Review imported days, day types, tasks, live sessions, revision, and mock-test slots before publishing."
+            metrics={[
+              { value: roadmap.days?.length || 0, label: "Days" },
+              {
+                value: roadmap.days?.reduce(
+                  (total, day) => total + Number(day.tasks?.length || 0),
+                  0
+                ),
+                label: "Tasks",
+              },
+              { value: roadmap.planType || "FREE", label: "Plan" },
+              { value: roadmap.status || "draft", label: "Status" },
+            ]}
+            actions={
+              <>
+                <Link
+                  className="roadmapStudioPrimaryBtn"
+                  to="/admin/content/roadmaps/manage"
+                >
+                  Manage Roadmaps
+                </Link>
+
+                <Link
+                  className="roadmapStudioSecondaryBtn"
+                  to={`/ctet-tet/roadmaps/${roadmap.id}`}
+                >
+                  Student Preview
+                </Link>
+              </>
+            }
+          />
+
+          <section className="roadmapStudioSection">
+            <RoadmapSectionHeader
+              mode="admin"
+              kicker="Timeline"
+              title="Imported schedule"
+              text={`${formatDate(roadmap.startDate)} to ${formatDate(
+                roadmap.endDate
+              )} • Exam: ${formatDate(roadmap.examDate)}`}
+              action={
+                <>
+                  <RoadmapPlanBadge
+                    mode="admin"
+                    planType={roadmap.planType}
+                  />
+                  <RoadmapStatusBadge
+                    mode="admin"
+                    status={roadmap.status}
+                  />
+                </>
+              }
+            />
+
+            <div className="aspirePathTimeline">
+              {Object.entries(weekGroups).map(([weekNumber, days]) => (
+                <div className="aspirePathWeekSection" key={weekNumber}>
+                  <div className="aspirePathWeekHeader">
+                    <h3 className="aspirePathWeekTitle">
+                      Week {weekNumber}
+                    </h3>
+
+                    <RoadmapBadge>{days.length} days</RoadmapBadge>
+                  </div>
+
+                  <div className="aspirePathDayGrid">
+                    {days.map((day) => (
+                      <RoadmapDayCard key={day.id} day={day} />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </>
+      )}
+    </RoadmapShell>
+  );
+};
+
+export const RoadmapProgressRoute = () => {
+  const { roadmapId } = useParams();
+  const [roadmap, setRoadmap] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    let mounted = true;
+
+    const loadProgressBase = async () => {
+      try {
+        setLoading(true);
+
+        const item = await loadStudyRoadmapWithDays(roadmapId);
+
+        if (mounted) {
+          setRoadmap(item);
+        }
+      } catch (error) {
+        console.error("Load roadmap progress base error:", error);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadProgressBase();
+
+    return () => {
+      mounted = false;
+    };
+  }, [roadmapId]);
+
+  const days = roadmap?.days || [];
+  const mockDays = days.filter((day) => day.dayType === "mock").length;
+  const analysisDays = days.filter((day) => day.dayType === "analysis").length;
+  const revisionDays = days.filter((day) => day.dayType === "revision").length;
+
+  return (
+    <RoadmapShell mode="admin">
+      {loading ? (
+        <RoadmapEmptyState
+          mode="admin"
+          title="Loading progress..."
+          text="Roadmap Studio is preparing progress overview."
+        />
+      ) : !roadmap ? (
+        <RoadmapEmptyState
+          mode="admin"
+          title="Roadmap not found"
+          text="This roadmap may have been deleted."
+        />
+      ) : (
+        <>
+          <AspirePathHero
+            mode="admin"
+            eyebrow="Progress Overview"
+            title={roadmap.title || "Roadmap Progress"}
+            subtitle="This panel is ready for student completion analytics. Current view shows schedule readiness and roadmap structure."
+            metrics={[
+              { value: days.length || 0, label: "Days" },
+              { value: mockDays || 0, label: "Mock Days" },
+              { value: analysisDays || 0, label: "Analysis" },
+              { value: revisionDays || 0, label: "Revision" },
+            ]}
+            actions={
+              <>
+                <Link
+                  className="roadmapStudioPrimaryBtn"
+                  to={`/admin/content/roadmaps/schedule/${roadmap.id}`}
+                >
+                  View Schedule
+                </Link>
+
+                <Link
+                  className="roadmapStudioSecondaryBtn"
+                  to="/admin/content/roadmaps/manage"
+                >
+                  Manage Roadmaps
+                </Link>
+              </>
+            }
+          />
+
+          <section className="roadmapStudioSection">
+            <RoadmapSectionHeader
+              mode="admin"
+              kicker="Analytics Ready"
+              title="Roadmap progress foundation"
+              text="Student-level completion, missed days, catch-up queue, and weak-area recommendations will connect here after progress tracking is enabled."
+            />
+
+            <div className="roadmapStudioGrid">
+              <article className="roadmapStudioCard">
+                <h3 className="roadmapStudioCardTitle">Completion</h3>
+                <p className="roadmapStudioCardText">
+                  Track how many students completed daily tasks, mock tests, and
+                  revision cards.
+                </p>
+              </article>
+
+              <article className="roadmapStudioCard">
+                <h3 className="roadmapStudioCardTitle">Catch-up</h3>
+                <p className="roadmapStudioCardText">
+                  Identify missed tasks and help students continue without
+                  breaking their preparation flow.
+                </p>
+              </article>
+
+              <article className="roadmapStudioCard">
+                <h3 className="roadmapStudioCardTitle">Weak Areas</h3>
+                <p className="roadmapStudioCardText">
+                  Later this will connect mock results to recommended notes,
+                  videos, and practice tasks.
+                </p>
+              </article>
+            </div>
+          </section>
+        </>
+      )}
+    </RoadmapShell>
+  );
+};

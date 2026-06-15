@@ -57,17 +57,29 @@ import {
 import React, { useState, useEffect } from 'react';
 import { createPortal } from "react-dom";
 import {
-  BrowserRouter,
   Routes,
   Route,
   Link,
   useNavigate,
   useLocation,
-  useParams,
   Navigate,
 } from "react-router-dom";
 import AspireNestLogo from "./components/AspireNestLogo.jsx";
 import AppDashboard from "./components/AppDashboard.jsx";
+import {
+  StudentRoadmapHub,
+  StudentRoadmapDetail,
+  StudentRoadmapDay,
+  MyAspirePath,
+} from "./components/roadmaps/StudentRoadmaps.jsx";
+
+import {
+  RoadmapStudioHome,
+  RoadmapImportRoute,
+  RoadmapManageRoute,
+  RoadmapScheduleRoute,
+  RoadmapProgressRoute,
+} from "./components/roadmaps/RoadmapStudio.jsx";
 
 import ExamAttemptRoute from "./components/exam/ExamAttemptRoute.jsx";
 import ExamResultRoute from "./components/exam/ExamResultRoute.jsx";
@@ -315,8 +327,7 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
   const activeMockChapterId =
     decodeURIComponent(location.pathname.split("/")[6] || "");
   
-  const activeMockTestId =
-    decodeURIComponent(location.pathname.split("/")[7] || "");
+  
   
  
   
@@ -341,7 +352,6 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
       clearAttemptResponse,
       markAttemptForReviewAndNext,
       saveAttemptAndNext,
-      submitAttemptState,
       updateAttemptTimeLeft,
     } = useExamAttemptState(universalContent);
 
@@ -719,7 +729,7 @@ const [mockTestSearch, setMockTestSearch] = useState("");
 const [mockTestStatusFilter, setMockTestStatusFilter] = useState("ALL");
 const [mockTestExamFilter, setMockTestExamFilter] = useState("ALL");
 const [mockTestSortMode, setMockTestSortMode] = useState("LATEST");
-const [activeMockActionMenu, setActiveMockActionMenu] = useState(null);
+
 const [mockMenuPosition, setMockMenuPosition] =
   useState(null);
 
@@ -5122,7 +5132,94 @@ return (
 <main className="appShell">
 <Routes key={location.key || location.pathname}>
 
+<Route
+  path="/ctet-tet/roadmaps"
+  element={
+    <StudentRoadmapHub
+      user={user}
+      userPlanType={userPlanType}
+      isAdminUser={isAdmin(user)}
+    />
+  }
+/>
 
+<Route
+  path="/ctet-tet/roadmaps/:roadmapId"
+  element={
+    <StudentRoadmapDetail
+      user={user}
+      userPlanType={userPlanType}
+      isAdminUser={isAdmin(user)}
+    />
+  }
+/>
+
+<Route
+  path="/ctet-tet/roadmaps/:roadmapId/day/:dayId"
+  element={
+    <StudentRoadmapDay
+      user={user}
+      userPlanType={userPlanType}
+      isAdminUser={isAdmin(user)}
+    />
+  }
+/>
+
+<Route
+  path="/my-aspirepath"
+  element={
+    <MyAspirePath
+      user={user}
+      userPlanType={userPlanType}
+      isAdminUser={isAdmin(user)}
+    />
+  }
+/>
+
+<Route
+  path="/admin/content/roadmaps"
+  element={
+    requireAdmin() ? (
+      <RoadmapStudioHome />
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/roadmaps/import"
+  element={
+    requireAdmin() ? (
+      <RoadmapImportRoute />
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/roadmaps/manage"
+  element={
+    requireAdmin() ? (
+      <RoadmapManageRoute />
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/roadmaps/schedule/:roadmapId"
+  element={
+    requireAdmin() ? (
+      <RoadmapScheduleRoute />
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/roadmaps/progress/:roadmapId"
+  element={
+    requireAdmin() ? (
+      <RoadmapProgressRoute />
+    ) : null
+  }
+/>
 
 <Route
   path="/"
