@@ -5,7 +5,7 @@ import {
     getDoc,
     doc,
     updateDoc,
-    deleteDoc,
+    setDoc,
     query,
     where,
     writeBatch,
@@ -459,16 +459,9 @@ import {
       progressKey
     );
   
-    await updateDoc(progressRef, {
-      userId,
-      roadmapId,
-      dayId,
-      completedTaskIds,
-      progressPercent: Number(progressPercent || 0),
-      studentNote: studentNote?.trim() || "",
-      updatedAt: serverTimestamp(),
-    }).catch(async () => {
-      await addDoc(collection(db, ROADMAP_COLLECTIONS.PROGRESS), {
+    await setDoc(
+      progressRef,
+      {
         progressKey,
         userId,
         roadmapId,
@@ -476,10 +469,10 @@ import {
         completedTaskIds,
         progressPercent: Number(progressPercent || 0),
         studentNote: studentNote?.trim() || "",
-        createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      });
-    });
+      },
+      { merge: true }
+    );
   
     return progressKey;
   };

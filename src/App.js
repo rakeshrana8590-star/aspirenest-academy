@@ -73,9 +73,8 @@ import ExamAttemptRoute from "./components/exam/ExamAttemptRoute.jsx";
 import ExamResultRoute from "./components/exam/ExamResultRoute.jsx";
 import ExamReviewRoute from "./components/exam/ExamReviewRoute.jsx";
 import ExamStartRoute from "./components/exam/ExamStartRoute.jsx";
-import {
-  getAttemptStorageKey,
-} from "./components/exam/examAttemptStorage.js";
+import StudentMockTestCard from "./components/exam/StudentMockTestCard.jsx";
+
 import { useExamAttemptState } from "./components/exam/useExamAttemptState.js";
 import { useExamTimer } from "./components/exam/useExamTimer.js";
 import { useExamSecurity } from "./components/exam/useExamSecurity.js";
@@ -18742,51 +18741,15 @@ handleSaveUniversalContent={handleSaveUniversalContent}
                   .trim()
                   .toLowerCase()
           )
-          .map((test) => {
-            const savedCardAttempt = JSON.parse(
-              localStorage.getItem(getAttemptStorageKey(test.id)) || "{}"
-            );
-          
-            const hasSubmittedCardAttempt =
-              savedCardAttempt?.isSubmitted;
-          
-            return (
-            <div className="pdfMiniCard" key={test.id}>
-              <div className="pdfIcon">📝</div>
+   
+          .map((test) => (
+            <StudentMockTestCard
+              key={test.id}
+              test={test}
+              hasPlanAccess={hasPlanAccess}
+            />
+          ))}
 
-              <h3>{test.title}</h3>
-
-              <p>
-                {test.subject} · {test.chapter}
-              </p>
-
-              <span>
-                {test.planType} · {test.testType || "Mock Test"}
-              </span>
-
-              <button
-                className="btnLink"
-                onClick={() => {
-                  if (
-                    test.planType !== "FREE" &&
-                    !hasPlanAccess(test.planType)
-                  ) {
-                    navigate("/ctet-tet/pricing");
-                    return;
-                  }
-
-                  navigate(
-                    hasSubmittedCardAttempt
-                      ? `/ctet-tet/mock-tests/result/${test.id}`
-                      : `/ctet-tet/mock-tests/start/${test.id}`
-                  );
-                }}
-              >
-                {hasSubmittedCardAttempt ? "View Result" : "Start Test"}
-              </button>
-            </div>
-            );
-          })}
       </div>
     </section>
   }
