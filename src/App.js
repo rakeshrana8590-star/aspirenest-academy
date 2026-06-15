@@ -76,6 +76,7 @@ import {
 import {
   RoadmapStudioHome,
   RoadmapImportRoute,
+  RoadmapEditRoute,
   RoadmapManageRoute,
   RoadmapScheduleRoute,
   RoadmapProgressRoute,
@@ -100,6 +101,11 @@ import {
 import { useExamAttemptState } from "./components/exam/useExamAttemptState.js";
 import { useExamTimer } from "./components/exam/useExamTimer.js";
 import { useExamSecurity } from "./components/exam/useExamSecurity.js";
+import { useMockTestActionMenu } from "./components/exam/useMockTestActionMenu.js";
+import {
+  downloadMockTestXlsxTemplate,
+  downloadMockTestCsvTemplate,
+} from "./components/exam/mockTestTemplateDownloads.js";
 import './style.css';
 import "./styles/exam/examHeader.css";
 import "./styles/exam/questionWorkspace.css";
@@ -694,42 +700,12 @@ const [mockTestStatusFilter, setMockTestStatusFilter] = useState("ALL");
 const [mockTestExamFilter, setMockTestExamFilter] = useState("ALL");
 const [mockTestSortMode, setMockTestSortMode] = useState("LATEST");
 
-const [mockMenuPosition, setMockMenuPosition] =
-  useState(null);
-
-const [mockMenuTest, setMockMenuTest] =
-  useState(null);
-  const openMockActionPortal = (event, test) => {
-    const rect =
-      event.currentTarget.getBoundingClientRect();
-  
-    setMockMenuPosition({
-      top: rect.bottom + 8,
-      left: rect.left,
-    });
-  
-    setMockMenuTest(test);
-  };
-  
-  const closeMockActionPortal = () => {
-    setMockMenuPosition(null);
-    setMockMenuTest(null);
-  };
-  useEffect(() => {
-    if (!mockMenuPosition) return;
-  
-    const handleCloseOnMove = () => {
-      closeMockActionPortal();
-    };
-  
-    window.addEventListener("scroll", handleCloseOnMove, true);
-    window.addEventListener("resize", handleCloseOnMove);
-  
-    return () => {
-      window.removeEventListener("scroll", handleCloseOnMove, true);
-      window.removeEventListener("resize", handleCloseOnMove);
-    };
-  }, [mockMenuPosition]);
+const {
+  mockMenuPosition,
+  mockMenuTest,
+  openMockActionPortal,
+  closeMockActionPortal,
+} = useMockTestActionMenu();
 const [selectedMockTestIds, setSelectedMockTestIds] = useState([]);
 const [mockImportXlsxUrl, setMockImportXlsxUrl] = useState("");
 const [mockTestPage, setMockTestPage] = useState(1);
@@ -1333,173 +1309,11 @@ const handleImportMockTestJson = async (event) => {
 
 
 const handleDownloadMockTestXlsxTemplate = () => {
-  const testInfoRows = [
-    { Field: "Test Title", Value: "Sample CTET Subject Test" },
-    { Field: "Plan", Value: "PREMIUM" },
-    { Field: "Exam Type", Value: "CTET" },
-    { Field: "Test Type", Value: "Subject Test" },
-    { Field: "Subject", Value: "Child Development & Pedagogy" },
-    { Field: "Chapter", Value: "Complete CDP" },
-    { Field: "Duration Minutes", Value: 200 },
-    { Field: "Total Questions", Value: 2 },
-    { Field: "Marks Per Question", Value: 1 },
-    { Field: "Negative Marks", Value: 0 },
-    { Field: "Passing Marks", Value: 0 },
-    { Field: "Exam Difficulty", Value: "Mixed" },
-    { Field: "Exam Language", Value: "English" },
-    { Field: "Attempt Limit", Value: "unlimited" },
-    { Field: "Result Publish Mode", Value: "instant" },
-    { Field: "Shuffle Questions", Value: "no" },
-    { Field: "Shuffle Options", Value: "no" },
-    { Field: "Navigation Mode", Value: "free" },
-    { Field: "Allow Pause", Value: "yes" },
-    { Field: "Calculator Allowed", Value: "no" },
-    { Field: "Question Source", Value: "xlsxImport" },
-    { Field: "Fullscreen Mode", Value: "no" },
-    { Field: "Tab Switch Detection", Value: "no" },
-    { Field: "Copy Paste Protection", Value: "no" },
-    { Field: "Auto Submit On Violation", Value: "no" },
-    { Field: "Leaderboard Mode", Value: "disabled" },
-    { Field: "Timer Mode", Value: "globalTimer" },
-    { Field: "Per Question Time Value", Value: 1 },
-    { Field: "Per Question Time Unit", Value: "min" },
-    { Field: "Auto Submit On Time Up", Value: "yes" },
-    { Field: "Schedule Type", Value: "alwaysAvailable" },
-    { Field: "Exam Start Date", Value: "" },
-    { Field: "Exam Start Time", Value: "" },
-    { Field: "Exam End Date", Value: "" },
-    { Field: "Exam End Time", Value: "" },
-    { Field: "Recurring Mode", Value: "none" },
-    { Field: "Weekly Test Day", Value: "" },
-    { Field: "Monthly Test Date", Value: "" },
-    { Field: "Live Event Mode", Value: "no" },
-    { Field: "Scholarship Mode", Value: "no" },
-    { Field: "Exam Instructions", Value: "" },
-    { Field: "Status", Value: "draft" },
-  ];
-
-  const questionRows = [
-    {
-      "Question Number": 1,
-      Question: "Sample question text",
-      "Option A": "Option A",
-      "Option B": "Option B",
-      "Option C": "Option C",
-      "Option D": "Option D",
-      "Correct Answer": "Option A",
-      Explanation: "Sample explanation",
-      "Difficulty Level": "Easy",
-      "Question Type": "Single Correct",
-      Language: "English",
-      Tag: "",
-      "Positive Marks": 1,
-      "Negative Marks": 0,
-      "Question Status": "published",
-      "Save To Question Bank": "yes",
-    },
-  ];
-
-  const testInfoSheet = XLSX.utils.json_to_sheet(testInfoRows);
-  const questionsSheet = XLSX.utils.json_to_sheet(questionRows);
-
-  testInfoSheet["!cols"] = [{ wch: 35 }, { wch: 45 }];
-  questionsSheet["!cols"] = [
-    { wch: 18 },
-    { wch: 70 },
-    { wch: 32 },
-    { wch: 32 },
-    { wch: 32 },
-    { wch: 32 },
-    { wch: 22 },
-    { wch: 65 },
-    { wch: 18 },
-    { wch: 20 },
-    { wch: 16 },
-    { wch: 20 },
-    { wch: 16 },
-    { wch: 16 },
-    { wch: 20 },
-    { wch: 22 },
-  ];
-
-  const workbook = XLSX.utils.book_new();
-
-  XLSX.utils.book_append_sheet(workbook, testInfoSheet, "Test Info");
-  XLSX.utils.book_append_sheet(workbook, questionsSheet, "Questions");
-
-  XLSX.writeFile(workbook, "mock-test-two-sheet-import-template.xlsx");
+  downloadMockTestXlsxTemplate();
 };
 
 const handleDownloadMockTestCsvTemplate = () => {
-  const headers = [
-    "Test Title",
-    "Plan",
-    "Exam Type",
-    "Test Type",
-    "Subject",
-    "Chapter",
-    "Duration Minutes",
-    "Question Number",
-    "Question",
-    "Option A",
-    "Option B",
-    "Option C",
-    "Option D",
-    "Correct Answer",
-    "Explanation",
-    "Difficulty Level",
-    "Language",
-    "Positive Marks",
-    "Negative Marks",
-    "Question Status",
-  ];
-
-  const sampleRow = [
-    "Sample CTET Test",
-    "FREE",
-    "CTET",
-    "Chapter Test",
-    "Child Development & Pedagogy",
-    "Growth and Development",
-    "30",
-    "1",
-    "Sample question text",
-    "Option A",
-    "Option B",
-    "Option C",
-    "Option D",
-    "Option A",
-    "Sample explanation",
-    "Easy",
-    "English",
-    "1",
-    "0",
-    "published",
-  ];
-
-  const safeCsvValue = (value = "") =>
-    `"${value.toString().replace(/"/g, '""')}"`;
-
-  const csvContent = [
-    headers.map(safeCsvValue).join(","),
-    sampleRow.map(safeCsvValue).join(","),
-  ].join("\n");
-
-  const csvBlob = new Blob(["\uFEFF" + csvContent], {
-    type: "text/csv;charset=utf-8;",
-  });
-
-  const downloadUrl = URL.createObjectURL(csvBlob);
-
-  const downloadLink = document.createElement("a");
-  downloadLink.href = downloadUrl;
-  downloadLink.download = "mock-test-import-template.csv";
-
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-  document.body.removeChild(downloadLink);
-
-  URL.revokeObjectURL(downloadUrl);
+  downloadMockTestCsvTemplate();
 };
 
 const handleImportMockTestXlsx = async (event) => {
@@ -4644,6 +4458,15 @@ return (
   element={
     requireAdmin() ? (
       <RoadmapManageRoute />
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/roadmaps/edit/:roadmapId"
+  element={
+    requireAdmin() ? (
+      <RoadmapEditRoute />
     ) : null
   }
 />
@@ -8883,22 +8706,19 @@ This action cannot be undone.`
                       <button
   className="dangerButton"
   onClick={async () => {
-    if (!mockMenuTest?.id) return;
+    if (!video?.id) return;
 
     const confirmDelete = window.confirm(
-      `Delete "${mockMenuTest.title}" permanently?\n\nThis cannot be undone.`
+      `Delete "${video.title}" permanently?\n\nThis cannot be undone.`
     );
 
     if (!confirmDelete) return;
 
-    await deleteMockTest({
-      test: mockMenuTest,
-      reloadContent: loadContentItemsFromFirestore,
-    });
+    await deleteDoc(doc(db, "contentItems", video.id));
 
-    closeMockActionPortal();
+    await loadContentItemsFromFirestore();
 
-    alert("Mock test deleted successfully ✅");
+    alert("Video deleted successfully ✅");
   }}
 >
   🗑 Delete

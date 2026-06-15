@@ -341,6 +341,63 @@ import {
     return roadmapId;
   };
   
+  export const updateStudyRoadmapMeta = async ({
+    roadmapId,
+    roadmapPayload,
+    allowPotentialDuplicate = false,
+  }) => {
+    if (!roadmapId) {
+      throw new Error("Roadmap ID is required for update.");
+    }
+  
+    const existingRoadmap = await loadStudyRoadmapById(roadmapId);
+  
+    if (!existingRoadmap) {
+      throw new Error("Roadmap not found for update.");
+    }
+  
+    const cleanPayload = {
+      title: roadmapPayload.title?.trim() || "Untitled Roadmap",
+      description: roadmapPayload.description?.trim() || "",
+      course: roadmapPayload.course?.trim() || "CTET/TET",
+      examType: roadmapPayload.examType?.trim() || "CTET/TET",
+      stream: roadmapPayload.stream?.trim() || "",
+      mentorName: roadmapPayload.mentorName?.trim() || "",
+      planType: roadmapPayload.planType || ROADMAP_PLAN_TYPES.FREE,
+      status: roadmapPayload.status || existingRoadmap.status || ROADMAP_STATUS.DRAFT,
+      startDate: roadmapPayload.startDate || "",
+      endDate: roadmapPayload.endDate || "",
+      examDate: roadmapPayload.examDate || "",
+      sourceType: roadmapPayload.sourceType || existingRoadmap.sourceType || "manual",
+      sourceFileName:
+        roadmapPayload.sourceFileName || existingRoadmap.sourceFileName || "",
+      sourceFileUrl:
+        roadmapPayload.sourceFileUrl || existingRoadmap.sourceFileUrl || "",
+    };
+  
+    const duplicateAudit = await findDuplicateStudyRoadmaps({
+      roadmap: {
+        ...existingRoadmap,
+        ...cleanPayload,
+        id: roadmapId,
+      },
+    });
+  
+    if (duplicateAudit.hasExactDuplicate) {
+      throw new Error(
+        "Exact duplicate roadmap found. Update blocked to avoid duplicate roadmap records."
+      );
+    }
+  
+    if (duplicateAudit.hasPotentialDuplicate && !allowPotentialDuplicate) {
+      throw new Error(
+        "Possible duplicate roadmap found. Please confirm before saving this update."
+      );
+    }
+  
+    return updateStudyRoadmap(roadmapId, cleanPayload);
+  };
+
   export const publishStudyRoadmap = async (roadmapId) => {
     if (!roadmapId) {
       throw new Error("Roadmap ID is required for publish.");

@@ -43,6 +43,7 @@ export const updateMockTestStatus = async ({
     test,
     status,
     reloadContent,
+    extraFields = {},
   }) => {
     if (!test?.id || !status) {
       return false;
@@ -50,6 +51,7 @@ export const updateMockTestStatus = async ({
   
     await updateDoc(doc(db, "contentItems", test.id), {
       status,
+      ...extraFields,
       updatedAt: new Date(),
     });
   
