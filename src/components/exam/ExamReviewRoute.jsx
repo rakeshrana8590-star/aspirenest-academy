@@ -3,10 +3,22 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { getAttemptStorageKey } from "./examAttemptStorage.js";
 
+const safeParseJson = (value, fallback = {}) => {
+  try {
+    return JSON.parse(value || "{}") || fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const hasObjectData = (value) =>
+  value && typeof value === "object" && Object.keys(value).length > 0;
+
 export default function ExamReviewRoute({
   universalContent,
   getMockTestAccessStatus,
   mockAttemptAnswers,
+  mockAttemptState,
 }) {
   const navigate = useNavigate();
   const { testId } = useParams();
@@ -99,11 +111,9 @@ export default function ExamReviewRoute({
       <section className="notesSubjectRoutePage">
         <div className="pdfMiniCard">
           <h3>Test upcoming</h3>
-
           <p>
             This mock test is scheduled for a future date or time.
           </p>
-
           <button
             className="btnLink"
             onClick={() => navigate("/ctet-tet/mock-tests")}
@@ -120,9 +130,7 @@ export default function ExamReviewRoute({
       <section className="notesSubjectRoutePage">
         <div className="pdfMiniCard">
           <h3>Test expired</h3>
-
           <p>This mock test window is closed.</p>
-
           <button
             className="btnLink"
             onClick={() => navigate("/ctet-tet/mock-tests")}
@@ -134,20 +142,26 @@ export default function ExamReviewRoute({
     );
   }
 
-  const storedAttemptState = JSON.parse(
-    localStorage.getItem(getAttemptStorageKey(test.id)) || "{}"
+  const liveAttemptState = mockAttemptState?.[test.id] || {};
+
+  const storedAttemptState = safeParseJson(
+    localStorage.getItem(getAttemptStorageKey(test.id))
   );
 
-  if (!storedAttemptState?.isSubmitted) {
+  const activeAttemptState = liveAttemptState?.isSubmitted
+    ? liveAttemptState
+    : storedAttemptState?.isSubmitted
+    ? storedAttemptState
+    : {};
+
+  if (!activeAttemptState?.isSubmitted) {
     return (
       <section className="notesSubjectRoutePage">
         <div className="pdfMiniCard">
           <h3>Review locked</h3>
-
           <p>
             Please submit the mock test before viewing solutions.
           </p>
-
           <button
             className="btnLink"
             onClick={() =>
@@ -161,48 +175,50 @@ export default function ExamReviewRoute({
     );
   }
 
-  const storedLegacyAnswers = JSON.parse(
-    localStorage.getItem(`mockAttemptAnswers_${test.id}`) || "{}"
+  const storedLegacyAnswers = safeParseJson(
+    localStorage.getItem(`mockAttemptAnswers_${test.id}`)
   );
 
+  const liveNewAnswers = liveAttemptState?.answers || {};
   const storedNewAnswers = storedAttemptState?.answers || {};
+  const activeNewAnswers = activeAttemptState?.answers || {};
+  const liveLegacyAnswers = mockAttemptAnswers?.[test.id] || {};
 
-  const liveAttemptAnswers = mockAttemptAnswers?.[test.id] || {};
-
-  const attemptAnswers =
-    Object.keys(liveAttemptAnswers).length > 0
-      ? liveAttemptAnswers
-      : Object.keys(storedNewAnswers).length > 0
-      ? storedNewAnswers
-      : storedLegacyAnswers;
+  const attemptAnswers = hasObjectData(activeNewAnswers)
+    ? activeNewAnswers
+    : hasObjectData(liveNewAnswers)
+    ? liveNewAnswers
+    : hasObjectData(storedNewAnswers)
+    ? storedNewAnswers
+    : hasObjectData(liveLegacyAnswers)
+    ? liveLegacyAnswers
+    : storedLegacyAnswers;
 
   const questions = test.questions || [];
 
   const questionOrder =
-    storedAttemptState?.questionOrder?.length
+    activeAttemptState?.questionOrder?.length
+      ? activeAttemptState.questionOrder
+      : storedAttemptState?.questionOrder?.length
       ? storedAttemptState.questionOrder
       : questions.map((_, index) => index);
 
   const reviewQuestions = questionOrder
-    .map((actualQuestionIndex) => questions[actualQuestionIndex])
-    .filter(Boolean);
+    .map((actualQuestionIndex) => ({
+      actualQuestionIndex,
+      question: questions[actualQuestionIndex],
+    }))
+    .filter((item) => Boolean(item.question));
 
   const correctCount = reviewQuestions.filter(
-    (question, index) => {
-      const actualQuestionIndex = questionOrder[index];
-
-      return (
-        attemptAnswers[actualQuestionIndex] &&
-        attemptAnswers[actualQuestionIndex] === question.answer
-      );
-    }
+    ({ actualQuestionIndex, question }) =>
+      attemptAnswers[actualQuestionIndex] &&
+      attemptAnswers[actualQuestionIndex] === question.answer
   ).length;
 
-  const skippedCount = reviewQuestions.filter((_, index) => {
-    const actualQuestionIndex = questionOrder[index];
-
-    return !attemptAnswers[actualQuestionIndex];
-  }).length;
+  const skippedCount = reviewQuestions.filter(
+    ({ actualQuestionIndex }) => !attemptAnswers[actualQuestionIndex]
+  ).length;
 
   const wrongCount =
     reviewQuestions.length - correctCount - skippedCount;
@@ -246,7 +262,7 @@ export default function ExamReviewRoute({
 
         <div className="reviewSummaryGrid">
           <div>
-            <strong>{questions.length}</strong>
+            <strong>{reviewQuestions.length}</strong>
             <span>Total</span>
           </div>
 
@@ -267,97 +283,102 @@ export default function ExamReviewRoute({
         </div>
 
         <div className="reviewQuestionPalette">
-          {reviewQuestions.map((question, index) => {
-            const actualQuestionIndex = questionOrder[index];
-            const userAnswer = attemptAnswers[actualQuestionIndex];
+          {reviewQuestions.map(
+            ({ actualQuestionIndex, question }, index) => {
+              const userAnswer = attemptAnswers[actualQuestionIndex];
 
-            const isCorrect =
-              userAnswer && userAnswer === question.answer;
+              const isCorrect =
+                userAnswer && userAnswer === question.answer;
 
-            const isSkipped = !userAnswer;
+              const isSkipped = !userAnswer;
 
-            return (
-              <a
-                key={index}
-                href={`#review-q-${index + 1}`}
-                className={`reviewPaletteDot ${
-                  isSkipped
-                    ? "isSkipped"
-                    : isCorrect
-                    ? "isCorrect"
-                    : "isWrong"
-                }`}
-              >
-                {index + 1}
-              </a>
-            );
-          })}
+              return (
+                <a
+                  key={`review-dot-${actualQuestionIndex}`}
+                  href={`#review-q-${index + 1}`}
+                  className={`reviewPaletteDot ${
+                    isSkipped
+                      ? "isSkipped"
+                      : isCorrect
+                      ? "isCorrect"
+                      : "isWrong"
+                  }`}
+                >
+                  {index + 1}
+                </a>
+              );
+            }
+          )}
         </div>
 
         <div className="reviewAnswerGrid">
-          {reviewQuestions.map((question, index) => {
-            const actualQuestionIndex = questionOrder[index];
-            const userAnswer = attemptAnswers[actualQuestionIndex];
+          {reviewQuestions.map(
+            ({ actualQuestionIndex, question }, index) => {
+              const userAnswer = attemptAnswers[actualQuestionIndex];
 
-            const isCorrect =
-              userAnswer && userAnswer === question.answer;
+              const isCorrect =
+                userAnswer && userAnswer === question.answer;
 
-            const isSkipped = !userAnswer;
+              const isSkipped = !userAnswer;
 
-            return (
-              <details
-                id={`review-q-${index + 1}`}
-                className={`reviewAnswerCard ${
-                  isSkipped
-                    ? "isSkipped"
-                    : isCorrect
-                    ? "isCorrect"
-                    : "isWrong"
-                }`}
-                key={index}
-              >
-                <summary>
-                  <div className="reviewQuestionTop">
-                    <span className="reviewQuestionNo">
-                      Q{index + 1}
-                    </span>
+              return (
+                <details
+                  id={`review-q-${index + 1}`}
+                  className={`reviewAnswerCard ${
+                    isSkipped
+                      ? "isSkipped"
+                      : isCorrect
+                      ? "isCorrect"
+                      : "isWrong"
+                  }`}
+                  key={`review-card-${actualQuestionIndex}`}
+                >
+                  <summary>
+                    <div className="reviewQuestionTop">
+                      <span className="reviewQuestionNo">
+                        Q{index + 1}
+                      </span>
 
-                    <span className="reviewStatusPill">
-                      {isSkipped
-                        ? "Skipped"
-                        : isCorrect
-                        ? "Correct"
-                        : "Wrong"}
-                    </span>
-                  </div>
-
-                  <div className="reviewAnswerLine">
-                    <span>
-                      Your:{" "}
-                      <strong>
+                      <span className="reviewStatusPill">
                         {isSkipped
-                          ? "—"
-                          : getOptionLabel(userAnswer)}
-                      </strong>
-                    </span>
+                          ? "Skipped"
+                          : isCorrect
+                          ? "Correct"
+                          : "Wrong"}
+                      </span>
+                    </div>
 
-                    <span>
-                      Correct:{" "}
-                      <strong>
-                        {getOptionLabel(question.answer)}
-                      </strong>
-                    </span>
-                  </div>
-                </summary>
+                    <div className="reviewAnswerLine">
+                      <span>
+                        Your:{" "}
+                        <strong>
+                          {isSkipped
+                            ? "—"
+                            : getOptionLabel(userAnswer)}
+                        </strong>
+                      </span>
 
-                <div className="reviewQuestionBody">
-                  <p className="reviewQuestionText">
-                    {question.question}
-                  </p>
+                      <span>
+                        Correct:{" "}
+                        <strong>
+                          {getOptionLabel(question.answer)}
+                        </strong>
+                      </span>
+                    </div>
+                  </summary>
 
-                  <div className="reviewOptionsList">
-                    {["option1", "option2", "option3", "option4"].map(
-                      (optionKey) => (
+                  <div className="reviewQuestionBody">
+                    <p className="reviewQuestionText">
+                      {question.question}
+                    </p>
+
+                    <div className="reviewOptionsList">
+                      {[
+                        "option1",
+                        "option2",
+                        "option3",
+                        "option4",
+                      ].map((optionKey) => (
                         <div
                           key={optionKey}
                           className={`reviewOptionItem ${
@@ -371,36 +392,36 @@ export default function ExamReviewRoute({
                           <strong>{getOptionLabel(optionKey)}.</strong>{" "}
                           {question[optionKey]}
                         </div>
-                      )
+                      ))}
+                    </div>
+
+                    <div className="reviewAnswerDetails">
+                      <p>
+                        Your Answer:{" "}
+                        <strong>
+                          {getOptionText(question, userAnswer)}
+                        </strong>
+                      </p>
+
+                      <p>
+                        Correct Answer:{" "}
+                        <strong>
+                          {getOptionText(question, question.answer)}
+                        </strong>
+                      </p>
+                    </div>
+
+                    {question.explanation && (
+                      <div className="reviewExplanation">
+                        <strong>Explanation:</strong>
+                        <p>{question.explanation}</p>
+                      </div>
                     )}
                   </div>
-
-                  <div className="reviewAnswerDetails">
-                    <p>
-                      Your Answer:{" "}
-                      <strong>
-                        {getOptionText(question, userAnswer)}
-                      </strong>
-                    </p>
-
-                    <p>
-                      Correct Answer:{" "}
-                      <strong>
-                        {getOptionText(question, question.answer)}
-                      </strong>
-                    </p>
-                  </div>
-
-                  {question.explanation && (
-                    <div className="reviewExplanation">
-                      <strong>Explanation:</strong>
-                      <p>{question.explanation}</p>
-                    </div>
-                  )}
-                </div>
-              </details>
-            );
-          })}
+                </details>
+              );
+            }
+          )}
         </div>
 
         <button

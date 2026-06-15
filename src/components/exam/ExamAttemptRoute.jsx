@@ -52,6 +52,274 @@ export default function ExamAttemptRoute({
 
   const accessStatus = getMockTestAccessStatus(test);
 
+  const questions = test?.questions || [];
+  const mockRules = getMockTestRules(test);
+
+  const isSequentialNavigation =
+    mockRules.navigationMode === "sequential";
+
+  const isCalculatorAllowed =
+    mockRules.calculatorAllowed === "yes";
+
+  const shouldShuffleOptions =
+    mockRules.shuffleOptions === "yes";
+
+  const isNoTimer = test?.timerMode === "noTimer";
+  const isPerQuestionTimer =
+    test?.timerMode === "perQuestionTimer";
+
+  const timerLabel = isPerQuestionTimer
+    ? "Question Time"
+    : "Time Left";
+
+  const defaultTimerSeconds = test
+    ? getExamTimerSeconds(test)
+    : 0;
+
+  const attemptState = test
+    ? mockAttemptState?.[test.id] ||
+      createDefaultAttemptState(test, defaultTimerSeconds)
+    : null;
+
+  const currentQuestionIndex =
+    Number.isInteger(attemptState?.currentIndex)
+      ? attemptState.currentIndex
+      : 0;
+
+  const orderedQuestionIndexes =
+    attemptState?.questionOrder?.length
+      ? attemptState.questionOrder
+      : questions.map((_, index) => index);
+
+  const actualQuestionIndex =
+    orderedQuestionIndexes[currentQuestionIndex] ??
+    currentQuestionIndex;
+
+  const currentQuestion = questions[actualQuestionIndex];
+
+  const selectedAnswerKey =
+    attemptState?.answers?.[actualQuestionIndex] || "";
+
+  const timeLeft = isNoTimer
+    ? 0
+    : attemptState?.timeLeft ?? defaultTimerSeconds;
+
+  const formattedTime = formatExamTime(timeLeft);
+
+  const {
+    answeredCount,
+    markedCount,
+    notAnsweredCount,
+    notVisitedCount,
+  } = attemptState
+    ? getExamQuestionCounts(questions, attemptState)
+    : {
+        answeredCount: 0,
+        markedCount: 0,
+        notAnsweredCount: 0,
+        notVisitedCount: 0,
+      };
+
+  const palettePageSize = 25;
+
+  const currentRangeStart =
+    Math.floor(currentQuestionIndex / palettePageSize) *
+    palettePageSize;
+
+  const finalPaletteRangeStart =
+    attemptState?.paletteRangeStart ?? currentRangeStart;
+
+  const paletteRanges = Array.from(
+    {
+      length: Math.ceil(questions.length / palettePageSize),
+    },
+    (_, rangeIndex) => {
+      const start = rangeIndex * palettePageSize;
+      const end = Math.min(
+        start + palettePageSize,
+        questions.length
+      );
+
+      return {
+        start,
+        end,
+        label: `${start + 1}-${end}`,
+      };
+    }
+  );
+
+  const visiblePaletteIndexes =
+    paletteFilter === "all"
+      ? questions
+          .map((_, index) => index)
+          .slice(
+            finalPaletteRangeStart,
+            finalPaletteRangeStart + palettePageSize
+          )
+      : getFilteredQuestionIndexes(
+          questions,
+          attemptState,
+          paletteFilter
+        ).slice(0, 25);
+
+  const optionList = React.useMemo(() => {
+    if (!currentQuestion) return [];
+
+    const baseOptions = [
+      {
+        key: "option1",
+        label: "A",
+        text:
+          currentQuestion.option1 ||
+          currentQuestion.options?.[0],
+      },
+      {
+        key: "option2",
+        label: "B",
+        text:
+          currentQuestion.option2 ||
+          currentQuestion.options?.[1],
+      },
+      {
+        key: "option3",
+        label: "C",
+        text:
+          currentQuestion.option3 ||
+          currentQuestion.options?.[2],
+      },
+      {
+        key: "option4",
+        label: "D",
+        text:
+          currentQuestion.option4 ||
+          currentQuestion.options?.[3],
+      },
+    ].filter((option) => option.text);
+
+    if (!shouldShuffleOptions) {
+      return baseOptions;
+    }
+
+    return [...baseOptions].sort(() => Math.random() - 0.5);
+  }, [
+    currentQuestion,
+    actualQuestionIndex,
+    shouldShuffleOptions,
+  ]);
+
+  const totalViolationCount =
+    Number(attemptState?.violations?.tabSwitchCount || 0) +
+    Number(attemptState?.violations?.fullscreenExitCount || 0);
+
+  const shouldForceSubmit =
+    test?.autoSubmitOnViolation === "yes" &&
+    totalViolationCount >= 5 &&
+    !attemptState?.isSubmitted;
+
+  React.useEffect(() => {
+    if (!test || !attemptState || !shouldForceSubmit) return;
+
+    const finalState = {
+      ...attemptState,
+      submittedAt: Date.now(),
+      isSubmitted: true,
+      forceSubmittedReason: "Violation limit exceeded",
+    };
+
+    saveAttemptState(test.id, finalState);
+
+    setMockAttemptState((prev) => ({
+      ...prev,
+      [test.id]: finalState,
+    }));
+
+    toast.error("Violation limit exceeded. Test auto-submitted.");
+
+    const redirectTimer = setTimeout(() => {
+      navigate(`/ctet-tet/mock-tests/result/${test.id}`);
+    }, 300);
+
+    return () => clearTimeout(redirectTimer);
+  }, [
+    test,
+    attemptState,
+    shouldForceSubmit,
+    setMockAttemptState,
+    navigate,
+  ]);
+
+  const resetQuestionTimer = () => {
+    if (!test || !isPerQuestionTimer) return;
+    updateAttemptTimeLeft(test.id, defaultTimerSeconds);
+  };
+
+  const jumpToFirstFilteredQuestion = (filterType) => {
+    if (!test || !attemptState) return;
+
+    const indexes = getFilteredQuestionIndexes(
+      questions,
+      attemptState,
+      filterType
+    );
+
+    setPaletteFilter(filterType);
+
+    if (indexes.length === 0) return;
+
+    const firstIndex = indexes[0];
+    const firstRangeStart =
+      Math.floor(firstIndex / palettePageSize) *
+      palettePageSize;
+
+    if (
+      isSequentialNavigation &&
+      firstIndex > currentQuestionIndex + 1
+    ) {
+      toast.error(
+        "Sequential navigation is enabled. Please continue in order."
+      );
+      return;
+    }
+
+    goToAttemptQuestion(
+      test.id,
+      firstIndex,
+      firstRangeStart
+    );
+  };
+
+  const submitAttempt = () => {
+    if (!test) return;
+    setSubmitConfirmTestId(test.id);
+  };
+
+  const confirmFinalSubmit = () => {
+    if (!test || !attemptState) return;
+
+    const finalState = {
+      ...attemptState,
+      submittedAt: Date.now(),
+      isSubmitted: true,
+    };
+
+    saveAttemptState(test.id, finalState);
+
+    setMockAttemptState((prev) => ({
+      ...prev,
+      [test.id]: finalState,
+    }));
+
+    setSubmitConfirmTestId(null);
+
+    toast.success("Test submitted successfully ✅");
+
+    navigate(`/ctet-tet/mock-tests/result/${test.id}`);
+  };
+
+  const cancelFinalSubmit = () => {
+    setSubmitConfirmTestId(null);
+  };
+
   if (accessStatus === "NOT_FOUND") {
     return (
       <section className="premiumExamPage">
@@ -161,32 +429,6 @@ export default function ExamAttemptRoute({
     );
   }
 
-  const questions = test.questions || [];
-  const mockRules = getMockTestRules(test);
-
-  const isSequentialNavigation =
-    mockRules.navigationMode === "sequential";
-
-  const isCalculatorAllowed =
-    mockRules.calculatorAllowed === "yes";
-
-  const shouldShuffleOptions =
-    mockRules.shuffleOptions === "yes";
-
-  const isNoTimer = test.timerMode === "noTimer";
-  const isPerQuestionTimer =
-    test.timerMode === "perQuestionTimer";
-
-  const timerLabel = isPerQuestionTimer
-    ? "Question Time"
-    : "Time Left";
-
-  const defaultTimerSeconds = getExamTimerSeconds(test);
-
-  const attemptState =
-    mockAttemptState?.[test.id] ||
-    createDefaultAttemptState(test, defaultTimerSeconds);
-
   if (attemptState?.isSubmitted) {
     return (
       <section className="premiumExamPage">
@@ -206,213 +448,7 @@ export default function ExamAttemptRoute({
     );
   }
 
-  const currentQuestionIndex =
-    Number.isInteger(attemptState.currentIndex)
-      ? attemptState.currentIndex
-      : 0;
-
-  const orderedQuestionIndexes =
-    attemptState.questionOrder?.length
-      ? attemptState.questionOrder
-      : questions.map((_, index) => index);
-
-  const actualQuestionIndex =
-    orderedQuestionIndexes[currentQuestionIndex] ??
-    currentQuestionIndex;
-
-  const currentQuestion = questions[actualQuestionIndex];
-
-  const selectedAnswerKey =
-    attemptState.answers?.[actualQuestionIndex] || "";
-
-  const timeLeft = isNoTimer
-    ? 0
-    : attemptState.timeLeft ?? defaultTimerSeconds;
-
-  const formattedTime = formatExamTime(timeLeft);
-
-  const {
-    answeredCount,
-    markedCount,
-    notAnsweredCount,
-    notVisitedCount,
-  } = getExamQuestionCounts(questions, attemptState);
-
-  const palettePageSize = 25;
-
-  const currentRangeStart =
-    Math.floor(currentQuestionIndex / palettePageSize) *
-    palettePageSize;
-
-  const finalPaletteRangeStart =
-    attemptState.paletteRangeStart ?? currentRangeStart;
-
-  const paletteRanges = Array.from(
-    {
-      length: Math.ceil(questions.length / palettePageSize),
-    },
-    (_, rangeIndex) => {
-      const start = rangeIndex * palettePageSize;
-      const end = Math.min(
-        start + palettePageSize,
-        questions.length
-      );
-
-      return {
-        start,
-        end,
-        label: `${start + 1}-${end}`,
-      };
-    }
-  );
-
-  const visiblePaletteIndexes =
-    paletteFilter === "all"
-      ? questions
-          .map((_, index) => index)
-          .slice(
-            finalPaletteRangeStart,
-            finalPaletteRangeStart + palettePageSize
-          )
-      : getFilteredQuestionIndexes(
-          questions,
-          attemptState,
-          paletteFilter
-        ).slice(0, 25);
-
-  const resetQuestionTimer = () => {
-    if (!isPerQuestionTimer) return;
-    updateAttemptTimeLeft(test.id, defaultTimerSeconds);
-  };
-
-  const jumpToFirstFilteredQuestion = (filterType) => {
-    const indexes = getFilteredQuestionIndexes(
-      questions,
-      attemptState,
-      filterType
-    );
-
-    setPaletteFilter(filterType);
-
-    if (indexes.length === 0) return;
-
-    const firstIndex = indexes[0];
-    const firstRangeStart =
-      Math.floor(firstIndex / palettePageSize) *
-      palettePageSize;
-
-    if (
-      isSequentialNavigation &&
-      firstIndex > currentQuestionIndex + 1
-    ) {
-      toast.error(
-        "Sequential navigation is enabled. Please continue in order."
-      );
-      return;
-    }
-
-    goToAttemptQuestion(
-      test.id,
-      firstIndex,
-      firstRangeStart
-    );
-  };
-
-  const optionList = currentQuestion
-    ? [
-        {
-          key: "option1",
-          label: "A",
-          text:
-            currentQuestion.option1 ||
-            currentQuestion.options?.[0],
-        },
-        {
-          key: "option2",
-          label: "B",
-          text:
-            currentQuestion.option2 ||
-            currentQuestion.options?.[1],
-        },
-        {
-          key: "option3",
-          label: "C",
-          text:
-            currentQuestion.option3 ||
-            currentQuestion.options?.[2],
-        },
-        {
-          key: "option4",
-          label: "D",
-          text:
-            currentQuestion.option4 ||
-            currentQuestion.options?.[3],
-        },
-      ]
-        .filter((option) => option.text)
-        .sort(() =>
-          shouldShuffleOptions ? Math.random() - 0.5 : 0
-        )
-    : [];
-
-  const submitAttempt = () => {
-    setSubmitConfirmTestId(test.id);
-  };
-
-  const confirmFinalSubmit = () => {
-    const finalState = {
-      ...attemptState,
-      submittedAt: Date.now(),
-      isSubmitted: true,
-    };
-
-    saveAttemptState(test.id, finalState);
-
-    setMockAttemptState((prev) => ({
-      ...prev,
-      [test.id]: finalState,
-    }));
-
-    setSubmitConfirmTestId(null);
-
-    toast.success("Test submitted successfully ✅");
-
-    navigate(`/ctet-tet/mock-tests/result/${test.id}`);
-  };
-
-  const cancelFinalSubmit = () => {
-    setSubmitConfirmTestId(null);
-  };
-
-  const totalViolationCount =
-    Number(attemptState.violations?.tabSwitchCount || 0) +
-    Number(attemptState.violations?.fullscreenExitCount || 0);
-
-  const shouldForceSubmit =
-    test.autoSubmitOnViolation === "yes" &&
-    totalViolationCount >= 5;
-
-  if (shouldForceSubmit && !attemptState.isSubmitted) {
-    const finalState = {
-      ...attemptState,
-      submittedAt: Date.now(),
-      isSubmitted: true,
-      forceSubmittedReason: "Violation limit exceeded",
-    };
-
-    saveAttemptState(test.id, finalState);
-
-    setMockAttemptState((prev) => ({
-      ...prev,
-      [test.id]: finalState,
-    }));
-
-    toast.error("Violation limit exceeded. Test auto-submitted.");
-
-    setTimeout(() => {
-      navigate(`/ctet-tet/mock-tests/result/${test.id}`);
-    }, 300);
-
+  if (shouldForceSubmit) {
     return null;
   }
 
@@ -475,7 +511,7 @@ export default function ExamAttemptRoute({
             currentQuestionIndex={currentQuestionIndex}
             selectedAnswerKey={selectedAnswerKey}
             isMarked={Boolean(
-              attemptState.marked?.[currentQuestionIndex]
+              attemptState?.marked?.[actualQuestionIndex]
             )}
             optionList={optionList}
             examFontScale={examFontScale}

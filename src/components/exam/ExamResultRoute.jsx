@@ -11,6 +11,48 @@ import {
 import { db } from "../../firebase";
 import { getAttemptStorageKey } from "./examAttemptStorage.js";
 
+const safeParseJson = (value, fallback = {}) => {
+  try {
+    return JSON.parse(value || "{}") || fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const hasObjectData = (value) =>
+  value && typeof value === "object" && Object.keys(value).length > 0;
+
+const isValidQuestionOrder = (order, totalQuestions) => {
+  if (!Array.isArray(order)) return false;
+  if (order.length !== totalQuestions) return false;
+
+  const sortedOrder = [...order].sort((a, b) => a - b);
+
+  return sortedOrder.every((item, index) => item === index);
+};
+
+const AutoSaveMockResult = ({
+  testId,
+  userEmail,
+  saveToLeaderboard,
+}) => {
+  React.useEffect(() => {
+    if (!testId || !userEmail) return;
+
+    const autoSaveKey = `mockResultAutoSaved_${testId}_${userEmail}`;
+
+    if (sessionStorage.getItem(autoSaveKey)) {
+      return;
+    }
+
+    sessionStorage.setItem(autoSaveKey, "yes");
+
+    saveToLeaderboard(false);
+  }, [testId, userEmail, saveToLeaderboard]);
+
+  return null;
+};
+
 export default function ExamResultRoute({
   universalContent,
   getMockTestAccessStatus,
@@ -51,6 +93,23 @@ export default function ExamResultRoute({
       </section>
     );
   }
+
+  const questions = test.questions || [];
+
+  const storedAttemptState = safeParseJson(
+    localStorage.getItem(getAttemptStorageKey(test.id))
+  );
+
+  const liveAttemptState = mockAttemptState?.[test.id] || {};
+
+  const activeAttemptState = liveAttemptState?.isSubmitted
+    ? liveAttemptState
+    : storedAttemptState?.isSubmitted
+    ? storedAttemptState
+    : {};
+
+  const hasSubmittedAttempt =
+    activeAttemptState?.isSubmitted === true;
 
   if (accessStatus === "UNPUBLISHED") {
     return (
@@ -108,7 +167,7 @@ export default function ExamResultRoute({
     );
   }
 
-  if (accessStatus === "UPCOMING") {
+  if (accessStatus === "UPCOMING" && !hasSubmittedAttempt) {
     return (
       <section className="notesSubjectRoutePage">
         <div className="pdfMiniCard">
@@ -127,12 +186,15 @@ export default function ExamResultRoute({
     );
   }
 
-  if (accessStatus === "EXPIRED") {
+  if (accessStatus === "EXPIRED" && !hasSubmittedAttempt) {
     return (
       <section className="notesSubjectRoutePage">
         <div className="pdfMiniCard">
-          <h3>Test expired</h3>
-          <p>This mock test window is closed.</p>
+          <h3>Result locked</h3>
+          <p>
+            This mock test window is closed and no submitted attempt
+            was found on this device.
+          </p>
           <button
             className="btnLink"
             onClick={() => navigate("/ctet-tet/mock-tests")}
@@ -144,14 +206,7 @@ export default function ExamResultRoute({
     );
   }
 
-  const questions = test.questions || [];
-  const totalQuestions = questions.length;
-
-  const savedAttemptState = JSON.parse(
-    localStorage.getItem(getAttemptStorageKey(test.id)) || "{}"
-  );
-
-  if (!savedAttemptState?.isSubmitted) {
+  if (!hasSubmittedAttempt) {
     return (
       <section className="notesSubjectRoutePage">
         <div className="pdfMiniCard">
@@ -170,47 +225,54 @@ export default function ExamResultRoute({
     );
   }
 
-  const newStoredAnswers = savedAttemptState?.answers || {};
+  const newStoredAnswers = storedAttemptState?.answers || {};
+  const liveAttemptAnswers = liveAttemptState?.answers || {};
+  const activeAttemptAnswers = activeAttemptState?.answers || {};
 
-  const oldStoredAnswers = JSON.parse(
-    localStorage.getItem(`mockAttemptAnswers_${test.id}`) || "{}"
+  const oldStoredAnswers = safeParseJson(
+    localStorage.getItem(`mockAttemptAnswers_${test.id}`)
   );
 
-  const liveAttemptAnswers =
-    mockAttemptState?.[test.id]?.answers || {};
+  const attemptAnswers = hasObjectData(activeAttemptAnswers)
+    ? activeAttemptAnswers
+    : hasObjectData(liveAttemptAnswers)
+    ? liveAttemptAnswers
+    : hasObjectData(newStoredAnswers)
+    ? newStoredAnswers
+    : oldStoredAnswers;
 
-  const attemptAnswers =
-    Object.keys(liveAttemptAnswers).length > 0
-      ? liveAttemptAnswers
-      : Object.keys(newStoredAnswers).length > 0
-      ? newStoredAnswers
-      : oldStoredAnswers;
+  const fallbackQuestionOrder = questions.map((_, index) => index);
 
-  const questionOrder =
-    savedAttemptState?.questionOrder?.length
-      ? savedAttemptState.questionOrder
-      : questions.map((_, index) => index);
+  const questionOrder = isValidQuestionOrder(
+    activeAttemptState?.questionOrder,
+    questions.length
+  )
+    ? activeAttemptState.questionOrder
+    : isValidQuestionOrder(
+        storedAttemptState?.questionOrder,
+        questions.length
+      )
+    ? storedAttemptState.questionOrder
+    : fallbackQuestionOrder;
 
   const resultQuestions = questionOrder
-    .map((actualQuestionIndex) => questions[actualQuestionIndex])
-    .filter(Boolean);
+    .map((actualQuestionIndex) => ({
+      actualQuestionIndex,
+      question: questions[actualQuestionIndex],
+    }))
+    .filter((item) => Boolean(item.question));
+
+  const totalQuestions = resultQuestions.length;
 
   const correctCount = resultQuestions.filter(
-    (question, index) => {
-      const actualQuestionIndex = questionOrder[index];
-
-      return (
-        attemptAnswers[actualQuestionIndex] &&
-        attemptAnswers[actualQuestionIndex] === question.answer
-      );
-    }
+    ({ actualQuestionIndex, question }) =>
+      attemptAnswers[actualQuestionIndex] &&
+      attemptAnswers[actualQuestionIndex] === question.answer
   ).length;
 
-  const skippedCount = resultQuestions.filter((_, index) => {
-    const actualQuestionIndex = questionOrder[index];
-
-    return !attemptAnswers[actualQuestionIndex];
-  }).length;
+  const skippedCount = resultQuestions.filter(
+    ({ actualQuestionIndex }) => !attemptAnswers[actualQuestionIndex]
+  ).length;
 
   const wrongCount =
     totalQuestions - correctCount - skippedCount;
@@ -220,36 +282,50 @@ export default function ExamResultRoute({
       ? Math.round((correctCount / totalQuestions) * 100)
       : 0;
 
+  const calculatedTotalMarks = resultQuestions.reduce(
+    (sum, { question }) =>
+      sum +
+      Number(
+        question.positiveMarks ||
+          test.marksPerQuestion ||
+          1
+      ),
+    0
+  );
+
   const totalMarks =
     Number(test.totalMarks) ||
+    calculatedTotalMarks ||
     totalQuestions * Number(test.marksPerQuestion || 1);
 
-  const score = resultQuestions.reduce((sum, question, index) => {
-    const actualQuestionIndex = questionOrder[index];
-    const selected = attemptAnswers[actualQuestionIndex];
+  const score = resultQuestions.reduce(
+    (sum, { actualQuestionIndex, question }) => {
+      const selected = attemptAnswers[actualQuestionIndex];
 
-    if (!selected) return sum;
+      if (!selected) return sum;
 
-    if (selected === question.answer) {
+      if (selected === question.answer) {
+        return (
+          sum +
+          Number(
+            question.positiveMarks ||
+              test.marksPerQuestion ||
+              1
+          )
+        );
+      }
+
       return (
-        sum +
+        sum -
         Number(
-          question.positiveMarks ||
-            test.marksPerQuestion ||
-            1
+          question.negativeMarks ||
+            test.negativeMarks ||
+            0
         )
       );
-    }
-
-    return (
-      sum -
-      Number(
-        question.negativeMarks ||
-          test.negativeMarks ||
-          0
-      )
-    );
-  }, 0);
+    },
+    0
+  );
 
   const percentage =
     totalMarks > 0
@@ -262,6 +338,14 @@ export default function ExamResultRoute({
 
   const canShowLeaderboardButton =
     leaderboardEnabled || isAdmin(user);
+
+  const startedAt = Number(activeAttemptState.startedAt || Date.now());
+  const endedAt = Number(activeAttemptState.submittedAt || Date.now());
+
+  const durationSeconds = Math.max(
+    0,
+    Math.round((endedAt - startedAt) / 1000)
+  );
 
   const saveToLeaderboard = async (showAlert = true) => {
     try {
@@ -308,6 +392,10 @@ export default function ExamResultRoute({
           wrongCount,
           skippedCount,
           totalQuestions,
+          durationSeconds,
+
+          startedAt: activeAttemptState.startedAt || null,
+          endedAt: activeAttemptState.submittedAt || null,
 
           createdAt: new Date(),
         });
@@ -349,18 +437,22 @@ export default function ExamResultRoute({
             wrongCount,
             skippedCount,
             totalQuestions,
+            durationSeconds,
 
             rankScore: percentage,
             rankTieBreakerScore: score,
+
+            startedAt: activeAttemptState.startedAt || null,
+            endedAt: activeAttemptState.submittedAt || null,
 
             createdAt: new Date(),
           });
         }
       }
 
-      await loadUserMockResults(user.email);
-      await loadLeaderboard();
-      await loadMockLeaderboardEntries();
+      await loadUserMockResults?.(user.email);
+      await loadLeaderboard?.();
+      await loadMockLeaderboardEntries?.();
 
       if (showAlert) {
         alert(
@@ -380,24 +472,6 @@ export default function ExamResultRoute({
 
       return false;
     }
-  };
-
-  const AutoSaveMockResult = () => {
-    React.useEffect(() => {
-      if (!test?.id || !user?.email) return;
-
-      const autoSaveKey = `mockResultAutoSaved_${test.id}_${user.email}`;
-
-      if (sessionStorage.getItem(autoSaveKey)) {
-        return;
-      }
-
-      sessionStorage.setItem(autoSaveKey, "yes");
-
-      saveToLeaderboard(false);
-    }, [test?.id, user?.email]);
-
-    return null;
   };
 
   return (
@@ -445,7 +519,11 @@ export default function ExamResultRoute({
               Review Answers
             </button>
 
-            <AutoSaveMockResult />
+            <AutoSaveMockResult
+              testId={test.id}
+              userEmail={user?.email || ""}
+              saveToLeaderboard={saveToLeaderboard}
+            />
 
             {canShowLeaderboardButton && (
               <button

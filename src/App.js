@@ -32,7 +32,7 @@ import {
 const AuthSection = React.lazy(() => import("./components/AuthSection.jsx"));
 const AdminPanel = React.lazy(() => import("./components/AdminPanel.jsx"));
 const StudentDashboard = React.lazy(() => import("./components/StudentDashboard.jsx"));
-const MockTest = React.lazy(() => import("./components/MockTest.jsx"));
+
 const NotesCMS = React.lazy(() => import("./components/NotesCMS.jsx"));
 const CurrentAffairs = React.lazy(() => import("./components/CurrentAffairs.jsx"));
 const Pricing = React.lazy(() => import("./components/Pricing.jsx"));
@@ -194,18 +194,14 @@ export default function App() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [selectedNotesSubject, setSelectedNotesSubject] = useState(null);
   const [activeSection, setActiveSection] = useState(null);
-  const [mockStarted, setMockStarted] = useState(false);
-const [currentQuestion, setCurrentQuestion] = useState(0);
-const [selectedAnswer, setSelectedAnswer] = useState("");
-const [score, setScore] = useState(0);
-const [showResult, setShowResult] = useState(false);
+  
+
 const [showMentorProfile, setShowMentorProfile] = useState(false);
 const [showProfile, setShowProfile] = useState(false);
 const [showAnswer, setShowAnswer] = useState(false);
 const [timeLeft, setTimeLeft] = useState(60);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+
 const [mobile, setMobile] = useState("");
 const [contactEmail, setContactEmail] = useState("");
   const [user, setUser] = useState(null);
@@ -355,7 +351,7 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
   
  
 
-    const [mockAttemptAnswers, setMockAttemptAnswers] = useState({});
+    
    
     
    
@@ -443,6 +439,7 @@ const [contentLoading, setContentLoading] = useState(false);
       hierarchy[requiredPlan]
     );
   };
+
   const getMockTestScheduleStatus = (test) => {
     if (!test) {
       return "EXPIRED";
@@ -478,8 +475,9 @@ const [contentLoading, setContentLoading] = useState(false);
       return "EXPIRED";
     }
   
-    
+    return "AVAILABLE";
   };
+  
   const getMockTestAccessStatus = (test) => {
     if (!test) {
       return "NOT_FOUND";
@@ -493,35 +491,27 @@ const [contentLoading, setContentLoading] = useState(false);
       return "LOGIN_REQUIRED";
     }
   
-    if (
-      test.planType &&
-      !hasPlanAccess(test.planType)
-    ) {
+    if (test.planType && !hasPlanAccess(test.planType)) {
       return "PLAN_LOCKED";
     }
   
-    if (
-      membershipExpiry &&
-      new Date(membershipExpiry) < new Date()
-    ) {
+    if (membershipExpiry && new Date(membershipExpiry) < new Date()) {
       return "EXPIRED_MEMBERSHIP";
     }
   
     const scheduleStatus = getMockTestScheduleStatus(test);
-
   
-
-if (scheduleStatus === "UPCOMING") {
-  return "UPCOMING";
-}
-
-if (scheduleStatus === "EXPIRED") {
-  return "EXPIRED";
-}
-
-return "AVAILABLE";
+    if (scheduleStatus === "UPCOMING") {
+      return "UPCOMING";
+    }
+  
+    if (scheduleStatus === "EXPIRED") {
+      return "EXPIRED";
+    }
+  
+    return "AVAILABLE";
   };
-
+  
   const getMockTestRules = (test) => ({
     navigationMode: test?.navigationMode || "free",
     shuffleQuestions: test?.shuffleQuestions || "no",
@@ -529,6 +519,7 @@ return "AVAILABLE";
     allowPause: test?.allowPause || "yes",
     calculatorAllowed: test?.calculatorAllowed || "no",
   });
+  
   const shuffleMockArray = (items = []) => {
     const clonedItems = [...items];
   
@@ -543,6 +534,7 @@ return "AVAILABLE";
   
     return clonedItems;
   };
+
   const [activePlan, setActivePlan] = useState("FREE");
   const adminEmail = "aspirenestplatform@gmail.com";
   const isAdmin = (currentUser = user) =>
@@ -3434,54 +3426,10 @@ subjectName:
     },
   ];
   
-  const handleAnswerSubmit = () => {
-    if (!selectedAnswer) {
-      alert("Please select an answer");
-      return;
-    }
-  
-    setShowAnswer(true);
-  
-    if (selectedAnswer === mockQuestions[currentQuestion].answer) {
-      setScore(score + 1);
-    }
-    const finalScore =
-    selectedAnswer === mockQuestions[currentQuestion].answer
-      ? score + 1
-      : score;
-    setTimeout(() => {
-      if (currentQuestion + 1 < mockQuestions.length) {
-        setCurrentQuestion(currentQuestion + 1);
-        setSelectedAnswer("");
-        setShowAnswer(false);
-        setTimeLeft(60);
-      } else {
-        saveMockResult(finalScore);
-        setShowResult(true);
-      }
-    }, 2000);
-  };
-  const saveMockResult = async (finalScore) => {
-    if (!user) return;
-  
-    try {
-      await addDoc(collection(db, "mockResults"), {
-        email: user.email,
-        score: finalScore,
-        totalQuestions: mockQuestions.length,
-        percentage: Math.round(
-          (finalScore / mockQuestions.length) * 100
-        ),
-        subject: selectedSubject,
-        createdAt: new Date(),
-      });
-    } catch (error) {
-      alert(error.message);
-    }
-  };
+
   
   const restartMockTest = () => {
-    setMockStarted(false);
+    
     setCurrentQuestion(0);
     setSelectedAnswer("");
     setScore(0);
@@ -3701,20 +3649,7 @@ const studyTimeMessage =
       ];
       
      
-  useEffect(() => {
-    if (!mockStarted || showResult) return;
-  
-    if (timeLeft === 0) {
-      setShowResult(true);
-      return;
-    }
-  
-    const timer = setTimeout(() => {
-      setTimeLeft(timeLeft - 1);
-    }, 1000);
-  
-    return () => clearTimeout(timer);
-  }, [mockStarted, showResult, timeLeft]);
+
 
 
   
@@ -17604,6 +17539,32 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   }
 />
 
+<Route
+  path="/ctet-tet/mock-tests/attempt/:testId"
+  element={
+    <ExamAttemptRoute
+      universalContent={universalContent}
+      getMockTestAccessStatus={getMockTestAccessStatus}
+      getMockTestRules={getMockTestRules}
+      mockAttemptState={mockAttemptState}
+      setMockAttemptState={setMockAttemptState}
+      paletteFilter={paletteFilter}
+      setPaletteFilter={setPaletteFilter}
+      submitConfirmTestId={submitConfirmTestId}
+      setSubmitConfirmTestId={setSubmitConfirmTestId}
+      examFontScale={examFontScale}
+      setExamFontScale={setExamFontScale}
+      fullName={fullName}
+      user={user}
+      goToAttemptQuestion={goToAttemptQuestion}
+      selectAttemptAnswer={selectAttemptAnswer}
+      clearAttemptResponse={clearAttemptResponse}
+      markAttemptForReviewAndNext={markAttemptForReviewAndNext}
+      saveAttemptAndNext={saveAttemptAndNext}
+      updateAttemptTimeLeft={updateAttemptTimeLeft}
+    />
+  }
+/>
 
 <Route
   path="/ctet-tet/mock-tests/result/:testId"
@@ -17629,7 +17590,8 @@ handleSaveUniversalContent={handleSaveUniversalContent}
     <ExamReviewRoute
       universalContent={universalContent}
       getMockTestAccessStatus={getMockTestAccessStatus}
-      mockAttemptAnswers={mockAttemptAnswers}
+      
+      mockAttemptState={mockAttemptState}
     />
   }
 />
@@ -19080,31 +19042,7 @@ Premium
           </div>
         </div>
       </section>
-      {mockQuestions.length > 0 && (
-        <section id="mock-tests">
-      <MockTest
-  mockStarted={mockStarted}
-  setMockStarted={setMockStarted}
-  showResult={showResult}
-  currentQuestion={currentQuestion}
-  mockQuestions={mockQuestions}
-  timeLeft={timeLeft}
-  setTimeLeft={setTimeLeft}
-  score={score}
-  selectedSubject={selectedSubject}
-  setSelectedSubject={setSelectedSubject}
-  loadMockQuestions={loadMockQuestions}
-  percentage={percentage}
-  performanceLevel={performanceLevel}
-  motivationalMessage={motivationalMessage}
-  restartMockTest={restartMockTest}
-  selectedAnswer={selectedAnswer}
-  setSelectedAnswer={setSelectedAnswer}
-  showAnswer={showAnswer}
-  handleAnswerSubmit={handleAnswerSubmit}
-  />
-  </section>
-)}
+
 
 
 <section id="notes">

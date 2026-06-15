@@ -3,6 +3,14 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { getAttemptStorageKey } from "./examAttemptStorage.js";
 
+const safeParseJson = (value, fallback = {}) => {
+  try {
+    return JSON.parse(value || "{}") || fallback;
+  } catch {
+    return fallback;
+  }
+};
+
 export default function ExamStartRoute({
   universalContent,
   getMockTestAccessStatus,
@@ -39,6 +47,17 @@ export default function ExamStartRoute({
       </section>
     );
   }
+
+  const savedStartAttempt = safeParseJson(
+    localStorage.getItem(getAttemptStorageKey(test.id))
+  );
+
+  const hasStartedAttempt =
+    Boolean(savedStartAttempt?.startedAt) &&
+    !savedStartAttempt?.isSubmitted;
+
+  const hasSubmittedAttempt =
+    savedStartAttempt?.isSubmitted === true;
 
   if (accessStatus === "UNPUBLISHED") {
     return (
@@ -96,7 +115,7 @@ export default function ExamStartRoute({
     );
   }
 
-  if (accessStatus === "UPCOMING") {
+  if (accessStatus === "UPCOMING" && !hasSubmittedAttempt) {
     return (
       <section className="notesSubjectRoutePage">
         <div className="pdfMiniCard">
@@ -113,7 +132,7 @@ export default function ExamStartRoute({
     );
   }
 
-  if (accessStatus === "EXPIRED") {
+  if (accessStatus === "EXPIRED" && !hasSubmittedAttempt) {
     return (
       <section className="notesSubjectRoutePage">
         <div className="pdfMiniCard">
@@ -130,16 +149,6 @@ export default function ExamStartRoute({
     );
   }
 
-  const savedStartAttempt = JSON.parse(
-    localStorage.getItem(getAttemptStorageKey(test.id)) || "{}"
-  );
-
-  const hasStartedAttempt =
-    savedStartAttempt?.startedAt &&
-    !savedStartAttempt?.isSubmitted;
-
-  const hasSubmittedAttempt = savedStartAttempt?.isSubmitted;
-
   const totalQuestions = test.questions?.length || 0;
   const durationText =
     test.durationMinutes || test.duration || "Not specified";
@@ -151,7 +160,6 @@ export default function ExamStartRoute({
   const scheduleStatus = getMockTestScheduleStatus(test);
 
   const startPageRules = getMockTestRules(test);
-
   const isPauseAllowed = startPageRules.allowPause === "yes";
 
   return (

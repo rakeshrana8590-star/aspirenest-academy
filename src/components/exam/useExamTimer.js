@@ -1,10 +1,20 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
+
 import {
   restoreAttemptState,
   saveAttemptState,
 } from "./examAttemptStorage.js";
+
 import { getExamTimerSeconds } from "./examUtils.js";
+
+const EXAM_ATTEMPT_PATH = "/ctet-tet/mock-tests/attempt/";
+
+const getAttemptTestIdFromPathname = (pathname = "") => {
+  if (!pathname.includes(EXAM_ATTEMPT_PATH)) return "";
+
+  return decodeURIComponent(pathname.split("/")[4] || "");
+};
 
 export const useExamTimer = ({
   locationPathname = "",
@@ -12,14 +22,10 @@ export const useExamTimer = ({
   setMockAttemptState,
   navigate,
 }) => {
+  const autoSubmittedRef = useRef({});
+
   useEffect(() => {
-    const attemptPath = "/ctet-tet/mock-tests/attempt/";
-
-    if (!locationPathname.includes(attemptPath)) return;
-
-    const testId = decodeURIComponent(
-      locationPathname.split("/")[4] || ""
-    );
+    const testId = getAttemptTestIdFromPathname(locationPathname);
 
     if (!testId) return;
 
@@ -31,62 +37,87 @@ export const useExamTimer = ({
 
     if (!activeTimerTest) return;
 
-    const defaultTimeLeft = getExamTimerSeconds(activeTimerTest);
+    const isNoTimer = activeTimerTest.timerMode === "noTimer";
+
+    const defaultTimeLeft = isNoTimer
+      ? 0
+      : getExamTimerSeconds(activeTimerTest);
 
     const restoredState = restoreAttemptState(
       activeTimerTest,
       defaultTimeLeft
     );
 
+    saveAttemptState(testId, restoredState);
+
     setMockAttemptState((prev) => ({
       ...prev,
       [testId]: restoredState,
     }));
 
+    if (isNoTimer || restoredState.isSubmitted) {
+      return;
+    }
+
     const timer = setInterval(() => {
-      setMockAttemptState((prev) => {
-        const currentState = prev[testId] || restoredState;
+      const currentState = restoreAttemptState(
+        activeTimerTest,
+        defaultTimeLeft
+      );
 
-        if (currentState.isSubmitted) {
-          return prev;
-        }
+      if (currentState.isSubmitted) {
+        return;
+      }
 
-        const nextTime =
-          currentState.timeLeft <= 0
-            ? 0
-            : currentState.timeLeft - 1;
+      const currentTime = Number(
+        currentState.timeLeft ?? defaultTimeLeft
+      );
 
-        const shouldAutoSubmit =
-          currentState.timeLeft <= 1 && nextTime === 0;
+      if (currentTime <= 0) {
+        return;
+      }
 
-        const nextState = {
-          ...currentState,
-          timeLeft: nextTime,
-          submittedAt: shouldAutoSubmit
-            ? Date.now()
-            : currentState.submittedAt,
-          isSubmitted: shouldAutoSubmit
-            ? true
-            : currentState.isSubmitted,
-        };
+      const nextTime = Math.max(0, currentTime - 1);
 
-        saveAttemptState(testId, nextState);
+      const shouldAutoSubmit =
+        nextTime === 0 &&
+        activeTimerTest.autoSubmitOnTimeUp !== "no";
 
-        if (shouldAutoSubmit) {
-          toast.success(
-            "Time is over. Test submitted automatically ✅"
-          );
+      const nextState = {
+        ...currentState,
+        timeLeft: nextTime,
+        submittedAt: shouldAutoSubmit
+          ? Date.now()
+          : currentState.submittedAt,
+        isSubmitted: shouldAutoSubmit
+          ? true
+          : currentState.isSubmitted,
+        forceSubmittedReason: shouldAutoSubmit
+          ? "Time is over"
+          : currentState.forceSubmittedReason,
+      };
 
-          setTimeout(() => {
-            navigate(`/ctet-tet/mock-tests/result/${testId}`);
-          }, 300);
-        }
+      saveAttemptState(testId, nextState);
 
-        return {
-          ...prev,
-          [testId]: nextState,
-        };
-      });
+      setMockAttemptState((prev) => ({
+        ...prev,
+        [testId]: nextState,
+      }));
+
+      if (
+        shouldAutoSubmit &&
+        !autoSubmittedRef.current[testId]
+      ) {
+        autoSubmittedRef.current[testId] = true;
+
+        toast.success(
+          "Time is over. Test submitted automatically ✅"
+        );
+
+        setTimeout(() => {
+          navigate(`/ctet-tet/mock-tests/result/${testId}`);
+        }, 300);
+      }
     }, 1000);
 
     return () => clearInterval(timer);

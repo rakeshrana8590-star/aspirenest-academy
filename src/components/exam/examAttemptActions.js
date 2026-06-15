@@ -1,106 +1,175 @@
+const getActualQuestionIndex = (state = {}, displayIndex) => {
+  return state.questionOrder?.[displayIndex] ?? displayIndex;
+};
+
+const getDisplayIndexFromActual = (
+  state = {},
+  actualQuestionIndex
+) => {
+  const questionOrder = state.questionOrder || [];
+
+  if (!questionOrder.length) {
+    return actualQuestionIndex;
+  }
+
+  const displayIndex = questionOrder.indexOf(actualQuestionIndex);
+
+  return displayIndex === -1 ? actualQuestionIndex : displayIndex;
+};
+
 export const getGoToQuestionState = (
-    state = {},
-    index,
-    paletteRangeStart = 0
-  ) => ({
+  state = {},
+  displayIndex,
+  paletteRangeStart = 0
+) => {
+  const actualQuestionIndex = getActualQuestionIndex(
+    state,
+    displayIndex
+  );
+
+  return {
     ...state,
-    currentIndex: index,
+    currentIndex: displayIndex,
     paletteRangeStart,
     visited: {
       ...(state.visited || {}),
-      [index]: true,
+      [actualQuestionIndex]: true,
     },
-  });
-  
-  export const getSelectAnswerState = (
-    state = {},
-    index,
-    optionKey
-  ) => ({
+  };
+};
+
+export const getSelectAnswerState = (
+  state = {},
+  actualQuestionIndex,
+  optionKey
+) => {
+  const displayIndex = getDisplayIndexFromActual(
+    state,
+    actualQuestionIndex
+  );
+
+  return {
     ...state,
-    currentIndex: index,
+    currentIndex: displayIndex,
     answers: {
       ...(state.answers || {}),
-      [index]: optionKey,
+      [actualQuestionIndex]: optionKey,
     },
     visited: {
       ...(state.visited || {}),
-      [index]: true,
+      [actualQuestionIndex]: true,
     },
-  });
-  
-  export const getClearResponseState = (state = {}, index) => ({
+  };
+};
+
+export const getClearResponseState = (
+  state = {},
+  actualQuestionIndex
+) => {
+  const displayIndex = getDisplayIndexFromActual(
+    state,
+    actualQuestionIndex
+  );
+
+  return {
     ...state,
-    currentIndex: index,
+    currentIndex: displayIndex,
     answers: {
       ...(state.answers || {}),
-      [index]: "",
+      [actualQuestionIndex]: "",
     },
     marked: {
       ...(state.marked || {}),
-      [index]: false,
+      [actualQuestionIndex]: false,
     },
     visited: {
       ...(state.visited || {}),
-      [index]: true,
+      [actualQuestionIndex]: true,
     },
-  });
-  
-  export const getMarkForReviewAndNextState = (
-    state = {},
-    index,
-    totalQuestions = 0
-  ) => {
-    const nextIndex =
-      index < totalQuestions - 1 ? index + 1 : index;
-  
-    return {
-      ...state,
-      currentIndex: nextIndex,
-      marked: {
-        ...(state.marked || {}),
-        [index]: true,
-      },
-      visited: {
-        ...(state.visited || {}),
-        [index]: true,
-        [nextIndex]: true,
-      },
-      paletteRangeStart: Math.floor(nextIndex / 25) * 25,
-    };
   };
-  
-  export const getSaveAndNextState = (
-    state = {},
-    index,
-    totalQuestions = 0
-  ) => {
-    const nextIndex =
-      index < totalQuestions - 1 ? index + 1 : index;
-  
-    return {
-      ...state,
-      currentIndex: nextIndex,
-      marked: {
-        ...(state.marked || {}),
-        [index]: false,
-      },
-      visited: {
-        ...(state.visited || {}),
-        [index]: true,
-        [nextIndex]: true,
-      },
-      paletteRangeStart: Math.floor(nextIndex / 25) * 25,
-    };
+};
+
+export const getMarkForReviewAndNextState = (
+  state = {},
+  actualQuestionIndex,
+  totalQuestions = 0
+) => {
+  const displayIndex = getDisplayIndexFromActual(
+    state,
+    actualQuestionIndex
+  );
+
+  const nextDisplayIndex =
+    displayIndex < totalQuestions - 1
+      ? displayIndex + 1
+      : displayIndex;
+
+  const nextActualQuestionIndex = getActualQuestionIndex(
+    state,
+    nextDisplayIndex
+  );
+
+  return {
+    ...state,
+    currentIndex: nextDisplayIndex,
+    marked: {
+      ...(state.marked || {}),
+      [actualQuestionIndex]: true,
+    },
+    visited: {
+      ...(state.visited || {}),
+      [actualQuestionIndex]: true,
+      [nextActualQuestionIndex]: true,
+    },
+    paletteRangeStart:
+      Math.floor(nextDisplayIndex / 25) * 25,
   };
-  
-  export const getSubmitAttemptState = (state = {}) => ({
+};
+
+export const getSaveAndNextState = (
+  state = {},
+  actualQuestionIndex,
+  totalQuestions = 0
+) => {
+  const displayIndex = getDisplayIndexFromActual(
+    state,
+    actualQuestionIndex
+  );
+
+  const nextDisplayIndex =
+    displayIndex < totalQuestions - 1
+      ? displayIndex + 1
+      : displayIndex;
+
+  const nextActualQuestionIndex = getActualQuestionIndex(
+    state,
+    nextDisplayIndex
+  );
+
+  return {
     ...state,
-    submittedAt: Date.now(),
-    isSubmitted: true,
-  });
-  
-  export const getTimeLeftState = (state = {}, timeLeft = 0) => ({
-    ...state,
-    timeLeft,
-  });
+    currentIndex: nextDisplayIndex,
+    marked: {
+      ...(state.marked || {}),
+      [actualQuestionIndex]: false,
+    },
+    visited: {
+      ...(state.visited || {}),
+      [actualQuestionIndex]: true,
+      [nextActualQuestionIndex]: true,
+    },
+    paletteRangeStart:
+      Math.floor(nextDisplayIndex / 25) * 25,
+  };
+};
+
+export const getSubmitAttemptState = (state = {}) => ({
+  ...state,
+  submittedAt: Date.now(),
+  isSubmitted: true,
+});
+
+export const getTimeLeftState = (state = {}, timeLeft = 0) => ({
+  ...state,
+  timeLeft,
+});

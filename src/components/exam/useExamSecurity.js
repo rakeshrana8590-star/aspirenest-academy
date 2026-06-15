@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 
 const EXAM_ATTEMPT_PATH = "/ctet-tet/mock-tests/attempt/";
@@ -19,55 +19,43 @@ const getActiveSecurityTest = (universalContent = [], testId = "") => {
   );
 };
 
-const isAttemptSecurityActive = ({
-  locationPathname,
-  universalContent,
-  mockAttemptState,
-}) => {
-  const testId = getAttemptTestIdFromPathname(locationPathname);
-
-  if (!testId) {
-    return {
-      isActive: false,
-      testId: "",
-      activeTest: null,
-      activeState: null,
-    };
-  }
-
-  const activeTest = getActiveSecurityTest(universalContent, testId);
-  const activeState = mockAttemptState?.[testId] || null;
-
-  if (!activeTest || activeState?.isSubmitted) {
-    return {
-      isActive: false,
-      testId,
-      activeTest,
-      activeState,
-    };
-  }
-
-  return {
-    isActive: true,
-    testId,
-    activeTest,
-    activeState,
-  };
-};
-
 export const useExamSecurity = ({
-  locationPathname,
-  universalContent,
-  mockAttemptState,
+  locationPathname = "",
+  universalContent = [],
+  mockAttemptState = {},
   updateAttemptState,
 }) => {
-  useEffect(() => {
-    const { isActive } = isAttemptSecurityActive({
-      locationPathname,
-      universalContent,
-      mockAttemptState,
-    });
+  const fullscreenRequestedRef = useRef({});
+  const toastCooldownRef = useRef({});
 
+  const testId = getAttemptTestIdFromPathname(locationPathname);
+
+  const activeTest = getActiveSecurityTest(
+    universalContent,
+    testId
+  );
+
+  const activeState = testId
+    ? mockAttemptState?.[testId]
+    : null;
+
+  const isActive = Boolean(
+    testId &&
+      activeTest &&
+      activeState?.isSubmitted !== true
+  );
+
+  const showLimitedToast = (key, message) => {
+    const now = Date.now();
+    const lastShownAt = toastCooldownRef.current[key] || 0;
+
+    if (now - lastShownAt < 1200) return;
+
+    toastCooldownRef.current[key] = now;
+    toast.error(message);
+  };
+
+  useEffect(() => {
     if (!isActive) return;
 
     const handleBeforeUnload = (event) => {
@@ -84,17 +72,11 @@ export const useExamSecurity = ({
         handleBeforeUnload
       );
     };
-  }, [locationPathname, universalContent, mockAttemptState]);
+  }, [isActive]);
 
   useEffect(() => {
-    const { isActive, testId, activeTest } = isAttemptSecurityActive({
-      locationPathname,
-      universalContent,
-      mockAttemptState,
-    });
-
     if (!isActive) return;
-    if (activeTest.tabSwitchDetection !== "yes") return;
+    if (activeTest?.tabSwitchDetection !== "yes") return;
 
     const handleVisibilityChange = () => {
       if (!document.hidden) return;
@@ -109,7 +91,8 @@ export const useExamSecurity = ({
         },
       }));
 
-      toast.error(
+      showLimitedToast(
+        "tabSwitch",
         "Tab switch detected. Please stay on the exam screen."
       );
     };
@@ -126,26 +109,21 @@ export const useExamSecurity = ({
       );
     };
   }, [
-    locationPathname,
-    universalContent,
-    mockAttemptState,
+    isActive,
+    activeTest?.tabSwitchDetection,
+    testId,
     updateAttemptState,
   ]);
 
   useEffect(() => {
-    const { isActive, activeTest } = isAttemptSecurityActive({
-      locationPathname,
-      universalContent,
-      mockAttemptState,
-    });
-
     if (!isActive) return;
-    if (activeTest.copyPasteProtection !== "yes") return;
+    if (activeTest?.copyPasteProtection !== "yes") return;
 
     const blockExamAction = (event) => {
       event.preventDefault();
 
-      toast.error(
+      showLimitedToast(
+        "copyPaste",
         "This action is blocked during the mock test."
       );
     };
@@ -164,17 +142,11 @@ export const useExamSecurity = ({
         blockExamAction
       );
     };
-  }, [locationPathname, universalContent, mockAttemptState]);
+  }, [isActive, activeTest?.copyPasteProtection]);
 
   useEffect(() => {
-    const { isActive, testId, activeTest } = isAttemptSecurityActive({
-      locationPathname,
-      universalContent,
-      mockAttemptState,
-    });
-
     if (!isActive) return;
-    if (activeTest.fullscreenMode !== "yes") return;
+    if (activeTest?.fullscreenMode !== "yes") return;
 
     const handleFullscreenChange = () => {
       if (document.fullscreenElement) return;
@@ -189,7 +161,8 @@ export const useExamSecurity = ({
         },
       }));
 
-      toast.error(
+      showLimitedToast(
+        "fullscreenExit",
         "Fullscreen exited. Please stay in exam mode."
       );
     };
@@ -206,54 +179,48 @@ export const useExamSecurity = ({
       );
     };
   }, [
-    locationPathname,
-    universalContent,
-    mockAttemptState,
+    isActive,
+    activeTest?.fullscreenMode,
+    testId,
     updateAttemptState,
   ]);
 
   useEffect(() => {
-    const { isActive, activeTest } = isAttemptSecurityActive({
-      locationPathname,
-      universalContent,
-      mockAttemptState,
-    });
-
     if (!isActive) return;
-    if (activeTest.fullscreenMode !== "yes") return;
+    if (activeTest?.fullscreenMode !== "yes") return;
     if (document.fullscreenElement) return;
+    if (fullscreenRequestedRef.current[testId]) return;
+
+    fullscreenRequestedRef.current[testId] = true;
 
     const enterFullscreen = async () => {
       try {
         await document.documentElement.requestFullscreen();
-      } catch (error) {
+      } catch {
         console.log("Fullscreen request skipped");
       }
     };
 
     enterFullscreen();
-  }, [locationPathname, universalContent, mockAttemptState]);
+  }, [isActive, activeTest?.fullscreenMode, testId]);
 
   useEffect(() => {
-    const { isActive, testId } = isAttemptSecurityActive({
-      locationPathname,
-      universalContent,
-      mockAttemptState,
-    });
-
     if (!isActive) return;
 
     const blockKeyboardShortcuts = (event) => {
       const key = event.key?.toLowerCase();
 
-      const blockedCtrlKeys =
+      const blockedClipboardKeys =
+        activeTest?.copyPasteProtection === "yes" &&
         event.ctrlKey &&
-        ["c", "v", "x", "a", "s", "p"].includes(key);
+        ["c", "v", "x", "a"].includes(key);
 
-      const blockedKeys =
-        key === "f12" || key === "printscreen";
+      const blockedSystemKeys =
+        (event.ctrlKey && ["s", "p"].includes(key)) ||
+        key === "f12" ||
+        key === "printscreen";
 
-      if (!blockedCtrlKeys && !blockedKeys) return;
+      if (!blockedClipboardKeys && !blockedSystemKeys) return;
 
       event.preventDefault();
 
@@ -267,7 +234,8 @@ export const useExamSecurity = ({
         },
       }));
 
-      toast.error(
+      showLimitedToast(
+        "shortcut",
         "Keyboard shortcut blocked during the mock test."
       );
     };
@@ -281,9 +249,9 @@ export const useExamSecurity = ({
       );
     };
   }, [
-    locationPathname,
-    universalContent,
-    mockAttemptState,
+    isActive,
+    activeTest?.copyPasteProtection,
+    testId,
     updateAttemptState,
   ]);
 };
