@@ -1,97 +1,267 @@
 /* =========================
-   VIDEO FORM — ADMIN ADD / EDIT
+   VIDEO FORM — PREMIUM ADD / EDIT CLASS
 ========================= */
 
-.videoFormPage .contentStudioForm {
-    border: 1px solid rgba(255, 122, 0, 0.16);
-    box-shadow: 0 24px 80px rgba(15, 23, 42, 0.08);
+.videoFormPage {
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at top left, rgba(255, 122, 0, 0.1), transparent 34%),
+      radial-gradient(circle at top right, rgba(15, 23, 42, 0.08), transparent 30%),
+      linear-gradient(180deg, #ffffff 0%, #f8fafc 55%, #ffffff 100%);
+  }
+  
+  .videoFormPage .sectionHeader {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .videoFormPage .sectionHeader::after {
+    content: "";
+    position: absolute;
+    right: 7%;
+    top: 10%;
+    width: 180px;
+    height: 180px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(255, 122, 0, 0.14), transparent 70%);
+    pointer-events: none;
+  }
+  
+  .videoFormPage .contentStudioForm {
+    position: relative;
+    overflow: hidden;
+    border-radius: 34px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    box-shadow:
+      0 26px 90px rgba(15, 23, 42, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  }
+  
+  .videoFormPage .contentStudioForm::before {
+    content: "";
+    position: absolute;
+    right: -70px;
+    top: -90px;
+    width: 240px;
+    height: 240px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(255, 122, 0, 0.12), transparent 70%);
+    pointer-events: none;
   }
   
   .videoFormPage .contentStudioGrid {
     align-items: start;
+    position: relative;
+    z-index: 2;
   }
   
   .videoFormPage label {
     display: block;
     margin-bottom: 8px;
     color: #334155;
-    font-size: 13px;
-    font-weight: 900;
-    letter-spacing: 0.02em;
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
   
   .videoFormPage input,
   .videoFormPage select,
   .videoFormPage textarea {
     width: 100%;
+    min-height: 50px;
+    border-radius: 17px;
+    border: 1px solid rgba(203, 213, 225, 0.95);
+    background: rgba(255, 255, 255, 0.94);
+    color: #0f172a;
+    font-size: 14px;
+    font-weight: 800;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.04);
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease;
   }
   
   .videoFormPage textarea {
-    min-height: 120px;
+    min-height: 132px;
     resize: vertical;
+    line-height: 1.6;
   }
   
-  .videoFormHint {
-    margin-top: 8px;
-    color: #64748b;
-    font-size: 13px;
+  .videoFormPage input:focus,
+  .videoFormPage select:focus,
+  .videoFormPage textarea:focus {
+    outline: none;
+    background: #ffffff;
+    border-color: rgba(255, 122, 0, 0.48);
+    box-shadow:
+      0 0 0 4px rgba(255, 122, 0, 0.1),
+      0 16px 38px rgba(15, 23, 42, 0.08);
+  }
+  
+  .videoFormPage input::placeholder,
+  .videoFormPage textarea::placeholder {
+    color: #94a3b8;
     font-weight: 700;
   }
   
-  .videoLiveFields {
-    padding: 22px;
-    border-radius: 22px;
-    background: #fff7ed;
-    border: 1px solid rgba(249, 115, 22, 0.18);
+  .videoFormHint {
+    margin: 9px 0 0;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 750;
+    line-height: 1.55;
   }
   
-  .videoLiveFields h3 {
-    margin: 0 0 14px;
-    color: #0f172a;
-    font-size: 22px;
-    letter-spacing: -0.03em;
-  }
+  /* =========================
+     MODE TABS
+  ========================= */
   
   .videoFormModeTabs {
+    position: relative;
+    z-index: 2;
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    margin-bottom: 22px;
+    margin-bottom: 24px;
+    padding: 10px;
+    border-radius: 999px;
+    width: fit-content;
+    background: rgba(248, 250, 252, 0.9);
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    box-shadow: 0 16px 46px rgba(15, 23, 42, 0.06);
   }
   
   .videoFormModeTabs button {
+    min-height: 44px;
     border-radius: 999px;
   }
   
   .videoFormModeTabs .active {
-    background: #0f172a;
+    background:
+      linear-gradient(135deg, #0f172a, #1e293b);
     color: #ffffff;
-    border-color: #0f172a;
+    border-color: rgba(15, 23, 42, 0.95);
+    box-shadow: 0 16px 38px rgba(15, 23, 42, 0.24);
   }
   
-  .videoFormSectionCard {
-    padding: 24px;
-    border-radius: 26px;
-    background: #ffffff;
-    border: 1px solid rgba(226, 232, 240, 0.9);
-    box-shadow: 0 18px 60px rgba(15, 23, 42, 0.06);
+  /* =========================
+     FORM SECTION CARDS
+  ========================= */
+  
+  .videoFormSectionCard,
+  .videoLiveFields {
+    position: relative;
+    z-index: 2;
+    margin-top: 24px;
+    padding: 26px;
+    border-radius: 30px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95));
+    border: 1px solid rgba(226, 232, 240, 0.94);
+    box-shadow:
+      0 22px 72px rgba(15, 23, 42, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    overflow: hidden;
   }
   
-  .videoFormSectionCard h3 {
-    margin: 0 0 18px;
+  .videoFormSectionCard::after,
+  .videoLiveFields::after {
+    content: "";
+    position: absolute;
+    right: -54px;
+    top: -66px;
+    width: 160px;
+    height: 160px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(255, 122, 0, 0.12), transparent 70%);
+    pointer-events: none;
+  }
+  
+  .videoLiveFields {
+    background:
+      radial-gradient(circle at top left, rgba(244, 63, 94, 0.1), transparent 34%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 241, 242, 0.54));
+    border-color: rgba(244, 63, 94, 0.18);
+  }
+  
+  .videoFormSectionCard h3,
+  .videoLiveFields h3 {
+    position: relative;
+    z-index: 2;
+    margin: 0 0 20px;
     color: #0f172a;
-    font-size: 24px;
-    letter-spacing: -0.04em;
+    font-size: clamp(24px, 3vw, 38px);
+    line-height: 1;
+    letter-spacing: -0.06em;
+  }
+  
+  /* =========================
+     ERROR / ACTIONS
+  ========================= */
+  
+  .videoFormPage .videoEmptyState {
+    position: relative;
+    z-index: 2;
+    min-height: auto;
+    margin-bottom: 22px;
+    padding: 18px 20px;
+    border-radius: 22px;
+    background: #fff1f2;
+    border: 1px solid rgba(244, 63, 94, 0.22);
+    box-shadow: 0 16px 45px rgba(244, 63, 94, 0.08);
+  }
+  
+  .videoFormPage .videoEmptyState strong {
+    color: #be123c;
+    font-size: 16px;
+    letter-spacing: -0.02em;
   }
   
   .videoFormActions {
+    position: relative;
+    z-index: 2;
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    margin-top: 24px;
+    margin-top: 26px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(226, 232, 240, 0.85);
   }
   
+  .videoFormActions button {
+    min-height: 48px;
+    border-radius: 999px;
+  }
+  
+  /* =========================
+     RESPONSIVE
+  ========================= */
+  
   @media (max-width: 768px) {
+    .videoFormPage .contentStudioForm {
+      border-radius: 26px;
+    }
+  
+    .videoFormModeTabs {
+      width: 100%;
+      border-radius: 24px;
+      flex-direction: column;
+    }
+  
+    .videoFormModeTabs button {
+      width: 100%;
+    }
+  
+    .videoFormSectionCard,
+    .videoLiveFields {
+      padding: 20px;
+      border-radius: 24px;
+    }
+  
     .videoFormActions {
       flex-direction: column;
     }
@@ -99,9 +269,18 @@
     .videoFormActions button {
       width: 100%;
     }
+  }
   
-    .videoLiveFields,
-    .videoFormSectionCard {
-      padding: 18px;
+  @media (max-width: 520px) {
+    .videoFormPage input,
+    .videoFormPage select,
+    .videoFormPage textarea {
+      min-height: 48px;
+      border-radius: 15px;
+    }
+  
+    .videoFormSectionCard h3,
+    .videoLiveFields h3 {
+      letter-spacing: -0.045em;
     }
   }

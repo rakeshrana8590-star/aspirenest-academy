@@ -1,215 +1,371 @@
 /* =========================
-   VIDEO CARDS — ADMIN + STUDENT
+   VIDEO CARDS — PREMIUM SYSTEM
+========================= */
+
+.videoAdminCard,
+.recordedLessonCard,
+.liveClassCard,
+.videoLibraryCard {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.videoAdminCard::before,
+.recordedLessonCard::before,
+.liveClassCard::before,
+.videoLibraryCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at top left, rgba(255, 122, 0, 0.16), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(15, 23, 42, 0.08), transparent 32%);
+  opacity: 0;
+  transition: opacity 0.24s ease;
+}
+
+.videoAdminCard:hover::before,
+.recordedLessonCard:hover::before,
+.liveClassCard:hover::before,
+.videoLibraryCard:hover::before {
+  opacity: 1;
+}
+
+/* =========================
+   ADMIN VIDEO CARD
 ========================= */
 
 .videoAdminCard {
-    display: grid;
-    gap: 18px;
-  }
-  
+  display: grid;
+  gap: 18px;
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow:
+    0 18px 55px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.videoAdminCard:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 122, 0, 0.26);
+  box-shadow:
+    0 30px 90px rgba(15, 23, 42, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.videoAdminCardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.videoAdminCardTop strong {
+  display: block;
+  margin-top: 12px;
+  color: #0f172a;
+  font-size: clamp(20px, 2vw, 26px);
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+}
+
+.videoAdminCardTop p {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.videoModePill,
+.videoStatusPill {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.videoModeRECORDED {
+  background: #eef2ff;
+  color: #3730a3;
+  border: 1px solid rgba(99, 102, 241, 0.18);
+}
+
+.videoModeLIVE {
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid rgba(244, 63, 94, 0.2);
+}
+
+.videoStatusPublished {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid rgba(22, 101, 52, 0.14);
+}
+
+.videoStatusDraft {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid rgba(100, 116, 139, 0.16);
+}
+
+.videoStatusUnpublished {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid rgba(146, 64, 14, 0.14);
+}
+
+.videoStatusArchived {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid rgba(153, 27, 27, 0.14);
+}
+
+.videoAdminMetaGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+}
+
+.videoAdminMetaGrid span {
+  min-height: 46px;
+  padding: 12px 14px;
+  border-radius: 17px;
+  background: rgba(248, 250, 252, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.86);
+  color: #475569;
+  font-size: 13px;
+  font-weight: 850;
+  display: flex;
+  align-items: center;
+}
+
+.videoAdminActions {
+  align-items: center;
+  gap: 10px;
+}
+
+/* =========================
+   ACTION PORTAL MENU
+========================= */
+
+.videoPortalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(2px);
+}
+
+.videoPortalMenu {
+  position: fixed;
+  min-width: 240px;
+  padding: 10px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #111827, #020617);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 28px 90px rgba(2, 6, 23, 0.46);
+  display: grid;
+  gap: 6px;
+}
+
+.videoPortalMenu button {
+  width: 100%;
+  padding: 13px 14px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: #ffffff;
+  text-align: left;
+  font-weight: 850;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+.videoPortalMenu button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(2px);
+}
+
+.videoPortalMenu .videoMenuDanger {
+  color: #fecaca;
+}
+
+/* =========================
+   STUDENT LESSON / LIVE CARDS
+========================= */
+
+.recordedLessonCard,
+.liveClassCard {
+  min-height: 260px;
+  padding: 24px;
+  border-radius: 30px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow:
+    0 24px 72px rgba(15, 23, 42, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.recordedLessonCard:hover,
+.liveClassCard:hover {
+  transform: translateY(-5px);
+  border-color: rgba(255, 122, 0, 0.24);
+  box-shadow:
+    0 34px 95px rgba(15, 23, 42, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.96);
+}
+
+.liveClassCard {
+  border-color: rgba(244, 63, 94, 0.18);
+}
+
+.liveClassCard::after {
+  content: "";
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  background: #ef4444;
+  box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.12);
+}
+
+.recordedLessonCard h3,
+.liveClassCard h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: clamp(21px, 2.4vw, 30px);
+  line-height: 1.08;
+  letter-spacing: -0.052em;
+}
+
+.recordedLessonCard p,
+.liveClassCard p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 760;
+  line-height: 1.6;
+}
+
+.videoCardTopIcon {
+  width: 58px;
+  height: 58px;
+  border-radius: 21px;
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+  background: linear-gradient(135deg, #f8fafc, #ffffff);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+}
+
+.recordedLessonCard .videoCardTopIcon {
+  background: linear-gradient(135deg, #eef2ff, #ffffff);
+}
+
+.liveClassCard .videoCardTopIcon {
+  background: linear-gradient(135deg, #fff1f2, #ffffff);
+}
+
+.videoCardMetaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.videoCardMetaRow span {
+  padding: 8px 11px;
+  border-radius: 999px;
+  background: rgba(248, 250, 252, 0.92);
+  border: 1px solid rgba(226, 232, 240, 0.86);
+  color: #475569;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.videoCardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.videoCardActions button {
+  border-radius: 999px;
+}
+
+/* =========================
+   LIBRARY CARDS
+========================= */
+
+.videoLibraryCard {
+  border: 1px solid rgba(226, 232, 240, 0.94);
+  box-shadow:
+    0 22px 68px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.videoLibraryCard:hover {
+  border-color: rgba(255, 122, 0, 0.28);
+  box-shadow:
+    0 34px 96px rgba(15, 23, 42, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.96);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 768px) {
   .videoAdminCardTop {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 18px;
+    flex-direction: column;
   }
-  
-  .videoAdminCardTop strong {
-    display: block;
-    margin-top: 10px;
-    color: #0f172a;
-    font-size: 22px;
-    line-height: 1.1;
-    letter-spacing: -0.03em;
-  }
-  
-  .videoAdminCardTop p {
-    color: #64748b;
-    font-weight: 750;
-  }
-  
-  .videoModePill,
+
   .videoStatusPill {
-    display: inline-flex;
-    align-items: center;
-    width: fit-content;
-    padding: 8px 12px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 950;
-    text-transform: uppercase;
+    align-self: flex-start;
   }
-  
-  .videoModeRECORDED {
-    background: #eef2ff;
-    color: #3730a3;
+
+  .videoAdminActions,
+  .videoCardActions {
+    flex-direction: column;
   }
-  
-  .videoModeLIVE {
-    background: #fff1f2;
-    color: #be123c;
-  }
-  
-  .videoStatusPublished {
-    background: #dcfce7;
-    color: #166534;
-  }
-  
-  .videoStatusDraft {
-    background: #f1f5f9;
-    color: #334155;
-  }
-  
-  .videoStatusUnpublished {
-    background: #fef3c7;
-    color: #92400e;
-  }
-  
-  .videoStatusArchived {
-    background: #fee2e2;
-    color: #991b1b;
-  }
-  
-  .videoAdminMetaGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-    gap: 12px;
-  }
-  
-  .videoAdminMetaGrid span {
-    padding: 12px 14px;
-    border-radius: 16px;
-    background: #f8fafc;
-    color: #475569;
-    font-weight: 850;
-  }
-  
-  .videoAdminActions {
-    align-items: center;
-  }
-  
-  .videoPortalBackdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 999999;
-    background: transparent;
-  }
-  
-  .videoPortalMenu {
-    position: fixed;
-    min-width: 230px;
-    padding: 10px;
-    border-radius: 18px;
-    background: #0f172a;
-    box-shadow: 0 22px 70px rgba(15, 23, 42, 0.36);
-    display: grid;
-    gap: 6px;
-  }
-  
-  .videoPortalMenu button {
+
+  .videoAdminActions button,
+  .videoCardActions button {
     width: 100%;
-    padding: 12px 14px;
-    border: 0;
-    border-radius: 12px;
-    background: transparent;
-    color: #ffffff;
-    text-align: left;
-    font-weight: 850;
-    cursor: pointer;
   }
-  
-  .videoPortalMenu button:hover {
-    background: rgba(255, 255, 255, 0.1);
-  }
-  
-  .videoPortalMenu .videoMenuDanger {
-    color: #fecaca;
-  }
-  
+
   .recordedLessonCard,
   .liveClassCard {
-    padding: 24px;
-    border-radius: 28px;
-    background: #ffffff;
-    border: 1px solid rgba(226, 232, 240, 0.95);
-    box-shadow: 0 22px 70px rgba(15, 23, 42, 0.08);
-    display: grid;
-    gap: 14px;
+    min-height: auto;
+    padding: 20px;
+    border-radius: 24px;
   }
-  
-  .recordedLessonCard h3,
-  .liveClassCard h3 {
-    margin: 0;
-    color: #0f172a;
-    font-size: 22px;
-    line-height: 1.12;
-    letter-spacing: -0.04em;
-  }
-  
-  .recordedLessonCard p,
-  .liveClassCard p {
-    margin: 0;
-    color: #64748b;
-    font-weight: 750;
-    line-height: 1.55;
-  }
-  
-  .videoCardTopIcon {
-    width: 52px;
-    height: 52px;
-    border-radius: 18px;
-    display: grid;
-    place-items: center;
-    font-size: 26px;
-    background: #f8fafc;
-  }
-  
-  .recordedLessonCard .videoCardTopIcon {
-    background: #eef2ff;
-  }
-  
-  .liveClassCard .videoCardTopIcon {
-    background: #fff1f2;
-  }
-  
-  .videoCardMetaRow {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  
-  .videoCardMetaRow span {
-    padding: 7px 10px;
-    border-radius: 999px;
-    background: #f8fafc;
-    color: #475569;
-    font-size: 12px;
-    font-weight: 900;
-  }
-  
-  .videoCardActions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 8px;
-  }
-  
-  .videoCardActions button {
-    border-radius: 999px;
-  }
-  
-  @media (max-width: 768px) {
-    .videoAdminCardTop {
-      flex-direction: column;
-    }
-  
-    .videoAdminActions,
-    .videoCardActions {
-      flex-direction: column;
-    }
-  
-    .videoAdminActions button,
-    .videoCardActions button {
-      width: 100%;
-    }
-  }
+}

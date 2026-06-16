@@ -1,0 +1,347 @@
+/* =========================
+   STUDENT CLASSROOM — PREMIUM WATCH PAGE
+========================= */
+
+.studentClassroomPage {
+    max-width: 1480px;
+    margin: 0 auto;
+    padding: 42px 22px 92px;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at top left, rgba(255, 122, 0, 0.1), transparent 34%),
+      radial-gradient(circle at 85% 10%, rgba(15, 23, 42, 0.08), transparent 30%),
+      linear-gradient(180deg, #ffffff 0%, #f8fafc 55%, #ffffff 100%);
+  }
+  
+  .classroomHero {
+    position: relative;
+    display: grid;
+    gap: 18px;
+    margin-bottom: 30px;
+    padding: 34px;
+    border-radius: 34px;
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow:
+      0 24px 80px rgba(15, 23, 42, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    overflow: hidden;
+  }
+  
+  .classroomHero::after {
+    content: "";
+    position: absolute;
+    right: -70px;
+    top: -90px;
+    width: 260px;
+    height: 260px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(255, 122, 0, 0.16), transparent 68%);
+    pointer-events: none;
+  }
+  
+  .classroomHero h1 {
+    max-width: 980px;
+    margin: 0;
+    color: #0f172a;
+    font-size: clamp(36px, 5vw, 74px);
+    line-height: 0.94;
+    letter-spacing: -0.075em;
+  }
+  
+  .classroomHero p {
+    max-width: 760px;
+    margin: 0;
+    color: #64748b;
+    font-size: 17px;
+    font-weight: 760;
+    line-height: 1.6;
+  }
+  
+  .classroomHero .contentStudioActions {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .classroomHeroMeta {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .classroomHeroMeta span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 8px 13px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(226, 232, 240, 0.88);
+    color: #475569;
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+  }
+  
+  /* =========================
+     PLAYER
+  ========================= */
+  
+  .classroomPlayerShell {
+    position: relative;
+    overflow: hidden;
+    border-radius: 34px;
+    background:
+      radial-gradient(circle at top left, rgba(255, 122, 0, 0.18), transparent 30%),
+      linear-gradient(135deg, #020617, #0f172a);
+    border: 1px solid rgba(15, 23, 42, 0.22);
+    box-shadow:
+      0 40px 120px rgba(2, 6, 23, 0.34),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  
+  .classroomPlayerShell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 24%);
+    z-index: 1;
+  }
+  
+  .classroomPlayerFrame {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 0;
+    display: block;
+    background: #020617;
+  }
+  
+  .classroomPlayerFallback {
+    min-height: 460px;
+    display: grid;
+    place-items: center;
+    padding: 34px;
+    color: #ffffff;
+    text-align: center;
+  }
+  
+  .classroomPlayerFallback strong {
+    display: block;
+    margin-bottom: 10px;
+    color: #ffffff;
+    font-size: clamp(24px, 3vw, 40px);
+    line-height: 1.05;
+    letter-spacing: -0.055em;
+  }
+  
+  .classroomPlayerFallback p {
+    max-width: 520px;
+    margin: 0 auto 18px;
+    color: #cbd5e1;
+    font-size: 15px;
+    font-weight: 760;
+    line-height: 1.6;
+  }
+  
+  /* =========================
+     INFO GRID
+  ========================= */
+  
+  .classroomInfoGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 22px;
+    margin-top: 30px;
+  }
+  
+  .classroomInfoCard {
+    padding: 28px;
+    border-radius: 30px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95));
+    border: 1px solid rgba(226, 232, 240, 0.92);
+    box-shadow:
+      0 24px 76px rgba(15, 23, 42, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  }
+  
+  .classroomInfoCard h3 {
+    margin: 0 0 12px;
+    color: #0f172a;
+    font-size: clamp(22px, 2.4vw, 32px);
+    line-height: 1.05;
+    letter-spacing: -0.055em;
+  }
+  
+  .classroomInfoCard p {
+    margin: 0 0 10px;
+    color: #64748b;
+    font-size: 15px;
+    font-weight: 760;
+    line-height: 1.65;
+  }
+  
+  .classroomInfoCard p:last-child {
+    margin-bottom: 0;
+  }
+  
+  .classroomSideStack {
+    display: grid;
+    gap: 18px;
+    align-content: start;
+  }
+  
+  .classroomActionButton {
+    width: 100%;
+    margin-top: 12px;
+    border-radius: 999px;
+  }
+  
+  /* =========================
+     LIVE CLASS PANEL
+  ========================= */
+  
+  .liveClassPanel {
+    position: relative;
+    overflow: hidden;
+    padding: 30px;
+    border-radius: 34px;
+    background:
+      radial-gradient(circle at top left, rgba(244, 63, 94, 0.16), transparent 34%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 241, 242, 0.56));
+    border: 1px solid rgba(244, 63, 94, 0.18);
+    box-shadow:
+      0 32px 100px rgba(15, 23, 42, 0.11),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+  
+  .liveClassPanel::after {
+    content: "";
+    position: absolute;
+    right: 28px;
+    top: 28px;
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background: #ef4444;
+    box-shadow:
+      0 0 0 8px rgba(239, 68, 68, 0.12),
+      0 0 38px rgba(239, 68, 68, 0.48);
+  }
+  
+  .liveClassPanel h3 {
+    margin: 14px 0 10px;
+    color: #0f172a;
+    font-size: clamp(28px, 4vw, 52px);
+    line-height: 0.98;
+    letter-spacing: -0.07em;
+  }
+  
+  .liveClassPanel p {
+    margin: 0 0 10px;
+    max-width: 880px;
+    color: #64748b;
+    font-size: 15px;
+    font-weight: 760;
+    line-height: 1.65;
+  }
+  
+  .liveStatusPill {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    min-height: 36px;
+    padding: 8px 13px;
+    border-radius: 999px;
+    background: #fff1f2;
+    color: #be123c;
+    border: 1px solid rgba(244, 63, 94, 0.18);
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  
+  /* =========================
+     CLASSROOM SHELVES
+  ========================= */
+  
+  .studentClassroomPage .videoShelfBlock {
+    margin-top: 38px;
+  }
+  
+  .studentClassroomPage .videoShelfHeader {
+    align-items: flex-end;
+  }
+  
+  .studentClassroomPage .videoChapterShelf {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+  
+  /* =========================
+     RESPONSIVE
+  ========================= */
+  
+  @media (max-width: 980px) {
+    .classroomInfoGrid {
+      grid-template-columns: 1fr;
+    }
+  
+    .studentClassroomPage {
+      padding: 30px 14px 72px;
+    }
+  
+    .classroomHero {
+      padding: 26px;
+      border-radius: 28px;
+    }
+  
+    .classroomPlayerShell,
+    .liveClassPanel {
+      border-radius: 28px;
+    }
+  
+    .classroomPlayerFallback {
+      min-height: 300px;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .classroomHero {
+      padding: 22px;
+    }
+  
+    .classroomHero h1 {
+      letter-spacing: -0.06em;
+    }
+  
+    .classroomInfoCard,
+    .liveClassPanel {
+      padding: 22px;
+      border-radius: 24px;
+    }
+  
+    .classroomPlayerShell {
+      border-radius: 22px;
+    }
+  
+    .classroomPlayerFallback {
+      min-height: 240px;
+      padding: 24px;
+    }
+  
+    .studentClassroomPage .videoChapterShelf {
+      grid-template-columns: 1fr;
+    }
+  }
