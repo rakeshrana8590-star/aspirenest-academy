@@ -194,13 +194,19 @@ export default function App() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [selectedNotesSubject, setSelectedNotesSubject] = useState(null);
   const [activeSection, setActiveSection] = useState(null);
-  
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+const [selectedAnswer, setSelectedAnswer] = useState("");
+const [score, setScore] = useState(0);
+const [showResult, setShowResult] = useState(false);
+const [showAnswer, setShowAnswer] = useState(false);
+const [timeLeft, setTimeLeft] = useState(60);
 
 const [showMentorProfile, setShowMentorProfile] = useState(false);
 const [showProfile, setShowProfile] = useState(false);
-const [showAnswer, setShowAnswer] = useState(false);
-const [timeLeft, setTimeLeft] = useState(60);
+
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+const [fullName, setFullName] = useState("");
 
 const [mobile, setMobile] = useState("");
 const [contactEmail, setContactEmail] = useState("");

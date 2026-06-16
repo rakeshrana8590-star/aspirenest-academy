@@ -826,14 +826,18 @@ import {
   
     let href = "";
   
+    if (type === "video") {
+      href = `/ctet-tet/videos/watch/${item.id}`;
+    }
+  
     if (type === "mock") {
       href = `/ctet-tet/mock-tests/start/${item.id}`;
-    } else if (type === "video") {
-      href = `/ctet-tet/videos/watch/${item.id}`;
-    } else {
+    }
+  
+    if (type === "note") {
       href =
-        item.fileUrl ||
         item.pdfUrl ||
+        item.fileUrl ||
         item.pdf ||
         "";
     }
