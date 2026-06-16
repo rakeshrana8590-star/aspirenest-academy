@@ -1,0 +1,798 @@
+/* =========================
+   EXAM START PAGE PREMIUM FLOATING LOCK
+   Paired with:
+   - src/components/exam/ExamStartRoute.jsx
+========================= */
+
+.examStartPage {
+    --exam-navy: #080b14;
+    --exam-ink: #0f172a;
+    --exam-muted: #64748b;
+    --exam-soft: #f8fafc;
+    --exam-border: rgba(226, 232, 240, 0.86);
+    --exam-orange: #f97316;
+  
+    position: relative;
+    isolation: isolate;
+    overflow-x: hidden;
+  
+    min-height: calc(100vh - 96px);
+    padding: 18px clamp(18px, 4vw, 54px) 38px;
+  
+    background:
+      radial-gradient(circle at 12% 0%, rgba(249, 115, 22, 0.2), transparent 28%),
+      radial-gradient(circle at 88% 7%, rgba(59, 130, 246, 0.16), transparent 30%),
+      linear-gradient(180deg, #070a12 0 238px, #f7f9fc 238px, #ffffff 100%);
+  
+    color: var(--exam-ink);
+    box-sizing: border-box;
+  }
+  
+  .examStartPage::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0 0 auto 0;
+    height: 300px;
+    pointer-events: none;
+  
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.06), transparent 36%),
+      radial-gradient(circle at 50% -30%, rgba(255, 255, 255, 0.18), transparent 30%);
+  }
+  
+  .examStartShell {
+    width: min(1320px, 100%);
+    margin: 0 auto;
+  }
+  
+  .examStartTopBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  
+  .examStartBackBtn {
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  
+    padding: 0 15px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+  
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+  
+    font-size: 0.76rem;
+    font-weight: 950;
+    cursor: pointer;
+  
+    box-shadow: 0 18px 34px rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(18px);
+  }
+  
+  .examStartTopNote {
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+  
+    padding: 0 14px;
+    border-radius: 999px;
+  
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+  
+    font-size: 0.74rem;
+    font-weight: 900;
+  
+    box-shadow: 0 18px 34px rgba(0, 0, 0, 0.18);
+    backdrop-filter: blur(18px);
+  }
+  
+  .examStartTopNote span {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: #22c55e;
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.14);
+  }
+  
+  /* supports both current/previous wrapper names safely */
+  .examStartLaunch,
+  .examStartHero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 354px);
+    gap: 18px;
+    align-items: stretch;
+    margin-bottom: 18px;
+  }
+  
+  .examStartHeroContent,
+  .examStartActionPanel,
+  .examStartCard,
+  .examStartStateCard {
+    border: 1px solid var(--exam-border);
+    box-shadow:
+      0 34px 90px rgba(15, 23, 42, 0.14),
+      0 1px 0 rgba(255, 255, 255, 0.72) inset;
+    backdrop-filter: blur(18px);
+  }
+  
+  .examStartHeroContent {
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+  
+    padding: clamp(22px, 3vw, 30px);
+    border-radius: 34px;
+  
+    background:
+      radial-gradient(circle at 10% 10%, rgba(249, 115, 22, 0.34), transparent 34%),
+      radial-gradient(circle at 88% 4%, rgba(59, 130, 246, 0.2), transparent 36%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.045)),
+      #0b1020;
+  
+    border-color: rgba(255, 255, 255, 0.18);
+  }
+  
+  .examStartHeroContent::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.13), transparent 38%),
+      radial-gradient(circle at 48% -20%, rgba(255, 255, 255, 0.18), transparent 30%);
+  }
+  
+  .examStartHeroContent > * {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .examStartHeroMeta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px;
+  }
+  
+  .examStartBadge,
+  .examStartActionLabel,
+  .examStartStateCard span,
+  .examStartSchedulePill {
+    width: fit-content;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  
+    padding: 7px 11px;
+    border-radius: 999px;
+  
+    background: rgba(249, 115, 22, 0.14);
+    color: #fed7aa;
+    border: 1px solid rgba(251, 146, 60, 0.3);
+  
+    font-size: 0.65rem;
+    line-height: 1;
+    font-weight: 1000;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+  
+  .examStartSchedulePill {
+    background: rgba(255, 255, 255, 0.11);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.18);
+  }
+  
+  .examStartHeroContent h1,
+  .examStartHero h1 {
+    max-width: 850px;
+    margin: 13px 0 8px;
+  
+    color: #ffffff;
+    font-size: clamp(2rem, 3.15vw, 3.25rem);
+    line-height: 1.02;
+    font-weight: 1000;
+    letter-spacing: -0.064em;
+    text-wrap: balance;
+  }
+  
+  .examStartHeroContent p,
+  .examStartHero p {
+    margin: 0;
+    color: rgba(226, 232, 240, 0.88);
+    font-size: 0.91rem;
+    line-height: 1.34;
+    font-weight: 850;
+  }
+  
+  .examStartQuickGrid,
+  .examStartHeroChips {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 17px;
+  }
+  
+  .examStartQuickGrid div,
+  .examStartHeroChips span {
+    min-width: 0;
+    padding: 12px 13px;
+    border-radius: 18px;
+  
+    background: rgba(255, 255, 255, 0.11);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 18px 34px rgba(0, 0, 0, 0.13);
+  }
+  
+  .examStartQuickGrid span {
+    display: block;
+    color: rgba(226, 232, 240, 0.72);
+    font-size: 0.66rem;
+    line-height: 1.1;
+    font-weight: 900;
+  }
+  
+  .examStartQuickGrid strong {
+    display: block;
+    margin-top: 6px;
+  
+    color: #ffffff;
+    font-size: 0.88rem;
+    line-height: 1.1;
+    font-weight: 1000;
+  
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .examStartHeroChips span {
+    display: flex;
+    align-items: center;
+    min-height: 46px;
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 950;
+  }
+  
+  .examStartActionPanel {
+    position: relative;
+    overflow: hidden;
+  
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  
+    padding: 22px;
+    border-radius: 32px;
+  
+    background:
+      radial-gradient(circle at 88% 0%, rgba(249, 115, 22, 0.2), transparent 38%),
+      linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  }
+  
+  .examStartActionPanel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), transparent 48%);
+  }
+  
+  .examStartActionPanel > * {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .examStartActionPanel .examStartActionLabel {
+    background: #fff7ed;
+    color: #c2410c;
+    border-color: #fed7aa;
+  }
+  
+  .examStartActionPanel strong {
+    display: block;
+    margin-top: 12px;
+  
+    color: var(--exam-ink);
+    font-size: 1.55rem;
+    line-height: 1.04;
+    font-weight: 1000;
+    letter-spacing: -0.045em;
+  }
+  
+  .examStartActionPanel p {
+    margin: 10px 0 14px;
+    color: var(--exam-muted);
+    font-size: 0.84rem;
+    line-height: 1.42;
+    font-weight: 820;
+  }
+  
+  .examStartActionChecks {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+    margin-bottom: 14px;
+  }
+  
+  .examStartActionChecks div {
+    padding: 11px 12px;
+    border-radius: 17px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e2e8f0;
+  }
+  
+  .examStartActionChecks span {
+    display: block;
+    color: var(--exam-muted);
+    font-size: 0.66rem;
+    line-height: 1;
+    font-weight: 900;
+  }
+  
+  .examStartActionChecks strong {
+    margin-top: 6px;
+    color: var(--exam-ink);
+    font-size: 0.82rem;
+    line-height: 1;
+    font-weight: 1000;
+    letter-spacing: 0;
+  }
+  
+  .examStartActionPanel button,
+  .examStartSecondaryAction,
+  .examStartStateCard button {
+    width: 100%;
+    min-height: 50px;
+  
+    border: none;
+    border-radius: 18px;
+  
+    background: linear-gradient(135deg, #111827 0%, #020617 100%);
+    color: #ffffff;
+  
+    font-size: 0.92rem;
+    line-height: 1;
+    font-weight: 1000;
+  
+    cursor: pointer;
+    box-shadow:
+      0 20px 42px rgba(15, 23, 42, 0.25),
+      0 1px 0 rgba(255, 255, 255, 0.22) inset;
+  
+    transition:
+      transform 0.18s ease,
+      box-shadow 0.18s ease,
+      filter 0.18s ease;
+  }
+  
+  .examStartActionPanel button:hover,
+  .examStartSecondaryAction:hover,
+  .examStartStateCard button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.05);
+    box-shadow:
+      0 28px 56px rgba(15, 23, 42, 0.3),
+      0 1px 0 rgba(255, 255, 255, 0.24) inset;
+  }
+  
+  .examStartGrid {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr 1fr 0.95fr;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .examStartCard {
+    position: relative;
+    overflow: hidden;
+  
+    min-width: 0;
+    padding: 20px;
+    border-radius: 30px;
+  
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(248, 250, 252, 0.95) 100%);
+  
+    transition:
+      transform 0.18s ease,
+      box-shadow 0.18s ease,
+      border-color 0.18s ease;
+  }
+  
+  .examStartCard::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 4px;
+  
+    background: linear-gradient(
+      90deg,
+      #f97316,
+      rgba(249, 115, 22, 0.05),
+      rgba(59, 130, 246, 0.32)
+    );
+  
+    opacity: 0.82;
+  }
+  
+  .examStartCard:hover {
+    transform: translateY(-4px);
+    border-color: rgba(249, 115, 22, 0.24);
+    box-shadow:
+      0 40px 100px rgba(15, 23, 42, 0.18),
+      0 1px 0 rgba(255, 255, 255, 0.78) inset;
+  }
+  
+  .examStartCardHead {
+    position: relative;
+    z-index: 1;
+  
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+  }
+  
+  .examStartCardIcon {
+    width: 44px;
+    height: 44px;
+  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  
+    border-radius: 16px;
+    background:
+      radial-gradient(circle at 30% 20%, #ffffff, transparent 48%),
+      #fff7ed;
+  
+    font-size: 1.18rem;
+    box-shadow: 0 14px 28px rgba(249, 115, 22, 0.12);
+  }
+  
+  .examStartCard h3 {
+    margin: 0;
+    color: #231006;
+    font-size: 1.03rem;
+    line-height: 1.08;
+    font-weight: 1000;
+    letter-spacing: -0.03em;
+  }
+  
+  .examStartCardHead p {
+    margin: 4px 0 0;
+    color: var(--exam-muted);
+    font-size: 0.7rem;
+    line-height: 1.15;
+    font-weight: 850;
+  }
+  
+  .examStartMetricGrid {
+    position: relative;
+    z-index: 1;
+  
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+    margin-bottom: 12px;
+  }
+  
+  .examStartMetricGrid div {
+    padding: 12px;
+    border-radius: 18px;
+  
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.045);
+  }
+  
+  .examStartMetricGrid span,
+  .examStartInfoList span {
+    display: block;
+    color: var(--exam-muted);
+    font-size: 0.68rem;
+    line-height: 1.1;
+    font-weight: 900;
+  }
+  
+  .examStartMetricGrid strong {
+    display: block;
+    margin-top: 6px;
+  
+    color: var(--exam-ink);
+    font-size: 1.08rem;
+    line-height: 1;
+    font-weight: 1000;
+  }
+  
+  .examStartInfoList {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 0;
+  }
+  
+  .examStartInfoList p {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  
+    margin: 0;
+    padding: 9px 0;
+    border-bottom: 1px solid #eaf0f7;
+  }
+  
+  .examStartInfoList p:last-child {
+    border-bottom: none;
+  }
+  
+  .examStartInfoList strong {
+    min-width: 0;
+    color: var(--exam-ink);
+    font-size: 0.77rem;
+    line-height: 1.2;
+    font-weight: 950;
+    text-align: right;
+    word-break: break-word;
+  }
+  
+  .examStartRuleList {
+    position: relative;
+    z-index: 1;
+  
+    display: grid;
+    gap: 9px;
+  }
+  
+  .examStartRuleList div {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+  
+    padding: 10px 12px;
+    border-radius: 17px;
+  
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.04);
+  }
+  
+  .examStartRuleList div.active {
+    background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+    border-color: rgba(22, 163, 74, 0.3);
+  }
+  
+  .examStartRuleList div.danger {
+    background: linear-gradient(180deg, #fff7ed 0%, #ffffff 100%);
+    border-color: rgba(249, 115, 22, 0.36);
+  }
+  
+  .examStartRuleList strong {
+    color: var(--exam-ink);
+    font-size: 0.77rem;
+    line-height: 1.2;
+    font-weight: 950;
+  }
+  
+  .examStartRuleList span {
+    padding: 7px 9px;
+    border-radius: 999px;
+  
+    background: #ffffff;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+  
+    font-size: 0.63rem;
+    line-height: 1;
+    font-weight: 950;
+    white-space: nowrap;
+  }
+  
+  .examStartInstructionCard ul {
+    position: relative;
+    z-index: 1;
+  
+    display: grid;
+    gap: 9px;
+  
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  
+  .examStartInstructionCard li {
+    position: relative;
+    padding-left: 20px;
+  
+    color: #334155;
+    font-size: 0.8rem;
+    line-height: 1.35;
+    font-weight: 850;
+  }
+  
+  .examStartInstructionCard li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.5em;
+  
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+  
+    background: var(--exam-orange);
+    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+  }
+  
+  .examStartCustomInstruction {
+    position: relative;
+    z-index: 1;
+  
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 16px;
+  
+    background: linear-gradient(180deg, #fff7ed 0%, #fffaf4 100%);
+    color: #7c2d12;
+    border: 1px solid #fed7aa;
+  
+    font-size: 0.76rem;
+    line-height: 1.38;
+    font-weight: 850;
+    white-space: pre-wrap;
+  }
+  
+  .examStartStatusBox {
+    position: relative;
+    z-index: 1;
+  
+    padding: 14px;
+    border-radius: 19px;
+  
+    background:
+      radial-gradient(circle at 18% 0%, rgba(34, 197, 94, 0.16), transparent 44%),
+      linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+    border: 1px solid rgba(22, 163, 74, 0.24);
+  
+    margin-bottom: 10px;
+    box-shadow: 0 16px 34px rgba(22, 163, 74, 0.09);
+  }
+  
+  .examStartStatusBox strong {
+    display: block;
+    color: #16a34a;
+    font-size: 1.2rem;
+    line-height: 1;
+    font-weight: 1000;
+  }
+  
+  .examStartStatusBox span {
+    display: block;
+    margin-top: 7px;
+  
+    color: #166534;
+    font-size: 0.77rem;
+    line-height: 1.32;
+    font-weight: 850;
+  }
+  
+  .examStartSecondaryAction {
+    position: relative;
+    z-index: 1;
+    margin-top: 14px;
+  }
+  
+  .examStartStateCard {
+    width: min(500px, 100%);
+    margin: 52px auto 0;
+    padding: 28px;
+    border-radius: 30px;
+    text-align: center;
+  
+    background: rgba(255, 255, 255, 0.96);
+  }
+  
+  .examStartStateCard h1 {
+    margin: 16px 0 10px;
+    color: var(--exam-ink);
+    font-size: 1.9rem;
+    line-height: 1.1;
+    font-weight: 1000;
+    letter-spacing: -0.05em;
+  }
+  
+  .examStartStateCard p {
+    margin: 0 0 20px;
+    color: var(--exam-muted);
+    font-size: 0.92rem;
+    line-height: 1.45;
+    font-weight: 800;
+  }
+  
+  @media (max-width: 1250px) {
+    .examStartPage {
+      background:
+        radial-gradient(circle at 12% 0%, rgba(249, 115, 22, 0.2), transparent 30%),
+        radial-gradient(circle at 88% 7%, rgba(59, 130, 246, 0.15), transparent 30%),
+        linear-gradient(180deg, #070a12 0 320px, #f7f9fc 320px, #ffffff 100%);
+    }
+  
+    .examStartLaunch,
+    .examStartHero {
+      grid-template-columns: 1fr;
+    }
+  
+    .examStartActionPanel {
+      justify-content: flex-start;
+    }
+  
+    .examStartGrid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  
+  @media (max-width: 860px) {
+    .examStartTopBar {
+      align-items: stretch;
+      flex-direction: column;
+    }
+  
+    .examStartTopNote,
+    .examStartBackBtn {
+      width: fit-content;
+    }
+  
+    .examStartQuickGrid,
+    .examStartHeroChips {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  
+    .examStartGrid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media (max-width: 760px) {
+    .examStartPage {
+      padding: 14px 13px 34px;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(249, 115, 22, 0.22), transparent 32%),
+        linear-gradient(180deg, #070a12 0 390px, #f7f9fc 390px, #ffffff 100%);
+    }
+  
+    .examStartHeroContent,
+    .examStartActionPanel,
+    .examStartCard {
+      border-radius: 24px;
+      padding: 18px;
+    }
+  
+    .examStartHeroContent h1,
+    .examStartHero h1 {
+      font-size: 2rem;
+      letter-spacing: -0.055em;
+    }
+  
+    .examStartRuleList div {
+      grid-template-columns: 1fr;
+    }
+  
+    .examStartRuleList span {
+      width: fit-content;
+    }
+  }

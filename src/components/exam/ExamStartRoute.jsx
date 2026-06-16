@@ -11,6 +11,23 @@ const safeParseJson = (value, fallback = {}) => {
   }
 };
 
+const isRuleEnabled = (value) => {
+  const normalizedValue = String(value || "")
+    .toLowerCase()
+    .trim();
+
+  return (
+    value === true ||
+    normalizedValue === "yes" ||
+    normalizedValue === "required" ||
+    normalizedValue === "enabled" ||
+    normalizedValue === "on"
+  );
+};
+
+const getDisplayValue = (value, fallback = "Not set") =>
+  value || value === 0 ? value : fallback;
+
 export default function ExamStartRoute({
   universalContent,
   getMockTestAccessStatus,
@@ -25,27 +42,41 @@ export default function ExamStartRoute({
 
   const test = universalContent.find(
     (item) =>
-      item.section === "mockTest" &&
-      item.id === activeStartMockTestId
+      item.section === "mockTest" && item.id === activeStartMockTestId
   );
 
   const accessStatus = getMockTestAccessStatus(test);
 
-  if (accessStatus === "NOT_FOUND") {
-    return (
-      <section className="notesSubjectRoutePage">
-        <div className="pdfMiniCard">
-          <h3>Test not found</h3>
-          <p>This mock test is not available anymore.</p>
-          <button
-            className="btnLink"
-            onClick={() => navigate("/ctet-tet/mock-tests")}
-          >
-            Back to Mock Tests
+  const renderStateCard = ({
+    label,
+    title,
+    message,
+    actionLabel,
+    onAction,
+  }) => (
+    <section className="examStartPage">
+      <div className="examStartShell">
+        <div className="examStartStateCard">
+          <span>{label}</span>
+          <h1>{title}</h1>
+          <p>{message}</p>
+
+          <button type="button" onClick={onAction}>
+            {actionLabel}
           </button>
         </div>
-      </section>
-    );
+      </div>
+    </section>
+  );
+
+  if (accessStatus === "NOT_FOUND") {
+    return renderStateCard({
+      label: "Unavailable",
+      title: "Test not found",
+      message: "This mock test is not available anymore.",
+      actionLabel: "Back to Mock Tests",
+      onAction: () => navigate("/ctet-tet/mock-tests"),
+    });
   }
 
   const savedStartAttempt = safeParseJson(
@@ -56,102 +87,67 @@ export default function ExamStartRoute({
     Boolean(savedStartAttempt?.startedAt) &&
     !savedStartAttempt?.isSubmitted;
 
-  const hasSubmittedAttempt =
-    savedStartAttempt?.isSubmitted === true;
+  const hasSubmittedAttempt = savedStartAttempt?.isSubmitted === true;
 
   if (accessStatus === "UNPUBLISHED") {
-    return (
-      <section className="notesSubjectRoutePage">
-        <div className="pdfMiniCard">
-          <h3>Test unavailable</h3>
-          <p>This mock test is not published yet.</p>
-          <button
-            className="btnLink"
-            onClick={() => navigate("/ctet-tet/mock-tests")}
-          >
-            Back to Mock Tests
-          </button>
-        </div>
-      </section>
-    );
+    return renderStateCard({
+      label: "Unpublished",
+      title: "Test unavailable",
+      message: "This mock test is not published yet.",
+      actionLabel: "Back to Mock Tests",
+      onAction: () => navigate("/ctet-tet/mock-tests"),
+    });
   }
 
   if (accessStatus === "LOGIN_REQUIRED") {
-    return (
-      <section className="notesSubjectRoutePage">
-        <div className="pdfMiniCard">
-          <h3>Login required</h3>
-          <p>Please login before starting this mock test.</p>
-          <button
-            className="btnLink"
-            onClick={() => navigate("/login")}
-          >
-            Login to Continue
-          </button>
-        </div>
-      </section>
-    );
+    return renderStateCard({
+      label: "Login Required",
+      title: "Login before starting",
+      message: "Please login before starting this mock test.",
+      actionLabel: "Login to Continue",
+      onAction: () => navigate("/login"),
+    });
   }
 
   if (
     accessStatus === "PLAN_LOCKED" ||
     accessStatus === "EXPIRED_MEMBERSHIP"
   ) {
-    return (
-      <section className="notesSubjectRoutePage">
-        <div className="pdfMiniCard">
-          <h3>Plan required</h3>
-          <p>
-            This mock test needs {test.planType || "PREMIUM"} access.
-          </p>
-          <button
-            className="btnLink"
-            onClick={() => navigate("/ctet-tet/pricing")}
-          >
-            View Pricing
-          </button>
-        </div>
-      </section>
-    );
+    return renderStateCard({
+      label: "Plan Required",
+      title: "Upgrade required",
+      message: `This mock test needs ${
+        test.planType || "PREMIUM"
+      } access.`,
+      actionLabel: "View Pricing",
+      onAction: () => navigate("/ctet-tet/pricing"),
+    });
   }
 
   if (accessStatus === "UPCOMING" && !hasSubmittedAttempt) {
-    return (
-      <section className="notesSubjectRoutePage">
-        <div className="pdfMiniCard">
-          <h3>Test upcoming</h3>
-          <p>This mock test is scheduled for a future date or time.</p>
-          <button
-            className="btnLink"
-            onClick={() => navigate("/ctet-tet/mock-tests")}
-          >
-            Back to Mock Tests
-          </button>
-        </div>
-      </section>
-    );
+    return renderStateCard({
+      label: "Upcoming",
+      title: "Test not started yet",
+      message: "This mock test is scheduled for a future date or time.",
+      actionLabel: "Back to Mock Tests",
+      onAction: () => navigate("/ctet-tet/mock-tests"),
+    });
   }
 
   if (accessStatus === "EXPIRED" && !hasSubmittedAttempt) {
-    return (
-      <section className="notesSubjectRoutePage">
-        <div className="pdfMiniCard">
-          <h3>Test expired</h3>
-          <p>This mock test window is closed.</p>
-          <button
-            className="btnLink"
-            onClick={() => navigate("/ctet-tet/mock-tests")}
-          >
-            Back to Mock Tests
-          </button>
-        </div>
-      </section>
-    );
+    return renderStateCard({
+      label: "Expired",
+      title: "Test window closed",
+      message: "This mock test window is closed.",
+      actionLabel: "Back to Mock Tests",
+      onAction: () => navigate("/ctet-tet/mock-tests"),
+    });
   }
 
   const totalQuestions = test.questions?.length || 0;
-  const durationText =
-    test.durationMinutes || test.duration || "Not specified";
+  const durationValue = test.durationMinutes || test.duration || "";
+  const durationText = durationValue ? `${durationValue}` : "Not specified";
+  const durationLabel = durationValue ? `${durationValue} min` : "Not set";
   const marksPerQuestion = Number(test.marksPerQuestion || 1);
   const negativeMarks = Number(test.negativeMarks || 0);
   const totalMarks =
@@ -160,81 +156,301 @@ export default function ExamStartRoute({
   const scheduleStatus = getMockTestScheduleStatus(test);
 
   const startPageRules = getMockTestRules(test);
-  const isPauseAllowed = startPageRules.allowPause === "yes";
+  const isPauseAllowed = isRuleEnabled(startPageRules.allowPause);
+
+  const isFullscreenRequired = isRuleEnabled(test.fullscreenMode);
+  const isTabSwitchEnabled = isRuleEnabled(test.tabSwitchDetection);
+  const isCopyPasteProtected = isRuleEnabled(test.copyPasteProtection);
+  const isCalculatorAllowed = isRuleEnabled(startPageRules.calculatorAllowed);
+  const isAutoSubmitOnViolation = isRuleEnabled(test.autoSubmitOnViolation);
+
+  const handleStartTest = () => {
+    if (hasSubmittedAttempt) {
+      navigate(`/ctet-tet/mock-tests/result/${test.id}`);
+      return;
+    }
+
+    if (hasStartedAttempt && !isPauseAllowed) {
+      localStorage.removeItem(getAttemptStorageKey(test.id));
+
+      setMockAttemptState((prev) => {
+        const next = { ...prev };
+        delete next[test.id];
+        return next;
+      });
+    }
+
+    navigate(`/ctet-tet/mock-tests/attempt/${test.id}`);
+  };
+
+  const primaryActionLabel = hasSubmittedAttempt
+    ? "View Result"
+    : hasStartedAttempt && isPauseAllowed
+    ? "Resume Test"
+    : "Begin Test";
 
   return (
-    <section className="notesSubjectRoutePage">
-      <div key={test.id}>
-        <button onClick={() => navigate(-1)}>
-          ← Back to Tests
-        </button>
+    <section className="examStartPage">
+      <div className="examStartShell">
+        <div className="examStartTopBar">
+          <button
+            type="button"
+            className="examStartBackBtn"
+            onClick={() => navigate(-1)}
+          >
+            ← Back to Tests
+          </button>
 
-        <span className="notesSubjectRouteBadge">
-          MOCK TEST START
-        </span>
+          <div className="examStartTopNote">
+            <span></span>
+            Timer starts only after entering attempt screen
+          </div>
+        </div>
 
-        <h1>{test.title}</h1>
+        <div className="examStartLaunch">
+          <div className="examStartHeroContent">
+            <div className="examStartHeroMeta">
+              <span className="examStartBadge">Mock Test Start</span>
+              <span className="examStartSchedulePill">
+                {scheduleStatus}
+              </span>
+            </div>
 
-        <p>
-          {test.planType} · {test.subject} · {test.chapter}
-        </p>
+            <h1>{test.title}</h1>
 
-        <div className="pdfShelfRow">
-          <div className="pdfMiniCard">
-            <div className="pdfIcon">📝</div>
+            <p>
+              {test.planType || "FREE"} · {test.subject || "Subject"} ·{" "}
+              {test.chapter || "Complete Test"}
+            </p>
 
-            <h3>Exam Overview</h3>
+            <div className="examStartQuickGrid">
+              <div>
+                <span>Questions</span>
+                <strong>{totalQuestions}</strong>
+              </div>
 
-            <p>Type: {test.testType || "Mock Test"}</p>
-            <p>Questions: {totalQuestions}</p>
-            <p>Duration: {durationText} minutes</p>
-            <p>Total Marks: {totalMarks}</p>
-            <p>Marks per Question: {marksPerQuestion}</p>
-            <p>Negative Marks: {negativeMarks}</p>
-            <p>Passing Marks: {passingMarks || "Not set"}</p>
+              <div>
+                <span>Duration</span>
+                <strong>{durationLabel}</strong>
+              </div>
 
-            <span>
-              {test.planType} · {scheduleStatus}
-            </span>
+              <div>
+                <span>Total Marks</span>
+                <strong>{totalMarks}</strong>
+              </div>
+
+              <div>
+                <span>Type</span>
+                <strong>{test.testType || "Mock Test"}</strong>
+              </div>
+            </div>
           </div>
 
-          <div className="pdfMiniCard">
-            <div className="pdfIcon">📋</div>
+          <aside className="examStartActionPanel">
+            <span className="examStartActionLabel">
+              {hasSubmittedAttempt
+                ? "Attempt Completed"
+                : hasStartedAttempt
+                ? "Attempt in Progress"
+                : "Ready to Begin"}
+            </span>
 
-            <h3>Instructions</h3>
+            <strong>{primaryActionLabel}</strong>
 
-            <p>Read every question carefully before answering.</p>
-            <p>Your timer will start after clicking Begin Test.</p>
-            <p>You can mark questions for review during the test.</p>
-            <p>Submit is required before result and review unlock.</p>
-            <p>Do not refresh the page during active attempt.</p>
+            <p>
+              Review the rules once. Your attempt, timer, answers, and
+              result flow will unlock after this step.
+            </p>
+
+            <div className="examStartActionChecks">
+              <div>
+                <span>Plan</span>
+                <strong>{getDisplayValue(test.planType)}</strong>
+              </div>
+
+              <div>
+                <span>Pause</span>
+                <strong>{isPauseAllowed ? "Allowed" : "Not allowed"}</strong>
+              </div>
+            </div>
+
+            <button type="button" onClick={handleStartTest}>
+              {primaryActionLabel}
+            </button>
+          </aside>
+        </div>
+
+        <div className="examStartGrid">
+          <div className="examStartCard examStartOverviewCard">
+            <div className="examStartCardHead">
+              <div className="examStartCardIcon">📝</div>
+              <div>
+                <h3>Exam Overview</h3>
+                <p>Core test configuration</p>
+              </div>
+            </div>
+
+            <div className="examStartMetricGrid">
+              <div>
+                <span>Questions</span>
+                <strong>{totalQuestions}</strong>
+              </div>
+
+              <div>
+                <span>Duration</span>
+                <strong>{durationText} min</strong>
+              </div>
+
+              <div>
+                <span>Total Marks</span>
+                <strong>{totalMarks}</strong>
+              </div>
+
+              <div>
+                <span>Negative</span>
+                <strong>{negativeMarks}</strong>
+              </div>
+            </div>
+
+            <div className="examStartInfoList">
+              <p>
+                <span>Marks per Question</span>
+                <strong>{marksPerQuestion}</strong>
+              </p>
+
+              <p>
+                <span>Passing Marks</span>
+                <strong>{passingMarks || "Not set"}</strong>
+              </p>
+
+              <p>
+                <span>Leaderboard</span>
+                <strong>{test.leaderboardMode || "Disabled"}</strong>
+              </p>
+            </div>
+          </div>
+
+          <div className="examStartCard">
+            <div className="examStartCardHead">
+              <div className="examStartCardIcon">🛡️</div>
+              <div>
+                <h3>Exam Rules</h3>
+                <p>Security and control mode</p>
+              </div>
+            </div>
+
+            <div className="examStartRuleList">
+              <div className={isFullscreenRequired ? "active" : ""}>
+                <strong>Fullscreen</strong>
+                <span>
+                  {isFullscreenRequired ? "Required" : "Not required"}
+                </span>
+              </div>
+
+              <div className={isTabSwitchEnabled ? "active" : ""}>
+                <strong>Tab Switch</strong>
+                <span>
+                  {isTabSwitchEnabled ? "Enabled" : "Disabled"}
+                </span>
+              </div>
+
+              <div className={isCopyPasteProtected ? "active" : ""}>
+                <strong>Copy / Paste</strong>
+                <span>
+                  {isCopyPasteProtected ? "Protected" : "Disabled"}
+                </span>
+              </div>
+
+              <div className={isAutoSubmitOnViolation ? "active danger" : ""}>
+                <strong>Violation Auto Submit</strong>
+                <span>
+                  {isAutoSubmitOnViolation ? "Enabled" : "Disabled"}
+                </span>
+              </div>
+
+              <div className={isCalculatorAllowed ? "active" : ""}>
+                <strong>Calculator</strong>
+                <span>
+                  {isCalculatorAllowed ? "Allowed" : "Not allowed"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="examStartCard examStartInstructionCard">
+            <div className="examStartCardHead">
+              <div className="examStartCardIcon">📋</div>
+              <div>
+                <h3>Instructions</h3>
+                <p>Before you begin</p>
+              </div>
+            </div>
+
+            <ul>
+              <li>Read every question carefully before answering.</li>
+              <li>Your timer starts after clicking Begin Test.</li>
+              <li>You can mark questions for review during the test.</li>
+              <li>Submit is required before result and review unlock.</li>
+              <li>Do not refresh the page during active attempt.</li>
+            </ul>
+
+            {test.examInstructions && (
+              <div className="examStartCustomInstruction">
+                {test.examInstructions}
+              </div>
+            )}
+          </div>
+
+          <div className="examStartCard examStartStatusCard">
+            <div className="examStartCardHead">
+              <div className="examStartCardIcon">⚡</div>
+              <div>
+                <h3>Attempt Status</h3>
+                <p>Current attempt state</p>
+              </div>
+            </div>
+
+            <div className="examStartStatusBox">
+              <strong>
+                {hasSubmittedAttempt
+                  ? "Submitted"
+                  : hasStartedAttempt
+                  ? "In Progress"
+                  : "Not Started"}
+              </strong>
+
+              <span>
+                {hasSubmittedAttempt
+                  ? "Your result is ready."
+                  : hasStartedAttempt && isPauseAllowed
+                  ? "You can resume your attempt."
+                  : "A fresh attempt will start."}
+              </span>
+            </div>
+
+            <div className="examStartInfoList">
+              <p>
+                <span>Schedule</span>
+                <strong>{scheduleStatus}</strong>
+              </p>
+
+              <p>
+                <span>Navigation</span>
+                <strong>{startPageRules.navigationMode || "free"}</strong>
+              </p>
+
+              <p>
+                <span>Pause</span>
+                <strong>{isPauseAllowed ? "Allowed" : "Not allowed"}</strong>
+              </p>
+            </div>
 
             <button
-              className="btnLink"
-              onClick={() => {
-                if (hasSubmittedAttempt) {
-                  navigate(`/ctet-tet/mock-tests/result/${test.id}`);
-                  return;
-                }
-
-                if (hasStartedAttempt && !isPauseAllowed) {
-                  localStorage.removeItem(getAttemptStorageKey(test.id));
-
-                  setMockAttemptState((prev) => {
-                    const next = { ...prev };
-                    delete next[test.id];
-                    return next;
-                  });
-                }
-
-                navigate(`/ctet-tet/mock-tests/attempt/${test.id}`);
-              }}
+              type="button"
+              className="examStartSecondaryAction"
+              onClick={handleStartTest}
             >
-              {hasSubmittedAttempt
-                ? "View Result"
-                : hasStartedAttempt && isPauseAllowed
-                ? "Resume Test"
-                : "Begin Test"}
+              {primaryActionLabel}
             </button>
           </div>
         </div>

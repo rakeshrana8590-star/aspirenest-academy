@@ -800,109 +800,215 @@ export const StudentRoadmapDay = ({
             }
           />
 
-          <section className="aspirePathSection">
-            <RoadmapSectionHeader
-              kicker="Daily Tasks"
-              title="Complete today’s learning path"
-              text="Mark each task complete as you finish your study, live session, mock test, or revision."
-            />
+<section className="aspirePathSection">
+  <RoadmapSectionHeader
+    kicker="Daily Tasks"
+    title="Complete today’s learning path"
+    text="Each task now carries its own Smart Guide. Resources are shown according to the actual task, not as a random day-level grid."
+  />
 
-            <div className="aspirePathTaskList">
-              {(activeDay.tasks || []).map((task) => (
-                <RoadmapTaskCard
-                  key={task.taskId || task.title}
-                  task={task}
-                  completed={completedTaskIds.includes(task.taskId)}
-                  onToggleComplete={handleToggleTask}
-                />
-              ))}
-            </div>
-          </section>
+  {!smartRecommendations ? (
+    <RoadmapEmptyState
+      title="Checking Smart Guide..."
+      text="AspirePath is matching notes, videos, and mock tests task by task."
+    />
+  ) : null}
 
-          <section className="aspirePathSection">
-            <RoadmapSectionHeader
-              kicker="Smart Guide"
-              title="Recommended resources"
-              text="AspirePath matches this day’s subject, chapter, focus area, and tasks with available notes, videos, and mock tests."
-            />
+  <div className="aspirePathTaskList">
+    {(activeDay.tasks || []).map((task, index) => {
+      const taskKey =
+        task.taskId ||
+        task.id ||
+        task.title ||
+        `${task.slot || task.taskType || "task"}-${index + 1}`;
 
-            {!smartRecommendations ? (
-              <RoadmapEmptyState
-                title="Checking recommendations..."
-                text="AspirePath is finding useful resources for this day."
-              />
-            ) : smartRecommendations.all?.length === 0 ? (
-              <RoadmapEmptyState
-                title="No smart recommendations yet"
-                text="Add matching notes, videos, or mock tests in Content Studio to enable recommendations for this day."
-              />
-            ) : (
-              <div className="aspirePathGrid">
-                {smartRecommendations.all.map((item) => (
-                  <article className="aspirePathCard" key={item.id}>
-                    <div className="aspirePathCardTop">
-                      <div>
-                        <h3 className="aspirePathCardTitle">
-                          {item.title}
-                        </h3>
+      const taskGuide =
+        smartRecommendations?.byTask?.find(
+          (entry) =>
+            entry.taskId === task.taskId ||
+            entry.taskId === task.id ||
+            entry.taskId === taskKey
+        ) ||
+        smartRecommendations?.byTask?.[index] ||
+        {};
 
-                        <p className="aspirePathCardText">
-                          {item.subject || activeDay.subject || "Subject"} •{" "}
-                          {item.chapter ||
-                            activeDay.chapter ||
-                            activeDay.focusArea ||
-                            "Recommended resource"}
-                        </p>
+      const taskTypeKey = (
+        taskGuide.taskType ||
+        task.taskType ||
+        task.slot ||
+        activeDay.dayType ||
+        ""
+      )
+        .toString()
+        .toLowerCase();
+
+      const taskNotes = Array.isArray(taskGuide.notes)
+        ? taskGuide.notes
+        : [];
+
+      const taskVideos = Array.isArray(taskGuide.videos)
+        ? taskGuide.videos
+        : [];
+
+      const taskMocks = Array.isArray(taskGuide.mocks)
+        ? taskGuide.mocks
+        : [];
+
+      const orderedSmartItems = taskTypeKey.includes("mock")
+        ? [...taskMocks, ...taskNotes, ...taskVideos]
+        : taskTypeKey.includes("revision")
+        ? [...taskNotes, ...taskVideos, ...taskMocks]
+        : taskTypeKey.includes("live")
+        ? [...taskVideos, ...taskNotes, ...taskMocks]
+        : [...taskNotes, ...taskVideos, ...taskMocks];
+
+      return (
+        <React.Fragment key={taskKey}>
+          <RoadmapTaskCard
+            task={task}
+            completed={completedTaskIds.includes(task.taskId)}
+            onToggleComplete={handleToggleTask}
+          />
+
+          {orderedSmartItems.length > 0 ? (
+            <article className="aspirePathCard">
+              <div className="aspirePathCardTop">
+                <div>
+                  <h3 className="aspirePathCardTitle">
+                    Smart Guide for this task
+                  </h3>
+
+                  <p className="aspirePathCardText">
+                    {taskGuide.taskTitle ||
+                      task.title ||
+                      task.description ||
+                      "Task resources"}
+                  </p>
+                </div>
+
+                <RoadmapBadge>
+                  {taskGuide.taskSlot ||
+                    task.slot ||
+                    taskGuide.taskType ||
+                    task.taskType ||
+                    "Guide"}
+                </RoadmapBadge>
+              </div>
+
+              <div className="aspirePathTaskList">
+                {[
+                  {
+                    key: "note",
+                    label: "Notes",
+                    actionLabel: "📘 Open Notes",
+                    items: taskNotes,
+                  },
+                  {
+                    key: "video",
+                    label: "Videos",
+                    actionLabel: "▶️ Watch Video",
+                    items: taskVideos,
+                  },
+                  {
+                    key: "mock",
+                    label: "Mock Tests",
+                    actionLabel: "📝 Start Mock",
+                    items: taskMocks,
+                  },
+                ]
+                  .filter((group) => group.items.length > 0)
+                  .map((group) => (
+                    <div
+                      className="aspirePathTodayCard"
+                      key={`${taskKey}-${group.key}`}
+                    >
+                      <div className="aspirePathCardTop">
+                        <h4 className="aspirePathCardTitle">
+                          {group.label}
+                        </h4>
+
+                        <RoadmapBadge>
+                          {group.items.length} Found
+                        </RoadmapBadge>
                       </div>
 
-                      <RoadmapBadge>
-                        {item.type === "note"
-                          ? "Notes"
-                          : item.type === "video"
-                          ? "Video"
-                          : "Mock"}
-                      </RoadmapBadge>
-                    </div>
-
-                    <div className="aspirePathResourceRow">
-                      <RoadmapBadge>{item.planType || "FREE"}</RoadmapBadge>
-                      <RoadmapBadge>{item.contentType || item.section}</RoadmapBadge>
-                    </div>
-
-                    <div className="aspirePathHeroActions">
-                      {item.href ? (
-                        item.href.startsWith("/") ? (
-                          <Link
-                            className="aspirePathPrimaryBtn"
-                            to={item.href}
+                      <div className="aspirePathTaskList">
+                        {group.items.map((item) => (
+                          <div
+                            className="aspirePathCardTop"
+                            key={`${taskKey}-${group.key}-${item.id || item.href || item.title}`}
                           >
-                            Open Recommendation
-                          </Link>
-                        ) : (
-                          <a
-                            className="aspirePathPrimaryBtn"
-                            href={item.href}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Open Recommendation
-                          </a>
-                        )
-                      ) : (
-                        <button
-                          className="aspirePathSecondaryBtn"
-                          type="button"
-                          disabled
-                        >
-                          No Link Available
-                        </button>
-                      )}
+                            <div>
+                              <p className="aspirePathCardText">
+                                {item.title || "Recommended resource"}
+                              </p>
+
+                              <div className="aspirePathResourceRow">
+                                <RoadmapBadge>
+                                  {item.planType || "FREE"}
+                                </RoadmapBadge>
+
+                                {item.contentType || item.section ? (
+                                  <RoadmapBadge>
+                                    {item.contentType || item.section}
+                                  </RoadmapBadge>
+                                ) : null}
+                              </div>
+                            </div>
+
+                            {item.href ? (
+                              item.href.startsWith("/") ? (
+                                <Link
+                                  className="aspirePathPrimaryBtn"
+                                  to={item.href}
+                                >
+                                  {group.actionLabel}
+                                </Link>
+                              ) : (
+                                <a
+                                  className="aspirePathPrimaryBtn"
+                                  href={item.href}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  {group.actionLabel}
+                                </a>
+                              )
+                            ) : (
+                              <button
+                                className="aspirePathSecondaryBtn"
+                                type="button"
+                                disabled
+                              >
+                                No Link
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </article>
-                ))}
+                  ))}
               </div>
-            )}
-          </section>
+            </article>
+          ) : null}
+        </React.Fragment>
+      );
+    })}
+  </div>
+
+  {smartRecommendations &&
+  !smartRecommendations.byTask?.some(
+    (taskGuide) =>
+      taskGuide.notes?.length ||
+      taskGuide.videos?.length ||
+      taskGuide.mocks?.length
+  ) ? (
+    <RoadmapEmptyState
+      title="No task-wise Smart Guide yet"
+      text="Add matching notes, videos, or mock tests in Content Studio, or map manual resources from Roadmap Studio."
+    />
+  ) : null}
+</section>
 
         </>
       )}
