@@ -851,137 +851,6 @@ import {
       .filter(Boolean)
       .join(" ");
   };
-
-  const ROADMAP_RECOMMENDATION_GENERIC_TOKENS = new Set([
-    "ctet",
-    "tet",
-    "paper",
-    "part",
-    "exam",
-    "course",
-    "subject",
-    "chapter",
-    "study",
-    "task",
-    "roadmap",
-    "daily",
-    "complete",
-    "learning",
-    "preparation",
-    "practice",
-    "question",
-    "questions",
-    "mcq",
-    "test",
-    "mock",
-    "notes",
-    "note",
-    "video",
-    "class",
-    "session",
-    "follow",
-    "revise",
-    "revision",
-    "imported",
-    "basic",
-    "premium",
-    "mentorship",
-    "free",
-  ]);
-  
-  const getStrongRoadmapRecommendationTokens = (value = "") => {
-    return getRoadmapRecommendationTokens(
-      expandRoadmapRecommendationText(value)
-    ).filter(
-      (token) => !ROADMAP_RECOMMENDATION_GENERIC_TOKENS.has(token)
-    );
-  };
-  
-  const getUniqueRoadmapTokens = (tokens = []) => {
-    return [...new Set(tokens.filter(Boolean))];
-  };
-  
-  const countRoadmapTokenOverlap = (sourceTokens = [], targetTokens = []) => {
-    const targetSet = new Set(targetTokens);
-  
-    return sourceTokens.reduce((total, token) => {
-      return targetSet.has(token) ? total + 1 : total;
-    }, 0);
-  };
-  
-  const hasStrongRoadmapRecommendationMatch = ({ item = {}, day = {} }) => {
-    const itemText = [
-      item.title,
-      item.subject,
-      item.chapter,
-      item.course,
-      item.examType,
-      item.testType,
-      item.section,
-      item.contentType,
-    ]
-      .filter(Boolean)
-      .join(" ");
-  
-    const taskText = Array.isArray(day.tasks)
-      ? day.tasks
-          .map((task) =>
-            [
-              task.title,
-              task.taskTitle,
-              task.description,
-              task.taskDescription,
-              task.focusArea,
-              task.revisionFocus,
-              task.mockTitle,
-              task.videoTitle,
-              task.noteTitle,
-            ]
-              .filter(Boolean)
-              .join(" ")
-          )
-          .join(" ")
-      : "";
-  
-    const subjectTokens = getUniqueRoadmapTokens(
-      getStrongRoadmapRecommendationTokens(day.subject)
-    );
-  
-    const itemTokens = getUniqueRoadmapTokens(
-      getStrongRoadmapRecommendationTokens(itemText)
-    );
-  
-    const detailTokens = getUniqueRoadmapTokens(
-      [
-        ...getStrongRoadmapRecommendationTokens(day.chapter),
-        ...getStrongRoadmapRecommendationTokens(day.focusArea),
-        ...getStrongRoadmapRecommendationTokens(taskText),
-      ].filter((token) => !subjectTokens.includes(token))
-    );
-  
-    const subjectOverlap = countRoadmapTokenOverlap(
-      subjectTokens,
-      itemTokens
-    );
-  
-    const detailOverlap = countRoadmapTokenOverlap(
-      detailTokens,
-      itemTokens
-    );
-  
-    if (detailTokens.length > 0) {
-      return detailOverlap > 0;
-    }
-  
-    if (subjectTokens.length > 0) {
-      return subjectOverlap > 0;
-    }
-  
-    return countRoadmapTokenOverlap(
-      getStrongRoadmapRecommendationTokens(buildDayRecommendationSearchText(day)),
-      itemTokens
-    ) >= 2;
-  };
   
   const scoreRoadmapRecommendationItem = ({ item, day }) => {
     const daySearchText = buildDayRecommendationSearchText(day);
@@ -1090,310 +959,17 @@ import {
     day,
     limit = 6,
   } = {}) => {
-    const safeLimit = Number(limit || 6);
-  
-    const emptyResult = {
-      notes: [],
-      videos: [],
-      mocks: [],
-      all: [],
-      byTask: [],
-    };
-  
     if (!day) {
-      return emptyResult;
+      return {
+        notes: [],
+        videos: [],
+        mocks: [],
+        all: [],
+      };
     }
   
-    const allowedSections = [
-      ROADMAP_RECOMMENDATION_SECTIONS.NOTES,
-      ROADMAP_RECOMMENDATION_SECTIONS.VIDEOS,
-      ROADMAP_RECOMMENDATION_SECTIONS.MOCK_TESTS,
-    ];
-  
-    const dayTasks = Array.isArray(day.tasks) ? day.tasks : [];
-  
-    const isPublishedStatus = (status = "") => {
-      return normalizeRoadmapRecommendationText(status) === "published";
-    };
-  
-    const isCurrentAffairsContext = (value = "") => {
-      const normalizedText = normalizeRoadmapRecommendationText(value);
-      const tokens = normalizedText.split(" ").filter(Boolean);
-  
-      return (
-        normalizedText.includes("current affairs") ||
-        normalizedText.includes("currentaffairs") ||
-        normalizedText.includes("general knowledge") ||
-        normalizedText.includes("समसामयिक") ||
-        tokens.includes("ca") ||
-        tokens.includes("gk")
-      );
-    };
-  
-    const dedupeRecommendations = (items = []) => {
-      const seen = new Set();
-  
-      return items.filter((item) => {
-        const key = [
-          item.type,
-          item.id,
-          item.href,
-          normalizeRoadmapRecommendationText(item.title),
-        ].join("|");
-  
-        if (seen.has(key)) {
-          return false;
-        }
-  
-        seen.add(key);
-        return true;
-      });
-    };
-  
-    const getTaskId = (task = {}, index = 0) => {
-      return (
-        task.taskId ||
-        task.id ||
-        `${task.slot || task.taskSlot || task.taskType || "task"}-${index + 1}`
-      );
-    };
-  
-    const getTaskTitle = (task = {}, index = 0) => {
-      return (
-        task.title ||
-        task.taskTitle ||
-        task.mockTitle ||
-        task.videoTitle ||
-        task.noteTitle ||
-        task.revisionFocus ||
-        task.focusArea ||
-        task.description ||
-        `Task ${index + 1}`
-      );
-    };
-  
-    const getTaskSlot = (task = {}) => {
-      return task.taskSlot || task.slot || task.session || "";
-    };
-  
-    const getTaskType = (task = {}) => {
-      return task.taskType || task.type || task.slot || day.dayType || "study";
-    };
-  
-    const buildTaskSearchDay = (task = {}) => {
-      const taskText = [
-        task.title,
-        task.taskTitle,
-        task.description,
-        task.taskDescription,
-        task.focusArea,
-        task.revisionFocus,
-        task.mockTitle,
-        task.videoTitle,
-        task.noteTitle,
-        task.slot,
-        task.taskSlot,
-        task.taskType,
-        task.type,
-      ]
-        .filter(Boolean)
-        .join(" ");
-  
-      return {
-        ...day,
-        subject: task.subject || day.subject || "",
-        chapter: task.chapter || day.chapter || "",
-        focusArea: [day.focusArea, task.focusArea, taskText]
-          .filter(Boolean)
-          .join(" "),
-        dayType: task.taskType || task.type || task.slot || day.dayType || "",
-        tasks: [task],
-      };
-    };
-  
-    const getManualResourceEntries = (task = {}) => {
-      const resourceLinks = Array.isArray(task.resourceLinks)
-        ? task.resourceLinks
-        : [];
-  
-      const resources = Array.isArray(task.resources) ? task.resources : [];
-  
-      const directResources = [];
-  
-      if (task.noteUrl) {
-        directResources.push({
-          resourceType: "note",
-          url: task.noteUrl,
-          title: task.noteTitle,
-        });
-      }
-  
-      if (task.videoUrl) {
-        directResources.push({
-          resourceType: "video",
-          url: task.videoUrl,
-          title: task.videoTitle,
-        });
-      }
-  
-      if (task.mockId) {
-        directResources.push({
-          resourceType: "mock",
-          mockId: task.mockId,
-          title: task.mockTitle,
-        });
-      }
-  
-      return [...resourceLinks, ...resources, ...directResources];
-    };
-  
-    const buildManualTaskResources = (task = {}, taskIndex = 0) => {
-      const taskId = getTaskId(task, taskIndex);
-      const taskTitle = getTaskTitle(task, taskIndex);
-      const entries = getManualResourceEntries(task);
-  
-      const notes = [];
-      const videos = [];
-      const mocks = [];
-  
-      entries.forEach((resource, resourceIndex) => {
-        const resourceType = normalizeRoadmapRecommendationText(
-          resource.resourceType ||
-            resource.type ||
-            resource.kind ||
-            resource.section ||
-            ""
-        );
-  
-        const rawUrl =
-          resource.noteUrl ||
-          resource.videoUrl ||
-          resource.url ||
-          resource.href ||
-          resource.fileUrl ||
-          resource.pdfUrl ||
-          "";
-  
-        const resourceTitle =
-          resource.title ||
-          resource.resourceTitle ||
-          resource.noteTitle ||
-          resource.videoTitle ||
-          resource.mockTitle ||
-          taskTitle;
-  
-        if (
-          resource.noteUrl ||
-          resource.pdfUrl ||
-          resource.fileUrl ||
-          resourceType.includes("note") ||
-          resourceType.includes("pdf")
-        ) {
-          if (rawUrl) {
-            notes.push({
-              id: `manual-note-${taskId}-${resourceIndex}`,
-              type: "note",
-              title: resourceTitle || `${taskTitle} Notes`,
-              subject: task.subject || day.subject || "",
-              chapter: task.chapter || day.chapter || "",
-              planType: day.planType || "FREE",
-              href: rawUrl,
-              section: ROADMAP_RECOMMENDATION_SECTIONS.NOTES,
-              contentType: "MANUAL_URL",
-              source: "roadmapTask",
-            });
-          }
-  
-          return;
-        }
-  
-        if (
-          resource.videoUrl ||
-          resourceType.includes("video") ||
-          resourceType.includes("class")
-        ) {
-          if (rawUrl) {
-            videos.push({
-              id: `manual-video-${taskId}-${resourceIndex}`,
-              type: "video",
-              title: resourceTitle || `${taskTitle} Video`,
-              subject: task.subject || day.subject || "",
-              chapter: task.chapter || day.chapter || "",
-              planType: day.planType || "FREE",
-              href: rawUrl,
-              section: ROADMAP_RECOMMENDATION_SECTIONS.VIDEOS,
-              contentType: "MANUAL_URL",
-              source: "roadmapTask",
-            });
-          }
-  
-          return;
-        }
-  
-        if (
-          resource.mockId ||
-          resource.testId ||
-          resourceType.includes("mock") ||
-          resourceType.includes("test")
-        ) {
-          const mockId = resource.mockId || resource.testId || "";
-  
-          if (mockId) {
-            mocks.push({
-              id: `manual-mock-${mockId}-${resourceIndex}`,
-              type: "mock",
-              title: resourceTitle || task.mockTitle || `${taskTitle} Mock Test`,
-              subject: task.subject || day.subject || "",
-              chapter: task.chapter || day.chapter || "",
-              planType: day.planType || "FREE",
-              href: `/ctet-tet/mock-tests/start/${mockId}`,
-              section: ROADMAP_RECOMMENDATION_SECTIONS.MOCK_TESTS,
-              contentType: "MANUAL_MOCK_ID",
-              source: "roadmapTask",
-            });
-          }
-        }
-      });
-  
-      return {
-        notes,
-        videos,
-        mocks,
-      };
-    };
-  
-    const mapSystemRecommendation = (item = {}) => {
-      return {
-        ...mapContentItemToRoadmapRecommendation(item),
-        source: "contentItems",
-      };
-    };
-  
-    const getScoredRecommendationsForDay = ({
-      contentItems = [],
-      targetDay,
-    }) => {
-      return contentItems
-        .filter((item) =>
-          hasStrongRoadmapRecommendationMatch({
-            item,
-            day: targetDay,
-          })
-        )
-        .map((item) => ({
-          item,
-          score: scoreRoadmapRecommendationItem({
-            item,
-            day: targetDay,
-          }),
-        }))
-        .filter((entry) => entry.score > 0)
-        .sort((a, b) => b.score - a.score)
-        .map((entry) => mapSystemRecommendation(entry.item));
-    };
-  
     const snapshot = await getDocs(collection(db, "contentItems"));
-  
+
     const contentItems = snapshot.docs
       .map((item) => ({
         id: item.id,
@@ -1401,183 +977,45 @@ import {
       }))
       .filter(
         (item) =>
-          isPublishedStatus(item.status) &&
-          allowedSections.includes(item.section)
+          normalizeRoadmapRecommendationText(item.status) === "published"
       );
   
-    const scoredDayItems = getScoredRecommendationsForDay({
-      contentItems,
-      targetDay: day,
-    });
+    const allowedSections = [
+      ROADMAP_RECOMMENDATION_SECTIONS.NOTES,
+      ROADMAP_RECOMMENDATION_SECTIONS.VIDEOS,
+      ROADMAP_RECOMMENDATION_SECTIONS.MOCK_TESTS,
+    ];
   
-    const notes = dedupeRecommendations(
-      scoredDayItems.filter((item) => item.type === "note")
-    ).slice(0, safeLimit);
+    const scoredItems = contentItems
+      .filter((item) => allowedSections.includes(item.section))
+      .map((item) => ({
+        item,
+        score: scoreRoadmapRecommendationItem({
+          item,
+          day,
+        }),
+      }))
+      .filter((entry) => entry.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map((entry) => mapContentItemToRoadmapRecommendation(entry.item));
   
-    const videos = dedupeRecommendations(
-      scoredDayItems.filter((item) => item.type === "video")
-    ).slice(0, safeLimit);
+    const notes = scoredItems
+      .filter((item) => item.type === "note")
+      .slice(0, limit);
   
-    const mocks = dedupeRecommendations(
-      scoredDayItems.filter((item) => item.type === "mock")
-    ).slice(0, safeLimit);
+    const videos = scoredItems
+      .filter((item) => item.type === "video")
+      .slice(0, limit);
   
-    const byTask = dayTasks.map((task, index) => {
-      const taskId = getTaskId(task, index);
-      const taskTitle = getTaskTitle(task, index);
-      const taskSlot = getTaskSlot(task);
-      const taskType = getTaskType(task);
-    
-      const taskContextText = [
-        day.dayType,
-        day.subject,
-        day.chapter,
-        day.focusArea,
-        taskType,
-        taskSlot,
-        taskTitle,
-        task.description,
-        task.taskDescription,
-        task.focusArea,
-        task.revisionFocus,
-      ]
-        .filter(Boolean)
-        .join(" ");
-    
-      const normalizedTaskType = normalizeRoadmapRecommendationText(taskType);
-      const normalizedTaskSlot = normalizeRoadmapRecommendationText(taskSlot);
-      const normalizedTaskTitle = normalizeRoadmapRecommendationText(taskTitle);
-    
-      const taskIntentText = [
-        normalizedTaskType,
-        normalizedTaskSlot,
-        normalizedTaskTitle,
-      ]
-        .filter(Boolean)
-        .join(" ");
-    
-      const isRestTask = normalizedTaskType === "rest";
-      const isLiveTask =
-        taskIntentText.includes("live") ||
-        taskIntentText.includes("class");
-      const isMockTask =
-        taskIntentText.includes("mock") ||
-        taskIntentText.includes("test");
-      const isRevisionTask =
-        taskIntentText.includes("revision") ||
-        taskIntentText.includes("revise") ||
-        taskIntentText.includes("analysis");
-    
-      const shouldSkipResources =
-        isRestTask || isCurrentAffairsContext(taskContextText);
-    
-      if (shouldSkipResources) {
-        return {
-          taskId,
-          taskTitle,
-          taskSlot,
-          taskType,
-          notes: [],
-          videos: [],
-          mocks: [],
-        };
-      }
-    
-      const taskSearchDay = buildTaskSearchDay(task);
-    
-      const scoredTaskItems = getScoredRecommendationsForDay({
-        contentItems,
-        targetDay: taskSearchDay,
-      });
-    
-      const manualResources = buildManualTaskResources(task, index);
-    
-      const scoredNotes = scoredTaskItems.filter((item) => item.type === "note");
-      const scoredVideos = scoredTaskItems.filter((item) => item.type === "video");
-      const scoredMocks = scoredTaskItems.filter((item) => item.type === "mock");
-    
-      let taskNotes = [];
-      let taskVideos = [];
-      let taskMocks = [];
-    
-      if (isLiveTask) {
-        taskVideos = dedupeRecommendations([
-          ...manualResources.videos,
-          ...scoredVideos,
-        ]).slice(0, 2);
-    
-        taskNotes = dedupeRecommendations([
-          ...manualResources.notes,
-          ...scoredNotes,
-        ]).slice(0, 2);
-    
-        taskMocks = dedupeRecommendations([
-          ...manualResources.mocks,
-        ]).slice(0, 1);
-      } else if (isMockTask) {
-        taskMocks = dedupeRecommendations([
-          ...manualResources.mocks,
-          ...scoredMocks,
-        ]).slice(0, 2);
-    
-        taskNotes = dedupeRecommendations([
-          ...manualResources.notes,
-          ...scoredNotes,
-        ]).slice(0, 2);
-    
-        taskVideos = dedupeRecommendations([
-          ...manualResources.videos,
-          ...scoredVideos,
-        ]).slice(0, 1);
-      } else if (isRevisionTask) {
-        taskNotes = dedupeRecommendations([
-          ...manualResources.notes,
-          ...scoredNotes,
-        ]).slice(0, 3);
-    
-        taskVideos = dedupeRecommendations([
-          ...manualResources.videos,
-          ...scoredVideos,
-        ]).slice(0, 2);
-    
-        taskMocks = dedupeRecommendations([
-          ...manualResources.mocks,
-          ...scoredMocks,
-        ]).slice(0, 1);
-      } else {
-        taskNotes = dedupeRecommendations([
-          ...manualResources.notes,
-          ...scoredNotes,
-        ]).slice(0, 2);
-    
-        taskVideos = dedupeRecommendations([
-          ...manualResources.videos,
-          ...scoredVideos,
-        ]).slice(0, 2);
-    
-        taskMocks = dedupeRecommendations([
-          ...manualResources.mocks,
-          ...scoredMocks,
-        ]).slice(0, 1);
-      }
-    
-      return {
-        taskId,
-        taskTitle,
-        taskSlot,
-        taskType,
-        notes: taskNotes,
-        videos: taskVideos,
-        mocks: taskMocks,
-      };
-    });
+    const mocks = scoredItems
+      .filter((item) => item.type === "mock")
+      .slice(0, limit);
   
     return {
       notes,
       videos,
       mocks,
-      all: [...notes, ...videos, ...mocks].slice(0, safeLimit),
-      byTask,
+      all: [...notes, ...videos, ...mocks].slice(0, limit),
     };
   };
 

@@ -120,7 +120,6 @@ import "./styles/exam/palettePanel.css";
 import "./styles/exam/warningCard.css";
 import "./styles/exam/submitCard.css";
 import "./styles/exam/reviewResult.css";
-import "./styles/exam/examStart.css";
 import "./styles/exam/examLayoutLock.css";
 import {
   CONTENT_SECTIONS,
