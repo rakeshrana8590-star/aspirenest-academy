@@ -1,0 +1,142 @@
+/* =========================
+   VIDEO LIBRARY — STUDENT PLAN / SUBJECT / CHAPTER
+========================= */
+
+.videoLibraryHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 20px;
+  }
+  
+  .videoLibraryGrid {
+    display: grid;
+    gap: 18px;
+  }
+  
+  .videoPlanGrid,
+  .videoSubjectGrid,
+  .videoChapterShelf {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
+  }
+  
+  .videoShelfBlock {
+    margin-top: 34px;
+  }
+  
+  .videoShelfHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    gap: 14px;
+  }
+  
+  .videoShelfHeader h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: clamp(24px, 3vw, 42px);
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  
+  .videoShelfHeader span {
+    color: #64748b;
+    font-weight: 900;
+  }
+  
+  .videoLibraryCard {
+    min-height: 210px;
+    padding: 24px;
+    border-radius: 28px;
+    background: #ffffff;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    box-shadow: 0 22px 70px rgba(15, 23, 42, 0.08);
+    cursor: pointer;
+    text-align: left;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      border-color 0.2s ease;
+  }
+  
+  .videoLibraryCard:hover {
+    transform: translateY(-4px);
+    border-color: rgba(249, 115, 22, 0.28);
+    box-shadow: 0 30px 90px rgba(15, 23, 42, 0.12);
+  }
+  
+  .videoLibraryCardIcon {
+    width: 52px;
+    height: 52px;
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    background: #fff7ed;
+    color: #c2410c;
+    font-size: 26px;
+    margin-bottom: 18px;
+  }
+  
+  .videoLibraryCard h3 {
+    margin: 0 0 10px;
+    color: #0f172a;
+    font-size: 24px;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+  }
+  
+  .videoLibraryCard p {
+    margin: 0;
+    color: #64748b;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.55;
+  }
+  
+  .videoLibraryCardTag {
+    display: inline-flex;
+    margin-top: 18px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 950;
+    text-transform: uppercase;
+  }
+  
+  .videoChapterPageGrid {
+    display: grid;
+    gap: 24px;
+  }
+  
+  .videoChapterEmpty {
+    padding: 26px;
+    border-radius: 26px;
+    background: #ffffff;
+    border: 1px dashed rgba(148, 163, 184, 0.8);
+    color: #64748b;
+    font-weight: 800;
+  }
+  
+  @media (max-width: 768px) {
+    .videoLibraryHeader,
+    .videoShelfHeader {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .videoPlanGrid,
+    .videoSubjectGrid,
+    .videoChapterShelf {
+      grid-template-columns: 1fr;
+    }
+  
+    .videoLibraryCard {
+      min-height: auto;
+    }
+  }

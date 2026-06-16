@@ -1,0 +1,116 @@
+/* =========================
+   VIDEO MANAGER — ADMIN HOME / CHAPTERS
+========================= */
+
+.videoManagerPage {
+    background:
+      radial-gradient(circle at top left, rgba(255, 122, 0, 0.08), transparent 34%),
+      linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  }
+  
+  .videoManagerToolbar {
+    margin-bottom: 26px;
+  }
+  
+  .videoManagerToolbar .contentStudioActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .videoChapterList,
+  .videoLibraryList {
+    border-radius: 28px;
+  }
+  
+  .videoChapterGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 16px;
+  }
+  
+  .videoChapterButton {
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 10px;
+    text-align: left;
+    white-space: normal;
+  }
+  
+  .videoChapterButton span {
+    color: #0f172a;
+    font-size: 18px;
+    font-weight: 950;
+  }
+  
+  .videoChapterButton small {
+    color: #64748b;
+    font-weight: 850;
+  }
+  
+  .videoEmptyState {
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .videoEmptyState strong {
+    color: #0f172a;
+    font-size: 22px;
+  }
+  
+  .videoEmptyState p {
+    color: #64748b;
+    font-weight: 700;
+  }
+  
+  .videoManagerStatsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+  }
+  
+  .videoManagerStatCard {
+    padding: 22px;
+    border-radius: 24px;
+    background: #ffffff;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: 0 18px 60px rgba(15, 23, 42, 0.07);
+  }
+  
+  .videoManagerStatCard span {
+    display: block;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  
+  .videoManagerStatCard strong {
+    display: block;
+    margin-top: 8px;
+    color: #0f172a;
+    font-size: 36px;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  
+  @media (max-width: 768px) {
+    .videoChapterGrid {
+      grid-template-columns: 1fr;
+    }
+  
+    .videoManagerToolbar .contentStudioActions {
+      flex-direction: column;
+    }
+  
+    .videoManagerToolbar button {
+      width: 100%;
+    }
+  }

@@ -1,0 +1,56 @@
+export const VIDEO_SECTION = "recordedVideo";
+
+export const VIDEO_CONTENT_TYPE = "VIDEO";
+
+export const VIDEO_CLASS_MODES = {
+  RECORDED: "RECORDED",
+  LIVE: "LIVE",
+};
+
+export const VIDEO_STATUS = {
+  PUBLISHED: "published",
+  DRAFT: "draft",
+  UNPUBLISHED: "unpublished",
+  ARCHIVED: "archived",
+};
+
+export const LIVE_CLASS_STATUS = {
+  UPCOMING: "UPCOMING",
+  JOIN_NOW: "JOIN_NOW",
+  ENDED: "ENDED",
+  REPLAY_AVAILABLE: "REPLAY_AVAILABLE",
+  CANCELLED: "CANCELLED",
+  NOT_SCHEDULED: "NOT_SCHEDULED",
+};
+
+export const LIVE_PLATFORMS = {
+  YOUTUBE_LIVE: "YOUTUBE_LIVE",
+  ZOOM: "ZOOM",
+  GOOGLE_MEET: "GOOGLE_MEET",
+  OTHER: "OTHER",
+};
+
+export const VIDEO_SOURCE_TYPES = {
+  YOUTUBE_PUBLIC: "YOUTUBE_PUBLIC",
+  YOUTUBE_UNLISTED: "YOUTUBE_UNLISTED",
+  YOUTUBE_LIVE: "YOUTUBE_LIVE",
+  DRIVE: "DRIVE",
+  OTHER: "OTHER",
+};
+
+export const VIDEO_PLAN_ORDER = {
+  FREE: 0,
+  BASIC: 1,
+  PREMIUM: 2,
+  MENTORSHIP: 3,
+};
+
+export const VIDEO_MANAGER_TABS = {
+  ALL: "ALL",
+  RECORDED: "RECORDED",
+  LIVE: "LIVE",
+  SCHEDULED: "SCHEDULED",
+  REPLAY: "REPLAY",
+  PUBLISHED: "PUBLISHED",
+  DRAFT: "DRAFT",
+};

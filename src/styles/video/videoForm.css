@@ -1,0 +1,107 @@
+/* =========================
+   VIDEO FORM — ADMIN ADD / EDIT
+========================= */
+
+.videoFormPage .contentStudioForm {
+    border: 1px solid rgba(255, 122, 0, 0.16);
+    box-shadow: 0 24px 80px rgba(15, 23, 42, 0.08);
+  }
+  
+  .videoFormPage .contentStudioGrid {
+    align-items: start;
+  }
+  
+  .videoFormPage label {
+    display: block;
+    margin-bottom: 8px;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+  }
+  
+  .videoFormPage input,
+  .videoFormPage select,
+  .videoFormPage textarea {
+    width: 100%;
+  }
+  
+  .videoFormPage textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+  
+  .videoFormHint {
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  
+  .videoLiveFields {
+    padding: 22px;
+    border-radius: 22px;
+    background: #fff7ed;
+    border: 1px solid rgba(249, 115, 22, 0.18);
+  }
+  
+  .videoLiveFields h3 {
+    margin: 0 0 14px;
+    color: #0f172a;
+    font-size: 22px;
+    letter-spacing: -0.03em;
+  }
+  
+  .videoFormModeTabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+  
+  .videoFormModeTabs button {
+    border-radius: 999px;
+  }
+  
+  .videoFormModeTabs .active {
+    background: #0f172a;
+    color: #ffffff;
+    border-color: #0f172a;
+  }
+  
+  .videoFormSectionCard {
+    padding: 24px;
+    border-radius: 26px;
+    background: #ffffff;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: 0 18px 60px rgba(15, 23, 42, 0.06);
+  }
+  
+  .videoFormSectionCard h3 {
+    margin: 0 0 18px;
+    color: #0f172a;
+    font-size: 24px;
+    letter-spacing: -0.04em;
+  }
+  
+  .videoFormActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  
+  @media (max-width: 768px) {
+    .videoFormActions {
+      flex-direction: column;
+    }
+  
+    .videoFormActions button {
+      width: 100%;
+    }
+  
+    .videoLiveFields,
+    .videoFormSectionCard {
+      padding: 18px;
+    }
+  }

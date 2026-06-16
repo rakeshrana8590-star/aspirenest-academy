@@ -83,6 +83,20 @@ import {
   RoadmapResourcesRoute,
 } from "./components/roadmaps/RoadmapStudio.jsx";
 
+import VideoManagerHome from "./components/video/VideoManagerHome.jsx";
+import VideoClassFormRoute from "./components/video/VideoClassFormRoute.jsx";
+import VideoLibraryManageRoute from "./components/video/VideoLibraryManageRoute.jsx";
+import VideoPublishedRoute from "./components/video/VideoPublishedRoute.jsx";
+import VideoSubjectsRoute from "./components/video/VideoSubjectsRoute.jsx";
+
+import VideoChaptersRoute from "./components/video/VideoChaptersRoute.jsx";
+import VideoChapterClassesRoute from "./components/video/VideoChapterClassesRoute.jsx";
+import StudentVideoHub from "./components/video/StudentVideoHub.jsx";
+import StudentVideoPlanRoute from "./components/video/StudentVideoPlanRoute.jsx";
+import StudentVideoSubjectRoute from "./components/video/StudentVideoSubjectRoute.jsx";
+import StudentVideoChapterRoute from "./components/video/StudentVideoChapterRoute.jsx";
+import StudentClassroomRoute from "./components/video/StudentClassroomRoute.jsx";
+
 import ExamAttemptRoute from "./components/exam/ExamAttemptRoute.jsx";
 import ExamResultRoute from "./components/exam/ExamResultRoute.jsx";
 import ExamReviewRoute from "./components/exam/ExamReviewRoute.jsx";
@@ -90,6 +104,8 @@ import ExamStartRoute from "./components/exam/ExamStartRoute.jsx";
 import StudentMockTestCard from "./components/exam/StudentMockTestCard.jsx";
 import MockTestActionMenu from "./components/exam/MockTestActionMenu.jsx";
 import { deleteMockTest } from "./components/exam/mockTestAdminActions.js";
+
+
 
 import {
   createEmptyMockQuestion,
@@ -121,6 +137,13 @@ import "./styles/exam/warningCard.css";
 import "./styles/exam/submitCard.css";
 import "./styles/exam/reviewResult.css";
 import "./styles/exam/examLayoutLock.css";
+
+import "./styles/video/videoManager.css";
+import "./styles/video/videoForm.css";
+import "./styles/video/videoLibrary.css";
+import "./styles/video/studentClassroom.css";
+import "./styles/video/videoCards.css";
+
 import {
   CONTENT_SECTIONS,
   CONTENT_STATUS,
@@ -128,8 +151,8 @@ import {
   SOURCE_TYPES,
   CONTENT_TYPES,
 } from "./contentSystem";
+
 import {
-  loadPublishedContent,
   addContentItem,
   updateContentItem,
   deleteContentItem,
@@ -300,58 +323,9 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
         CONTENT_SECTIONS.CURRENT_AFFAIRS
     );
   
-  const universalVideos = universalContent.filter(
-    (item) =>
-      item.section ===
-      CONTENT_SECTIONS.RECORDED_VIDEO
-  );
 
-  const universalStudentVideos = universalContent.filter(
-    (item) =>
-      item.section === "recordedVideo" &&
-      item.status === "published"
-  );
-  
-  const studentVideoPlanRouteMatch =
-    location.pathname.match(
-      /^\/ctet-tet\/videos\/plan\/([^/]+)$/
-    );
-  
-  const studentVideoSubjectRouteMatch =
-    location.pathname.match(
-      /^\/ctet-tet\/videos\/plan\/([^/]+)\/([^/]+)$/
-    );
-  
-  const studentVideoChapterRouteMatch =
-    location.pathname.match(
-      /^\/ctet-tet\/videos\/plan\/([^/]+)\/([^/]+)\/([^/]+)$/
-    );
-  
-  const studentVideoWatchRouteMatch =
-    location.pathname.match(
-      /^\/ctet-tet\/videos\/watch\/([^/]+)$/
-    );
-  
-  const activeVideoPlan =
-    (
-      studentVideoPlanRouteMatch?.[1] ||
-      studentVideoSubjectRouteMatch?.[1] ||
-      studentVideoChapterRouteMatch?.[1] ||
-      ""
-    ).toUpperCase();
-  
-  const activeVideoSubjectId =
-    studentVideoSubjectRouteMatch?.[2] ||
-    studentVideoChapterRouteMatch?.[2] ||
-    "";
-  
-  const activeVideoChapterId =
-    studentVideoChapterRouteMatch?.[3] ||
-    "";
-  
-  const activeWatchVideoId =
-    studentVideoWatchRouteMatch?.[1] ||
-    "";
+
+
   
     const activeMockPlan =
     decodeURIComponent(location.pathname.split("/")[4] || "FREE").toUpperCase();
@@ -405,7 +379,7 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
     });
 
 
-const [contentLoading, setContentLoading] = useState(false);
+    const contentLoading = false;
   const [authLoading, setAuthLoading] = useState(true);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
   const [userPlanType, setUserPlanType] = useState("FREE");
@@ -733,18 +707,7 @@ const [questionBankItems, setQuestionBankItems] = useState([]);
 const [editingQuestionBankId, setEditingQuestionBankId] = useState(null);
 const [selectedQuestionBankIds, setSelectedQuestionBankIds] = useState([]);
 
-const [videoForm, setVideoForm] = useState({
-  title: "",
-  planType: "",
-  subject: "",
-  chapter: "",
-  videoUrl: "",
-  thumbnailUrl: "",
-  duration: "",
-  mentorName: "",
-  status: "published",
-  sourceType: "YOUTUBE_PUBLIC",
-});
+
 
 useEffect(() => {
   const isAddMockTestRoute =
@@ -1444,120 +1407,9 @@ const handleImportMockTestXlsxFromUrl = async () => {
   }
 };
 
-const handleSaveVideo = async () => {
-  try {
-    const finalSubject = videoForm.subject?.trim();
-    const finalChapter = videoForm.chapter?.trim();
 
-    if (
-      !videoForm.title?.trim() ||
-      !videoForm.planType?.trim() ||
-      !finalSubject ||
-      !finalChapter ||
-      !videoForm.videoUrl?.trim()
-    ) {
-      alert("Please fill Title, Plan, Subject, Chapter, and Video URL");
-      return;
-    }
 
-    const normalizeText = (value = "") =>
-    value
-      .toString()
-      .trim()
-      .toLowerCase()
-      .replace(/-/g, " ")
-      .replace(/\s+/g, " ");
-  
-  const existingSubject = notesSubjectsList.find(
-    (subject) =>
-      normalizeText(subject.name) === normalizeText(finalSubject) ||
-      normalizeText(subject.slug) === normalizeText(finalSubject) ||
-      normalizeText(subject.code) === normalizeText(finalSubject)
-  );
 
-    if (!existingSubject) {
-      await addDoc(collection(db, "notesSubjects"), {
-        name: finalSubject,
-        code: "",
-        slug: finalSubject.toLowerCase().replace(/\s+/g, "-"),
-        order: "0",
-        status: "Active",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-
-      await loadNotesSubjectsFromFirestore();
-    }
-
-    const existingChapter = notesChaptersList.find(
-      (chapter) =>
-        chapter.subjectName?.trim().toLowerCase() ===
-          finalSubject.toLowerCase() &&
-        chapter.name?.trim().toLowerCase() ===
-          finalChapter.toLowerCase()
-    );
-
-    if (!existingChapter) {
-      await addDoc(collection(db, "notesChapters"), {
-        subjectId: "",
-        subjectName: finalSubject,
-        name: finalChapter,
-        code: "",
-        slug: finalChapter.toLowerCase().replace(/\s+/g, "-"),
-        order: "0",
-        status: "Active",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-
-      await loadNotesChaptersFromFirestore();
-    }
-
-    const videoPayload = {
-      title: videoForm.title.trim(),
-      section: "recordedVideo",
-      contentType: "VIDEO",
-      planType: videoForm.planType,
-      subject: finalSubject,
-      chapter: finalChapter,
-      videoUrl: videoForm.videoUrl.trim(),
-      fileUrl: videoForm.videoUrl.trim(),
-      thumbnailUrl: videoForm.thumbnailUrl || "",
-      duration: videoForm.duration || "",
-      mentorName: videoForm.mentorName || "",
-      status: (videoForm.status || "published").toLowerCase(),
-      sourceType: videoForm.sourceType || "YOUTUBE_UNLISTED",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    await addDoc(collection(db, "contentItems"), videoPayload);
-
-    await loadContentItemsFromFirestore();
-
-    alert("Video saved successfully 🎥");
-
-    setVideoForm({
-      title: "",
-      planType: "",
-      subject: "",
-      chapter: "",
-      videoUrl: "",
-      thumbnailUrl: "",
-      duration: "",
-      mentorName: "",
-      status: "published",
-      sourceType: "YOUTUBE_PUBLIC",
-    });
-
-    navigate("/admin/content/videos/manage");
-  } catch (error) {
-    console.error("Video save error:", error);
-    alert(error.code + "\n\n" + error.message);
-  }
-};
-
-const [videoContent, setVideoContent] = useState([]);
 const [currentTitle, setCurrentTitle] = useState("");
 const [currentMonth, setCurrentMonth] = useState("");
 const [currentType, setCurrentType] = useState("FREE");
@@ -2284,51 +2136,7 @@ if (expiryDate && expiryDate < new Date()) {
       alert(error.message);
     }
   };
-  const loadUniversalContent = async () => {
-    try {
-      setContentLoading(true);
-  
-      const notesContent =
-        (await loadPublishedContent(
-          CONTENT_SECTIONS.NOTES
-        )) || [];
-  
-      const currentAffairsContent =
-        (await loadPublishedContent(
-          CONTENT_SECTIONS.CURRENT_AFFAIRS
-        )) || [];
-  
-      const videoContent =
-        (await loadPublishedContent(
-          CONTENT_SECTIONS.RECORDED_VIDEO
-        )) || [];
-  
-      const finalContent = [
-        ...notesContent,
-        ...currentAffairsContent,
-        ...videoContent,
-      ];
-  
-      setUniversalContent(finalContent);
-  
-      console.log("Universal CMS Loaded:", {
-        total: finalContent.length,
-        notes: notesContent.length,
-        currentAffairs: currentAffairsContent.length,
-        videos: videoContent.length,
-        finalContent,
-      });
-    } catch (error) {
-      console.error(
-        "Universal content loading error:",
-        error
-      );
-  
-      setUniversalContent([]);
-    } finally {
-      setContentLoading(false);
-    }
-  };
+
 
   React.useEffect(() => {
     loadContentItemsFromFirestore();
@@ -7675,42 +7483,7 @@ This action cannot be undone.`
   path="/admin/content/videos"
   element={
     requireAdmin() ? (
-      <section className="coursePages">
-        <div className="sectionHeader">
-          <span className="badge">VIDEO CMS</span>
-
-          <h1>Recorded Videos Manager</h1>
-
-          <p>
-            Add, manage, organize, publish, and preview recorded
-            lectures for the student video learning system.
-          </p>
-        </div>
-
-        <div className="contentStudioForm">
-          <div className="contentStudioGrid">
-            <button onClick={() => navigate("/admin/content/videos/add")}>
-              ➕ Add Video
-            </button>
-
-            <button onClick={() => navigate("/admin/content/videos/manage")}>
-              📂 Manage Videos
-            </button>
-
-            <button onClick={() => navigate("/admin/content/videos/subjects")}>
-              📚 Subjects
-            </button>
-
-            <button onClick={() => navigate("/admin/content/videos/published")}>
-              🎬 Published Videos
-            </button>
-
-            <button onClick={() => navigate("/admin/content")}>
-              ← Back to Content Studio
-            </button>
-          </div>
-        </div>
-      </section>
+      <VideoManagerHome universalContent={universalContent} />
     ) : (
       <Navigate to="/login" replace />
     )
@@ -7721,418 +7494,31 @@ This action cannot be undone.`
   path="/admin/content/videos/add"
   element={
     requireAdmin() ? (
-      <section className="coursePages">
-        <div className="sectionHeader">
-          <span className="badge">ADD VIDEO</span>
-
-          <h1>Add Recorded Video</h1>
-
-          <p>
-            Save YouTube public or unlisted lectures into Firestore with plan,
-            subject, chapter, mentor, thumbnail, and publish status.
-          </p>
-        </div>
-
-        <div className="contentStudioForm">
-          <div className="contentStudioGrid">
-            <input
-              type="text"
-              placeholder="Video Title"
-              value={videoForm.title}
-              onChange={(e) =>
-                setVideoForm({ ...videoForm, title: e.target.value })
-              }
-            />
-
-            <select
-              value={videoForm.planType}
-              onChange={(e) =>
-                setVideoForm({ ...videoForm, planType: e.target.value })
-              }
-            >
-              <option value="">Select Plan</option>
-              <option value="FREE">FREE</option>
-              <option value="BASIC">BASIC</option>
-              <option value="PREMIUM">PREMIUM</option>
-              <option value="MENTORSHIP">MENTORSHIP</option>
-            </select>
-
-            <input
-  type="text"
-  list="videoSubjectSuggestions"
-  placeholder="Select or type Subject"
-  value={
-    videoForm.subject === "CUSTOM"
-      ? videoForm.customSubject || ""
-      : videoForm.subject
-  }
-  onChange={(e) =>
-    setVideoForm({
-      ...videoForm,
-      subject: e.target.value,
-      customSubject: "",
-      chapter: "",
-      customChapter: "",
-    })
-  }
-/>
-
-<datalist id="videoSubjectSuggestions">
-  {[
-    ...new Set([
-      ...notesSubjectsList
-        .map((subject) => subject.name)
-        .filter(Boolean),
-
-      ...universalContent
-        .map((item) => item.subject)
-        .filter(Boolean),
-    ]),
-  ]
-    .map((name) => name.trim())
-    .filter((name) => {
-      if (!name) return false;
-      if (name.length < 2) return false;
-      if (/^[a-zA-Z0-9]{15,}$/.test(name)) return false;
-
-      return true;
-    })
-    .filter(
-      (name, index, array) =>
-        array.findIndex(
-          (item) =>
-            item.toLowerCase() === name.toLowerCase()
-        ) === index
-    )
-    .map((name) => (
-      <option key={name} value={name} />
-    ))}
-</datalist>
-
-            {videoForm.subject === "CUSTOM" && (
-              <input
-                type="text"
-                placeholder="Enter Custom Subject"
-                value={videoForm.customSubject || ""}
-                onChange={(e) =>
-                  setVideoForm({
-                    ...videoForm,
-                    customSubject: e.target.value,
-                  })
-                }
-              />
-            )}
-
-<input
-  type="text"
-  list="videoChapterSuggestions"
-  placeholder={
-    videoForm.subject
-      ? "Select or type Chapter"
-      : "Select subject first"
-  }
-  value={
-    videoForm.chapter === "CUSTOM"
-      ? videoForm.customChapter || ""
-      : videoForm.chapter
-  }
-  onChange={(e) =>
-    setVideoForm({
-      ...videoForm,
-      chapter: e.target.value,
-      customChapter: "",
-    })
-  }
-  disabled={!videoForm.subject}
-/>
-
-<datalist id="videoChapterSuggestions">
-  {[
-    ...new Map(
-      notesChaptersList
-        .filter((chapter) => {
-          if (!chapter.name) return false;
-
-          if (!videoForm.subject) {
-            return false;
-          }
-
-          const selectedSubject = videoForm.subject
-            .toString()
-            .trim()
-            .toLowerCase();
-
-          const chapterSubjectName = (
-            chapter.subjectName || ""
-          )
-            .toString()
-            .trim()
-            .toLowerCase();
-
-          const chapterSubjectId = (
-            chapter.subjectId || ""
-          )
-            .toString()
-            .trim()
-            .toLowerCase();
-
-          return (
-            chapterSubjectName === selectedSubject ||
-            chapterSubjectId === selectedSubject
-          );
-        })
-        .filter((chapter) => {
-          const name = (chapter.name || "").trim();
-
-          if (!name) return false;
-          if (name.length < 2) return false;
-          if (/^[a-zA-Z0-9]{15,}$/.test(name))
-            return false;
-
-          return true;
-        })
-        .map((chapter) => [
-          chapter.name.trim().toLowerCase(),
-          chapter,
-        ])
-    ).values(),
-  ].map((chapter) => (
-    <option
-      key={chapter.id}
-      value={chapter.name}
-    />
-  ))}
-</datalist>
-
-            {videoForm.chapter === "CUSTOM" && (
-              <input
-                type="text"
-                placeholder="Enter Custom Chapter"
-                value={videoForm.customChapter || ""}
-                onChange={(e) =>
-                  setVideoForm({
-                    ...videoForm,
-                    customChapter: e.target.value,
-                  })
-                }
-              />
-            )}
-
-            <input
-              type="text"
-              placeholder="YouTube Video URL"
-              value={videoForm.videoUrl}
-              onChange={(e) =>
-                setVideoForm({ ...videoForm, videoUrl: e.target.value })
-              }
-            />
-
-            <input
-              type="text"
-              placeholder="Thumbnail URL"
-              value={videoForm.thumbnailUrl}
-              onChange={(e) =>
-                setVideoForm({
-                  ...videoForm,
-                  thumbnailUrl: e.target.value,
-                })
-              }
-            />
-
-            <input
-              type="text"
-              placeholder="Duration e.g. 32 min"
-              value={videoForm.duration}
-              onChange={(e) =>
-                setVideoForm({ ...videoForm, duration: e.target.value })
-              }
-            />
-
-            <input
-              type="text"
-              placeholder="Mentor Name"
-              value={videoForm.mentorName}
-              onChange={(e) =>
-                setVideoForm({ ...videoForm, mentorName: e.target.value })
-              }
-            />
-
-            <select
-              value={videoForm.status}
-              onChange={(e) =>
-                setVideoForm({ ...videoForm, status: e.target.value })
-              }
-            >
-              <option value="published">Published</option>
-              <option value="draft">Draft</option>
-              <option value="unpublished">Unpublished</option>
-            </select>
-
-            <select
-              value={videoForm.sourceType}
-              onChange={(e) =>
-                setVideoForm({ ...videoForm, sourceType: e.target.value })
-              }
-            >
-              <option value="YOUTUBE_PUBLIC">YouTube Public</option>
-              <option value="YOUTUBE_UNLISTED">YouTube Unlisted</option>
-            </select>
-          </div>
-
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              handleSaveVideo();
-            }}
-          >
-            💾 Save Video
-          </button>
-
-          <button onClick={() => navigate("/admin/content/videos")}>
-            ← Back to Videos Manager
-          </button>
-        </div>
-      </section>
+      <VideoClassFormRoute
+        db={db}
+        universalContent={universalContent}
+        notesSubjectsList={notesSubjectsList}
+        notesChaptersList={notesChaptersList}
+        reloadSubjects={loadNotesSubjectsFromFirestore}
+        reloadChapters={loadNotesChaptersFromFirestore}
+        reloadContent={loadContentItemsFromFirestore}
+      />
     ) : (
       <Navigate to="/login" replace />
     )
   }
 />
 
+
 <Route
   path="/admin/content/videos/manage"
   element={
     requireAdmin() ? (
-      <section className="coursePages">
-        <div className="sectionHeader">
-          <span className="badge">MANAGE VIDEOS</span>
-
-          <h1>Manage Recorded Videos</h1>
-
-          <p>
-            Review, edit, delete, preview, publish, and unpublish
-            all saved video lectures.
-          </p>
-        </div>
-
-        <div className="contentStudioForm">
-          <button onClick={() => navigate("/admin/content/videos")}>
-            ← Back to Videos Manager
-          </button>
-
-          <div className="contentStudioList">
-            {universalContent.filter(
-              (item) => item.section === "recordedVideo"
-            ).length === 0 ? (
-              <p>No videos found yet.</p>
-            ) : (
-              universalContent
-                .filter((item) => item.section === "recordedVideo")
-                .map((video) => (
-                  <div className="contentStudioItem" key={video.id}>
-                    <div>
-                      <strong>{video.title}</strong>
-
-                      <p>
-                        {video.planType} · {video.subject} ·{" "}
-                        {video.chapter}
-                      </p>
-
-                      <p>
-                        {video.duration || "No duration"} ·{" "}
-                        {video.mentorName || "No mentor"}
-                      </p>
-
-                      <p>Status: {video.status}</p>
-                    </div>
-
-                    <div className="contentStudioActions">
-                    <button
-  onClick={() =>
-    navigate(
-      `/ctet-tet/videos/watch/${video.id}`
-    )
-  }
->
-  ▶ Preview
-</button>
-
-                      <button
-                        onClick={() => {
-                          setVideoForm({
-                            title: video.title || "",
-                            planType: video.planType || "FREE",
-                            subject: video.subject || "",
-                            chapter: video.chapter || "",
-                            videoUrl: video.videoUrl || video.fileUrl || "",
-                            thumbnailUrl: video.thumbnailUrl || "",
-                            duration: video.duration || "",
-                            mentorName: video.mentorName || "",
-                            status: video.status || "published",
-                            sourceType:
-                              video.sourceType || "YOUTUBE_PUBLIC",
-                          });
-
-                          setEditingCmsId(video.id);
-                          navigate("/admin/content/videos/add");
-                        }}
-                      >
-                        ✏️ Edit
-                      </button>
-
-                      <button
-                        onClick={async () => {
-                          const newStatus =
-                            video.status === "published"
-                              ? "unpublished"
-                              : "published";
-
-                          await updateDoc(
-                            doc(db, "contentItems", video.id),
-                            {
-                              status: newStatus,
-                              updatedAt: new Date(),
-                            }
-                          );
-
-                          alert(`Video ${newStatus} successfully`);
-
-                          await loadContentItemsFromFirestore();
-                        }}
-                      >
-                        {video.status === "published"
-                          ? "🚫 Unpublish"
-                          : "✅ Publish"}
-                      </button>
-
-                      <button
-  className="dangerButton"
-  onClick={async () => {
-    if (!video?.id) return;
-
-    const confirmDelete = window.confirm(
-      `Delete "${video.title}" permanently?\n\nThis cannot be undone.`
-    );
-
-    if (!confirmDelete) return;
-
-    await deleteDoc(doc(db, "contentItems", video.id));
-
-    await loadContentItemsFromFirestore();
-
-    alert("Video deleted successfully ✅");
-  }}
->
-  🗑 Delete
-</button>
-                    </div>
-                  </div>
-                ))
-            )}
-          </div>
-        </div>
-      </section>
+      <VideoLibraryManageRoute
+        db={db}
+        universalContent={universalContent}
+        reloadContent={loadContentItemsFromFirestore}
+      />
     ) : (
       <Navigate to="/login" replace />
     )
@@ -8143,82 +7529,7 @@ This action cannot be undone.`
   path="/admin/content/videos/subjects"
   element={
     requireAdmin() ? (
-      <section className="coursePages">
-        <div className="sectionHeader">
-          <span className="badge">VIDEO SUBJECTS</span>
-
-          <h1>Video Subject Library</h1>
-
-          <p>
-            Automatically group videos by plan, subject, and chapter
-            for the student-side video experience.
-          </p>
-        </div>
-        <div className="contentStudioForm">
-  <button onClick={() => navigate("/admin/content/videos")}>
-    ← Back to Videos Manager
-  </button>
-
-  <div className="contentStudioList">
-    {[
-      ...new Map(
-        universalContent
-          .filter((item) => item.section === "recordedVideo")
-          .filter((item) => item.subject)
-          .map((item) => [
-            item.subject.trim().toLowerCase(),
-            item.subject,
-          ])
-      ).values(),
-    ].length === 0 ? (
-      <p>No video subjects found yet.</p>
-    ) : (
-      [
-        ...new Map(
-          universalContent
-            .filter((item) => item.section === "recordedVideo")
-            .filter((item) => item.subject)
-            .map((item) => [
-              item.subject.trim().toLowerCase(),
-              item.subject,
-            ])
-        ).values(),
-      ].map((subjectName) => (
-        <div className="contentStudioItem" key={subjectName}>
-          <div>
-            <strong>{subjectName}</strong>
-            <p>
-              {
-                universalContent.filter(
-                  (item) =>
-                    item.section === "recordedVideo" &&
-                    item.subject?.trim().toLowerCase() ===
-                      subjectName.trim().toLowerCase()
-                ).length
-              }{" "}
-              videos available
-            </p>
-          </div>
-
-          <div>
-          <button
-  onClick={() =>
-    navigate(
-      `/admin/content/videos/${encodeURIComponent(
-        subjectName
-      )}`
-    )
-  }
->
-  View Chapters →
-</button>
-          </div>
-        </div>
-      ))
-    )}
-  </div>
-</div>
-      </section>
+      <VideoSubjectsRoute universalContent={universalContent} />
     ) : (
       <Navigate to="/login" replace />
     )
@@ -8228,92 +7539,11 @@ This action cannot be undone.`
 <Route
   path="/admin/content/videos/:subjectName"
   element={
-    <section className="coursePages">
-      <div className="sectionHeader">
-        <span className="badge">
-          VIDEO CHAPTERS
-        </span>
-
-        <h1>Video Chapter Library</h1>
-
-        <p>
-          Browse video chapters inside the selected subject.
-        </p>
-        <div className="contentStudioForm">
-  <button
-    onClick={() => navigate("/admin/content/videos/subjects")}
-  >
-    ← Back to Video Subjects
-  </button>
-
-  <div className="contentStudioList">
-    {[
-      ...new Set(
-        universalContent
-          .filter(
-            (video) =>
-              video.section === "recordedVideo" &&
-              video.subject?.trim().toLowerCase() ===
-                activeVideoSubjectName.trim().toLowerCase() &&
-              video.chapter
-          )
-          .map((video) => video.chapter)
-      ),
-    ].length === 0 ? (
-      <p>No chapters found for this subject.</p>
+    requireAdmin() ? (
+      <VideoChaptersRoute universalContent={universalContent} />
     ) : (
-      [
-        ...new Set(
-          universalContent
-            .filter(
-              (video) =>
-                video.section === "recordedVideo" &&
-                video.subject?.trim().toLowerCase() ===
-                  activeVideoSubjectName.trim().toLowerCase() &&
-                video.chapter
-            )
-            .map((video) => video.chapter)
-        ),
-      ].map((chapterName) => (
-        <div className="contentStudioItem" key={chapterName}>
-          <div>
-            <strong>{chapterName}</strong>
-
-            <p>
-              {
-                universalContent.filter(
-                  (video) =>
-                    video.section === "recordedVideo" &&
-                    video.subject?.trim().toLowerCase() ===
-                      activeVideoSubjectName.trim().toLowerCase() &&
-                    video.chapter?.trim().toLowerCase() ===
-                      chapterName.trim().toLowerCase()
-                ).length
-              }{" "}
-              videos available
-            </p>
-          </div>
-
-          <button
-            onClick={() =>
-              navigate(
-                `/admin/content/videos/${encodeURIComponent(
-                  activeVideoSubjectName
-                )}/${encodeURIComponent(chapterName)}`
-              )
-            }
-          >
-            View Videos →
-          </button>
-        </div>
-      ))
-    )}
-  </div>
-</div>
-
-
-      </div>
-    </section>
+      <Navigate to="/login" replace />
+    )
   }
 />
 
@@ -8321,229 +7551,18 @@ This action cannot be undone.`
   path="/admin/content/videos/:subjectName/:chapterName"
   element={
     requireAdmin() ? (
-      <section className="coursePages">
-        <div className="sectionHeader">
-          <span className="badge">CHAPTER VIDEOS</span>
-
-          <h1>Chapter Video Lectures</h1>
-
-          <p>
-            Review all saved video lectures inside the selected
-            subject and chapter.
-          </p>
-        </div>
-
-        <div className="contentStudioForm">
-          <button
-            onClick={() =>
-              navigate(
-                `/admin/content/videos/${decodeURIComponent(
-                  location.pathname.split("/").slice(-2)[0]
-                )}`
-              )
-            }
-          >
-            ← Back to Video Chapters
-          </button>
-
-          <div className="contentStudioList">
-            {universalContent
-              .filter((video) => {
-                const routeParts = location.pathname.split("/");
-                const routeSubject = decodeURIComponent(
-                  routeParts[routeParts.length - 2]
-                )
-                  .trim()
-                  .toLowerCase();
-
-                const routeChapter = decodeURIComponent(
-                  routeParts[routeParts.length - 1]
-                )
-                  .trim()
-                  .toLowerCase();
-
-                return (
-                  video.section === "recordedVideo" &&
-                  video.subject?.trim().toLowerCase() === routeSubject &&
-                  video.chapter?.trim().toLowerCase() === routeChapter
-                );
-              })
-              .map((video) => (
-                <div className="contentStudioItem" key={video.id}>
-                  <div>
-                    <strong>{video.title}</strong>
-
-                    <p>
-                      {video.planType} · {video.subject} ·{" "}
-                      {video.chapter}
-                    </p>
-
-                    <p>
-                      {video.duration || "No duration"} ·{" "}
-                      {video.mentorName || "No mentor"}
-                    </p>
-
-                    <p>Status: {video.status}</p>
-                  </div>
-                  <button
-  onClick={() =>
-    navigate(
-      `/ctet-tet/videos/watch/${video.id}`
-    )
-  }
->
-  ▶ Preview
-</button>
-                </div>
-              ))}
-          </div>
-        </div>
-      </section>
+      <VideoChapterClassesRoute universalContent={universalContent} />
     ) : (
       <Navigate to="/login" replace />
     )
   }
 />
+
 <Route
   path="/admin/content/videos/published"
   element={
     requireAdmin() ? (
-      <section className="coursePages">
-        <div className="sectionHeader">
-          <span className="badge">PUBLISHED VIDEOS</span>
-
-          <h1>Published Video Lectures</h1>
-
-          <p>
-            Review all student-ready published videos by plan,
-            subject, chapter, mentor, and duration.
-          </p>
-        </div>
-
-        <div className="contentStudioForm">
-          <div className="contentStudioActions">
-            <button onClick={() => navigate("/admin/content/videos")}>
-              ← Back to Videos Manager
-            </button>
-
-            <button onClick={() => navigate("/admin/content/videos/add")}>
-              + Add New Video
-            </button>
-
-            <button onClick={() => navigate("/admin/content/videos/manage")}>
-              Manage All Videos
-            </button>
-          </div>
-        </div>
-
-        {["FREE", "BASIC", "PREMIUM", "MENTORSHIP"].map((plan) => {
-          const planVideos = universalContent.filter(
-            (item) =>
-              item.section === "recordedVideo" &&
-              (item.status || "").toLowerCase() === "published" &&
-              (item.planType || "FREE").toUpperCase() === plan
-          );
-
-          return (
-            <div className="contentStudioList" key={plan}>
-              <h3>{plan} Published Videos</h3>
-
-              {planVideos.length === 0 ? (
-                <p>No published videos in {plan} plan.</p>
-              ) : (
-                planVideos.map((item) => (
-                  <div
-                    className="contentStudioItem"
-                    key={item.id}
-                  >
-                    <div>
-                      <strong>{item.title || "Untitled Video"}</strong>
-
-                      <p>
-                        {item.subject || "No Subject"} •{" "}
-                        {item.chapter || "No Chapter"} •{" "}
-                        {item.duration || "No Duration"}
-                      </p>
-
-                      <p>
-                        {item.mentorName || "No Mentor"} •{" "}
-                        Status: {item.status || "published"}
-                      </p>
-                    </div>
-
-                    <div className="contentStudioActions">
-                    <button
-  onClick={() =>
-    navigate(
-      `/ctet-tet/videos/watch/${item.id}`
-    )
-  }
->
-  ▶ Preview
-</button>
-
-                      <button
-                        onClick={() => {
-                          setVideoForm({
-                            title: item.title || "",
-                            planType: item.planType || "FREE",
-                            subject: item.subject || "",
-                            chapter: item.chapter || "",
-                            videoUrl:
-                              item.videoUrl || item.fileUrl || "",
-                            thumbnailUrl: item.thumbnailUrl || "",
-                            duration: item.duration || "",
-                            mentorName: item.mentorName || "",
-                            status: item.status || "published",
-                            sourceType:
-                              item.sourceType || "YOUTUBE_PUBLIC",
-                          });
-
-                          navigate("/admin/content/videos/add");
-                        }}
-                      >
-                        ✏️ Edit
-                      </button>
-
-                      <button
-                        onClick={async () => {
-                          await updateDoc(
-                            doc(db, "contentItems", item.id),
-                            {
-                              status: "draft",
-                              updatedAt: new Date(),
-                            }
-                          );
-
-                          alert("Video unpublished successfully.");
-                          loadContentItemsFromFirestore();
-                        }}
-                      >
-                        🚫 Unpublish
-                      </button>
-
-                      <button
-                        className="deleteContentButton"
-                        onClick={() => {
-                          if (
-                            window.confirm(
-                              `Delete "${item.title}" permanently?`
-                            )
-                          ) {
-                            handleDeleteLocalContentItem(item.id);
-                          }
-                        }}
-                      >
-                        🗑 Delete
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          );
-        })}
-      </section>
+      <VideoPublishedRoute universalContent={universalContent} />
     ) : (
       <Navigate to="/login" replace />
     )
@@ -16181,688 +15200,53 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 <Route
   path="/ctet-tet/videos"
   element={
-    <section className="coursePages">
-      <div className="sectionHeader">
-        <span className="badge">
-          CTET / TET Videos
-        </span>
-
-        <h2>Recorded Video Library</h2>
-
-        <p>
-          Access recorded lectures organized
-          by plan, subject, and chapter.
-        </p>
-      </div>
-
-      <div className="notesNetflixLibrary">
-        {["FREE", "BASIC", "PREMIUM", "MENTORSHIP"].map((planName) => {
-          const videoSubjects = [
-            ...new Map(
-              universalStudentVideos
-                .filter(
-                  (video) =>
-                    video.planType === planName &&
-                    video.subject
-                )
-                .map((video) => [
-                  video.subject.trim().toLowerCase(),
-                  {
-                    id: video.subject.trim(),
-                    title: video.subject.trim(),
-                    cover: "🎬",
-                    description: "CMS uploaded videos",
-                  },
-                ])
-            ).values(),
-          ];
-
-          return (
-            <div className="notesShelf" key={planName}>
-              <div className="notesShelfHeader">
-                <h2>
-                  {planName === "FREE" && "🎬 FREE VIDEOS"}
-                  {planName === "BASIC" && "🔷 BASIC VIDEOS"}
-                  {planName === "PREMIUM" && "⭐ PREMIUM VIDEO LIBRARY"}
-                  {planName === "MENTORSHIP" && "👩‍🏫 MENTORSHIP VIDEO VAULT"}
-                </h2>
-
-                <span>{videoSubjects.length} Subjects</span>
-              </div>
-
-              <div className="notesShelfScrollWrap">
-                {notesScrollState[`videos-row-${planName}`]?.canScroll &&
-                  !notesScrollState[`videos-row-${planName}`]?.atStart && (
-                    <button
-                      type="button"
-                      className="notesShelfArrow notesShelfArrowLeft"
-                      onClick={() =>
-                        scrollShelf(`videos-row-${planName}`, "left")
-                      }
-                    >
-                      ‹
-                    </button>
-                  )}
-
-                <div
-                  className="notesSubjectRow"
-                  id={`videos-row-${planName}`}
-                  onScroll={() =>
-                    updateNotesScrollState(`videos-row-${planName}`)
-                  }
-                  onMouseEnter={() =>
-                    updateNotesScrollState(`videos-row-${planName}`)
-                  }
-                >
-                  {videoSubjects.length === 0 ? (
-                    <button
-                      type="button"
-                      className="notesSubjectCard"
-                      disabled
-                    >
-                      <div className="notesSubjectIcon">🎬</div>
-                      <h3>No videos yet</h3>
-                      <p>Videos will appear here after publishing.</p>
-                      <span className="notesSubjectTag">{planName}</span>
-                    </button>
-                  ) : (
-                    videoSubjects.map((subject) => (
-                      <button
-                        type="button"
-                        className="notesSubjectCard"
-                        key={subject.id}
-                        onClick={() =>
-                          navigate(
-                            `/ctet-tet/videos/plan/${planName}/${encodeURIComponent(
-                              subject.id
-                            )}`
-                          )
-                        }
-                      >
-                        <div className="notesSubjectIcon">
-                          {subject.cover}
-                        </div>
-
-                        <h3>{subject.title}</h3>
-
-                        <p>{subject.description}</p>
-
-                        <span className="notesSubjectTag">
-                          {planName}
-                        </span>
-                      </button>
-                    ))
-                  )}
-                </div>
-
-                {notesScrollState[`videos-row-${planName}`]?.canScroll &&
-                  !notesScrollState[`videos-row-${planName}`]?.atEnd && (
-                    <button
-                      type="button"
-                      className="notesShelfArrow notesShelfArrowRight"
-                      onClick={() =>
-                        scrollShelf(`videos-row-${planName}`, "right")
-                      }
-                    >
-                      ›
-                    </button>
-                  )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </section>
+    <StudentVideoHub universalContent={universalContent} />
   }
 />
 
 <Route
   path="/ctet-tet/videos/plan/:plan"
   element={
-    <section className="coursePages">
-      <div className="sectionHeader">
-        <span className="badge">{activeVideoPlan} VIDEOS</span>
-
-        <h2>{activeVideoPlan} Video Subject Library</h2>
-
-        <p>Choose a subject to open chapters and recorded lectures.</p>
-      </div>
-
-      <div className="notesShelfScrollWrap">
-        <div className="notesSubjectRow">
-          {[
-            ...new Map(
-              universalStudentVideos
-                .filter(
-                  (video) =>
-                    video.planType === activeVideoPlan &&
-                    video.subject
-                )
-                .map((video) => [
-                  video.subject.trim().toLowerCase(),
-                  video.subject,
-                ])
-            ).values(),
-          ].map((subjectName) => (
-            <button
-              type="button"
-              className="notesSubjectCard"
-              key={subjectName}
-              onClick={() =>
-                navigate(
-                  `/ctet-tet/videos/plan/${activeVideoPlan}/${encodeURIComponent(
-                    subjectName
-                  )}`
-                )
-              }
-            >
-              <div className="notesSubjectIcon">🎬</div>
-              <h3>{subjectName}</h3>
-              <p>Open video chapters</p>
-              <span className="notesSubjectTag">{activeVideoPlan}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    </section>
+    <StudentVideoPlanRoute
+      universalContent={universalContent}
+      userPlanType={userPlanType}
+      isAdmin={isAdmin(user)}
+    />
   }
 />
 
 <Route
   path="/ctet-tet/videos/plan/:plan/:subjectId"
   element={
-    <section className="notesSubjectRoutePage">
-      <button onClick={() => navigate("/ctet-tet/videos")}>
-        ← Back to Videos Library
-      </button>
-
-      <span className="notesSubjectRouteBadge">
-        {activeVideoPlan} VIDEO LIBRARY
-      </span>
-
-      <h1>
-        🎬{" "}
-        {decodeURIComponent(activeVideoSubjectId || "")
-          .replace(/-/g, " ")}
-      </h1>
-
-      <p>Subject-wise video chapters will appear here.</p>
-
-      <div className="chapterLibraryStack">
-        {[
-          ...new Set(
-            universalStudentVideos
-              .filter(
-                (video) =>
-                  video.planType === activeVideoPlan &&
-                  video.subject?.trim().toLowerCase() ===
-                    decodeURIComponent(activeVideoSubjectId)
-                      .trim()
-                      .toLowerCase() &&
-                  video.chapter
-              )
-              .map((video) => video.chapter)
-          ),
-        ].map((chapterName) => (
-          <button
-            type="button"
-            className="notesSubjectCard chapterLibraryCard"
-            key={chapterName}
-            onClick={() =>
-              navigate(
-                `/ctet-tet/videos/plan/${activeVideoPlan}/${activeVideoSubjectId}/${encodeURIComponent(
-                  chapterName
-                )}`
-              )
-            }
-          >
-            <div className="notesSubjectIcon">🎥</div>
-            <h3>{chapterName}</h3>
-            <p>Open chapter videos</p>
-            <span className="notesSubjectTag">{activeVideoPlan}</span>
-          </button>
-        ))}
-      </div>
-    </section>
+    <StudentVideoSubjectRoute
+      universalContent={universalContent}
+      userPlanType={userPlanType}
+      isAdmin={isAdmin(user)}
+    />
   }
 />
 
 <Route
   path="/ctet-tet/videos/plan/:plan/:subjectId/:chapterId"
   element={
-    <section className="notesSubjectRoutePage">
-      <button
-        onClick={() =>
-          navigate(
-            `/ctet-tet/videos/plan/${activeVideoPlan}/${activeVideoSubjectId}`
-          )
-        }
-      >
-        ← Back to Chapters
-      </button>
-
-      <span className="notesSubjectRouteBadge">
-        {activeVideoPlan} VIDEO CHAPTER
-      </span>
-
-      <h1>
-        {decodeURIComponent(activeVideoChapterId || "")
-          .replace(/-/g, " ")
-          .replace(/\b\w/g, (char) => char.toUpperCase())}
-      </h1>
-
-      <p>Chapter-wise recorded lectures. Open and watch your video lessons.</p>
-
-      <div className="pdfShelfRow">
-        {universalStudentVideos
-          .filter(
-            (video) =>
-              video.planType === activeVideoPlan &&
-              video.subject?.trim().toLowerCase() ===
-                decodeURIComponent(activeVideoSubjectId)
-                  .trim()
-                  .toLowerCase() &&
-              video.chapter?.trim().toLowerCase() ===
-                decodeURIComponent(activeVideoChapterId)
-                  .trim()
-                  .toLowerCase()
-          )
-          .map((video) => (
-            <div className="pdfMiniCard" key={video.id}>
-              <div className="pdfIcon">▶️</div>
-
-              <h3>{video.title}</h3>
-
-              <p>{video.chapter || "Recorded Lecture"}</p>
-
-              <span>{video.planType}</span>
-
-              <button
-                className="btnLink"
-                onClick={() => {
-                  if (
-                    video.planType !== "FREE" &&
-                    !hasPlanAccess(video.planType)
-                  ) {
-                    navigate("/ctet-tet/pricing");
-                    return;
-                  }
-
-                  navigate(`/ctet-tet/videos/watch/${video.id}`);
-                }}
-              >
-                Watch Video
-              </button>
-            </div>
-          ))}
-      </div>
-    </section>
+    <StudentVideoChapterRoute
+      universalContent={universalContent}
+      userPlanType={userPlanType}
+      isAdmin={isAdmin(user)}
+    />
   }
 />
 
 <Route
   path="/ctet-tet/videos/watch/:videoId"
   element={
-    <section className="notesSubjectRoutePage">
-      {universalStudentVideos
-        .filter((video) => video.id === activeWatchVideoId)
-        .map((video) => {
-          const rawVideoUrl = video.videoUrl || video.fileUrl || "";
-
-          const getYouTubeId = (url = "") => {
-            if (!url) return "";
-
-            try {
-              const parsedUrl = new URL(url);
-
-              if (parsedUrl.hostname.includes("youtu.be")) {
-                return parsedUrl.pathname.split("/")[1] || "";
-              }
-
-              if (parsedUrl.pathname.includes("/embed/")) {
-                return (
-                  parsedUrl.pathname
-                    .split("/embed/")[1]
-                    ?.split("/")[0] || ""
-                );
-              }
-
-              if (parsedUrl.pathname.includes("/shorts/")) {
-                return (
-                  parsedUrl.pathname
-                    .split("/shorts/")[1]
-                    ?.split("/")[0] || ""
-                );
-              }
-
-              return parsedUrl.searchParams.get("v") || "";
-            } catch {
-              return "";
-            }
-          };
-
-          const normalizeValue = (value = "") =>
-            value
-              .toString()
-              .toLowerCase()
-              .trim()
-              .replace(/-/g, " ")
-              .replace(/\s+/g, " ");
-
-          const youtubeId = getYouTubeId(rawVideoUrl);
-
-          const sameSubjectVideos = universalStudentVideos.filter(
-            (item) =>
-              item.id !== video.id &&
-              normalizeValue(item.subject) ===
-                normalizeValue(video.subject)
-          );
-
-          const sameChapterVideos = sameSubjectVideos.filter(
-            (item) =>
-              normalizeValue(item.chapter) ===
-              normalizeValue(video.chapter)
-          );
-
-          const continueLearningVideos = sameSubjectVideos.filter(
-            (item) =>
-              normalizeValue(item.chapter) !==
-              normalizeValue(video.chapter)
-          );
-
-          const relatedNotes = universalNotes.filter(
-            (note) =>
-              normalizeValue(note.subject || note.category) ===
-                normalizeValue(video.subject) &&
-              normalizeValue(note.chapter || "General Notes") ===
-                normalizeValue(video.chapter)
-          );
-
-          const currentSubjectVideos = universalStudentVideos.filter(
-            (item) =>
-              normalizeValue(item.subject) ===
-              normalizeValue(video.subject)
-          );
-
-          const currentVideoIndex = currentSubjectVideos.findIndex(
-            (item) => item.id === video.id
-          );
-
-          const nextLecture =
-            currentVideoIndex >= 0 &&
-            currentVideoIndex < currentSubjectVideos.length - 1
-              ? currentSubjectVideos[currentVideoIndex + 1]
-              : null;
-
-          return (
-            <div key={video.id}>
-              <button onClick={() => navigate(-1)}>
-                ← Back
-              </button>
-
-              <span className="notesSubjectRouteBadge">
-                VIDEO CLASSROOM
-              </span>
-
-              <h1>{video.title}</h1>
-
-              <p>
-                {video.planType} · {video.subject} · {video.chapter}
-              </p>
-
-              {youtubeId ? (
-                <div className="videoPlayerBox">
-                  <iframe
-                    src={`https://www.youtube.com/embed/${youtubeId}`}
-                    title={video.title}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
-                </div>
-              ) : (
-                <button
-                  className="btnLink"
-                  onClick={() =>
-                    window.open(rawVideoUrl, "_blank")
-                  }
-                >
-                  ▶ Open Video
-                </button>
-              )}
-
-              <div className="pdfShelfRow">
-                <div className="pdfMiniCard">
-                  <div className="pdfIcon">🎬</div>
-
-                  <h3>{video.title}</h3>
-
-                  <p>
-                    Mentor:{" "}
-                    {video.mentorName || "AspireNest Mentor"}
-                  </p>
-
-                  <p>
-                    Duration:{" "}
-                    {video.duration || "Not specified"}
-                  </p>
-
-                  <span>
-                    {video.planType} ·{" "}
-                    {video.sourceType || "YouTube"}
-                  </span>
-                </div>
-
-                {nextLecture && (
-                  <div className="pdfMiniCard">
-                    <div className="pdfIcon">⏭️</div>
-
-                    <h3>Next Lecture</h3>
-
-                    <p>{nextLecture.title}</p>
-
-                    <span>
-                      {nextLecture.duration || "Continue"}
-                    </span>
-
-                    <button
-                      className="btnLink"
-                      onClick={() => {
-                        if (
-                          nextLecture.planType !== "FREE" &&
-                          !hasPlanAccess(nextLecture.planType)
-                        ) {
-                          navigate("/ctet-tet/pricing");
-                          return;
-                        }
-
-                        navigate(
-                          `/ctet-tet/videos/watch/${nextLecture.id}`
-                        );
-                      }}
-                    >
-                      Continue →
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <div className="notesShelf">
-                <div className="notesShelfHeader">
-                  <h2>📄 Related Notes</h2>
-                  <span>{relatedNotes.length} Notes</span>
-                </div>
-
-                <div className="pdfShelfRow">
-                  {relatedNotes.length === 0 ? (
-                    <div className="pdfMiniCard">
-                      <div className="pdfIcon">📄</div>
-
-                      <h3>No related notes yet</h3>
-
-                      <p>
-                        Matching notes from this chapter will appear
-                        here.
-                      </p>
-
-                      <span>{video.chapter}</span>
-                    </div>
-                  ) : (
-                    relatedNotes.map((note) => (
-                      <div className="pdfMiniCard" key={note.id}>
-                        <div className="pdfIcon">📄</div>
-
-                        <h3>{note.title}</h3>
-
-                        <p>
-                          {note.subject || note.category} ·{" "}
-                          {note.chapter || "General Notes"}
-                        </p>
-
-                        <span>{note.planType}</span>
-
-                        <button
-                          className="btnLink"
-                          onClick={() =>
-                            handleNoteAccess({
-                              ...note,
-                              pdf:
-                                note.fileUrl ||
-                                note.pdfUrl ||
-                                note.pdf,
-                            })
-                          }
-                        >
-                          Open Note
-                        </button>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              <div className="notesShelf">
-                <div className="notesShelfHeader">
-                  <h2>🎬 Related Videos</h2>
-                  <span>{sameChapterVideos.length} Videos</span>
-                </div>
-
-                <div className="pdfShelfRow">
-                  {sameChapterVideos.length === 0 ? (
-                    <div className="pdfMiniCard">
-                      <div className="pdfIcon">▶️</div>
-
-                      <h3>No related videos yet</h3>
-
-                      <p>
-                        More videos from this chapter will appear
-                        here.
-                      </p>
-
-                      <span>{video.chapter}</span>
-                    </div>
-                  ) : (
-                    sameChapterVideos.map((relatedVideo) => (
-                      <div className="pdfMiniCard" key={relatedVideo.id}>
-                        <div className="pdfIcon">▶️</div>
-
-                        <h3>{relatedVideo.title}</h3>
-
-                        <p>
-                          {relatedVideo.subject} ·{" "}
-                          {relatedVideo.chapter}
-                        </p>
-
-                        <span>
-                          {relatedVideo.duration || "No duration"}
-                        </span>
-
-                        <button
-                          className="btnLink"
-                          onClick={() => {
-                            if (
-                              relatedVideo.planType !== "FREE" &&
-                              !hasPlanAccess(relatedVideo.planType)
-                            ) {
-                              navigate("/ctet-tet/pricing");
-                              return;
-                            }
-
-                            navigate(
-                              `/ctet-tet/videos/watch/${relatedVideo.id}`
-                            );
-                          }}
-                        >
-                          Watch
-                        </button>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              <div className="notesShelf">
-                <div className="notesShelfHeader">
-                  <h2>▶ Continue Learning</h2>
-                  <span>{continueLearningVideos.length} Videos</span>
-                </div>
-
-                <div className="pdfShelfRow">
-                  {continueLearningVideos.length === 0 ? (
-                    <div className="pdfMiniCard">
-                      <div className="pdfIcon">🎓</div>
-
-                      <h3>No more lessons yet</h3>
-
-                      <p>
-                        More lessons from this subject will appear
-                        here.
-                      </p>
-
-                      <span>{video.subject}</span>
-                    </div>
-                  ) : (
-                    continueLearningVideos.map((nextVideo) => (
-                      <div className="pdfMiniCard" key={nextVideo.id}>
-                        <div className="pdfIcon">🎓</div>
-
-                        <h3>{nextVideo.title}</h3>
-
-                        <p>
-                          {nextVideo.subject} · {nextVideo.chapter}
-                        </p>
-
-                        <span>
-                          {nextVideo.duration || "No duration"}
-                        </span>
-
-                        <button
-                          className="btnLink"
-                          onClick={() => {
-                            if (
-                              nextVideo.planType !== "FREE" &&
-                              !hasPlanAccess(nextVideo.planType)
-                            ) {
-                              navigate("/ctet-tet/pricing");
-                              return;
-                            }
-
-                            navigate(
-                              `/ctet-tet/videos/watch/${nextVideo.id}`
-                            );
-                          }}
-                        >
-                          Continue →
-                        </button>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-    </section>
+    <StudentClassroomRoute
+      universalContent={universalContent}
+      user={user}
+      userPlanType={userPlanType}
+      isAdmin={isAdmin(user)}
+      hasPlanAccess={hasPlanAccess}
+    />
   }
 />
 
