@@ -1,245 +1,381 @@
-/* ASPIRENEST EXAM QUESTION WORKSPACE */
+/* =========================
+   QUESTION WORKSPACE FINAL LOCK
+   Owns only: left question area + status + zoom + question + options
+   Rule: normal MCQ = one-screen, no visible scrollbar
+   Long content = only inner controlled scroll
+========================= */
 
-.premiumExamGrid {
-    min-height: 0 !important;
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 390px !important;
-    gap: 14px !important;
-    overflow: hidden !important;
+.premiumQuestionWorkspace.aspireExamMain {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+
+  padding: 18px 22px !important;
+  border-radius: 30px !important;
+
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  box-shadow: 0 22px 55px rgba(15, 23, 42, 0.08) !important;
+
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif !important;
+}
+
+.examAttemptCardPro {
+  height: 100% !important;
+  min-height: 0 !important;
+
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  grid-template-rows:
+    auto
+    minmax(82px, max-content)
+    minmax(245px, 1fr)
+    auto !important;
+
+  column-gap: 14px !important;
+  row-gap: 9px !important;
+
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* Empty state */
+.examEmptyState {
+  padding: 34px !important;
+  border-radius: 24px !important;
+  background: #fff7ed !important;
+  border: 1px solid #fed7aa !important;
+}
+
+/* Row 1 left: status pills */
+.examRefStatusRow {
+  grid-column: 1 / 2 !important;
+  grid-row: 1 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+
+  min-height: 42px !important;
+  align-self: center !important;
+}
+
+.examRefPill {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  min-height: 40px !important;
+  padding: 0 18px !important;
+  border-radius: 16px !important;
+
+  font-size: 0.82rem !important;
+  font-weight: 800 !important;
+
+  border: 1px solid #e2e8f0 !important;
+  background: #ffffff !important;
+  color: #475569 !important;
+
+  white-space: nowrap !important;
+}
+
+.examRefPill.dark {
+  background: #0f172a !important;
+  color: #ffffff !important;
+  border-color: #0f172a !important;
+}
+
+.examRefPill.success {
+  background: #dcfce7 !important;
+  color: #166534 !important;
+  border-color: #86efac !important;
+}
+
+.examRefPill.warning {
+  background: #fff7ed !important;
+  color: #c2410c !important;
+  border-color: #fed7aa !important;
+}
+
+.examRefPill.review {
+  background: #f3e8ff !important;
+  color: #6d28d9 !important;
+  border-color: #c4b5fd !important;
+}
+
+.examRefPill.neutral {
+  background: #ffffff !important;
+  color: #64748b !important;
+}
+
+/* Row 1 right: text size controls */
+.examZoomControls {
+  grid-column: 2 / 3 !important;
+  grid-row: 1 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+
+  min-height: 42px !important;
+  align-self: center !important;
+  white-space: nowrap !important;
+}
+
+.examZoomControls span {
+  margin-right: 4px !important;
+  color: #0f172a !important;
+  font-size: 0.9rem !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+}
+
+.examZoomControls button {
+  width: 38px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border-radius: 999px !important;
+  background: #0f172a !important;
+  color: #ffffff !important;
+
+  font-size: 0.9rem !important;
+  font-weight: 850 !important;
+}
+
+/* Row 2: question block */
+.examQuestionBlockPro {
+  grid-column: 1 / -1 !important;
+  grid-row: 2 !important;
+
+  min-height: 82px !important;
+  max-height: 132px !important;
+
+  display: grid !important;
+  grid-template-columns: 42px minmax(0, 1fr) !important;
+  gap: 14px !important;
+  align-items: start !important;
+
+  padding: 14px 18px !important;
+  border-radius: 22px !important;
+
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+}
+
+.examQuestionBlockPro::-webkit-scrollbar,
+.aspireOptionList::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+.examQuestionBlockPro::-webkit-scrollbar-thumb,
+.aspireOptionList::-webkit-scrollbar-thumb {
+  background: rgba(249, 115, 22, 0.75) !important;
+  border-radius: 999px !important;
+}
+
+.examQuestionNoPro {
+  width: 38px !important;
+  height: 38px !important;
+
+  display: grid !important;
+  place-items: center !important;
+
+  border-radius: 999px !important;
+  background: #0f172a !important;
+  color: #ffffff !important;
+
+  font-size: 0.94rem !important;
+  font-weight: 850 !important;
+}
+
+.examQuestionBlockPro h2 {
+  margin: 0 !important;
+
+  color: #111827 !important;
+  font-size: 1.02em !important;
+  line-height: 1.56 !important;
+  font-weight: 650 !important;
+  letter-spacing: -0.012em !important;
+}
+
+/* Row 3: options */
+.aspireOptionList {
+  grid-column: 1 / -1 !important;
+  grid-row: 3 !important;
+
+  min-height: 0 !important;
+  height: 100% !important;
+
+  display: grid !important;
+  grid-auto-rows: minmax(54px, max-content) !important;
+  align-content: start !important;
+  gap: 8px !important;
+
+  padding: 0 4px 6px 0 !important;
+  margin: 0 !important;
+
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+}
+
+.aspireOption {
+  width: 100% !important;
+  min-height: 54px !important;
+
+  display: grid !important;
+  grid-template-columns: 42px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+
+  padding: 8px 14px !important;
+  border-radius: 16px !important;
+  border: 2px solid #e2e8f0 !important;
+
+  background: #ffffff !important;
+  color: #334155 !important;
+
+  text-align: left !important;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04) !important;
+  cursor: pointer !important;
+}
+
+.aspireOption:hover {
+  border-color: rgba(249, 115, 22, 0.45) !important;
+  background: #fffaf5 !important;
+}
+
+.aspireOption span {
+  width: 32px !important;
+  height: 32px !important;
+
+  display: grid !important;
+  place-items: center !important;
+
+  border-radius: 999px !important;
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+
+  font-size: 0.84rem !important;
+  font-weight: 850 !important;
+}
+
+.aspireOption p {
+  margin: 0 !important;
+
+  color: #334155 !important;
+  font-size: 0.95em !important;
+  font-weight: 600 !important;
+  line-height: 1.42 !important;
+  letter-spacing: -0.004em !important;
+}
+
+.aspireOption.selectedAspireOption {
+  border-color: #16a34a !important;
+  background: #f0fdf4 !important;
+  box-shadow: 0 18px 38px rgba(22, 163, 74, 0.16) !important;
+}
+
+.aspireOption.selectedAspireOption span {
+  background: #16a34a !important;
+  color: #ffffff !important;
+}
+
+.aspireOption.selectedAspireOption:hover {
+  border-color: #16a34a !important;
+  background: #ecfdf5 !important;
+}
+
+/* Row 4: action bar placement only. Button design remains in actionBar.css */
+.aspireExamActionBar {
+  grid-column: 1 / -1 !important;
+  grid-row: 4 !important;
+}
+
+/* Smaller desktop */
+@media (max-width: 1200px) {
+  .premiumQuestionWorkspace.aspireExamMain {
+    padding: 16px 18px !important;
   }
-  
-  .premiumQuestionWorkspace,
-  .aspireExamMain {
-    min-height: 0 !important;
-    overflow: visible !important;
-  }
-  
+
   .examAttemptCardPro {
-    height: 100% !important;
-    padding: 18px !important;
-    background: #fff !important;
-    border: 1px solid #e3e8f0 !important;
-    border-radius: 24px !important;
-    display: grid !important;
-    grid-template-rows: auto auto auto auto !important;
-    gap: 12px !important;
-    overflow: visible !important;
+    row-gap: 8px !important;
+    grid-template-rows:
+      auto
+      minmax(76px, max-content)
+      minmax(224px, 1fr)
+      auto !important;
   }
-  
-  .examEmptyState {
-    height: 100% !important;
-    display: grid !important;
-    place-items: center !important;
-    text-align: center !important;
-    background: #fff !important;
-    border: 1px solid #e3e8f0 !important;
-    border-radius: 24px !important;
-  }
-  
-  .examRefStatusRow {
-    display: flex !important;
-    align-items: center !important;
-    gap: 14px !important;
-    flex-wrap: wrap !important;
-  }
-  
+
   .examRefPill {
-    min-height: 40px !important;
-    padding: 0 20px !important;
-    border-radius: 16px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 13px !important;
-    font-weight: 900 !important;
-    line-height: 1 !important;
-    border: 1px solid #e5e7eb !important;
+    min-height: 38px !important;
+    padding: 0 15px !important;
   }
-  
-  .examRefPill.dark {
-    background: #0f172a !important;
-    color: #fff !important;
-    border-color: #0f172a !important;
-  }
-  
-  .examRefPill.success {
-    background: #ecfdf3 !important;
-    color: #15803d !important;
-    border-color: #bbf7d0 !important;
-  }
-  
-  .examRefPill.warning {
-    background: #fff3e0 !important;
-    color: #c2410c !important;
-    border-color: #fed7aa !important;
-  }
-  
-  .examRefPill.review {
-    background: #f3e8ff !important;
-    color: #6d28d9 !important;
-    border-color: #ddd6fe !important;
-  }
-  
-  .examRefPill.neutral {
-    background: #fff !important;
-    color: #64748b !important;
-    border-color: #e5e7eb !important;
-  }
-  
-  .examZoomControls {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-left: auto;
-  }
-  
+
   .examZoomControls button {
-    width: 36px;
-    height: 32px;
-    border-radius: 10px;
-    border: 1px solid #e2e8f0;
-    background: #ffffff;
-    color: #0f172a;
-    font-weight: 900;
-    cursor: pointer;
-  }
-  
-  .examZoomControls button:hover {
-    border-color: #fb923c;
-    color: #f97316;
-  }
-  
-  .examQuestionBlockPro {
-    display: grid !important;
-    grid-template-columns: 40px 1fr !important;
-    gap: 18px !important;
-    padding: 22px 24px !important;
-    border: 1px solid #e3e8f0 !important;
-    border-radius: 22px !important;
-    background: #fff !important;
-  }
-  
-  .examQuestionNoPro {
     width: 36px !important;
-    height: 36px !important;
-    border-radius: 50% !important;
-    background: #0f172a !important;
-    color: #fff !important;
-    display: grid !important;
-    place-items: center !important;
-    font-size: 15px !important;
-    font-weight: 900 !important;
+    height: 34px !important;
+    min-height: 34px !important;
   }
-  
-  .premiumExamPage .examQuestionBlockPro h2 {
-    margin: 0 !important;
-    font-size: 18px !important;
-    font-weight: 600 !important;
-    line-height: 1.75 !important;
-    letter-spacing: -0.2px !important;
-    color: #111827 !important;
-    max-height: 150px !important;
-    overflow-y: auto !important;
+
+  .examQuestionBlockPro {
+    min-height: 76px !important;
+    max-height: 118px !important;
+    padding: 13px 16px !important;
   }
-  
-  .premiumExamPage .aspireOptionList {
-    min-height: 0 !important;
-    overflow: visible !important;
-    display: grid !important;
-    grid-template-rows: none !important;
-    gap: 10px !important;
-    margin: 0 !important;
+
+  .examQuestionBlockPro h2 {
+    font-size: 0.98em !important;
+    line-height: 1.46 !important;
+    font-weight: 650 !important;
   }
-  
-  .premiumExamPage .aspireOption {
-    min-height: 52px !important;
+
+  .aspireOption {
+    min-height: 50px !important;
+  }
+
+  .aspireOption p {
+    font-size: 0.93em !important;
+  }
+}
+
+/* Tablet/mobile */
+@media (max-width: 1100px) {
+  .premiumQuestionWorkspace.aspireExamMain {
     height: auto !important;
-    padding: 10px 18px !important;
-    border-radius: 18px !important;
-    border: 1px solid #e3e8f0 !important;
-    background: #fff !important;
-    display: grid !important;
-    grid-template-columns: 42px 1fr !important;
-    align-items: center !important;
-    text-align: left !important;
-  }
-  
-  .premiumExamPage .aspireOption span {
-    width: 38px !important;
-    height: 38px !important;
-    border-radius: 50% !important;
-    background: #eef2f7 !important;
-    color: #0f172a !important;
-    display: grid !important;
-    place-items: center !important;
-    font-size: 16px !important;
-    font-weight: 900 !important;
-  }
-  
-  .premiumExamPage .aspireOption p {
-    margin: 0 !important;
-    font-size: 16px !important;
-    font-weight: 500 !important;
-    line-height: 1.55 !important;
-    color: #111827 !important;
-    text-align: left !important;
-  }
-  
-  .selectedAspireOption {
-    position: relative !important;
-    background: linear-gradient(
-      135deg,
-      #fff7ed 0%,
-      #fffbf5 100%
-    ) !important;
-    border: 2px solid #f97316 !important;
-    box-shadow: 0 10px 24px rgba(249, 115, 22, 0.18) !important;
-    transform: translateY(-2px) !important;
-  }
-  
-  .selectedAspireOption span {
-    background: #f97316 !important;
-    color: #ffffff !important;
-    font-weight: 900 !important;
-    box-shadow: 0 4px 10px rgba(249, 115, 22, 0.25);
-  }
-  
-  .selectedAspireOption p {
-    color: #111827 !important;
-    font-weight: 700 !important;
-  }
-  
-  .selectedAspireOption::after {
-    content: "✓ Selected";
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #f97316;
-    font-size: 14px;
-    font-weight: 900;
-    letter-spacing: 0.3px;
+    overflow: visible !important;
   }
 
-  /* FINAL SELECTED ANSWER = GREEN */
+  .examAttemptCardPro {
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: visible !important;
+  }
 
-.premiumExamPage .aspireOption.selectedAspireOption {
-    background: #ecfdf3 !important;
-    border: 2px solid #22c55e !important;
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15) !important;
+  .examQuestionBlockPro {
+    max-height: none !important;
+    overflow: visible !important;
   }
-  
-  .premiumExamPage .aspireOption.selectedAspireOption span {
-    background: #22c55e !important;
-    color: #ffffff !important;
+
+  .aspireOptionList {
+    height: auto !important;
+    overflow: visible !important;
   }
-  
-  .premiumExamPage .aspireOption.selectedAspireOption p {
-    color: #064e3b !important;
-    font-weight: 800 !important;
-  }
-  
-  .premiumExamPage .aspireOption.selectedAspireOption::after {
-    content: "✓ Answered";
-    color: #16a34a !important;
-  }
+}

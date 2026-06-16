@@ -1,138 +1,539 @@
-/* ASPIRENEST EXAM SHELL + HEADER */
+/* =========================
+   EXAM HEADER FINAL LOCK
+   Owns only: logo / title / stats / submit
+========================= */
 
-body:has(.premiumExamPage) {
-    overflow: hidden !important;
-  }
-  
-  body:has(.premiumExamPage) header,
-  body:has(.premiumExamPage) .siteHeader,
-  body:has(.premiumExamPage) .appHeader,
-  body:has(.premiumExamPage) .mainHeader {
-    display: none !important;
-  }
-  
-  .premiumExamPage {
-    height: 100vh !important;
-    padding: 6px 12px !important;
-    background: #f6f8fb !important;
-    overflow: hidden !important;
-  }
-  
-  .premiumExamShell {
-    height: calc(100vh - 12px) !important;
-    max-width: 1540px !important;
-    margin: 0 auto !important;
-    display: grid !important;
-    grid-template-rows: 92px minmax(0, 1fr) !important;
+.premiumExamTop.examHeaderCompact {
+  width: 100% !important;
+  min-height: 86px !important;
+  max-height: 92px !important;
+
+  display: grid !important;
+  grid-template-columns:
+    120px
+    minmax(360px, 1fr)
+    minmax(720px, 0.95fr) !important;
+
+  align-items: center !important;
+  gap: 12px !important;
+
+  margin: 0 !important;
+  padding: 10px 14px !important;
+
+  border-radius: 26px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08) !important;
+  backdrop-filter: blur(16px) !important;
+
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* Logo */
+.premiumExamBrand {
+  height: 60px !important;
+  min-width: 0 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding-right: 10px !important;
+  border-right: 1px solid #e2e8f0 !important;
+  overflow: hidden !important;
+}
+
+.premiumExamBrand img,
+.premiumExamBrand svg {
+  max-width: 96px !important;
+  max-height: 44px !important;
+  object-fit: contain !important;
+}
+
+/* Title */
+.examTitleBlock.compactExamTitleBlock {
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.examTitleBlock.compactExamTitleBlock h1 {
+  margin: 0 !important;
+
+  color: #0f172a !important;
+  font-size: clamp(1.2rem, 1.35vw, 1.7rem) !important;
+  line-height: 1.1 !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.04em !important;
+
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.examTitleBlock.compactExamTitleBlock p {
+  margin: 5px 0 0 !important;
+
+  color: #64748b !important;
+  font-size: 0.88rem !important;
+  line-height: 1.15 !important;
+  font-weight: 800 !important;
+
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Stats */
+.examTopStats.compactExamStats {
+  min-width: 0 !important;
+  width: 100% !important;
+
+  display: grid !important;
+  grid-template-columns:
+    minmax(235px, 1.25fr)
+    minmax(112px, 0.58fr)
+    minmax(96px, 0.48fr)
+    minmax(96px, 0.48fr)
+    minmax(155px, 0.68fr) !important;
+
+  align-items: stretch !important;
+  gap: 8px !important;
+}
+
+.examTopStats.compactExamStats > div {
+  min-width: 0 !important;
+  min-height: 58px !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+
+  padding: 8px 10px !important;
+  border-radius: 17px !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04) !important;
+
+  overflow: hidden !important;
+}
+
+.examTopStats.compactExamStats span {
+  display: block !important;
+
+  color: #64748b !important;
+  font-size: 0.7rem !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.examTopStats.compactExamStats strong {
+  display: block !important;
+  margin-top: 7px !important;
+
+  color: #0f172a !important;
+  font-size: 1rem !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.timerStat strong {
+  color: #0f172a !important;
+}
+
+.candidateExamPanel strong {
+  max-width: 100% !important;
+}
+
+/* Submit */
+.examTopStats.compactExamStats .examSubmitBtn {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 58px !important;
+
+  padding: 0 12px !important;
+  border: none !important;
+  border-radius: 19px !important;
+
+  background: #0f172a !important;
+  color: #ffffff !important;
+
+  font-size: 0.95rem !important;
+  font-weight: 950 !important;
+  white-space: nowrap !important;
+
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.2) !important;
+  cursor: pointer !important;
+}
+
+.examTopStats.compactExamStats .examSubmitBtn:hover {
+  transform: translateY(-1px) !important;
+}
+
+/* 1280px range */
+@media (max-width: 1280px) {
+  .premiumExamTop.examHeaderCompact {
+    grid-template-columns:
+      104px
+      minmax(300px, 1fr)
+      minmax(650px, 0.95fr) !important;
     gap: 10px !important;
+    padding: 10px 12px !important;
   }
-  
-  .premiumExamTop {
-    height: 92px !important;
-    padding: 12px 20px !important;
-    display: grid !important;
-    grid-template-columns: 190px 1fr auto !important;
-    align-items: center !important;
-    gap: 22px !important;
-    background: #fff !important;
-    border: 1px solid #e3e8f0 !important;
+
+  .premiumExamBrand img,
+  .premiumExamBrand svg {
+    max-width: 86px !important;
+  }
+
+  .examTopStats.compactExamStats {
+    grid-template-columns:
+      minmax(210px, 1.2fr)
+      minmax(100px, 0.56fr)
+      minmax(82px, 0.46fr)
+      minmax(82px, 0.46fr)
+      minmax(138px, 0.68fr) !important;
+    gap: 7px !important;
+  }
+
+  .examTopStats.compactExamStats > div,
+  .examTopStats.compactExamStats .examSubmitBtn {
+    min-height: 56px !important;
+  }
+
+  .examTopStats.compactExamStats strong {
+    font-size: 0.96rem !important;
+  }
+}
+
+/* Tablet */
+@media (max-width: 1100px) {
+  .premiumExamTop.examHeaderCompact {
+    max-height: none !important;
+    grid-template-columns: 1fr !important;
+    align-items: stretch !important;
+  }
+
+  .premiumExamBrand {
+    justify-content: flex-start !important;
+    border-right: none !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding-right: 0 !important;
+    padding-bottom: 10px !important;
+  }
+
+  .examTitleBlock.compactExamTitleBlock h1,
+  .examTitleBlock.compactExamTitleBlock p {
+    white-space: normal !important;
+  }
+
+  .examTopStats.compactExamStats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .examTopStats.compactExamStats .examSubmitBtn {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  .premiumExamTop.examHeaderCompact {
+    min-height: auto !important;
+    padding: 14px !important;
     border-radius: 22px !important;
   }
-  
-  .premiumExamBrand {
-    height: 100% !important;
-    display: flex !important;
-    align-items: center !important;
-    border-right: 1px solid #e5e7eb !important;
-  }
-  
-  .compactExamTitleBlock h1 {
-    font-size: 24px !important;
-    margin: 0 0 6px !important;
-    color: #101828 !important;
-  }
-  
-  .compactExamTitleBlock p {
-    margin: 0 !important;
-    font-size: 14px !important;
-    font-weight: 700 !important;
-    color: #64748b !important;
-  }
-  
-  .compactExamStats {
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
-  }
-  
-  .compactExamStats > div {
-    min-width: 112px !important;
-    height: 66px !important;
-    padding: 10px 14px !important;
-    border: 1px solid #e3e8f0 !important;
-    border-radius: 16px !important;
-    background: #fff !important;
-  }
-  
-  .compactExamStats span {
-    font-size: 13px !important;
-    font-weight: 800 !important;
-    color: #667085 !important;
-  }
-  
-  .compactExamStats strong {
-    display: block !important;
-    font-size: 20px !important;
-    color: #101828 !important;
-  }
-  
-  .candidateExamPanel {
-    min-width: 150px;
-    padding: 8px 12px;
-    border-radius: 14px;
-    background: rgba(15, 23, 42, 0.06);
-    border: 1px solid rgba(15, 23, 42, 0.08);
-  }
-  
-  .candidateExamPanel span {
-    display: block;
-    font-size: 11px;
-    font-weight: 800;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-  
-  .candidateExamPanel strong {
-    display: block;
-    font-size: 13px;
-    font-weight: 900;
-    color: #0f172a;
-    max-width: 210px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  .timerStat strong {
-    color: #f97316 !important;
-  }
-  
-  .examSubmitBtn {
-    height: 66px !important;
-    padding: 0 30px !important;
-    border-radius: 20px !important;
-    background: #0f172a !important;
-    color: #fff !important;
-    font-size: 16px !important;
-    font-weight: 900 !important;
-  }
-  /* EXAM DISTRACTION FREE */
 
-body:has(.premiumExamPage) .chatWidget,
-body:has(.premiumExamPage) .floatingChatButton,
-body:has(.premiumExamPage) .chatBubble,
-body:has(.premiumExamPage) .whatsappFloat,
-body:has(.premiumExamPage) .whatsappButton {
-  display: none !important;
+  .examTopStats.compactExamStats {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* =========================
+   TOP SUBMIT CONFIRM MODAL
+   Triggered from ExamHeader submit button
+   Rendered in ExamAttemptRoute
+========================= */
+
+.examSubmitConfirmBackdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 24px !important;
+  background: rgba(15, 23, 42, 0.58) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.examSubmitConfirmModal {
+  width: min(520px, 100%) !important;
+  max-height: calc(100vh - 48px) !important;
+
+  padding: 22px !important;
+  border-radius: 28px !important;
+
+  background: #ffffff !important;
+  border: 1px solid rgba(226, 232, 240, 0.96) !important;
+  box-shadow: 0 34px 90px rgba(15, 23, 42, 0.32) !important;
+
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+}
+
+.examSubmitConfirmHeader {
+  margin-bottom: 16px !important;
+}
+
+.examSubmitConfirmBadge {
+  width: fit-content !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+
+  margin-bottom: 10px !important;
+  padding: 7px 11px !important;
+  border-radius: 999px !important;
+
+  background: #fff7ed !important;
+  color: #c2410c !important;
+  border: 1px solid #fed7aa !important;
+
+  font-size: 0.72rem !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+}
+
+.examSubmitConfirmHeader h3 {
+  margin: 0 !important;
+  color: #0f172a !important;
+
+  font-size: 1.55rem !important;
+  line-height: 1.1 !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.04em !important;
+}
+
+.examSubmitConfirmHeader p {
+  margin: 8px 0 0 !important;
+  color: #64748b !important;
+
+  font-size: 0.92rem !important;
+  line-height: 1.45 !important;
+  font-weight: 750 !important;
+}
+
+.examSubmitConfirmStats {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+
+  margin-bottom: 14px !important;
+}
+
+.submitStat {
+  min-width: 0 !important;
+  padding: 13px !important;
+  border-radius: 18px !important;
+
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+.submitStat span {
+  display: block !important;
+
+  font-size: 0.72rem !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+}
+
+.submitStat strong {
+  display: block !important;
+  margin-top: 8px !important;
+
+  font-size: 1.45rem !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+}
+
+.submitStat.answered {
+  background: #f0fdf4 !important;
+  border-color: rgba(22, 163, 74, 0.24) !important;
+}
+
+.submitStat.answered span,
+.submitStat.answered strong {
+  color: #166534 !important;
+}
+
+.submitStat.review {
+  background: #faf5ff !important;
+  border-color: rgba(124, 58, 237, 0.24) !important;
+}
+
+.submitStat.review span,
+.submitStat.review strong {
+  color: #6d28d9 !important;
+}
+
+.submitStat.pending {
+  background: #fff7ed !important;
+  border-color: rgba(249, 115, 22, 0.3) !important;
+}
+
+.submitStat.pending span,
+.submitStat.pending strong {
+  color: #9a3412 !important;
+}
+
+.submitStat.notVisited {
+  background: #f8fafc !important;
+  border-color: rgba(148, 163, 184, 0.36) !important;
+}
+
+.submitStat.notVisited span,
+.submitStat.notVisited strong {
+  color: #475569 !important;
+}
+
+.examSubmitConfirmWarning {
+  margin-bottom: 16px !important;
+  padding: 12px 14px !important;
+  border-radius: 18px !important;
+
+  background: #0f172a !important;
+  color: #ffffff !important;
+
+  font-size: 0.84rem !important;
+  line-height: 1.4 !important;
+  font-weight: 800 !important;
+}
+
+.examSubmitConfirmActions {
+  display: grid !important;
+  grid-template-columns: 1fr 1.2fr !important;
+  gap: 10px !important;
+}
+
+.examSubmitCancelBtn,
+.examSubmitConfirmBtn {
+  min-height: 48px !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 0 16px !important;
+  border-radius: 17px !important;
+
+  font-size: 0.92rem !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+
+  cursor: pointer !important;
+}
+
+.examSubmitCancelBtn {
+  background: #ffffff !important;
+  color: #334155 !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+.examSubmitConfirmBtn {
+  background: #f97316 !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 16px 34px rgba(249, 115, 22, 0.24) !important;
+}
+
+.examSubmitCancelBtn:hover,
+.examSubmitConfirmBtn:hover {
+  transform: translateY(-1px) !important;
+}
+
+@media (max-width: 700px) {
+  .examSubmitConfirmBackdrop {
+    padding: 14px !important;
+    align-items: flex-end !important;
+  }
+
+  .examSubmitConfirmModal {
+    border-radius: 24px !important;
+    padding: 18px !important;
+  }
+
+  .examSubmitConfirmStats {
+    grid-template-columns: 1fr !important;
+  }
+
+  .examSubmitConfirmActions {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* =========================
+   CANDIDATE EMAIL SAFE LOCK
+   Paired with ExamHeader.jsx
+========================= */
+
+.examTopStats.compactExamStats .candidateExamPanel {
+  justify-content: center !important;
+}
+
+.examTopStats.compactExamStats .candidateExamPanel strong {
+  max-width: 100% !important;
+
+  margin-top: 6px !important;
+  color: #0f172a !important;
+
+  font-size: 0.95rem !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.examTopStats.compactExamStats .candidateEmailDomain {
+  display: block !important;
+
+  margin-top: 4px !important;
+  color: #64748b !important;
+
+  font-size: 0.68rem !important;
+  line-height: 1 !important;
+  font-weight: 850 !important;
+
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+@media (max-width: 1280px) {
+  .examTopStats.compactExamStats .candidateExamPanel strong {
+    font-size: 0.88rem !important;
+  }
+
+  .examTopStats.compactExamStats .candidateEmailDomain {
+    font-size: 0.64rem !important;
+  }
 }

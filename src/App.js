@@ -119,6 +119,8 @@ import "./styles/exam/actionBar.css";
 import "./styles/exam/palettePanel.css";
 import "./styles/exam/warningCard.css";
 import "./styles/exam/submitCard.css";
+import "./styles/exam/reviewResult.css";
+import "./styles/exam/examLayoutLock.css";
 import {
   CONTENT_SECTIONS,
   CONTENT_STATUS,
@@ -144,7 +146,16 @@ export default function App() {
     "/ctet-tet/mock-tests/attempt/"
   );
 
-
+  React.useEffect(() => {
+    document.body.classList.toggle(
+      "aspireExamAttemptMode",
+      isExamAttemptPage
+    );
+  
+    return () => {
+      document.body.classList.remove("aspireExamAttemptMode");
+    };
+  }, [isExamAttemptPage]);
   const [notesScrollState, setNotesScrollState] = React.useState({});
 
   const updateNotesScrollState = (rowId) => {

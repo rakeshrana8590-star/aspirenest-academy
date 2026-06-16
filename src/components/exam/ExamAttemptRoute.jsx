@@ -55,11 +55,28 @@ export default function ExamAttemptRoute({
   const questions = test?.questions || [];
   const mockRules = getMockTestRules(test);
 
+  const isRuleEnabled = (value) => {
+    const normalizedValue = String(value || "")
+      .toLowerCase()
+      .trim();
+
+    return (
+      value === true ||
+      normalizedValue === "yes" ||
+      normalizedValue === "required" ||
+      normalizedValue === "enabled" ||
+      normalizedValue === "on"
+    );
+  };
+
+  const isFullscreenRequired = isRuleEnabled(test?.fullscreenMode);
+
   const isSequentialNavigation =
     mockRules.navigationMode === "sequential";
 
-  const isCalculatorAllowed =
-    mockRules.calculatorAllowed === "yes";
+  const isCalculatorAllowed = isRuleEnabled(
+    mockRules.calculatorAllowed
+  );
 
   const shouldShuffleOptions =
     mockRules.shuffleOptions === "yes";
@@ -105,6 +122,44 @@ export default function ExamAttemptRoute({
     : attemptState?.timeLeft ?? defaultTimerSeconds;
 
   const formattedTime = formatExamTime(timeLeft);
+
+  const [isExamFullscreenActive, setIsExamFullscreenActive] =
+    React.useState(() =>
+      typeof document !== "undefined"
+        ? Boolean(document.fullscreenElement)
+        : false
+    );
+
+  React.useEffect(() => {
+    const handleFullscreenState = () => {
+      setIsExamFullscreenActive(Boolean(document.fullscreenElement));
+    };
+
+    document.addEventListener(
+      "fullscreenchange",
+      handleFullscreenState
+    );
+
+    handleFullscreenState();
+
+    return () => {
+      document.removeEventListener(
+        "fullscreenchange",
+        handleFullscreenState
+      );
+    };
+  }, []);
+
+  const enterExamFullscreen = async () => {
+    try {
+      await document.documentElement.requestFullscreen();
+      setIsExamFullscreenActive(true);
+    } catch {
+      toast.error(
+        "Please allow fullscreen to continue this mock test."
+      );
+    }
+  };
 
   const {
     answeredCount,
@@ -456,37 +511,91 @@ export default function ExamAttemptRoute({
     <section className="premiumExamPage">
       <div className="premiumExamShell" key={test.id}>
         {submitConfirmTestId === test.id && (
-          <div className="mockPortalBackdrop">
-            <div className="mockPortalMenu examSubmitConfirmModal">
-              <h3>Submit Test?</h3>
+          <div className="examSubmitConfirmBackdrop" role="presentation">
+            <div
+              className="examSubmitConfirmModal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="exam-submit-confirm-title"
+            >
+              <div className="examSubmitConfirmHeader">
+                <span className="examSubmitConfirmBadge">
+                  Final Submission
+                </span>
+
+                <h3 id="exam-submit-confirm-title">Submit Test?</h3>
+
+                <p>
+                  Please review your attempt summary before final
+                  submission. Once submitted, this attempt will be
+                  locked.
+                </p>
+              </div>
+
+              <div className="examSubmitConfirmStats">
+                <div className="submitStat answered">
+                  <span>Answered</span>
+                  <strong>
+                    {answeredCount}/{questions.length}
+                  </strong>
+                </div>
+
+                <div className="submitStat review">
+                  <span>Review</span>
+                  <strong>{markedCount}</strong>
+                </div>
+
+                <div className="submitStat pending">
+                  <span>Not Answered</span>
+                  <strong>{notAnsweredCount}</strong>
+                </div>
+
+                <div className="submitStat notVisited">
+                  <span>Not Visited</span>
+                  <strong>{notVisitedCount}</strong>
+                </div>
+              </div>
+
+              <div className="examSubmitConfirmWarning">
+                Result will be generated after submission. You cannot
+                edit answers after this action.
+              </div>
+
+              <div className="examSubmitConfirmActions">
+                <button
+                  type="button"
+                  className="examSubmitCancelBtn"
+                  onClick={cancelFinalSubmit}
+                >
+                  Continue Exam
+                </button>
+
+                <button
+                  type="button"
+                  className="examSubmitConfirmBtn"
+                  onClick={confirmFinalSubmit}
+                >
+                  Yes, Submit Test
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isFullscreenRequired && !isExamFullscreenActive && (
+          <div className="examFullscreenGate">
+            <div className="examFullscreenGateCard">
+              <span>Fullscreen Required</span>
+
+              <h3>Enter fullscreen to continue exam</h3>
 
               <p>
-                Answered: {answeredCount}/{questions.length}
+                This test requires fullscreen mode. Exiting fullscreen
+                may be counted as an exam violation.
               </p>
 
-              <p>Review: {markedCount}</p>
-              <p>Not Answered: {notAnsweredCount}</p>
-              <p>Not Visited: {notVisitedCount}</p>
-
-              <p>
-                After submission, your attempt will be locked and
-                result will be generated.
-              </p>
-
-              <button
-                type="button"
-                className="examControlBtn primary"
-                onClick={confirmFinalSubmit}
-              >
-                Yes, Submit Test
-              </button>
-
-              <button
-                type="button"
-                className="examControlBtn secondary"
-                onClick={cancelFinalSubmit}
-              >
-                Continue Exam
+              <button type="button" onClick={enterExamFullscreen}>
+                Enter Fullscreen
               </button>
             </div>
           </div>
@@ -631,7 +740,6 @@ export default function ExamAttemptRoute({
               resetQuestionTimer();
             }}
             onOpenStatus={jumpToFirstFilteredQuestion}
-            onSubmit={submitAttempt}
           />
         </div>
       </div>

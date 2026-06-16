@@ -19,13 +19,27 @@ const getActiveSecurityTest = (universalContent = [], testId = "") => {
   );
 };
 
+const isEnabledRule = (value) => {
+  const normalizedValue = String(value || "")
+    .toLowerCase()
+    .trim();
+
+  return (
+    value === true ||
+    normalizedValue === "yes" ||
+    normalizedValue === "required" ||
+    normalizedValue === "enabled" ||
+    normalizedValue === "on"
+  );
+};
+
 export const useExamSecurity = ({
   locationPathname = "",
   universalContent = [],
   mockAttemptState = {},
   updateAttemptState,
 }) => {
-  const fullscreenRequestedRef = useRef({});
+  const fullscreenEnteredRef = useRef({});
   const toastCooldownRef = useRef({});
 
   const testId = getAttemptTestIdFromPathname(locationPathname);
@@ -43,6 +57,18 @@ export const useExamSecurity = ({
     testId &&
       activeTest &&
       activeState?.isSubmitted !== true
+  );
+
+  const isTabSwitchDetectionEnabled = isEnabledRule(
+    activeTest?.tabSwitchDetection
+  );
+
+  const isCopyPasteProtectionEnabled = isEnabledRule(
+    activeTest?.copyPasteProtection
+  );
+
+  const isFullscreenRequired = isEnabledRule(
+    activeTest?.fullscreenMode
   );
 
   const showLimitedToast = (key, message) => {
@@ -76,7 +102,7 @@ export const useExamSecurity = ({
 
   useEffect(() => {
     if (!isActive) return;
-    if (activeTest?.tabSwitchDetection !== "yes") return;
+    if (!isTabSwitchDetectionEnabled) return;
 
     const handleVisibilityChange = () => {
       if (!document.hidden) return;
@@ -110,14 +136,14 @@ export const useExamSecurity = ({
     };
   }, [
     isActive,
-    activeTest?.tabSwitchDetection,
+    isTabSwitchDetectionEnabled,
     testId,
     updateAttemptState,
   ]);
 
   useEffect(() => {
     if (!isActive) return;
-    if (activeTest?.copyPasteProtection !== "yes") return;
+    if (!isCopyPasteProtectionEnabled) return;
 
     const blockExamAction = (event) => {
       event.preventDefault();
@@ -142,14 +168,19 @@ export const useExamSecurity = ({
         blockExamAction
       );
     };
-  }, [isActive, activeTest?.copyPasteProtection]);
+  }, [isActive, isCopyPasteProtectionEnabled]);
 
   useEffect(() => {
     if (!isActive) return;
-    if (activeTest?.fullscreenMode !== "yes") return;
+    if (!isFullscreenRequired) return;
 
     const handleFullscreenChange = () => {
-      if (document.fullscreenElement) return;
+      if (document.fullscreenElement) {
+        fullscreenEnteredRef.current[testId] = true;
+        return;
+      }
+
+      if (!fullscreenEnteredRef.current[testId]) return;
 
       updateAttemptState(testId, (state) => ({
         ...state,
@@ -163,7 +194,7 @@ export const useExamSecurity = ({
 
       showLimitedToast(
         "fullscreenExit",
-        "Fullscreen exited. Please stay in exam mode."
+        "Fullscreen exited. Please return to exam fullscreen mode."
       );
     };
 
@@ -180,29 +211,10 @@ export const useExamSecurity = ({
     };
   }, [
     isActive,
-    activeTest?.fullscreenMode,
+    isFullscreenRequired,
     testId,
     updateAttemptState,
   ]);
-
-  useEffect(() => {
-    if (!isActive) return;
-    if (activeTest?.fullscreenMode !== "yes") return;
-    if (document.fullscreenElement) return;
-    if (fullscreenRequestedRef.current[testId]) return;
-
-    fullscreenRequestedRef.current[testId] = true;
-
-    const enterFullscreen = async () => {
-      try {
-        await document.documentElement.requestFullscreen();
-      } catch {
-        console.log("Fullscreen request skipped");
-      }
-    };
-
-    enterFullscreen();
-  }, [isActive, activeTest?.fullscreenMode, testId]);
 
   useEffect(() => {
     if (!isActive) return;
@@ -211,7 +223,7 @@ export const useExamSecurity = ({
       const key = event.key?.toLowerCase();
 
       const blockedClipboardKeys =
-        activeTest?.copyPasteProtection === "yes" &&
+        isCopyPasteProtectionEnabled &&
         event.ctrlKey &&
         ["c", "v", "x", "a"].includes(key);
 
@@ -250,7 +262,7 @@ export const useExamSecurity = ({
     };
   }, [
     isActive,
-    activeTest?.copyPasteProtection,
+    isCopyPasteProtectionEnabled,
     testId,
     updateAttemptState,
   ]);

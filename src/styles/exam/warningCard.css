@@ -1,18 +1,75 @@
-/* ASPIRENEST EXAM WARNING CARD */
+/* =========================
+   WARNING CARD FINAL COMPACT LOCK
+   Paired with:
+   - src/components/exam/WarningCard.jsx
 
-.premiumExamPage .examFinalBox .notesSubjectTag {
-    min-height: 24px !important;
-    height: 24px !important;
-    margin-top: 2px !important;
-    padding: 0 10px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 999px !important;
-    background: rgba(255, 247, 237, 0.12) !important;
-    color: #fed7aa !important;
-    border: 1px solid rgba(254, 215, 170, 0.22) !important;
-    font-size: 10.5px !important;
-    font-weight: 900 !important;
-    line-height: 1 !important;
-  }
+   Rule:
+   - No global .examFinalBox
+   - No global .notesSubjectTag
+   - Compact only, because palette already has many tools
+========================= */
+
+.examWarningCard {
+  flex: 0 0 auto !important;
+
+  width: 100% !important;
+  min-width: 0 !important;
+
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+
+  margin: 0 !important;
+  padding: 10px 12px !important;
+  border-radius: 16px !important;
+
+  background: linear-gradient(180deg, #ffffff 0%, #fff7ed 100%) !important;
+  border: 1px solid rgba(249, 115, 22, 0.32) !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05) !important;
+
+  color: #0f172a !important;
+  box-sizing: border-box !important;
+}
+
+.examWarningCard strong {
+  display: block !important;
+
+  margin: 0 !important;
+  color: #9a3412 !important;
+
+  font-size: 0.78rem !important;
+  line-height: 1.1 !important;
+  font-weight: 950 !important;
+}
+
+.examWarningCard span {
+  display: block !important;
+
+  margin-top: 4px !important;
+  color: #7c2d12 !important;
+
+  font-size: 0.7rem !important;
+  line-height: 1.2 !important;
+  font-weight: 800 !important;
+}
+
+.examWarningCard small {
+  width: fit-content !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 6px 9px !important;
+  border-radius: 999px !important;
+
+  background: #ffedd5 !important;
+  color: #9a3412 !important;
+  border: 1px solid #fed7aa !important;
+
+  font-size: 0.66rem !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+  white-space: nowrap !important;
+}

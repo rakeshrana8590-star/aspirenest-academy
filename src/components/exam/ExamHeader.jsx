@@ -11,6 +11,13 @@ export default function ExamHeader({
   answeredCount,
   onSubmit,
 }) {
+  const safeCandidateName = candidateName || "Student";
+  const isEmailCandidate = safeCandidateName.includes("@");
+
+  const [candidateLocalPart, candidateDomainPart] = isEmailCandidate
+    ? safeCandidateName.split("@")
+    : [safeCandidateName, ""];
+
   return (
     <div className="premiumExamTop examHeaderCompact">
       <div className="premiumExamBrand">
@@ -25,9 +32,23 @@ export default function ExamHeader({
       </div>
 
       <div className="examTopStats compactExamStats">
-        <div className="candidateExamPanel">
+        <div
+          className="candidateExamPanel"
+          title={safeCandidateName}
+        >
           <span>Candidate</span>
-          <strong>{candidateName}</strong>
+
+          <strong>
+            {isEmailCandidate
+              ? candidateLocalPart
+              : safeCandidateName}
+          </strong>
+
+          {isEmailCandidate && (
+            <small className="candidateEmailDomain">
+              @{candidateDomainPart}
+            </small>
+          )}
         </div>
 
         {!isNoTimer && (

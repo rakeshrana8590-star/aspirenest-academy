@@ -1,60 +1,149 @@
-/* ASPIRENEST EXAM ACTION BAR */
+/* =========================
+   ACTION BAR FINAL LOCK
+   Owns only: bottom exam action buttons
+   Rule: no fixed, no overlap, always visible
+========================= */
 
 .aspireExamActionBar {
-    margin-top: 8px !important;
-    padding-top: 10px !important;
-    border-top: 1px solid #e5e7eb !important;
-    display: grid !important;
-    grid-template-columns: 1fr 1.25fr 1.55fr 1.25fr !important;
-    gap: 12px !important;
-  }
-  
-  .examControlBtn {
-    height: 48px !important;
-    border-radius: 16px !important;
-    font-size: 14px !important;
-    font-weight: 900 !important;
-  }
-  
-  .examControlBtn:disabled {
-    opacity: 0.45 !important;
-    cursor: not-allowed !important;
-    transform: none !important;
-  }
-  
-  .examControlBtn.secondary {
-    background: #f8fafc !important;
-    color: #0f172a !important;
-    border: 1px solid #e2e8f0 !important;
-  }
-  
-  .examControlBtn.ghost {
-    background: #ffffff !important;
-    color: #334155 !important;
-    border: 1px solid #e2e8f0 !important;
-  }
-  
-  .examControlBtn.review {
-    background: #f3e8ff !important;
-    color: #6d28d9 !important;
-    border: 1px solid #ddd6fe !important;
-  }
-  
-  .examControlBtn.primary {
-    background: #0f172a !important;
-    color: #ffffff !important;
-    border: 1px solid #0f172a !important;
-  }
+  position: static !important;
+  inset: auto !important;
+  z-index: 3 !important;
 
-  /* FINAL ACTION BUTTON COLORS */
+  width: 100% !important;
+  min-height: 66px !important;
+  flex: 0 0 auto !important;
+
+  display: grid !important;
+  grid-template-columns:
+    minmax(170px, 0.85fr)
+    minmax(190px, 1fr)
+    minmax(260px, 1.35fr)
+    minmax(190px, 1fr) !important;
+  gap: 12px !important;
+  align-items: center !important;
+
+  margin: 0 !important;
+  padding: 10px 0 0 !important;
+
+  border-top: 1px solid rgba(226, 232, 240, 0.95) !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+
+  box-sizing: border-box !important;
+}
+
+.examControlBtn {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 52px !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 0 16px !important;
+  border-radius: 18px !important;
+  border: 2px solid transparent !important;
+
+  font-size: 0.92rem !important;
+  line-height: 1 !important;
+  font-weight: 850 !important;
+  letter-spacing: -0.01em !important;
+  white-space: nowrap !important;
+
+  cursor: pointer !important;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease !important;
+
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06) !important;
+}
+
+.examControlBtn.secondary {
+  background: #ffffff !important;
+  color: #94a3b8 !important;
+  border-color: #e2e8f0 !important;
+}
+
+.examControlBtn.ghost {
+  background: #ffffff !important;
+  color: #334155 !important;
+  border-color: #e2e8f0 !important;
+}
+
+.examControlBtn.review {
+  background: #ffffff !important;
+  color: #7c3aed !important;
+  border-color: #7c3aed !important;
+}
 
 .examControlBtn.primary {
-    background: #f97316 !important;
-    color: white !important;
+  background: #f97316 !important;
+  color: #ffffff !important;
+  border-color: #f97316 !important;
+  box-shadow: 0 14px 30px rgba(249, 115, 22, 0.22) !important;
+}
+
+.examControlBtn:not(:disabled):hover {
+  transform: translateY(-1px) !important;
+}
+
+.examControlBtn.secondary:not(:disabled):hover,
+.examControlBtn.ghost:not(:disabled):hover {
+  border-color: #cbd5e1 !important;
+  background: #f8fafc !important;
+}
+
+.examControlBtn.review:not(:disabled):hover {
+  background: #faf5ff !important;
+  box-shadow: 0 14px 30px rgba(124, 58, 237, 0.14) !important;
+}
+
+.examControlBtn.primary:not(:disabled):hover {
+  background: #ea580c !important;
+  border-color: #ea580c !important;
+}
+
+.examControlBtn:disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.examControlBtn:disabled:hover {
+  transform: none !important;
+}
+
+.examControlBtn:focus-visible {
+  outline: 3px solid rgba(249, 115, 22, 0.28) !important;
+  outline-offset: 3px !important;
+}
+
+/* Medium desktop */
+@media (max-width: 1200px) {
+  .aspireExamActionBar {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    min-height: auto !important;
   }
-  
-  .examControlBtn.review {
-    background: white !important;
-    color: #7c3aed !important;
-    border: 2px solid #7c3aed !important;
+
+  .examControlBtn {
+    min-height: 50px !important;
   }
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  .aspireExamActionBar {
+    grid-template-columns: 1fr !important;
+  }
+
+  .examControlBtn {
+    white-space: normal !important;
+    min-height: 50px !important;
+  }
+}

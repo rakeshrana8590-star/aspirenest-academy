@@ -739,6 +739,92 @@ import {
       .filter((item) => item.length >= 3);
   };
   
+  const ROADMAP_RECOMMENDATION_ALIASES = [
+    {
+      keys: [
+        "cdp",
+        "child development",
+        "child development pedagogy",
+        "child development and pedagogy",
+        "development and learning",
+        "बाल विकास",
+      ],
+      expansion:
+        "cdp child development pedagogy child development and pedagogy development learning बाल विकास",
+    },
+    {
+      keys: [
+        "math",
+        "maths",
+        "mathematics",
+        "गणित",
+      ],
+      expansion: "math maths mathematics गणित",
+    },
+    {
+      keys: [
+        "evs",
+        "environment",
+        "environmental studies",
+        "पर्यावरण",
+      ],
+      expansion: "evs environment environmental studies पर्यावरण",
+    },
+    {
+      keys: [
+        "language i",
+        "language 1",
+        "lang i",
+        "lang 1",
+        "hindi",
+        "english",
+        "भाषा",
+      ],
+      expansion: "language i language 1 lang i lang 1 hindi english भाषा",
+    },
+    {
+      keys: [
+        "language ii",
+        "language 2",
+        "lang ii",
+        "lang 2",
+        "sanskrit",
+        "gujarati",
+        "हिंदी",
+        "english",
+      ],
+      expansion: "language ii language 2 lang ii lang 2 sanskrit gujarati hindi english हिंदी",
+    },
+    {
+      keys: [
+        "current affairs",
+        "ca",
+        "gk",
+        "general knowledge",
+        "समसामयिक",
+      ],
+      expansion: "current affairs ca gk general knowledge समसामयिक",
+    },
+  ];
+  
+  const expandRoadmapRecommendationText = (value = "") => {
+    const normalizedText = normalizeRoadmapRecommendationText(value);
+  
+    const matchedExpansions = ROADMAP_RECOMMENDATION_ALIASES
+      .filter((aliasGroup) =>
+        aliasGroup.keys.some((key) =>
+          normalizedText.includes(
+            normalizeRoadmapRecommendationText(key)
+          )
+        )
+      )
+      .map((aliasGroup) => aliasGroup.expansion);
+  
+    return normalizeRoadmapRecommendationText(
+      [normalizedText, ...matchedExpansions].join(" ")
+    );
+  };
+
   const buildDayRecommendationSearchText = (day = {}) => {
     const taskText = Array.isArray(day.tasks)
       ? day.tasks
@@ -768,7 +854,10 @@ import {
   
   const scoreRoadmapRecommendationItem = ({ item, day }) => {
     const daySearchText = buildDayRecommendationSearchText(day);
-    const dayTokens = getRoadmapRecommendationTokens(daySearchText);
+  
+    const expandedDayText = expandRoadmapRecommendationText(daySearchText);
+  
+    const dayTokens = getRoadmapRecommendationTokens(expandedDayText);
   
     const itemText = [
       item.title,
@@ -783,31 +872,42 @@ import {
       .filter(Boolean)
       .join(" ");
   
-    const itemNormalized = normalizeRoadmapRecommendationText(itemText);
+    const expandedItemText = expandRoadmapRecommendationText(itemText);
   
     let score = 0;
   
-    const subjectKey = normalizeRoadmapRecommendationText(day.subject);
-    const chapterKey = normalizeRoadmapRecommendationText(day.chapter);
-    const focusKey = normalizeRoadmapRecommendationText(day.focusArea);
+    const subjectKey = expandRoadmapRecommendationText(day.subject);
+    const chapterKey = expandRoadmapRecommendationText(day.chapter);
+    const focusKey = expandRoadmapRecommendationText(day.focusArea);
   
-    if (subjectKey && itemNormalized.includes(subjectKey)) {
+    if (subjectKey && expandedItemText.includes(subjectKey)) {
       score += 40;
     }
   
-    if (chapterKey && itemNormalized.includes(chapterKey)) {
+    if (chapterKey && expandedItemText.includes(chapterKey)) {
       score += 40;
     }
   
-    if (focusKey && itemNormalized.includes(focusKey)) {
+    if (focusKey && expandedItemText.includes(focusKey)) {
       score += 25;
     }
   
     dayTokens.forEach((token) => {
-      if (itemNormalized.includes(token)) {
+      if (expandedItemText.includes(token)) {
         score += 4;
       }
     });
+  
+    const itemSubject = expandRoadmapRecommendationText(item.subject);
+    const itemChapter = expandRoadmapRecommendationText(item.chapter);
+  
+    if (itemSubject && expandedDayText.includes(itemSubject)) {
+      score += 18;
+    }
+  
+    if (itemChapter && expandedDayText.includes(itemChapter)) {
+      score += 18;
+    }
   
     if (item.planType === "FREE") {
       score += 2;
@@ -868,17 +968,17 @@ import {
       };
     }
   
-    const contentQuery = query(
-      collection(db, "contentItems"),
-      where("status", "==", "published")
-    );
-  
-    const snapshot = await getDocs(contentQuery);
-  
-    const contentItems = snapshot.docs.map((item) => ({
-      id: item.id,
-      ...item.data(),
-    }));
+    const snapshot = await getDocs(collection(db, "contentItems"));
+
+    const contentItems = snapshot.docs
+      .map((item) => ({
+        id: item.id,
+        ...item.data(),
+      }))
+      .filter(
+        (item) =>
+          normalizeRoadmapRecommendationText(item.status) === "published"
+      );
   
     const allowedSections = [
       ROADMAP_RECOMMENDATION_SECTIONS.NOTES,
