@@ -1,0 +1,457 @@
+/* ===============================
+   34A6A — ADMIN MOCK TEST PREVIEW
+   Premium preview page polish
+================================ */
+
+.adminMockPreviewPage {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+  
+  .adminMockPreviewHero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 22px;
+    padding: 26px;
+    margin-bottom: 22px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 28px;
+    background:
+      radial-gradient(circle at 12% 10%, rgba(255, 122, 0, 0.16), transparent 34%),
+      radial-gradient(circle at 88% 14%, rgba(37, 99, 235, 0.14), transparent 34%),
+      linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+    box-shadow: 0 22px 60px rgba(15, 23, 42, 0.08);
+  }
+  
+  .adminMockPreviewHero h1 {
+    margin: 12px 0 10px;
+    color: #0f172a;
+    font-size: clamp(1.75rem, 3vw, 2.6rem);
+    line-height: 1.08;
+    letter-spacing: -0.04em;
+  }
+  
+  .adminMockPreviewHero p {
+    margin: 0;
+    max-width: 760px;
+    color: #64748b;
+    font-size: 0.98rem;
+    line-height: 1.6;
+  }
+  
+  .adminMockPreviewHeroActions,
+  .adminMockPreviewBottomActions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+  }
+  
+  .adminMockPreviewPrimaryBtn,
+  .adminMockPreviewGhostBtn {
+    min-height: 46px;
+    border: 0;
+    border-radius: 999px;
+    padding: 0 18px;
+    font-weight: 900;
+    font-size: 0.9rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease;
+  }
+  
+  .adminMockPreviewPrimaryBtn {
+    color: #ffffff;
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    box-shadow: 0 16px 34px rgba(249, 115, 22, 0.28);
+  }
+  
+  .adminMockPreviewGhostBtn {
+    color: #0f172a;
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+  }
+  
+  .adminMockPreviewPrimaryBtn:hover,
+  .adminMockPreviewGhostBtn:hover {
+    transform: translateY(-1px);
+  }
+  
+  .adminMockPreviewStatsGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  
+  .adminMockPreviewStatCard {
+    min-height: 132px;
+    padding: 18px;
+    border-radius: 24px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: #ffffff;
+    box-shadow: 0 18px 44px rgba(15, 23, 42, 0.07);
+  }
+  
+  .adminMockPreviewStatCard span,
+  .adminMockPreviewMetaPanel span,
+  .adminMockPreviewAnswerBox span,
+  .adminMockPreviewExplanation span,
+  .adminMockPreviewQuestionTop span {
+    display: block;
+    color: #64748b;
+    font-size: 0.76rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  
+  .adminMockPreviewStatCard strong {
+    display: block;
+    margin-top: 10px;
+    color: #0f172a;
+    font-size: 2rem;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+  
+  .adminMockPreviewStatCard p {
+    margin: 10px 0 0;
+    color: #64748b;
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
+  
+  .adminMockPreviewMetaPanel {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 1px;
+    overflow: hidden;
+    margin-bottom: 18px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 24px;
+    background: rgba(15, 23, 42, 0.08);
+    box-shadow: 0 18px 44px rgba(15, 23, 42, 0.06);
+  }
+  
+  .adminMockPreviewMetaPanel div {
+    min-height: 94px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.96);
+  }
+  
+  .adminMockPreviewMetaPanel strong {
+    display: block;
+    margin-top: 8px;
+    color: #0f172a;
+    font-size: 0.98rem;
+    line-height: 1.35;
+    text-transform: capitalize;
+  }
+  
+  .adminMockPreviewWarning {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 18px;
+    padding: 14px 18px;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    border-radius: 20px;
+    background: #fffbeb;
+    color: #92400e;
+  }
+  
+  .adminMockPreviewWarning strong {
+    font-size: 0.95rem;
+  }
+  
+  .adminMockPreviewWarning span {
+    color: #b45309;
+    font-size: 0.88rem;
+    font-weight: 800;
+  }
+  
+  .adminMockPreviewQuestionList {
+    display: grid;
+    gap: 16px;
+  }
+  
+  .adminMockPreviewQuestionCard {
+    padding: 20px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 26px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92)),
+      #ffffff;
+    box-shadow: 0 20px 52px rgba(15, 23, 42, 0.08);
+  }
+  
+  .adminMockPreviewQuestionTop {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 16px;
+  }
+  
+  .adminMockPreviewQuestionTop h2 {
+    margin: 8px 0 0;
+    color: #0f172a;
+    font-size: 1.06rem;
+    line-height: 1.55;
+    letter-spacing: -0.02em;
+  }
+  
+  .adminMockPreviewQuestionBadges {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+    min-width: 240px;
+  }
+  
+  .adminMockPreviewQuestionBadges small {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    color: #0f172a;
+    background: #eef2ff;
+    font-size: 0.74rem;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+  
+  .adminMockPreviewOptionGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  
+  .adminMockPreviewOptionGrid div {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+    min-height: 62px;
+    padding: 14px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 18px;
+    background: #ffffff;
+  }
+  
+  .adminMockPreviewOptionGrid span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    color: #ffffff;
+    background: #0f172a;
+    font-size: 0.82rem;
+    font-weight: 950;
+  }
+  
+  .adminMockPreviewOptionGrid p {
+    margin: 5px 0 0;
+    color: #334155;
+    font-size: 0.94rem;
+    line-height: 1.45;
+  }
+  
+  .adminMockPreviewAnswerBox {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  
+  .adminMockPreviewAnswerBox div {
+    padding: 14px;
+    border-radius: 18px;
+    background: #f8fafc;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+  }
+  
+  .adminMockPreviewAnswerBox strong {
+    display: block;
+    margin-top: 8px;
+    color: #0f172a;
+    font-size: 0.94rem;
+    line-height: 1.45;
+  }
+  
+  .adminMockPreviewExplanation {
+    padding: 14px;
+    border-radius: 18px;
+    background: #fff7ed;
+    border: 1px solid rgba(249, 115, 22, 0.16);
+  }
+  
+  .adminMockPreviewExplanation p {
+    margin: 8px 0 0;
+    color: #7c2d12;
+    font-size: 0.94rem;
+    line-height: 1.55;
+  }
+  
+  .adminMockPreviewQuestionFoot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  
+  .adminMockPreviewQuestionFoot span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    color: #475569;
+    background: #f1f5f9;
+    font-size: 0.74rem;
+    font-weight: 900;
+  }
+  
+  .adminMockPreviewBottomActions {
+    margin-top: 22px;
+    padding: 18px;
+    border-radius: 24px;
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+  }
+  
+  .adminMockPreviewEmpty {
+    padding: 28px;
+    border-radius: 26px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: #ffffff;
+    box-shadow: 0 20px 52px rgba(15, 23, 42, 0.08);
+  }
+  
+  .adminMockPreviewEmpty strong {
+    display: block;
+    color: #0f172a;
+    font-size: 1.2rem;
+  }
+  
+  .adminMockPreviewEmpty p {
+    margin: 8px 0 18px;
+    color: #64748b;
+  }
+  
+  @media (max-width: 980px) {
+    .adminMockPreviewHero {
+      flex-direction: column;
+    }
+  
+    .adminMockPreviewHeroActions,
+    .adminMockPreviewBottomActions {
+      width: 100%;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+  
+    .adminMockPreviewStatsGrid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  
+    .adminMockPreviewMetaPanel {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  
+    .adminMockPreviewQuestionTop {
+      flex-direction: column;
+    }
+  
+    .adminMockPreviewQuestionBadges {
+      justify-content: flex-start;
+      min-width: 0;
+    }
+  
+    .adminMockPreviewAnswerBox {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .adminMockPreviewHero,
+    .adminMockPreviewQuestionCard {
+      border-radius: 22px;
+      padding: 18px;
+    }
+  
+    .adminMockPreviewStatsGrid,
+    .adminMockPreviewMetaPanel,
+    .adminMockPreviewOptionGrid {
+      grid-template-columns: 1fr;
+    }
+  
+    .adminMockPreviewHeroActions button,
+    .adminMockPreviewBottomActions button {
+      width: 100%;
+    }
+  
+    .adminMockPreviewWarning {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+
+  /* =========================================================
+   34A6B — PREVIEW QUESTION TYPOGRAPHY LOCK
+   Scope: Admin mock-test preview only
+   Fix: long imported questions should not become giant headings
+   ========================================================= */
+
+.adminMockPreviewPage .adminMockPreviewQuestionCard h2,
+.adminMockPreviewPage .adminMockPreviewQuestionTop h2 {
+  margin: 8px 0 0 !important;
+  max-width: 100%;
+  color: #0f172a;
+  font-size: clamp(1.05rem, 1.15vw, 1.28rem) !important;
+  line-height: 1.55 !important;
+  font-weight: 850 !important;
+  letter-spacing: -0.018em !important;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.adminMockPreviewPage .adminMockPreviewQuestionTop {
+  align-items: flex-start;
+}
+
+.adminMockPreviewPage .adminMockPreviewQuestionTop > div:first-child {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.adminMockPreviewPage .adminMockPreviewQuestionBadges {
+  flex: 0 0 auto;
+}
+
+.adminMockPreviewPage .adminMockPreviewQuestionCard {
+  overflow: hidden;
+}
+
+.adminMockPreviewPage .adminMockPreviewOptionGrid p,
+.adminMockPreviewPage .adminMockPreviewAnswerBox strong,
+.adminMockPreviewPage .adminMockPreviewExplanation p {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
