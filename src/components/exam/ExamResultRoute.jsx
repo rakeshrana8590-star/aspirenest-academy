@@ -31,6 +31,28 @@ const isValidQuestionOrder = (order, totalQuestions) => {
   return sortedOrder.every((item, index) => item === index);
 };
 
+const formatDuration = (seconds = 0) => {
+  const safeSeconds = Math.max(0, Number(seconds) || 0);
+  const minutes = Math.floor(safeSeconds / 60);
+  const remainingSeconds = safeSeconds % 60;
+
+  if (minutes <= 0) return `${remainingSeconds}s`;
+
+  return `${minutes}m ${remainingSeconds}s`;
+};
+
+const getPerformanceLabel = (percentage) => {
+  if (percentage >= 80) return "Excellent";
+  if (percentage >= 50) return "Good Attempt";
+  return "Needs Revision";
+};
+
+const getPerformanceTone = (percentage) => {
+  if (percentage >= 80) return "excellent";
+  if (percentage >= 50) return "good";
+  return "revision";
+};
+
 const AutoSaveMockResult = ({
   testId,
   userEmail,
@@ -41,12 +63,9 @@ const AutoSaveMockResult = ({
 
     const autoSaveKey = `mockResultAutoSaved_${testId}_${userEmail}`;
 
-    if (sessionStorage.getItem(autoSaveKey)) {
-      return;
-    }
+    if (sessionStorage.getItem(autoSaveKey)) return;
 
     sessionStorage.setItem(autoSaveKey, "yes");
-
     saveToLeaderboard(false);
   }, [testId, userEmail, saveToLeaderboard]);
 
@@ -77,21 +96,36 @@ export default function ExamResultRoute({
 
   const accessStatus = getMockTestAccessStatus(test);
 
-  if (accessStatus === "NOT_FOUND") {
-    return (
-      <section className="notesSubjectRoutePage">
-        <div className="pdfMiniCard">
-          <h3>Result not found</h3>
-          <p>This mock test result is not available anymore.</p>
-          <button
-            className="btnLink"
-            onClick={() => navigate("/ctet-tet/mock-tests")}
-          >
-            Back to Mock Tests
+  const renderStateCard = ({
+    label,
+    title,
+    message,
+    actionLabel,
+    onAction,
+  }) => (
+    <section className="examResultPage">
+      <div className="examResultShell">
+        <div className="examResultStateCard">
+          <span>{label}</span>
+          <h1>{title}</h1>
+          <p>{message}</p>
+
+          <button type="button" onClick={onAction}>
+            {actionLabel}
           </button>
         </div>
-      </section>
-    );
+      </div>
+    </section>
+  );
+
+  if (accessStatus === "NOT_FOUND") {
+    return renderStateCard({
+      label: "Unavailable",
+      title: "Result not found",
+      message: "This mock test result is not available anymore.",
+      actionLabel: "Back to Mock Tests",
+      onAction: () => navigate("/ctet-tet/mock-tests"),
+    });
   }
 
   const questions = test.questions || [];
@@ -108,121 +142,71 @@ export default function ExamResultRoute({
     ? storedAttemptState
     : {};
 
-  const hasSubmittedAttempt =
-    activeAttemptState?.isSubmitted === true;
+  const hasSubmittedAttempt = activeAttemptState?.isSubmitted === true;
 
   if (accessStatus === "UNPUBLISHED") {
-    return (
-      <section className="notesSubjectRoutePage">
-        <div className="pdfMiniCard">
-          <h3>Result unavailable</h3>
-          <p>This mock test is not published right now.</p>
-          <button
-            className="btnLink"
-            onClick={() => navigate("/ctet-tet/mock-tests")}
-          >
-            Back to Mock Tests
-          </button>
-        </div>
-      </section>
-    );
+    return renderStateCard({
+      label: "Unpublished",
+      title: "Result unavailable",
+      message: "This mock test is not published right now.",
+      actionLabel: "Back to Mock Tests",
+      onAction: () => navigate("/ctet-tet/mock-tests"),
+    });
   }
 
   if (accessStatus === "LOGIN_REQUIRED") {
-    return (
-      <section className="notesSubjectRoutePage">
-        <div className="pdfMiniCard">
-          <h3>Login required</h3>
-          <p>Please login to view your result.</p>
-          <button
-            className="btnLink"
-            onClick={() => navigate("/login")}
-          >
-            Login to Continue
-          </button>
-        </div>
-      </section>
-    );
+    return renderStateCard({
+      label: "Login Required",
+      title: "Login required",
+      message: "Please login to view your result.",
+      actionLabel: "Login to Continue",
+      onAction: () => navigate("/login"),
+    });
   }
 
   if (
     accessStatus === "PLAN_LOCKED" ||
     accessStatus === "EXPIRED_MEMBERSHIP"
   ) {
-    return (
-      <section className="notesSubjectRoutePage">
-        <div className="pdfMiniCard">
-          <h3>Plan required</h3>
-          <p>
-            This result needs {test.planType || "PREMIUM"} access.
-          </p>
-          <button
-            className="btnLink"
-            onClick={() => navigate("/ctet-tet/pricing")}
-          >
-            View Pricing
-          </button>
-        </div>
-      </section>
-    );
+    return renderStateCard({
+      label: "Plan Required",
+      title: "Plan required",
+      message: `This result needs ${test.planType || "PREMIUM"} access.`,
+      actionLabel: "View Pricing",
+      onAction: () => navigate("/ctet-tet/pricing"),
+    });
   }
 
   if (accessStatus === "UPCOMING" && !hasSubmittedAttempt) {
-    return (
-      <section className="notesSubjectRoutePage">
-        <div className="pdfMiniCard">
-          <h3>Test upcoming</h3>
-          <p>
-            This mock test is scheduled for a future date or time.
-          </p>
-          <button
-            className="btnLink"
-            onClick={() => navigate("/ctet-tet/mock-tests")}
-          >
-            Back to Mock Tests
-          </button>
-        </div>
-      </section>
-    );
+    return renderStateCard({
+      label: "Upcoming",
+      title: "Test upcoming",
+      message: "This mock test is scheduled for a future date or time.",
+      actionLabel: "Back to Mock Tests",
+      onAction: () => navigate("/ctet-tet/mock-tests"),
+    });
   }
 
   if (accessStatus === "EXPIRED" && !hasSubmittedAttempt) {
-    return (
-      <section className="notesSubjectRoutePage">
-        <div className="pdfMiniCard">
-          <h3>Result locked</h3>
-          <p>
-            This mock test window is closed and no submitted attempt
-            was found on this device.
-          </p>
-          <button
-            className="btnLink"
-            onClick={() => navigate("/ctet-tet/mock-tests")}
-          >
-            Back to Mock Tests
-          </button>
-        </div>
-      </section>
-    );
+    return renderStateCard({
+      label: "Locked",
+      title: "Result locked",
+      message:
+        "This mock test window is closed and no submitted attempt was found on this device.",
+      actionLabel: "Back to Mock Tests",
+      onAction: () => navigate("/ctet-tet/mock-tests"),
+    });
   }
 
   if (!hasSubmittedAttempt) {
-    return (
-      <section className="notesSubjectRoutePage">
-        <div className="pdfMiniCard">
-          <h3>Result locked</h3>
-          <p>Please submit the mock test before viewing result.</p>
-          <button
-            className="btnLink"
-            onClick={() =>
-              navigate(`/ctet-tet/mock-tests/attempt/${test.id}`)
-            }
-          >
-            Continue Test
-          </button>
-        </div>
-      </section>
-    );
+    return renderStateCard({
+      label: "Locked",
+      title: "Result locked",
+      message: "Please submit the mock test before viewing result.",
+      actionLabel: "Continue Test",
+      onAction: () =>
+        navigate(`/ctet-tet/mock-tests/attempt/${test.id}`),
+    });
   }
 
   const newStoredAnswers = storedAttemptState?.answers || {};
@@ -274,8 +258,7 @@ export default function ExamResultRoute({
     ({ actualQuestionIndex }) => !attemptAnswers[actualQuestionIndex]
   ).length;
 
-  const wrongCount =
-    totalQuestions - correctCount - skippedCount;
+  const wrongCount = totalQuestions - correctCount - skippedCount;
 
   const accuracy =
     totalQuestions > 0
@@ -332,12 +315,13 @@ export default function ExamResultRoute({
       ? Math.round((score / totalMarks) * 100)
       : 0;
 
-  const leaderboardEnabled =
-    test.leaderboardMode &&
-    test.leaderboardMode !== "disabled";
+  const safePercentage = Math.max(0, Math.min(100, percentage));
 
-  const canShowLeaderboardButton =
-    leaderboardEnabled || isAdmin(user);
+  const leaderboardEnabled =
+    test.leaderboardMode && test.leaderboardMode !== "disabled";
+
+  const isAdminUser = Boolean(isAdmin?.(user));
+  const canShowLeaderboardButton = leaderboardEnabled || isAdminUser;
 
   const startedAt = Number(activeAttemptState.startedAt || Date.now());
   const endedAt = Number(activeAttemptState.submittedAt || Date.now());
@@ -346,6 +330,9 @@ export default function ExamResultRoute({
     0,
     Math.round((endedAt - startedAt) / 1000)
   );
+
+  const performanceLabel = getPerformanceLabel(percentage);
+  const performanceTone = getPerformanceTone(percentage);
 
   const saveToLeaderboard = async (showAlert = true) => {
     try {
@@ -474,90 +461,197 @@ export default function ExamResultRoute({
     }
   };
 
+  const resultMetrics = [
+    {
+      tone: "correct",
+      label: "Correct",
+      value: correctCount,
+      text: "Answers matched with the answer key.",
+    },
+    {
+      tone: "wrong",
+      label: "Wrong",
+      value: wrongCount,
+      text: "Review these first to avoid repeat mistakes.",
+    },
+    {
+      tone: "skipped",
+      label: "Skipped",
+      value: skippedCount,
+      text: "Unattempted questions left during the test.",
+    },
+    {
+      tone: "neutral",
+      label: "Total Questions",
+      value: totalQuestions,
+      text: "Final evaluated questions in this attempt.",
+    },
+  ];
+
   return (
-    <section className="notesSubjectRoutePage">
-      <div key={test.id}>
-        <span className="notesSubjectRouteBadge">
-          MOCK TEST RESULT
-        </span>
+    <section className="examResultPage">
+      <div className="examResultShell">
+        <AutoSaveMockResult
+          testId={test.id}
+          userEmail={user?.email || ""}
+          saveToLeaderboard={saveToLeaderboard}
+        />
 
-        <h1>Result: {test.title}</h1>
+        <div className="examResultHero">
+          <div className="examResultHeroContent">
+            <span className="examResultBadge">Mock Test Result</span>
 
-        <p>
-          {test.planType} · {test.subject} · {test.chapter}
-        </p>
-
-        <div className="pdfShelfRow">
-          <div className="pdfMiniCard">
-            <div className="pdfIcon">🏆</div>
-
-            <h3>Score Summary</h3>
-
-            <p>Total Questions: {totalQuestions}</p>
-            <p>Correct: {correctCount}</p>
-            <p>Wrong: {wrongCount}</p>
-            <p>Skipped: {skippedCount}</p>
+            <h1>{test.title}</h1>
 
             <p>
-              Score: {score} / {totalMarks}
+              {test.planType || "FREE"} · {test.subject || "Subject"} ·{" "}
+              {test.chapter || "Complete Test"}
             </p>
 
-            <span>Accuracy: {accuracy}%</span>
+            <div className="examResultHeroStats">
+              <div>
+                <span>Score</span>
+                <strong>
+                  {score} / {totalMarks}
+                </strong>
+              </div>
 
-            {canShowLeaderboardButton && (
-              <p>
-                Leaderboard: {test.leaderboardMode || "disabled"}
-              </p>
-            )}
+              <div>
+                <span>Percentage</span>
+                <strong>{percentage}%</strong>
+              </div>
 
-            <button
-              className="btnLink"
-              onClick={() =>
-                navigate(`/ctet-tet/mock-tests/review/${test.id}`)
-              }
+              <div>
+                <span>Accuracy</span>
+                <strong>{accuracy}%</strong>
+              </div>
+
+              <div>
+                <span>Time</span>
+                <strong>{formatDuration(durationSeconds)}</strong>
+              </div>
+            </div>
+          </div>
+
+          <aside className="examResultScorePanel">
+            <div
+              className={`examResultScoreRing ${performanceTone}`}
+              style={{
+                "--exam-result-percent": `${safePercentage}%`,
+              }}
             >
-              Review Answers
-            </button>
+              <div>
+                <strong>{percentage}%</strong>
+                <span>{performanceLabel}</span>
+              </div>
+            </div>
 
-            <AutoSaveMockResult
-              testId={test.id}
-              userEmail={user?.email || ""}
-              saveToLeaderboard={saveToLeaderboard}
-            />
+            <p>
+              {percentage >= 80
+                ? "Strong command. Keep revising and maintain consistency."
+                : percentage >= 50
+                ? "Good base. Review wrong answers and strengthen weak areas."
+                : "Revision needed. Start with incorrect and skipped questions."}
+            </p>
+
+            <div className="examResultActionStack">
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(`/ctet-tet/mock-tests/review/${test.id}`)
+                }
+              >
+                Review Answers
+              </button>
+
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => navigate("/ctet-tet/mock-tests")}
+              >
+                Back to Mock Tests
+              </button>
+            </div>
+          </aside>
+        </div>
+
+        <section className="examResultMetricsPanel">
+          <div className="examResultMetricRail">
+            {resultMetrics.map((metric) => (
+              <article
+                key={metric.label}
+                className={`examResultMetricCard ${metric.tone}`}
+              >
+                <span>{metric.label}</span>
+                <strong>{metric.value}</strong>
+                <p>{metric.text}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="examResultInsightGrid">
+          <article className="examResultInfoCard">
+            <h3>Attempt Details</h3>
+
+            <div className="examResultInfoList">
+              <p>
+                <span>Student</span>
+                <strong>{fullName || user?.email || "Student"}</strong>
+              </p>
+
+              <p>
+                <span>Test Type</span>
+                <strong>{test.testType || "Mock Test"}</strong>
+              </p>
+
+              <p>
+                <span>Exam Type</span>
+                <strong>{test.examType || "CTET/TET"}</strong>
+              </p>
+
+              <p>
+                <span>Duration Used</span>
+                <strong>{formatDuration(durationSeconds)}</strong>
+              </p>
+            </div>
+          </article>
+
+          <article className="examResultInfoCard examResultStatusCard">
+            <h3>Result Status</h3>
+
+            <div className="examResultStatusBox">
+              <strong>{performanceLabel}</strong>
+              <span>
+                Score saved automatically when this result page opens.
+              </span>
+            </div>
+
+            <div className="examResultInfoList">
+              <p>
+                <span>Leaderboard</span>
+                <strong>{test.leaderboardMode || "disabled"}</strong>
+              </p>
+
+              <p>
+                <span>Sync</span>
+                <strong>
+                  {canShowLeaderboardButton ? "Available" : "Auto saved"}
+                </strong>
+              </p>
+            </div>
 
             {canShowLeaderboardButton && (
               <button
-                className="btnLink"
+                type="button"
+                className="examResultSyncButton"
                 onClick={() => saveToLeaderboard(true)}
               >
                 Sync Result
               </button>
             )}
-          </div>
-
-          <div className="pdfMiniCard">
-            <div className="pdfIcon">📊</div>
-
-            <h3>Performance</h3>
-
-            <p>Percentage: {percentage}%</p>
-
-            <span>
-              {percentage >= 80
-                ? "Excellent"
-                : percentage >= 50
-                ? "Good Attempt"
-                : "Needs Revision"}
-            </span>
-
-            <button
-              className="btnLink"
-              onClick={() => navigate("/ctet-tet/mock-tests")}
-            >
-              Back to Mock Tests
-            </button>
-          </div>
-        </div>
+          </article>
+        </section>
       </div>
     </section>
   );
