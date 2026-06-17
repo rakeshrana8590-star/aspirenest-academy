@@ -1,0 +1,509 @@
+.mockStudentPage,
+.mockStudentPage *,
+.mockStudentPage *::before,
+.mockStudentPage *::after {
+  box-sizing: border-box;
+}
+
+.mockStudentPage button {
+  font: inherit;
+}
+
+.mockStudentPage {
+  min-height: calc(100vh - 92px);
+  padding: 18px 7vw 70px;
+  background:
+    radial-gradient(circle at 8% 14%, rgba(255, 123, 0, 0.14), transparent 30%),
+    radial-gradient(circle at 92% 18%, rgba(59, 130, 246, 0.16), transparent 32%),
+    linear-gradient(180deg, #f8fbff 0%, #ffffff 52%, #f8fbff 100%);
+}
+
+.mockStudentHero {
+  margin: 0 auto 34px;
+  max-width: 1480px;
+}
+
+.mockStudentHeroPanel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 34px;
+  padding: 42px;
+  color: #ffffff;
+  background:
+    linear-gradient(115deg, rgba(255, 123, 0, 0.22), transparent 28%),
+    linear-gradient(135deg, #101827 0%, #17233a 55%, #0b1220 100%);
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.18);
+  isolation: isolate;
+}
+
+.mockStudentHeroPanel::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  z-index: 0;
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.14), transparent 22%),
+    radial-gradient(circle at 80% 20%, rgba(255, 123, 0, 0.2), transparent 30%);
+  pointer-events: none;
+}
+
+.mockStudentHeroActions,
+.mockStudentKpiGrid,
+.mockStudentHeroPanel h1,
+.mockStudentHeroPanel p {
+  position: relative;
+  z-index: 1;
+}
+
+.mockStudentHeroActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.mockStudentBackBtn {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  padding: 13px 20px;
+  background: #0b1220;
+  color: #ffffff;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(2, 6, 23, 0.2);
+}
+
+.mockStudentBadge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 10px 18px;
+  background: rgba(255, 123, 0, 0.14);
+  border: 1px solid rgba(255, 123, 0, 0.38);
+  color: #fed7aa;
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mockStudentHeroPanel h1 {
+  max-width: 980px;
+  margin: 0;
+  font-size: clamp(40px, 5vw, 74px);
+  line-height: 0.96;
+  letter-spacing: -0.06em;
+  font-weight: 1000;
+}
+
+.mockStudentHeroPanel p {
+  max-width: 820px;
+  margin: 18px 0 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 18px;
+  line-height: 1.6;
+  font-weight: 750;
+}
+
+.mockStudentKpiGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 30px;
+}
+
+.mockStudentKpi {
+  min-height: 78px;
+  border-radius: 18px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.11);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(12px);
+}
+
+.mockStudentKpi span {
+  display: block;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.mockStudentKpi strong {
+  display: block;
+  margin-top: 8px;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 1000;
+}
+
+.mockStudentShelf {
+  max-width: 1480px;
+  margin: 0 auto;
+  border-radius: 34px;
+  padding: 32px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(226, 232, 240, 0.92);
+  box-shadow: 0 22px 70px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.mockStudentShelfHeader {
+  margin-bottom: 24px;
+}
+
+.mockStudentShelfHeader span {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 9px 15px;
+  background: #fff7ed;
+  color: #c2410c;
+  font-size: 12px;
+  font-weight: 1000;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mockStudentShelfHeader h2 {
+  margin: 14px 0 0;
+  color: #0f172a;
+  font-size: clamp(28px, 3vw, 44px);
+  letter-spacing: -0.04em;
+  font-weight: 1000;
+}
+
+.mockStudentPlanGrid,
+.mockStudentGrid,
+.mockStudentTestGrid {
+  display: grid;
+  align-items: stretch;
+  gap: 22px;
+}
+
+.mockStudentPlanGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.mockStudentGrid,
+.mockStudentTestGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.mockStudentPlanCard,
+.mockStudentTile,
+.mockTestPremiumCard {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  border-radius: 28px !important;
+  color: #0f172a;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 123, 0, 0.13), transparent 34%),
+    radial-gradient(circle at 100% 0%, rgba(59, 130, 246, 0.12), transparent 34%),
+    rgba(255, 255, 255, 0.96) !important;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.mockStudentPlanCard,
+.mockStudentTile {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 250px;
+  padding: 26px;
+  cursor: pointer;
+}
+
+.mockStudentPlanCard:hover,
+.mockStudentTile:hover,
+.mockTestPremiumCard:hover {
+  transform: translateY(-5px);
+  border-color: rgba(255, 123, 0, 0.36) !important;
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.13);
+}
+
+.mockStudentPlanTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 26px;
+}
+
+.mockStudentPlanIcon,
+.mockStudentTileIcon,
+.mockTestPremiumIcon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 58px;
+  height: 58px;
+  border-radius: 20px;
+  background: #fff7ed;
+  font-size: 28px;
+  box-shadow: inset 0 0 0 1px rgba(255, 123, 0, 0.08);
+}
+
+.mockStudentPlanPill,
+.mockStudentTile span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 8px 13px;
+  background: #fff7ed;
+  color: #c2410c;
+  font-size: 12px;
+  font-weight: 1000;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mockStudentPlanCard h3,
+.mockStudentTile h3,
+.mockTestPremiumCard h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 24px;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  font-weight: 1000;
+}
+
+.mockStudentPlanCard p,
+.mockStudentTile p,
+.mockTestPremiumMeta {
+  margin: 12px 0 0;
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 800;
+}
+
+.mockStudentPlanStats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: auto;
+  padding-top: 18px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.mockStudentPlanStats span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.mockStudentPlanStats strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 1000;
+}
+
+.mockStudentTile {
+  gap: 14px;
+}
+
+.mockStudentTile h3 {
+  margin-top: 10px;
+}
+
+.mockStudentTile span {
+  margin-top: auto;
+  width: fit-content;
+}
+
+.mockStudentEmpty {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  min-height: 260px;
+  border-radius: 28px;
+  padding: 28px;
+  background: #ffffff;
+  border: 1px dashed #cbd5e1;
+}
+
+.mockStudentEmptyIcon {
+  display: grid;
+  place-items: center;
+  width: 66px;
+  height: 66px;
+  border-radius: 22px;
+  background: #fff7ed;
+  font-size: 30px;
+  margin-bottom: 16px;
+}
+
+.mockStudentEmpty strong {
+  color: #0f172a;
+  font-size: 24px;
+  font-weight: 1000;
+}
+
+.mockStudentEmpty p {
+  max-width: 460px;
+  color: #64748b;
+  font-weight: 800;
+}
+
+.mockTestPremiumCard {
+  display: flex;
+  flex-direction: column;
+  min-height: 440px;
+  border-radius: 32px !important;
+  padding: 26px;
+}
+
+.mockTestPremiumCard.isCompleted {
+  border-color: rgba(22, 163, 74, 0.24) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(22, 163, 74, 0.12), transparent 34%),
+    radial-gradient(circle at 100% 0%, rgba(59, 130, 246, 0.1), transparent 34%),
+    rgba(255, 255, 255, 0.96) !important;
+}
+
+.mockTestPremiumTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 26px;
+}
+
+.mockTestPremiumBadges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.mockTestPremiumBadges span {
+  height: fit-content;
+  border-radius: 999px;
+  padding: 8px 13px;
+  background: #fff7ed;
+  color: #c2410c;
+  font-size: 12px;
+  font-weight: 1000;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mockTestPremiumStats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.mockTestPremiumStats div {
+  min-width: 0;
+  border-radius: 18px;
+  padding: 15px;
+  background: rgba(248, 250, 252, 0.82);
+  border: 1px solid #e2e8f0;
+}
+
+.mockTestPremiumStats span,
+.mockTestPremiumFooter span {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.mockTestPremiumStats strong,
+.mockTestPremiumFooter strong {
+  display: block;
+  margin-top: 7px;
+  color: #0f172a;
+  font-size: 16px;
+  line-height: 1.2;
+  font-weight: 1000;
+}
+
+.mockTestPremiumFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: auto;
+  padding-top: 22px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.mockTestPremiumButton {
+  appearance: none;
+  min-width: 150px;
+  border: 0;
+  border-radius: 999px;
+  padding: 15px 22px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 1000;
+  cursor: pointer;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.22);
+}
+
+.mockTestPremiumButton:hover {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 1180px) {
+  .mockStudentPlanGrid,
+  .mockStudentGrid,
+  .mockStudentTestGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mockStudentHeroPanel {
+    padding: 34px;
+  }
+}
+
+@media (max-width: 760px) {
+  .mockStudentPage {
+    padding: 14px 16px 52px;
+  }
+
+  .mockStudentHeroPanel,
+  .mockStudentShelf {
+    border-radius: 24px;
+    padding: 24px;
+  }
+
+  .mockStudentHeroPanel h1 {
+    font-size: clamp(34px, 13vw, 52px);
+  }
+
+  .mockStudentKpiGrid,
+  .mockStudentPlanGrid,
+  .mockStudentGrid,
+  .mockStudentTestGrid,
+  .mockTestPremiumStats {
+    grid-template-columns: 1fr;
+  }
+
+  .mockTestPremiumFooter {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .mockTestPremiumButton {
+    width: 100%;
+  }
+}
