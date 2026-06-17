@@ -48,6 +48,35 @@ export default function AdminMockTestQuestionBankRoute({
     );
   });
 
+  const questionBankSubjectCards = [
+    ...new Set(
+      questionBankItems
+        .map((item) => item.sourceSubject || item.subject)
+        .filter(Boolean)
+    ),
+  ]
+    .sort()
+    .map((subject) => {
+      const subjectQuestions = questionBankItems.filter(
+        (question) =>
+          (question.sourceSubject || question.subject) === subject
+      );
+
+      const chapterCount = [
+        ...new Set(
+          subjectQuestions
+            .map((question) => question.sourceChapter || question.chapter)
+            .filter(Boolean)
+        ),
+      ].length;
+
+      return {
+        subject,
+        questionCount: subjectQuestions.length,
+        chapterCount,
+      };
+    });
+
   const downloadJson = (payload, fileName) => {
     const jsonBlob = new Blob([JSON.stringify(payload, null, 2)], {
       type: "application/json",
@@ -288,6 +317,59 @@ export default function AdminMockTestQuestionBankRoute({
             Bulk Export
           </button>
         </div>
+      </div>
+
+      <div className="adminMockQbBrowsePanel">
+        <div className="adminMockQbBrowseHeader">
+          <span>Browse Question Bank</span>
+
+          <h2>Open by Subject</h2>
+
+          <p>
+            Use subject cards to open chapter-wise question pools. Filters are
+            for search; this section is for navigation.
+          </p>
+        </div>
+
+        {questionBankSubjectCards.length === 0 ? (
+          <div className="adminMockQbEmptyBrowse">
+            <strong>No subjects found.</strong>
+            <p>Add questions with subject and chapter details first.</p>
+          </div>
+        ) : (
+          <div className="adminMockQbBrowseGrid">
+            {questionBankSubjectCards.map((item) => (
+              <button
+                type="button"
+                key={item.subject}
+                className="adminMockQbSubjectCard"
+                onClick={() =>
+                  navigate(
+                    `/admin/content/mock-tests/question-bank/${encodeURIComponent(
+                      item.subject
+                    )}`
+                  )
+                }
+              >
+                <span className="adminMockQbSubjectIcon" aria-hidden="true">
+                  📚
+                </span>
+
+                <span className="adminMockQbSubjectBody">
+                  <strong>{item.subject}</strong>
+
+                  <small>
+                    {item.chapterCount} Chapters • {item.questionCount} Questions
+                  </small>
+                </span>
+
+                <span className="adminMockQbSubjectArrow" aria-hidden="true">
+                  →
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="contentStudioList questionBankList">

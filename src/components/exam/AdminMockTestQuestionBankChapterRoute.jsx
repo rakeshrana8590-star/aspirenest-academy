@@ -94,26 +94,31 @@ export default function AdminMockTestQuestionBankChapterRoute({
           </div>
         ) : (
           questions.map((question, index) => (
-            <div className="contentStudioItem" key={`${question.testTitle}-${index}`}>
-              <strong>
+            <div
+              className="contentStudioItem adminMockQbChapterQuestionCard"
+              key={`${question.testTitle}-${index}`}
+            >
+              <strong className="adminMockQbChapterQuestionText">
                 Q{index + 1}. {question.question}
               </strong>
-
-              <p>A. {question.option1}</p>
-              <p>B. {question.option2}</p>
-              <p>C. {question.option3}</p>
-              <p>D. {question.option4}</p>
-
-              <p>
+          
+              <div className="adminMockQbChapterOptionGrid">
+                <p className="adminMockQbChapterOption">A. {question.option1}</p>
+                <p className="adminMockQbChapterOption">B. {question.option2}</p>
+                <p className="adminMockQbChapterOption">C. {question.option3}</p>
+                <p className="adminMockQbChapterOption">D. {question.option4}</p>
+              </div>
+          
+              <p className="adminMockQbChapterAnswer">
                 <strong>Correct:</strong> {getAnswerLabel(question)}
               </p>
-
-              <p>
+          
+              <p className="adminMockQbChapterExplanation">
                 <strong>Explanation:</strong>{" "}
                 {question.explanation || "No explanation added."}
               </p>
-
-              <p>
+          
+              <p className="adminMockQbChapterMeta">
                 {question.planType || "FREE"} • {question.level || "Easy"} •{" "}
                 {question.questionType || "Single Correct"} •{" "}
                 {question.language || "English"} • {question.testTitle}

@@ -713,3 +713,461 @@
     font-size: 16px !important;
   }
 }
+
+/* ===============================
+   34A4D — QUESTION BANK BROWSE PANEL
+   Visible subject navigation from main Question Bank.
+================================ */
+
+.adminMockQuestionBankPage > .adminMockQbBrowsePanel {
+  width: min(1180px, calc(100% - 32px)) !important;
+  margin: 24px auto 0 !important;
+  padding: clamp(24px, 3vw, 34px) !important;
+  border-radius: 36px !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  box-shadow: 0 28px 82px rgba(15, 23, 42, 0.09) !important;
+}
+
+.adminMockQbBrowseHeader {
+  display: grid !important;
+  gap: 8px !important;
+  margin-bottom: 20px !important;
+}
+
+.adminMockQbBrowseHeader span {
+  color: #f97316 !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+}
+
+.adminMockQbBrowseHeader h2 {
+  margin: 0 !important;
+  color: #0f172a !important;
+  font-size: clamp(30px, 3.4vw, 46px) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.05em !important;
+  font-weight: 950 !important;
+}
+
+.adminMockQbBrowseHeader p {
+  max-width: 760px !important;
+  margin: 0 !important;
+  color: #64748b !important;
+  font-size: 15px !important;
+  line-height: 1.62 !important;
+  font-weight: 700 !important;
+}
+
+.adminMockQbBrowseGrid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+
+.adminMockQbSubjectCard {
+  appearance: none !important;
+  width: 100% !important;
+  min-height: 132px !important;
+  display: grid !important;
+  grid-template-columns: auto 1fr auto !important;
+  align-items: center !important;
+  gap: 15px !important;
+  text-align: left !important;
+  padding: 18px !important;
+  border-radius: 26px !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(249, 115, 22, 0.08), transparent 36%),
+    linear-gradient(180deg, #ffffff, #f8fafc) !important;
+  color: #0f172a !important;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.07) !important;
+  cursor: pointer !important;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease !important;
+}
+
+.adminMockQbSubjectCard:hover {
+  transform: translateY(-3px) !important;
+  border-color: rgba(249, 115, 22, 0.28) !important;
+  box-shadow: 0 26px 70px rgba(15, 23, 42, 0.11) !important;
+}
+
+.adminMockQbSubjectIcon {
+  display: grid !important;
+  place-items: center !important;
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 20px !important;
+  background: linear-gradient(135deg, #111827, #020617) !important;
+  color: #ffffff !important;
+  font-size: 22px !important;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.16) !important;
+}
+
+.adminMockQbSubjectBody {
+  display: grid !important;
+  gap: 7px !important;
+  min-width: 0 !important;
+}
+
+.adminMockQbSubjectBody strong {
+  color: #0f172a !important;
+  font-size: 18px !important;
+  line-height: 1.18 !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.025em !important;
+}
+
+.adminMockQbSubjectBody small {
+  color: #64748b !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  font-weight: 750 !important;
+}
+
+.adminMockQbSubjectArrow {
+  display: grid !important;
+  place-items: center !important;
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 999px !important;
+  background: #fff7ed !important;
+  color: #f97316 !important;
+  font-size: 18px !important;
+  font-weight: 950 !important;
+}
+
+.adminMockQbEmptyBrowse {
+  padding: 26px !important;
+  border-radius: 26px !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  background: #f8fafc !important;
+}
+
+.adminMockQbEmptyBrowse strong {
+  display: inline-flex !important;
+  width: fit-content !important;
+  padding: 10px 16px !important;
+  border-radius: 999px !important;
+  background: #111827 !important;
+  color: #ffffff !important;
+  font-size: 16px !important;
+  font-weight: 950 !important;
+}
+
+.adminMockQbEmptyBrowse p {
+  margin: 14px 0 0 !important;
+  color: #64748b !important;
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+  font-weight: 700 !important;
+}
+
+@media (max-width: 1100px) {
+  .adminMockQbBrowseGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .adminMockQuestionBankPage > .adminMockQbBrowsePanel {
+    width: min(100% - 24px, 1180px) !important;
+    border-radius: 28px !important;
+    padding: 22px !important;
+  }
+
+  .adminMockQbBrowseGrid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .adminMockQbSubjectCard {
+    grid-template-columns: 1fr !important;
+  }
+
+  .adminMockQbSubjectArrow {
+    display: none !important;
+  }
+}
+
+/* ===============================
+   34A4E — QUESTION BANK CHAPTER FINAL FIX
+   Remove dark question pill from chapter route.
+================================ */
+
+/* Chapter route question statement must be light premium, not dark pill */
+.adminMockQuestionBankChapterPage
+  > .contentStudioList
+  > .contentStudioItem
+  > strong {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 0 18px !important;
+  padding: 18px 20px !important;
+  border-radius: 22px !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(249, 115, 22, 0.055), transparent 34%),
+    #f8fafc !important;
+  color: #0f172a !important;
+  box-shadow: none !important;
+  font-size: 18px !important;
+  line-height: 1.55 !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Chapter route option / answer rows stay readable */
+.adminMockQuestionBankChapterPage
+  > .contentStudioList
+  > .contentStudioItem
+  p {
+  margin: 12px 0 0 !important;
+  padding: 14px 16px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  background: #f8fafc !important;
+  color: #334155 !important;
+  box-shadow: none !important;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+  font-weight: 750 !important;
+}
+
+/* Correct / Explanation labels can stay dark but compact */
+.adminMockQuestionBankChapterPage
+  > .contentStudioList
+  > .contentStudioItem
+  p
+  strong {
+  display: inline-flex !important;
+  width: fit-content !important;
+  max-width: max-content !important;
+  margin: 0 8px 0 0 !important;
+  padding: 7px 12px !important;
+  border-radius: 999px !important;
+  border: none !important;
+  background: #111827 !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12) !important;
+  font-size: 13px !important;
+  line-height: 1.2 !important;
+  font-weight: 950 !important;
+}
+
+/* Correct answer row subtle green premium */
+.adminMockQuestionBankChapterPage
+  > .contentStudioList
+  > .contentStudioItem
+  p:has(strong:first-child) {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(22, 163, 74, 0.08), transparent 34%),
+    #f8fafc !important;
+}
+
+/* Keep each question card premium and separated */
+.adminMockQuestionBankChapterPage
+  > .contentStudioList
+  > .contentStudioItem {
+  padding: 26px !important;
+  border-radius: 30px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.055), transparent 34%),
+    linear-gradient(180deg, #ffffff, #f8fafc) !important;
+}
+
+/* Mobile safety */
+@media (max-width: 720px) {
+  .adminMockQuestionBankChapterPage
+    > .contentStudioList
+    > .contentStudioItem
+    > strong {
+    padding: 15px 16px !important;
+    font-size: 16px !important;
+  }
+}
+
+/* ===============================
+   34A4F — CHAPTER QUESTION CLASS LOCK
+   Class-based final fix. No global selector dependency.
+================================ */
+
+.adminMockQuestionBankChapterPage .adminMockQbChapterQuestionCard {
+  padding: 26px !important;
+  border-radius: 30px !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.055), transparent 34%),
+    linear-gradient(180deg, #ffffff, #f8fafc) !important;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.065) !important;
+}
+
+.adminMockQuestionBankChapterPage
+  .adminMockQbChapterQuestionCard
+  > .adminMockQbChapterQuestionText {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 0 18px !important;
+  padding: 18px 20px !important;
+  border-radius: 22px !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(249, 115, 22, 0.055), transparent 34%),
+    #f8fafc !important;
+  color: #0f172a !important;
+  box-shadow: none !important;
+  font-size: 18px !important;
+  line-height: 1.55 !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.adminMockQbChapterOptionGrid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  margin-top: 16px !important;
+}
+
+.adminMockQuestionBankChapterPage .adminMockQbChapterOption {
+  min-height: 54px !important;
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  padding: 14px 16px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  box-shadow: none !important;
+  font-size: 14px !important;
+  line-height: 1.45 !important;
+  font-weight: 800 !important;
+}
+
+.adminMockQuestionBankChapterPage .adminMockQbChapterAnswer,
+.adminMockQuestionBankChapterPage .adminMockQbChapterExplanation {
+  margin: 14px 0 0 !important;
+  padding: 16px 18px !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  background: #f8fafc !important;
+  color: #334155 !important;
+  box-shadow: none !important;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+  font-weight: 750 !important;
+}
+
+.adminMockQuestionBankChapterPage .adminMockQbChapterAnswer {
+  border-color: #bbf7d0 !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(22, 163, 74, 0.1), transparent 34%),
+    linear-gradient(180deg, #f0fdf4, #ecfdf5) !important;
+}
+
+.adminMockQuestionBankChapterPage .adminMockQbChapterAnswer > strong,
+.adminMockQuestionBankChapterPage .adminMockQbChapterExplanation > strong {
+  display: inline-flex !important;
+  width: fit-content !important;
+  max-width: max-content !important;
+  margin: 0 8px 0 0 !important;
+  padding: 7px 12px !important;
+  border-radius: 999px !important;
+  border: none !important;
+  background: #111827 !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12) !important;
+  font-size: 13px !important;
+  line-height: 1.2 !important;
+  font-weight: 950 !important;
+}
+
+.adminMockQuestionBankChapterPage .adminMockQbChapterMeta {
+  margin: 14px 0 0 !important;
+  padding: 14px 16px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  background: #ffffff !important;
+  color: #64748b !important;
+  box-shadow: none !important;
+  font-size: 14px !important;
+  line-height: 1.45 !important;
+  font-weight: 800 !important;
+}
+
+@media (max-width: 720px) {
+  .adminMockQuestionBankChapterPage
+    .adminMockQbChapterQuestionCard
+    > .adminMockQbChapterQuestionText {
+    padding: 15px 16px !important;
+    font-size: 16px !important;
+  }
+
+  .adminMockQbChapterOptionGrid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ===============================
+   34A4G — FINAL DARK QUESTION PILL OVERRIDE
+   This beats old .contentStudioItem:not(.questionBankCard) > strong.
+================================ */
+
+.adminMockQuestionBankPage.adminMockQuestionBankChapterPage
+  > .contentStudioList
+  > .contentStudioItem.adminMockQbChapterQuestionCard
+  > strong.adminMockQbChapterQuestionText {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 0 18px !important;
+  padding: 18px 20px !important;
+  border-radius: 22px !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(249, 115, 22, 0.055), transparent 34%),
+    #f8fafc !important;
+  color: #0f172a !important;
+  box-shadow: none !important;
+  font-size: 18px !important;
+  line-height: 1.55 !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Also protect the question text from inherited pill behavior */
+.adminMockQuestionBankPage.adminMockQuestionBankChapterPage
+  .adminMockQbChapterQuestionText {
+  border-radius: 22px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(249, 115, 22, 0.055), transparent 34%),
+    #f8fafc !important;
+  color: #0f172a !important;
+  box-shadow: none !important;
+}
+
+/* Keep correct/explanation labels compact only inside their own rows */
+.adminMockQuestionBankPage.adminMockQuestionBankChapterPage
+  .adminMockQbChapterAnswer
+  > strong,
+.adminMockQuestionBankPage.adminMockQuestionBankChapterPage
+  .adminMockQbChapterExplanation
+  > strong {
+  display: inline-flex !important;
+  width: fit-content !important;
+  max-width: max-content !important;
+  margin: 0 8px 0 0 !important;
+  padding: 7px 12px !important;
+  border-radius: 999px !important;
+  border: none !important;
+  background: #111827 !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12) !important;
+}
