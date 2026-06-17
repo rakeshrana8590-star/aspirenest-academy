@@ -1,0 +1,9 @@
+/* ===============================
+   ADMIN MOCK TESTS — CSS IMPORT HUB
+   Keep this file small.
+   Page-level CSS lives inside /adminMockTests.
+================================ */
+
+@import "./adminMockTests/home.css";
+@import "./adminMockTests/manage.css";
+@import "./adminMockTests/questionBank.css";

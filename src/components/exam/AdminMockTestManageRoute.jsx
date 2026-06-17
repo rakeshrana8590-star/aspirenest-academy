@@ -32,7 +32,7 @@ export default function AdminMockTestManageRoute({
   navigate,
 }) {
   return (
-    <section className="coursePages">
+    <section className="coursePages adminMockManagePage">
             <div className="sectionHeader">
               <span className="badge">
                 MANAGE MOCK TESTS

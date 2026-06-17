@@ -49,7 +49,7 @@ export default function AdminMockTestQuestionBankChapterRoute({
   };
 
   return (
-    <section className="coursePages">
+    <section className="coursePages adminMockQuestionBankPage adminMockQuestionBankChapterPage">
       <div className="sectionHeader">
         <span className="badge">QUESTION BANK CHAPTER</span>
 

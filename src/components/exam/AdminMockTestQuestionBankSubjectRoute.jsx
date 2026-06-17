@@ -26,7 +26,7 @@ export default function AdminMockTestQuestionBankSubjectRoute({
   ];
 
   return (
-    <section className="coursePages">
+    <section className="coursePages adminMockQuestionBankPage adminMockQuestionBankSubjectPage">
       <div className="sectionHeader">
         <span className="badge">QUESTION BANK SUBJECT</span>
 
