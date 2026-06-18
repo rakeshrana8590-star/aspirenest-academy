@@ -1,316 +1,452 @@
+import { useMemo } from "react";
+
+const toNumber = (value, fallback = 0) => {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? numberValue : fallback;
+};
+
+const getStudentLabel = (entry) =>
+  entry.studentName ||
+  entry.studentEmail ||
+  entry.email ||
+  entry.userEmail ||
+  "Student";
+
+const getTestTitle = (entry) =>
+  entry.testTitle || entry.title || entry.mockTestTitle || "Mock Test";
+
+const getLeaderboardPercentage = (entry) =>
+  Math.round(
+    toNumber(
+      entry.percentage,
+      toNumber(entry.accuracy, 0)
+    )
+  );
+
+const getCreatedTime = (value) => {
+  if (!value) return 0;
+
+  try {
+    if (typeof value?.toDate === "function") {
+      return value.toDate().getTime();
+    }
+
+    if (value?.seconds) {
+      return value.seconds * 1000;
+    }
+
+    const dateValue = new Date(value).getTime();
+
+    return Number.isNaN(dateValue) ? 0 : dateValue;
+  } catch {
+    return 0;
+  }
+};
+
 export default function AdminMockTestLeaderboardRoute({
-    mockLeaderboardEntries = [],
-    loadMockLeaderboardEntries,
-    navigate,
-  }) {
-    const leaderboardEntries = mockLeaderboardEntries || [];
-  
-    const sortedEntries = [...leaderboardEntries].sort(
-      (a, b) =>
-        Number(b.percentage || 0) - Number(a.percentage || 0) ||
-        Number(b.score || 0) - Number(a.score || 0)
-    );
-  
-    const bestByStudent = Object.values(
-      sortedEntries.reduce((acc, entry) => {
-        const key =
-          entry.studentEmail ||
-          entry.email ||
-          entry.studentName ||
-          `student-${entry.id}`;
-  
-        const current = acc[key];
-  
-        if (
-          !current ||
-          Number(entry.percentage || 0) > Number(current.percentage || 0) ||
-          (Number(entry.percentage || 0) === Number(current.percentage || 0) &&
-            Number(entry.score || 0) > Number(current.score || 0))
-        ) {
-          acc[key] = entry;
-        }
-  
-        return acc;
-      }, {})
-    ).sort(
-      (a, b) =>
-        Number(b.percentage || 0) - Number(a.percentage || 0) ||
-        Number(b.score || 0) - Number(a.score || 0)
-    );
-  
-    const totalRankedStudents = bestByStudent.length;
-  
-    const highestScore =
-      bestByStudent.length > 0
-        ? Math.max(...bestByStudent.map((entry) => Number(entry.score || 0)))
-        : 0;
-  
-    const averageAccuracy =
-      bestByStudent.length > 0
-        ? Math.round(
-            bestByStudent.reduce(
-              (sum, entry) => sum + Number(entry.accuracy || 0),
-              0
-            ) / bestByStudent.length
-          )
-        : 0;
-  
-    const subjectLeaders = Object.values(
-      sortedEntries
-        .filter((entry) => entry.subject)
-        .reduce((acc, entry) => {
-          const key = entry.subject;
-  
+  mockLeaderboardEntries = [],
+  loadMockLeaderboardEntries,
+  navigate,
+}) {
+  const leaderboardEntries = Array.isArray(mockLeaderboardEntries)
+    ? mockLeaderboardEntries
+    : [];
+
+  const sortedEntries = useMemo(
+    () =>
+      [...leaderboardEntries].sort(
+        (a, b) =>
+          getLeaderboardPercentage(b) - getLeaderboardPercentage(a) ||
+          toNumber(b.score, 0) - toNumber(a.score, 0)
+      ),
+    [leaderboardEntries]
+  );
+
+  const bestByStudent = useMemo(
+    () =>
+      Object.values(
+        sortedEntries.reduce((acc, entry) => {
+          const key =
+            entry.studentEmail ||
+            entry.email ||
+            entry.userEmail ||
+            entry.studentName ||
+            `student-${entry.id}`;
+
           const current = acc[key];
-  
+
+          const entryPercentage = getLeaderboardPercentage(entry);
+          const currentPercentage = current
+            ? getLeaderboardPercentage(current)
+            : -1;
+
           if (
             !current ||
-            Number(entry.percentage || 0) > Number(current.percentage || 0) ||
-            (Number(entry.percentage || 0) === Number(current.percentage || 0) &&
-              Number(entry.score || 0) > Number(current.score || 0))
+            entryPercentage > currentPercentage ||
+            (entryPercentage === currentPercentage &&
+              toNumber(entry.score, 0) > toNumber(current.score, 0))
           ) {
             acc[key] = entry;
           }
-  
+
           return acc;
         }, {})
-    );
-  
-    const recentWinners = [...leaderboardEntries]
-      .sort((a, b) => {
-        const dateA = a.createdAt?.toDate
-          ? a.createdAt.toDate()
-          : new Date(a.createdAt || 0);
-  
-        const dateB = b.createdAt?.toDate
-          ? b.createdAt.toDate()
-          : new Date(b.createdAt || 0);
-  
-        return dateB - dateA;
-      })
-      .slice(0, 6);
-  
-    return (
-      <section className="coursePages leaderboardPage">
-        <div className="sectionHeader">
+      ).sort(
+        (a, b) =>
+          getLeaderboardPercentage(b) - getLeaderboardPercentage(a) ||
+          toNumber(b.score, 0) - toNumber(a.score, 0)
+      ),
+    [sortedEntries]
+  );
+
+  const subjectLeaders = useMemo(
+    () =>
+      Object.values(
+        sortedEntries
+          .filter((entry) => entry.subject)
+          .reduce((acc, entry) => {
+            const key = entry.subject;
+            const current = acc[key];
+
+            const entryPercentage = getLeaderboardPercentage(entry);
+            const currentPercentage = current
+              ? getLeaderboardPercentage(current)
+              : -1;
+
+            if (
+              !current ||
+              entryPercentage > currentPercentage ||
+              (entryPercentage === currentPercentage &&
+                toNumber(entry.score, 0) > toNumber(current.score, 0))
+            ) {
+              acc[key] = entry;
+            }
+
+            return acc;
+          }, {})
+      ),
+    [sortedEntries]
+  );
+
+  const recentWinners = useMemo(
+    () =>
+      [...leaderboardEntries]
+        .sort(
+          (a, b) =>
+            getCreatedTime(b.createdAt || b.submittedAt || b.completedAt) -
+            getCreatedTime(a.createdAt || a.submittedAt || a.completedAt)
+        )
+        .slice(0, 6),
+    [leaderboardEntries]
+  );
+
+  const topThree = bestByStudent.slice(0, 3);
+
+  const totalRankedStudents = bestByStudent.length;
+
+  const highestScore =
+    bestByStudent.length > 0
+      ? Math.max(...bestByStudent.map((entry) => toNumber(entry.score, 0)))
+      : 0;
+
+  const averageAccuracy =
+    bestByStudent.length > 0
+      ? Math.round(
+          bestByStudent.reduce(
+            (sum, entry) => sum + toNumber(entry.accuracy, getLeaderboardPercentage(entry)),
+            0
+          ) / bestByStudent.length
+        )
+      : 0;
+
+  const averagePercentage =
+    bestByStudent.length > 0
+      ? Math.round(
+          bestByStudent.reduce(
+            (sum, entry) => sum + getLeaderboardPercentage(entry),
+            0
+          ) / bestByStudent.length
+        )
+      : 0;
+
+  const handleRefreshLeaderboard = async () => {
+    await loadMockLeaderboardEntries?.();
+  };
+
+  return (
+    <section className="coursePages adminMockLeaderboardPage">
+      <div className="adminMockLeaderboardHero">
+        <div className="adminMockLeaderboardHeroCopy">
           <span className="badge">LEADERBOARD</span>
-  
-          <h1>Mock Test Leaderboard</h1>
-  
+
+          <h1>Mock Test Leaderboard Command Center</h1>
+
           <p>
-            Rank top students, subject champions, and latest leaderboard entries
-            from real mock test attempts.
+            Rank top students, subject champions, latest winners, and unique
+            best scores from leaderboard-enabled mock-test attempts.
           </p>
-        </div>
-  
-        <div className="leaderboardTopBar">
-          <button
-            className="backButton"
-            onClick={() => navigate("/admin/content/mock-tests")}
-          >
-            ← Back
-          </button>
-  
-          <button className="publishButton" onClick={loadMockLeaderboardEntries}>
-            Refresh Leaderboard
-          </button>
-  
-          <button
-            className="backButton"
-            onClick={() => navigate("/admin/content/mock-tests/results")}
-          >
-            View Results
-          </button>
-        </div>
-  
-        <div className="leaderboardKpiGrid">
-          <div className="leaderboardKpiCard">
-            <span>Ranked Students</span>
-            <strong>{totalRankedStudents}</strong>
-            <small>Unique best scores</small>
-          </div>
-  
-          <div className="leaderboardKpiCard">
-            <span>Total Entries</span>
-            <strong>{leaderboardEntries.length}</strong>
-            <small>All leaderboard saves</small>
-          </div>
-  
-          <div className="leaderboardKpiCard">
-            <span>Highest Score</span>
-            <strong>{highestScore}</strong>
-            <small>Best score</small>
-          </div>
-  
-          <div className="leaderboardKpiCard">
-            <span>Avg Accuracy</span>
-            <strong>{averageAccuracy}%</strong>
-            <small>Unique ranked students</small>
+
+          <div className="adminMockLeaderboardHeroActions">
+            <button
+              type="button"
+              className="adminMockLeaderboardPrimaryBtn"
+              onClick={handleRefreshLeaderboard}
+            >
+              Refresh Leaderboard
+            </button>
+
+            <button
+              type="button"
+              className="adminMockLeaderboardGhostBtn"
+              onClick={() => navigate("/admin/content/mock-tests/results")}
+            >
+              View Results
+            </button>
+
+            <button
+              type="button"
+              className="adminMockLeaderboardGhostBtn"
+              onClick={() => navigate("/admin/content/mock-tests")}
+            >
+              ← Back
+            </button>
           </div>
         </div>
-  
-        <div className="leaderboardPodium">
-          <div className="leaderboardSectionHeader">
-            <h3>Top 3 Podium</h3>
-            <span>Unique champions</span>
+
+        <div className="adminMockLeaderboardSystemCard">
+          <div className="adminMockLeaderboardSystemTop">
+            <span>RANKING STATUS</span>
+            <strong>Live</strong>
           </div>
-  
-          {bestByStudent.length === 0 ? (
-            <div className="leaderboardEmptyCard">No leaderboard entries yet.</div>
-          ) : (
-            <div className="leaderboardPodiumGrid">
-              {bestByStudent.slice(0, 3).map((entry, index) => (
-                <div
-                  className={`leaderboardPodiumCard rank${index + 1}`}
-                  key={entry.id || index}
-                >
-                  <div className="leaderboardRankBadge">
-                    {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
-                  </div>
-  
-                  <strong>
-                    {entry.studentName ||
-                      entry.studentEmail ||
-                      entry.email ||
-                      "Student"}
-                  </strong>
-  
-                  <p>{entry.testTitle || "Mock Test"}</p>
-  
-                  <div className="leaderboardMiniStats">
-                    <span>
-                      Score {entry.score || 0}/{entry.totalMarks || 0}
-                    </span>
-                    <span>{entry.percentage || 0}%</span>
-                    <span>Accuracy {entry.accuracy || 0}%</span>
-                  </div>
+
+          <div className="adminMockLeaderboardSystemGrid">
+            <div>
+              <strong>{totalRankedStudents}</strong>
+              <span>Ranked students</span>
+            </div>
+
+            <div>
+              <strong>{leaderboardEntries.length}</strong>
+              <span>Total entries</span>
+            </div>
+
+            <div>
+              <strong>{highestScore}</strong>
+              <span>Highest score</span>
+            </div>
+
+            <div>
+              <strong>{averagePercentage}%</strong>
+              <span>Avg percentage</span>
+            </div>
+          </div>
+
+          <div className="adminMockLeaderboardFlow">
+            <span>Attempt</span>
+            <i />
+            <span>Score</span>
+            <i />
+            <span>Rank</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="adminMockLeaderboardKpiGrid">
+        <div className="adminMockLeaderboardKpiCard">
+          <span>Ranked Students</span>
+          <strong>{totalRankedStudents}</strong>
+          <p>Unique best scores</p>
+        </div>
+
+        <div className="adminMockLeaderboardKpiCard">
+          <span>Total Entries</span>
+          <strong>{leaderboardEntries.length}</strong>
+          <p>All leaderboard saves</p>
+        </div>
+
+        <div className="adminMockLeaderboardKpiCard">
+          <span>Highest Score</span>
+          <strong>{highestScore}</strong>
+          <p>Best score recorded</p>
+        </div>
+
+        <div className="adminMockLeaderboardKpiCard">
+          <span>Avg Accuracy</span>
+          <strong>{averageAccuracy}%</strong>
+          <p>Unique ranked students</p>
+        </div>
+      </div>
+
+      <div className="adminMockLeaderboardPanel adminMockLeaderboardPodiumPanel">
+        <div className="adminMockLeaderboardPanelHeader">
+          <div>
+            <span>TOP 3 PODIUM</span>
+            <h2>Unique Champions</h2>
+          </div>
+
+          <small>{topThree.length} winners</small>
+        </div>
+
+        {topThree.length === 0 ? (
+          <div className="adminMockLeaderboardEmpty">
+            No leaderboard entries yet.
+          </div>
+        ) : (
+          <div className="adminMockLeaderboardPodiumGrid">
+            {topThree.map((entry, index) => (
+              <article
+                className={`adminMockLeaderboardPodiumCard adminMockLeaderboardRank${
+                  index + 1
+                }`}
+                key={entry.id || `${getStudentLabel(entry)}-${index}`}
+              >
+                <div className="adminMockLeaderboardMedal">
+                  {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-  
-        <div className="leaderboardSection">
-          <div className="leaderboardSectionHeader">
-            <h3>Global Rankings</h3>
-            <span>{bestByStudent.length} students</span>
+
+                <strong>{getStudentLabel(entry)}</strong>
+
+                <p>{getTestTitle(entry)}</p>
+
+                <div className="adminMockLeaderboardMiniStats">
+                  <span>
+                    Score {entry.score || 0}/{entry.totalMarks || 0}
+                  </span>
+                  <span>{getLeaderboardPercentage(entry)}%</span>
+                  <span>Accuracy {entry.accuracy || 0}%</span>
+                </div>
+              </article>
+            ))}
           </div>
-  
+        )}
+      </div>
+
+      <div className="adminMockLeaderboardCommandGrid">
+        <div className="adminMockLeaderboardPanel adminMockLeaderboardPanelLarge">
+          <div className="adminMockLeaderboardPanelHeader">
+            <div>
+              <span>GLOBAL RANKINGS</span>
+              <h2>Student Ranking Table</h2>
+            </div>
+
+            <small>{bestByStudent.length} students</small>
+          </div>
+
           {bestByStudent.length === 0 ? (
-            <div className="leaderboardEmptyCard">
-              Leaderboard will appear after students submit leaderboard-enabled
-              tests.
+            <div className="adminMockLeaderboardEmpty">
+              Leaderboard will appear after students submit
+              leaderboard-enabled tests.
             </div>
           ) : (
-            <div className="leaderboardTable">
+            <div className="adminMockLeaderboardTable">
               {bestByStudent.map((entry, index) => (
-                <div className="leaderboardRow" key={entry.id || index}>
-                  <div className="leaderboardRank">#{index + 1}</div>
-  
-                  <div className="leaderboardStudent">
-                    <strong>
-                      {entry.studentName ||
-                        entry.studentEmail ||
-                        entry.email ||
-                        "Student"}
-                    </strong>
-  
+                <article
+                  className="adminMockLeaderboardRow"
+                  key={entry.id || `${getStudentLabel(entry)}-${index}`}
+                >
+                  <div className="adminMockLeaderboardRank">#{index + 1}</div>
+
+                  <div className="adminMockLeaderboardStudent">
+                    <strong>{getStudentLabel(entry)}</strong>
+
                     <span>
-                      {entry.testTitle || "Mock Test"} •{" "}
-                      {entry.subject || "Subject"} • {entry.chapter || "Chapter"}
+                      {getTestTitle(entry)} • {entry.subject || "Subject"} •{" "}
+                      {entry.chapter || "Chapter"}
                     </span>
                   </div>
-  
-                  <div className="leaderboardScore">
+
+                  <div className="adminMockLeaderboardScore">
                     <strong>
                       {entry.score || 0}/{entry.totalMarks || 0}
                     </strong>
                     <span>Score</span>
                   </div>
-  
-                  <div className="leaderboardScore">
-                    <strong>{entry.percentage || 0}%</strong>
+
+                  <div className="adminMockLeaderboardScore">
+                    <strong>{getLeaderboardPercentage(entry)}%</strong>
                     <span>Percentage</span>
                   </div>
-  
-                  <div className="leaderboardScore">
+
+                  <div className="adminMockLeaderboardScore">
                     <strong>{entry.accuracy || 0}%</strong>
                     <span>Accuracy</span>
                   </div>
-                </div>
+                </article>
               ))}
             </div>
           )}
         </div>
-  
-        <div className="leaderboardSection">
-          <div className="leaderboardSectionHeader">
-            <h3>Subject-wise Leaders</h3>
-            <span>{subjectLeaders.length} subjects</span>
+
+        <div className="adminMockLeaderboardPanel">
+          <div className="adminMockLeaderboardPanelHeader">
+            <div>
+              <span>SUBJECT LEADERS</span>
+              <h2>Top by Subject</h2>
+            </div>
+
+            <small>{subjectLeaders.length}</small>
           </div>
-  
+
           {subjectLeaders.length === 0 ? (
-            <div className="leaderboardEmptyCard">
-              Subject leaders will appear after leaderboard entries are available.
+            <div className="adminMockLeaderboardEmpty">
+              Subject leaders will appear after entries are available.
             </div>
           ) : (
-            <div className="leaderboardCompactGrid">
+            <div className="adminMockLeaderboardCompactGrid">
               {subjectLeaders.map((entry, index) => (
-                <div
-                  className="leaderboardSubjectCard"
+                <article
+                  className="adminMockLeaderboardSubjectCard"
                   key={`${entry.subject}-${index}`}
                 >
                   <strong>{entry.subject}</strong>
-  
-                  <p>
-                    {entry.studentName ||
-                      entry.studentEmail ||
-                      entry.email ||
-                      "Student"}
-                  </p>
-  
-                  <div className="leaderboardMiniStats">
-                    <span>{entry.percentage || 0}%</span>
+
+                  <p>{getStudentLabel(entry)}</p>
+
+                  <div className="adminMockLeaderboardMiniStats">
+                    <span>{getLeaderboardPercentage(entry)}%</span>
                     <span>Score {entry.score || 0}</span>
                     <span>Accuracy {entry.accuracy || 0}%</span>
                   </div>
-                </div>
+                </article>
               ))}
             </div>
           )}
         </div>
-  
-        <div className="leaderboardSection">
-          <div className="leaderboardSectionHeader">
-            <h3>Recent Winners</h3>
-            <span>Latest ranked entries</span>
+      </div>
+
+      <div className="adminMockLeaderboardPanel">
+        <div className="adminMockLeaderboardPanelHeader">
+          <div>
+            <span>RECENT WINNERS</span>
+            <h2>Latest Ranked Entries</h2>
           </div>
-  
-          {recentWinners.length === 0 ? (
-            <div className="leaderboardEmptyCard">No recent winners yet.</div>
-          ) : (
-            <div className="leaderboardCompactGrid">
-              {recentWinners.map((entry, index) => (
-                <div className="leaderboardRecentCard" key={entry.id || index}>
-                  <strong>
-                    {entry.studentName ||
-                      entry.studentEmail ||
-                      entry.email ||
-                      "Student"}
-                  </strong>
-  
-                  <p>{entry.testTitle || "Mock Test"}</p>
-  
-                  <div className="leaderboardMiniStats">
-                    <span>{entry.percentage || 0}%</span>
-                    <span>{entry.accuracy || 0}% accuracy</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+
+          <small>{recentWinners.length} latest</small>
         </div>
-      </section>
-    );
-  }
-  
+
+        {recentWinners.length === 0 ? (
+          <div className="adminMockLeaderboardEmpty">No recent winners yet.</div>
+        ) : (
+          <div className="adminMockLeaderboardRecentGrid">
+            {recentWinners.map((entry, index) => (
+              <article
+                className="adminMockLeaderboardRecentCard"
+                key={entry.id || `${getStudentLabel(entry)}-${index}`}
+              >
+                <div>
+                  <strong>{getStudentLabel(entry)}</strong>
+
+                  <p>{getTestTitle(entry)}</p>
+                </div>
+
+                <div className="adminMockLeaderboardScorePill">
+                  {getLeaderboardPercentage(entry)}%
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}

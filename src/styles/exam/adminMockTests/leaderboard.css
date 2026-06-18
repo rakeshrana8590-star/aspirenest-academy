@@ -1,0 +1,757 @@
+/* ===============================
+   34A8B — ADMIN MOCK TEST LEADERBOARD
+   One App • One System premium polish
+================================ */
+
+.adminMockLeaderboardPage {
+    max-width: 1220px;
+    margin: 0 auto;
+    padding-bottom: 70px;
+  }
+  
+  /* HERO */
+  
+  .adminMockLeaderboardHero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(420px, 0.9fr);
+    align-items: stretch;
+    gap: 24px;
+    margin-bottom: 26px;
+    padding: 36px;
+    border-radius: 36px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background:
+      radial-gradient(circle at 8% 16%, rgba(249, 115, 22, 0.14), transparent 34%),
+      radial-gradient(circle at 92% 10%, rgba(37, 99, 235, 0.13), transparent 32%),
+      linear-gradient(135deg, #ffffff 0%, #fbf7f0 54%, #eef5ff 100%);
+    box-shadow: 0 28px 80px rgba(15, 23, 42, 0.1);
+    overflow: hidden;
+  }
+  
+  .adminMockLeaderboardHeroCopy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+  }
+  
+  .adminMockLeaderboardHero h1 {
+    max-width: 760px;
+    margin: 16px 0 14px;
+    color: #0f172a;
+    font-size: clamp(2.65rem, 5.2vw, 5rem);
+    line-height: 0.96;
+    letter-spacing: -0.075em;
+  }
+  
+  .adminMockLeaderboardHero p {
+    max-width: 760px;
+    margin: 0;
+    color: #42526b;
+    font-size: 1.05rem;
+    font-weight: 750;
+    line-height: 1.7;
+  }
+  
+  .adminMockLeaderboardHeroActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+  
+  .adminMockLeaderboardPrimaryBtn,
+  .adminMockLeaderboardGhostBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+    border-radius: 999px;
+    padding: 0 20px;
+    font-size: 0.92rem;
+    font-weight: 950;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease;
+  }
+  
+  .adminMockLeaderboardPrimaryBtn {
+    border: 0;
+    color: #ffffff;
+    background: #0f172a;
+    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.22);
+  }
+  
+  .adminMockLeaderboardGhostBtn {
+    color: #0f172a;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+  }
+  
+  .adminMockLeaderboardPrimaryBtn:hover,
+  .adminMockLeaderboardGhostBtn:hover {
+    transform: translateY(-1px);
+  }
+  
+  /* DARK SYSTEM CARD */
+  
+  .adminMockLeaderboardSystemCard {
+    position: relative;
+    min-height: 320px;
+    padding: 22px;
+    border-radius: 30px;
+    color: #ffffff;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(249, 115, 22, 0.22), transparent 30%),
+      radial-gradient(circle at 90% 20%, rgba(59, 130, 246, 0.18), transparent 32%),
+      linear-gradient(135deg, #2b1f20 0%, #0f172a 54%, #08111f 100%);
+    box-shadow: 0 28px 70px rgba(15, 23, 42, 0.24);
+    overflow: hidden;
+  }
+  
+  .adminMockLeaderboardSystemCard::after {
+    content: "";
+    position: absolute;
+    inset: auto -70px -90px auto;
+    width: 210px;
+    height: 210px;
+    border-radius: 999px;
+    background: rgba(249, 115, 22, 0.16);
+    filter: blur(24px);
+  }
+  
+  .adminMockLeaderboardSystemTop {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  
+  .adminMockLeaderboardSystemTop span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 14px;
+    border-radius: 999px;
+    color: #fed7aa;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 0.78rem;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+  }
+  
+  .adminMockLeaderboardSystemTop strong {
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 950;
+  }
+  
+  .adminMockLeaderboardSystemGrid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  
+  .adminMockLeaderboardSystemGrid div {
+    min-height: 102px;
+    padding: 18px;
+    border-radius: 22px;
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  
+  .adminMockLeaderboardSystemGrid strong {
+    display: block;
+    color: #ffffff;
+    font-size: 2rem;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  
+  .adminMockLeaderboardSystemGrid span {
+    display: block;
+    margin-top: 9px;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.82rem;
+    font-weight: 850;
+  }
+  
+  .adminMockLeaderboardFlow {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: auto 1fr auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+    margin-top: 24px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.14);
+  }
+  
+  .adminMockLeaderboardFlow span {
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 950;
+  }
+  
+  .adminMockLeaderboardFlow i {
+    display: block;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.24);
+  }
+  
+  /* KPI */
+  
+  .adminMockLeaderboardKpiGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+  
+  .adminMockLeaderboardKpiCard {
+    min-height: 146px;
+    padding: 22px;
+    border-radius: 26px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94)),
+      #ffffff;
+    box-shadow: 0 20px 54px rgba(15, 23, 42, 0.08);
+  }
+  
+  .adminMockLeaderboardKpiCard span,
+  .adminMockLeaderboardPanelHeader span {
+    display: block;
+    color: #64748b;
+    font-size: 0.76rem;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  
+  .adminMockLeaderboardKpiCard strong {
+    display: block;
+    margin-top: 12px;
+    color: #0f172a;
+    font-size: 2.15rem;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  
+  .adminMockLeaderboardKpiCard p {
+    margin: 12px 0 0;
+    color: #64748b;
+    font-size: 0.88rem;
+    font-weight: 800;
+    line-height: 1.45;
+  }
+  
+  /* PANELS */
+  
+  .adminMockLeaderboardPanel {
+    margin-bottom: 18px;
+    padding: 22px;
+    border-radius: 30px;
+    background:
+      radial-gradient(circle at 95% 10%, rgba(249, 115, 22, 0.07), transparent 32%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+    border: 1px solid rgba(249, 115, 22, 0.18);
+    box-shadow: 0 24px 64px rgba(15, 23, 42, 0.08);
+  }
+  
+  .adminMockLeaderboardPanelHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  
+  .adminMockLeaderboardPanelHeader h2 {
+    margin: 7px 0 0;
+    color: #0f172a;
+    font-size: 1.28rem;
+    line-height: 1.2;
+    letter-spacing: -0.035em;
+  }
+  
+  .adminMockLeaderboardPanelHeader small {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 13px;
+    border-radius: 999px;
+    color: #475569;
+    background: #f1f5f9;
+    font-size: 0.78rem;
+    font-weight: 950;
+    white-space: nowrap;
+  }
+  
+  .adminMockLeaderboardCommandGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(360px, 0.65fr);
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+  
+  /* PODIUM */
+  
+  .adminMockLeaderboardPodiumGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .adminMockLeaderboardPodiumCard {
+    position: relative;
+    min-height: 210px;
+    padding: 22px;
+    border-radius: 28px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background:
+      radial-gradient(circle at 90% 8%, rgba(249, 115, 22, 0.12), transparent 32%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95));
+    box-shadow: 0 20px 54px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+  }
+  
+  .adminMockLeaderboardRank1 {
+    transform: translateY(-8px);
+    border-color: rgba(249, 115, 22, 0.26);
+    box-shadow: 0 28px 70px rgba(249, 115, 22, 0.14);
+  }
+  
+  .adminMockLeaderboardMedal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    margin-bottom: 14px;
+    border-radius: 18px;
+    background: #0f172a;
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.18);
+    font-size: 1.45rem;
+  }
+  
+  .adminMockLeaderboardPodiumCard strong {
+    display: block;
+    color: #0f172a;
+    font-size: 1.1rem;
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+  }
+  
+  .adminMockLeaderboardPodiumCard p {
+    margin: 8px 0 14px;
+    color: #64748b;
+    font-size: 0.9rem;
+    font-weight: 800;
+    line-height: 1.45;
+  }
+  
+  /* GLOBAL ROWS */
+  
+  .adminMockLeaderboardTable {
+    display: grid;
+    gap: 12px;
+  }
+  
+  .adminMockLeaderboardRow {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr) 110px 110px 110px;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 24px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 16px 38px rgba(15, 23, 42, 0.05);
+  }
+  
+  .adminMockLeaderboardRank {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 18px;
+    color: #ffffff;
+    background: #0f172a;
+    font-size: 0.88rem;
+    font-weight: 950;
+  }
+  
+  .adminMockLeaderboardStudent {
+    min-width: 0;
+  }
+  
+  .adminMockLeaderboardStudent strong {
+    display: block;
+    color: #0f172a;
+    font-size: 1rem;
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+  }
+  
+  .adminMockLeaderboardStudent span {
+    display: block;
+    margin-top: 6px;
+    color: #64748b;
+    font-size: 0.82rem;
+    font-weight: 850;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+  
+  .adminMockLeaderboardScore {
+    min-height: 58px;
+    padding: 10px;
+    border-radius: 18px;
+    background: #f8fafc;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+  }
+  
+  .adminMockLeaderboardScore strong {
+    display: block;
+    color: #0f172a;
+    font-size: 1rem;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  
+  .adminMockLeaderboardScore span {
+    display: block;
+    margin-top: 7px;
+    color: #64748b;
+    font-size: 0.68rem;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  
+  /* COMPACT CARDS */
+  
+  .adminMockLeaderboardCompactGrid,
+  .adminMockLeaderboardRecentGrid {
+    display: grid;
+    gap: 12px;
+  }
+  
+  .adminMockLeaderboardSubjectCard,
+  .adminMockLeaderboardRecentCard {
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 16px 38px rgba(15, 23, 42, 0.05);
+  }
+  
+  .adminMockLeaderboardSubjectCard {
+    padding: 16px;
+  }
+  
+  .adminMockLeaderboardSubjectCard strong,
+  .adminMockLeaderboardRecentCard strong {
+    display: block;
+    color: #0f172a;
+    font-size: 1rem;
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+  }
+  
+  .adminMockLeaderboardSubjectCard p,
+  .adminMockLeaderboardRecentCard p {
+    margin: 7px 0 0;
+    color: #64748b;
+    font-size: 0.86rem;
+    font-weight: 800;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+  
+  .adminMockLeaderboardRecentGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  
+  .adminMockLeaderboardRecentCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px;
+  }
+  
+  .adminMockLeaderboardScorePill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 64px;
+    min-height: 38px;
+    border-radius: 999px;
+    color: #ffffff;
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    font-size: 0.9rem;
+    font-weight: 950;
+    box-shadow: 0 12px 28px rgba(22, 163, 74, 0.2);
+  }
+  
+  /* MINI STATS */
+  
+  .adminMockLeaderboardMiniStats {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  
+  .adminMockLeaderboardMiniStats span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 0 11px;
+    border-radius: 999px;
+    color: #475569;
+    background: #f8fafc;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    font-size: 0.76rem;
+    font-weight: 950;
+  }
+  
+  /* EMPTY */
+  
+  .adminMockLeaderboardEmpty {
+    padding: 24px;
+    border-radius: 22px;
+    color: #64748b;
+    background: rgba(248, 250, 252, 0.94);
+    border: 1px dashed rgba(15, 23, 42, 0.16);
+    font-size: 0.94rem;
+    font-weight: 850;
+  }
+  
+  /* RESPONSIVE */
+  
+  @media (max-width: 1080px) {
+    .adminMockLeaderboardHero,
+    .adminMockLeaderboardCommandGrid {
+      grid-template-columns: 1fr;
+    }
+  
+    .adminMockLeaderboardSystemCard {
+      min-height: auto;
+    }
+  
+    .adminMockLeaderboardRow {
+      grid-template-columns: 52px minmax(0, 1fr);
+    }
+  
+    .adminMockLeaderboardScore {
+      grid-column: span 1;
+    }
+  }
+  
+  @media (max-width: 860px) {
+    .adminMockLeaderboardKpiGrid,
+    .adminMockLeaderboardPodiumGrid,
+    .adminMockLeaderboardRecentGrid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  
+    .adminMockLeaderboardRank1 {
+      transform: none;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .adminMockLeaderboardPage {
+      padding-bottom: 46px;
+    }
+  
+    .adminMockLeaderboardHero,
+    .adminMockLeaderboardPanel {
+      border-radius: 24px;
+      padding: 18px;
+    }
+  
+    .adminMockLeaderboardHero h1 {
+      font-size: clamp(2.25rem, 14vw, 3.25rem);
+    }
+  
+    .adminMockLeaderboardKpiGrid,
+    .adminMockLeaderboardPodiumGrid,
+    .adminMockLeaderboardRecentGrid,
+    .adminMockLeaderboardSystemGrid {
+      grid-template-columns: 1fr;
+    }
+  
+    .adminMockLeaderboardHeroActions button {
+      width: 100%;
+    }
+  
+    .adminMockLeaderboardRecentCard {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+
+  /* =========================================================
+   34A8C — LEADERBOARD FLOATING FINAL LOCK
+   Scope: /admin/content/mock-tests/leaderboard only
+   Fix: make all premium cards float where they should
+   ========================================================= */
+
+.adminMockLeaderboardPage .adminMockLeaderboardKpiCard,
+.adminMockLeaderboardPage .adminMockLeaderboardPanel,
+.adminMockLeaderboardPage .adminMockLeaderboardPodiumCard,
+.adminMockLeaderboardPage .adminMockLeaderboardRow,
+.adminMockLeaderboardPage .adminMockLeaderboardSubjectCard,
+.adminMockLeaderboardPage .adminMockLeaderboardRecentCard {
+  position: relative;
+  transform: translateY(0);
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.adminMockLeaderboardPage .adminMockLeaderboardKpiCard {
+  box-shadow:
+    0 18px 36px rgba(15, 23, 42, 0.07),
+    0 34px 90px rgba(15, 23, 42, 0.06) !important;
+}
+
+.adminMockLeaderboardPage .adminMockLeaderboardPanel {
+  box-shadow:
+    0 22px 48px rgba(15, 23, 42, 0.07),
+    0 44px 110px rgba(15, 23, 42, 0.055) !important;
+}
+
+.adminMockLeaderboardPage .adminMockLeaderboardPodiumCard {
+  box-shadow:
+    0 18px 38px rgba(15, 23, 42, 0.08),
+    0 34px 84px rgba(15, 23, 42, 0.06) !important;
+}
+
+.adminMockLeaderboardPage .adminMockLeaderboardRank1 {
+  transform: translateY(-10px) !important;
+  box-shadow:
+    0 22px 44px rgba(249, 115, 22, 0.13),
+    0 42px 96px rgba(15, 23, 42, 0.08) !important;
+}
+
+.adminMockLeaderboardPage .adminMockLeaderboardRow,
+.adminMockLeaderboardPage .adminMockLeaderboardSubjectCard,
+.adminMockLeaderboardPage .adminMockLeaderboardRecentCard {
+  box-shadow:
+    0 14px 28px rgba(15, 23, 42, 0.055),
+    0 26px 70px rgba(15, 23, 42, 0.045) !important;
+}
+
+.adminMockLeaderboardPage .adminMockLeaderboardKpiCard:hover,
+.adminMockLeaderboardPage .adminMockLeaderboardPodiumCard:hover,
+.adminMockLeaderboardPage .adminMockLeaderboardRow:hover,
+.adminMockLeaderboardPage .adminMockLeaderboardSubjectCard:hover,
+.adminMockLeaderboardPage .adminMockLeaderboardRecentCard:hover {
+  transform: translateY(-3px);
+  border-color: rgba(249, 115, 22, 0.22) !important;
+  box-shadow:
+    0 22px 44px rgba(15, 23, 42, 0.09),
+    0 40px 100px rgba(15, 23, 42, 0.07) !important;
+}
+
+.adminMockLeaderboardPage .adminMockLeaderboardRank1:hover {
+  transform: translateY(-12px) !important;
+}
+
+/* Give section panels internal floating surface */
+.adminMockLeaderboardPage .adminMockLeaderboardPanel::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  z-index: 0;
+  border-radius: 24px;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 92% 12%, rgba(249, 115, 22, 0.08), transparent 32%),
+    radial-gradient(circle at 8% 90%, rgba(37, 99, 235, 0.055), transparent 36%);
+}
+
+.adminMockLeaderboardPage .adminMockLeaderboardPanel > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Podium should feel like lifted winner tiles */
+.adminMockLeaderboardPage .adminMockLeaderboardPodiumGrid {
+  padding-top: 10px;
+}
+
+.adminMockLeaderboardPage .adminMockLeaderboardPodiumCard::after {
+  content: "";
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: -18px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.12);
+  filter: blur(18px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* Recent winners and ranking rows should stay clean inside viewport */
+.adminMockLeaderboardPage .adminMockLeaderboardRow,
+.adminMockLeaderboardPage .adminMockLeaderboardRecentCard,
+.adminMockLeaderboardPage .adminMockLeaderboardSubjectCard {
+  overflow: hidden;
+}
+
+/* Keep long email/test names safe */
+.adminMockLeaderboardPage .adminMockLeaderboardStudent strong,
+.adminMockLeaderboardPage .adminMockLeaderboardStudent span,
+.adminMockLeaderboardPage .adminMockLeaderboardSubjectCard strong,
+.adminMockLeaderboardPage .adminMockLeaderboardSubjectCard p,
+.adminMockLeaderboardPage .adminMockLeaderboardRecentCard strong,
+.adminMockLeaderboardPage .adminMockLeaderboardRecentCard p,
+.adminMockLeaderboardPage .adminMockLeaderboardPodiumCard strong,
+.adminMockLeaderboardPage .adminMockLeaderboardPodiumCard p {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+/* Mobile: floating yes, but no vertical jump issue */
+@media (max-width: 640px) {
+  .adminMockLeaderboardPage .adminMockLeaderboardRank1,
+  .adminMockLeaderboardPage .adminMockLeaderboardRank1:hover {
+    transform: translateY(0) !important;
+  }
+
+  .adminMockLeaderboardPage .adminMockLeaderboardKpiCard:hover,
+  .adminMockLeaderboardPage .adminMockLeaderboardPodiumCard:hover,
+  .adminMockLeaderboardPage .adminMockLeaderboardRow:hover,
+  .adminMockLeaderboardPage .adminMockLeaderboardSubjectCard:hover,
+  .adminMockLeaderboardPage .adminMockLeaderboardRecentCard:hover {
+    transform: translateY(-1px);
+  }
+}

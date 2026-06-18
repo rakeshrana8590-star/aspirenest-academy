@@ -1,0 +1,595 @@
+/* ===============================
+   34A9D — ADMIN MOCK TEST ANALYTICS
+   One App • One System full premium lock
+   Route: /admin/content/mock-tests/analytics
+================================ */
+
+.adminMockAnalyticsPage {
+    max-width: 1220px;
+    margin: 0 auto;
+    padding-bottom: 72px;
+  }
+  
+  /* ===============================
+     HERO
+  ================================ */
+  
+  .adminMockAnalyticsHero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(420px, 0.92fr);
+    align-items: stretch;
+    gap: 24px;
+    margin-bottom: 26px;
+    padding: 36px;
+    border-radius: 36px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background:
+      radial-gradient(circle at 8% 16%, rgba(249, 115, 22, 0.15), transparent 34%),
+      radial-gradient(circle at 92% 10%, rgba(37, 99, 235, 0.13), transparent 32%),
+      linear-gradient(135deg, #ffffff 0%, #fbf7f0 54%, #eef5ff 100%);
+    box-shadow:
+      0 24px 56px rgba(15, 23, 42, 0.08),
+      0 44px 120px rgba(15, 23, 42, 0.07);
+    overflow: hidden;
+  }
+  
+  .adminMockAnalyticsHeroCopy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+  }
+  
+  .adminMockAnalyticsHero h1 {
+    max-width: 760px;
+    margin: 16px 0 14px;
+    color: #0f172a;
+    font-size: clamp(2.65rem, 5.2vw, 5rem);
+    line-height: 0.96;
+    letter-spacing: -0.075em;
+  }
+  
+  .adminMockAnalyticsHero p {
+    max-width: 760px;
+    margin: 0;
+    color: #42526b;
+    font-size: 1.05rem;
+    font-weight: 750;
+    line-height: 1.7;
+  }
+  
+  .adminMockAnalyticsHeroActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+  
+  .adminMockAnalyticsPrimaryBtn,
+  .adminMockAnalyticsGhostBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+    border-radius: 999px;
+    padding: 0 20px;
+    font-size: 0.92rem;
+    font-weight: 950;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease;
+  }
+  
+  .adminMockAnalyticsPrimaryBtn {
+    border: 0;
+    color: #ffffff;
+    background: #0f172a;
+    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.22);
+  }
+  
+  .adminMockAnalyticsGhostBtn {
+    color: #0f172a;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+  }
+  
+  .adminMockAnalyticsPrimaryBtn:hover,
+  .adminMockAnalyticsGhostBtn:hover {
+    transform: translateY(-1px);
+  }
+  
+  /* ===============================
+     DARK SYSTEM CARD
+  ================================ */
+  
+  .adminMockAnalyticsSystemCard {
+    position: relative;
+    min-height: 320px;
+    padding: 22px;
+    border-radius: 30px;
+    color: #ffffff;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(249, 115, 22, 0.22), transparent 30%),
+      radial-gradient(circle at 90% 20%, rgba(59, 130, 246, 0.18), transparent 32%),
+      linear-gradient(135deg, #2b1f20 0%, #0f172a 54%, #08111f 100%);
+    box-shadow:
+      0 24px 52px rgba(15, 23, 42, 0.22),
+      0 44px 120px rgba(15, 23, 42, 0.16);
+    overflow: hidden;
+  }
+  
+  .adminMockAnalyticsSystemCard::after {
+    content: "";
+    position: absolute;
+    inset: auto -70px -90px auto;
+    width: 210px;
+    height: 210px;
+    border-radius: 999px;
+    background: rgba(249, 115, 22, 0.16);
+    filter: blur(24px);
+  }
+  
+  .adminMockAnalyticsSystemTop {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  
+  .adminMockAnalyticsSystemTop span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 14px;
+    border-radius: 999px;
+    color: #fed7aa;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 0.78rem;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+  }
+  
+  .adminMockAnalyticsSystemTop strong {
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 950;
+  }
+  
+  .adminMockAnalyticsSystemGrid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  
+  .adminMockAnalyticsSystemGrid div {
+    min-height: 102px;
+    padding: 18px;
+    border-radius: 22px;
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  
+  .adminMockAnalyticsSystemGrid strong {
+    display: block;
+    color: #ffffff;
+    font-size: 2rem;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  
+  .adminMockAnalyticsSystemGrid span {
+    display: block;
+    margin-top: 9px;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.82rem;
+    font-weight: 850;
+  }
+  
+  .adminMockAnalyticsFlow {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: auto 1fr auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+    margin-top: 24px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.14);
+  }
+  
+  .adminMockAnalyticsFlow span {
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 950;
+  }
+  
+  .adminMockAnalyticsFlow i {
+    display: block;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.24);
+  }
+  
+  /* ===============================
+     KPI + INSIGHTS
+  ================================ */
+  
+  .adminMockAnalyticsKpiGrid,
+  .adminMockAnalyticsInsightGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+  
+  .adminMockAnalyticsKpiGrid {
+    margin-bottom: 18px;
+  }
+  
+  .adminMockAnalyticsInsightGrid {
+    margin-bottom: 18px;
+  }
+  
+  .adminMockAnalyticsKpiCard {
+    min-height: 146px;
+    padding: 22px;
+    border-radius: 26px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94)),
+      #ffffff;
+    box-shadow:
+      0 18px 36px rgba(15, 23, 42, 0.07),
+      0 34px 90px rgba(15, 23, 42, 0.06);
+  }
+  
+  .adminMockAnalyticsKpiCard span,
+  .adminMockAnalyticsInsightCard span,
+  .adminMockAnalyticsPanelHeader span {
+    display: block;
+    color: #64748b;
+    font-size: 0.76rem;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  
+  .adminMockAnalyticsKpiCard strong {
+    display: block;
+    margin-top: 12px;
+    color: #0f172a;
+    font-size: 2.15rem;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  
+  .adminMockAnalyticsKpiCard p {
+    margin: 12px 0 0;
+    color: #64748b;
+    font-size: 0.88rem;
+    font-weight: 800;
+    line-height: 1.45;
+  }
+  
+  .adminMockAnalyticsInsightCard {
+    min-height: 92px;
+    padding: 18px;
+    border-radius: 24px;
+    color: #ffffff;
+    background:
+      radial-gradient(circle at 90% 8%, rgba(249, 115, 22, 0.18), transparent 32%),
+      linear-gradient(135deg, #172033, #0f172a);
+    box-shadow:
+      0 18px 36px rgba(15, 23, 42, 0.14),
+      0 34px 90px rgba(15, 23, 42, 0.1);
+  }
+  
+  .adminMockAnalyticsInsightCard span {
+    color: rgba(255, 255, 255, 0.68);
+  }
+  
+  .adminMockAnalyticsInsightCard strong {
+    display: block;
+    margin-top: 10px;
+    color: #ffffff;
+    font-size: 1.55rem;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+  
+  /* ===============================
+     PANEL LAYOUT — NO EMPTY STRETCH
+  ================================ */
+  
+  .adminMockAnalyticsCommandGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(360px, 0.65fr);
+    align-items: start;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+  
+  .adminMockAnalyticsPanel {
+    position: relative;
+    align-self: start;
+    height: fit-content;
+    min-height: 0;
+    margin-bottom: 0;
+    padding: 22px;
+    border-radius: 30px;
+    background:
+      radial-gradient(circle at 95% 10%, rgba(249, 115, 22, 0.07), transparent 32%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+    border: 1px solid rgba(249, 115, 22, 0.18);
+    box-shadow:
+      0 22px 48px rgba(15, 23, 42, 0.07),
+      0 44px 110px rgba(15, 23, 42, 0.055);
+    overflow: hidden;
+  }
+  
+  .adminMockAnalyticsPanel::before {
+    content: "";
+    position: absolute;
+    inset: 12px;
+    z-index: 0;
+    border-radius: 24px;
+    pointer-events: none;
+    opacity: 0.78;
+    background:
+      radial-gradient(circle at 92% 12%, rgba(249, 115, 22, 0.08), transparent 32%),
+      radial-gradient(circle at 8% 90%, rgba(37, 99, 235, 0.055), transparent 36%);
+  }
+  
+  .adminMockAnalyticsPanel > * {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .adminMockAnalyticsPanelHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  
+  .adminMockAnalyticsPanelHeader h2 {
+    margin: 7px 0 0;
+    color: #0f172a;
+    font-size: clamp(2.1rem, 4.3vw, 3.6rem);
+    line-height: 0.98;
+    letter-spacing: -0.065em;
+  }
+  
+  .adminMockAnalyticsPanelHeader small {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 13px;
+    border-radius: 999px;
+    color: #475569;
+    background: #f1f5f9;
+    font-size: 0.78rem;
+    font-weight: 950;
+    white-space: nowrap;
+  }
+  
+  /* ===============================
+     TEST-WISE PERFORMANCE
+  ================================ */
+  
+  .adminMockAnalyticsTestGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 14px;
+  }
+  
+  .adminMockAnalyticsCompactGrid {
+    display: grid;
+    align-items: start;
+    gap: 12px;
+  }
+  
+  .adminMockAnalyticsTestCard,
+  .adminMockAnalyticsWeakCard,
+  .adminMockAnalyticsStudentCard {
+    position: relative;
+    min-width: 0;
+    padding: 18px;
+    border-radius: 24px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow:
+      0 14px 28px rgba(15, 23, 42, 0.055),
+      0 26px 70px rgba(15, 23, 42, 0.045);
+    overflow: hidden;
+    transform: translateY(0);
+    transition:
+      transform 0.22s ease,
+      box-shadow 0.22s ease,
+      border-color 0.22s ease;
+  }
+  
+  .adminMockAnalyticsTestCard:hover,
+  .adminMockAnalyticsWeakCard:hover,
+  .adminMockAnalyticsStudentCard:hover,
+  .adminMockAnalyticsKpiCard:hover,
+  .adminMockAnalyticsInsightCard:hover {
+    transform: translateY(-3px);
+    border-color: rgba(249, 115, 22, 0.22);
+    box-shadow:
+      0 22px 44px rgba(15, 23, 42, 0.09),
+      0 40px 100px rgba(15, 23, 42, 0.07);
+  }
+  
+  .adminMockAnalyticsTestCard strong,
+  .adminMockAnalyticsWeakCard strong,
+  .adminMockAnalyticsStudentCard strong {
+    display: block;
+    color: #0f172a;
+    font-size: 1rem;
+    line-height: 1.38;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+  
+  .adminMockAnalyticsTestCard p,
+  .adminMockAnalyticsWeakCard p,
+  .adminMockAnalyticsStudentCard p {
+    margin: 7px 0 0;
+    color: #64748b;
+    font-size: 0.88rem;
+    font-weight: 800;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+  
+  /* ===============================
+     TOP PERFORMERS / RECENT ATTEMPTS
+  ================================ */
+  
+  .adminMockAnalyticsStudentTop {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 14px;
+    margin-bottom: 13px;
+  }
+  
+  .adminMockAnalyticsScorePill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    min-width: 64px;
+    min-height: 38px;
+    border-radius: 999px;
+    color: #ffffff;
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    font-size: 0.9rem;
+    font-weight: 950;
+    box-shadow:
+      0 12px 28px rgba(22, 163, 74, 0.22),
+      0 22px 48px rgba(22, 163, 74, 0.14);
+  }
+  
+  /* ===============================
+     MINI STATS
+  ================================ */
+  
+  .adminMockAnalyticsMiniStats {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 13px;
+  }
+  
+  .adminMockAnalyticsMiniStats span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 0 11px;
+    border-radius: 999px;
+    color: #475569;
+    background: #f8fafc;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    font-size: 0.76rem;
+    font-weight: 950;
+    white-space: nowrap;
+  }
+  
+  /* ===============================
+     EMPTY
+  ================================ */
+  
+  .adminMockAnalyticsEmpty {
+    padding: 24px;
+    border-radius: 22px;
+    color: #64748b;
+    background: rgba(248, 250, 252, 0.94);
+    border: 1px dashed rgba(15, 23, 42, 0.16);
+    font-size: 0.94rem;
+    font-weight: 850;
+  }
+  
+  /* ===============================
+     RESPONSIVE
+  ================================ */
+  
+  @media (max-width: 1080px) {
+    .adminMockAnalyticsHero,
+    .adminMockAnalyticsCommandGrid {
+      grid-template-columns: 1fr;
+    }
+  
+    .adminMockAnalyticsSystemCard {
+      min-height: auto;
+    }
+  }
+  
+  @media (max-width: 860px) {
+    .adminMockAnalyticsKpiGrid,
+    .adminMockAnalyticsInsightGrid,
+    .adminMockAnalyticsTestGrid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  
+    .adminMockAnalyticsPanelHeader h2 {
+      font-size: clamp(1.8rem, 8vw, 2.8rem);
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .adminMockAnalyticsPage {
+      padding-bottom: 46px;
+    }
+  
+    .adminMockAnalyticsHero,
+    .adminMockAnalyticsPanel {
+      border-radius: 24px;
+      padding: 18px;
+    }
+  
+    .adminMockAnalyticsHero h1 {
+      font-size: clamp(2.25rem, 14vw, 3.25rem);
+    }
+  
+    .adminMockAnalyticsKpiGrid,
+    .adminMockAnalyticsInsightGrid,
+    .adminMockAnalyticsTestGrid,
+    .adminMockAnalyticsSystemGrid {
+      grid-template-columns: 1fr;
+    }
+  
+    .adminMockAnalyticsHeroActions button {
+      width: 100%;
+    }
+  
+    .adminMockAnalyticsStudentTop {
+      grid-template-columns: 1fr;
+    }
+  
+    .adminMockAnalyticsKpiCard:hover,
+    .adminMockAnalyticsInsightCard:hover,
+    .adminMockAnalyticsTestCard:hover,
+    .adminMockAnalyticsWeakCard:hover,
+    .adminMockAnalyticsStudentCard:hover {
+      transform: translateY(-1px);
+    }
+  }
