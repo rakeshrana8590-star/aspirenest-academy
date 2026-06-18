@@ -1,0 +1,573 @@
+/* ===============================
+   34A7C — ADMIN MOCK TEST RESULTS
+   One App • One System premium polish
+================================ */
+
+.adminMockResultsPage {
+  max-width: 1220px;
+  margin: 0 auto;
+  padding-bottom: 70px;
+}
+
+/* HERO */
+
+.adminMockResultsHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(420px, 0.9fr);
+  align-items: stretch;
+  gap: 24px;
+  margin-bottom: 26px;
+  padding: 36px;
+  border-radius: 36px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background:
+    radial-gradient(circle at 8% 16%, rgba(249, 115, 22, 0.14), transparent 34%),
+    radial-gradient(circle at 92% 10%, rgba(37, 99, 235, 0.13), transparent 32%),
+    linear-gradient(135deg, #ffffff 0%, #fbf7f0 54%, #eef5ff 100%);
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.1);
+  overflow: hidden;
+}
+
+.adminMockResultsHeroCopy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.adminMockResultsHero h1 {
+  max-width: 720px;
+  margin: 16px 0 14px;
+  color: #0f172a;
+  font-size: clamp(2.65rem, 5.2vw, 5rem);
+  line-height: 0.96;
+  letter-spacing: -0.075em;
+}
+
+.adminMockResultsHero p {
+  max-width: 760px;
+  margin: 0;
+  color: #42526b;
+  font-size: 1.05rem;
+  font-weight: 750;
+  line-height: 1.7;
+}
+
+.adminMockResultsHeroActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+.adminMockResultsPrimaryBtn,
+.adminMockResultsGhostBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  border-radius: 999px;
+  padding: 0 20px;
+  font-size: 0.92rem;
+  font-weight: 950;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.adminMockResultsPrimaryBtn {
+  border: 0;
+  color: #ffffff;
+  background: #0f172a;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.22);
+}
+
+.adminMockResultsGhostBtn {
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+}
+
+.adminMockResultsPrimaryBtn:hover,
+.adminMockResultsGhostBtn:hover {
+  transform: translateY(-1px);
+}
+
+/* DARK SYSTEM CARD */
+
+.adminMockResultsSystemCard {
+  position: relative;
+  min-height: 320px;
+  padding: 22px;
+  border-radius: 30px;
+  color: #ffffff;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(249, 115, 22, 0.22), transparent 30%),
+    radial-gradient(circle at 90% 20%, rgba(59, 130, 246, 0.18), transparent 32%),
+    linear-gradient(135deg, #2b1f20 0%, #0f172a 54%, #08111f 100%);
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.24);
+  overflow: hidden;
+}
+
+.adminMockResultsSystemCard::after {
+  content: "";
+  position: absolute;
+  inset: auto -70px -90px auto;
+  width: 210px;
+  height: 210px;
+  border-radius: 999px;
+  background: rgba(249, 115, 22, 0.16);
+  filter: blur(24px);
+}
+
+.adminMockResultsSystemTop {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.adminMockResultsSystemTop span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  color: #fed7aa;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.78rem;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+}
+
+.adminMockResultsSystemTop strong {
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 950;
+}
+
+.adminMockResultsSystemGrid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.adminMockResultsSystemGrid div {
+  min-height: 102px;
+  padding: 18px;
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.adminMockResultsSystemGrid strong {
+  display: block;
+  color: #ffffff;
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.adminMockResultsSystemGrid span {
+  display: block;
+  margin-top: 9px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.adminMockResultsFlow {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto 1fr auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  margin-top: 24px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.14);
+}
+
+.adminMockResultsFlow span {
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 950;
+}
+
+.adminMockResultsFlow i {
+  display: block;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.24);
+}
+
+/* KPI */
+
+.adminMockResultsKpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.adminMockResultsKpiCard {
+  min-height: 146px;
+  padding: 22px;
+  border-radius: 26px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94)),
+    #ffffff;
+  box-shadow: 0 20px 54px rgba(15, 23, 42, 0.08);
+}
+
+.adminMockResultsKpiCard span,
+.adminMockResultsToolbar span,
+.adminMockResultsPanelHeader span {
+  display: block;
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.adminMockResultsKpiCard strong {
+  display: block;
+  margin-top: 12px;
+  color: #0f172a;
+  font-size: 2.15rem;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.adminMockResultsKpiCard p {
+  margin: 12px 0 0;
+  color: #64748b;
+  font-size: 0.88rem;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+/* TOOLBAR */
+
+.adminMockResultsToolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(240px, 0.7fr) auto;
+  align-items: end;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 18px;
+  border-radius: 28px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.92));
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 20px 56px rgba(15, 23, 42, 0.08);
+}
+
+.adminMockResultsToolbar input,
+.adminMockResultsToolbar select {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 9px;
+  border-radius: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 0.92rem;
+  font-weight: 850;
+  outline: none;
+  padding: 0 15px;
+}
+
+.adminMockResultsToolbar input:focus,
+.adminMockResultsToolbar select:focus {
+  border-color: rgba(249, 115, 22, 0.42);
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.12);
+  background: #ffffff;
+}
+
+/* PANELS */
+
+.adminMockResultsCommandGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(360px, 0.65fr);
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.adminMockResultsPanel {
+  margin-bottom: 18px;
+  padding: 22px;
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 95% 10%, rgba(249, 115, 22, 0.07), transparent 32%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+  border: 1px solid rgba(249, 115, 22, 0.18);
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.08);
+}
+
+.adminMockResultsPanelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.adminMockResultsPanelHeader h2 {
+  margin: 7px 0 0;
+  color: #0f172a;
+  font-size: 1.28rem;
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+}
+
+.adminMockResultsPanelHeader small {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 13px;
+  border-radius: 999px;
+  color: #475569;
+  background: #f1f5f9;
+  font-size: 0.78rem;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+/* TEST CARDS */
+
+.adminMockResultsTestGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.adminMockResultsTestCard,
+.adminMockResultsStudentCard,
+.adminMockResultsWeakCard,
+.adminMockResultsTopCard {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.05);
+}
+
+.adminMockResultsTestCard,
+.adminMockResultsStudentCard,
+.adminMockResultsWeakCard {
+  padding: 18px;
+}
+
+.adminMockResultsTestCard strong,
+.adminMockResultsTopCard strong,
+.adminMockResultsStudentCard strong,
+.adminMockResultsWeakCard strong {
+  display: block;
+  color: #0f172a;
+  font-size: 1rem;
+  line-height: 1.38;
+  letter-spacing: -0.015em;
+}
+
+.adminMockResultsTestCard p,
+.adminMockResultsTopCard p,
+.adminMockResultsStudentCard p,
+.adminMockResultsWeakCard p {
+  margin: 7px 0 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+/* TOP PERFORMERS */
+
+.adminMockResultsTopList,
+.adminMockResultsStudentGrid,
+.adminMockResultsWeakGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.adminMockResultsTopCard {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+}
+
+.adminMockResultsRank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  color: #ffffff;
+  background: #0f172a;
+  font-size: 0.86rem;
+  font-weight: 950;
+}
+
+.adminMockResultsScorePill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  min-height: 38px;
+  border-radius: 999px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  font-size: 0.9rem;
+  font-weight: 950;
+  box-shadow: 0 12px 28px rgba(22, 163, 74, 0.2);
+}
+
+/* STUDENT RESULTS */
+
+.adminMockResultsStudentGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.adminMockResultsStudentTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 13px;
+}
+
+.adminMockResultsMetaLine,
+.adminMockResultsMiniStats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.adminMockResultsMetaLine {
+  margin-bottom: 13px;
+}
+
+.adminMockResultsMetaLine span,
+.adminMockResultsMiniStats span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 11px;
+  border-radius: 999px;
+  color: #475569;
+  background: #f8fafc;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  font-size: 0.76rem;
+  font-weight: 950;
+}
+
+/* WEAK CHAPTERS */
+
+.adminMockResultsWeakGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.adminMockResultsWeakCard {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+/* EMPTY */
+
+.adminMockResultsEmpty {
+  padding: 24px;
+  border-radius: 22px;
+  color: #64748b;
+  background: rgba(248, 250, 252, 0.94);
+  border: 1px dashed rgba(15, 23, 42, 0.16);
+  font-size: 0.94rem;
+  font-weight: 850;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1060px) {
+  .adminMockResultsHero,
+  .adminMockResultsCommandGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminMockResultsSystemCard {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 860px) {
+  .adminMockResultsKpiGrid,
+  .adminMockResultsTestGrid,
+  .adminMockResultsStudentGrid,
+  .adminMockResultsWeakGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .adminMockResultsToolbar {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .adminMockResultsPage {
+    padding-bottom: 46px;
+  }
+
+  .adminMockResultsHero,
+  .adminMockResultsPanel {
+    border-radius: 24px;
+    padding: 18px;
+  }
+
+  .adminMockResultsHero h1 {
+    font-size: clamp(2.25rem, 14vw, 3.25rem);
+  }
+
+  .adminMockResultsKpiGrid,
+  .adminMockResultsTestGrid,
+  .adminMockResultsStudentGrid,
+  .adminMockResultsWeakGrid,
+  .adminMockResultsSystemGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminMockResultsHeroActions button,
+  .adminMockResultsToolbar button {
+    width: 100%;
+  }
+
+  .adminMockResultsWeakCard {
+    flex-direction: column;
+  }
+
+  .adminMockResultsTopCard {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .adminMockResultsTopCard .adminMockResultsScorePill {
+    grid-column: 1 / -1;
+    width: max-content;
+  }
+}

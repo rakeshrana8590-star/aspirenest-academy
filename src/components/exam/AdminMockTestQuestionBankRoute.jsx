@@ -58,8 +58,7 @@ export default function AdminMockTestQuestionBankRoute({
     .sort()
     .map((subject) => {
       const subjectQuestions = questionBankItems.filter(
-        (question) =>
-          (question.sourceSubject || question.subject) === subject
+        (question) => (question.sourceSubject || question.subject) === subject
       );
 
       const chapterCount = [
@@ -76,6 +75,30 @@ export default function AdminMockTestQuestionBankRoute({
         chapterCount,
       };
     });
+
+  const totalQuestions = questionBankItems.length;
+
+  const easyQuestions = questionBankItems.filter(
+    (question) => question.level === "Easy"
+  ).length;
+
+  const mediumQuestions = questionBankItems.filter(
+    (question) => question.level === "Medium"
+  ).length;
+
+  const hardQuestions = questionBankItems.filter(
+    (question) => question.level === "Hard"
+  ).length;
+
+  const subjectCount = questionBankSubjectCards.length;
+
+  const chapterCount = [
+    ...new Set(
+      questionBankItems
+        .map((question) => question.sourceChapter || question.chapter)
+        .filter(Boolean)
+    ),
+  ].length;
 
   const downloadJson = (payload, fileName) => {
     const jsonBlob = new Blob([JSON.stringify(payload, null, 2)], {
@@ -115,42 +138,97 @@ export default function AdminMockTestQuestionBankRoute({
 
   return (
     <section className="coursePages adminMockQuestionBankPage adminMockQuestionBankIndexPage">
-      <div className="sectionHeader">
-        <span className="badge">QUESTION BANK</span>
+      <div className="adminMockQbHero">
+        <div className="adminMockQbHeroCopy">
+          <span className="badge">QUESTION BANK</span>
 
-        <h1>Examination Question Bank</h1>
+          <h1>Examination Question Bank</h1>
 
-        <p>
-          Search, filter, review, export, and reuse saved examination questions
-          from one professional question bank.
-        </p>
+          <p>
+            Search, filter, review, export, and reuse saved examination
+            questions from one professional CTET/TET question command center.
+          </p>
+
+          <div className="adminMockQbHeroActions">
+            <button
+              type="button"
+              className="adminMockQbPrimaryBtn"
+              onClick={() => navigate("/admin/content/mock-tests/add")}
+            >
+              + Add Examination Test
+            </button>
+
+            <button
+              type="button"
+              className="adminMockQbGhostBtn"
+              onClick={() => navigate("/admin/content/mock-tests/manage")}
+            >
+              Manage Tests
+            </button>
+          </div>
+        </div>
+
+        <div className="adminMockQbSystemCard">
+          <div className="adminMockQbSystemTop">
+            <span>SYSTEM STATUS</span>
+            <strong>Live</strong>
+          </div>
+
+          <div className="adminMockQbSystemGrid">
+            <div>
+              <strong>{totalQuestions}</strong>
+              <span>Total questions</span>
+            </div>
+
+            <div>
+              <strong>{subjectCount}</strong>
+              <span>Subjects</span>
+            </div>
+
+            <div>
+              <strong>{chapterCount}</strong>
+              <span>Chapters</span>
+            </div>
+
+            <div>
+              <strong>{selectedQuestionBankIds.length}</strong>
+              <span>Selected</span>
+            </div>
+          </div>
+
+          <div className="adminMockQbFlow">
+            <span>Save</span>
+            <i />
+            <span>Reuse</span>
+            <i />
+            <span>Export</span>
+          </div>
+        </div>
       </div>
 
       <div className="mockManageStatsGrid">
         <div className="mockManageStatCard">
           <span>Total Questions</span>
-          <strong>{questionBankItems.length}</strong>
+          <strong>{totalQuestions}</strong>
+          <p>Saved reusable items</p>
         </div>
 
         <div className="mockManageStatCard">
           <span>Easy</span>
-          <strong>
-            {questionBankItems.filter((q) => q.level === "Easy").length}
-          </strong>
+          <strong>{easyQuestions}</strong>
+          <p>Foundation level</p>
         </div>
 
         <div className="mockManageStatCard">
           <span>Medium</span>
-          <strong>
-            {questionBankItems.filter((q) => q.level === "Medium").length}
-          </strong>
+          <strong>{mediumQuestions}</strong>
+          <p>Practice level</p>
         </div>
 
         <div className="mockManageStatCard">
           <span>Hard</span>
-          <strong>
-            {questionBankItems.filter((q) => q.level === "Hard").length}
-          </strong>
+          <strong>{hardQuestions}</strong>
+          <p>Advanced level</p>
         </div>
       </div>
 
@@ -359,7 +437,8 @@ export default function AdminMockTestQuestionBankRoute({
                   <strong>{item.subject}</strong>
 
                   <small>
-                    {item.chapterCount} Chapters • {item.questionCount} Questions
+                    {item.chapterCount} Chapters • {item.questionCount}{" "}
+                    Questions
                   </small>
                 </span>
 
@@ -495,7 +574,9 @@ export default function AdminMockTestQuestionBankRoute({
                   onClick={() => {
                     localStorage.setItem(
                       "reusedQuestionForMockTest",
-                      JSON.stringify(buildReusableQuestionPayload(question, "no"))
+                      JSON.stringify(
+                        buildReusableQuestionPayload(question, "no")
+                      )
                     );
 
                     navigate("/admin/content/mock-tests/add");
