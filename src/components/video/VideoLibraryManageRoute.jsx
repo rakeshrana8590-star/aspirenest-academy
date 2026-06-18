@@ -13,7 +13,9 @@ import VideoActionMenu from "./VideoActionMenu.jsx";
 import useVideoLibrary from "./useVideoLibrary.js";
 
 import {
+  getClassroomSourceUrl,
   getLiveClassStatus,
+  getLiveStatusLabel,
   isLiveClass,
   isRecordedClass,
   LIVE_CLASS_STATUS,
@@ -37,6 +39,45 @@ const getLibraryBucket = (item = {}) => {
   return getLiveClassStatus(item);
 };
 
+const getLiveSourceState = (item = {}) => {
+  if (!isLiveClass(item)) return "RECORDED";
+
+  const liveStatus = getLiveClassStatus(item);
+
+  const hasJoinSource = Boolean(
+    item.joinUrl || item.liveUrl || item.meetingUrl
+  );
+
+  const hasReplaySource = Boolean(
+    item.replayUrl ||
+      item.recordingUrl ||
+      item.videoUrl ||
+      item.fileUrl ||
+      item.sourceUrl
+  );
+
+  if (liveStatus === LIVE_CLASS_STATUS.CANCELLED) {
+    return "CANCELLED";
+  }
+
+  if (
+    liveStatus === LIVE_CLASS_STATUS.UPCOMING ||
+    liveStatus === LIVE_CLASS_STATUS.JOIN_NOW
+  ) {
+    return hasJoinSource ? "SOURCE_LINKED" : "SOURCE_PENDING";
+  }
+
+  if (liveStatus === LIVE_CLASS_STATUS.REPLAY_AVAILABLE) {
+    return hasReplaySource ? "SOURCE_LINKED" : "SOURCE_PENDING";
+  }
+
+  if (liveStatus === LIVE_CLASS_STATUS.ENDED) {
+    return hasReplaySource ? "SOURCE_LINKED" : "REPLAY_PENDING";
+  }
+
+  return hasJoinSource || hasReplaySource ? "SOURCE_LINKED" : "SOURCE_PENDING";
+};
+
 const filterOptions = [
   { value: "ALL", label: "All Classes" },
   { value: "RECORDED", label: "Recorded Lessons" },
@@ -46,6 +87,8 @@ const filterOptions = [
   { value: "REPLAY_AVAILABLE", label: "Replay Available" },
   { value: "ENDED", label: "Ended Live" },
   { value: "CANCELLED", label: "Cancelled Live" },
+  { value: "SOURCE_PENDING", label: "Source Pending" },
+  { value: "REPLAY_PENDING", label: "Replay Pending" },
   { value: "PUBLISHED", label: "Published" },
   { value: "DRAFT", label: "Draft" },
   { value: "UNPUBLISHED", label: "Unpublished" },
@@ -79,27 +122,91 @@ export default function VideoLibraryManageRoute({
     [videoLibrary.allVideos]
   );
 
-  const stats = React.useMemo(
-    () => ({
+  const stats = React.useMemo(() => {
+    const liveItems = allVideos.filter(isLiveClass);
+
+    return {
       total: allVideos.length,
       published: allVideos.filter(
         (item) => normalizeVideoStatus(item.status) === "published"
       ).length,
       recorded: allVideos.filter(isRecordedClass).length,
-      live: allVideos.filter(isLiveClass).length,
-      upcoming: allVideos.filter(
+      live: liveItems.length,
+      joinNow: liveItems.filter(
+        (item) => getLiveClassStatus(item) === LIVE_CLASS_STATUS.JOIN_NOW
+      ).length,
+      upcoming: liveItems.filter(
         (item) => getLiveClassStatus(item) === LIVE_CLASS_STATUS.UPCOMING
       ).length,
-      replay: allVideos.filter(
+      replay: liveItems.filter(
         (item) =>
           getLiveClassStatus(item) === LIVE_CLASS_STATUS.REPLAY_AVAILABLE
+      ).length,
+      ended: liveItems.filter(
+        (item) => getLiveClassStatus(item) === LIVE_CLASS_STATUS.ENDED
+      ).length,
+      cancelled: liveItems.filter(
+        (item) => getLiveClassStatus(item) === LIVE_CLASS_STATUS.CANCELLED
+      ).length,
+      sourcePending: liveItems.filter(
+        (item) => getLiveSourceState(item) === "SOURCE_PENDING"
+      ).length,
+      replayPending: liveItems.filter(
+        (item) => getLiveSourceState(item) === "REPLAY_PENDING"
       ).length,
       draft: allVideos.filter(
         (item) => normalizeVideoStatus(item.status) === "draft"
       ).length,
-    }),
-    [allVideos]
-  );
+      unpublished: allVideos.filter(
+        (item) => normalizeVideoStatus(item.status) === "unpublished"
+      ).length,
+    };
+  }, [allVideos]);
+
+  const liveStateCards = [
+    {
+      key: "JOIN_NOW",
+      label: "Join Now",
+      value: stats.joinNow,
+      filter: "JOIN_NOW",
+      hint: "Live window active",
+    },
+    {
+      key: "UPCOMING",
+      label: "Upcoming",
+      value: stats.upcoming,
+      filter: "UPCOMING",
+      hint: "Scheduled ahead",
+    },
+    {
+      key: "REPLAY_AVAILABLE",
+      label: "Replay",
+      value: stats.replay,
+      filter: "REPLAY_AVAILABLE",
+      hint: "Recording ready",
+    },
+    {
+      key: "ENDED",
+      label: "Ended",
+      value: stats.ended,
+      filter: "ENDED",
+      hint: "Replay pending",
+    },
+    {
+      key: "CANCELLED",
+      label: "Cancelled",
+      value: stats.cancelled,
+      filter: "CANCELLED",
+      hint: "Student update",
+    },
+    {
+      key: "SOURCE_PENDING",
+      label: "Source Pending",
+      value: stats.sourcePending + stats.replayPending,
+      filter: "SOURCE_PENDING",
+      hint: "Needs link",
+    },
+  ];
 
   const filteredVideos = React.useMemo(() => {
     const finalSearch = normalizeVideoText(searchText);
@@ -114,6 +221,7 @@ export default function VideoLibraryManageRoute({
           item.planType,
           item.sourceType,
           item.livePlatform,
+          getLiveStatusLabel(getLibraryBucket(item)),
         ]
           .filter(Boolean)
           .join(" ")
@@ -124,6 +232,7 @@ export default function VideoLibraryManageRoute({
 
       const status = normalizeVideoStatus(item.status);
       const bucket = getLibraryBucket(item);
+      const sourceState = getLiveSourceState(item);
 
       const matchesFilter =
         activeFilter === "ALL" ||
@@ -138,6 +247,10 @@ export default function VideoLibraryManageRoute({
         (activeFilter === "ENDED" && bucket === LIVE_CLASS_STATUS.ENDED) ||
         (activeFilter === "CANCELLED" &&
           bucket === LIVE_CLASS_STATUS.CANCELLED) ||
+        (activeFilter === "SOURCE_PENDING" &&
+          sourceState === "SOURCE_PENDING") ||
+        (activeFilter === "REPLAY_PENDING" &&
+          sourceState === "REPLAY_PENDING") ||
         (activeFilter === "PUBLISHED" && status === "published") ||
         (activeFilter === "DRAFT" && status === "draft") ||
         (activeFilter === "UNPUBLISHED" && status === "unpublished");
@@ -241,8 +354,8 @@ export default function VideoLibraryManageRoute({
 
             <p>
               Manage recorded lessons, live sessions, replay links, plan access,
-              publishing status, and student classroom visibility from one
-              protected admin workspace.
+              publishing status, source readiness, and student classroom
+              visibility from one protected admin workspace.
             </p>
 
             <div className="videoManageHeroActions">
@@ -324,6 +437,11 @@ export default function VideoLibraryManageRoute({
           </article>
 
           <article>
+            <span>Join Now</span>
+            <strong>{stats.joinNow}</strong>
+          </article>
+
+          <article>
             <span>Upcoming</span>
             <strong>{stats.upcoming}</strong>
           </article>
@@ -334,9 +452,49 @@ export default function VideoLibraryManageRoute({
           </article>
 
           <article>
+            <span>Cancelled</span>
+            <strong>{stats.cancelled}</strong>
+          </article>
+
+          <article>
+            <span>Source Pending</span>
+            <strong>{stats.sourcePending + stats.replayPending}</strong>
+          </article>
+
+          <article>
             <span>Draft</span>
             <strong>{stats.draft}</strong>
           </article>
+        </section>
+
+        <section className="videoManageLiveDashboard">
+          <div className="videoManageListHeader">
+            <div>
+              <span>Live Engine</span>
+
+              <h2>Live classroom state dashboard</h2>
+
+              <p>
+                These cards use the same status engine as the student video hub,
+                chapter cards, and watch classroom.
+              </p>
+            </div>
+          </div>
+
+          <div className="videoManageLiveStateGrid">
+            {liveStateCards.map((card) => (
+              <button
+                type="button"
+                key={card.key}
+                className={`videoManageLiveStateCard liveState-${card.key}`}
+                onClick={() => setActiveFilter(card.filter)}
+              >
+                <span>{card.label}</span>
+                <strong>{card.value}</strong>
+                <small>{card.hint}</small>
+              </button>
+            ))}
+          </div>
         </section>
 
         <section className="videoManageWorkspace">
@@ -350,7 +508,7 @@ export default function VideoLibraryManageRoute({
               Search Library
               <input
                 type="text"
-                placeholder="Title, subject, chapter, mentor..."
+                placeholder="Title, subject, chapter, mentor, live state..."
                 value={searchText}
                 onChange={(event) => setSearchText(event.target.value)}
               />

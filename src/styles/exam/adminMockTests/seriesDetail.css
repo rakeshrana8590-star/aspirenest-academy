@@ -1,0 +1,617 @@
+/* ===============================
+   34A15B — ADMIN MOCK TEST SERIES DETAIL
+   One App • One System premium polish
+   Route: /admin/content/mock-tests/test-series/:seriesName
+================================ */
+
+.adminMockSeriesDetailPage {
+    max-width: 1220px;
+    margin: 0 auto;
+    padding-bottom: 72px;
+  }
+  
+  /* HERO */
+  
+  .adminMockSeriesDetailHero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(420px, 0.92fr);
+    align-items: stretch;
+    gap: 24px;
+    margin-bottom: 26px;
+    padding: 36px;
+    border-radius: 36px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background:
+      radial-gradient(circle at 8% 16%, rgba(249, 115, 22, 0.15), transparent 34%),
+      radial-gradient(circle at 92% 10%, rgba(37, 99, 235, 0.13), transparent 32%),
+      linear-gradient(135deg, #ffffff 0%, #fbf7f0 54%, #eef5ff 100%);
+    box-shadow:
+      0 24px 56px rgba(15, 23, 42, 0.08),
+      0 44px 120px rgba(15, 23, 42, 0.07);
+    overflow: hidden;
+  }
+  
+  .adminMockSeriesDetailHeroCopy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+  }
+  
+  .adminMockSeriesDetailHero h1 {
+    max-width: 780px;
+    margin: 16px 0 14px;
+    color: #0f172a;
+    font-size: clamp(2.45rem, 5vw, 4.7rem);
+    line-height: 0.96;
+    letter-spacing: -0.075em;
+  }
+  
+  .adminMockSeriesDetailHero p {
+    max-width: 760px;
+    margin: 0;
+    color: #42526b;
+    font-size: 1.05rem;
+    font-weight: 750;
+    line-height: 1.7;
+  }
+  
+  .adminMockSeriesDetailHeroActions,
+  .adminMockSeriesDetailBottomActions,
+  .adminMockSeriesDetailActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  
+  .adminMockSeriesDetailHeroActions {
+    margin-top: 28px;
+  }
+  
+  .adminMockSeriesDetailPrimaryBtn,
+  .adminMockSeriesDetailGhostBtn,
+  .adminMockSeriesDetailDangerBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    border-radius: 999px;
+    padding: 0 18px;
+    font-size: 0.88rem;
+    font-weight: 950;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease,
+      border-color 0.2s ease;
+  }
+  
+  .adminMockSeriesDetailPrimaryBtn {
+    border: 0;
+    color: #ffffff;
+    background: #0f172a;
+    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.22);
+  }
+  
+  .adminMockSeriesDetailGhostBtn {
+    color: #0f172a;
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+  }
+  
+  .adminMockSeriesDetailDangerBtn {
+    color: #ffffff;
+    background: #991b1b;
+    border: 0;
+    box-shadow: 0 16px 34px rgba(153, 27, 27, 0.18);
+  }
+  
+  .adminMockSeriesDetailPrimaryBtn:hover,
+  .adminMockSeriesDetailGhostBtn:hover,
+  .adminMockSeriesDetailDangerBtn:hover {
+    transform: translateY(-1px);
+  }
+  
+  /* DARK SYSTEM CARD */
+  
+  .adminMockSeriesDetailSystemCard {
+    position: relative;
+    min-height: 320px;
+    padding: 22px;
+    border-radius: 30px;
+    color: #ffffff;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(249, 115, 22, 0.22), transparent 30%),
+      radial-gradient(circle at 90% 20%, rgba(59, 130, 246, 0.18), transparent 32%),
+      linear-gradient(135deg, #2b1f20 0%, #0f172a 54%, #08111f 100%);
+    box-shadow:
+      0 24px 52px rgba(15, 23, 42, 0.22),
+      0 44px 120px rgba(15, 23, 42, 0.16);
+    overflow: hidden;
+  }
+  
+  .adminMockSeriesDetailSystemCard::after {
+    content: "";
+    position: absolute;
+    inset: auto -70px -90px auto;
+    width: 210px;
+    height: 210px;
+    border-radius: 999px;
+    background: rgba(249, 115, 22, 0.16);
+    filter: blur(24px);
+  }
+  
+  .adminMockSeriesDetailSystemTop {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  
+  .adminMockSeriesDetailSystemTop span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 14px;
+    border-radius: 999px;
+    color: #fed7aa;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 0.78rem;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+  }
+  
+  .adminMockSeriesDetailSystemTop strong {
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 950;
+  }
+  
+  .adminMockSeriesDetailSystemGrid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  
+  .adminMockSeriesDetailSystemGrid div {
+    min-height: 102px;
+    padding: 18px;
+    border-radius: 22px;
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  
+  .adminMockSeriesDetailSystemGrid strong {
+    display: block;
+    color: #ffffff;
+    font-size: 2rem;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  
+  .adminMockSeriesDetailSystemGrid span {
+    display: block;
+    margin-top: 9px;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.82rem;
+    font-weight: 850;
+  }
+  
+  .adminMockSeriesDetailFlow {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: auto 1fr auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+    margin-top: 24px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.14);
+  }
+  
+  .adminMockSeriesDetailFlow span {
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 950;
+  }
+  
+  .adminMockSeriesDetailFlow i {
+    display: block;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.24);
+  }
+  
+  /* KPI */
+  
+  .adminMockSeriesDetailKpiGrid,
+  .adminMockSeriesDetailMiniGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+  
+  .adminMockSeriesDetailKpiGrid {
+    margin-bottom: 16px;
+  }
+  
+  .adminMockSeriesDetailMiniGrid {
+    margin-bottom: 18px;
+  }
+  
+  .adminMockSeriesDetailKpiCard,
+  .adminMockSeriesDetailMiniCard {
+    min-height: 140px;
+    padding: 22px;
+    border-radius: 26px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94)),
+      #ffffff;
+    box-shadow:
+      0 18px 36px rgba(15, 23, 42, 0.07),
+      0 34px 90px rgba(15, 23, 42, 0.06);
+  }
+  
+  .adminMockSeriesDetailMiniCard {
+    min-height: 112px;
+    color: #ffffff;
+    background:
+      radial-gradient(circle at 90% 8%, rgba(249, 115, 22, 0.18), transparent 32%),
+      linear-gradient(135deg, #0f172a 0%, #111827 62%, #2b1f20 100%);
+  }
+  
+  .adminMockSeriesDetailKpiCard span,
+  .adminMockSeriesDetailMiniCard span,
+  .adminMockSeriesDetailPanelHeader span {
+    display: block;
+    color: #64748b;
+    font-size: 0.76rem;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  
+  .adminMockSeriesDetailMiniCard span {
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .adminMockSeriesDetailKpiCard strong,
+  .adminMockSeriesDetailMiniCard strong {
+    display: block;
+    margin-top: 12px;
+    color: #0f172a;
+    font-size: 2.1rem;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  
+  .adminMockSeriesDetailMiniCard strong {
+    color: #ffffff;
+    font-size: 1.8rem;
+  }
+  
+  .adminMockSeriesDetailKpiCard p,
+  .adminMockSeriesDetailMiniCard p {
+    margin: 12px 0 0;
+    color: #64748b;
+    font-size: 0.88rem;
+    font-weight: 800;
+    line-height: 1.45;
+  }
+  
+  .adminMockSeriesDetailMiniCard p {
+    color: rgba(255, 255, 255, 0.76);
+  }
+  
+  /* PANEL */
+  
+  .adminMockSeriesDetailPanel {
+    position: relative;
+    margin-bottom: 18px;
+    padding: 22px;
+    border-radius: 30px;
+    background:
+      radial-gradient(circle at 95% 10%, rgba(249, 115, 22, 0.07), transparent 32%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+    border: 1px solid rgba(249, 115, 22, 0.18);
+    box-shadow:
+      0 22px 48px rgba(15, 23, 42, 0.07),
+      0 44px 110px rgba(15, 23, 42, 0.055);
+    overflow: hidden;
+  }
+  
+  .adminMockSeriesDetailPanel::before {
+    content: "";
+    position: absolute;
+    inset: 12px;
+    z-index: 0;
+    border-radius: 24px;
+    pointer-events: none;
+    opacity: 0.78;
+    background:
+      radial-gradient(circle at 92% 12%, rgba(249, 115, 22, 0.08), transparent 32%),
+      radial-gradient(circle at 8% 90%, rgba(37, 99, 235, 0.055), transparent 36%);
+  }
+  
+  .adminMockSeriesDetailPanel > * {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .adminMockSeriesDetailPanelHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  
+  .adminMockSeriesDetailPanelHeader h2 {
+    margin: 7px 0 0;
+    color: #0f172a;
+    font-size: clamp(2.1rem, 4.3vw, 3.6rem);
+    line-height: 0.98;
+    letter-spacing: -0.065em;
+  }
+  
+  .adminMockSeriesDetailPanelHeader small {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 13px;
+    border-radius: 999px;
+    color: #475569;
+    background: #f1f5f9;
+    font-size: 0.78rem;
+    font-weight: 950;
+    white-space: nowrap;
+  }
+  
+  /* TEST CARDS */
+  
+  .adminMockSeriesDetailGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .adminMockSeriesDetailCard {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+    padding: 22px;
+    border-radius: 28px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background:
+      radial-gradient(circle at 94% 12%, rgba(249, 115, 22, 0.07), transparent 32%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.99), rgba(248, 250, 252, 0.96));
+    box-shadow:
+      0 14px 28px rgba(15, 23, 42, 0.055),
+      0 26px 70px rgba(15, 23, 42, 0.045);
+  }
+  
+  .adminMockSeriesDetailCardTop {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+  }
+  
+  .adminMockSeriesDetailPlanPill,
+  .adminMockSeriesDetailStatusPill,
+  .adminMockSeriesDetailMetaLine span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    padding: 0 11px;
+    border-radius: 999px;
+    color: #475569;
+    background: #f1f5f9;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    font-size: 0.76rem;
+    font-weight: 950;
+    white-space: nowrap;
+  }
+  
+  .adminMockSeriesDetailPlanPill {
+    color: #c2410c;
+    background: #fff7ed;
+    border-color: rgba(249, 115, 22, 0.18);
+  }
+  
+  .adminMockSeriesDetailStatusPill.isPublished {
+    color: #166534;
+    background: #dcfce7;
+    border-color: rgba(22, 163, 74, 0.16);
+  }
+  
+  .adminMockSeriesDetailCard h3 {
+    margin: 12px 0 8px;
+    color: #0f172a;
+    font-size: 1.16rem;
+    font-weight: 950;
+    line-height: 1.32;
+    letter-spacing: -0.03em;
+  }
+  
+  .adminMockSeriesDetailCard p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.92rem;
+    font-weight: 800;
+    line-height: 1.52;
+  }
+  
+  .adminMockSeriesDetailStats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+  
+  .adminMockSeriesDetailStats div {
+    min-height: 78px;
+    padding: 13px;
+    border-radius: 18px;
+    background: #f8fafc;
+    border: 1px solid rgba(15, 23, 42, 0.07);
+  }
+  
+  .adminMockSeriesDetailStats span {
+    display: block;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  
+  .adminMockSeriesDetailStats strong {
+    display: block;
+    margin-top: 8px;
+    color: #0f172a;
+    font-size: 0.94rem;
+    font-weight: 950;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+  
+  .adminMockSeriesDetailMetaLine {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  
+  .adminMockSeriesDetailActions {
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+  }
+  
+  .adminMockSeriesDetailActions .adminMockSeriesDetailPrimaryBtn,
+  .adminMockSeriesDetailActions .adminMockSeriesDetailGhostBtn,
+  .adminMockSeriesDetailActions .adminMockSeriesDetailDangerBtn {
+    min-height: 42px;
+    padding: 0 15px;
+    font-size: 0.84rem;
+  }
+  
+  /* EMPTY + BOTTOM */
+  
+  .adminMockSeriesDetailEmpty {
+    padding: 24px;
+    border-radius: 22px;
+    color: #64748b;
+    background: rgba(248, 250, 252, 0.94);
+    border: 1px dashed rgba(15, 23, 42, 0.16);
+    font-size: 0.94rem;
+    font-weight: 850;
+  }
+  
+  .adminMockSeriesDetailEmpty strong {
+    display: block;
+    color: #0f172a;
+    font-size: 1rem;
+  }
+  
+  .adminMockSeriesDetailEmpty p {
+    margin: 8px 0 0;
+    color: #64748b;
+    font-weight: 800;
+  }
+  
+  .adminMockSeriesDetailBottomActions {
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding: 18px;
+    border-radius: 28px;
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow:
+      0 18px 36px rgba(15, 23, 42, 0.07),
+      0 34px 90px rgba(15, 23, 42, 0.06);
+  }
+  
+  /* RESPONSIVE */
+  
+  @media (max-width: 1080px) {
+    .adminMockSeriesDetailHero {
+      grid-template-columns: 1fr;
+    }
+  
+    .adminMockSeriesDetailSystemCard {
+      min-height: auto;
+    }
+  
+    .adminMockSeriesDetailGrid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media (max-width: 860px) {
+    .adminMockSeriesDetailKpiGrid,
+    .adminMockSeriesDetailMiniGrid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  
+    .adminMockSeriesDetailPanelHeader h2 {
+      font-size: clamp(1.8rem, 8vw, 2.8rem);
+    }
+  
+    .adminMockSeriesDetailStats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .adminMockSeriesDetailPage {
+      padding-bottom: 46px;
+    }
+  
+    .adminMockSeriesDetailHero,
+    .adminMockSeriesDetailPanel {
+      border-radius: 24px;
+      padding: 18px;
+    }
+  
+    .adminMockSeriesDetailHero h1 {
+      font-size: clamp(2.15rem, 13vw, 3.15rem);
+    }
+  
+    .adminMockSeriesDetailKpiGrid,
+    .adminMockSeriesDetailMiniGrid,
+    .adminMockSeriesDetailSystemGrid,
+    .adminMockSeriesDetailStats {
+      grid-template-columns: 1fr;
+    }
+  
+    .adminMockSeriesDetailHeroActions button,
+    .adminMockSeriesDetailActions button,
+    .adminMockSeriesDetailBottomActions button {
+      width: 100%;
+    }
+  
+    .adminMockSeriesDetailCardTop {
+      flex-direction: column;
+    }
+  
+    .adminMockSeriesDetailBottomActions {
+      justify-content: stretch;
+    }
+  }

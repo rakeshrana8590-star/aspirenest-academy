@@ -96,7 +96,13 @@ export default function AdminMockTestSeriesRoute({
             <button
               type="button"
               className="adminMockSeriesGhostBtn"
-              onClick={() => navigate("/admin/content/mock-tests/manage")}
+              onClick={() =>
+                navigate(
+                  `/admin/content/mock-tests/test-series/${encodeURIComponent(
+                    series.seriesName
+                  )}`
+                )
+              }
             >
               Manage Tests
             </button>
@@ -197,7 +203,13 @@ export default function AdminMockTestSeriesRoute({
                 type="button"
                 key={series.seriesName}
                 className="adminMockSeriesCard"
-                onClick={() => navigate("/admin/content/mock-tests/manage")}
+                onClick={() =>
+                  navigate(
+                    `/admin/content/mock-tests/test-series/${encodeURIComponent(
+                      series.seriesName || series.name || series.testType || "Mock Test"
+                    )}`
+                  )
+                }
               >
                 <span className="adminMockSeriesIcon" aria-hidden="true">
                   🧩
