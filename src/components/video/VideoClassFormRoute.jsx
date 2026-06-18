@@ -1,100 +1,32 @@
 import React from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
+
 import {
-  addDoc,
-  collection,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
+  LIVE_CLASS_STATUS,
+  LIVE_PLATFORMS,
+  VIDEO_CLASS_MODES,
+  VIDEO_SOURCE_TYPES,
+  VIDEO_STATUS,
+} from "./videoConstants.js";
 
-const DEFAULT_VIDEO_FORM = {
-  classMode: "RECORDED",
-  title: "",
-  planType: "FREE",
-  subject: "",
-  chapter: "",
-  videoUrl: "",
-  thumbnailUrl: "",
-  duration: "",
-  mentorName: "",
-  status: "published",
-  sourceType: "YOUTUBE_PUBLIC",
+import { isVideoContentItem } from "./videoUtils.js";
 
-  liveStartDate: "",
-  liveStartTime: "",
-  liveEndDate: "",
-  liveEndTime: "",
-  livePlatform: "YOUTUBE_LIVE",
-  joinUrl: "",
-  replayUrl: "",
-  liveInstructions: "",
-};
+import {
+  buildVideoFormFromItem,
+  buildVideoSavePayload,
+  createDefaultVideoForm,
+  findDuplicateVideoClass,
+  getUniqueVideoLabels,
+  validateVideoClassForm,
+} from "./videoFormUtils.js";
 
-const normalizeText = (value = "") =>
-  value.toString().trim().toLowerCase().replace(/\s+/g, " ");
-
-const normalizeClassMode = (value = "RECORDED") =>
-  value.toString().trim().toUpperCase() === "LIVE" ? "LIVE" : "RECORDED";
-
-const getOptionLabel = (item) => {
-  if (!item) return "";
-  if (typeof item === "string") return item;
-
-  return (
-    item.name ||
-    item.title ||
-    item.subject ||
-    item.chapter ||
-    item.label ||
-    ""
-  );
-};
-
-const uniqueLabels = (items = []) => {
-  const map = new Map();
-
-  items.forEach((item) => {
-    const label = getOptionLabel(item).trim();
-
-    if (!label) return;
-
-    const key = normalizeText(label);
-
-    if (!map.has(key)) {
-      map.set(key, label);
-    }
-  });
-
-  return [...map.values()];
-};
-
-const buildFormFromItem = (item = {}) => {
-  const classMode = normalizeClassMode(item.classMode || item.mode);
-
-  return {
-    ...DEFAULT_VIDEO_FORM,
-    classMode,
-    title: item.title || "",
-    planType: item.planType || "FREE",
-    subject: item.subject || "",
-    chapter: item.chapter || "",
-    videoUrl: item.videoUrl || item.fileUrl || "",
-    thumbnailUrl: item.thumbnailUrl || "",
-    duration: item.duration || "",
-    mentorName: item.mentorName || "",
-    status: item.status || "published",
-    sourceType: item.sourceType || "YOUTUBE_PUBLIC",
-
-    liveStartDate: item.liveStartDate || "",
-    liveStartTime: item.liveStartTime || "",
-    liveEndDate: item.liveEndDate || "",
-    liveEndTime: item.liveEndTime || "",
-    livePlatform: item.livePlatform || item.sourceType || "YOUTUBE_LIVE",
-    joinUrl: item.joinUrl || "",
-    replayUrl: item.replayUrl || "",
-    liveInstructions: item.liveInstructions || "",
-  };
-};
+const builderChecklist = [
+  "Plan access selected",
+  "Subject + chapter connected",
+  "Student classroom source ready",
+  "Publish state controlled",
+];
 
 export default function VideoClassFormRoute({
   db,
@@ -115,35 +47,37 @@ export default function VideoClassFormRoute({
     [editId, universalContent]
   );
 
-  const [videoForm, setVideoForm] = React.useState(DEFAULT_VIDEO_FORM);
+  const [videoForm, setVideoForm] = React.useState(() =>
+    createDefaultVideoForm()
+  );
   const [formError, setFormError] = React.useState("");
   const [isSaving, setIsSaving] = React.useState(false);
 
   React.useEffect(() => {
     if (editId && editItem) {
-      setVideoForm(buildFormFromItem(editItem));
+      setVideoForm(buildVideoFormFromItem(editItem));
       return;
     }
 
     if (!editId) {
-      setVideoForm(DEFAULT_VIDEO_FORM);
+      setVideoForm(createDefaultVideoForm());
     }
   }, [editId, editItem]);
 
   const subjectOptions = React.useMemo(() => {
     const videoSubjects = universalContent
-      .filter((item) => item.section === "recordedVideo")
+      .filter(isVideoContentItem)
       .map((item) => item.subject);
 
-    return uniqueLabels([...notesSubjectsList, ...videoSubjects]);
+    return getUniqueVideoLabels([...notesSubjectsList, ...videoSubjects]);
   }, [notesSubjectsList, universalContent]);
 
   const chapterOptions = React.useMemo(() => {
     const videoChapters = universalContent
-      .filter((item) => item.section === "recordedVideo")
+      .filter(isVideoContentItem)
       .map((item) => item.chapter);
 
-    return uniqueLabels([...notesChaptersList, ...videoChapters]);
+    return getUniqueVideoLabels([...notesChaptersList, ...videoChapters]);
   }, [notesChaptersList, universalContent]);
 
   const updateField = (field, value) => {
@@ -155,135 +89,28 @@ export default function VideoClassFormRoute({
     }));
   };
 
-  const validateForm = () => {
-    if (!videoForm.title.trim()) {
-      return "Class title required.";
-    }
-
-    if (!videoForm.planType.trim()) {
-      return "Plan type required.";
-    }
-
-    if (!videoForm.subject.trim()) {
-      return "Subject required.";
-    }
-
-    if (!videoForm.chapter.trim()) {
-      return "Chapter required.";
-    }
-
-    if (videoForm.classMode === "RECORDED" && !videoForm.videoUrl.trim()) {
-      return "Recorded lesson video URL required.";
-    }
-
-    if (videoForm.classMode === "LIVE") {
-      if (!videoForm.liveStartDate.trim()) {
-        return "Live class start date required.";
-      }
-
-      if (!videoForm.liveStartTime.trim()) {
-        return "Live class start time required.";
-      }
-
-      if (!videoForm.joinUrl.trim()) {
-        return "Live class join URL required.";
-      }
-    }
-
-    return "";
-  };
-
-  const findDuplicateClass = () => {
-    return universalContent.find((item) => {
-      if (editId && item.id === editId) return false;
-
-      if (item.section !== "recordedVideo" && item.contentType !== "VIDEO") {
-        return false;
-      }
-
-      const itemMode = normalizeClassMode(item.classMode || item.mode);
-
-      const sameCore =
-        normalizeText(item.title) === normalizeText(videoForm.title) &&
-        normalizeText(item.planType) === normalizeText(videoForm.planType) &&
-        normalizeText(item.subject) === normalizeText(videoForm.subject) &&
-        normalizeText(item.chapter) === normalizeText(videoForm.chapter) &&
-        itemMode === videoForm.classMode;
-
-      if (!sameCore) return false;
-
-      if (videoForm.classMode === "LIVE") {
-        return (
-          item.liveStartDate === videoForm.liveStartDate &&
-          item.liveStartTime === videoForm.liveStartTime
-        );
-      }
-
-      return true;
-    });
-  };
-
-  const buildSavePayload = () => {
-    const now = new Date();
-    const classMode = normalizeClassMode(videoForm.classMode);
-
-    return {
-      section: "recordedVideo",
-      contentType: "VIDEO",
-      classMode,
-
-      title: videoForm.title.trim(),
-      planType: videoForm.planType.trim().toUpperCase(),
-      subject: videoForm.subject.trim(),
-      chapter: videoForm.chapter.trim(),
-      thumbnailUrl: videoForm.thumbnailUrl.trim(),
-      duration: videoForm.duration.trim(),
-      mentorName: videoForm.mentorName.trim(),
-      status: videoForm.status,
-      updatedAt: now,
-
-      sourceType:
-        classMode === "LIVE"
-          ? videoForm.livePlatform
-          : videoForm.sourceType,
-
-      videoUrl:
-        classMode === "RECORDED"
-          ? videoForm.videoUrl.trim()
-          : videoForm.replayUrl.trim(),
-
-      fileUrl:
-        classMode === "RECORDED"
-          ? videoForm.videoUrl.trim()
-          : videoForm.replayUrl.trim(),
-
-      liveStartDate: classMode === "LIVE" ? videoForm.liveStartDate : "",
-      liveStartTime: classMode === "LIVE" ? videoForm.liveStartTime : "",
-      liveEndDate: classMode === "LIVE" ? videoForm.liveEndDate : "",
-      liveEndTime: classMode === "LIVE" ? videoForm.liveEndTime : "",
-      livePlatform: classMode === "LIVE" ? videoForm.livePlatform : "",
-      joinUrl: classMode === "LIVE" ? videoForm.joinUrl.trim() : "",
-      replayUrl: classMode === "LIVE" ? videoForm.replayUrl.trim() : "",
-      liveInstructions:
-        classMode === "LIVE" ? videoForm.liveInstructions.trim() : "",
-    };
-  };
+  const isRecordedMode = videoForm.classMode === VIDEO_CLASS_MODES.RECORDED;
+  const isLiveMode = videoForm.classMode === VIDEO_CLASS_MODES.LIVE;
 
   const handleSaveVideoClass = async (event) => {
     event.preventDefault();
 
-    const validationMessage = validateForm();
+    const validationMessage = validateVideoClassForm(videoForm);
 
     if (validationMessage) {
       setFormError(validationMessage);
       return;
     }
 
-    const duplicateClass = findDuplicateClass();
+    const duplicateClass = findDuplicateVideoClass({
+      universalContent,
+      videoForm,
+      editId,
+    });
 
     if (duplicateClass) {
       setFormError(
-        "Duplicate class found with same title, plan, subject, chapter, and class mode."
+        "Duplicate class found with same title, plan, subject, chapter, class mode, and live schedule."
       );
       return;
     }
@@ -292,7 +119,7 @@ export default function VideoClassFormRoute({
     setFormError("");
 
     try {
-      const payload = buildSavePayload();
+      const payload = buildVideoSavePayload(videoForm);
 
       if (editId) {
         await updateDoc(doc(db, "contentItems", editId), payload);
@@ -316,333 +143,475 @@ export default function VideoClassFormRoute({
   };
 
   return (
-    <section className="coursePages videoFormPage">
-      <div className="sectionHeader">
-        <span className="badge">
-          {editId ? "EDIT CLASS" : "ADD CLASS"}
-        </span>
+    <section className="coursePages videoFormPage videoClassBuilderPage">
+      <div className="videoClassBuilderShell">
+        <section className="videoClassBuilderHero">
+          <div className="videoClassBuilderHeroCopy">
+            <span className="videoClassBuilderKicker">
+              {editId ? "EDIT CLASSROOM ITEM" : "CLASSROOM BUILDER"}
+            </span>
 
-        <h1>
-          {editId
-            ? "Edit Video / Live Class"
-            : "Add Video / Live Class"}
-        </h1>
+            <h1>{editId ? "Edit Class" : "Add Video / Live Class"}</h1>
 
-        <p>
-          Save recorded lessons and live classes in one AspireNest classroom
-          system using contentItems.
-        </p>
-      </div>
+            <p>
+              Build recorded lessons and live classrooms with plan access,
+              subject shelves, replay links, schedule state, and student-ready
+              publishing from one protected admin system.
+            </p>
 
-      <form className="contentStudioForm" onSubmit={handleSaveVideoClass}>
-        <div className="videoFormModeTabs">
-          <button
-            type="button"
-            className={
-              videoForm.classMode === "RECORDED"
-                ? "backButton active"
-                : "backButton"
-            }
-            onClick={() => updateField("classMode", "RECORDED")}
-          >
-            🎬 Recorded Lesson
-          </button>
+            <div className="videoClassBuilderHeroActions">
+              <button
+                type="button"
+                className="videoManagerPrimaryButton"
+                onClick={() => navigate("/admin/content/videos/manage")}
+              >
+                Manage Library
+              </button>
 
-          <button
-            type="button"
-            className={
-              videoForm.classMode === "LIVE"
-                ? "backButton active"
-                : "backButton"
-            }
-            onClick={() => updateField("classMode", "LIVE")}
-          >
-            🔴 Live Class
-          </button>
-        </div>
-
-        {formError && (
-          <div className="contentStudioItem videoEmptyState">
-            <strong>{formError}</strong>
-          </div>
-        )}
-
-        <div className="contentStudioGrid">
-          <div>
-            <label>Class Title</label>
-            <input
-              type="text"
-              value={videoForm.title}
-              onChange={(event) => updateField("title", event.target.value)}
-              placeholder="Example: Child Development — Piaget Theory"
-            />
+              <button
+                type="button"
+                className="videoManagerSecondaryButton"
+                onClick={() => navigate("/admin/content/videos")}
+              >
+                ← Video Manager
+              </button>
+            </div>
           </div>
 
-          <div>
-            <label>Plan Access</label>
-            <select
-              value={videoForm.planType}
-              onChange={(event) =>
-                updateField("planType", event.target.value)
-              }
-            >
-              <option value="FREE">FREE</option>
-              <option value="BASIC">BASIC</option>
-              <option value="PREMIUM">PREMIUM</option>
-              <option value="MENTORSHIP">MENTORSHIP</option>
-            </select>
-          </div>
+          <aside className="videoClassBuilderStatusPanel">
+            <div className="videoClassBuilderPanelHeader">
+              <span>Builder Status</span>
+              <strong>{isLiveMode ? "Live Mode" : "Recorded Mode"}</strong>
+            </div>
 
-          <div>
-            <label>Subject</label>
-            <input
-              type="text"
-              value={videoForm.subject}
-              list="video-subject-options"
-              onChange={(event) => updateField("subject", event.target.value)}
-              placeholder="Example: Child Development"
-            />
+            <div className="videoClassBuilderStatusGrid">
+              <article>
+                <strong>{videoForm.planType || "FREE"}</strong>
+                <span>Plan Access</span>
+              </article>
 
-            <datalist id="video-subject-options">
-              {subjectOptions.map((subject) => (
-                <option value={subject} key={subject} />
+              <article>
+                <strong>{videoForm.status || "draft"}</strong>
+                <span>Publish State</span>
+              </article>
+
+              <article>
+                <strong>{videoForm.subject || "Subject"}</strong>
+                <span>Subject Shelf</span>
+              </article>
+
+              <article>
+                <strong>{videoForm.chapter || "Chapter"}</strong>
+                <span>Chapter Shelf</span>
+              </article>
+            </div>
+
+            <div className="videoClassBuilderFlowLine">
+              <span>Create</span>
+              <i />
+              <span>Protect</span>
+              <i />
+              <span>Publish</span>
+            </div>
+          </aside>
+        </section>
+
+        <form
+          className="contentStudioForm videoClassBuilderForm"
+          onSubmit={handleSaveVideoClass}
+        >
+          <aside className="videoClassBuilderRail">
+            <div className="videoClassBuilderRailHeader">
+              <span>Class Type</span>
+              <strong>Choose workflow</strong>
+            </div>
+
+            <div className="videoFormModeTabs videoClassBuilderModeTabs">
+              <button
+                type="button"
+                className={isRecordedMode ? "backButton active" : "backButton"}
+                onClick={() =>
+                  updateField("classMode", VIDEO_CLASS_MODES.RECORDED)
+                }
+              >
+                🎬 Recorded Lesson
+              </button>
+
+              <button
+                type="button"
+                className={isLiveMode ? "backButton active" : "backButton"}
+                onClick={() => updateField("classMode", VIDEO_CLASS_MODES.LIVE)}
+              >
+                🔴 Live Class
+              </button>
+            </div>
+
+            <div className="videoClassBuilderChecklist">
+              {builderChecklist.map((item) => (
+                <span key={item}>✓ {item}</span>
               ))}
-            </datalist>
-          </div>
+            </div>
 
-          <div>
-            <label>Chapter</label>
-            <input
-              type="text"
-              value={videoForm.chapter}
-              list="video-chapter-options"
-              onChange={(event) => updateField("chapter", event.target.value)}
-              placeholder="Example: Learning Theories"
-            />
+            <div className="videoClassBuilderSafetyNote">
+              <strong>Secure classroom note</strong>
+              <p>
+                YouTube/Drive/external links can be embedded and gated by plan,
+                but public platform URLs cannot be made impossible to share.
+              </p>
+            </div>
+          </aside>
 
-            <datalist id="video-chapter-options">
-              {chapterOptions.map((chapter) => (
-                <option value={chapter} key={chapter} />
-              ))}
-            </datalist>
-          </div>
-
-          <div>
-            <label>Mentor Name</label>
-            <input
-              type="text"
-              value={videoForm.mentorName}
-              onChange={(event) =>
-                updateField("mentorName", event.target.value)
-              }
-              placeholder="Example: Dr. Varsha D. Maru"
-            />
-          </div>
-
-          <div>
-            <label>Duration</label>
-            <input
-              type="text"
-              value={videoForm.duration}
-              onChange={(event) => updateField("duration", event.target.value)}
-              placeholder="Example: 42 min"
-            />
-          </div>
-
-          <div>
-            <label>Thumbnail URL</label>
-            <input
-              type="url"
-              value={videoForm.thumbnailUrl}
-              onChange={(event) =>
-                updateField("thumbnailUrl", event.target.value)
-              }
-              placeholder="Optional thumbnail image URL"
-            />
-          </div>
-
-          <div>
-            <label>Status</label>
-            <select
-              value={videoForm.status}
-              onChange={(event) => updateField("status", event.target.value)}
-            >
-              <option value="published">Published</option>
-              <option value="draft">Draft</option>
-              <option value="unpublished">Unpublished</option>
-              <option value="archived">Archived</option>
-            </select>
-          </div>
-        </div>
-
-        {videoForm.classMode === "RECORDED" && (
-          <div className="videoFormSectionCard" style={{ marginTop: "24px" }}>
-            <h3>Recorded Lesson Source</h3>
-
-            <div className="contentStudioGrid">
-              <div>
-                <label>Source Type</label>
-                <select
-                  value={videoForm.sourceType}
-                  onChange={(event) =>
-                    updateField("sourceType", event.target.value)
-                  }
-                >
-                  <option value="YOUTUBE_PUBLIC">YouTube Public</option>
-                  <option value="YOUTUBE_UNLISTED">YouTube Unlisted</option>
-                  <option value="DRIVE">Google Drive</option>
-                  <option value="ASSET">Asset Link</option>
-                  <option value="EXTERNAL">External Secure Link</option>
-                </select>
+          <div className="videoClassBuilderWorkspace">
+            {formError && (
+              <div className="contentStudioItem videoEmptyState videoClassBuilderError">
+                <strong>{formError}</strong>
               </div>
+            )}
 
-              <div>
-                <label>Video URL</label>
-                <input
-                  type="url"
-                  value={videoForm.videoUrl}
-                  onChange={(event) =>
-                    updateField("videoUrl", event.target.value)
-                  }
-                  placeholder="Paste YouTube / Drive / secure video URL"
-                />
-
-                <p className="videoFormHint">
-                  Student side will show this inside AspireNest classroom.
+            <section className="videoClassBuilderCard">
+              <div className="videoClassBuilderCardHeader">
+                <span>Core Details</span>
+                <h2>Classroom identity</h2>
+                <p>
+                  These fields decide where the class appears in student plan,
+                  subject, and chapter shelves.
                 </p>
               </div>
+
+              <div className="contentStudioGrid">
+                <div>
+                  <label>Class Title</label>
+                  <input
+                    type="text"
+                    value={videoForm.title}
+                    onChange={(event) =>
+                      updateField("title", event.target.value)
+                    }
+                    placeholder="Example: Child Development — Piaget Theory"
+                  />
+                </div>
+
+                <div>
+                  <label>Plan Access</label>
+                  <select
+                    value={videoForm.planType}
+                    onChange={(event) =>
+                      updateField("planType", event.target.value)
+                    }
+                  >
+                    <option value="FREE">FREE</option>
+                    <option value="BASIC">BASIC</option>
+                    <option value="PREMIUM">PREMIUM</option>
+                    <option value="MENTORSHIP">MENTORSHIP</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label>Subject</label>
+                  <input
+                    type="text"
+                    value={videoForm.subject}
+                    list="video-subject-options"
+                    onChange={(event) =>
+                      updateField("subject", event.target.value)
+                    }
+                    placeholder="Example: Child Development"
+                  />
+
+                  <datalist id="video-subject-options">
+                    {subjectOptions.map((subject) => (
+                      <option value={subject} key={subject} />
+                    ))}
+                  </datalist>
+                </div>
+
+                <div>
+                  <label>Chapter</label>
+                  <input
+                    type="text"
+                    value={videoForm.chapter}
+                    list="video-chapter-options"
+                    onChange={(event) =>
+                      updateField("chapter", event.target.value)
+                    }
+                    placeholder="Example: Learning Theories"
+                  />
+
+                  <datalist id="video-chapter-options">
+                    {chapterOptions.map((chapter) => (
+                      <option value={chapter} key={chapter} />
+                    ))}
+                  </datalist>
+                </div>
+
+                <div>
+                  <label>Mentor Name</label>
+                  <input
+                    type="text"
+                    value={videoForm.mentorName}
+                    onChange={(event) =>
+                      updateField("mentorName", event.target.value)
+                    }
+                    placeholder="Example: Dr. Varsha D. Maru"
+                  />
+                </div>
+
+                <div>
+                  <label>Duration</label>
+                  <input
+                    type="text"
+                    value={videoForm.duration}
+                    onChange={(event) =>
+                      updateField("duration", event.target.value)
+                    }
+                    placeholder="Example: 42 min"
+                  />
+                </div>
+
+                <div>
+                  <label>Thumbnail URL</label>
+                  <input
+                    type="url"
+                    value={videoForm.thumbnailUrl}
+                    onChange={(event) =>
+                      updateField("thumbnailUrl", event.target.value)
+                    }
+                    placeholder="Optional thumbnail image URL"
+                  />
+                </div>
+
+                <div>
+                  <label>Status</label>
+                  <select
+                    value={videoForm.status}
+                    onChange={(event) =>
+                      updateField("status", event.target.value)
+                    }
+                  >
+                    <option value={VIDEO_STATUS.PUBLISHED}>Published</option>
+                    <option value={VIDEO_STATUS.DRAFT}>Draft</option>
+                    <option value={VIDEO_STATUS.UNPUBLISHED}>
+                      Unpublished
+                    </option>
+                    <option value={VIDEO_STATUS.ARCHIVED}>Archived</option>
+                  </select>
+                </div>
+              </div>
+            </section>
+
+            {isRecordedMode && (
+              <section className="videoClassBuilderCard videoClassBuilderRecordedCard">
+                <div className="videoClassBuilderCardHeader">
+                  <span>Recorded Source</span>
+                  <h2>Lesson playback</h2>
+                  <p>
+                    Recorded videos open inside AspireNest classroom with plan
+                    access guard and safe embed handling.
+                  </p>
+                </div>
+
+                <div className="contentStudioGrid">
+                  <div>
+                    <label>Source Type</label>
+                    <select
+                      value={videoForm.sourceType}
+                      onChange={(event) =>
+                        updateField("sourceType", event.target.value)
+                      }
+                    >
+                      <option value={VIDEO_SOURCE_TYPES.YOUTUBE_PUBLIC}>
+                        YouTube Public
+                      </option>
+                      <option value={VIDEO_SOURCE_TYPES.YOUTUBE_UNLISTED}>
+                        YouTube Unlisted
+                      </option>
+                      <option value={VIDEO_SOURCE_TYPES.DRIVE}>
+                        Google Drive
+                      </option>
+                      <option value="ASSET">Asset Link</option>
+                      <option value="EXTERNAL">External Secure Link</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label>Video URL</label>
+                    <input
+                      type="url"
+                      value={videoForm.videoUrl}
+                      onChange={(event) =>
+                        updateField("videoUrl", event.target.value)
+                      }
+                      placeholder="Paste YouTube / Drive / secure video URL"
+                    />
+
+                    <p className="videoFormHint">
+                      Student side will show this inside AspireNest classroom.
+                    </p>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {isLiveMode && (
+              <section className="videoClassBuilderCard videoClassBuilderLiveCard">
+                <div className="videoClassBuilderCardHeader">
+                  <span>Live Classroom</span>
+                  <h2>Schedule & access</h2>
+                  <p>
+                    Control upcoming, join-now, ended, replay, and cancelled
+                    states from one live classroom setup.
+                  </p>
+                </div>
+
+                <div className="contentStudioGrid">
+                  <div>
+                    <label>Live Platform</label>
+                    <select
+                      value={videoForm.livePlatform}
+                      onChange={(event) =>
+                        updateField("livePlatform", event.target.value)
+                      }
+                    >
+                      <option value={LIVE_PLATFORMS.YOUTUBE_LIVE}>
+                        YouTube Live
+                      </option>
+                      <option value={LIVE_PLATFORMS.ZOOM}>Zoom</option>
+                      <option value={LIVE_PLATFORMS.GOOGLE_MEET}>
+                        Google Meet
+                      </option>
+                      <option value="EXTERNAL_LIVE">External Live Link</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label>Live State</label>
+                    <select
+                      value={videoForm.liveStatus}
+                      onChange={(event) =>
+                        updateField("liveStatus", event.target.value)
+                      }
+                    >
+                      <option value="SCHEDULED">Scheduled / Auto State</option>
+                      <option value={LIVE_CLASS_STATUS.CANCELLED}>
+                        Cancelled
+                      </option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label>Join URL</label>
+                    <input
+                      type="url"
+                      value={videoForm.joinUrl}
+                      onChange={(event) =>
+                        updateField("joinUrl", event.target.value)
+                      }
+                      placeholder="Paste live class join URL"
+                    />
+                  </div>
+
+                  <div>
+                    <label>Replay URL</label>
+                    <input
+                      type="url"
+                      value={videoForm.replayUrl}
+                      onChange={(event) =>
+                        updateField("replayUrl", event.target.value)
+                      }
+                      placeholder="Optional replay URL after live class"
+                    />
+                  </div>
+
+                  <div>
+                    <label>Start Date</label>
+                    <input
+                      type="date"
+                      value={videoForm.liveStartDate}
+                      onChange={(event) =>
+                        updateField("liveStartDate", event.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <label>Start Time</label>
+                    <input
+                      type="time"
+                      value={videoForm.liveStartTime}
+                      onChange={(event) =>
+                        updateField("liveStartTime", event.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <label>End Date</label>
+                    <input
+                      type="date"
+                      value={videoForm.liveEndDate}
+                      onChange={(event) =>
+                        updateField("liveEndDate", event.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <label>End Time</label>
+                    <input
+                      type="time"
+                      value={videoForm.liveEndTime}
+                      onChange={(event) =>
+                        updateField("liveEndTime", event.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div className="videoClassBuilderWideField">
+                    <label>Live Instructions</label>
+                    <textarea
+                      value={videoForm.liveInstructions}
+                      onChange={(event) =>
+                        updateField("liveInstructions", event.target.value)
+                      }
+                      placeholder="Example: Join 10 minutes before class. Keep notebook ready."
+                    />
+                  </div>
+                </div>
+              </section>
+            )}
+
+            <div className="videoFormActions videoClassBuilderActions">
+              <button
+                className="publishButton"
+                type="submit"
+                disabled={isSaving}
+              >
+                {isSaving
+                  ? "Saving..."
+                  : editId
+                  ? "Update Class"
+                  : "Save Class"}
+              </button>
+
+              <button
+                type="button"
+                className="backButton"
+                onClick={() => navigate("/admin/content/videos/manage")}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="backButton"
+                onClick={() => navigate("/admin/content/videos")}
+              >
+                Back to Video Manager
+              </button>
             </div>
           </div>
-        )}
-
-        {videoForm.classMode === "LIVE" && (
-          <div className="videoLiveFields" style={{ marginTop: "24px" }}>
-            <h3>Live Class Schedule & Access</h3>
-
-            <div className="contentStudioGrid">
-              <div>
-                <label>Live Platform</label>
-                <select
-                  value={videoForm.livePlatform}
-                  onChange={(event) =>
-                    updateField("livePlatform", event.target.value)
-                  }
-                >
-                  <option value="YOUTUBE_LIVE">YouTube Live</option>
-                  <option value="ZOOM">Zoom</option>
-                  <option value="GOOGLE_MEET">Google Meet</option>
-                  <option value="EXTERNAL_LIVE">External Live Link</option>
-                </select>
-              </div>
-
-              <div>
-                <label>Join URL</label>
-                <input
-                  type="url"
-                  value={videoForm.joinUrl}
-                  onChange={(event) =>
-                    updateField("joinUrl", event.target.value)
-                  }
-                  placeholder="Paste live class join URL"
-                />
-              </div>
-
-              <div>
-                <label>Start Date</label>
-                <input
-                  type="date"
-                  value={videoForm.liveStartDate}
-                  onChange={(event) =>
-                    updateField("liveStartDate", event.target.value)
-                  }
-                />
-              </div>
-
-              <div>
-                <label>Start Time</label>
-                <input
-                  type="time"
-                  value={videoForm.liveStartTime}
-                  onChange={(event) =>
-                    updateField("liveStartTime", event.target.value)
-                  }
-                />
-              </div>
-
-              <div>
-                <label>End Date</label>
-                <input
-                  type="date"
-                  value={videoForm.liveEndDate}
-                  onChange={(event) =>
-                    updateField("liveEndDate", event.target.value)
-                  }
-                />
-              </div>
-
-              <div>
-                <label>End Time</label>
-                <input
-                  type="time"
-                  value={videoForm.liveEndTime}
-                  onChange={(event) =>
-                    updateField("liveEndTime", event.target.value)
-                  }
-                />
-              </div>
-
-              <div>
-                <label>Replay URL</label>
-                <input
-                  type="url"
-                  value={videoForm.replayUrl}
-                  onChange={(event) =>
-                    updateField("replayUrl", event.target.value)
-                  }
-                  placeholder="Optional replay URL after live class"
-                />
-              </div>
-
-              <div>
-                <label>Live Instructions</label>
-                <textarea
-                  value={videoForm.liveInstructions}
-                  onChange={(event) =>
-                    updateField("liveInstructions", event.target.value)
-                  }
-                  placeholder="Example: Join 10 minutes before class. Keep notebook ready."
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="videoFormActions">
-          <button className="publishButton" type="submit" disabled={isSaving}>
-            {isSaving
-              ? "Saving..."
-              : editId
-              ? "Update Class"
-              : "Save Class"}
-          </button>
-
-          <button
-            type="button"
-            className="backButton"
-            onClick={() => navigate("/admin/content/videos/manage")}
-          >
-            Cancel
-          </button>
-
-          <button
-            type="button"
-            className="backButton"
-            onClick={() => navigate("/admin/content/videos")}
-          >
-            Back to Video Manager
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </section>
   );
 }

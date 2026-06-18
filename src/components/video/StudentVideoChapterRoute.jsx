@@ -5,25 +5,7 @@ import LiveClassCard from "./LiveClassCard.jsx";
 import RecordedLessonCard from "./RecordedLessonCard.jsx";
 import useVideoLibrary from "./useVideoLibrary.js";
 
-const PLAN_LEVEL = {
-  FREE: 0,
-  BASIC: 1,
-  PREMIUM: 2,
-  MENTORSHIP: 3,
-};
-
-const canOpenPlan = ({
-  requiredPlan = "FREE",
-  userPlanType = "FREE",
-  isAdmin = false,
-}) => {
-  if (isAdmin) return true;
-
-  const requiredLevel = PLAN_LEVEL[requiredPlan] ?? 0;
-  const userLevel = PLAN_LEVEL[userPlanType] ?? 0;
-
-  return userLevel >= requiredLevel;
-};
+import { canAccessVideoPlan } from "./videoUtils.js";
 
 export default function StudentVideoChapterRoute({
   universalContent = [],
@@ -32,11 +14,7 @@ export default function StudentVideoChapterRoute({
 }) {
   const navigate = useNavigate();
 
-  const {
-    plan = "FREE",
-    subjectId = "",
-    chapterId = "",
-  } = useParams();
+  const { plan = "FREE", subjectId = "", chapterId = "" } = useParams();
 
   const activePlan = decodeURIComponent(plan || "FREE").toUpperCase();
   const activeSubjectId = decodeURIComponent(subjectId || "");
@@ -60,11 +38,18 @@ export default function StudentVideoChapterRoute({
       char.toUpperCase()
     );
 
-  const hasAccess = canOpenPlan({
-    requiredPlan: activePlan,
-    userPlanType,
-    isAdmin,
-  });
+  const hasAccess =
+    isAdmin ||
+    canAccessVideoPlan({
+      requiredPlan: activePlan,
+      userPlanType,
+    });
+
+  const featuredClass =
+    chapterItems.liveClasses[0] ||
+    chapterItems.recordedLessons[0] ||
+    chapterItems.all[0] ||
+    null;
 
   const openClassroom = (item) => {
     if (!item?.id) return;
@@ -74,141 +59,216 @@ export default function StudentVideoChapterRoute({
 
   if (!hasAccess) {
     return (
-      <section className="coursePages videoLibraryPage">
-        <div className="sectionHeader">
-          <span className="badge">PLAN LOCKED</span>
+      <section className="coursePages studentVideoShelfPage">
+        <div className="studentVideoShelfShell">
+          <section className="studentVideoShelfLocked">
+            <span>{activePlan} CHAPTER LOCKED</span>
 
-          <h1>{activePlan} Chapter Locked</h1>
+            <h1>{activePlan} Chapter Locked</h1>
 
-          <p>
-            This chapter requires {activePlan} access. Upgrade your plan to
-            open recorded lessons, live classes, and replays.
-          </p>
-        </div>
+            <p>
+              This chapter requires {activePlan} access. Upgrade your plan to
+              open recorded lessons, live classes, replays, and connected
+              classroom resources.
+            </p>
 
-        <div className="contentStudioForm">
-          <div className="contentStudioActions">
-            <button
-              className="publishButton"
-              onClick={() => navigate("/ctet-tet/pricing")}
-            >
-              View Plans
-            </button>
+            <div className="studentVideoShelfActions">
+              <button
+                type="button"
+                className="studentVideoPrimaryButton"
+                onClick={() => navigate("/ctet-tet/pricing")}
+              >
+                View Plans
+              </button>
 
-            <button
-              className="backButton"
-              onClick={() => navigate("/ctet-tet/videos")}
-            >
-              ← Back to Classes
-            </button>
-          </div>
+              <button
+                type="button"
+                className="studentVideoSecondaryButton"
+                onClick={() => navigate("/ctet-tet/videos")}
+              >
+                ← Back to Classes
+              </button>
+            </div>
+          </section>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="coursePages videoLibraryPage">
-      <div className="sectionHeader">
-        <span className="badge">{activePlan} CHAPTER CLASSROOM</span>
+    <section className="coursePages studentVideoShelfPage">
+      <div className="studentVideoShelfShell">
+        <section className="studentVideoShelfHero studentVideoChapterHeroPremium">
+          <div className="studentVideoShelfHeroCopy">
+            <span className="studentVideoShelfKicker">
+              {activePlan} CHAPTER CLASSROOM
+            </span>
 
-        <h1>{chapterTitle || "Chapter Classes"}</h1>
+            <h1>{chapterTitle || "Chapter Classes"}</h1>
 
-        <p>
-          {subjectName || "Subject"} • Recorded lessons, upcoming live
-          classes, and replay-ready AspireNest classroom sessions.
-        </p>
-      </div>
+            <p>
+              {subjectName || "Subject"} • Watch recordings, join live classes,
+              open replays, and continue chapter-wise learning inside one
+              AspireNest classroom.
+            </p>
 
-      <div className="videoManagerStatsGrid">
-        <div className="videoManagerStatCard">
-          <span>Total Classes</span>
-          <strong>{chapterItems.all.length}</strong>
-        </div>
+            <div className="studentVideoShelfActions">
+              <button
+                type="button"
+                className="studentVideoPrimaryButton"
+                onClick={() => openClassroom(featuredClass)}
+                disabled={!featuredClass}
+              >
+                Start Chapter →
+              </button>
 
-        <div className="videoManagerStatCard">
-          <span>Live Classes</span>
-          <strong>{chapterItems.liveClasses.length}</strong>
-        </div>
-
-        <div className="videoManagerStatCard">
-          <span>Recorded Lessons</span>
-          <strong>{chapterItems.recordedLessons.length}</strong>
-        </div>
-      </div>
-
-      <div className="contentStudioForm videoManagerToolbar">
-        <div className="contentStudioActions">
-          <button
-            className="backButton"
-            onClick={() =>
-              navigate(
-                `/ctet-tet/videos/plan/${activePlan}/${encodeURIComponent(
-                  activeSubjectId
-                )}`
-              )
-            }
-          >
-            ← Back to Chapters
-          </button>
-
-          <button
-            className="backButton"
-            onClick={() => navigate("/ctet-tet/videos")}
-          >
-            Classes & Recordings
-          </button>
-        </div>
-      </div>
-
-      <div className="videoChapterPageGrid">
-        <div className="videoShelfBlock">
-          <div className="videoShelfHeader">
-            <h2>🔴 Upcoming Live Classes</h2>
-
-            <span>{chapterItems.liveClasses.length} Live</span>
+              <button
+                type="button"
+                className="studentVideoSecondaryButton"
+                onClick={() =>
+                  navigate(
+                    `/ctet-tet/videos/plan/${activePlan}/${encodeURIComponent(
+                      activeSubjectId
+                    )}`
+                  )
+                }
+              >
+                ← Back to Chapters
+              </button>
+            </div>
           </div>
 
-          <div className="videoChapterShelf">
-            {chapterItems.liveClasses.length === 0 ? (
-              <div className="videoChapterEmpty">
-                No live classes scheduled for this chapter yet.
+          <aside className="studentVideoPlanSpotlight">
+            <div className="studentVideoShelfPanelHeader">
+              <span>Chapter Status</span>
+              <strong>Classroom ON</strong>
+            </div>
+
+            <div className="studentVideoPlanFeatured">
+              <span>
+                {featuredClass &&
+                videoLibrary.getClassMode(featuredClass) === "LIVE"
+                  ? "🔴"
+                  : "▶️"}
+              </span>
+
+              <div>
+                <strong>
+                  {featuredClass?.title || "Chapter classroom ready"}
+                </strong>
+
+                <p>
+                  {featuredClass
+                    ? `${featuredClass.subject || "Subject"} • ${
+                        featuredClass.chapter || "Chapter"
+                      }`
+                    : "Published classes will appear here after admin adds them."}
+                </p>
               </div>
-            ) : (
-              chapterItems.liveClasses.map((item) => (
-                <LiveClassCard
-                  key={item.id}
-                  item={item}
-                  onOpen={openClassroom}
-                />
-              ))
-            )}
-          </div>
-        </div>
 
-        <div className="videoShelfBlock">
-          <div className="videoShelfHeader">
-            <h2>🎬 Recorded Lessons</h2>
+              {featuredClass && (
+                <button
+                  type="button"
+                  onClick={() => openClassroom(featuredClass)}
+                >
+                  Open Class →
+                </button>
+              )}
+            </div>
 
-            <span>{chapterItems.recordedLessons.length} Lessons</span>
+            <div className="studentVideoShelfPanelGrid">
+              <article>
+                <strong>{chapterItems.all.length}</strong>
+                <span>Total classes</span>
+              </article>
+
+              <article>
+                <strong>{chapterItems.recordedLessons.length}</strong>
+                <span>Recorded lessons</span>
+              </article>
+
+              <article>
+                <strong>{chapterItems.liveClasses.length}</strong>
+                <span>Live classes</span>
+              </article>
+
+              <article>
+                <strong>{activePlan}</strong>
+                <span>Plan access</span>
+              </article>
+            </div>
+
+            <div className="studentVideoShelfFlow">
+              <span>Chapter</span>
+              <i />
+              <span>Live</span>
+              <i />
+              <span>Recording</span>
+              <i />
+              <span>Replay</span>
+            </div>
+          </aside>
+        </section>
+
+        <section className="studentVideoChapterWorkspace">
+          <div className="studentVideoChapterShelfBlock">
+            <div className="studentVideoShelfTitle">
+              <span>🔴 Live Classroom</span>
+
+              <h2>Live & replay sessions</h2>
+
+              <p>
+                Upcoming live classes, join-now state, ended sessions, and
+                replay-ready classrooms stay connected here.
+              </p>
+            </div>
+
+            <div className="studentVideoChapterCardGrid">
+              {chapterItems.liveClasses.length === 0 ? (
+                <div className="studentVideoShelfEmpty">
+                  No live classes scheduled for this chapter yet.
+                </div>
+              ) : (
+                chapterItems.liveClasses.map((item) => (
+                  <LiveClassCard
+                    key={item.id}
+                    item={item}
+                    onOpen={openClassroom}
+                  />
+                ))
+              )}
+            </div>
           </div>
 
-          <div className="videoChapterShelf">
-            {chapterItems.recordedLessons.length === 0 ? (
-              <div className="videoChapterEmpty">
-                No recorded lessons published in this chapter yet.
-              </div>
-            ) : (
-              chapterItems.recordedLessons.map((item) => (
-                <RecordedLessonCard
-                  key={item.id}
-                  item={item}
-                  onOpen={openClassroom}
-                />
-              ))
-            )}
+          <div className="studentVideoChapterShelfBlock">
+            <div className="studentVideoShelfTitle">
+              <span>🎬 Recorded Lessons</span>
+
+              <h2>Watch chapter recordings</h2>
+
+              <p>
+                Open published recordings inside AspireNest classroom with plan
+                access guard and connected learning flow.
+              </p>
+            </div>
+
+            <div className="studentVideoChapterCardGrid">
+              {chapterItems.recordedLessons.length === 0 ? (
+                <div className="studentVideoShelfEmpty">
+                  No recorded lessons published in this chapter yet.
+                </div>
+              ) : (
+                chapterItems.recordedLessons.map((item) => (
+                  <RecordedLessonCard
+                    key={item.id}
+                    item={item}
+                    onOpen={openClassroom}
+                  />
+                ))
+              )}
+            </div>
           </div>
-        </div>
+        </section>
       </div>
     </section>
   );

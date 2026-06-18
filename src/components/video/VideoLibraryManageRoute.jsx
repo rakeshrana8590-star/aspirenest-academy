@@ -12,15 +12,14 @@ import VideoAdminCard from "./VideoAdminCard.jsx";
 import VideoActionMenu from "./VideoActionMenu.jsx";
 import useVideoLibrary from "./useVideoLibrary.js";
 
-const normalizeStatus = (value = "published") =>
-  value.toString().trim().toLowerCase();
-
-const getMode = (item = {}) =>
-  (item.classMode || "RECORDED").toString().trim().toUpperCase();
-
-const isLiveItem = (item = {}) => getMode(item) === "LIVE";
-
-const isRecordedItem = (item = {}) => getMode(item) === "RECORDED";
+import {
+  getLiveClassStatus,
+  isLiveClass,
+  isRecordedClass,
+  LIVE_CLASS_STATUS,
+  normalizeVideoStatus,
+  normalizeVideoText,
+} from "./videoUtils.js";
 
 const getTimeValue = (value) => {
   if (!value) return 0;
@@ -32,48 +31,25 @@ const getTimeValue = (value) => {
   return Number.isNaN(date.getTime()) ? 0 : date.getTime();
 };
 
-const getLiveBucket = (item = {}) => {
-  if (!isLiveItem(item)) return "RECORDED";
+const getLibraryBucket = (item = {}) => {
+  if (isRecordedClass(item)) return "RECORDED";
 
-  const now = new Date();
-
-  const startDateTime =
-    item.liveStartDate && item.liveStartTime
-      ? new Date(`${item.liveStartDate}T${item.liveStartTime}`)
-      : item.liveStartDate
-      ? new Date(`${item.liveStartDate}T00:00`)
-      : null;
-
-  const endDateTime =
-    item.liveEndDate && item.liveEndTime
-      ? new Date(`${item.liveEndDate}T${item.liveEndTime}`)
-      : item.liveEndDate
-      ? new Date(`${item.liveEndDate}T23:59`)
-      : null;
-
-  if (startDateTime && now < startDateTime) {
-    return "SCHEDULED";
-  }
-
-  if (
-    startDateTime &&
-    endDateTime &&
-    now >= startDateTime &&
-    now <= endDateTime
-  ) {
-    return "LIVE_NOW";
-  }
-
-  if (endDateTime && now > endDateTime && item.replayUrl) {
-    return "REPLAY";
-  }
-
-  if (endDateTime && now > endDateTime) {
-    return "ENDED";
-  }
-
-  return "LIVE";
+  return getLiveClassStatus(item);
 };
+
+const filterOptions = [
+  { value: "ALL", label: "All Classes" },
+  { value: "RECORDED", label: "Recorded Lessons" },
+  { value: "LIVE", label: "All Live Classes" },
+  { value: "UPCOMING", label: "Upcoming Live" },
+  { value: "JOIN_NOW", label: "Join Now" },
+  { value: "REPLAY_AVAILABLE", label: "Replay Available" },
+  { value: "ENDED", label: "Ended Live" },
+  { value: "CANCELLED", label: "Cancelled Live" },
+  { value: "PUBLISHED", label: "Published" },
+  { value: "DRAFT", label: "Draft" },
+  { value: "UNPUBLISHED", label: "Unpublished" },
+];
 
 export default function VideoLibraryManageRoute({
   db,
@@ -106,40 +82,62 @@ export default function VideoLibraryManageRoute({
   const stats = React.useMemo(
     () => ({
       total: allVideos.length,
-      recorded: allVideos.filter(isRecordedItem).length,
-      live: allVideos.filter(isLiveItem).length,
       published: allVideos.filter(
-        (item) => normalizeStatus(item.status) === "published"
+        (item) => normalizeVideoStatus(item.status) === "published"
+      ).length,
+      recorded: allVideos.filter(isRecordedClass).length,
+      live: allVideos.filter(isLiveClass).length,
+      upcoming: allVideos.filter(
+        (item) => getLiveClassStatus(item) === LIVE_CLASS_STATUS.UPCOMING
+      ).length,
+      replay: allVideos.filter(
+        (item) =>
+          getLiveClassStatus(item) === LIVE_CLASS_STATUS.REPLAY_AVAILABLE
       ).length,
       draft: allVideos.filter(
-        (item) => normalizeStatus(item.status) === "draft"
+        (item) => normalizeVideoStatus(item.status) === "draft"
       ).length,
-      replay: allVideos.filter((item) => getLiveBucket(item) === "REPLAY")
-        .length,
     }),
     [allVideos]
   );
 
   const filteredVideos = React.useMemo(() => {
-    const finalSearch = searchText.trim().toLowerCase();
+    const finalSearch = normalizeVideoText(searchText);
 
     return allVideos.filter((item) => {
-      const matchesSearch =
-        !finalSearch ||
-        item.title?.toLowerCase().includes(finalSearch) ||
-        item.subject?.toLowerCase().includes(finalSearch) ||
-        item.chapter?.toLowerCase().includes(finalSearch) ||
-        item.mentorName?.toLowerCase().includes(finalSearch);
+      const searchableText = normalizeVideoText(
+        [
+          item.title,
+          item.subject,
+          item.chapter,
+          item.mentorName,
+          item.planType,
+          item.sourceType,
+          item.livePlatform,
+        ]
+          .filter(Boolean)
+          .join(" ")
+      );
 
-      const status = normalizeStatus(item.status);
-      const bucket = getLiveBucket(item);
+      const matchesSearch =
+        !finalSearch || searchableText.includes(finalSearch);
+
+      const status = normalizeVideoStatus(item.status);
+      const bucket = getLibraryBucket(item);
 
       const matchesFilter =
         activeFilter === "ALL" ||
-        (activeFilter === "RECORDED" && isRecordedItem(item)) ||
-        (activeFilter === "LIVE" && isLiveItem(item)) ||
-        (activeFilter === "SCHEDULED" && bucket === "SCHEDULED") ||
-        (activeFilter === "REPLAY" && bucket === "REPLAY") ||
+        (activeFilter === "RECORDED" && isRecordedClass(item)) ||
+        (activeFilter === "LIVE" && isLiveClass(item)) ||
+        (activeFilter === "UPCOMING" &&
+          bucket === LIVE_CLASS_STATUS.UPCOMING) ||
+        (activeFilter === "JOIN_NOW" &&
+          bucket === LIVE_CLASS_STATUS.JOIN_NOW) ||
+        (activeFilter === "REPLAY_AVAILABLE" &&
+          bucket === LIVE_CLASS_STATUS.REPLAY_AVAILABLE) ||
+        (activeFilter === "ENDED" && bucket === LIVE_CLASS_STATUS.ENDED) ||
+        (activeFilter === "CANCELLED" &&
+          bucket === LIVE_CLASS_STATUS.CANCELLED) ||
         (activeFilter === "PUBLISHED" && status === "published") ||
         (activeFilter === "DRAFT" && status === "draft") ||
         (activeFilter === "UNPUBLISHED" && status === "unpublished");
@@ -178,7 +176,7 @@ export default function VideoLibraryManageRoute({
   const toggleStatus = async (video) => {
     if (!video?.id) return;
 
-    const currentStatus = normalizeStatus(video.status);
+    const currentStatus = normalizeVideoStatus(video.status);
 
     const nextStatus =
       currentStatus === "published" ? "unpublished" : "published";
@@ -200,13 +198,7 @@ export default function VideoLibraryManageRoute({
 
     if (!confirmDuplicate) return;
 
-    const {
-      id,
-      createdAt,
-      updatedAt,
-      editedAt,
-      ...safePayload
-    } = video;
+    const { id, createdAt, updatedAt, editedAt, ...safePayload } = video;
 
     await addDoc(collection(db, "contentItems"), {
       ...safePayload,
@@ -233,145 +225,218 @@ export default function VideoLibraryManageRoute({
     await reloadContent?.();
   };
 
+  const clearFilters = () => {
+    setSearchText("");
+    setActiveFilter("ALL");
+  };
+
   return (
-    <section className="coursePages videoManagerPage">
-      <div className="sectionHeader">
-        <span className="badge">VIDEO LIBRARY</span>
+    <section className="coursePages videoManagePage">
+      <div className="videoManageShell">
+        <section className="videoManageHero">
+          <div className="videoManageHeroCopy">
+            <span className="videoManageKicker">VIDEO LIBRARY CMS</span>
 
-        <h1>Manage Video & Live Classes</h1>
-
-        <p>
-          Review, edit, publish, unpublish, duplicate, delete, and preview
-          recorded lessons, live classes, and replay-ready classroom content.
-        </p>
-      </div>
-
-      <div className="videoManagerStatsGrid">
-        <div className="videoManagerStatCard">
-          <span>Total Classes</span>
-          <strong>{stats.total}</strong>
-        </div>
-
-        <div className="videoManagerStatCard">
-          <span>Recorded</span>
-          <strong>{stats.recorded}</strong>
-        </div>
-
-        <div className="videoManagerStatCard">
-          <span>Live</span>
-          <strong>{stats.live}</strong>
-        </div>
-
-        <div className="videoManagerStatCard">
-          <span>Published</span>
-          <strong>{stats.published}</strong>
-        </div>
-
-        <div className="videoManagerStatCard">
-          <span>Draft</span>
-          <strong>{stats.draft}</strong>
-        </div>
-
-        <div className="videoManagerStatCard">
-          <span>Replay</span>
-          <strong>{stats.replay}</strong>
-        </div>
-      </div>
-
-      <div className="contentStudioForm videoManagerToolbar">
-        <div className="contentStudioGrid">
-          <input
-            type="text"
-            placeholder="Search title, subject, chapter, mentor..."
-            value={searchText}
-            onChange={(event) => setSearchText(event.target.value)}
-          />
-
-          <select
-            value={activeFilter}
-            onChange={(event) => setActiveFilter(event.target.value)}
-          >
-            <option value="ALL">All Classes</option>
-            <option value="RECORDED">Recorded Lessons</option>
-            <option value="LIVE">Live Classes</option>
-            <option value="SCHEDULED">Scheduled Live</option>
-            <option value="REPLAY">Replay Available</option>
-            <option value="PUBLISHED">Published</option>
-            <option value="DRAFT">Draft</option>
-            <option value="UNPUBLISHED">Unpublished</option>
-          </select>
-
-          <button
-            className="publishButton"
-            onClick={() => navigate("/admin/content/videos/add")}
-          >
-            + Add Class
-          </button>
-
-          <button
-            className="backButton"
-            onClick={() => navigate("/admin/content/videos")}
-          >
-            ← Back to Video Manager
-          </button>
-        </div>
-      </div>
-
-      <div className="contentStudioList videoLibraryList">
-        <div className="videoLibraryHeader">
-          <div>
-            <h3>Saved Classes</h3>
+            <h1>Classroom Control Center</h1>
 
             <p>
-              Showing {filteredVideos.length} of {allVideos.length} classroom
-              items.
+              Manage recorded lessons, live sessions, replay links, plan access,
+              publishing status, and student classroom visibility from one
+              protected admin workspace.
             </p>
+
+            <div className="videoManageHeroActions">
+              <button
+                type="button"
+                className="videoManagerPrimaryButton"
+                onClick={() => navigate("/admin/content/videos/add")}
+              >
+                + Add Class
+              </button>
+
+              <button
+                type="button"
+                className="videoManagerSecondaryButton"
+                onClick={() => navigate("/admin/content/videos")}
+              >
+                ← Video Manager
+              </button>
+            </div>
           </div>
 
-          <button
-            className="backButton"
-            onClick={() => {
-              setSearchText("");
-              setActiveFilter("ALL");
-            }}
-          >
-            Clear Filters
-          </button>
-        </div>
+          <aside className="videoManageHeroPanel">
+            <div className="videoManagePanelHeader">
+              <span>Library Status</span>
+              <strong>Admin ON</strong>
+            </div>
 
-        <div className="videoLibraryGrid">
-          {filteredVideos.length === 0 ? (
-            <div className="contentStudioItem videoEmptyState">
-              <strong>No video or live classes found.</strong>
+            <div className="videoManagePanelGrid">
+              <article>
+                <strong>{filteredVideos.length}</strong>
+                <span>Visible in current view</span>
+              </article>
 
-              <p>
-                Add your first recorded lesson or live class from the Video
-                Manager.
-              </p>
+              <article>
+                <strong>{stats.published}</strong>
+                <span>Published classes</span>
+              </article>
 
-              <div className="contentStudioActions">
-                <button
-                  className="publishButton"
-                  onClick={() => navigate("/admin/content/videos/add")}
-                >
-                  + Add Class
-                </button>
+              <article>
+                <strong>{stats.recorded}</strong>
+                <span>Recorded lessons</span>
+              </article>
+
+              <article>
+                <strong>{stats.live}</strong>
+                <span>Live classes</span>
+              </article>
+            </div>
+
+            <div className="videoManageFlowLine">
+              <span>Edit</span>
+              <i />
+              <span>Publish</span>
+              <i />
+              <span>Preview</span>
+            </div>
+          </aside>
+        </section>
+
+        <section className="videoManageStatsGrid">
+          <article>
+            <span>Total</span>
+            <strong>{stats.total}</strong>
+          </article>
+
+          <article>
+            <span>Published</span>
+            <strong>{stats.published}</strong>
+          </article>
+
+          <article>
+            <span>Recorded</span>
+            <strong>{stats.recorded}</strong>
+          </article>
+
+          <article>
+            <span>Live</span>
+            <strong>{stats.live}</strong>
+          </article>
+
+          <article>
+            <span>Upcoming</span>
+            <strong>{stats.upcoming}</strong>
+          </article>
+
+          <article>
+            <span>Replay</span>
+            <strong>{stats.replay}</strong>
+          </article>
+
+          <article>
+            <span>Draft</span>
+            <strong>{stats.draft}</strong>
+          </article>
+        </section>
+
+        <section className="videoManageWorkspace">
+          <aside className="videoManageFilterRail">
+            <div className="videoManageFilterHeader">
+              <span>Control Panel</span>
+              <strong>Search · Filter · Publish</strong>
+            </div>
+
+            <label>
+              Search Library
+              <input
+                type="text"
+                placeholder="Title, subject, chapter, mentor..."
+                value={searchText}
+                onChange={(event) => setSearchText(event.target.value)}
+              />
+            </label>
+
+            <label>
+              Library Filter
+              <select
+                value={activeFilter}
+                onChange={(event) => setActiveFilter(event.target.value)}
+              >
+                {filterOptions.map((option) => (
+                  <option value={option.value} key={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <button
+              type="button"
+              className="videoManagerPrimaryButton"
+              onClick={() => navigate("/admin/content/videos/add")}
+            >
+              + Add Class
+            </button>
+
+            <button
+              type="button"
+              className="videoManagerSecondaryButton"
+              onClick={clearFilters}
+            >
+              Clear Filters
+            </button>
+          </aside>
+
+          <div className="videoManageListPanel">
+            <div className="videoManageListHeader">
+              <div>
+                <span>Saved Classes</span>
+
+                <h2>Classroom Library</h2>
+
+                <p>
+                  Showing {filteredVideos.length} of {allVideos.length} video
+                  and live class items.
+                </p>
               </div>
             </div>
-          ) : (
-            filteredVideos.map((video) => (
-              <VideoAdminCard
-                key={video.id}
-                video={video}
-                onPreview={previewVideo}
-                onEdit={editVideo}
-                onToggleStatus={toggleStatus}
-                onDelete={deleteVideo}
-                onOpenMenu={openMenu}
-              />
-            ))
-          )}
-        </div>
+
+            <div className="videoManageGrid">
+              {filteredVideos.length === 0 ? (
+                <div className="contentStudioItem videoEmptyState videoManageEmptyState">
+                  <strong>No video or live classes found.</strong>
+
+                  <p>
+                    Add your first recorded lesson or live class from the Video
+                    Manager.
+                  </p>
+
+                  <div className="contentStudioActions">
+                    <button
+                      type="button"
+                      className="publishButton"
+                      onClick={() => navigate("/admin/content/videos/add")}
+                    >
+                      + Add Class
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                filteredVideos.map((video) => (
+                  <VideoAdminCard
+                    key={video.id}
+                    video={video}
+                    onPreview={previewVideo}
+                    onEdit={editVideo}
+                    onToggleStatus={toggleStatus}
+                    onDelete={deleteVideo}
+                    onOpenMenu={openMenu}
+                  />
+                ))
+              )}
+            </div>
+          </div>
+        </section>
       </div>
 
       <VideoActionMenu

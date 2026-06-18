@@ -1,10 +1,16 @@
 import React from "react";
 
-const getModeLabel = (video = {}) =>
-  (video.classMode || "RECORDED").toString().toUpperCase();
+import {
+  getLiveClassStatus,
+  getLiveStatusClassName,
+  getLiveStatusLabel,
+  isLiveClass,
+  normalizeClassMode,
+  normalizeVideoStatus,
+} from "./videoUtils.js";
 
 const getStatusClass = (status = "") => {
-  const finalStatus = status.toString().trim().toLowerCase();
+  const finalStatus = normalizeVideoStatus(status);
 
   if (finalStatus === "published") return "videoStatusPublished";
   if (finalStatus === "draft") return "videoStatusDraft";
@@ -12,6 +18,19 @@ const getStatusClass = (status = "") => {
   if (finalStatus === "archived") return "videoStatusArchived";
 
   return "videoStatusDraft";
+};
+
+const getLiveScheduleLine = (video = {}) => {
+  const startDate = video.liveStartDate || "No date";
+  const startTime = video.liveStartTime || "No time";
+
+  if (video.liveEndDate || video.liveEndTime) {
+    return `${startDate} ${startTime} → ${
+      video.liveEndDate || video.liveStartDate || ""
+    } ${video.liveEndTime || ""}`.trim();
+  }
+
+  return `${startDate} • ${startTime}`;
 };
 
 export default function VideoAdminCard({
@@ -24,15 +43,31 @@ export default function VideoAdminCard({
 }) {
   if (!video) return null;
 
-  const modeLabel = getModeLabel(video);
+  const modeLabel = normalizeClassMode(video.classMode || video.mode);
+  const isLive = isLiveClass(video);
+  const liveStatus = isLive ? getLiveClassStatus(video) : "";
+  const liveStatusLabel = isLive ? getLiveStatusLabel(liveStatus) : "";
+  const liveStatusClassName = isLive ? getLiveStatusClassName(liveStatus) : "";
 
   return (
-    <article className="contentStudioItem videoAdminCard">
+    <article
+      className={`contentStudioItem videoAdminCard ${
+        isLive ? liveStatusClassName : "videoAdminRecorded"
+      }`}
+    >
       <div className="videoAdminCardTop">
         <div>
-          <span className={`videoModePill videoMode${modeLabel}`}>
-            {modeLabel === "LIVE" ? "🔴 Live Class" : "🎬 Recorded Lesson"}
-          </span>
+          <div className="videoAdminCardPills">
+            <span className={`videoModePill videoMode${modeLabel}`}>
+              {modeLabel === "LIVE" ? "🔴 Live Class" : "🎬 Recorded Lesson"}
+            </span>
+
+            {isLive && (
+              <span className={`liveCardStatusPill ${liveStatusClassName}`}>
+                {liveStatusLabel}
+              </span>
+            )}
+          </div>
 
           <strong>{video.title || "Untitled Class"}</strong>
 
@@ -52,16 +87,25 @@ export default function VideoAdminCard({
 
         <span>⏱ {video.duration || "No duration"}</span>
 
-        <span>🎥 {video.sourceType || video.livePlatform || "Source"}</span>
+        <span>
+          🎥 {isLive ? video.livePlatform || "Live platform" : video.sourceType || "Source"}
+        </span>
 
-        {modeLabel === "LIVE" ? (
-          <span>
-            🗓 {video.liveStartDate || "No date"}{" "}
-            {video.liveStartTime || ""}
-          </span>
+        {isLive ? (
+          <span>🗓 {getLiveScheduleLine(video)}</span>
         ) : (
           <span>📼 Replay-ready lesson</span>
         )}
+
+        <span>🔐 {video.planType || "FREE"} access</span>
+
+        <span>
+          {isLive && video.replayUrl
+            ? "🔁 Replay linked"
+            : isLive
+            ? "🔴 Live access"
+            : "▶️ Classroom video"}
+        </span>
       </div>
 
       <div className="contentStudioActions videoAdminActions">
@@ -91,7 +135,9 @@ export default function VideoAdminCard({
             className="backButton"
             onClick={() => onToggleStatus(video)}
           >
-            {video.status === "published" ? "Unpublish" : "Publish"}
+            {normalizeVideoStatus(video.status) === "published"
+              ? "Unpublish"
+              : "Publish"}
           </button>
         )}
 

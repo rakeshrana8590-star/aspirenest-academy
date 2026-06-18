@@ -1,45 +1,15 @@
 import { useMemo } from "react";
 
-const normalizeText = (value = "") =>
-  value
-    .toString()
-    .trim()
-    .toLowerCase()
-    .replace(/%20/g, " ")
-    .replace(/-/g, " ")
-    .replace(/\s+/g, " ");
-
-const createSlug = (value = "") =>
-  value
-    .toString()
-    .trim()
-    .toLowerCase()
-    .replace(/%20/g, " ")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-const normalizePlan = (value = "FREE") =>
-  value?.toString().trim().toUpperCase() || "FREE";
-
-const normalizeStatus = (value = "published") =>
-  value?.toString().trim().toLowerCase() || "published";
-
-const getClassMode = (item = {}) =>
-  (item.classMode || item.mode || "RECORDED")
-    .toString()
-    .trim()
-    .toUpperCase();
-
-const isVideoContent = (item = {}) => {
-  return (
-    item.section === "recordedVideo" ||
-    item.section === "video" ||
-    item.contentType === "VIDEO"
-  );
-};
-
-const isPublished = (item = {}) =>
-  normalizeStatus(item.status) === "published";
+import {
+  createVideoSlug,
+  isLiveClass,
+  isPublishedVideoItem,
+  isRecordedClass,
+  isVideoContentItem,
+  normalizePlanType,
+  normalizeVideoStatus,
+  normalizeVideoText,
+} from "./videoUtils.js";
 
 const uniqueByKey = (items = [], getKey) => {
   const map = new Map();
@@ -59,23 +29,33 @@ const uniqueByKey = (items = [], getKey) => {
 
 export function useVideoLibrary(universalContent = []) {
   return useMemo(() => {
-    const allVideos = universalContent.filter(isVideoContent);
+    const allVideos = universalContent.filter(isVideoContentItem);
 
-    const publishedVideos = allVideos.filter(isPublished);
+    const publishedVideos = allVideos.filter(isPublishedVideoItem);
 
-    const recordedVideos = publishedVideos.filter(
-      (item) => getClassMode(item) === "RECORDED"
-    );
+    const recordedVideos = publishedVideos.filter(isRecordedClass);
 
-    const liveClasses = publishedVideos.filter(
-      (item) => getClassMode(item) === "LIVE"
-    );
+    const liveClasses = publishedVideos.filter(isLiveClass);
 
     const notes = universalContent.filter(
       (item) =>
         item.section === "notes" &&
-        normalizeStatus(item.status) === "published"
+        normalizeVideoStatus(item.status) === "published"
     );
+
+    const getClassMode = (item = {}) =>
+      isLiveClass(item) ? "LIVE" : "RECORDED";
+
+    const normalizeText = (value = "") => normalizeVideoText(value);
+
+    const createSlug = (value = "") => createVideoSlug(value);
+
+    const normalizePlan = (value = "FREE") => normalizePlanType(value);
+
+    const normalizeStatus = (value = "published") =>
+      normalizeVideoStatus(value);
+
+    const isPublished = (item = {}) => isPublishedVideoItem(item);
 
     const getPlans = () => {
       return ["FREE", "BASIC", "PREMIUM", "MENTORSHIP"].map((plan) => {
@@ -87,12 +67,8 @@ export function useVideoLibrary(universalContent = []) {
           id: plan,
           title: plan,
           count: planItems.length,
-          recordedCount: planItems.filter(
-            (item) => getClassMode(item) === "RECORDED"
-          ).length,
-          liveCount: planItems.filter(
-            (item) => getClassMode(item) === "LIVE"
-          ).length,
+          recordedCount: planItems.filter(isRecordedClass).length,
+          liveCount: planItems.filter(isLiveClass).length,
         };
       });
     };
@@ -113,8 +89,7 @@ export function useVideoLibrary(universalContent = []) {
             const name = item.subject.trim();
 
             const subjectItems = sourceItems.filter(
-              (video) =>
-                normalizeText(video.subject) === normalizeText(name)
+              (video) => normalizeText(video.subject) === normalizeText(name)
             );
 
             return {
@@ -123,12 +98,8 @@ export function useVideoLibrary(universalContent = []) {
               title: name,
               slug: createSlug(name),
               count: subjectItems.length,
-              liveCount: subjectItems.filter(
-                (video) => getClassMode(video) === "LIVE"
-              ).length,
-              recordedCount: subjectItems.filter(
-                (video) => getClassMode(video) === "RECORDED"
-              ).length,
+              liveCount: subjectItems.filter(isLiveClass).length,
+              recordedCount: subjectItems.filter(isRecordedClass).length,
             };
           }),
         (subject) => subject.slug
@@ -178,12 +149,8 @@ export function useVideoLibrary(universalContent = []) {
             title: chapterName,
             slug: createSlug(chapterName),
             count: chapterItems.length,
-            liveCount: chapterItems.filter(
-              (video) => getClassMode(video) === "LIVE"
-            ).length,
-            recordedCount: chapterItems.filter(
-              (video) => getClassMode(video) === "RECORDED"
-            ).length,
+            liveCount: chapterItems.filter(isLiveClass).length,
+            recordedCount: chapterItems.filter(isRecordedClass).length,
           };
         }),
         (chapter) => chapter.slug
@@ -197,9 +164,7 @@ export function useVideoLibrary(universalContent = []) {
     } = {}) => {
       const activePlan = plan ? normalizePlan(plan) : "";
       const activeSubjectName = getSubjectNameFromRoute(subjectId);
-      const activeChapterSlug = createSlug(
-        decodeURIComponent(chapterId || "")
-      );
+      const activeChapterSlug = createSlug(decodeURIComponent(chapterId || ""));
 
       const items = publishedVideos.filter((item) => {
         const matchesPlan =
@@ -220,12 +185,8 @@ export function useVideoLibrary(universalContent = []) {
 
       return {
         all: items,
-        liveClasses: items.filter(
-          (item) => getClassMode(item) === "LIVE"
-        ),
-        recordedLessons: items.filter(
-          (item) => getClassMode(item) === "RECORDED"
-        ),
+        liveClasses: items.filter(isLiveClass),
+        recordedLessons: items.filter(isRecordedClass),
       };
     };
 

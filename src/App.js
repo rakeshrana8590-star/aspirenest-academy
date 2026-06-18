@@ -176,6 +176,12 @@ import "./styles/video/videoForm.css";
 import "./styles/video/videoLibrary.css";
 import "./styles/video/studentClassroom.css";
 import "./styles/video/videoCards.css";
+import "./styles/video/videoManagerHome.css";
+import "./styles/video/videoManageLibrary.css";
+import "./styles/video/videoClassBuilder.css";
+import "./styles/video/studentVideoHub.css";
+import "./styles/video/studentVideoShelves.css";
+import "./styles/video/videoLiveStates.css";
 
 import {
   CONTENT_SECTIONS,
