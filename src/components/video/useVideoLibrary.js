@@ -27,6 +27,68 @@ const uniqueByKey = (items = [], getKey) => {
   return [...map.values()];
 };
 
+const isPublishedContent = (item = {}) =>
+  normalizeVideoStatus(item.status || "published") === "published";
+
+const getItemSubjectKey = (item = {}) => normalizeVideoText(item.subject || "");
+
+const getItemChapterKey = (item = {}) => normalizeVideoText(item.chapter || "");
+
+const getItemChapterSlug = (item = {}) => createVideoSlug(item.chapter || "");
+
+const isNotesContentItem = (item = {}) => {
+  if (isVideoContentItem(item)) return false;
+
+  const section = normalizeVideoText(item.section || "");
+  const contentType = String(item.contentType || "").trim().toLowerCase();
+  const sourceType = String(item.sourceType || "").trim().toLowerCase();
+  const type = String(item.type || "").trim().toLowerCase();
+
+  return (
+    section === "notes" ||
+    section.includes("notes") ||
+    type === "note" ||
+    type === "notes" ||
+    contentType === "pdf" ||
+    contentType === "document" ||
+    contentType.includes("pdf") ||
+    sourceType === "pdf"
+  );
+};
+
+const isSameSubject = (first = {}, second = {}) => {
+  const firstSubject = getItemSubjectKey(first);
+  const secondSubject = getItemSubjectKey(second);
+
+  return Boolean(firstSubject && secondSubject && firstSubject === secondSubject);
+};
+
+const isSameChapter = (first = {}, second = {}) => {
+  const firstChapter = getItemChapterKey(first);
+  const secondChapter = getItemChapterKey(second);
+
+  return Boolean(firstChapter && secondChapter && firstChapter === secondChapter);
+};
+
+const isSameLearningNode = (first = {}, second = {}) => {
+  const sameSubject = isSameSubject(first, second);
+  const sameChapter = isSameChapter(first, second);
+
+  if (getItemSubjectKey(first) && getItemChapterKey(first)) {
+    return sameSubject && sameChapter;
+  }
+
+  if (getItemSubjectKey(first)) {
+    return sameSubject;
+  }
+
+  if (getItemChapterKey(first)) {
+    return sameChapter;
+  }
+
+  return false;
+};
+
 export function useVideoLibrary(universalContent = []) {
   return useMemo(() => {
     const allVideos = universalContent.filter(isVideoContentItem);
@@ -37,11 +99,9 @@ export function useVideoLibrary(universalContent = []) {
 
     const liveClasses = publishedVideos.filter(isLiveClass);
 
-    const notes = universalContent.filter(
-      (item) =>
-        item.section === "notes" &&
-        normalizeVideoStatus(item.status) === "published"
-    );
+    const notes = universalContent
+      .filter(isNotesContentItem)
+      .filter(isPublishedContent);
 
     const getClassMode = (item = {}) =>
       isLiveClass(item) ? "LIVE" : "RECORDED";
@@ -86,7 +146,7 @@ export function useVideoLibrary(universalContent = []) {
         sourceItems
           .filter((item) => item.subject)
           .map((item) => {
-            const name = item.subject.trim();
+            const name = String(item.subject || "").trim();
 
             const subjectItems = sourceItems.filter(
               (video) => normalizeText(video.subject) === normalizeText(name)
@@ -136,7 +196,7 @@ export function useVideoLibrary(universalContent = []) {
 
       return uniqueByKey(
         sourceItems.map((item) => {
-          const chapterName = item.chapter.trim();
+          const chapterName = String(item.chapter || "").trim();
 
           const chapterItems = sourceItems.filter(
             (video) =>
@@ -177,51 +237,62 @@ export function useVideoLibrary(universalContent = []) {
 
         const matchesChapter =
           !activeChapterSlug ||
-          createSlug(item.chapter) === activeChapterSlug ||
+          getItemChapterSlug(item) === activeChapterSlug ||
           normalizeText(item.chapter) === normalizeText(chapterId);
 
         return matchesPlan && matchesSubject && matchesChapter;
+      });
+
+      const chapterNotes = notes.filter((note) => {
+        const matchesSubject =
+          !activeSubjectName ||
+          normalizeText(note.subject) === normalizeText(activeSubjectName) ||
+          createSlug(note.subject) === createSlug(subjectId);
+
+        const matchesChapter =
+          !activeChapterSlug ||
+          getItemChapterSlug(note) === activeChapterSlug ||
+          normalizeText(note.chapter) === normalizeText(chapterId);
+
+        return matchesSubject && matchesChapter;
       });
 
       return {
         all: items,
         liveClasses: items.filter(isLiveClass),
         recordedLessons: items.filter(isRecordedClass),
+        notes: chapterNotes,
       };
     };
 
     const getVideoById = (videoId = "") => {
-      return allVideos.find((item) => item.id === videoId) || null;
+      const activeId = decodeURIComponent(videoId || "");
+
+      return (
+        allVideos.find(
+          (item) =>
+            item.id === activeId ||
+            item.videoId === activeId ||
+            item.classId === activeId
+        ) || null
+      );
     };
 
     const getRelatedNotes = (video = {}) => {
       if (!video) return [];
 
-      return notes.filter((note) => {
-        const sameSubject =
-          normalizeText(note.subject) === normalizeText(video.subject);
-
-        const sameChapter =
-          normalizeText(note.chapter) === normalizeText(video.chapter);
-
-        return sameSubject || sameChapter;
-      });
+      return notes
+        .filter((note) => isSameLearningNode(video, note))
+        .slice(0, 6);
     };
 
     const getRelatedVideos = (video = {}) => {
       if (!video) return [];
 
-      return publishedVideos.filter((item) => {
-        if (item.id === video.id) return false;
-
-        const sameSubject =
-          normalizeText(item.subject) === normalizeText(video.subject);
-
-        const sameChapter =
-          normalizeText(item.chapter) === normalizeText(video.chapter);
-
-        return sameSubject || sameChapter;
-      });
+      return publishedVideos
+        .filter((item) => item.id !== video.id)
+        .filter((item) => isSameLearningNode(video, item))
+        .slice(0, 8);
     };
 
     return {
@@ -229,6 +300,7 @@ export function useVideoLibrary(universalContent = []) {
       publishedVideos,
       recordedVideos,
       liveClasses,
+      notes,
       getClassMode,
       getPlans,
       getSubjects,
@@ -243,6 +315,10 @@ export function useVideoLibrary(universalContent = []) {
       normalizePlan,
       normalizeStatus,
       isPublished,
+      isNotesContentItem,
+      isSameSubject,
+      isSameChapter,
+      isSameLearningNode,
     };
   }, [universalContent]);
 }

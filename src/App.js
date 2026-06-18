@@ -95,7 +95,7 @@ import StudentVideoHub from "./components/video/StudentVideoHub.jsx";
 import StudentVideoPlanRoute from "./components/video/StudentVideoPlanRoute.jsx";
 import StudentVideoSubjectRoute from "./components/video/StudentVideoSubjectRoute.jsx";
 import StudentVideoChapterRoute from "./components/video/StudentVideoChapterRoute.jsx";
-import StudentClassroomRoute from "./components/video/StudentClassroomRoute.jsx";
+import StudentClassroomGuardRoute from "./components/video/StudentClassroomGuardRoute.jsx";
 
 import ExamAttemptRoute from "./components/exam/ExamAttemptRoute.jsx";
 import ExamResultRoute from "./components/exam/ExamResultRoute.jsx";
@@ -8856,7 +8856,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 <Route
   path="/ctet-tet/videos/watch/:videoId"
   element={
-    <StudentClassroomRoute
+    <StudentClassroomGuardRoute
       universalContent={universalContent}
       user={user}
       userPlanType={userPlanType}

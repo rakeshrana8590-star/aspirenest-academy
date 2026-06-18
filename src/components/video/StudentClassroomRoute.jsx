@@ -2,63 +2,26 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import SecureVideoPlayer from "./SecureVideoPlayer.jsx";
+import useVideoLibrary from "./useVideoLibrary.js";
 
 import {
+  canAccessVideoPlan,
+  createVideoSlug,
+  getClassroomSourceUrl,
   getLiveClassStatus,
+  getLiveStatusLabel,
   isLiveClass,
   isRecordedClass,
-  normalizeVideoStatus,
-  normalizeVideoText,
+  LIVE_CLASS_STATUS,
+  normalizePlanType,
 } from "./videoUtils.js";
 
-import { LIVE_CLASS_STATUS } from "./videoConstants.js";
-
-const PLAN_ORDER = {
-  FREE: 0,
-  BASIC: 1,
-  PREMIUM: 2,
-  MENTORSHIP: 3,
-};
-
-const toPlan = (value = "FREE") =>
-  String(value || "FREE").trim().toUpperCase();
-
-const toSlug = (value = "") =>
-  String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-const isVideoSection = (item = {}) => {
-  const section = String(item.section || "").toLowerCase();
-  const contentType = String(item.contentType || "").toLowerCase();
-
-  return (
-    section.includes("recordedvideo") ||
-    section.includes("video") ||
-    contentType.includes("video") ||
-    Boolean(item.videoUrl || item.replayUrl || item.joinUrl)
-  );
-};
-
-const isNotesSection = (item = {}) => {
-  const section = String(item.section || "").toLowerCase();
-  const contentType = String(item.contentType || "").toLowerCase();
-  const sourceType = String(item.sourceType || "").toLowerCase();
-  const type = String(item.type || "").toLowerCase();
-
-  return (
-    section === "notes" ||
-    section.includes("notes") ||
-    type === "note" ||
-    type === "notes" ||
-    contentType === "pdf" ||
-    contentType === "document" ||
-    contentType.includes("pdf") ||
-    sourceType === "pdf"
-  );
+const safeDecodeRouteValue = (value = "") => {
+  try {
+    return decodeURIComponent(value || "");
+  } catch {
+    return value || "";
+  }
 };
 
 const getClassMode = (item = {}) => {
@@ -72,21 +35,16 @@ const getClassMode = (item = {}) => {
   return mode === "LIVE" ? "LIVE" : "RECORDED";
 };
 
-const getLiveStateLabel = (state) => {
-  if (state === LIVE_CLASS_STATUS.JOIN_NOW) return "Join Now";
-  if (state === LIVE_CLASS_STATUS.REPLAY_AVAILABLE) return "Replay Available";
-  if (state === LIVE_CLASS_STATUS.ENDED) return "Ended";
-  if (state === LIVE_CLASS_STATUS.CANCELLED) return "Cancelled";
-
-  return "Upcoming";
-};
-
 const getLiveTimeLabel = (item = {}) => {
   const date = item.liveStartDate || item.startDate || "";
   const start = item.liveStartTime || item.startTime || "";
+  const endDate = item.liveEndDate || item.endDate || "";
   const end = item.liveEndTime || item.endTime || "";
 
   if (!date && !start) return "Schedule pending";
+  if (date && start && endDate && end && endDate !== date) {
+    return `${date} • ${start} - ${endDate} • ${end}`;
+  }
   if (date && start && end) return `${date} • ${start} - ${end}`;
   if (date && start) return `${date} • ${start}`;
   if (date) return date;
@@ -94,127 +52,31 @@ const getLiveTimeLabel = (item = {}) => {
   return start || "Schedule pending";
 };
 
-const getPlaybackUrl = (item = {}, classMode = "RECORDED", liveState = "") => {
-  if (classMode === "LIVE") {
-    if (liveState === LIVE_CLASS_STATUS.REPLAY_AVAILABLE) {
-      return (
-        item.replayUrl ||
-        item.videoUrl ||
-        item.fileUrl ||
-        item.joinUrl ||
-        item.liveUrl ||
-        ""
-      );
-    }
+const getSafeClassroomSourceLabel = (item = {}) =>
+  item.sourceType || item.livePlatform || item.platform || "Class source";
 
-    if (liveState === LIVE_CLASS_STATUS.JOIN_NOW) {
-      return (
-        item.joinUrl ||
-        item.liveUrl ||
-        item.videoUrl ||
-        item.fileUrl ||
-        item.replayUrl ||
-        ""
-      );
-    }
+const getNoteUrl = (note = {}) =>
+  note.fileUrl || note.pdfUrl || note.url || note.driveUrl || note.sourceUrl || "";
 
-    return item.replayUrl || item.videoUrl || item.fileUrl || "";
-  }
+const getLiveActionLabel = (liveState = "") => {
+  if (liveState === LIVE_CLASS_STATUS.JOIN_NOW) return "Join Now →";
+  if (liveState === LIVE_CLASS_STATUS.REPLAY_AVAILABLE) return "Watch Replay →";
+  if (liveState === LIVE_CLASS_STATUS.CANCELLED) return "Cancelled";
+  if (liveState === LIVE_CLASS_STATUS.ENDED) return "Replay Pending";
 
-  return item.videoUrl || item.fileUrl || item.sourceUrl || item.replayUrl || "";
+  return "Schedule Pending";
 };
 
-const buildAccessStatus = ({
-  item,
-  user,
-  isAdmin,
-  userPlanType,
-  hasPlanAccess,
-  universalContent,
-}) => {
-  if (!item) {
-    return universalContent.length === 0 ? "LOADING" : "NOT_FOUND";
+const canOpenLiveAction = (item = {}, liveState = "", playbackUrl = "") => {
+  if (liveState === LIVE_CLASS_STATUS.JOIN_NOW) {
+    return Boolean(item.joinUrl || item.liveUrl || item.meetingUrl || playbackUrl);
   }
 
-  const status = normalizeVideoStatus(item.status || "published");
-
-  if (status !== "published" && !isAdmin) {
-    return "UNPUBLISHED";
+  if (liveState === LIVE_CLASS_STATUS.REPLAY_AVAILABLE) {
+    return Boolean(item.replayUrl || item.recordingUrl || playbackUrl);
   }
 
-  if (!user && !isAdmin) {
-    return "LOGIN_REQUIRED";
-  }
-
-  const requiredPlan = toPlan(item.planType || "FREE");
-  const currentPlan = toPlan(userPlanType || "FREE");
-
-  if (isAdmin || requiredPlan === "FREE") {
-    return "AVAILABLE";
-  }
-
-  if (typeof hasPlanAccess === "function") {
-    return hasPlanAccess(requiredPlan) ? "AVAILABLE" : "PLAN_LOCKED";
-  }
-
-  return PLAN_ORDER[currentPlan] >= PLAN_ORDER[requiredPlan]
-    ? "AVAILABLE"
-    : "PLAN_LOCKED";
-};
-
-const getStateCardCopy = (status, requiredPlan = "FREE") => {
-  if (status === "LOADING") {
-    return {
-      label: "Preparing Classroom",
-      title: "Loading classroom",
-      message:
-        "AspireNest is preparing this classroom. If it does not open, reload or go back to Classes & Recordings.",
-      primaryLabel: "Reload Classroom",
-      secondaryLabel: "Back to Classes",
-    };
-  }
-
-  if (status === "UNPUBLISHED") {
-    return {
-      label: "Class Unavailable",
-      title: "This class is not published yet",
-      message:
-        "Admin has not published this classroom for students. Published video classes will appear in the classroom library.",
-      primaryLabel: "Back to Classes",
-      secondaryLabel: "View Video Hub",
-    };
-  }
-
-  if (status === "LOGIN_REQUIRED") {
-    return {
-      label: "Login Required",
-      title: "Login required to watch",
-      message:
-        "Please login to open this AspireNest classroom and continue learning.",
-      primaryLabel: "Login to Continue",
-      secondaryLabel: "Back to Classes",
-    };
-  }
-
-  if (status === "PLAN_LOCKED") {
-    return {
-      label: `${requiredPlan} Access Required`,
-      title: `${requiredPlan} classroom locked`,
-      message:
-        "This classroom is protected by plan access. Upgrade your plan to watch this class, replay, or live session.",
-      primaryLabel: "View Plans",
-      secondaryLabel: "Back to Classes",
-    };
-  }
-
-  return {
-    label: "Class Not Found",
-    title: "Classroom not found",
-    message:
-      "This video or live class is not available. It may have been deleted, unpublished, or disconnected from this route.",
-    primaryLabel: "Back to Classes",
-    secondaryLabel: "Reload Classroom",
-  };
+  return false;
 };
 
 export default function StudentClassroomRoute({
@@ -226,79 +88,45 @@ export default function StudentClassroomRoute({
 }) {
   const navigate = useNavigate();
   const { videoId = "" } = useParams();
+  const videoLibrary = useVideoLibrary(universalContent);
 
-  const activeVideoId = decodeURIComponent(videoId || "");
+  const activeVideoId = safeDecodeRouteValue(videoId);
 
-  const classroomItem = React.useMemo(() => {
-    return (
-      universalContent.find(
-        (item) =>
-          item?.id === activeVideoId ||
-          item?.videoId === activeVideoId ||
-          item?.classId === activeVideoId
-      ) || null
-    );
-  }, [universalContent, activeVideoId]);
+  const classroomItem = React.useMemo(
+    () => videoLibrary.getVideoById(activeVideoId),
+    [videoLibrary, activeVideoId]
+  );
 
-  const requiredPlan = toPlan(classroomItem?.planType || "FREE");
-
-  const accessStatus = buildAccessStatus({
-    item: classroomItem,
-    user,
-    isAdmin,
-    userPlanType,
-    hasPlanAccess,
-    universalContent,
-  });
-
+  const requiredPlan = normalizePlanType(classroomItem?.planType || "FREE");
   const classMode = getClassMode(classroomItem || {});
+
   const liveState =
     classroomItem && classMode === "LIVE"
       ? getLiveClassStatus(classroomItem)
       : "";
 
-  const liveStateLabel = getLiveStateLabel(liveState);
-  const playbackUrl = getPlaybackUrl(classroomItem || {}, classMode, liveState);
+  const liveStateLabel =
+    classMode === "LIVE" ? getLiveStatusLabel(liveState) : "Recorded Lesson";
+
+  const playbackUrl = getClassroomSourceUrl(classroomItem || {});
 
   const canShowPlayer =
     Boolean(playbackUrl) &&
     (classMode === "RECORDED" ||
       liveState === LIVE_CLASS_STATUS.JOIN_NOW ||
-      liveState === LIVE_CLASS_STATUS.REPLAY_AVAILABLE ||
-      liveState === LIVE_CLASS_STATUS.ENDED);
-
-  const subjectKey = normalizeVideoText(classroomItem?.subject || "");
-  const chapterKey = normalizeVideoText(classroomItem?.chapter || "");
+      liveState === LIVE_CLASS_STATUS.REPLAY_AVAILABLE);
 
   const relatedVideos = React.useMemo(() => {
     if (!classroomItem) return [];
 
-    return universalContent
-      .filter((item) => item?.id !== classroomItem.id)
-      .filter(isVideoSection)
-      .filter(
-        (item) =>
-          normalizeVideoStatus(item.status || "published") === "published"
-      )
-      .filter((item) => normalizeVideoText(item.subject) === subjectKey)
-      .filter((item) => normalizeVideoText(item.chapter) === chapterKey)
-      .slice(0, 6);
-  }, [universalContent, classroomItem, subjectKey, chapterKey]);
+    return videoLibrary.getRelatedVideos(classroomItem).slice(0, 6);
+  }, [videoLibrary, classroomItem]);
 
   const relatedNotes = React.useMemo(() => {
     if (!classroomItem) return [];
 
-    return universalContent
-      .filter(isNotesSection)
-      .filter((item) => !isVideoSection(item))
-      .filter(
-        (item) =>
-          normalizeVideoStatus(item.status || "published") === "published"
-      )
-      .filter((item) => normalizeVideoText(item.subject) === subjectKey)
-      .filter((item) => normalizeVideoText(item.chapter) === chapterKey)
-      .slice(0, 4);
-  }, [universalContent, classroomItem, subjectKey, chapterKey]);
+    return videoLibrary.getRelatedNotes(classroomItem).slice(0, 4);
+  }, [videoLibrary, classroomItem]);
 
   const nextClass = relatedVideos[0] || null;
 
@@ -328,13 +156,13 @@ export default function StudentClassroomRoute({
   };
 
   const openNote = (note = {}) => {
-    const notePlan = toPlan(note.planType || "FREE");
+    const notePlan = normalizePlanType(note.planType || "FREE");
 
     if (!isAdmin && notePlan !== "FREE") {
       const hasAccess =
         typeof hasPlanAccess === "function"
           ? hasPlanAccess(notePlan)
-          : PLAN_ORDER[toPlan(userPlanType)] >= PLAN_ORDER[notePlan];
+          : canAccessVideoPlan({ requiredPlan: notePlan, userPlanType });
 
       if (!hasAccess) {
         navigate("/ctet-tet/pricing");
@@ -342,11 +170,7 @@ export default function StudentClassroomRoute({
       }
     }
 
-    const noteUrl = note.fileUrl || note.pdfUrl || note.url || note.driveUrl;
-
-    if (noteUrl) {
-      openExternalUrl(noteUrl);
-    }
+    openExternalUrl(getNoteUrl(note));
   };
 
   const goBackToChapter = () => {
@@ -357,67 +181,40 @@ export default function StudentClassroomRoute({
 
     navigate(
       `/ctet-tet/videos/plan/${requiredPlan}/${encodeURIComponent(
-        toSlug(classroomItem.subject || "")
-      )}/${encodeURIComponent(toSlug(classroomItem.chapter || ""))}`
+        createVideoSlug(classroomItem.subject || "")
+      )}/${encodeURIComponent(createVideoSlug(classroomItem.chapter || ""))}`
     );
   };
 
-  if (accessStatus !== "AVAILABLE") {
-    const stateCopy = getStateCardCopy(accessStatus, requiredPlan);
-
-    const handlePrimaryAction = () => {
-      if (accessStatus === "LOADING") {
-        window.location.reload();
-        return;
-      }
-
-      if (accessStatus === "LOGIN_REQUIRED") {
-        navigate("/login");
-        return;
-      }
-
-      if (accessStatus === "PLAN_LOCKED") {
-        navigate("/ctet-tet/pricing");
-        return;
-      }
-
-      navigate("/ctet-tet/videos");
-    };
-
-    const handleSecondaryAction = () => {
-      if (accessStatus === "NOT_FOUND" || accessStatus === "LOADING") {
-        window.location.reload();
-        return;
-      }
-
-      navigate("/ctet-tet/videos");
-    };
-
+  if (!classroomItem) {
     return (
       <section className="coursePages studentClassroomPage studentClassroomCinemaPage">
         <div className="studentClassroomShell">
           <section className="studentClassroomStateCard">
-            <span>{stateCopy.label}</span>
+            <span>Classroom Not Found</span>
 
-            <h1>{stateCopy.title}</h1>
+            <h1>This class is not available</h1>
 
-            <p>{stateCopy.message}</p>
+            <p>
+              This classroom may be loading, unpublished, deleted, or disconnected
+              from the current route.
+            </p>
 
             <div className="studentClassroomStateActions">
               <button
                 type="button"
                 className="studentVideoPrimaryButton"
-                onClick={handlePrimaryAction}
+                onClick={() => navigate("/ctet-tet/videos")}
               >
-                {stateCopy.primaryLabel}
+                Back to Classes
               </button>
 
               <button
                 type="button"
                 className="studentVideoSecondaryButton"
-                onClick={handleSecondaryAction}
+                onClick={() => window.location.reload()}
               >
-                {stateCopy.secondaryLabel}
+                Reload Classroom
               </button>
             </div>
           </section>
@@ -431,8 +228,12 @@ export default function StudentClassroomRoute({
   const safeChapter = classroomItem.chapter || "Chapter";
   const safeDuration = classroomItem.duration || "Duration pending";
   const safeMentor = classroomItem.mentorName || "AspireNest Mentor";
-  const safeSource =
-    classroomItem.sourceType || classroomItem.livePlatform || "Class source";
+  const safeSource = getSafeClassroomSourceLabel(classroomItem);
+  const liveActionEnabled = canOpenLiveAction(
+    classroomItem,
+    liveState,
+    playbackUrl
+  );
 
   return (
     <section
@@ -471,8 +272,7 @@ export default function StudentClassroomRoute({
             <h1>{safeTitle}</h1>
 
             <p>
-              {safeSubject} • {safeChapter} •{" "}
-              {classMode === "LIVE" ? liveStateLabel : "Recorded Lesson"}
+              {safeSubject} • {safeChapter} • {liveStateLabel}
             </p>
           </div>
 
@@ -514,6 +314,8 @@ export default function StudentClassroomRoute({
                     {classMode === "LIVE"
                       ? liveState === LIVE_CLASS_STATUS.CANCELLED
                         ? "Live class cancelled"
+                        : liveState === LIVE_CLASS_STATUS.ENDED
+                        ? "Replay is not available yet"
                         : "Live class not open yet"
                       : "Video source pending"}
                   </h3>
@@ -538,13 +340,13 @@ export default function StudentClassroomRoute({
                 </article>
 
                 <article>
-                  <span>Class Source</span>
+                  <span>Connected Node</span>
 
-                  <strong>{safeSource}</strong>
+                  <strong>{safeSubject}</strong>
 
                   <p>
-                    Protected embed is shown inside AspireNest. Raw source URL
-                    stays hidden from the student interface.
+                    This class, related notes, and chapter classes are now
+                    matched through one subject-chapter learning node.
                   </p>
                 </article>
 
@@ -558,6 +360,8 @@ export default function StudentClassroomRoute({
                   <p>
                     {nextClass
                       ? "A related class is ready from this chapter."
+                      : relatedNotes.length
+                      ? "Revise connected notes from this chapter."
                       : "Finish this class and revise connected notes when added."}
                   </p>
                 </article>
@@ -609,22 +413,10 @@ export default function StudentClassroomRoute({
 
                   <button
                     type="button"
-                    onClick={() =>
-                      openExternalUrl(
-                        liveState === LIVE_CLASS_STATUS.REPLAY_AVAILABLE
-                          ? classroomItem.replayUrl || playbackUrl
-                          : classroomItem.joinUrl ||
-                              classroomItem.liveUrl ||
-                              playbackUrl
-                      )
-                    }
-                    disabled={!playbackUrl}
+                    onClick={() => openExternalUrl(playbackUrl)}
+                    disabled={!liveActionEnabled}
                   >
-                    {liveState === LIVE_CLASS_STATUS.JOIN_NOW
-                      ? "Join Now →"
-                      : liveState === LIVE_CLASS_STATUS.REPLAY_AVAILABLE
-                      ? "Watch Replay →"
-                      : "Open Details →"}
+                    {getLiveActionLabel(liveState)}
                   </button>
                 </div>
               ) : null}

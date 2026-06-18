@@ -2,8 +2,13 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 
 import useVideoLibrary from "./useVideoLibrary.js";
-import { LIVE_CLASS_STATUS } from "./videoConstants.js";
-import { getLiveClassStatus } from "./videoUtils.js";
+
+import {
+  getLiveClassStatus,
+  getLiveStatusClassName,
+  getLiveStatusLabel,
+  LIVE_CLASS_STATUS,
+} from "./videoUtils.js";
 
 const PLAN_META = {
   FREE: {
@@ -40,23 +45,60 @@ const getLocalDateKey = (date = new Date()) => {
   return `${year}-${month}-${day}`;
 };
 
-const getLiveTimeLabel = (item = {}) => {
-  if (!item.liveStartTime) return "Time will be announced";
+const getLiveSortKey = (item = {}) =>
+  `${item.liveStartDate || "9999-12-31"}T${item.liveStartTime || "23:59"}`;
 
-  if (item.liveEndTime) {
-    return `${item.liveStartTime} - ${item.liveEndTime}`;
-  }
+const getLiveDateLabel = (item = {}, todayKey = getLocalDateKey()) => {
+  const date = item.liveStartDate || item.startDate || item.classDate || "";
 
-  return item.liveStartTime;
+  if (!date) return "Date pending";
+  if (date === todayKey) return "Today";
+
+  return date;
 };
 
-const getLiveStateLabel = (state) => {
-  if (state === LIVE_CLASS_STATUS.JOIN_NOW) return "Join Now";
-  if (state === LIVE_CLASS_STATUS.REPLAY_AVAILABLE) return "Replay Available";
-  if (state === LIVE_CLASS_STATUS.ENDED) return "Ended";
-  if (state === LIVE_CLASS_STATUS.CANCELLED) return "Cancelled";
+const getLiveTimeLabel = (item = {}) => {
+  const start = item.liveStartTime || item.startTime || "";
+  const end = item.liveEndTime || item.endTime || "";
 
-  return "Upcoming";
+  if (!start) return "Time will be announced";
+  if (end) return `${start} - ${end}`;
+
+  return start;
+};
+
+const getLiveActionLabel = (state = "") => {
+  if (state === LIVE_CLASS_STATUS.JOIN_NOW) return "Join Now →";
+  if (state === LIVE_CLASS_STATUS.REPLAY_AVAILABLE) return "Watch Replay →";
+  if (state === LIVE_CLASS_STATUS.CANCELLED) return "View Update →";
+  if (state === LIVE_CLASS_STATUS.ENDED) return "Replay Pending →";
+  if (state === LIVE_CLASS_STATUS.NOT_SCHEDULED) return "View Details →";
+
+  return "Open Schedule →";
+};
+
+const getLivePriority = (state = "") => {
+  if (state === LIVE_CLASS_STATUS.JOIN_NOW) return 1;
+  if (state === LIVE_CLASS_STATUS.UPCOMING) return 2;
+  if (state === LIVE_CLASS_STATUS.REPLAY_AVAILABLE) return 3;
+  if (state === LIVE_CLASS_STATUS.ENDED) return 4;
+  if (state === LIVE_CLASS_STATUS.CANCELLED) return 5;
+
+  return 6;
+};
+
+const uniqueLiveItems = (items = []) => {
+  const map = new Map();
+
+  items.forEach((item) => {
+    const id = item?.item?.id;
+
+    if (!id || map.has(id)) return;
+
+    map.set(id, item);
+  });
+
+  return [...map.values()];
 };
 
 const learningBenefits = [
@@ -77,8 +119,8 @@ const learningBenefits = [
   },
   {
     icon: "📚",
-    title: "Subject Shelves",
-    text: "Plan → subject → chapter → classroom path stays connected.",
+    title: "Notes Connected",
+    text: "Video, live class, notes, subject, and chapter stay in one node.",
   },
 ];
 
@@ -88,45 +130,74 @@ export default function StudentVideoHub({ universalContent = [] }) {
 
   const plans = videoLibrary.getPlans();
   const latestItems = videoLibrary.publishedVideos.slice(0, 6);
-  const featuredClass = latestItems[0] || null;
   const todayKey = getLocalDateKey();
 
-  const todayLiveClasses = videoLibrary.liveClasses
-    .filter((item) => item.liveStartDate === todayKey)
-    .sort((first, second) =>
-      `${first.liveStartDate || ""}T${first.liveStartTime || "00:00"}`.localeCompare(
-        `${second.liveStartDate || ""}T${second.liveStartTime || "00:00"}`
-      )
-    );
-  
-  const upcomingLiveClasses = videoLibrary.liveClasses
-    .filter((item) => {
-      const state = getLiveClassStatus(item);
-  
-      return (
-        state === LIVE_CLASS_STATUS.JOIN_NOW ||
-        state === LIVE_CLASS_STATUS.UPCOMING
-      );
-    })
-    .sort((first, second) =>
-      `${first.liveStartDate || ""}T${first.liveStartTime || "00:00"}`.localeCompare(
-        `${second.liveStartDate || ""}T${second.liveStartTime || "00:00"}`
-      )
-    );
-  
-  const nextLiveClass = todayLiveClasses[0] || upcomingLiveClasses[0] || null;
+  const liveViewItems = React.useMemo(() => {
+    return videoLibrary.liveClasses
+      .map((item) => {
+        const state = getLiveClassStatus(item);
 
+        return {
+          item,
+          state,
+          stateLabel: getLiveStatusLabel(state),
+          statusClassName: getLiveStatusClassName(state),
+          isToday: (item.liveStartDate || item.startDate || "") === todayKey,
+          sortKey: getLiveSortKey(item),
+        };
+      })
+      .sort((first, second) => {
+        const priorityDiff =
+          getLivePriority(first.state) - getLivePriority(second.state);
+
+        if (priorityDiff !== 0) return priorityDiff;
+
+        return first.sortKey.localeCompare(second.sortKey);
+      });
+  }, [videoLibrary, todayKey]);
+
+  const joinNowLiveClasses = liveViewItems.filter(
+    (live) => live.state === LIVE_CLASS_STATUS.JOIN_NOW
+  );
+
+  const todayLiveClasses = liveViewItems.filter((live) => live.isToday);
+
+  const upcomingLiveClasses = liveViewItems.filter(
+    (live) => live.state === LIVE_CLASS_STATUS.UPCOMING
+  );
+
+  const replayLiveClasses = liveViewItems.filter(
+    (live) => live.state === LIVE_CLASS_STATUS.REPLAY_AVAILABLE
+  );
+
+  const dashboardLiveItems = uniqueLiveItems([
+    ...joinNowLiveClasses,
+    ...todayLiveClasses,
+    ...upcomingLiveClasses,
+    ...replayLiveClasses,
+    ...liveViewItems,
+  ]).slice(0, 6);
+
+  const nextLiveView =
+    joinNowLiveClasses[0] ||
+    todayLiveClasses[0] ||
+    upcomingLiveClasses[0] ||
+    replayLiveClasses[0] ||
+    liveViewItems[0] ||
+    null;
+
+  const featuredClass = nextLiveView?.item || latestItems[0] || null;
 
   const totalClasses = videoLibrary.publishedVideos.length;
   const recordedCount = videoLibrary.recordedVideos.length;
   const liveCount = videoLibrary.liveClasses.length;
-  const subjectCount = videoLibrary.getSubjects().length;
+  const notesCount = videoLibrary.notes.length;
 
   const heroStats = [
     { value: totalClasses, label: "Published classes" },
     { value: recordedCount, label: "Recorded lessons" },
-    { value: liveCount, label: "Live classes" },
-    { value: subjectCount, label: "Subject shelves" },
+    { value: liveCount, label: "Live classrooms" },
+    { value: notesCount, label: "Connected notes" },
   ];
 
   return (
@@ -140,8 +211,8 @@ export default function StudentVideoHub({ universalContent = [] }) {
 
             <p>
               Recorded lessons, live classes, replay access, subject shelves,
-              and chapter-wise CTET/TET learning stay connected in one clean
-              AspireNest system.
+              notes, and chapter-wise CTET/TET learning stay connected in one
+              clean AspireNest system.
             </p>
 
             <div className="studentVideoHeroActions">
@@ -165,21 +236,20 @@ export default function StudentVideoHub({ universalContent = [] }) {
             <div className="studentVideoTrustStrip">
               <span>✓ Plan protected</span>
               <span>✓ Subject-wise</span>
-              <span>✓ Replay-ready</span>
-              <span>✓ Live class connected</span>
+              <span>✓ Notes connected</span>
+              <span>✓ Live + replay ready</span>
             </div>
           </div>
 
           <aside className="studentVideoLearningPanel">
             <div className="studentVideoPanelHeader">
               <span>Now Learning</span>
-              <strong>Classroom ON</strong>
+              <strong>One App • One System</strong>
             </div>
 
             <div className="studentVideoNowCard">
               <span className="studentVideoNowIcon">
-                {featuredClass &&
-                videoLibrary.getClassMode(featuredClass) === "LIVE"
+                {featuredClass && videoLibrary.getClassMode(featuredClass) === "LIVE"
                   ? "🔴"
                   : "▶️"}
               </span>
@@ -232,100 +302,101 @@ export default function StudentVideoHub({ universalContent = [] }) {
         </section>
 
         <section className="studentVideoTodayLiveSection">
-  <div className="studentVideoTodayLiveHeader">
-    <div>
-      <span>Live Classroom</span>
-      <h2>Today’s live classes</h2>
-      <p>
-  See today’s live schedule, join-now classes, ended sessions, replay-ready
-  classrooms, and cancelled updates in one place.
-</p>
-    </div>
+          <div className="studentVideoTodayLiveHeader">
+            <div>
+              <span>Live Classroom</span>
 
-    {nextLiveClass && (
-      <button
-        type="button"
-        className="studentVideoSecondaryButton"
-        onClick={() => navigate(`/ctet-tet/videos/watch/${nextLiveClass.id}`)}
-      >
-        Open Next Live →
-      </button>
-    )}
-  </div>
+              <h2>Live classroom command center</h2>
 
-  {todayLiveClasses.length === 0 ? (
-    <div className="studentVideoTodayLiveEmpty">
-      <span>📅</span>
-
-      <div>
-        <strong>No live class scheduled today.</strong>
-
-        <p>
-          {nextLiveClass
-            ? `Next live: ${nextLiveClass.title || "AspireNest Live Class"} • ${
-                nextLiveClass.liveStartDate || "Date pending"
-              } • ${getLiveTimeLabel(nextLiveClass)}`
-            : "Upcoming live classes will appear here when admin schedules them."}
-        </p>
-      </div>
-
-      {nextLiveClass && (
-        <button
-          type="button"
-          onClick={() => navigate(`/ctet-tet/videos/watch/${nextLiveClass.id}`)}
-        >
-          View Next Live →
-        </button>
-      )}
-    </div>
-  ) : (
-    <div className="studentVideoTodayLiveGrid">
-      {todayLiveClasses.map((item) => {
-        const liveState = getLiveClassStatus(item);
-        const stateLabel = getLiveStateLabel(liveState);
-
-        return (
-          <button
-            type="button"
-            className={`studentVideoTodayLiveCard studentVideoTodayLive-${liveState}`}
-            key={item.id}
-            onClick={() => navigate(`/ctet-tet/videos/watch/${item.id}`)}
-          >
-            <span className="studentVideoTodayLiveState">
-              {stateLabel}
-            </span>
-
-            <strong>{item.title || "AspireNest Live Class"}</strong>
-
-            <p>
-              {item.subject || "Subject"} • {item.chapter || "Chapter"}
-            </p>
-
-            <div className="studentVideoTodayLiveMeta">
-              <span>🕒 {getLiveTimeLabel(item)}</span>
-              <span>🔐 {item.planType || "FREE"} access</span>
+              <p>
+                Join-now classes, today’s schedule, upcoming live sessions,
+                replay-ready classes, ended sessions, and cancelled updates stay
+                in one connected student classroom.
+              </p>
             </div>
 
-            <em>
-              {liveState === LIVE_CLASS_STATUS.JOIN_NOW
-                ? "Join Now →"
-                : liveState === LIVE_CLASS_STATUS.REPLAY_AVAILABLE
-                ? "Watch Replay →"
-                : liveState === LIVE_CLASS_STATUS.CANCELLED
-                ? "View Details →"
-                : "Open Live Room →"}
-            </em>
-          </button>
-        );
-      })}
-    </div>
-  )}
-</section>
+            {nextLiveView ? (
+              <button
+                type="button"
+                className="studentVideoSecondaryButton"
+                onClick={() =>
+                  navigate(`/ctet-tet/videos/watch/${nextLiveView.item.id}`)
+                }
+              >
+                {nextLiveView.state === LIVE_CLASS_STATUS.JOIN_NOW
+                  ? "Join Live Class →"
+                  : "Open Next Live →"}
+              </button>
+            ) : null}
+          </div>
+
+          {dashboardLiveItems.length === 0 ? (
+            <div className="studentVideoTodayLiveEmpty">
+              <span>📅</span>
+
+              <div>
+                <strong>No live class scheduled yet.</strong>
+
+                <p>
+                  Upcoming, join-now, replay-ready, and cancelled live classroom
+                  updates will appear here when admin schedules them.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => navigate("/ctet-tet/videos/plan/FREE")}
+              >
+                Browse Recordings →
+              </button>
+            </div>
+          ) : (
+            <div className="studentVideoTodayLiveGrid">
+              {dashboardLiveItems.map((live) => (
+                <button
+                  type="button"
+                  className={`studentVideoTodayLiveCard studentVideoTodayLive-${live.state} ${live.statusClassName}`}
+                  key={live.item.id}
+                  onClick={() =>
+                    navigate(`/ctet-tet/videos/watch/${live.item.id}`)
+                  }
+                >
+                  <span className="studentVideoTodayLiveState">
+                    {live.stateLabel}
+                  </span>
+
+                  <strong>
+                    {live.item.title || "AspireNest Live Class"}
+                  </strong>
+
+                  <p>
+                    {live.item.subject || "Subject"} •{" "}
+                    {live.item.chapter || "Chapter"}
+                  </p>
+
+                  <div className="studentVideoTodayLiveMeta">
+                    <span>
+                      📅 {getLiveDateLabel(live.item, todayKey)}
+                    </span>
+
+                    <span>🕒 {getLiveTimeLabel(live.item)}</span>
+
+                    <span>🔐 {live.item.planType || "FREE"} access</span>
+                  </div>
+
+                  <em>{getLiveActionLabel(live.state)}</em>
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
 
         <section className="studentVideoPlanSection studentVideoPlanPrime">
           <div className="studentVideoSectionTitle">
             <span>Classroom Shelves</span>
+
             <h2>Choose your learning path</h2>
+
             <p>
               Select a plan shelf and continue into subject-wise and
               chapter-wise classrooms.
@@ -367,14 +438,16 @@ export default function StudentVideoHub({ universalContent = [] }) {
         <section className="studentVideoExperienceSection studentVideoExperiencePrime">
           <div className="studentVideoExperienceCard">
             <div>
-              <span className="studentVideoMiniKicker">One App • One System</span>
+              <span className="studentVideoMiniKicker">
+                One App • One System
+              </span>
 
               <h2>No random links. No broken learning flow.</h2>
 
               <p>
-                Your classroom keeps plan shelf, subject, chapter, live status,
-                replay, related learning, and continue learning connected in
-                one premium student experience.
+                Your classroom keeps plan shelf, subject, chapter, notes, live
+                status, replay, related learning, and continue learning connected
+                in one premium student experience.
               </p>
             </div>
 
@@ -391,98 +464,102 @@ export default function StudentVideoHub({ universalContent = [] }) {
         </section>
 
         <section className="studentVideoLatestSection studentVideoLatestPrime">
-  <div className="studentVideoSectionTitle studentVideoLatestHeaderPrime">
-    <div>
-      <span>Continue Learning</span>
-      <h2>Latest classroom items</h2>
-      <p>
-        Open the newest published class directly, or continue from plan,
-        subject, and chapter shelves.
-      </p>
-    </div>
+          <div className="studentVideoSectionTitle studentVideoLatestHeaderPrime">
+            <div>
+              <span>Continue Learning</span>
 
-    <button
-      type="button"
-      className="studentVideoSecondaryButton"
-      onClick={() => navigate("/ctet-tet/videos/plan/FREE")}
-    >
-      Browse Free Shelf →
-    </button>
-  </div>
+              <h2>Latest classroom items</h2>
 
-  {latestItems.length === 0 ? (
-    <div className="studentVideoEmptyState">
-      <strong>No published classes yet.</strong>
+              <p>
+                Open the newest published class directly, or continue from plan,
+                subject, and chapter shelves.
+              </p>
+            </div>
 
-      <p>
-        Published recorded lessons and live classes will appear here after admin
-        adds them.
-      </p>
-    </div>
-  ) : (
-    <div className="studentVideoLatestPremiumLayout">
-      <button
-        type="button"
-        className="studentVideoFeaturedLatestCard"
-        onClick={() =>
-          navigate(`/ctet-tet/videos/watch/${latestItems[0].id}`)
-        }
-      >
-        <span className="studentVideoFeaturedLatestBadge">
-          {videoLibrary.getClassMode(latestItems[0]) === "LIVE"
-            ? "🔴 Live Classroom"
-            : "▶️ Featured Recording"}
-        </span>
-
-        <strong>{latestItems[0].title || "AspireNest Class"}</strong>
-
-        <p>
-          {latestItems[0].subject || "Subject"} •{" "}
-          {latestItems[0].chapter || "Chapter"}
-        </p>
-
-        <span className="studentVideoFeaturedLatestMeta">
-          {latestItems[0].planType || "FREE"} •{" "}
-          {videoLibrary.getClassMode(latestItems[0])}
-        </span>
-
-        <em>Open Class →</em>
-      </button>
-
-      <div className="studentVideoLatestStack">
-        {latestItems.slice(1).map((item) => {
-          const mode = videoLibrary.getClassMode(item);
-
-          return (
             <button
               type="button"
-              className="studentVideoLatestCard"
-              key={item.id}
-              onClick={() => navigate(`/ctet-tet/videos/watch/${item.id}`)}
+              className="studentVideoSecondaryButton"
+              onClick={() => navigate("/ctet-tet/videos/plan/FREE")}
             >
-              <span className="studentVideoLatestIcon">
-                {mode === "LIVE" ? "🔴" : "▶️"}
-              </span>
-
-              <span className="studentVideoLatestCopy">
-                <strong>{item.title || "AspireNest Class"}</strong>
-
-                <small>
-                  {item.subject || "Subject"} • {item.chapter || "Chapter"}
-                </small>
-              </span>
-
-              <span className="studentVideoLatestTag">
-                {item.planType || "FREE"} • {mode}
-              </span>
+              Browse Free Shelf →
             </button>
-          );
-        })}
-      </div>
-    </div>
-  )}
-</section>
+          </div>
 
+          {latestItems.length === 0 ? (
+            <div className="studentVideoEmptyState">
+              <strong>No published classes yet.</strong>
+
+              <p>
+                Published recorded lessons and live classes will appear here
+                after admin adds them.
+              </p>
+            </div>
+          ) : (
+            <div className="studentVideoLatestPremiumLayout">
+              <button
+                type="button"
+                className="studentVideoFeaturedLatestCard"
+                onClick={() =>
+                  navigate(`/ctet-tet/videos/watch/${latestItems[0].id}`)
+                }
+              >
+                <span className="studentVideoFeaturedLatestBadge">
+                  {videoLibrary.getClassMode(latestItems[0]) === "LIVE"
+                    ? "🔴 Live Classroom"
+                    : "▶️ Featured Recording"}
+                </span>
+
+                <strong>{latestItems[0].title || "AspireNest Class"}</strong>
+
+                <p>
+                  {latestItems[0].subject || "Subject"} •{" "}
+                  {latestItems[0].chapter || "Chapter"}
+                </p>
+
+                <span className="studentVideoFeaturedLatestMeta">
+                  {latestItems[0].planType || "FREE"} •{" "}
+                  {videoLibrary.getClassMode(latestItems[0])}
+                </span>
+
+                <em>Open Class →</em>
+              </button>
+
+              <div className="studentVideoLatestStack">
+                {latestItems.slice(1).map((item) => {
+                  const mode = videoLibrary.getClassMode(item);
+
+                  return (
+                    <button
+                      type="button"
+                      className="studentVideoLatestCard"
+                      key={item.id}
+                      onClick={() =>
+                        navigate(`/ctet-tet/videos/watch/${item.id}`)
+                      }
+                    >
+                      <span className="studentVideoLatestIcon">
+                        {mode === "LIVE" ? "🔴" : "▶️"}
+                      </span>
+
+                      <span className="studentVideoLatestCopy">
+                        <strong>{item.title || "AspireNest Class"}</strong>
+
+                        <small>
+                          {item.subject || "Subject"} •{" "}
+                          {item.chapter || "Chapter"}
+                        </small>
+                      </span>
+
+                      <span className="studentVideoLatestTag">
+                        {item.planType || "FREE"} • {mode}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </section>
       </div>
     </section>
   );

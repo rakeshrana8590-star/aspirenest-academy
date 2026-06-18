@@ -63,27 +63,35 @@ function GuardScreen({
   onSecondary,
 }) {
   return (
-    <section className="coursePages videoLibraryPage">
-      <div className="sectionHeader">
-        <span className="badge">{badge}</span>
+    <section className="coursePages studentClassroomPage studentClassroomCinemaPage">
+      <div className="studentClassroomShell">
+        <section className="studentClassroomStateCard">
+          <span>{badge}</span>
 
-        <h1>{title}</h1>
+          <h1>{title}</h1>
 
-        {message && <p>{message}</p>}
-      </div>
+          {message && <p>{message}</p>}
 
-      <div className="contentStudioForm">
-        <div className="contentStudioActions">
-          <button className="publishButton" onClick={onPrimary}>
-            {primaryLabel}
-          </button>
-
-          {secondaryLabel && (
-            <button className="backButton" onClick={onSecondary}>
-              {secondaryLabel}
+          <div className="studentClassroomStateActions">
+            <button
+              type="button"
+              className="studentVideoPrimaryButton"
+              onClick={onPrimary}
+            >
+              {primaryLabel}
             </button>
-          )}
-        </div>
+
+            {secondaryLabel && (
+              <button
+                type="button"
+                className="studentVideoSecondaryButton"
+                onClick={onSecondary}
+              >
+                {secondaryLabel}
+              </button>
+            )}
+          </div>
+        </section>
       </div>
     </section>
   );
@@ -95,9 +103,24 @@ export default function VideoAccessGuard({
   userPlanType = "FREE",
   isAdmin = false,
   hasPlanAccess,
+  isLoading = false,
   children,
 }) {
   const navigate = useNavigate();
+
+  if (isLoading) {
+    return (
+      <GuardScreen
+        badge="PREPARING CLASSROOM"
+        title="Loading classroom"
+        message="AspireNest is preparing this classroom. If it does not open, reload or go back to Classes & Recordings."
+        primaryLabel="Reload Classroom"
+        onPrimary={() => window.location.reload()}
+        secondaryLabel="Back to Classes"
+        onSecondary={() => navigate("/ctet-tet/videos")}
+      />
+    );
+  }
 
   if (!item || !isVideoContentItem(item)) {
     return (
@@ -131,12 +154,12 @@ export default function VideoAccessGuard({
 
   const requiredPlan = normalizePlanType(item.planType || "FREE");
 
-  if (requiredPlan !== "FREE" && !user && !isAdmin) {
+  if (!user && !isAdmin) {
     return (
       <GuardScreen
         badge="LOGIN REQUIRED"
         title="Login required to open this classroom"
-        message={`This class requires ${requiredPlan} access. Please login with your student account.`}
+        message={`Please login with your student account to open this ${requiredPlan} classroom.`}
         primaryLabel="Login"
         onPrimary={() => navigate("/login")}
         secondaryLabel="View Plans"
