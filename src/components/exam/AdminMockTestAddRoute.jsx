@@ -225,22 +225,92 @@ export default function AdminMockTestAddRoute({
 
   return (
     <section className="coursePages adminMockAddFormPage">
-      <div className="sectionHeader adminMockAddHero">
-        <span className="badge">
-          {editingMockTestId ? "EDIT EXAMINATION" : "ADD EXAMINATION"}
-        </span>
+   <div className="adminMockAddCommandHero">
+  <div className="adminMockAddHeroCopy">
+    <span className="badge">
+      {editingMockTestId ? "EDIT EXAMINATION" : "ADD EXAMINATION"}
+    </span>
 
-        <h1>
-          {editingMockTestId
-            ? "Edit Examination Test"
-            : "Create New Examination Test"}
-        </h1>
+    <h1>
+      {editingMockTestId
+        ? "Edit Examination Test"
+        : "Create New Examination Test"}
+    </h1>
 
-        <p>
-          Build chapter tests, subject tests, full mocks, PYQ papers, mixed
-          tests, live exams, and custom exams without backend changes.
-        </p>
+    <p>
+      Build chapter tests, subject tests, full mocks, PYQ papers, mixed
+      tests, live exams, and custom exams from one premium examination
+      builder.
+    </p>
+
+    <div className="adminMockAddHeroActions">
+      <button
+        type="button"
+        className="publishButton"
+        onClick={() =>
+          document
+            .querySelector(".adminMockAddSetupConsole")
+            ?.scrollIntoView({ behavior: "smooth", block: "start" })
+        }
+      >
+        Start Exam Setup
+      </button>
+
+      <button
+        type="button"
+        className="backButton"
+        onClick={() => navigate("/admin/content/mock-tests/manage")}
+      >
+        Manage Tests
+      </button>
+
+      <button
+        type="button"
+        className="backButton"
+        onClick={() => navigate("/admin/content/mock-tests")}
+      >
+        ← Back
+      </button>
+    </div>
+  </div>
+
+  <div className="adminMockAddSystemCard">
+    <div className="adminMockAddSystemTop">
+      <span>BUILDER STATUS</span>
+      <strong>{editingMockTestId ? "Edit" : "New"}</strong>
+    </div>
+
+    <div className="adminMockAddSystemGrid">
+      <div>
+        <strong>{mockTestForm.planType || "FREE"}</strong>
+        <span>Plan shelf</span>
       </div>
+
+      <div>
+        <strong>{mockTestForm.testType || "Chapter Test"}</strong>
+        <span>Test type</span>
+      </div>
+
+      <div>
+        <strong>{mockTestQuestionsForm.length}</strong>
+        <span>Questions</span>
+      </div>
+
+      <div>
+        <strong>{mockTestForm.status || "draft"}</strong>
+        <span>Publish state</span>
+      </div>
+    </div>
+
+    <div className="adminMockAddFlow">
+      <span>Setup</span>
+      <i />
+      <span>Questions</span>
+      <i />
+      <span>Publish</span>
+    </div>
+  </div>
+</div>
 
       <div className="contentStudioForm adminMockAddSetupConsole">
         <div className="sectionHeader adminMockAddSectionHeader">

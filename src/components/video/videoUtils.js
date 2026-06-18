@@ -341,39 +341,42 @@ export const getClassroomSourceUrl = (item = {}) => {
   if (isLiveClass(item)) {
     const status = getLiveClassStatus(item);
 
-    if (status === LIVE_CLASS_STATUS.CANCELLED) {
-      return (
-        item.replayUrl ||
-        item.recordingUrl ||
-        item.videoUrl ||
-        item.fileUrl ||
-        ""
-      );
-    }
+    const joinSource =
+      item.joinUrl || item.liveUrl || item.meetingUrl || "";
 
-    if (status === LIVE_CLASS_STATUS.REPLAY_AVAILABLE) {
-      return (
-        item.replayUrl ||
-        item.recordingUrl ||
-        item.videoUrl ||
-        item.fileUrl ||
-        ""
-      );
-    }
-
-    if (status === LIVE_CLASS_STATUS.JOIN_NOW) {
-      return (
-        item.joinUrl || item.liveUrl || item.meetingUrl || item.videoUrl || ""
-      );
-    }
-
-    return (
+    const replaySource =
       item.replayUrl ||
       item.recordingUrl ||
       item.videoUrl ||
       item.fileUrl ||
-      ""
-    );
+      item.sourceUrl ||
+      "";
+
+    if (status === LIVE_CLASS_STATUS.CANCELLED) {
+      return replaySource;
+    }
+
+    if (status === LIVE_CLASS_STATUS.REPLAY_AVAILABLE) {
+      return replaySource;
+    }
+
+    if (status === LIVE_CLASS_STATUS.JOIN_NOW) {
+      return joinSource || replaySource;
+    }
+
+    if (status === LIVE_CLASS_STATUS.UPCOMING) {
+      return joinSource || replaySource;
+    }
+
+    if (status === LIVE_CLASS_STATUS.NOT_SCHEDULED) {
+      return joinSource || replaySource;
+    }
+
+    if (status === LIVE_CLASS_STATUS.ENDED) {
+      return replaySource;
+    }
+
+    return joinSource || replaySource;
   }
 
   return getVideoSourceUrl(item);

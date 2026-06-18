@@ -1014,3 +1014,38 @@
     max-height: none !important;
   }
 }
+
+/* ===============================
+   WATCH PAGE — JOIN NOW IN-APP FOCUS
+================================ */
+
+.studentClassroomCinemaPage .studentClassroomTheaterFocus {
+  animation: studentClassroomTheaterPulse 1.35s ease !important;
+  border-color: rgba(16, 185, 129, 0.46) !important;
+  box-shadow:
+    0 0 0 5px rgba(16, 185, 129, 0.12),
+    0 30px 90px rgba(15, 23, 42, 0.16) !important;
+}
+
+@keyframes studentClassroomTheaterPulse {
+  0% {
+    transform: translateY(0);
+    box-shadow:
+      0 0 0 0 rgba(16, 185, 129, 0),
+      0 22px 70px rgba(15, 23, 42, 0.1);
+  }
+
+  32% {
+    transform: translateY(-4px);
+    box-shadow:
+      0 0 0 8px rgba(16, 185, 129, 0.14),
+      0 34px 96px rgba(15, 23, 42, 0.18);
+  }
+
+  100% {
+    transform: translateY(0);
+    box-shadow:
+      0 0 0 0 rgba(16, 185, 129, 0),
+      0 22px 70px rgba(15, 23, 42, 0.1);
+  }
+}

@@ -130,6 +130,26 @@ export default function StudentClassroomRoute({
 
   const nextClass = relatedVideos[0] || null;
 
+  const playerSectionRef = React.useRef(null);
+  const [playerFocusPulse, setPlayerFocusPulse] = React.useState(false);
+
+  const focusClassroomPlayer = () => {
+    setPlayerFocusPulse(true);
+
+    playerSectionRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+
+    window.setTimeout(() => {
+      setPlayerFocusPulse(false);
+    }, 1400);
+  };
+
+  const handleLiveRailAction = () => {
+    focusClassroomPlayer();
+  };
+
   React.useEffect(() => {
     if (!classroomItem?.id) return;
 
@@ -277,7 +297,12 @@ export default function StudentClassroomRoute({
           </div>
 
           <div className="studentClassroomCinemaGrid">
-            <div className="studentClassroomTheaterCard">
+          <div
+  className={`studentClassroomTheaterCard ${
+    playerFocusPulse ? "studentClassroomTheaterFocus" : ""
+  }`}
+  ref={playerSectionRef}
+>
               <div className="studentClassroomTheaterHeader">
                 <div>
                   <span>
@@ -413,7 +438,7 @@ export default function StudentClassroomRoute({
 
                   <button
                     type="button"
-                    onClick={() => openExternalUrl(playbackUrl)}
+                    onClick={handleLiveRailAction}
                     disabled={!liveActionEnabled}
                   >
                     {getLiveActionLabel(liveState)}

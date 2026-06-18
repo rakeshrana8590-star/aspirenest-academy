@@ -711,3 +711,229 @@
     justify-content: center;
   }
 }
+
+/* ===============================
+   34A17B — ADD MOCK TEST COMMAND HERO
+   1 App • 1 System premium builder
+================================ */
+
+.adminMockAddCommandHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(420px, 0.85fr);
+  gap: 34px;
+  align-items: stretch;
+  max-width: 1500px;
+  margin: 8px auto 34px;
+  padding: 32px 38px;
+  border-radius: 34px;
+  border: 1px solid rgba(249, 115, 22, 0.16);
+  background:
+    radial-gradient(circle at 12% 12%, rgba(249, 115, 22, 0.14), transparent 32%),
+    radial-gradient(circle at 92% 16%, rgba(59, 130, 246, 0.14), transparent 34%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
+  box-shadow: 0 30px 90px rgba(15, 23, 42, 0.1);
+}
+
+.adminMockAddHeroCopy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 430px;
+}
+
+.adminMockAddHeroCopy .badge {
+  width: max-content;
+  max-width: 100%;
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 950;
+  letter-spacing: 0.11em;
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.18);
+}
+
+.adminMockAddHeroCopy h1 {
+  margin: 28px 0 18px;
+  max-width: 850px;
+  color: #0f172a;
+  font-size: clamp(3rem, 6.2vw, 5.8rem);
+  line-height: 0.96;
+  letter-spacing: -0.075em;
+}
+
+.adminMockAddHeroCopy p {
+  margin: 0;
+  max-width: 760px;
+  color: #64748b;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.65;
+}
+
+.adminMockAddHeroActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
+
+.adminMockAddHeroActions .publishButton,
+.adminMockAddHeroActions .backButton {
+  min-height: 48px;
+  border-radius: 999px;
+  padding: 0 20px;
+  font-size: 0.88rem;
+  font-weight: 950;
+  white-space: nowrap;
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.14);
+}
+
+.adminMockAddSystemCard {
+  min-height: 430px;
+  padding: 26px;
+  border-radius: 30px;
+  color: #ffffff;
+  background:
+    radial-gradient(circle at 9% 10%, rgba(249, 115, 22, 0.24), transparent 34%),
+    radial-gradient(circle at 88% 16%, rgba(59, 130, 246, 0.28), transparent 36%),
+    linear-gradient(135deg, #111827 0%, #0f172a 58%, #241917 100%);
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.22);
+}
+
+.adminMockAddSystemTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 26px;
+}
+
+.adminMockAddSystemTop span {
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  color: #fed7aa;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 0.8rem;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.adminMockAddSystemTop strong {
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.adminMockAddSystemGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.adminMockAddSystemGrid div {
+  min-height: 106px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.adminMockAddSystemGrid strong {
+  display: block;
+  max-width: 100%;
+  color: #ffffff;
+  font-size: clamp(1.45rem, 2.1vw, 2.1rem);
+  line-height: 1.05;
+  letter-spacing: -0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.adminMockAddSystemGrid span {
+  display: block;
+  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.adminMockAddFlow {
+  display: grid;
+  grid-template-columns: auto 1fr auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-top: 24px;
+  padding: 12px 16px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.18);
+}
+
+.adminMockAddFlow span {
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 950;
+}
+
+.adminMockAddFlow i {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 1180px) {
+  .adminMockAddCommandHero {
+    grid-template-columns: 1fr;
+  }
+
+  .adminMockAddHeroCopy,
+  .adminMockAddSystemCard {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .adminMockAddCommandHero {
+    border-radius: 24px;
+    padding: 18px;
+  }
+
+  .adminMockAddHeroCopy h1 {
+    font-size: clamp(2.25rem, 12vw, 3.2rem);
+  }
+
+  .adminMockAddHeroActions {
+    align-items: stretch;
+  }
+
+  .adminMockAddHeroActions .publishButton,
+  .adminMockAddHeroActions .backButton {
+    width: 100%;
+  }
+
+  .adminMockAddSystemGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminMockAddFlow {
+    grid-template-columns: 1fr;
+    border-radius: 20px;
+  }
+
+  .adminMockAddFlow i {
+    display: none;
+  }
+}
