@@ -90,27 +90,50 @@ export default function MockTestActionMenu({
         <div className="mockPortalMenuDivider" />
 
         <button
-          onClick={async () => {
-            const nextStatus =
-              test.status === "published" ? "unpublished" : "published";
+  onClick={async () => {
+    const nextStatus =
+      test.status === "published" ? "unpublished" : "published";
 
-            await updateMockTestStatus({
-              test,
-              status: nextStatus,
-              reloadContent,
-            });
+    if (nextStatus === "published") {
+      const confirmText = window.prompt(
+        `Publish "${test.title || "this mock test"}" to student side?\n\n` +
+          `Published tests may become visible to eligible students based on plan access.\n\n` +
+          `Type PUBLISH to confirm.`
+      );
 
-            onClose();
+      if (confirmText !== "PUBLISH") {
+        alert("Publish cancelled. Mock test was not published.");
+        onClose();
+        return;
+      }
+    } else {
+      const confirmUnpublish = window.confirm(
+        `Unpublish "${test.title || "this mock test"}"?\n\n` +
+          `Students will no longer see this test.`
+      );
 
-            alert(
-              nextStatus === "published"
-                ? "Mock test published ✅"
-                : "Mock test unpublished ✅"
-            );
-          }}
-        >
-          🚀 Publish / Unpublish
-        </button>
+      if (!confirmUnpublish) {
+        return;
+      }
+    }
+
+    await updateMockTestStatus({
+      test,
+      status: nextStatus,
+      reloadContent,
+    });
+
+    onClose();
+
+    alert(
+      nextStatus === "published"
+        ? "Mock test published ✅"
+        : "Mock test unpublished ✅"
+    );
+  }}
+>
+  🚀 Publish / Unpublish
+</button>
 
         <button
           onClick={async () => {

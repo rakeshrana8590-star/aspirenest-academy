@@ -264,28 +264,47 @@ export default function AdminMockTestManageRoute({
       alert("Please select at least one mock test");
       return;
     }
-
-    const confirmBulkAction = window.confirm(
-      `You are about to ${label.toLowerCase()} ${
-        safeSelectedIds.length
-      } selected mock test(s).\n\nDo you want to continue?`
-    );
-
-    if (!confirmBulkAction) {
-      return;
+  
+    const selectedTitles = safeSelectedIds
+      .map((testId) => mockTests.find((item) => item.id === testId)?.title)
+      .filter(Boolean)
+      .slice(0, 5);
+  
+    if (status === "published") {
+      const confirmText = window.prompt(
+        `Publish ${safeSelectedIds.length} selected mock test(s) to student side?\n\n` +
+          `Published tests may become visible to eligible students based on plan access.\n\n` +
+          `Selected sample:\n${selectedTitles.join("\n") || "Selected tests"}\n\n` +
+          `Type PUBLISH to confirm.`
+      );
+  
+      if (confirmText !== "PUBLISH") {
+        alert("Bulk publish cancelled. No mock tests were published.");
+        return;
+      }
+    } else {
+      const confirmBulkAction = window.confirm(
+        `You are about to ${label.toLowerCase()} ${
+          safeSelectedIds.length
+        } selected mock test(s).\n\nDo you want to continue?`
+      );
+  
+      if (!confirmBulkAction) {
+        return;
+      }
     }
-
+  
     for (const testId of safeSelectedIds) {
       await updateDoc(doc(db, "contentItems", testId), {
         status,
         updatedAt: new Date(),
       });
     }
-
+  
     await loadContentItemsFromFirestore();
-
+  
     setSelectedMockTestIds([]);
-
+  
     alert(`Selected mock tests ${label.toLowerCase()} ✅`);
   };
 
