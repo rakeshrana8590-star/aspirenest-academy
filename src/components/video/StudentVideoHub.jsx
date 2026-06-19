@@ -323,9 +323,7 @@ export default function StudentVideoHub({ universalContent = [] }) {
                   navigate(`/ctet-tet/videos/watch/${nextLiveView.item.id}`)
                 }
               >
-                {nextLiveView.state === LIVE_CLASS_STATUS.JOIN_NOW
-                  ? "Join Live Class →"
-                  : "Open Next Live →"}
+              {getLiveActionLabel(nextLiveView.state)}
               </button>
             ) : null}
           </div>
