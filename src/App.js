@@ -1700,51 +1700,37 @@ const [paymentHistory, setPaymentHistory] = useState([]);
     }
   };
 
-  const handleLogin = async () => {
-    if (window.self !== window.top) {
-      alert(
-        "StackBlitz preview me login block ho sakta hai. App new tab me open ho rahi hai."
-      );
+  const handleLogin = async (loginPayload = {}) => {
+    const loginEmail = (loginPayload.email ?? email).trim();
+    const loginPassword = loginPayload.password ?? password;
   
-      window.open(window.location.href, "_blank");
+    if (!loginEmail || !loginPassword) {
+      alert("Please enter email and password.");
       return;
     }
   
     try {
-      const userCredential =
-        await signInWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        loginEmail,
+        loginPassword
+      );
   
-        if (!userCredential.user.emailVerified) {
-          const verificationResult = await resendVerificationEmailAndLogout(
-            auth,
-            userCredential.user
-          );
-        
-          alert(verificationResult.message);
-        
-          return;
-        }
+      if (!userCredential.user.emailVerified) {
+        alert("Please verify your email before login 📩");
+        await signOut(auth);
+        return;
+      }
+  
+      setEmail(loginEmail);
+      setPassword(loginPassword);
   
       navigate("/ctet-tet", { replace: true });
-  
     } catch (error) {
       alert(error.message);
     }
   };
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      setStudents([]);
-setEnquiries([]);
-      alert("Logged out successfully");
-    } catch (error) {
-      alert(error.message);
-    }
-  };
+
   const handleGoogleLogin = async () => {
     if (window.self !== window.top) {
       alert(
@@ -1764,6 +1750,17 @@ setEnquiries([]);
       alert(error.message);
     }
   };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+      navigate("/login", { replace: true });
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
   const handleForgotPassword = async () => {
     if (!email) {
       alert("Please enter your email first");
@@ -3693,6 +3690,7 @@ return (
 )}
 <main className="appShell">
 <Routes key={location.key || location.pathname}>
+
 
 <Route
   path="/ctet-tet/roadmaps"

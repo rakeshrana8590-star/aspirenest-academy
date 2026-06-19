@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 const TARGET_EXAMS = [
@@ -18,78 +18,36 @@ const PREPARATION_LEVELS = [
 
 const LEARNING_MEDIUMS = ["Hindi", "English", "Gujarati", "Bilingual"];
 
-function PasswordField({
-  label,
-  name,
-  value,
-  onChange,
-  placeholder,
-  autoComplete,
-  isVisible,
-  onToggleVisible,
-}) {
-  const inputRef = useRef(null);
-
-  const handleToggle = () => {
-    onToggleVisible();
-
-    window.requestAnimationFrame(() => {
-      inputRef.current?.focus();
-    });
-  };
-
-  return (
-    <label className="aspireLoginField">
-      <span>{label}</span>
-
-      <div className="aspireLoginPasswordWrap">
-        <input
-          ref={inputRef}
-          name={name}
-          type={isVisible ? "text" : "password"}
-          placeholder={placeholder}
-          value={value}
-          autoComplete={autoComplete}
-          onChange={(event) => onChange(event.target.value)}
-        />
-
-        <button
-          type="button"
-          className="aspireLoginPasswordToggle"
-          onMouseDown={(event) => event.preventDefault()}
-          onClick={handleToggle}
-          aria-label={isVisible ? "Hide password" : "Show password"}
-        >
-          {isVisible ? "Hide" : "Show"}
-        </button>
-      </div>
-    </label>
-  );
-}
-
 export default function AuthSection({
-  email,
-  setEmail,
-  password,
-  setPassword,
+  email = "",
+  setEmail = () => {},
+  password = "",
+  setPassword = () => {},
   handleLogin,
   handleGoogleLogin,
   handleForgotPassword,
   handleRegister,
 }) {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
-  const [showLoginPassword, setShowLoginPassword] = useState(false);
-  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [loginEmail, setLoginEmail] = useState(email || "");
+  const [loginPassword, setLoginPassword] = useState(password || "");
+
+  const [registerEmail, setRegisterEmail] = useState(email || "");
+  const [registerPassword, setRegisterPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
   const [fullName, setFullName] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
   const [targetExam, setTargetExam] = useState("CTET Paper I + II");
   const [preparationLevel, setPreparationLevel] = useState("Beginner");
   const [preferredMedium, setPreferredMedium] = useState("Bilingual");
 
-  const registerSubtext = useMemo(() => {
-    return "Create your verified AspireNest account with a basic learning profile.";
-  }, []);
+  const registerSubtext = useMemo(
+    () => "Create your verified AspireNest account with a basic learning profile.",
+    []
+  );
 
   const resetRegisterFields = () => {
     setConfirmPassword("");
@@ -98,10 +56,11 @@ export default function AuthSection({
     setTargetExam("CTET Paper I + II");
     setPreparationLevel("Beginner");
     setPreferredMedium("Bilingual");
-    setShowRegisterPassword(false);
   };
 
   const openRegister = () => {
+    setRegisterEmail(loginEmail);
+    setRegisterPassword("");
     setIsRegisterOpen(true);
   };
 
@@ -110,45 +69,69 @@ export default function AuthSection({
     resetRegisterFields();
   };
 
-  const submitLogin = (event) => {
-    event.preventDefault();
-    handleLogin();
+  const submitLogin = () => {
+    const cleanEmail = loginEmail.trim();
+
+    setEmail(cleanEmail);
+    setPassword(loginPassword);
+
+    handleLogin?.({
+      email: cleanEmail,
+      password: loginPassword,
+    });
   };
 
-  const submitRegister = (event) => {
-    event.preventDefault();
+  const submitForgotPassword = () => {
+    const cleanEmail = loginEmail.trim();
+
+    if (!cleanEmail) {
+      alert("Please enter email address first.");
+      return;
+    }
+
+    setEmail(cleanEmail);
+    handleForgotPassword?.(cleanEmail);
+  };
+
+  const submitRegister = () => {
+    const cleanEmail = registerEmail.trim();
 
     if (!fullName.trim()) {
       alert("Please enter student full name.");
       return;
     }
 
-    if (!email.trim()) {
+    if (!cleanEmail) {
       alert("Please enter email address.");
       return;
     }
 
-    if (!password.trim()) {
+    if (!registerPassword.trim()) {
       alert("Please enter password.");
       return;
     }
 
-    if (password.length < 6) {
+    if (registerPassword.length < 6) {
       alert("Password should be at least 6 characters.");
       return;
     }
 
-    if (password !== confirmPassword) {
+    if (registerPassword !== confirmPassword) {
       alert("Password and confirm password do not match.");
       return;
     }
 
-    handleRegister({
+    setEmail(cleanEmail);
+    setPassword(registerPassword);
+
+    handleRegister?.({
       fullName: fullName.trim(),
       mobileNumber: mobileNumber.trim(),
       targetExam,
       preparationLevel,
       preferredMedium,
+      email: cleanEmail,
+      password: registerPassword,
     });
   };
 
@@ -181,7 +164,7 @@ export default function AuthSection({
         </div>
 
         <div className="aspireLoginCardPanel">
-          <form className="aspireLoginBox" onSubmit={submitLogin}>
+          <div className="aspireLoginBox">
             <div className="aspireLoginModeTabs">
               <button type="button" className="active">
                 Login
@@ -203,29 +186,43 @@ export default function AuthSection({
             <label className="aspireLoginField">
               <span>Email Address</span>
               <input
-                name="username"
                 type="email"
                 placeholder="Enter registered email"
-                value={email}
-                autoComplete="username"
-                onChange={(event) => setEmail(event.target.value)}
+                value={loginEmail}
+                autoComplete="email"
+                onChange={(event) => setLoginEmail(event.target.value)}
               />
             </label>
 
-            <PasswordField
-              label="Password"
-              name="password"
-              value={password}
-              onChange={setPassword}
-              placeholder="Enter password"
-              autoComplete="current-password"
-              isVisible={showLoginPassword}
-              onToggleVisible={() =>
-                setShowLoginPassword((current) => !current)
-              }
-            />
+            <label className="aspireLoginField">
+              <span>Password</span>
 
-            <button type="submit" className="aspireLoginPrimaryBtn">
+              <div className="aspireLoginPasswordWrap">
+                <input
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter password"
+                  value={loginPassword}
+                  autoComplete="current-password"
+                  onChange={(event) => setLoginPassword(event.target.value)}
+                />
+
+                <button
+                  type="button"
+                  className="aspireLoginPasswordToggle"
+                  onClick={() => setShowPassword((current) => !current)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+            </label>
+
+            <button
+              type="button"
+              className="aspireLoginPrimaryBtn"
+              onClick={submitLogin}
+            >
               Login
             </button>
 
@@ -241,7 +238,7 @@ export default function AuthSection({
               <button
                 type="button"
                 className="aspireLoginTextBtn"
-                onClick={handleForgotPassword}
+                onClick={submitForgotPassword}
               >
                 Forgot Password?
               </button>
@@ -254,19 +251,18 @@ export default function AuthSection({
             <p className="aspireLoginCreateText">
               New student? <span onClick={openRegister}>Create Account</span>
             </p>
-          </form>
+          </div>
         </div>
       </section>
 
       {isRegisterOpen && (
         <div className="aspireRegisterOverlay" onClick={closeRegister}>
-          <form
+          <div
             className="aspireRegisterModal"
             role="dialog"
             aria-modal="true"
             aria-label="Create Student Account"
             onClick={(event) => event.stopPropagation()}
-            onSubmit={submitRegister}
           >
             <div className="aspireRegisterModalHeader">
               <div>
@@ -315,40 +311,49 @@ export default function AuthSection({
               <label className="aspireLoginField">
                 <span>Email Address</span>
                 <input
-                  name="email"
                   type="email"
                   placeholder="Enter registered email"
-                  value={email}
+                  value={registerEmail}
                   autoComplete="email"
-                  onChange={(event) => setEmail(event.target.value)}
+                  onChange={(event) => setRegisterEmail(event.target.value)}
                 />
               </label>
 
-              <PasswordField
-                label="Password"
-                name="newPassword"
-                value={password}
-                onChange={setPassword}
-                placeholder="Enter password"
-                autoComplete="new-password"
-                isVisible={showRegisterPassword}
-                onToggleVisible={() =>
-                  setShowRegisterPassword((current) => !current)
-                }
-              />
+              <label className="aspireLoginField">
+                <span>Password</span>
 
-              <PasswordField
-                label="Confirm Password"
-                name="confirmPassword"
-                value={confirmPassword}
-                onChange={setConfirmPassword}
-                placeholder="Confirm password"
-                autoComplete="new-password"
-                isVisible={showRegisterPassword}
-                onToggleVisible={() =>
-                  setShowRegisterPassword((current) => !current)
-                }
-              />
+                <div className="aspireLoginPasswordWrap">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter password"
+                    value={registerPassword}
+                    autoComplete="new-password"
+                    onChange={(event) =>
+                      setRegisterPassword(event.target.value)
+                    }
+                  />
+
+                  <button
+                    type="button"
+                    className="aspireLoginPasswordToggle"
+                    onClick={() => setShowPassword((current) => !current)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
+              </label>
+
+              <label className="aspireLoginField">
+                <span>Confirm Password</span>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Confirm password"
+                  value={confirmPassword}
+                  autoComplete="new-password"
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                />
+              </label>
 
               <label className="aspireLoginField">
                 <span>Target Exam</span>
@@ -368,7 +373,9 @@ export default function AuthSection({
                 <span>Preparation Level</span>
                 <select
                   value={preparationLevel}
-                  onChange={(event) => setPreparationLevel(event.target.value)}
+                  onChange={(event) =>
+                    setPreparationLevel(event.target.value)
+                  }
                 >
                   {PREPARATION_LEVELS.map((level) => (
                     <option value={level} key={level}>
@@ -382,7 +389,9 @@ export default function AuthSection({
                 <span>Preferred Medium</span>
                 <select
                   value={preferredMedium}
-                  onChange={(event) => setPreferredMedium(event.target.value)}
+                  onChange={(event) =>
+                    setPreferredMedium(event.target.value)
+                  }
                 >
                   {LEARNING_MEDIUMS.map((medium) => (
                     <option value={medium} key={medium}>
@@ -399,7 +408,11 @@ export default function AuthSection({
             </div>
 
             <div className="aspireRegisterModalActions">
-              <button type="submit" className="aspireLoginPrimaryBtn">
+              <button
+                type="button"
+                className="aspireLoginPrimaryBtn"
+                onClick={submitRegister}
+              >
                 Create Account & Send Verification
               </button>
 
@@ -408,10 +421,10 @@ export default function AuthSection({
                 className="aspireLoginGoogleBtn"
                 onClick={closeRegister}
               >
-                Already verified? Login
+                Back to Login
               </button>
             </div>
-          </form>
+          </div>
         </div>
       )}
     </>
