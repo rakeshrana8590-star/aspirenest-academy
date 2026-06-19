@@ -1556,7 +1556,17 @@ const [paymentHistory, setPaymentHistory] = useState([]);
     }
   };
   React.useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser && !currentUser.emailVerified) {
+        await signOut(auth);
+    
+        setUser(null);
+        setIsPremiumUser(false);
+        setAuthLoading(false);
+    
+        return;
+      }
+    
       const verifiedUser =
         currentUser && currentUser.emailVerified ? currentUser : null;
     
@@ -1704,15 +1714,17 @@ const [paymentHistory, setPaymentHistory] = useState([]);
           password
         );
   
-      if (!userCredential.user.emailVerified) {
-        alert(
-          "Please verify your email before login 📩"
-        );
-  
-        await signOut(auth);
-  
-        return;
-      }
+        if (!userCredential.user.emailVerified) {
+          await sendEmailVerification(userCredential.user);
+        
+          await signOut(auth);
+        
+          alert(
+            "Email verification pending 📩 A fresh verification email has been sent. Please verify your Gmail before login."
+          );
+        
+          return;
+        }
   
       navigate("/ctet-tet", { replace: true });
   
