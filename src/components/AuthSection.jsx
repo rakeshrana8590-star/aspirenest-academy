@@ -28,7 +28,7 @@ export default function AuthSection({
   handleForgotPassword,
   handleRegister,
 }) {
-  const [authMode, setAuthMode] = useState("login");
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -37,20 +37,9 @@ export default function AuthSection({
   const [preparationLevel, setPreparationLevel] = useState("Beginner");
   const [preferredMedium, setPreferredMedium] = useState("Bilingual");
 
-  const isRegisterMode = authMode === "register";
-
-  const formTitle = useMemo(
-    () => (isRegisterMode ? "Create Student Account" : "Welcome Back"),
-    [isRegisterMode]
-  );
-
-  const formSubtext = useMemo(
-    () =>
-      isRegisterMode
-        ? "Create your verified AspireNest account with a basic learning profile."
-        : "Sign in to continue your AspireNest learning journey.",
-    [isRegisterMode]
-  );
+  const registerSubtext = useMemo(() => {
+    return "Create your verified AspireNest account with a basic learning profile.";
+  }, []);
 
   const resetRegisterFields = () => {
     setConfirmPassword("");
@@ -61,13 +50,13 @@ export default function AuthSection({
     setPreferredMedium("Bilingual");
   };
 
-  const switchToLogin = () => {
-    setAuthMode("login");
-    resetRegisterFields();
+  const openRegister = () => {
+    setIsRegisterOpen(true);
   };
 
-  const switchToRegister = () => {
-    setAuthMode("register");
+  const closeRegister = () => {
+    setIsRegisterOpen(false);
+    resetRegisterFields();
   };
 
   const submitRegister = () => {
@@ -106,71 +95,156 @@ export default function AuthSection({
   };
 
   return (
-    <section
-      id="login"
-      className={`aspireLoginRoute ${
-        isRegisterMode ? "aspireLoginRegisterRoute" : "aspireLoginLoginRoute"
-      }`}
-    >
-      <div className="aspireLoginStoryPanel">
-        <span className="aspireLoginEyebrow">AspireNest Academy</span>
+    <>
+      <section id="login" className="aspireLoginRoute">
+        <div className="aspireLoginStoryPanel">
+          <span className="aspireLoginEyebrow">AspireNest Academy</span>
 
-        <h1>Secure access for serious learning.</h1>
+          <h1>Secure access for serious learning.</h1>
 
-        <p>
-          Login or create a verified student account to continue CTET/TET
-          preparation with notes, classes, mock tests, roadmaps, and progress
-          tracking in one connected academy system.
-        </p>
+          <p>
+            Login or create a verified student account to continue CTET/TET
+            preparation with notes, classes, mock tests, roadmaps, and progress
+            tracking in one connected academy system.
+          </p>
 
-        <div className="aspireLoginFeatureGrid">
-          <div>📚 Notes & Resources</div>
-          <div>🎯 Mock Test Practice</div>
-          <div>🎥 Video & Live Classes</div>
-          <div>🧭 AspirePath Roadmaps</div>
+          <div className="aspireLoginFeatureGrid">
+            <div>📚 Notes & Resources</div>
+            <div>🎯 Mock Test Practice</div>
+            <div>🎥 Video & Live Classes</div>
+            <div>🧭 AspirePath Roadmaps</div>
+          </div>
+
+          <div className="aspireLoginTrustRow">
+            <span>Email Verification</span>
+            <span>Student Profile</span>
+            <span>CTET/TET Live</span>
+          </div>
         </div>
 
-        <div className="aspireLoginTrustRow">
-          <span>Email Verification</span>
-          <span>Student Profile</span>
-          <span>CTET/TET Live</span>
-        </div>
-      </div>
+        <div className="aspireLoginCardPanel">
+          <div className="aspireLoginBox">
+            <div className="aspireLoginModeTabs">
+              <button type="button" className="active">
+                Login
+              </button>
 
-      <div className="aspireLoginCardPanel">
-        <div
-          className={`aspireLoginBox ${
-            isRegisterMode ? "aspireLoginBoxRegister" : "aspireLoginBoxLogin"
-          }`}
-        >
-          <div className="aspireLoginModeTabs">
+              <button type="button" onClick={openRegister}>
+                Create Account
+              </button>
+            </div>
+
+            <span className="aspireLoginBadge">Student Access</span>
+
+            <h2>Welcome Back</h2>
+
+            <p className="aspireLoginSubtext">
+              Sign in to continue your AspireNest learning journey.
+            </p>
+
+            <label className="aspireLoginField">
+              <span>Email Address</span>
+              <input
+                type="email"
+                placeholder="Enter registered email"
+                value={email}
+                autoComplete="email"
+                onChange={(event) => setEmail(event.target.value)}
+              />
+            </label>
+
+            <label className="aspireLoginField">
+              <span>Password</span>
+
+              <div className="aspireLoginPasswordWrap">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter password"
+                  value={password}
+                  autoComplete="current-password"
+                  onChange={(event) => setPassword(event.target.value)}
+                />
+
+                <button
+                  type="button"
+                  className="aspireLoginPasswordToggle"
+                  onClick={() => setShowPassword((current) => !current)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+            </label>
+
             <button
               type="button"
-              className={!isRegisterMode ? "active" : ""}
-              onClick={switchToLogin}
+              className="aspireLoginPrimaryBtn"
+              onClick={handleLogin}
             >
               Login
             </button>
 
             <button
               type="button"
-              className={isRegisterMode ? "active" : ""}
-              onClick={switchToRegister}
+              className="aspireLoginGoogleBtn"
+              onClick={handleGoogleLogin}
             >
-              Create Account
+              Continue with Google
             </button>
+
+            <div className="aspireLoginSupportRow">
+              <button
+                type="button"
+                className="aspireLoginTextBtn"
+                onClick={handleForgotPassword}
+              >
+                Forgot Password?
+              </button>
+
+              <Link to="/ctet-tet" className="aspireLoginTextLink">
+                Explore CTET/TET
+              </Link>
+            </div>
+
+            <p className="aspireLoginCreateText">
+              New student?{" "}
+              <span onClick={openRegister}>Create Account</span>
+            </p>
           </div>
+        </div>
+      </section>
 
-          <span className="aspireLoginBadge">
-            {isRegisterMode ? "Verified Student Setup" : "Student Access"}
-          </span>
+      {isRegisterOpen && (
+        <div className="aspireRegisterOverlay" onClick={closeRegister}>
+          <div
+            className="aspireRegisterModal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Create Student Account"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="aspireRegisterModalHeader">
+              <div>
+                <span className="aspireLoginBadge">
+                  Verified Student Setup
+                </span>
 
-          <h2>{formTitle}</h2>
+                <h2>Create Student Account</h2>
 
-          <p className="aspireLoginSubtext">{formSubtext}</p>
+                <p>{registerSubtext}</p>
+              </div>
 
-          {isRegisterMode && (
-            <div className="aspireLoginRegisterGrid">
+              <button
+                type="button"
+                className="aspireRegisterCloseBtn"
+                onClick={closeRegister}
+                aria-label="Close registration form"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="aspireRegisterModalGrid">
               <label className="aspireLoginField">
                 <span>Student Full Name</span>
                 <input
@@ -192,174 +266,120 @@ export default function AuthSection({
                   onChange={(event) => setMobileNumber(event.target.value)}
                 />
               </label>
-            </div>
-          )}
 
-          <label className="aspireLoginField">
-            <span>Email Address</span>
-            <input
-              type="email"
-              placeholder="Enter registered email"
-              value={email}
-              autoComplete="email"
-              onChange={(event) => setEmail(event.target.value)}
-            />
-          </label>
-
-          <label className="aspireLoginField">
-            <span>Password</span>
-
-            <div className="aspireLoginPasswordWrap">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter password"
-                value={password}
-                autoComplete={isRegisterMode ? "new-password" : "current-password"}
-                onChange={(event) => setPassword(event.target.value)}
-              />
-
-              <button
-                type="button"
-                className="aspireLoginPasswordToggle"
-                onClick={() => setShowPassword((current) => !current)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
-            </div>
-          </label>
-
-          {isRegisterMode && (
-            <>
               <label className="aspireLoginField">
-                <span>Confirm Password</span>
+                <span>Email Address</span>
+                <input
+                  type="email"
+                  placeholder="Enter registered email"
+                  value={email}
+                  autoComplete="email"
+                  onChange={(event) => setEmail(event.target.value)}
+                />
+              </label>
+
+              <label className="aspireLoginField">
+                <span>Password</span>
 
                 <div className="aspireLoginPasswordWrap">
                   <input
                     type={showPassword ? "text" : "password"}
-                    placeholder="Confirm password"
-                    value={confirmPassword}
+                    placeholder="Enter password"
+                    value={password}
                     autoComplete="new-password"
-                    onChange={(event) => setConfirmPassword(event.target.value)}
+                    onChange={(event) => setPassword(event.target.value)}
                   />
+
+                  <button
+                    type="button"
+                    className="aspireLoginPasswordToggle"
+                    onClick={() => setShowPassword((current) => !current)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
                 </div>
               </label>
 
-              <div className="aspireLoginRegisterGrid">
-                <label className="aspireLoginField">
-                  <span>Target Exam</span>
-                  <select
-                    value={targetExam}
-                    onChange={(event) => setTargetExam(event.target.value)}
-                  >
-                    {TARGET_EXAMS.map((exam) => (
-                      <option value={exam} key={exam}>
-                        {exam}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+              <label className="aspireLoginField">
+                <span>Confirm Password</span>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Confirm password"
+                  value={confirmPassword}
+                  autoComplete="new-password"
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                />
+              </label>
 
-                <label className="aspireLoginField">
-                  <span>Preparation Level</span>
-                  <select
-                    value={preparationLevel}
-                    onChange={(event) => setPreparationLevel(event.target.value)}
-                  >
-                    {PREPARATION_LEVELS.map((level) => (
-                      <option value={level} key={level}>
-                        {level}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+              <label className="aspireLoginField">
+                <span>Target Exam</span>
+                <select
+                  value={targetExam}
+                  onChange={(event) => setTargetExam(event.target.value)}
+                >
+                  {TARGET_EXAMS.map((exam) => (
+                    <option value={exam} key={exam}>
+                      {exam}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-                <label className="aspireLoginField">
-                  <span>Preferred Medium</span>
-                  <select
-                    value={preferredMedium}
-                    onChange={(event) => setPreferredMedium(event.target.value)}
-                  >
-                    {LEARNING_MEDIUMS.map((medium) => (
-                      <option value={medium} key={medium}>
-                        {medium}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
+              <label className="aspireLoginField">
+                <span>Preparation Level</span>
+                <select
+                  value={preparationLevel}
+                  onChange={(event) => setPreparationLevel(event.target.value)}
+                >
+                  {PREPARATION_LEVELS.map((level) => (
+                    <option value={level} key={level}>
+                      {level}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-              <div className="aspireLoginVerificationNote">
-                Verification email will be sent to this Gmail address. Login will
-                stay locked until email is verified.
-              </div>
-            </>
-          )}
+              <label className="aspireLoginField">
+                <span>Preferred Medium</span>
+                <select
+                  value={preferredMedium}
+                  onChange={(event) => setPreferredMedium(event.target.value)}
+                >
+                  {LEARNING_MEDIUMS.map((medium) => (
+                    <option value={medium} key={medium}>
+                      {medium}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
 
-          {!isRegisterMode ? (
-            <button
-              type="button"
-              className="aspireLoginPrimaryBtn"
-              onClick={handleLogin}
-            >
-              Login
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="aspireLoginPrimaryBtn"
-              onClick={submitRegister}
-            >
-              Create Account & Send Verification
-            </button>
-          )}
+            <div className="aspireLoginVerificationNote">
+              Verification email will be sent to this Gmail address. Login will
+              stay locked until email is verified.
+            </div>
 
-          {!isRegisterMode && (
-            <button
-              type="button"
-              className="aspireLoginGoogleBtn"
-              onClick={handleGoogleLogin}
-            >
-              Continue with Google
-            </button>
-          )}
-
-          <div className="aspireLoginSupportRow">
-            {!isRegisterMode ? (
+            <div className="aspireRegisterModalActions">
               <button
                 type="button"
-                className="aspireLoginTextBtn"
-                onClick={handleForgotPassword}
+                className="aspireLoginPrimaryBtn"
+                onClick={submitRegister}
               >
-                Forgot Password?
+                Create Account & Send Verification
               </button>
-            ) : (
+
               <button
                 type="button"
-                className="aspireLoginTextBtn"
-                onClick={switchToLogin}
+                className="aspireLoginGoogleBtn"
+                onClick={closeRegister}
               >
                 Already verified? Login
               </button>
-            )}
-
-            <Link to="/ctet-tet" className="aspireLoginTextLink">
-              Explore CTET/TET
-            </Link>
+            </div>
           </div>
-
-          {!isRegisterMode ? (
-            <p className="aspireLoginCreateText">
-              New student?{" "}
-              <span onClick={switchToRegister}>Create Account</span>
-            </p>
-          ) : (
-            <p className="aspireLoginCreateText">
-              Email verified? <span onClick={switchToLogin}>Go to Login</span>
-            </p>
-          )}
         </div>
-      </div>
-    </section>
+      )}
+    </>
   );
 }

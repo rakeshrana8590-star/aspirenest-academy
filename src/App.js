@@ -1714,7 +1714,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
         return;
       }
   
-      navigate("/academy-overview", { replace: true });
+      navigate("/ctet-tet", { replace: true });
   
     } catch (error) {
       alert(error.message);
@@ -1743,7 +1743,7 @@ setEnquiries([]);
     try {
       await signInWithPopup(auth, provider);
   
-      navigate("/academy-overview", { replace: true });
+      navigate("/ctet-tet", { replace: true });
   
     } catch (error) {
       alert(error.message);
@@ -3795,16 +3795,20 @@ return (
 <Route
   path="/login"
   element={
-    <AuthSection
-      email={email}
-      setEmail={setEmail}
-      password={password}
-      setPassword={setPassword}
-      handleLogin={handleLogin}
-      handleGoogleLogin={handleGoogleLogin}
-      handleForgotPassword={handleForgotPassword}
-      handleRegister={handleRegister}
-    />
+    user ? (
+      <Navigate to="/ctet-tet" replace />
+    ) : (
+      <AuthSection
+        email={email}
+        setEmail={setEmail}
+        password={password}
+        setPassword={setPassword}
+        handleLogin={handleLogin}
+        handleGoogleLogin={handleGoogleLogin}
+        handleForgotPassword={handleForgotPassword}
+        handleRegister={handleRegister}
+      />
+    )
   }
 />
 
