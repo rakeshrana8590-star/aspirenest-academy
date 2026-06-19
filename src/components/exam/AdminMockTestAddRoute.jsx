@@ -504,7 +504,7 @@ export default function AdminMockTestAddRoute({
 
           <AdminMockField label="Publish Status">
             <select
-              value={mockTestForm.status || "published"}
+              value={mockTestForm.status || "draft"}
               onChange={(e) => updateMockForm({ status: e.target.value })}
             >
               <option value="published">Published</option>

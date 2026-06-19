@@ -945,7 +945,7 @@ const handleSaveMockTest = async () => {
     const finalTestType = mockTestForm.testType || "Chapter Test";
     const finalSubject = mockTestForm.subject?.trim();
     const finalChapter = mockTestForm.chapter?.trim();
-    const finalStatus = mockTestForm.status || "published";
+    const finalStatus = mockTestForm.status || "draft";
 
     const finalDuration = Number(mockTestForm.duration);
     const finalMarksPerQuestion = Number(mockTestForm.marksPerQuestion);

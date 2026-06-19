@@ -12,7 +12,7 @@ export const createEmptyMockQuestion = () => ({
     tag: "",
     positiveMarks: "1",
     negativeMarks: "0",
-    questionStatus: "published",
+    questionstatus: "draft",
     saveToQuestionBank: "yes",
   });
   
@@ -139,7 +139,7 @@ export const createEmptyMockQuestion = () => ({
   
     examInstructions: test.examInstructions || "",
   
-    status: test.status || "published",
+    status: test.status || "draft",
   });
   
   export const buildMockTestQuestionsFormFromTest = (test = {}) =>
