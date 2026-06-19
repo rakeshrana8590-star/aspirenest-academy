@@ -1623,34 +1623,69 @@ const [paymentHistory, setPaymentHistory] = useState([]);
       }
     }, 100);
   }, [location.pathname, userPlanType]);
-  const handleRegister = async () => {
+
+  const handleRegister = async (studentProfile = {}) => {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanFullName =
+      studentProfile.fullName?.trim() || cleanEmail.split("@")[0];
+  
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
-        email,
+        cleanEmail,
         password
       );
   
-      await addDoc(collection(db, "students"), {
-        email: email,
+      const baseStudentProfile = {
+        uid: userCredential.user.uid,
+        fullName: cleanFullName,
+        name: cleanFullName,
+        email: cleanEmail,
+        mobileNumber: studentProfile.mobileNumber || "",
+        whatsappNumber: studentProfile.mobileNumber || "",
+        targetExam: studentProfile.targetExam || "CTET Paper I + II",
+        examTrack: "CTET/TET",
+        currentProgram: "CTET/TET",
+        preparationLevel: studentProfile.preparationLevel || "Beginner",
+        preferredMedium: studentProfile.preferredMedium || "Bilingual",
+        role: "student",
         isPremium: false,
+        planType: "FREE",
+        subscriptionType: "FREE",
+        purchasedCourses: [],
+        emailVerified: false,
+        accountStatus: "pendingEmailVerification",
+        profileStatus: "basicProfileCreated",
+        profileCompletion: 55,
+        onboardingStatus: "basicProfilePending",
         createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+  
+      await setDoc(
+        doc(db, "students", userCredential.user.uid),
+        baseStudentProfile
+      );
+  
+      await setDoc(doc(db, "users", userCredential.user.uid), {
+        ...baseStudentProfile,
+        displayName: cleanFullName,
+        paymentStatus: "FREE",
+        premiumStatus: "FREE",
       });
   
       await sendEmailVerification(userCredential.user);
-      await setDoc(doc(db, "users", userCredential.user.uid), {
-        email: email,
-        isPremium: false,
-        subscriptionType: "FREE",
-        purchasedCourses: [],
-        createdAt: new Date(),
-      });
   
-      alert("Account Created Successfully 🚀");
+      await signOut(auth);
+  
+      alert(
+        "Account created ✅ Verification email sent. Please verify your Gmail before login."
+      );
     } catch (error) {
       alert(error.message);
     }
   };
+
   const handleLogin = async () => {
     if (window.self !== window.top) {
       alert(

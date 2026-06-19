@@ -39,15 +39,18 @@ export default function AuthSection({
 
   const isRegisterMode = authMode === "register";
 
-  const formTitle = useMemo(() => {
-    return isRegisterMode ? "Create Student Account" : "Welcome Back";
-  }, [isRegisterMode]);
+  const formTitle = useMemo(
+    () => (isRegisterMode ? "Create Student Account" : "Welcome Back"),
+    [isRegisterMode]
+  );
 
-  const formSubtext = useMemo(() => {
-    return isRegisterMode
-      ? "Create your verified AspireNest account and start with a clear preparation profile."
-      : "Sign in to continue your AspireNest learning journey.";
-  }, [isRegisterMode]);
+  const formSubtext = useMemo(
+    () =>
+      isRegisterMode
+        ? "Create your verified AspireNest account with a basic learning profile."
+        : "Sign in to continue your AspireNest learning journey.",
+    [isRegisterMode]
+  );
 
   const resetRegisterFields = () => {
     setConfirmPassword("");
@@ -103,8 +106,13 @@ export default function AuthSection({
   };
 
   return (
-    <section id="login" className="loginSection loginExperience aspireLoginRoute">
-      <div className="loginStoryPanel aspireLoginStoryPanel">
+    <section
+      id="login"
+      className={`aspireLoginRoute ${
+        isRegisterMode ? "aspireLoginRegisterRoute" : "aspireLoginLoginRoute"
+      }`}
+    >
+      <div className="aspireLoginStoryPanel">
         <span className="aspireLoginEyebrow">AspireNest Academy</span>
 
         <h1>Secure access for serious learning.</h1>
@@ -115,7 +123,7 @@ export default function AuthSection({
           tracking in one connected academy system.
         </p>
 
-        <div className="loginFeatureGrid aspireLoginFeatureGrid">
+        <div className="aspireLoginFeatureGrid">
           <div>📚 Notes & Resources</div>
           <div>🎯 Mock Test Practice</div>
           <div>🎥 Video & Live Classes</div>
@@ -129,8 +137,12 @@ export default function AuthSection({
         </div>
       </div>
 
-      <div className="loginCardPanel aspireLoginCardPanel">
-        <div className="loginBox premiumLoginBox aspireLoginBox">
+      <div className="aspireLoginCardPanel">
+        <div
+          className={`aspireLoginBox ${
+            isRegisterMode ? "aspireLoginBoxRegister" : "aspireLoginBoxLogin"
+          }`}
+        >
           <div className="aspireLoginModeTabs">
             <button
               type="button"
@@ -149,13 +161,13 @@ export default function AuthSection({
             </button>
           </div>
 
-          <span className="loginBadge aspireLoginBadge">
+          <span className="aspireLoginBadge">
             {isRegisterMode ? "Verified Student Setup" : "Student Access"}
           </span>
 
           <h2>{formTitle}</h2>
 
-          <p className="loginSubtext aspireLoginSubtext">{formSubtext}</p>
+          <p className="aspireLoginSubtext">{formSubtext}</p>
 
           {isRegisterMode && (
             <div className="aspireLoginRegisterGrid">
@@ -166,7 +178,7 @@ export default function AuthSection({
                   placeholder="Enter full name"
                   value={fullName}
                   autoComplete="name"
-                  onChange={(e) => setFullName(e.target.value)}
+                  onChange={(event) => setFullName(event.target.value)}
                 />
               </label>
 
@@ -177,7 +189,7 @@ export default function AuthSection({
                   placeholder="Optional mobile number"
                   value={mobileNumber}
                   autoComplete="tel"
-                  onChange={(e) => setMobileNumber(e.target.value)}
+                  onChange={(event) => setMobileNumber(event.target.value)}
                 />
               </label>
             </div>
@@ -190,7 +202,7 @@ export default function AuthSection({
               placeholder="Enter registered email"
               value={email}
               autoComplete="email"
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(event) => setEmail(event.target.value)}
             />
           </label>
 
@@ -203,7 +215,7 @@ export default function AuthSection({
                 placeholder="Enter password"
                 value={password}
                 autoComplete={isRegisterMode ? "new-password" : "current-password"}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(event) => setPassword(event.target.value)}
               />
 
               <button
@@ -228,7 +240,7 @@ export default function AuthSection({
                     placeholder="Confirm password"
                     value={confirmPassword}
                     autoComplete="new-password"
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={(event) => setConfirmPassword(event.target.value)}
                   />
                 </div>
               </label>
@@ -238,7 +250,7 @@ export default function AuthSection({
                   <span>Target Exam</span>
                   <select
                     value={targetExam}
-                    onChange={(e) => setTargetExam(e.target.value)}
+                    onChange={(event) => setTargetExam(event.target.value)}
                   >
                     {TARGET_EXAMS.map((exam) => (
                       <option value={exam} key={exam}>
@@ -252,7 +264,7 @@ export default function AuthSection({
                   <span>Preparation Level</span>
                   <select
                     value={preparationLevel}
-                    onChange={(e) => setPreparationLevel(e.target.value)}
+                    onChange={(event) => setPreparationLevel(event.target.value)}
                   >
                     {PREPARATION_LEVELS.map((level) => (
                       <option value={level} key={level}>
@@ -266,7 +278,7 @@ export default function AuthSection({
                   <span>Preferred Medium</span>
                   <select
                     value={preferredMedium}
-                    onChange={(e) => setPreferredMedium(e.target.value)}
+                    onChange={(event) => setPreferredMedium(event.target.value)}
                   >
                     {LEARNING_MEDIUMS.map((medium) => (
                       <option value={medium} key={medium}>
@@ -305,7 +317,7 @@ export default function AuthSection({
           {!isRegisterMode && (
             <button
               type="button"
-              className="googleBtn aspireLoginGoogleBtn"
+              className="aspireLoginGoogleBtn"
               onClick={handleGoogleLogin}
             >
               Continue with Google
@@ -316,7 +328,7 @@ export default function AuthSection({
             {!isRegisterMode ? (
               <button
                 type="button"
-                className="forgotPassword aspireLoginTextBtn"
+                className="aspireLoginTextBtn"
                 onClick={handleForgotPassword}
               >
                 Forgot Password?
@@ -324,7 +336,7 @@ export default function AuthSection({
             ) : (
               <button
                 type="button"
-                className="forgotPassword aspireLoginTextBtn"
+                className="aspireLoginTextBtn"
                 onClick={switchToLogin}
               >
                 Already verified? Login
@@ -337,12 +349,12 @@ export default function AuthSection({
           </div>
 
           {!isRegisterMode ? (
-            <p className="createAccountText aspireLoginCreateText">
+            <p className="aspireLoginCreateText">
               New student?{" "}
               <span onClick={switchToRegister}>Create Account</span>
             </p>
           ) : (
-            <p className="createAccountText aspireLoginCreateText">
+            <p className="aspireLoginCreateText">
               Email verified? <span onClick={switchToLogin}>Go to Login</span>
             </p>
           )}
