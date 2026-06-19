@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import RoadmapDuplicatePanel from "./import/RoadmapDuplicatePanel.jsx";
+import RoadmapImportValidationPanel from "./import/RoadmapImportValidationPanel.jsx";
 
 import {
     archiveStudyRoadmap,
@@ -446,78 +447,7 @@ const saveBlockedByDuplicate = hasExactDuplicate || needsDuplicateConfirm;
         </div>
       </section>
 
-      {validation ? (
-        <section className="roadmapStudioSection">
-          <RoadmapSectionHeader
-            mode="admin"
-            kicker="Validation"
-            title={validation.isValid ? "Ready to save" : "Fix required issues"}
-            text="Roadmap Studio checks the file before Firestore save so broken student timelines are not published."
-          />
-
-          <div className="roadmapStudioValidationGrid">
-            <RoadmapStudioMessage type={validation.isValid ? "success" : "error"}>
-              <strong>Status</strong>
-              <p className="roadmapStudioCardText">
-                {validation.isValid
-                  ? "No blocking errors found."
-                  : "Blocking errors found. Please fix the XLSX and import again."}
-              </p>
-            </RoadmapStudioMessage>
-
-            <RoadmapStudioMessage type="warning">
-              <strong>Warnings</strong>
-              <p className="roadmapStudioCardText">
-                {validation.warnings?.length || 0} warning(s)
-              </p>
-            </RoadmapStudioMessage>
-
-            <RoadmapStudioMessage type="success">
-              <strong>Summary</strong>
-              <p className="roadmapStudioCardText">
-                {validation.summary?.totalDays || 0} days •{" "}
-                {validation.summary?.totalTasks || 0} tasks
-              </p>
-            </RoadmapStudioMessage>
-          </div>
-
-          {validation.errors?.length ? (
-            <div className="roadmapStudioSection">
-              <RoadmapSectionHeader
-                mode="admin"
-                kicker="Errors"
-                title="Blocking issues"
-              />
-
-              <div className="roadmapStudioImportPanel">
-                {validation.errors.map((error, index) => (
-                  <p className="roadmapStudioCardText" key={index}>
-                    ❌ {error}
-                  </p>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          {validation.warnings?.length ? (
-            <div className="roadmapStudioSection">
-              <RoadmapSectionHeader
-                mode="admin"
-                kicker="Warnings"
-                title="Review before publishing"
-              />
-
-              <div className="roadmapStudioImportPanel">
-                {validation.warnings.map((warning, index) => (
-                  <p className="roadmapStudioCardText" key={index}>
-                    ⚠️ {warning}
-                  </p>
-                ))}
-              </div>
-            </div>
-          ) : null}
-        </section>
-      ) : null}
+      <RoadmapImportValidationPanel validation={validation} />
 
 <RoadmapDuplicatePanel
         duplicateChecking={duplicateChecking}

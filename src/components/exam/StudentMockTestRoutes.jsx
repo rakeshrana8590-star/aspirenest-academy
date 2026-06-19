@@ -69,49 +69,132 @@ const buildChapterList = (tests = []) =>
     (chapter) => normalizeText(chapter.id)
   );
 
-function MockStudentHero({
-  badge,
-  title,
-  text,
-  stats = [],
-  backLabel,
-  onBack,
-}) {
-  return (
-    <div className="mockStudentHero">
-      <div className="mockStudentHeroPanel">
-        <div className="mockStudentHeroActions">
-          {backLabel && (
-            <button
-              type="button"
-              className="mockStudentBackBtn"
-              onClick={onBack}
-            >
-              ← {backLabel}
-            </button>
-          )}
-
-          <span className="mockStudentBadge">{badge}</span>
-        </div>
-
-        <h1>{title}</h1>
-
-        <p>{text}</p>
-
-        {stats.length > 0 && (
-          <div className="mockStudentKpiGrid">
-            {stats.map((stat) => (
-              <div className="mockStudentKpi" key={stat.label}>
-                <span>{stat.label}</span>
-                <strong>{stat.value}</strong>
-              </div>
-            ))}
+  function MockStudentHero({
+    badge,
+    title,
+    text,
+    stats = [],
+    backLabel,
+    onBack,
+  }) {
+    const primaryStat = stats[0] || {
+      label: "Published Tests",
+      value: "0",
+    };
+  
+    const secondaryStat = stats[1] || {
+      label: "Plans",
+      value: "0",
+    };
+  
+    const tertiaryStat = stats[2] || {
+      label: "Mode",
+      value: "Premium",
+    };
+  
+    return (
+      <div className="mockStudentHero">
+        <div className="mockStudentCommandHero">
+          <div className="mockStudentHeroCopy">
+            <div className="mockStudentHeroActions">
+              {backLabel && (
+                <button
+                  type="button"
+                  className="mockStudentBackBtn"
+                  onClick={onBack}
+                >
+                  ← {backLabel}
+                </button>
+              )}
+  
+              <span className="mockStudentBadge">{badge}</span>
+            </div>
+  
+            <h1>{title}</h1>
+  
+            <p>{text}</p>
+  
+            <div className="mockStudentHeroButtons">
+              <button
+                type="button"
+                className="mockStudentPrimaryBtn"
+                onClick={() =>
+                  document
+                    .querySelector(".mockStudentShelf")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" })
+                }
+              >
+                Start Practice →
+              </button>
+  
+              <button
+                type="button"
+                className="mockStudentGhostBtn"
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              >
+                Practice Center
+              </button>
+            </div>
+  
+            <div className="mockStudentTrustRow">
+              <span>✓ Plan protected</span>
+              <span>✓ Subject-wise</span>
+              <span>✓ Chapter-wise</span>
+              <span>✓ Result tracking</span>
+            </div>
           </div>
-        )}
+  
+          <div className="mockStudentSystemCard">
+            <div className="mockStudentSystemTop">
+              <span>NOW PRACTICING</span>
+              <strong>One App • One System</strong>
+            </div>
+  
+            <div className="mockStudentFeatureCard">
+              <span>📝</span>
+  
+              <div>
+                <strong>{title}</strong>
+                <p>{badge}</p>
+              </div>
+            </div>
+  
+            <div className="mockStudentSystemGrid">
+              <div>
+                <strong>{primaryStat.value}</strong>
+                <span>{primaryStat.label}</span>
+              </div>
+  
+              <div>
+                <strong>{secondaryStat.value}</strong>
+                <span>{secondaryStat.label}</span>
+              </div>
+  
+              <div>
+                <strong>{tertiaryStat.value}</strong>
+                <span>{tertiaryStat.label}</span>
+              </div>
+  
+              <div>
+                <strong>Live</strong>
+                <span>Exam engine</span>
+              </div>
+            </div>
+  
+            <div className="mockStudentSystemFlow">
+              <span>Plan</span>
+              <i />
+              <span>Subject</span>
+              <i />
+              <span>Chapter</span>
+              <i />
+              <span>Attempt</span>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
 function MockEmptyState({ title, text }) {
   return (
