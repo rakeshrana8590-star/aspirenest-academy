@@ -1,5 +1,8 @@
 import React from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+
+import RoadmapDuplicatePanel from "./import/RoadmapDuplicatePanel.jsx";
+
 import {
     archiveStudyRoadmap,
     buildRoadmapProgressAnalytics,
@@ -516,98 +519,21 @@ const saveBlockedByDuplicate = hasExactDuplicate || needsDuplicateConfirm;
         </section>
       ) : null}
 
-{duplicateChecking ? (
-        <section className="roadmapStudioSection">
-          <RoadmapSectionHeader
-            mode="admin"
-            kicker="Duplicate Safety"
-            title="Checking existing roadmaps..."
-            text="Roadmap Studio is comparing this import with saved roadmaps before allowing draft save."
-          />
-        </section>
-      ) : duplicateAudit && (hasExactDuplicate || hasPotentialDuplicate) ? (
-        <section className="roadmapStudioSection">
-          <RoadmapSectionHeader
-            mode="admin"
-            kicker="Duplicate Safety"
-            title={
-              hasExactDuplicate
-                ? "Duplicate roadmap blocked"
-                : "Possible duplicate roadmap found"
-            }
-            text={
-              hasExactDuplicate
-                ? "A roadmap with the same title, exam type, start date, and end date already exists. This import is blocked."
-                : "A roadmap with the same title, exam type, and start date already exists. Confirm only if this should be saved as a separate draft."
-            }
-          />
-
-          <div className="roadmapStudioValidationGrid">
-            {hasExactDuplicate ? (
-              <RoadmapStudioMessage type="error">
-                <strong>Exact duplicate</strong>
-                <p className="roadmapStudioCardText">
-                  Save as Draft is blocked for exact duplicates.
-                </p>
-              </RoadmapStudioMessage>
-            ) : null}
-
-            {hasPotentialDuplicate ? (
-              <RoadmapStudioMessage type="warning">
-                <strong>Potential duplicate</strong>
-                <p className="roadmapStudioCardText">
-                  Same title, exam type, and start date found. End date may be
-                  different.
-                </p>
-              </RoadmapStudioMessage>
-            ) : null}
-
-            <RoadmapStudioMessage type={allowDuplicateSave ? "success" : "warning"}>
-              <strong>Save permission</strong>
-              <p className="roadmapStudioCardText">
-                {hasExactDuplicate
-                  ? "Blocked"
-                  : allowDuplicateSave
-                  ? "Confirmed for new draft save"
-                  : "Confirmation required"}
-              </p>
-            </RoadmapStudioMessage>
-          </div>
-
-          <div className="roadmapStudioImportPanel">
-            {[...exactDuplicateRoadmaps, ...potentialDuplicateRoadmaps].map(
-              (roadmap) => (
-                <p className="roadmapStudioCardText" key={roadmap.id}>
-                  ⚠️ {roadmap.title || "Untitled Roadmap"} •{" "}
-                  {roadmap.examType || "Exam"} • {formatDate(roadmap.startDate)} →{" "}
-                  {formatDate(roadmap.endDate)} • {roadmap.status || "draft"}
-                </p>
-              )
-            )}
-
-            {hasPotentialDuplicate && !hasExactDuplicate ? (
-              <div className="roadmapStudioHeroActions">
-                {allowDuplicateSave ? (
-                  <RoadmapBadge mode="admin">Duplicate save confirmed</RoadmapBadge>
-                ) : (
-                  <button
-                    className="roadmapStudioSecondaryBtn"
-                    type="button"
-                    onClick={() => {
-                      setAllowDuplicateSave(true);
-                      setSaveMessage(
-                        "Duplicate warning confirmed. You can now save this as a new draft."
-                      );
-                    }}
-                  >
-                    I understand, save as new draft
-                  </button>
-                )}
-              </div>
-            ) : null}
-          </div>
-        </section>
-      ) : null}
+<RoadmapDuplicatePanel
+        duplicateChecking={duplicateChecking}
+        duplicateAudit={duplicateAudit}
+        hasExactDuplicate={hasExactDuplicate}
+        hasPotentialDuplicate={hasPotentialDuplicate}
+        exactDuplicateRoadmaps={exactDuplicateRoadmaps}
+        potentialDuplicateRoadmaps={potentialDuplicateRoadmaps}
+        allowDuplicateSave={allowDuplicateSave}
+        onConfirmDuplicateSave={() => {
+          setAllowDuplicateSave(true);
+          setSaveMessage(
+            "Duplicate warning confirmed. You can now save this as a new draft."
+          );
+        }}
+      />
 
       {importResult?.roadmap ? (
         <section className="roadmapStudioSection">
