@@ -285,27 +285,33 @@ export default function MockTestActionMenu({
         <div className="mockPortalMenuDivider" />
 
         <button
-          className="dangerMenuButton"
-          onClick={async () => {
-            if (!test?.id) return;
+  className="dangerMenuButton"
+  onClick={async () => {
+    if (!test?.id) return;
 
-            const confirmDelete = window.confirm(
-              `Delete "${test.title}" permanently?\n\nThis action cannot be undone.`
-            );
+    const confirmText = window.prompt(
+      `Danger Zone: Delete "${test.title || "this mock test"}" permanently?\n\n` +
+        `This action cannot be undone.\n\n` +
+        `Type DELETE to confirm.`
+    );
 
-            if (!confirmDelete) return;
+    if (confirmText !== "DELETE") {
+      alert("Delete cancelled. No mock test was deleted.");
+      onClose();
+      return;
+    }
 
-            await deleteMockTest({
-              test,
-              reloadContent,
-            });
+    await deleteMockTest({
+      test,
+      reloadContent,
+    });
 
-            onClose();
-            alert("Mock test deleted permanently ✅");
-          }}
-        >
-          🗑 Delete
-        </button>
+    onClose();
+    alert("Mock test deleted permanently ✅");
+  }}
+>
+  🗑 Delete
+</button>
       </div>
     </div>,
     document.body

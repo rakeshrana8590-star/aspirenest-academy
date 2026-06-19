@@ -294,30 +294,39 @@ export default function AdminMockTestManageRoute({
       alert("Please select at least one mock test");
       return;
     }
-
-    const confirmDelete = window.confirm(
-      `Delete ${safeSelectedIds.length} selected mock test(s) permanently?\n\nThis action cannot be undone.`
+  
+    const selectedTitles = safeSelectedIds
+      .map((testId) => mockTests.find((item) => item.id === testId)?.title)
+      .filter(Boolean)
+      .slice(0, 5);
+  
+    const confirmText = window.prompt(
+      `Danger Zone: Delete ${safeSelectedIds.length} selected mock test(s) permanently?\n\n` +
+        `This action cannot be undone.\n\n` +
+        `Selected sample:\n${selectedTitles.join("\n") || "Selected tests"}\n\n` +
+        `Type DELETE to confirm.`
     );
-
-    if (!confirmDelete) {
+  
+    if (confirmText !== "DELETE") {
+      alert("Bulk delete cancelled. No mock tests were deleted.");
       return;
     }
-
+  
     for (const testId of safeSelectedIds) {
       const selectedTest = mockTests.find((item) => item.id === testId);
-
+  
       if (!selectedTest) continue;
-
+  
       await deleteMockTest({
         test: selectedTest,
         reloadContent: async () => {},
       });
     }
-
+  
     await loadContentItemsFromFirestore();
-
+  
     setSelectedMockTestIds([]);
-
+  
     alert("Selected mock tests deleted permanently ✅");
   };
 
