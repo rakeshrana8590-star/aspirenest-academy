@@ -20,6 +20,13 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
+
+import {
+  getVerifiedAuthSession,
+  resendVerificationEmailAndLogout,
+  syncVerifiedStudentAccountStatus,
+} from "./utils/authAccountService";
+
 import {
   LineChart,
   Line,
@@ -56,6 +63,8 @@ import {
 } from "firebase/storage";
 import React, { useState, useEffect } from 'react';
 
+
+
 import {
   Routes,
   Route,
@@ -66,6 +75,8 @@ import {
 } from "react-router-dom";
 import AspireNestLogo from "./components/AspireNestLogo.jsx";
 import AcademyOverviewRoute from "./components/public/AcademyOverviewRoute.jsx";
+import AuthRoute from "./components/public/AuthRoute";
+
 
 import AppDashboard from "./components/AppDashboard.jsx";
 import {
@@ -1557,22 +1568,15 @@ const [paymentHistory, setPaymentHistory] = useState([]);
   };
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser && !currentUser.emailVerified) {
-        await signOut(auth);
+      const verifiedUser = await getVerifiedAuthSession(auth, currentUser);
     
-        setUser(null);
-        setIsPremiumUser(false);
-        setAuthLoading(false);
-    
-        return;
-      }
-    
-      const verifiedUser =
-        currentUser && currentUser.emailVerified ? currentUser : null;
-    
-      setUser(verifiedUser);
-    
-      if (!verifiedUser) {
+        setUser(verifiedUser);
+
+        if (verifiedUser && !isAdmin(verifiedUser)) {
+          syncVerifiedStudentAccountStatus(db, verifiedUser);
+        }
+        
+        if (!verifiedUser) {
         setIsPremiumUser(false);
         setAuthLoading(false);
         return;
@@ -1715,13 +1719,12 @@ const [paymentHistory, setPaymentHistory] = useState([]);
         );
   
         if (!userCredential.user.emailVerified) {
-          await sendEmailVerification(userCredential.user);
-        
-          await signOut(auth);
-        
-          alert(
-            "Email verification pending 📩 A fresh verification email has been sent. Please verify your Gmail before login."
+          const verificationResult = await resendVerificationEmailAndLogout(
+            auth,
+            userCredential.user
           );
+        
+          alert(verificationResult.message);
         
           return;
         }
@@ -3807,20 +3810,17 @@ return (
 <Route
   path="/login"
   element={
-    user ? (
-      <Navigate to="/ctet-tet" replace />
-    ) : (
-      <AuthSection
-        email={email}
-        setEmail={setEmail}
-        password={password}
-        setPassword={setPassword}
-        handleLogin={handleLogin}
-        handleGoogleLogin={handleGoogleLogin}
-        handleForgotPassword={handleForgotPassword}
-        handleRegister={handleRegister}
-      />
-    )
+    <AuthRoute
+      user={user}
+      email={email}
+      setEmail={setEmail}
+      password={password}
+      setPassword={setPassword}
+      handleLogin={handleLogin}
+      handleGoogleLogin={handleGoogleLogin}
+      handleForgotPassword={handleForgotPassword}
+      handleRegister={handleRegister}
+    />
   }
 />
 

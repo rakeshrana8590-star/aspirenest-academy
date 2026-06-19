@@ -569,3 +569,62 @@
     text-align: center !important;
   }
 }
+
+/* ===============================
+   PHASE 40T — AUTH PASSWORD STABILITY LOCK
+   Keep Show/Hide, remove typing/focus pulse.
+================================ */
+
+.aspireLoginRoute .aspireLoginField input,
+.aspireLoginRoute .aspireLoginField select {
+  transform: none !important;
+  transition:
+    border-color 0.12s ease,
+    box-shadow 0.12s ease,
+    background-color 0.12s ease !important;
+}
+
+.aspireLoginRoute .aspireLoginField input:hover,
+.aspireLoginRoute .aspireLoginField input:focus,
+.aspireLoginRoute .aspireLoginField input:active,
+.aspireLoginRoute .aspireLoginField select:hover,
+.aspireLoginRoute .aspireLoginField select:focus,
+.aspireLoginRoute .aspireLoginField select:active {
+  transform: none !important;
+}
+
+.aspireLoginRoute .aspireLoginField input:focus,
+.aspireLoginRoute .aspireLoginField select:focus {
+  border-color: rgba(249, 115, 22, 0.34) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 10px 22px rgba(15, 23, 42, 0.1) !important;
+}
+
+.aspireLoginRoute .aspireLoginPasswordWrap input,
+.aspireLoginRoute .aspireLoginPasswordWrap input:hover,
+.aspireLoginRoute .aspireLoginPasswordWrap input:focus,
+.aspireLoginRoute .aspireLoginPasswordWrap input:active {
+  transform: none !important;
+}
+
+.aspireLoginRoute .aspireLoginPasswordToggle {
+  transform: translateY(-50%) !important;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease,
+    box-shadow 0.12s ease !important;
+}
+
+.aspireLoginRoute .aspireLoginPasswordToggle:hover,
+.aspireLoginRoute .aspireLoginPasswordToggle:focus,
+.aspireLoginRoute .aspireLoginPasswordToggle:active {
+  transform: translateY(-50%) !important;
+}
+
+.aspireLoginRoute .aspireLoginBox,
+.aspireLoginRoute .aspireLoginBox:hover,
+.aspireLoginRoute .aspireLoginStoryPanel,
+.aspireLoginRoute .aspireLoginStoryPanel:hover {
+  transform: none !important;
+}

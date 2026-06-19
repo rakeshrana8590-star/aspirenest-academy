@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 const TARGET_EXAMS = [
@@ -18,6 +18,55 @@ const PREPARATION_LEVELS = [
 
 const LEARNING_MEDIUMS = ["Hindi", "English", "Gujarati", "Bilingual"];
 
+function PasswordField({
+  label,
+  name,
+  value,
+  onChange,
+  placeholder,
+  autoComplete,
+  isVisible,
+  onToggleVisible,
+}) {
+  const inputRef = useRef(null);
+
+  const handleToggle = () => {
+    onToggleVisible();
+
+    window.requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
+  };
+
+  return (
+    <label className="aspireLoginField">
+      <span>{label}</span>
+
+      <div className="aspireLoginPasswordWrap">
+        <input
+          ref={inputRef}
+          name={name}
+          type={isVisible ? "text" : "password"}
+          placeholder={placeholder}
+          value={value}
+          autoComplete={autoComplete}
+          onChange={(event) => onChange(event.target.value)}
+        />
+
+        <button
+          type="button"
+          className="aspireLoginPasswordToggle"
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={handleToggle}
+          aria-label={isVisible ? "Hide password" : "Show password"}
+        >
+          {isVisible ? "Hide" : "Show"}
+        </button>
+      </div>
+    </label>
+  );
+}
+
 export default function AuthSection({
   email,
   setEmail,
@@ -29,7 +78,8 @@ export default function AuthSection({
   handleRegister,
 }) {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
@@ -48,6 +98,7 @@ export default function AuthSection({
     setTargetExam("CTET Paper I + II");
     setPreparationLevel("Beginner");
     setPreferredMedium("Bilingual");
+    setShowRegisterPassword(false);
   };
 
   const openRegister = () => {
@@ -59,7 +110,14 @@ export default function AuthSection({
     resetRegisterFields();
   };
 
-  const submitRegister = () => {
+  const submitLogin = (event) => {
+    event.preventDefault();
+    handleLogin();
+  };
+
+  const submitRegister = (event) => {
+    event.preventDefault();
+
     if (!fullName.trim()) {
       alert("Please enter student full name.");
       return;
@@ -123,7 +181,7 @@ export default function AuthSection({
         </div>
 
         <div className="aspireLoginCardPanel">
-          <div className="aspireLoginBox">
+          <form className="aspireLoginBox" onSubmit={submitLogin}>
             <div className="aspireLoginModeTabs">
               <button type="button" className="active">
                 Login
@@ -145,42 +203,29 @@ export default function AuthSection({
             <label className="aspireLoginField">
               <span>Email Address</span>
               <input
+                name="username"
                 type="email"
                 placeholder="Enter registered email"
                 value={email}
-                autoComplete="email"
+                autoComplete="username"
                 onChange={(event) => setEmail(event.target.value)}
               />
             </label>
 
-            <label className="aspireLoginField">
-              <span>Password</span>
+            <PasswordField
+              label="Password"
+              name="password"
+              value={password}
+              onChange={setPassword}
+              placeholder="Enter password"
+              autoComplete="current-password"
+              isVisible={showLoginPassword}
+              onToggleVisible={() =>
+                setShowLoginPassword((current) => !current)
+              }
+            />
 
-              <div className="aspireLoginPasswordWrap">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter password"
-                  value={password}
-                  autoComplete="current-password"
-                  onChange={(event) => setPassword(event.target.value)}
-                />
-
-                <button
-                  type="button"
-                  className="aspireLoginPasswordToggle"
-                  onClick={() => setShowPassword((current) => !current)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? "Hide" : "Show"}
-                </button>
-              </div>
-            </label>
-
-            <button
-              type="button"
-              className="aspireLoginPrimaryBtn"
-              onClick={handleLogin}
-            >
+            <button type="submit" className="aspireLoginPrimaryBtn">
               Login
             </button>
 
@@ -207,21 +252,21 @@ export default function AuthSection({
             </div>
 
             <p className="aspireLoginCreateText">
-              New student?{" "}
-              <span onClick={openRegister}>Create Account</span>
+              New student? <span onClick={openRegister}>Create Account</span>
             </p>
-          </div>
+          </form>
         </div>
       </section>
 
       {isRegisterOpen && (
         <div className="aspireRegisterOverlay" onClick={closeRegister}>
-          <div
+          <form
             className="aspireRegisterModal"
             role="dialog"
             aria-modal="true"
             aria-label="Create Student Account"
             onClick={(event) => event.stopPropagation()}
+            onSubmit={submitRegister}
           >
             <div className="aspireRegisterModalHeader">
               <div>
@@ -270,6 +315,7 @@ export default function AuthSection({
               <label className="aspireLoginField">
                 <span>Email Address</span>
                 <input
+                  name="email"
                   type="email"
                   placeholder="Enter registered email"
                   value={email}
@@ -278,39 +324,31 @@ export default function AuthSection({
                 />
               </label>
 
-              <label className="aspireLoginField">
-                <span>Password</span>
+              <PasswordField
+                label="Password"
+                name="newPassword"
+                value={password}
+                onChange={setPassword}
+                placeholder="Enter password"
+                autoComplete="new-password"
+                isVisible={showRegisterPassword}
+                onToggleVisible={() =>
+                  setShowRegisterPassword((current) => !current)
+                }
+              />
 
-                <div className="aspireLoginPasswordWrap">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter password"
-                    value={password}
-                    autoComplete="new-password"
-                    onChange={(event) => setPassword(event.target.value)}
-                  />
-
-                  <button
-                    type="button"
-                    className="aspireLoginPasswordToggle"
-                    onClick={() => setShowPassword((current) => !current)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                  >
-                    {showPassword ? "Hide" : "Show"}
-                  </button>
-                </div>
-              </label>
-
-              <label className="aspireLoginField">
-                <span>Confirm Password</span>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Confirm password"
-                  value={confirmPassword}
-                  autoComplete="new-password"
-                  onChange={(event) => setConfirmPassword(event.target.value)}
-                />
-              </label>
+              <PasswordField
+                label="Confirm Password"
+                name="confirmPassword"
+                value={confirmPassword}
+                onChange={setConfirmPassword}
+                placeholder="Confirm password"
+                autoComplete="new-password"
+                isVisible={showRegisterPassword}
+                onToggleVisible={() =>
+                  setShowRegisterPassword((current) => !current)
+                }
+              />
 
               <label className="aspireLoginField">
                 <span>Target Exam</span>
@@ -361,11 +399,7 @@ export default function AuthSection({
             </div>
 
             <div className="aspireRegisterModalActions">
-              <button
-                type="button"
-                className="aspireLoginPrimaryBtn"
-                onClick={submitRegister}
-              >
+              <button type="submit" className="aspireLoginPrimaryBtn">
                 Create Account & Send Verification
               </button>
 
@@ -377,7 +411,7 @@ export default function AuthSection({
                 Already verified? Login
               </button>
             </div>
-          </div>
+          </form>
         </div>
       )}
     </>
