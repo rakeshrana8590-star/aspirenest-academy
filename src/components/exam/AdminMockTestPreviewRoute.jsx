@@ -29,11 +29,18 @@ const getQuestionStatusLabel = (status) => {
   if (status === "published") return "Published";
   if (status === "draft") return "Draft";
   if (status === "unpublished") return "Unpublished";
-  return status || "Published";
+  return status || "Draft";
+};
+
+const getStatusClass = (status) => {
+  if (status === "published") return "isPublished";
+  if (status === "unpublished") return "isUnpublished";
+  if (status === "archived") return "isArchived";
+  return "isDraft";
 };
 
 export default function AdminMockTestPreviewRoute({
-  universalContent,
+  universalContent = [],
   setEditingMockTestId,
   setMockTestForm,
   setMockTestQuestionsForm,
@@ -41,18 +48,61 @@ export default function AdminMockTestPreviewRoute({
 }) {
   const { testId } = useParams();
 
-  const previewTest = universalContent.find(
+  const safeContent = Array.isArray(universalContent) ? universalContent : [];
+
+  const previewTest = safeContent.find(
     (item) => item.id === testId && item.section === "mockTest"
   );
 
   if (!previewTest) {
     return (
       <section className="coursePages adminMockPreviewPage">
-        <div className="adminMockPreviewHero">
-          <div>
+        <div className="adminMockPreviewCommandHero">
+          <div className="adminMockPreviewHeroCopy">
             <span className="badge">MOCK TEST PREVIEW</span>
+
             <h1>Test Not Found</h1>
+
             <p>This mock test may have been deleted or not loaded yet.</p>
+
+            <div className="adminMockPreviewHeroActions">
+              <button
+                type="button"
+                className="adminMockPreviewGhostBtn"
+                onClick={() => navigate("/admin/content/mock-tests/manage")}
+              >
+                ← Back to Manage Mock Tests
+              </button>
+            </div>
+          </div>
+
+          <div className="adminMockPreviewSystemCard">
+            <div className="adminMockPreviewSystemTop">
+              <span>PREVIEW STATUS</span>
+              <strong>Missing</strong>
+            </div>
+
+            <div className="adminMockPreviewSystemGrid">
+              <div>
+                <strong>0</strong>
+                <span>Questions</span>
+              </div>
+
+              <div>
+                <strong>0</strong>
+                <span>Total marks</span>
+              </div>
+
+              <div>
+                <strong>0</strong>
+                <span>Duration</span>
+              </div>
+
+              <div>
+                <strong>Safe</strong>
+                <span>No test loaded</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -61,6 +111,7 @@ export default function AdminMockTestPreviewRoute({
           <p>Go back to Manage Mock Tests and open a valid test preview.</p>
 
           <button
+            type="button"
             className="adminMockPreviewGhostBtn"
             onClick={() => navigate("/admin/content/mock-tests/manage")}
           >
@@ -105,7 +156,7 @@ export default function AdminMockTestPreviewRoute({
             tag: "",
             positiveMarks: "1",
             negativeMarks: "0",
-            questionStatus: "published",
+            questionStatus: "draft",
             saveToQuestionBank: "yes",
           },
         ];
@@ -144,32 +195,98 @@ export default function AdminMockTestPreviewRoute({
     navigate("/admin/content/mock-tests/add");
   };
 
+  const testStatus = previewTest.status || "draft";
+
   return (
     <section className="coursePages adminMockPreviewPage">
-      <div className="adminMockPreviewHero">
-        <div>
+      <div className="adminMockPreviewCommandHero">
+        <div className="adminMockPreviewHeroCopy">
           <span className="badge">MOCK TEST PREVIEW</span>
 
-          <h1>{previewTest.title}</h1>
+          <h1>{previewTest.title || "Untitled Mock Test"}</h1>
 
           <p>
-            {previewTest.planType} • {previewTest.subject} •{" "}
-            {previewTest.chapter} • {previewTest.testType} • {durationMinutes}{" "}
-            min
+            Preview the complete exam configuration, student-visible question
+            paper, correct answers, marks, security readiness, and question bank
+            mapping before publishing.
           </p>
+
+          <div className="adminMockPreviewHeroActions">
+            <button
+              type="button"
+              className="adminMockPreviewPrimaryBtn"
+              onClick={handleEditTest}
+            >
+              Edit Test
+            </button>
+
+            <button
+              type="button"
+              className="adminMockPreviewGhostBtn"
+              onClick={() => navigate("/admin/content/mock-tests/manage")}
+            >
+              ← Back to Manage
+            </button>
+          </div>
         </div>
 
-        <div className="adminMockPreviewHeroActions">
-          <button className="adminMockPreviewPrimaryBtn" onClick={handleEditTest}>
-            Edit Test
-          </button>
+        <div className="adminMockPreviewSystemCard">
+          <div className="adminMockPreviewSystemTop">
+            <span>PREVIEW STATUS</span>
+            <strong className={getStatusClass(testStatus)}>{testStatus}</strong>
+          </div>
 
-          <button
-            className="adminMockPreviewGhostBtn"
-            onClick={() => navigate("/admin/content/mock-tests/manage")}
-          >
-            ← Back to Manage
-          </button>
+          <div className="adminMockPreviewSystemGrid">
+            <div>
+              <strong>{totalQuestions}</strong>
+              <span>Total questions</span>
+            </div>
+
+            <div>
+              <strong>{totalMarks}</strong>
+              <span>Total marks</span>
+            </div>
+
+            <div>
+              <strong>{durationMinutes}</strong>
+              <span>Minutes</span>
+            </div>
+
+            <div>
+              <strong>{missingAnswerCount}</strong>
+              <span>Missing answers</span>
+            </div>
+          </div>
+
+          <div className="adminMockPreviewFlow">
+            <span>Config</span>
+            <i />
+            <span>Questions</span>
+            <i />
+            <span>Publish</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="adminMockPreviewMetaHero">
+        <div>
+          <span>Plan Shelf</span>
+          <strong>{previewTest.planType || "FREE"}</strong>
+        </div>
+
+        <div>
+          <span>Subject</span>
+          <strong>{previewTest.subject || "No Subject"}</strong>
+        </div>
+
+        <div>
+          <span>Chapter</span>
+          <strong>{previewTest.chapter || "No Chapter"}</strong>
+        </div>
+
+        <div>
+          <span>Test Type</span>
+          <strong>{previewTest.testType || "Mock Test"}</strong>
         </div>
       </div>
 
@@ -187,15 +304,15 @@ export default function AdminMockTestPreviewRoute({
         </div>
 
         <div className="adminMockPreviewStatCard">
-          <span>Duration</span>
-          <strong>{durationMinutes}</strong>
-          <p>Minutes configured for test</p>
+          <span>Live Questions</span>
+          <strong>{publishedQuestions}</strong>
+          <p>Questions ready for student side</p>
         </div>
 
         <div className="adminMockPreviewStatCard">
-          <span>Published</span>
-          <strong>{publishedQuestions}</strong>
-          <p>Questions ready for student side</p>
+          <span>Saved To Bank</span>
+          <strong>{savedToBank}</strong>
+          <p>Question bank mapped items</p>
         </div>
       </div>
 
@@ -216,18 +333,18 @@ export default function AdminMockTestPreviewRoute({
         </div>
 
         <div>
-          <span>Status</span>
-          <strong>{previewTest.status || "draft"}</strong>
-        </div>
-
-        <div>
-          <span>Saved To Bank</span>
-          <strong>{savedToBank}</strong>
+          <span>Test Status</span>
+          <strong className={getStatusClass(testStatus)}>{testStatus}</strong>
         </div>
 
         <div>
           <span>Negative Marking</span>
           <strong>{negativeMarksCount}</strong>
+        </div>
+
+        <div>
+          <span>Duration</span>
+          <strong>{durationMinutes} min</strong>
         </div>
       </div>
 
@@ -237,6 +354,15 @@ export default function AdminMockTestPreviewRoute({
           <span>Correct answer is missing in one or more questions.</span>
         </div>
       )}
+
+      <div className="adminMockPreviewPaperHeader">
+        <div>
+          <span>QUESTION PAPER PREVIEW</span>
+          <h2>Student-visible Paper</h2>
+        </div>
+
+        <small>{totalQuestions} questions</small>
+      </div>
 
       <div className="adminMockPreviewQuestionList">
         {safeQuestions.map((questionItem, index) => (
@@ -312,11 +438,16 @@ export default function AdminMockTestPreviewRoute({
       </div>
 
       <div className="adminMockPreviewBottomActions">
-        <button className="adminMockPreviewPrimaryBtn" onClick={handleEditTest}>
+        <button
+          type="button"
+          className="adminMockPreviewPrimaryBtn"
+          onClick={handleEditTest}
+        >
           Edit Test
         </button>
 
         <button
+          type="button"
           className="adminMockPreviewGhostBtn"
           onClick={() => navigate("/admin/content/mock-tests/manage")}
         >
