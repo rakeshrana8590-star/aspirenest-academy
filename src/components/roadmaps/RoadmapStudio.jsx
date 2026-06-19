@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import RoadmapDuplicatePanel from "./import/RoadmapDuplicatePanel.jsx";
 import RoadmapImportValidationPanel from "./import/RoadmapImportValidationPanel.jsx";
+import RoadmapImportPreviewPanel from "./import/RoadmapImportPreviewPanel.jsx";
+import RoadmapImportUploadPanel from "./import/RoadmapImportUploadPanel.jsx";
 
 import {
     archiveStudyRoadmap,
@@ -133,124 +135,41 @@ export const RoadmapStudioHome = () => {
 
   return (
     <RoadmapShell mode="admin">
-      <AspirePathHero
-        mode="admin"
-        eyebrow="Roadmap Studio"
-        title="Build guided study paths"
-        subtitle="Create, import, validate, publish, and manage AspirePath roadmaps for students without hardcoding daily cards."
-        metrics={buildStudioMetrics(roadmaps)}
-        actions={
-          <>
-            <Link
-              className="roadmapStudioPrimaryBtn"
-              to="/admin/content/roadmaps/import"
-            >
-              Import Roadmap
-            </Link>
-
-            <Link
-              className="roadmapStudioSecondaryBtn"
-              to="/admin/content/roadmaps/manage"
-            >
-              Manage Roadmaps
-            </Link>
-
-            <button
-              className="roadmapStudioGhostBtn"
-              type="button"
-              onClick={downloadRoadmapXlsxTemplate}
-            >
-              Download Template
-            </button>
-          </>
-        }
+      <RoadmapImportUploadPanel
+        validation={validation}
+        importing={importing}
+        selectedFileName={selectedFileName}
+        onFileChange={handleFileChange}
+        onDownloadTemplate={downloadRoadmapXlsxTemplate}
       />
 
-      <section className="roadmapStudioSection">
-        <RoadmapSectionHeader
-          mode="admin"
-          kicker="Studio Flow"
-          title="One import, complete student roadmap"
-          text="Roadmap Studio converts structured XLSX data into guided student timelines with daily tasks, live sessions, mock days, revision, and analytics-ready progress."
-        />
+      <RoadmapImportValidationPanel validation={validation} />
 
-        <div className="roadmapStudioGrid">
-          <article className="roadmapStudioCard">
-            <h3 className="roadmapStudioCardTitle">1. Import</h3>
-            <p className="roadmapStudioCardText">
-              Upload a clean XLSX roadmap template with Roadmap Info, Schedule,
-              and Resources sheets.
-            </p>
-          </article>
+      <RoadmapDuplicatePanel
+        duplicateChecking={duplicateChecking}
+        duplicateAudit={duplicateAudit}
+        hasExactDuplicate={hasExactDuplicate}
+        hasPotentialDuplicate={hasPotentialDuplicate}
+        exactDuplicateRoadmaps={exactDuplicateRoadmaps}
+        potentialDuplicateRoadmaps={potentialDuplicateRoadmaps}
+        allowDuplicateSave={allowDuplicateSave}
+        onConfirmDuplicateSave={() => {
+          setAllowDuplicateSave(true);
+          setSaveMessage(
+            "Duplicate warning confirmed. You can now save this as a new draft."
+          );
+        }}
+      />
 
-          <article className="roadmapStudioCard">
-            <h3 className="roadmapStudioCardTitle">2. Validate</h3>
-            <p className="roadmapStudioCardText">
-              Check dates, duplicate days, missing tasks, wrong plan types, and
-              schedule quality before saving.
-            </p>
-          </article>
-
-          <article className="roadmapStudioCard">
-            <h3 className="roadmapStudioCardTitle">3. Publish</h3>
-            <p className="roadmapStudioCardText">
-              Save as draft, review schedule, then publish to student
-              AspirePath automatically.
-            </p>
-          </article>
-        </div>
-      </section>
-
-      <section className="roadmapStudioSection">
-        <RoadmapSectionHeader
-          mode="admin"
-          kicker="Recent"
-          title="Latest roadmaps"
-          text="Recently created or imported roadmaps will appear here."
-          action={
-            <Link
-              className="roadmapStudioSecondaryBtn"
-              to="/admin/content/roadmaps/manage"
-            >
-              View All
-            </Link>
-          }
-        />
-
-        {loading ? (
-          <RoadmapEmptyState
-            mode="admin"
-            title="Loading roadmaps..."
-            text="Roadmap Studio is checking your saved paths."
-          />
-        ) : recentRoadmaps.length === 0 ? (
-          <RoadmapEmptyState
-            mode="admin"
-            title="No roadmaps yet"
-            text="Import your first XLSX roadmap to start building AspirePath."
-            action={
-              <Link
-                className="roadmapStudioPrimaryBtn"
-                to="/admin/content/roadmaps/import"
-              >
-                Import First Roadmap
-              </Link>
-            }
-          />
-        ) : (
-          <div className="roadmapStudioGrid">
-            {recentRoadmaps.map((roadmap) => (
-              <RoadmapCard
-                key={roadmap.id}
-                mode="admin"
-                roadmap={roadmap}
-                to={`/admin/content/roadmaps/schedule/${roadmap.id}`}
-                progress={0}
-              />
-            ))}
-          </div>
-        )}
-      </section>
+      <RoadmapImportPreviewPanel
+        importResult={importResult}
+        validation={validation}
+        saving={saving}
+        duplicateChecking={duplicateChecking}
+        saveBlockedByDuplicate={saveBlockedByDuplicate}
+        saveMessage={saveMessage}
+        onSaveDraft={handleSaveDraft}
+      />
     </RoadmapShell>
   );
 };
@@ -465,63 +384,15 @@ const saveBlockedByDuplicate = hasExactDuplicate || needsDuplicateConfirm;
         }}
       />
 
-      {importResult?.roadmap ? (
-        <section className="roadmapStudioSection">
-          <RoadmapSectionHeader
-            mode="admin"
-            kicker="Preview"
-            title="Imported roadmap preview"
-            text="This is the draft that will be saved to Roadmap Studio."
-            action={
-              <button
-                className="roadmapStudioPrimaryBtn"
-                type="button"
-                disabled={!validation?.isValid || saving || duplicateChecking || saveBlockedByDuplicate}
-                onClick={handleSaveDraft}
-              >
-                {saving ? "Saving..." : "Save as Draft"}
-              </button>
-            }
-          />
-
-          {saveMessage ? (
-            <div className="roadmapStudioImportPanel">
-              <p className="roadmapStudioCardText">{saveMessage}</p>
-            </div>
-          ) : null}
-
-          <RoadmapCard
-            mode="admin"
-            roadmap={{
-              ...importResult.roadmap,
-              totalDays: importResult.days?.length || 0,
-              status: "draft",
-            }}
-            progress={0}
-          />
-
-          <div className="roadmapStudioSection">
-            <RoadmapSectionHeader
-              mode="admin"
-              kicker="First Days"
-              title="Schedule sample"
-              text="First five days from the imported roadmap."
-            />
-
-            <div className="aspirePathDayGrid">
-              {(importResult.days || []).slice(0, 5).map((day, index) => (
-                <RoadmapDayCard
-                  key={`${day.date}-${index}`}
-                  day={{
-                    ...day,
-                    id: `${day.date}-${index}`,
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
+<RoadmapImportPreviewPanel
+        importResult={importResult}
+        validation={validation}
+        saving={saving}
+        duplicateChecking={duplicateChecking}
+        saveBlockedByDuplicate={saveBlockedByDuplicate}
+        saveMessage={saveMessage}
+        onSaveDraft={handleSaveDraft}
+      />
     </RoadmapShell>
   );
 };

@@ -232,55 +232,114 @@ export function StudentMockTestLibraryRoute({ universalContent = [] }) {
         ]}
       />
 
-      <div className="mockStudentShelf">
-        <div className="mockStudentShelfHeader">
+      <div className="mockStudentShelf mockStudentPlanShelfV2">
+        <div className="mockStudentShelfHeader mockStudentShelfHeaderV2">
           <span>Mock Test Library</span>
           <h2>Choose your preparation plan</h2>
+          <p>
+            Select the right plan shelf and continue into subject-wise,
+            chapter-wise, and test-wise practice inside one connected exam
+            system.
+          </p>
         </div>
 
-        <div className="mockStudentPlanGrid">
+        <div className="mockStudentPlanGridV2">
           {MOCK_PLAN_ORDER.map((planName) => {
-            const planTests = getPlanMockTests(
-              universalContent,
-              planName
-            );
-
+            const planTests = getPlanMockTests(universalContent, planName);
             const subjects = buildSubjectList(planTests);
 
             return (
               <button
                 type="button"
-                className="mockStudentPlanCard"
+                className={
+                  planName === "PREMIUM"
+                    ? "mockStudentPlanCardV2 isPremiumPlan"
+                    : "mockStudentPlanCardV2"
+                }
                 key={planName}
                 onClick={() =>
                   navigate(`/ctet-tet/mock-tests/plan/${planName}`)
                 }
               >
-                <div className="mockStudentPlanTop">
-                  <span className="mockStudentPlanIcon">
+                <div className="mockStudentPlanCardTopV2">
+                  <span className="mockStudentPlanIconV2">
                     {PLAN_ICONS[planName]}
                   </span>
 
-                  <span className="mockStudentPlanPill">
-                    {planName}
-                  </span>
+                  <span className="mockStudentPlanPillV2">{planName}</span>
                 </div>
 
                 <h3>{PLAN_LABELS[planName]}</h3>
 
                 <p>
                   {subjects.length > 0
-                    ? `${subjects.length} subjects available`
-                    : "Published mock tests will appear here."}
+                    ? `${subjects.length} subject shelves ready for practice.`
+                    : "Published mock tests will appear here after admin publishes them."}
                 </p>
 
-                <div className="mockStudentPlanStats">
-                  <span>{planTests.length} Tests</span>
+                <div className="mockStudentPlanStatsV2">
+                  <div>
+                    <strong>{planTests.length}</strong>
+                    <span>Tests</span>
+                  </div>
+
+                  <div>
+                    <strong>{subjects.length}</strong>
+                    <span>Subjects</span>
+                  </div>
+                </div>
+
+                <div className="mockStudentPlanFooterV2">
+                  <span>
+                    {planTests.length > 0
+                      ? "Open exam shelf"
+                      : "Waiting for tests"}
+                  </span>
+
                   <strong>Open →</strong>
                 </div>
               </button>
             );
           })}
+        </div>
+      </div>
+
+      <div className="mockStudentShelf mockStudentPromisePanelV2">
+        <div className="mockStudentPromiseCopyV2">
+          <span>ONE APP • ONE SYSTEM</span>
+
+          <h2>No random links. No broken exam flow.</h2>
+
+          <p>
+            Plans, subjects, chapters, attempts, results, review, history, and
+            leaderboard stay connected inside one premium mock-test experience.
+          </p>
+        </div>
+
+        <div className="mockStudentPromiseGridV2">
+          <div>
+            <span>🧭</span>
+            <strong>Plan Protected</strong>
+            <p>Every test remains connected with plan access and student flow.</p>
+          </div>
+
+          <div>
+            <span>📚</span>
+            <strong>Subject-wise</strong>
+            <p>Students continue from plan shelf to subject and chapter.</p>
+          </div>
+
+          <div>
+            <span>📝</span>
+            <strong>Exam Engine</strong>
+            <p>Start, attempt, submit, result, and review stay in one system.</p>
+          </div>
+
+          <div>
+            <span>🏆</span>
+            <strong>Performance</strong>
+            <p>History, score tracking, and leaderboard stay connected.</p>
+          </div>
         </div>
       </div>
     </section>
