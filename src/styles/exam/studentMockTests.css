@@ -1704,3 +1704,402 @@
   }
 }
 
+/* ===============================
+   36D2 — STUDENT MOCK LEVEL SHELF V2
+   Plan → Subject premium shelf
+================================ */
+
+.mockStudentLevelShelfV2 {
+  margin-top: 28px !important;
+  padding: 34px !important;
+  border-radius: 34px !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(circle at 10% 12%, rgba(249, 115, 22, 0.1), transparent 34%),
+    radial-gradient(circle at 92% 10%, rgba(59, 130, 246, 0.13), transparent 34%),
+    rgba(255, 255, 255, 0.94) !important;
+}
+
+.mockStudentLevelHeaderV2 {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 220px !important;
+  gap: 22px !important;
+  align-items: center !important;
+  margin-bottom: 26px !important;
+}
+
+.mockStudentLevelHeaderV2 span {
+  min-height: 34px !important;
+  padding: 0 14px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  width: max-content !important;
+  background: #fff7ed !important;
+  color: #ea580c !important;
+  font-size: 0.74rem !important;
+  font-weight: 1000 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+}
+
+.mockStudentLevelHeaderV2 h2 {
+  margin: 16px 0 0 !important;
+  max-width: 940px !important;
+  color: #0f172a !important;
+  font-size: clamp(2.45rem, 4vw, 4.4rem) !important;
+  line-height: 0.94 !important;
+  letter-spacing: -0.078em !important;
+  font-weight: 1000 !important;
+}
+
+.mockStudentLevelHeaderV2 p {
+  max-width: 760px !important;
+  margin: 14px 0 0 !important;
+  color: #64748b !important;
+  font-size: 0.94rem !important;
+  line-height: 1.55 !important;
+  font-weight: 850 !important;
+}
+
+.mockStudentLevelStatusV2 {
+  min-height: 138px !important;
+  padding: 20px !important;
+  border-radius: 28px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  color: #ffffff !important;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(249, 115, 22, 0.22), transparent 36%),
+    linear-gradient(135deg, #111827, #0f172a 72%, #241917) !important;
+  box-shadow: 0 20px 54px rgba(15, 23, 42, 0.14) !important;
+}
+
+.mockStudentLevelStatusV2 strong {
+  color: #ffffff !important;
+  font-size: 2.6rem !important;
+  line-height: 1 !important;
+  letter-spacing: -0.06em !important;
+  font-weight: 1000 !important;
+}
+
+.mockStudentLevelStatusV2 span {
+  margin-top: 10px !important;
+  min-height: auto !important;
+  padding: 0 !important;
+  width: auto !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.74) !important;
+  font-size: 0.78rem !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.mockStudentLevelGridV2 {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+}
+
+.mockStudentLevelCardV2 {
+  appearance: none !important;
+  cursor: pointer !important;
+  min-height: 282px !important;
+  padding: 22px !important;
+  border-radius: 28px !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  text-align: left !important;
+  color: #0f172a !important;
+  background:
+    radial-gradient(circle at 88% 10%, rgba(59, 130, 246, 0.13), transparent 35%),
+    radial-gradient(circle at 8% 12%, rgba(249, 115, 22, 0.1), transparent 35%),
+    linear-gradient(145deg, #ffffff 0%, #f8fbff 100%) !important;
+  box-shadow: 0 20px 54px rgba(15, 23, 42, 0.08) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease !important;
+}
+
+.mockStudentLevelCardV2:hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(249, 115, 22, 0.3) !important;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.12) !important;
+}
+
+.mockStudentLevelCardTopV2 {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  margin-bottom: 22px !important;
+}
+
+.mockStudentLevelIconV2 {
+  width: 58px !important;
+  height: 58px !important;
+  border-radius: 20px !important;
+  display: grid !important;
+  place-items: center !important;
+  background: #fff7ed !important;
+  border: 1px solid rgba(249, 115, 22, 0.15) !important;
+  font-size: 1.35rem !important;
+  box-shadow: 0 16px 30px rgba(249, 115, 22, 0.08) !important;
+}
+
+.mockStudentLevelPillV2 {
+  min-height: 32px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  background: #fff7ed !important;
+  color: #c2410c !important;
+  font-size: 0.72rem !important;
+  font-weight: 1000 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+}
+
+.mockStudentLevelCardV2 h3 {
+  margin: 0 !important;
+  color: #0f172a !important;
+  font-size: clamp(1.38rem, 1.7vw, 1.82rem) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.055em !important;
+  font-weight: 1000 !important;
+}
+
+.mockStudentLevelCardV2 p {
+  min-height: 48px !important;
+  margin: 12px 0 0 !important;
+  color: #64748b !important;
+  font-size: 0.86rem !important;
+  line-height: 1.45 !important;
+  font-weight: 850 !important;
+}
+
+.mockStudentLevelMiniV2 {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  margin-top: 16px !important;
+}
+
+.mockStudentLevelMiniV2 div {
+  min-height: 70px !important;
+  padding: 12px !important;
+  border-radius: 18px !important;
+  background: rgba(248, 250, 252, 0.94) !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+}
+
+.mockStudentLevelMiniV2 strong {
+  display: block !important;
+  color: #0f172a !important;
+  font-size: 1.45rem !important;
+  line-height: 1 !important;
+  letter-spacing: -0.05em !important;
+  font-weight: 1000 !important;
+}
+
+.mockStudentLevelMiniV2 span {
+  display: block !important;
+  margin-top: 6px !important;
+  color: #64748b !important;
+  font-size: 0.68rem !important;
+  font-weight: 950 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+}
+
+.mockStudentLevelFooterV2 {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin-top: auto !important;
+  padding-top: 14px !important;
+  border-top: 1px solid rgba(15, 23, 42, 0.08) !important;
+}
+
+.mockStudentLevelFooterV2 span {
+  color: #64748b !important;
+  font-size: 0.78rem !important;
+  font-weight: 900 !important;
+}
+
+.mockStudentLevelFooterV2 strong {
+  min-height: 34px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  color: #ffffff !important;
+  background: #0f172a !important;
+  font-size: 0.76rem !important;
+  font-weight: 1000 !important;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14) !important;
+}
+
+@media (max-width: 1180px) {
+  .mockStudentLevelHeaderV2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .mockStudentLevelGridV2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .mockStudentLevelShelfV2 {
+    padding: 22px !important;
+    border-radius: 24px !important;
+  }
+
+  .mockStudentLevelHeaderV2 h2 {
+    font-size: clamp(2.2rem, 11vw, 3.15rem) !important;
+  }
+
+  .mockStudentLevelGridV2,
+  .mockStudentLevelMiniV2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .mockStudentLevelCardV2 {
+    min-height: auto !important;
+  }
+
+  .mockStudentLevelFooterV2 {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+}
+
+/* ===============================
+   36F2 — STUDENT CHAPTER TEST GRID V2
+   Chapter → Available Tests premium lock
+================================ */
+
+.mockStudentChapterTestGridV2 {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+}
+
+.mockStudentChapterTestGridV2 .mockTestPremiumCard {
+  min-height: 360px !important;
+  padding: 22px !important;
+  border-radius: 28px !important;
+  background:
+    radial-gradient(circle at 8% 10%, rgba(249, 115, 22, 0.1), transparent 34%),
+    radial-gradient(circle at 92% 10%, rgba(59, 130, 246, 0.12), transparent 34%),
+    linear-gradient(145deg, #ffffff 0%, #f8fbff 100%) !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 20px 54px rgba(15, 23, 42, 0.08) !important;
+}
+
+.mockStudentChapterTestGridV2 .mockTestPremiumCard:hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(249, 115, 22, 0.3) !important;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.12) !important;
+}
+
+.mockStudentChapterTestGridV2 .mockTestPremiumTop {
+  margin-bottom: 20px !important;
+}
+
+.mockStudentChapterTestGridV2 .mockTestPremiumIcon {
+  width: 58px !important;
+  height: 58px !important;
+  border-radius: 20px !important;
+  font-size: 1.35rem !important;
+}
+
+.mockStudentChapterTestGridV2 .mockTestPremiumBadges span {
+  min-height: 32px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  font-size: 0.7rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.mockStudentChapterTestGridV2 .mockTestPremiumCard h3 {
+  font-size: clamp(1.32rem, 1.6vw, 1.75rem) !important;
+  line-height: 1.04 !important;
+  letter-spacing: -0.052em !important;
+}
+
+.mockStudentChapterTestGridV2 .mockTestPremiumMeta {
+  min-height: auto !important;
+  margin-top: 10px !important;
+  font-size: 0.84rem !important;
+  line-height: 1.45 !important;
+}
+
+.mockStudentChapterTestGridV2 .mockTestPremiumStats {
+  gap: 10px !important;
+  margin-top: 18px !important;
+}
+
+.mockStudentChapterTestGridV2 .mockTestPremiumStats div {
+  min-height: 70px !important;
+  padding: 12px !important;
+  border-radius: 18px !important;
+}
+
+.mockStudentChapterTestGridV2 .mockTestPremiumStats span,
+.mockStudentChapterTestGridV2 .mockTestPremiumFooter span {
+  font-size: 0.68rem !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase !important;
+}
+
+.mockStudentChapterTestGridV2 .mockTestPremiumStats strong,
+.mockStudentChapterTestGridV2 .mockTestPremiumFooter strong {
+  font-size: 0.95rem !important;
+}
+
+.mockStudentChapterTestGridV2 .mockTestPremiumFooter {
+  padding-top: 16px !important;
+}
+
+.mockStudentChapterTestGridV2 .mockTestPremiumButton {
+  min-height: 44px !important;
+  min-width: 130px !important;
+  padding: 0 18px !important;
+  font-size: 0.82rem !important;
+}
+
+@media (max-width: 1180px) {
+  .mockStudentChapterTestGridV2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .mockStudentChapterTestGridV2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .mockStudentChapterTestGridV2 .mockTestPremiumCard {
+    min-height: auto !important;
+  }
+
+  .mockStudentChapterTestGridV2 .mockTestPremiumFooter {
+    align-items: stretch !important;
+    flex-direction: column !important;
+  }
+
+  .mockStudentChapterTestGridV2 .mockTestPremiumButton {
+    width: 100% !important;
+  }
+}

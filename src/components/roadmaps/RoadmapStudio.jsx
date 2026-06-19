@@ -5,6 +5,7 @@ import RoadmapDuplicatePanel from "./import/RoadmapDuplicatePanel.jsx";
 import RoadmapImportValidationPanel from "./import/RoadmapImportValidationPanel.jsx";
 import RoadmapImportPreviewPanel from "./import/RoadmapImportPreviewPanel.jsx";
 import RoadmapImportUploadPanel from "./import/RoadmapImportUploadPanel.jsx";
+import useRoadmapImportController from "./hooks/useRoadmapImportController.js";
 
 import {
     archiveStudyRoadmap,
@@ -15,15 +16,11 @@ import {
     loadStudyRoadmapById,
     loadStudyRoadmapWithDays,
     publishStudyRoadmap,
-    findDuplicateStudyRoadmaps,
-    saveImportedRoadmapAsDraft,
+    
     updateStudyRoadmapMeta,
     unpublishStudyRoadmap,
   } from "../../services/roadmapService";
-import {
-  downloadRoadmapXlsxTemplate,
-  parseRoadmapXlsxFile,
-} from "../../utils/roadmapImportUtils";
+  import { downloadRoadmapXlsxTemplate } from "../../utils/roadmapImportUtils";
 import {
   AspirePathHero,
   RoadmapBadge,
@@ -135,6 +132,132 @@ export const RoadmapStudioHome = () => {
 
   return (
     <RoadmapShell mode="admin">
+      <AspirePathHero
+        mode="admin"
+        eyebrow="Roadmap Studio"
+        title="AspirePath command center"
+        subtitle="Create, import, publish, review, and track study roadmaps connected with notes, videos, live classes, mock tests, and student progress."
+        metrics={buildStudioMetrics(roadmaps)}
+        actions={
+          <>
+            <Link
+              className="roadmapStudioPrimaryBtn"
+              to="/admin/content/roadmaps/import"
+            >
+              Import Roadmap
+            </Link>
+
+            <Link
+              className="roadmapStudioSecondaryBtn"
+              to="/admin/content/roadmaps/manage"
+            >
+              Manage Roadmaps
+            </Link>
+          </>
+        }
+      />
+
+      <section className="roadmapStudioSection">
+        <RoadmapSectionHeader
+          mode="admin"
+          kicker="Studio Overview"
+          title="Recent AspirePaths"
+          text="Review latest saved roadmaps and continue managing schedule, resources, and student progress."
+          action={
+            <Link
+              className="roadmapStudioSecondaryBtn"
+              to="/admin/content/roadmaps/import"
+            >
+              + New Import
+            </Link>
+          }
+        />
+
+        {loading ? (
+          <RoadmapEmptyState
+            mode="admin"
+            title="Loading roadmaps..."
+            text="Roadmap Studio is loading saved AspirePaths."
+          />
+        ) : recentRoadmaps.length === 0 ? (
+          <RoadmapEmptyState
+            mode="admin"
+            title="No roadmaps yet"
+            text="Import your first AspirePath roadmap to start building the student study journey."
+            action={
+              <Link
+                className="roadmapStudioPrimaryBtn"
+                to="/admin/content/roadmaps/import"
+              >
+                Import Roadmap
+              </Link>
+            }
+          />
+        ) : (
+          <div className="roadmapStudioGrid">
+            {recentRoadmaps.map((roadmap) => (
+              <RoadmapCard
+                key={roadmap.id}
+                mode="admin"
+                roadmap={roadmap}
+                progress={0}
+                action={
+                  <div className="roadmapStudioHeroActions">
+                    <Link
+                      className="roadmapStudioGhostBtn"
+                      to={`/admin/content/roadmaps/schedule/${roadmap.id}`}
+                    >
+                      Schedule
+                    </Link>
+
+                    <Link
+                      className="roadmapStudioGhostBtn"
+                      to={`/admin/content/roadmaps/resources/${roadmap.id}`}
+                    >
+                      Resources
+                    </Link>
+
+                    <Link
+                      className="roadmapStudioGhostBtn"
+                      to={`/admin/content/roadmaps/progress/${roadmap.id}`}
+                    >
+                      Progress
+                    </Link>
+                  </div>
+                }
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    </RoadmapShell>
+  );
+};
+
+
+export const RoadmapImportRoute = () => {
+  const {
+    selectedFileName,
+    importResult,
+    importing,
+    saving,
+    saveMessage,
+    duplicateAudit,
+    duplicateChecking,
+    allowDuplicateSave,
+    validation,
+    exactDuplicateRoadmaps,
+    potentialDuplicateRoadmaps,
+    hasExactDuplicate,
+    hasPotentialDuplicate,
+    saveBlockedByDuplicate,
+    handleFileChange,
+    handleSaveDraft,
+    confirmPotentialDuplicateSave,
+  } = useRoadmapImportController();
+
+  return (
+    <RoadmapShell mode="admin">
       <RoadmapImportUploadPanel
         validation={validation}
         importing={importing}
@@ -153,238 +276,10 @@ export const RoadmapStudioHome = () => {
         exactDuplicateRoadmaps={exactDuplicateRoadmaps}
         potentialDuplicateRoadmaps={potentialDuplicateRoadmaps}
         allowDuplicateSave={allowDuplicateSave}
-        onConfirmDuplicateSave={() => {
-          setAllowDuplicateSave(true);
-          setSaveMessage(
-            "Duplicate warning confirmed. You can now save this as a new draft."
-          );
-        }}
+        onConfirmDuplicateSave={confirmPotentialDuplicateSave}
       />
 
       <RoadmapImportPreviewPanel
-        importResult={importResult}
-        validation={validation}
-        saving={saving}
-        duplicateChecking={duplicateChecking}
-        saveBlockedByDuplicate={saveBlockedByDuplicate}
-        saveMessage={saveMessage}
-        onSaveDraft={handleSaveDraft}
-      />
-    </RoadmapShell>
-  );
-};
-
-export const RoadmapImportRoute = () => {
-  const navigate = useNavigate();
-  const [selectedFileName, setSelectedFileName] = React.useState("");
-  const [importResult, setImportResult] = React.useState(null);
-  const [importing, setImporting] = React.useState(false);
-  const [saving, setSaving] = React.useState(false);
-  const [saveMessage, setSaveMessage] = React.useState("");
-  const [duplicateAudit, setDuplicateAudit] = React.useState(null);
-  const [duplicateChecking, setDuplicateChecking] = React.useState(false);
-  const [allowDuplicateSave, setAllowDuplicateSave] = React.useState(false);
-
-
-  const handleFileChange = async (event) => {
-    const file = event.target.files?.[0];
-
-    setSaveMessage("");
-    setImportResult(null);
-    setSelectedFileName("");
-    setDuplicateAudit(null);
-    setDuplicateChecking(false);
-    setAllowDuplicateSave(false);
-
-    if (!file) return;
-
-    try {
-      setImporting(true);
-      setSelectedFileName(file.name);
-
-      const parsed = await parseRoadmapXlsxFile(file);
-
-      setImportResult(parsed);
-      setAllowDuplicateSave(false);
-
-      if (parsed?.roadmap && parsed?.validation?.isValid) {
-        setDuplicateChecking(true);
-
-        try {
-          const audit = await findDuplicateStudyRoadmaps({
-            roadmap: parsed.roadmap,
-          });
-
-          setDuplicateAudit(audit);
-        } finally {
-          setDuplicateChecking(false);
-        }
-      }
-    } catch (error) {
-      console.error("Roadmap import parse error:", error);
-      setDuplicateAudit(null);
-      setAllowDuplicateSave(false);
-
-      setImportResult({
-        roadmap: null,
-        days: [],
-        validation: {
-          isValid: false,
-          errors: [error.message || "Unable to parse roadmap file."],
-          warnings: [],
-          summary: {},
-        },
-      });
-    } finally {
-      setImporting(false);
-      event.target.value = "";
-    }
-  };
-
-  const handleSaveDraft = async () => {
-    if (!importResult?.validation?.isValid) {
-      setSaveMessage("Fix validation errors before saving this roadmap.");
-      return;
-    }
-
-    if (hasExactDuplicate) {
-        setSaveMessage(
-          "Exact duplicate roadmap found. This import is blocked to avoid accidental duplicate drafts."
-        );
-        return;
-      }
-  
-      if (hasPotentialDuplicate && !allowDuplicateSave) {
-        setSaveMessage(
-          "Possible duplicate roadmap found. Review the warning and confirm before saving as a new draft."
-        );
-        return;
-      }
-
-    try {
-      setSaving(true);
-      setSaveMessage("");
-
-      const roadmapId = await saveImportedRoadmapAsDraft({
-        roadmap: importResult.roadmap,
-        days: importResult.days,
-        allowPotentialDuplicate: allowDuplicateSave,
-      });
-
-      setSaveMessage("Roadmap saved as draft successfully.");
-
-      navigate(`/admin/content/roadmaps/schedule/${roadmapId}`);
-    } catch (error) {
-      console.error("Save imported roadmap error:", error);
-      setSaveMessage(error.message || "Unable to save roadmap as draft.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const validation = importResult?.validation;
-  const exactDuplicateRoadmaps = duplicateAudit?.exactDuplicates || [];
-const potentialDuplicateRoadmaps = duplicateAudit?.potentialDuplicates || [];
-const hasExactDuplicate = exactDuplicateRoadmaps.length > 0;
-const hasPotentialDuplicate = potentialDuplicateRoadmaps.length > 0;
-const needsDuplicateConfirm = hasPotentialDuplicate && !allowDuplicateSave;
-const saveBlockedByDuplicate = hasExactDuplicate || needsDuplicateConfirm;
-
-  return (
-    <RoadmapShell mode="admin">
-      <AspirePathHero
-        mode="admin"
-        eyebrow="Import Roadmap"
-        title="Create AspirePath from XLSX"
-        subtitle="Upload a structured roadmap file and Roadmap Studio will validate it before saving as a draft."
-        metrics={[
-          {
-            value: validation?.summary?.totalDays || 0,
-            label: "Days",
-          },
-          {
-            value: validation?.summary?.totalTasks || 0,
-            label: "Tasks",
-          },
-          {
-            value: validation?.summary?.mockDays || 0,
-            label: "Mock Days",
-          },
-          {
-            value: validation?.isValid ? "Ready" : "Check",
-            label: "Status",
-          },
-        ]}
-        actions={
-          <>
-            <button
-              className="roadmapStudioPrimaryBtn"
-              type="button"
-              onClick={downloadRoadmapXlsxTemplate}
-            >
-              Download Template
-            </button>
-
-            <Link
-              className="roadmapStudioSecondaryBtn"
-              to="/admin/content/roadmaps/manage"
-            >
-              Manage Roadmaps
-            </Link>
-          </>
-        }
-      />
-
-      <section className="roadmapStudioSection">
-        <RoadmapSectionHeader
-          mode="admin"
-          kicker="Upload"
-          title="Roadmap XLSX import"
-          text="Use the official AspirePath template. Required sheets: Roadmap Info and Schedule. Resources sheet is optional but recommended."
-        />
-
-        <div className="roadmapStudioImportPanel">
-          <label className="roadmapStudioDropzone">
-            <span className="roadmapStudioDropzoneIcon">⬆</span>
-            <strong>
-              {importing
-                ? "Reading file..."
-                : selectedFileName || "Choose AspirePath XLSX file"}
-            </strong>
-            <span className="roadmapStudioCardText">
-              Accepted format: .xlsx with Roadmap Info, Schedule, Resources
-              sheets.
-            </span>
-
-            <input
-              type="file"
-              accept=".xlsx,.xls"
-              onChange={handleFileChange}
-              style={{ display: "none" }}
-            />
-          </label>
-        </div>
-      </section>
-
-      <RoadmapImportValidationPanel validation={validation} />
-
-<RoadmapDuplicatePanel
-        duplicateChecking={duplicateChecking}
-        duplicateAudit={duplicateAudit}
-        hasExactDuplicate={hasExactDuplicate}
-        hasPotentialDuplicate={hasPotentialDuplicate}
-        exactDuplicateRoadmaps={exactDuplicateRoadmaps}
-        potentialDuplicateRoadmaps={potentialDuplicateRoadmaps}
-        allowDuplicateSave={allowDuplicateSave}
-        onConfirmDuplicateSave={() => {
-          setAllowDuplicateSave(true);
-          setSaveMessage(
-            "Duplicate warning confirmed. You can now save this as a new draft."
-          );
-        }}
-      />
-
-<RoadmapImportPreviewPanel
         importResult={importResult}
         validation={validation}
         saving={saving}

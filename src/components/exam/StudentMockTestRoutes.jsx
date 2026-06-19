@@ -355,12 +355,18 @@ export function StudentMockTestPlanRoute({ universalContent = [] }) {
   const planTests = getPlanMockTests(universalContent, activePlan);
   const subjects = buildSubjectList(planTests);
 
+  const totalQuestions = planTests.reduce(
+    (sum, test) =>
+      sum + Number(test.totalQuestions || test.questions?.length || 0),
+    0
+  );
+
   return (
     <section className="mockStudentPage">
       <MockStudentHero
         badge={`${activePlan} MOCK TESTS`}
-        title={`${activePlan} Subject Library`}
-        text="Choose a subject to open chapters and available tests."
+        title={`${activePlan} Practice Library`}
+        text="Choose a subject shelf and continue into chapter-wise mock tests with protected access and result tracking."
         backLabel="Back to Mock Tests"
         onBack={() => navigate("/ctet-tet/mock-tests")}
         stats={[
@@ -373,16 +379,29 @@ export function StudentMockTestPlanRoute({ universalContent = [] }) {
             value: planTests.length,
           },
           {
-            label: "Access",
-            value: activePlan,
+            label: "Questions",
+            value: totalQuestions,
           },
         ]}
       />
 
-      <div className="mockStudentShelf">
-        <div className="mockStudentShelfHeader">
-          <span>{activePlan} Plan</span>
-          <h2>Subject-wise test library</h2>
+      <div className="mockStudentShelf mockStudentLevelShelfV2">
+        <div className="mockStudentLevelHeaderV2">
+          <div>
+            <span>{activePlan} Plan</span>
+
+            <h2>Subject-wise test library</h2>
+
+            <p>
+              Open a subject node, enter connected chapters, and continue into
+              student-visible mock tests from one premium practice flow.
+            </p>
+          </div>
+
+          <div className="mockStudentLevelStatusV2">
+            <strong>{planTests.length}</strong>
+            <span>Published tests</span>
+          </div>
         </div>
 
         {subjects.length === 0 ? (
@@ -391,11 +410,11 @@ export function StudentMockTestPlanRoute({ universalContent = [] }) {
             text="Published mock tests for this plan will appear here."
           />
         ) : (
-          <div className="mockStudentGrid">
+          <div className="mockStudentLevelGridV2">
             {subjects.map((subject) => (
               <button
                 type="button"
-                className="mockStudentTile"
+                className="mockStudentLevelCardV2"
                 key={subject.id}
                 onClick={() =>
                   navigate(
@@ -405,13 +424,31 @@ export function StudentMockTestPlanRoute({ universalContent = [] }) {
                   )
                 }
               >
-                <div className="mockStudentTileIcon">📝</div>
+                <div className="mockStudentLevelCardTopV2">
+                  <span className="mockStudentLevelIconV2">📝</span>
+                  <span className="mockStudentLevelPillV2">{activePlan}</span>
+                </div>
 
                 <h3>{subject.title}</h3>
 
                 <p>{subject.description}</p>
 
-                <span>{subject.count} Test{subject.count > 1 ? "s" : ""}</span>
+                <div className="mockStudentLevelMiniV2">
+                  <div>
+                    <strong>{subject.count}</strong>
+                    <span>Tests</span>
+                  </div>
+
+                  <div>
+                    <strong>{totalQuestions}</strong>
+                    <span>Questions</span>
+                  </div>
+                </div>
+
+                <div className="mockStudentLevelFooterV2">
+                  <span>Open subject shelf</span>
+                  <strong>Continue →</strong>
+                </div>
               </button>
             ))}
           </div>
@@ -440,12 +477,18 @@ export function StudentMockTestSubjectRoute({
 
   const chapters = buildChapterList(subjectTests);
 
+  const totalQuestions = subjectTests.reduce(
+    (sum, test) =>
+      sum + Number(test.totalQuestions || test.questions?.length || 0),
+    0
+  );
+
   return (
     <section className="mockStudentPage">
       <MockStudentHero
         badge={`${activePlan} MOCK TESTS`}
         title={activeSubject || "Subject Library"}
-        text="Subject-wise chapters with structured practice tests."
+        text="Open a chapter shelf and continue into student-visible mock tests with connected exam flow."
         backLabel="Back to Plan"
         onBack={() =>
           navigate(`/ctet-tet/mock-tests/plan/${activePlan}`)
@@ -460,16 +503,30 @@ export function StudentMockTestSubjectRoute({
             value: subjectTests.length,
           },
           {
-            label: "Plan",
-            value: activePlan,
+            label: "Questions",
+            value: totalQuestions,
           },
         ]}
       />
 
-      <div className="mockStudentShelf">
-        <div className="mockStudentShelfHeader">
-          <span>{activeSubject}</span>
-          <h2>Choose chapter</h2>
+      <div className="mockStudentShelf mockStudentLevelShelfV2">
+        <div className="mockStudentLevelHeaderV2">
+          <div>
+            <span>{activeSubject || activePlan}</span>
+
+            <h2>Chapter-wise test library</h2>
+
+            <p>
+              Continue from subject shelf into chapter-wise mock tests. Every
+              chapter stays connected with plan access, attempt flow, result,
+              and review.
+            </p>
+          </div>
+
+          <div className="mockStudentLevelStatusV2">
+            <strong>{chapters.length}</strong>
+            <span>Chapter shelves</span>
+          </div>
         </div>
 
         {chapters.length === 0 ? (
@@ -478,29 +535,61 @@ export function StudentMockTestSubjectRoute({
             text="Published chapter tests for this subject will appear here."
           />
         ) : (
-          <div className="mockStudentGrid">
-            {chapters.map((chapter) => (
-              <button
-                type="button"
-                className="mockStudentTile"
-                key={chapter.id}
-                onClick={() =>
-                  navigate(
-                    `/ctet-tet/mock-tests/plan/${activePlan}/${encodeURIComponent(
-                      activeSubject
-                    )}/${encodeURIComponent(chapter.id)}`
-                  )
-                }
-              >
-                <div className="mockStudentTileIcon">📚</div>
+          <div className="mockStudentLevelGridV2">
+            {chapters.map((chapter) => {
+              const chapterTests = subjectTests.filter(
+                (test) =>
+                  normalizeText(test.chapter) === normalizeText(chapter.id)
+              );
 
-                <h3>{chapter.title}</h3>
+              const chapterQuestions = chapterTests.reduce(
+                (sum, test) =>
+                  sum +
+                  Number(test.totalQuestions || test.questions?.length || 0),
+                0
+              );
 
-                <p>{chapter.description}</p>
+              return (
+                <button
+                  type="button"
+                  className="mockStudentLevelCardV2"
+                  key={chapter.id}
+                  onClick={() =>
+                    navigate(
+                      `/ctet-tet/mock-tests/plan/${activePlan}/${encodeURIComponent(
+                        activeSubject
+                      )}/${encodeURIComponent(chapter.id)}`
+                    )
+                  }
+                >
+                  <div className="mockStudentLevelCardTopV2">
+                    <span className="mockStudentLevelIconV2">📚</span>
+                    <span className="mockStudentLevelPillV2">{activePlan}</span>
+                  </div>
 
-                <span>{chapter.count} Test{chapter.count > 1 ? "s" : ""}</span>
-              </button>
-            ))}
+                  <h3>{chapter.title}</h3>
+
+                  <p>{chapter.description}</p>
+
+                  <div className="mockStudentLevelMiniV2">
+                    <div>
+                      <strong>{chapter.count}</strong>
+                      <span>Tests</span>
+                    </div>
+
+                    <div>
+                      <strong>{chapterQuestions}</strong>
+                      <span>Questions</span>
+                    </div>
+                  </div>
+
+                  <div className="mockStudentLevelFooterV2">
+                    <span>Open chapter shelf</span>
+                    <strong>Continue →</strong>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
@@ -539,7 +628,7 @@ export function StudentMockTestChapterRoute({
       <MockStudentHero
         badge={`${activePlan} MOCK CHAPTER`}
         title={activeChapter || "Chapter Tests"}
-        text="Chapter-wise available mock tests. Select a test to start practice."
+        text="Choose a student-visible test and continue into the protected exam start flow."
         backLabel="Back to Chapters"
         onBack={() =>
           navigate(
@@ -564,10 +653,24 @@ export function StudentMockTestChapterRoute({
         ]}
       />
 
-      <div className="mockStudentShelf">
-        <div className="mockStudentShelfHeader">
-          <span>{activeSubject}</span>
-          <h2>Available mock tests</h2>
+      <div className="mockStudentShelf mockStudentLevelShelfV2">
+        <div className="mockStudentLevelHeaderV2">
+          <div>
+            <span>{activeSubject || activePlan}</span>
+
+            <h2>Available mock tests</h2>
+
+            <p>
+              Start from the correct chapter node. Every test stays connected
+              with access, timer, attempt, result, review, and performance
+              history.
+            </p>
+          </div>
+
+          <div className="mockStudentLevelStatusV2">
+            <strong>{chapterTests.length}</strong>
+            <span>Ready tests</span>
+          </div>
         </div>
 
         {chapterTests.length === 0 ? (
@@ -576,7 +679,7 @@ export function StudentMockTestChapterRoute({
             text="Published mock tests for this chapter will appear here."
           />
         ) : (
-          <div className="mockStudentTestGrid">
+          <div className="mockStudentTestGrid mockStudentChapterTestGridV2">
             {chapterTests.map((test) => (
               <StudentMockTestCard
                 key={test.id}
