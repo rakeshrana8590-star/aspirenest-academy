@@ -33,15 +33,42 @@ export default function MockTestActionMenu({
     return null;
   }
 
+  const VIEWPORT_PADDING = 16;
+  const MENU_WIDTH = 260;
+  const MENU_HEIGHT = 520;
+  
+  const safeMenuPosition = (() => {
+    if (typeof window === "undefined") {
+      return position;
+    }
+  
+    const maxLeft = Math.max(
+      VIEWPORT_PADDING,
+      window.innerWidth - MENU_WIDTH - VIEWPORT_PADDING
+    );
+  
+    const maxTop = Math.max(
+      VIEWPORT_PADDING,
+      window.innerHeight - MENU_HEIGHT - VIEWPORT_PADDING
+    );
+  
+    return {
+      top: Math.min(Math.max(position.top, VIEWPORT_PADDING), maxTop),
+      left: Math.min(Math.max(position.left, VIEWPORT_PADDING), maxLeft),
+    };
+  })();
+
   return createPortal(
     <div className="mockPortalBackdrop" onClick={onClose}>
       <div
         className="mockPortalMenu"
         style={{
           position: "fixed",
-          top: `${position.top}px`,
-          left: `${position.left}px`,
+          top: `${safeMenuPosition.top}px`,
+          left: `${safeMenuPosition.left}px`,
           zIndex: 999999,
+          maxHeight: `calc(100vh - ${VIEWPORT_PADDING * 2}px)`,
+          overflowY: "auto",
         }}
         onClick={(event) => event.stopPropagation()}
       >
@@ -213,22 +240,33 @@ export default function MockTestActionMenu({
         <div className="mockPortalMenuDivider" />
 
         <button
-          onClick={async () => {
-            const copied = await copyMockTestStartLink({
-              test,
-            });
+  onClick={async () => {
+    if (test.status !== "published") {
+      alert(
+        `Link not copied.\n\n"${test.title || "This mock test"}" is currently ${
+          test.status || "draft"
+        }.\n\nOnly Published mock tests should be shared with students.`
+      );
 
-            onClose();
+      onClose();
+      return;
+    }
 
-            alert(
-              copied
-                ? "Mock test link copied ✅"
-                : "Unable to copy mock test link"
-            );
-          }}
-        >
-          🔗 Copy Link
-        </button>
+    const copied = await copyMockTestStartLink({
+      test,
+    });
+
+    onClose();
+
+    alert(
+      copied
+        ? "Published mock test link copied ✅"
+        : "Unable to copy mock test link"
+    );
+  }}
+>
+  🔗 Copy Link
+</button>
 
         <button
           onClick={() => {
