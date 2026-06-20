@@ -6,10 +6,32 @@ import StudentNotesEmptyState from "./StudentNotesEmptyState";
 import { StudentNotesLevelCard } from "./StudentNoteCards";
 
 import {
+  NOTES_PLAN_LABELS,
   buildNotesSubjectList,
   getNotesPdfCount,
   getPlanNotes,
+  normalizeNoteText,
 } from "../shared/notesUtils";
+
+function getPublicNotesShelfTitle(subject = {}) {
+  const title = subject.title || "Notes Shelf";
+
+  if (normalizeNoteText(title) === "ctet-tet") {
+    return "CTET/TET Revision Notes";
+  }
+
+  return title;
+}
+
+function getPublicNotesShelfText(subject = {}) {
+  const title = subject.title || "";
+
+  if (normalizeNoteText(title) === "ctet-tet") {
+    return "Complete CTET/TET notes arranged into chapter-wise PDF shelves.";
+  }
+
+  return subject.description || "Open chapter-wise PDF notes inside this shelf.";
+}
 
 export default function StudentNotesPlanRoute({
   universalContent = [],
@@ -18,6 +40,7 @@ export default function StudentNotesPlanRoute({
   const { plan } = useParams();
 
   const activePlan = decodeURIComponent(plan || "FREE").toUpperCase();
+  const planLabel = NOTES_PLAN_LABELS[activePlan] || `${activePlan} Notes`;
 
   const planNotes = getPlanNotes(universalContent, activePlan);
   const subjects = buildNotesSubjectList(planNotes);
@@ -26,13 +49,13 @@ export default function StudentNotesPlanRoute({
     <section className="studentNotesPage">
       <StudentNotesHero
         badge={`${activePlan} NOTES`}
-        title={`${activePlan} Subject Library`}
-        text="Choose a subject shelf and continue into chapter-wise revision PDFs."
+        title={`${planLabel} Library`}
+        text="Choose a notes shelf and continue into chapter-wise revision PDFs."
         backLabel="Back to Notes"
         onBack={() => navigate("/ctet-tet/notes")}
         stats={[
           {
-            label: "Subjects",
+            label: "Notes Shelves",
             value: subjects.length,
           },
           {
@@ -40,7 +63,7 @@ export default function StudentNotesPlanRoute({
             value: getNotesPdfCount(planNotes),
           },
           {
-            label: "Access",
+            label: "Plan",
             value: activePlan,
           },
         ]}
@@ -49,19 +72,19 @@ export default function StudentNotesPlanRoute({
       <div className="studentNotesShelf studentNotesLevelShelf">
         <div className="studentNotesLevelHeader">
           <div>
-            <span>{activePlan} Plan</span>
+            <span>{planLabel}</span>
 
-            <h2>Subject-wise notes library</h2>
+            <h2>Choose a notes shelf</h2>
 
             <p>
-              Open a subject node, enter chapters, and continue into
-              student-visible PDFs from one premium revision flow.
+              Open a notes shelf, enter chapters, and continue into
+              student-visible PDF notes from the AspireNest learning flow.
             </p>
           </div>
 
           <div className="studentNotesLevelStatus">
             <strong>{subjects.length}</strong>
-            <span>Subject shelves</span>
+            <span>Notes shelves</span>
           </div>
         </div>
 
@@ -77,8 +100,8 @@ export default function StudentNotesPlanRoute({
                 key={subject.id}
                 icon={subject.cover || "📘"}
                 pill={activePlan}
-                title={subject.title}
-                text={subject.description}
+                title={getPublicNotesShelfTitle(subject)}
+                text={getPublicNotesShelfText(subject)}
                 firstStat={{
                   label: "PDFs",
                   value: subject.count,
@@ -87,7 +110,7 @@ export default function StudentNotesPlanRoute({
                   label: "Chapters",
                   value: subject.chapterCount || 1,
                 }}
-                footerText="Open subject shelf"
+                footerText="Open notes shelf"
                 onOpen={() =>
                   navigate(
                     `/ctet-tet/notes/plan/${activePlan}/${encodeURIComponent(

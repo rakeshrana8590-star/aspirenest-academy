@@ -123,6 +123,14 @@ import {
   StudentMockTestHistoryRoute,
   StudentMockLeaderboardRoute,
 } from "./components/exam/StudentMockTestRoutes.jsx";
+
+import {
+  StudentNotesLibraryRoute,
+  StudentNotesPlanRoute,
+  StudentNotesSubjectRoute,
+  StudentNotesChapterRoute,
+} from "./components/notes/student/index.js";
+
 import AdminMockTestHomeRoute from "./components/exam/AdminMockTestHomeRoute.jsx";
 import AdminMockTestAddRoute from "./components/exam/AdminMockTestAddRoute.jsx";
 import AdminMockTestManageRoute from "./components/exam/AdminMockTestManageRoute.jsx";
@@ -8710,398 +8718,38 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 <Route
   path="/ctet-tet/notes"
   element={
-    <section className="coursePages">
-      <div className="sectionHeader">
-        <span className="badge">CTET / TET Notes</span>
-
-        <h2>Notes & Revision Library</h2>
-
-        <p>
-          Access free notes, premium notes, revision sheets,
-          CDP notes, PYQ notes, and mentor-curated study material.
-        </p>
-      </div>
-
-      <div className="notesNetflixLibrary">
-        {Object.entries(dynamicNotesLibraryData).map(([planName, subjects]) => (
-          <div className="notesShelf" key={planName}>
-            <div className="notesShelfHeader">
-              <h2>
-                {planName === "FREE" && "📘 FREE NOTES"}
-                {planName === "BASIC" && "🔷 BASIC NOTES"}
-                {planName === "PREMIUM" && "⭐ PREMIUM LIBRARY"}
-                {planName === "MENTORSHIP" && "👩‍🏫 MENTORSHIP VAULT"}
-              </h2>
-
-              <span>{subjects.length} Subjects</span>
-            </div>
-
-            <div className="notesShelfScrollWrap">
-              {notesScrollState[`notes-row-${planName}`]?.canScroll &&
-                !notesScrollState[`notes-row-${planName}`]?.atStart && (
-                  <button
-                    type="button"
-                    className="notesShelfArrow notesShelfArrowLeft"
-                    onClick={() =>
-                      scrollShelf(`notes-row-${planName}`, "left")
-                    }
-                  >
-                    ‹
-                  </button>
-                )}
-
-              <div
-                className="notesSubjectRow"
-                id={`notes-row-${planName}`}
-                onScroll={() =>
-                  updateNotesScrollState(`notes-row-${planName}`)
-                }
-                onMouseEnter={() =>
-                  updateNotesScrollState(`notes-row-${planName}`)
-                }
-              >
-                {subjects.map((subject) => (
-                  <button
-                    type="button"
-                    className="notesSubjectCard"
-                    key={subject.id}
-                    onClick={() =>
-                      navigate(
-                        `/ctet-tet/notes/plan/${planName}/${encodeURIComponent(
-                          subject.id
-                        )}`
-                      )
-                    }
-                  >
-                    <div className="notesSubjectIcon">{subject.cover}</div>
-                    <h3>{subject.title}</h3>
-                    <p>{subject.description}</p>
-                    <span className="notesSubjectTag">{planName}</span>
-                  </button>
-                ))}
-              </div>
-
-              {notesScrollState[`notes-row-${planName}`]?.canScroll &&
-                !notesScrollState[`notes-row-${planName}`]?.atEnd && (
-                  <button
-                    type="button"
-                    className="notesShelfArrow notesShelfArrowRight"
-                    onClick={() =>
-                      scrollShelf(`notes-row-${planName}`, "right")
-                    }
-                  >
-                    ›
-                  </button>
-                )}
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
+    <StudentNotesLibraryRoute
+      universalContent={universalContent}
+    />
   }
 />
 
 <Route
   path="/ctet-tet/notes/plan/:plan"
   element={
-    <section className="coursePages">
-      <div className="sectionHeader">
-        <span className="badge">{activeNotesPlan} NOTES</span>
-
-        <h2>{activeNotesPlan} Subject Library</h2>
-
-        <p>Choose a subject to open chapters and PDF resources.</p>
-      </div>
-
-      <div className="notesShelfScrollWrap">
-        {notesScrollState[`notes-row-${activeNotesPlan}`]?.canScroll &&
-          !notesScrollState[`notes-row-${activeNotesPlan}`]?.atStart && (
-            <button
-              type="button"
-              className="notesShelfArrow notesShelfArrowLeft"
-              onClick={() =>
-                scrollShelf(`notes-row-${activeNotesPlan}`, "left")
-              }
-            >
-              ‹
-            </button>
-          )}
-
-        <div
-          className="notesSubjectRow"
-          id={`notes-row-${activeNotesPlan}`}
-          onScroll={() =>
-            updateNotesScrollState(`notes-row-${activeNotesPlan}`)
-          }
-          onMouseEnter={() =>
-            updateNotesScrollState(`notes-row-${activeNotesPlan}`)
-          }
-        >
-          {(dynamicNotesLibraryData[activeNotesPlan] || []).map((subject) => (
-            <button
-              type="button"
-              className="notesSubjectCard"
-              key={subject.id}
-              onClick={() =>
-                navigate(
-                  `/ctet-tet/notes/plan/${activeNotesPlan}/${encodeURIComponent(subject.id)}`
-                )
-              }
-            >
-              <div className="notesSubjectIcon">{subject.cover}</div>
-              <h3>{subject.title}</h3>
-              <p>{subject.description}</p>
-              <span className="notesSubjectTag">{activeNotesPlan}</span>
-            </button>
-          ))}
-        </div>
-
-        {notesScrollState[`notes-row-${activeNotesPlan}`]?.canScroll &&
-          !notesScrollState[`notes-row-${activeNotesPlan}`]?.atEnd && (
-            <button
-              type="button"
-              className="notesShelfArrow notesShelfArrowRight"
-              onClick={() =>
-                scrollShelf(`notes-row-${activeNotesPlan}`, "right")
-              }
-            >
-              ›
-            </button>
-          )}
-      </div>
-    </section>
+    <StudentNotesPlanRoute
+      universalContent={universalContent}
+    />
   }
 />
 
 <Route
   path="/ctet-tet/notes/plan/:plan/:subjectId"
   element={
-    <section className="notesSubjectRoutePage">
-      <button onClick={() => navigate("/ctet-tet/notes")}>
-        ← Back to Notes Library
-      </button>
-
-      <span className="notesSubjectRouteBadge">
-        {activeNotesPlan} LIBRARY
-      </span>
-
-      <h1>
-        {activeNotesSubject?.cover}{" "}
-        {activeNotesSubject?.title || "Subject Library"}
-      </h1>
-
-
-      <p>
-        Subject-wise PDF library. PDF resources will appear here.
-      </p>
-
-      <div className="chapterLibraryStack">
-  {Object.keys(
-    universalNotes
-      .filter((item) => {
-        const itemPlan = item.planType?.toUpperCase();
-
-        const normalizeSubject = (value = "") =>
-          value
-            .toString()
-            .toLowerCase()
-            .trim()
-            .replace(/-/g, " ")
-            .replace(/\s+/g, " ");
-
-        const itemSubject = normalizeSubject(
-          item.subject || item.category || ""
-        );
-
-        const activeSubject = normalizeSubject(
-          activeNotesSubject?.id || activeNotesSubjectId || ""
-        );
-
-        return (
-          itemPlan === activeNotesPlan &&
-          (
-            itemSubject.includes(activeSubject) ||
-            activeSubject.includes(itemSubject)
-          )
-        );
-      })
-      .reduce((chapters, pdf) => {
-        const chapterName =
-          pdf.chapter?.trim() || "General Notes";
-
-        const chapterId = chapterName
-          .toLowerCase()
-          .trim()
-          .replace(/\s+/g, "-");
-
-        return {
-          ...chapters,
-          [chapterId]: chapterName,
-        };
-      }, {})
-  ).map((chapterId) => {
-    const chapterName = universalNotes
-      .filter((item) => {
-        const itemPlan = item.planType?.toUpperCase();
-
-        const normalizeSubject = (value = "") =>
-          value
-            .toString()
-            .toLowerCase()
-            .trim()
-            .replace(/-/g, " ")
-            .replace(/\s+/g, " ");
-
-        const itemSubject = normalizeSubject(
-          item.subject || item.category || ""
-        );
-
-        const activeSubject = normalizeSubject(
-          activeNotesSubject?.id || activeNotesSubjectId || ""
-        );
-
-        return (
-          itemPlan === activeNotesPlan &&
-          (
-            itemSubject.includes(activeSubject) ||
-            activeSubject.includes(itemSubject)
-          )
-        );
-      })
-      .reduce((chapters, pdf) => {
-        const chapterName =
-          pdf.chapter?.trim() || "General Notes";
-
-        const id = chapterName
-          .toLowerCase()
-          .trim()
-          .replace(/\s+/g, "-");
-
-        return {
-          ...chapters,
-          [id]: chapterName,
-        };
-      }, {})[chapterId];
-
-    return (
-      <button
-        type="button"
-        className="notesSubjectCard chapterLibraryCard"
-        key={chapterId}
-        onClick={() =>
-          navigate(
-            `/ctet-tet/notes/plan/${activeNotesPlan}/${activeNotesSubjectId}/${chapterId}`
-          )
-        }
-      >
-        <div className="notesSubjectIcon">📘</div>
-        <h3>{chapterName}</h3>
-        <p>Open chapter PDFs</p>
-        <span className="notesSubjectTag">
-          {activeNotesPlan}
-        </span>
-      </button>
-    );
-  })}
-  </div>
-    </section>
+    <StudentNotesSubjectRoute
+      universalContent={universalContent}
+    />
   }
 />
 
 <Route
- path="/ctet-tet/notes/plan/:plan/:subjectId/:chapterId"
+  path="/ctet-tet/notes/plan/:plan/:subjectId/:chapterId"
   element={
-    <section className="notesSubjectRoutePage">
-      <button
-        onClick={() =>
-          navigate(
-            `/ctet-tet/notes/plan/${activeNotesPlan}/${activeNotesSubjectId}`
-          )
-        }
-      >
-        ← Back to Chapters
-      </button>
-
-      <span className="notesSubjectRouteBadge">
-        {activeNotesPlan} CHAPTER
-      </span>
-
-      <h1>
-        {location.pathname
-          .split("/")
-          .pop()
-          ?.replace(/-/g, " ")
-          .replace(/\b\w/g, (char) => char.toUpperCase())}
-      </h1>
-
-      <p>
-        Chapter-wise PDF library. Open or download your study PDFs.
-      </p>
-
-      <div className="pdfShelfRow">
-        {universalNotes
-          .filter((item) => {
-            const itemPlan = item.planType?.toUpperCase();
-
-            const normalizeValue = (value = "") =>
-              value
-                .toString()
-                .toLowerCase()
-                .trim()
-                .replace(/-/g, " ")
-                .replace(/\s+/g, " ");
-
-            const itemSubject = normalizeValue(
-              item.subject || item.category || ""
-            );
-
-            const activeSubject = normalizeValue(
-              activeNotesSubject?.id || activeNotesSubjectId || ""
-            );
-
-            const itemChapter = normalizeValue(
-              item.chapter || "General Notes"
-            );
-
-            const activeChapter = normalizeValue(
-              location.pathname.split("/").pop() || ""
-            );
-
-            return (
-              itemPlan === activeNotesPlan &&
-              (
-                itemSubject.includes(activeSubject) ||
-                activeSubject.includes(itemSubject)
-              ) &&
-              itemChapter.includes(activeChapter) ||
-              activeChapter.includes(itemChapter)
-            );
-          })
-          .map((pdf) => (
-            <div className="pdfMiniCard" key={pdf.id}>
-              <div className="pdfIcon">📄</div>
-
-              <h3>{pdf.title}</h3>
-
-              <p>{pdf.chapter || "Premium Study Material"}</p>
-
-              <span>{pdf.planType}</span>
-
-              <button
-                className="btnLink"
-                onClick={() =>
-                  handleNoteAccess({
-                    ...pdf,
-                    pdf: pdf.fileUrl || pdf.pdfUrl || pdf.pdf,
-                  })
-                }
-              >
-                Open PDF
-              </button>
-            </div>
-          ))}
-      </div>
-    </section>
+    <StudentNotesChapterRoute
+      universalContent={universalContent}
+      handleNoteAccess={handleNoteAccess}
+      hasPlanAccess={hasPlanAccess}
+    />
   }
 />
 

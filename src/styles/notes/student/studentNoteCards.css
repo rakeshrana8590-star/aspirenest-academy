@@ -1,253 +1,275 @@
 /* ===============================
    Student Notes — Cards
    StudentNoteCards.jsx only
+   Mock-test style rectangular premium cards
 ================================ */
 
 .studentNotesPlanCard,
 .studentNotesLevelCard,
 .studentNotesPdfCard {
-  min-width: 0;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  text-align: left;
-  color: #0f172a;
+  position: relative !important;
+  isolation: isolate !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: auto !important;
+  border-radius: 28px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  text-align: left !important;
+  color: #0f172a !important;
   background:
     radial-gradient(circle at 88% 10%, rgba(59, 130, 246, 0.13), transparent 35%),
     radial-gradient(circle at 8% 12%, rgba(249, 115, 22, 0.1), transparent 35%),
-    linear-gradient(145deg, #ffffff 0%, #f8fbff 100%);
-  box-shadow: 0 20px 54px rgba(15, 23, 42, 0.08);
+    linear-gradient(145deg, #ffffff 0%, #f8fbff 100%) !important;
+  box-shadow: 0 20px 54px rgba(15, 23, 42, 0.08) !important;
+}
+
+.studentNotesPlanCard::before,
+.studentNotesPlanCard::after,
+.studentNotesLevelCard::before,
+.studentNotesLevelCard::after,
+.studentNotesPdfCard::before,
+.studentNotesPdfCard::after {
+  display: none !important;
+  content: none !important;
 }
 
 .studentNotesPlanCard,
 .studentNotesLevelCard {
-  appearance: none;
-  cursor: pointer;
-  min-height: 268px;
-  padding: 20px;
-  border-radius: 28px;
-  display: flex;
-  flex-direction: column;
+  appearance: none !important;
+  cursor: pointer !important;
+  min-height: 286px !important;
+  padding: 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
-    border-color 0.2s ease;
+    border-color 0.2s ease !important;
 }
 
 .studentNotesPdfCard {
-  min-height: 340px;
-  padding: 22px;
-  border-radius: 28px;
-  display: flex;
-  flex-direction: column;
+  min-height: 340px !important;
+  padding: 22px !important;
+  display: flex !important;
+  flex-direction: column !important;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
-    border-color 0.2s ease;
+    border-color 0.2s ease !important;
 }
 
 .studentNotesPlanCard:hover,
 .studentNotesLevelCard:hover,
 .studentNotesPdfCard:hover {
-  transform: translateY(-4px);
-  border-color: rgba(249, 115, 22, 0.3);
-  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.12);
+  transform: translateY(-4px) !important;
+  border-color: rgba(249, 115, 22, 0.3) !important;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.12) !important;
 }
 
 .studentNotesPlanCard.isPremiumNotesPlan {
   background:
     radial-gradient(circle at 90% 10%, rgba(251, 146, 60, 0.2), transparent 36%),
     radial-gradient(circle at 8% 12%, rgba(59, 130, 246, 0.13), transparent 35%),
-    linear-gradient(145deg, #ffffff 0%, #fff7ed 100%);
-  border-color: rgba(249, 115, 22, 0.18);
+    linear-gradient(145deg, #ffffff 0%, #fff7ed 100%) !important;
+  border-color: rgba(249, 115, 22, 0.18) !important;
 }
 
 .studentNotesPlanCardTop,
 .studentNotesLevelCardTop,
 .studentNotesPdfTop {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 20px;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  margin-bottom: 22px !important;
 }
 
 .studentNotesPlanIcon,
 .studentNotesLevelIcon,
 .studentNotesPdfIcon {
-  width: 56px;
-  height: 56px;
-  border-radius: 20px;
-  display: grid;
-  place-items: center;
-  flex: 0 0 auto;
-  background: #fff7ed;
-  border: 1px solid rgba(249, 115, 22, 0.15);
-  font-size: 1.32rem;
-  box-shadow: 0 16px 30px rgba(249, 115, 22, 0.08);
+  width: 58px !important;
+  height: 58px !important;
+  border-radius: 20px !important;
+  display: grid !important;
+  place-items: center !important;
+  flex: 0 0 auto !important;
+  background: #fff7ed !important;
+  border: 1px solid rgba(249, 115, 22, 0.15) !important;
+  color: #0f172a !important;
+  font-size: 1.35rem !important;
+  box-shadow: 0 16px 30px rgba(249, 115, 22, 0.08) !important;
 }
 
 .studentNotesPlanPill,
 .studentNotesLevelPill,
 .studentNotesPdfBadges span {
-  min-height: 32px;
-  padding: 0 12px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  color: #c2410c;
-  background: #fff7ed;
-  font-size: 0.7rem;
-  font-weight: 1000;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  white-space: nowrap;
+  min-height: 32px !important;
+  max-width: 150px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #c2410c !important;
+  background: #fff7ed !important;
+  border: 1px solid rgba(249, 115, 22, 0.1) !important;
+  font-size: 0.7rem !important;
+  font-weight: 1000 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 .studentNotesPdfBadges {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px;
-  min-width: 0;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  min-width: 0 !important;
 }
 
 .studentNotesPlanCard h3,
 .studentNotesLevelCard h3,
 .studentNotesPdfCard h3 {
-  margin: 0;
-  color: #0f172a;
-  font-size: clamp(1.28rem, 1.55vw, 1.72rem);
-  line-height: 1.04;
-  letter-spacing: -0.052em;
-  font-weight: 1000;
+  margin: 0 !important;
+  color: #0f172a !important;
+  font-size: clamp(1.25rem, 1.5vw, 1.68rem) !important;
+  line-height: 1.04 !important;
+  letter-spacing: -0.052em !important;
+  font-weight: 1000 !important;
 }
 
 .studentNotesPlanCard p,
 .studentNotesLevelCard p,
 .studentNotesPdfCard p {
-  min-height: 50px;
-  margin: 12px 0 0;
-  color: #64748b;
-  font-size: 0.84rem;
-  line-height: 1.45;
-  font-weight: 850;
+  min-height: 58px !important;
+  margin: 12px 0 0 !important;
+  color: #64748b !important;
+  font-size: 0.84rem !important;
+  line-height: 1.45 !important;
+  font-weight: 850 !important;
 }
 
 .studentNotesPlanStats,
 .studentNotesLevelMini,
 .studentNotesPdfMeta {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 16px;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  margin-top: 16px !important;
 }
 
 .studentNotesPlanStats div,
 .studentNotesLevelMini div,
 .studentNotesPdfMeta div {
-  min-height: 68px;
-  padding: 12px;
-  border-radius: 18px;
-  background: rgba(248, 250, 252, 0.94);
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  min-width: 0;
+  min-height: 70px !important;
+  padding: 12px !important;
+  border-radius: 18px !important;
+  background: rgba(248, 250, 252, 0.94) !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  min-width: 0 !important;
 }
 
 .studentNotesPlanStats strong,
 .studentNotesLevelMini strong {
-  display: block;
-  color: #0f172a;
-  font-size: 1.42rem;
-  line-height: 1;
-  letter-spacing: -0.05em;
-  font-weight: 1000;
+  display: block !important;
+  color: #0f172a !important;
+  font-size: 1.42rem !important;
+  line-height: 1 !important;
+  letter-spacing: -0.05em !important;
+  font-weight: 1000 !important;
 }
 
 .studentNotesPlanStats span,
 .studentNotesLevelMini span,
 .studentNotesPdfMeta span {
-  display: block;
-  margin-top: 6px;
-  color: #64748b;
-  font-size: 0.68rem;
-  font-weight: 950;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  display: block !important;
+  margin-top: 6px !important;
+  color: #64748b !important;
+  font-size: 0.68rem !important;
+  font-weight: 950 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
 }
 
 .studentNotesPdfMeta strong {
-  display: block;
-  margin-top: 6px;
-  color: #0f172a;
-  font-size: 0.86rem;
-  line-height: 1.25;
-  font-weight: 1000;
-  overflow-wrap: anywhere;
+  display: block !important;
+  margin-top: 6px !important;
+  color: #0f172a !important;
+  font-size: 0.86rem !important;
+  line-height: 1.25 !important;
+  font-weight: 1000 !important;
+  overflow-wrap: anywhere !important;
 }
 
 .studentNotesPlanFooter,
 .studentNotesLevelFooter,
 .studentNotesPdfFooter {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: auto;
-  padding-top: 14px;
-  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin-top: auto !important;
+  padding-top: 14px !important;
+  border-top: 1px solid rgba(15, 23, 42, 0.08) !important;
 }
 
 .studentNotesPlanFooter span,
 .studentNotesLevelFooter span,
 .studentNotesPdfFooter span {
-  color: #64748b;
-  font-size: 0.76rem;
-  line-height: 1.3;
-  font-weight: 900;
+  color: #64748b !important;
+  font-size: 0.76rem !important;
+  line-height: 1.3 !important;
+  font-weight: 900 !important;
 }
 
 .studentNotesPlanFooter strong,
 .studentNotesLevelFooter strong,
 .studentNotesPdfFooter button {
-  min-height: 34px;
-  padding: 0 12px;
-  border-radius: 999px;
-  border: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  background: #0f172a;
-  font-size: 0.76rem;
-  font-weight: 1000;
-  white-space: nowrap;
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14);
+  min-height: 34px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  border: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #ffffff !important;
+  background: #0f172a !important;
+  font-size: 0.76rem !important;
+  font-weight: 1000 !important;
+  white-space: nowrap !important;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14) !important;
 }
 
 .studentNotesPdfFooter button {
-  cursor: pointer;
+  cursor: pointer !important;
 }
 
 @media (max-width: 760px) {
   .studentNotesPlanCard,
   .studentNotesLevelCard,
   .studentNotesPdfCard {
-    min-height: auto;
+    min-height: auto !important;
   }
 
   .studentNotesPlanStats,
   .studentNotesLevelMini,
   .studentNotesPdfMeta {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
   .studentNotesPlanFooter,
   .studentNotesLevelFooter,
   .studentNotesPdfFooter {
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: flex-start !important;
+    flex-direction: column !important;
   }
 
   .studentNotesPdfFooter button {
-    width: 100%;
+    width: 100% !important;
   }
 }

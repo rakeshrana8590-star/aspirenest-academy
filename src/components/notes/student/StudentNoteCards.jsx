@@ -14,7 +14,7 @@ import {
 } from "../shared/notesUtils";
 
 export function StudentNotesPlanCard({ planName, notes = [], onOpen }) {
-  const subjects = buildNotesSubjectList(notes);
+  const shelves = buildNotesSubjectList(notes);
   const pdfCount = getNotesPdfCount(notes);
 
   return (
@@ -39,13 +39,13 @@ export function StudentNotesPlanCard({ planName, notes = [], onOpen }) {
 
       <p>
         {NOTES_PLAN_DESCRIPTIONS[planName] ||
-          "Open subject-wise and chapter-wise notes inside one revision flow."}
+          "Open shelf-wise and chapter-wise notes inside one revision flow."}
       </p>
 
       <div className="studentNotesPlanStats">
         <div>
-          <strong>{subjects.length}</strong>
-          <span>Subjects</span>
+          <strong>{shelves.length}</strong>
+          <span>Shelves</span>
         </div>
 
         <div>
@@ -55,7 +55,7 @@ export function StudentNotesPlanCard({ planName, notes = [], onOpen }) {
       </div>
 
       <div className="studentNotesPlanFooter">
-        <span>{notes.length > 0 ? "Open notes shelf" : "Waiting for notes"}</span>
+        <span>{notes.length > 0 ? "Open notes shelf" : "Waiting for PDFs"}</span>
         <strong>Open →</strong>
       </div>
     </button>

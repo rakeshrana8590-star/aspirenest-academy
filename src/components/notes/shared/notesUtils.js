@@ -49,7 +49,6 @@ export const NOTES_PLAN_ORDER = [
       note.planType ||
         note.accessPlan ||
         note.plan ||
-        note.type ||
         "FREE"
     )
       .trim()
@@ -57,7 +56,9 @@ export const NOTES_PLAN_ORDER = [
   }
   
   export function getNoteStatus(note = {}) {
-    return String(note.status || "published").trim().toLowerCase();
+    return String(note.status || "")
+      .trim()
+      .toLowerCase();
   }
   
   export function isPublishedNote(note = {}) {
@@ -65,16 +66,9 @@ export const NOTES_PLAN_ORDER = [
   }
   
   export function isNotesContent(note = {}) {
-    const section = String(note.section || "").trim().toLowerCase();
-    const contentType = String(note.contentType || "").trim().toLowerCase();
-    const type = String(note.type || "").trim().toLowerCase();
-  
-    return (
-      section === "notes" ||
-      contentType === "note" ||
-      contentType === "pdf" ||
-      type === "note"
-    );
+    return String(note.section || "")
+      .trim()
+      .toLowerCase() === "notes";
   }
   
   export function getNotePdfUrl(note = {}) {
@@ -82,14 +76,13 @@ export const NOTES_PLAN_ORDER = [
       note.pdfUrl ||
       note.fileUrl ||
       note.pdf ||
-      note.url ||
       note.sourceUrl ||
       ""
     );
   }
   
   export function hasNotePdf(note = {}) {
-    return Boolean(getNotePdfUrl(note));
+    return Boolean(String(getNotePdfUrl(note) || "").trim());
   }
   
   export function getNoteSubject(note = {}) {
@@ -111,7 +104,10 @@ export const NOTES_PLAN_ORDER = [
   
   export function getPublishedNotes(contentItems = []) {
     return contentItems.filter(
-      (item) => isNotesContent(item) && isPublishedNote(item)
+      (item) =>
+        isNotesContent(item) &&
+        isPublishedNote(item) &&
+        hasNotePdf(item)
     );
   }
   
