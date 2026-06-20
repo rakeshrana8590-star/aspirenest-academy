@@ -1,123 +1,474 @@
 /* ===============================
    Admin Notes — Route Layout
-   Page + Shelf + Grids only
+   Home uses mock-test shell + notes scoped styling
+   Plan/Subject/Chapter routes keep adminNotesPage layout
 ================================ */
 
+/* Admin notes home page shell */
+.adminNotesMockAlignedPage {
+  min-height: calc(100vh - 92px);
+  padding: 34px 7vw 74px;
+  background:
+    radial-gradient(circle at 8% 14%, rgba(249, 115, 22, 0.14), transparent 30%),
+    radial-gradient(circle at 92% 18%, rgba(59, 130, 246, 0.16), transparent 32%),
+    linear-gradient(180deg, #f8fbff 0%, #ffffff 54%, #f8fbff 100%);
+}
+
+/* Keep notes home aligned with mock-test launched layout */
+.adminNotesMockAlignedPage .adminMockHomeShell {
+  width: min(100%, 1500px);
+  margin: 0 auto;
+}
+
+.adminNotesMockAlignedPage .adminMockCommandCenter {
+  margin-top: 28px;
+  padding: 38px;
+  border-radius: 34px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 10% 12%, rgba(249, 115, 22, 0.1), transparent 34%),
+    radial-gradient(circle at 92% 10%, rgba(59, 130, 246, 0.13), transparent 34%),
+    rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+}
+
+.adminNotesMockAlignedPage .adminMockSectionTitle {
+  margin-bottom: 24px;
+}
+
+.adminNotesMockAlignedPage .adminMockSectionTitle > span {
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  color: #ea580c;
+  background: #fff7ed;
+  font-size: 0.74rem;
+  font-weight: 1000;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.adminNotesMockAlignedPage .adminMockSectionTitle h2 {
+  max-width: 940px;
+  margin: 16px 0 0;
+  color: #0f172a;
+  font-size: clamp(2.35rem, 4vw, 4.25rem);
+  line-height: 0.94;
+  letter-spacing: -0.078em;
+  font-weight: 1000;
+}
+
+.adminNotesMockAlignedPage .adminMockSectionTitle p {
+  max-width: 780px;
+  margin: 14px 0 0;
+  color: #64748b;
+  font-size: 0.94rem;
+  line-height: 1.55;
+  font-weight: 850;
+}
+
+.adminNotesMockAlignedPage .adminMockCommandLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 22px;
+  align-items: stretch;
+}
+
+.adminNotesMockAlignedPage .adminMockPrimaryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.adminNotesMockAlignedPage .adminMockActionCard {
+  position: relative;
+  min-height: 292px;
+  padding: 22px;
+  border-radius: 30px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  color: #0f172a;
+  background:
+    radial-gradient(circle at 88% 10%, rgba(59, 130, 246, 0.11), transparent 34%),
+    radial-gradient(circle at 10% 10%, rgba(249, 115, 22, 0.08), transparent 30%),
+    linear-gradient(145deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 18px 46px rgba(15, 23, 42, 0.06);
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.adminNotesMockAlignedPage .adminMockActionCard:hover {
+  transform: translateY(-4px);
+  border-color: rgba(249, 115, 22, 0.24);
+  box-shadow: 0 28px 68px rgba(15, 23, 42, 0.11);
+}
+
+.adminNotesMockAlignedPage .adminMockActionTop {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.adminNotesMockAlignedPage .adminMockActionIcon {
+  width: 58px;
+  height: 58px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: #ffffff;
+  background: linear-gradient(135deg, #f97316, #fb923c);
+  border: 1px solid rgba(249, 115, 22, 0.18);
+  box-shadow: 0 18px 36px rgba(249, 115, 22, 0.18);
+  font-size: 1.32rem;
+  font-weight: 1000;
+}
+
+.adminNotesMockAlignedPage .adminMockTone-blue .adminMockActionIcon {
+  background: linear-gradient(135deg, #2563eb, #60a5fa);
+  box-shadow: 0 18px 36px rgba(37, 99, 235, 0.18);
+}
+
+.adminNotesMockAlignedPage .adminMockTone-green .adminMockActionIcon {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  box-shadow: 0 18px 36px rgba(22, 163, 74, 0.18);
+}
+
+.adminNotesMockAlignedPage .adminMockTone-purple .adminMockActionIcon {
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+  box-shadow: 0 18px 36px rgba(124, 58, 237, 0.18);
+}
+
+.adminNotesMockAlignedPage .adminMockActionArrow {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: #f97316;
+  background: #fff7ed;
+  border: 1px solid rgba(249, 115, 22, 0.14);
+  font-size: 1rem;
+  font-weight: 1000;
+}
+
+.adminNotesMockAlignedPage .adminMockActionLabel {
+  display: block;
+  margin-top: 22px;
+  color: #f97316;
+  font-size: 0.72rem;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 1000;
+}
+
+.adminNotesMockAlignedPage .adminMockActionCard > strong {
+  display: block;
+  margin-top: 10px;
+  color: #0f172a;
+  font-size: clamp(1.5rem, 1.8vw, 2rem);
+  line-height: 1.03;
+  letter-spacing: -0.055em;
+  font-weight: 1000;
+}
+
+.adminNotesMockAlignedPage .adminMockActionCard > small {
+  display: block;
+  max-width: 390px;
+  margin-top: 14px;
+  color: #64748b;
+  font-size: 0.92rem;
+  line-height: 1.52;
+  font-weight: 850;
+}
+
+/* Right quick rail */
+.adminNotesMockAlignedPage .adminMockQuickRail {
+  min-height: 100%;
+  padding: 18px;
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 92% 10%, rgba(59, 130, 246, 0.1), transparent 32%),
+    linear-gradient(145deg, #f8fbff 0%, #eef5ff 100%);
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.adminNotesMockAlignedPage .adminMockQuickRailHeader > span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: #f97316;
+  background: #fff7ed;
+  border: 1px solid rgba(249, 115, 22, 0.12);
+  font-size: 0.73rem;
+  font-weight: 1000;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.adminNotesMockAlignedPage .adminMockQuickRailHeader > strong {
+  display: block;
+  margin-top: 16px;
+  color: #0f172a;
+  font-size: clamp(1.35rem, 1.55vw, 1.75rem);
+  line-height: 1.08;
+  letter-spacing: -0.05em;
+  font-weight: 1000;
+}
+
+.adminNotesMockAlignedPage .adminMockQuickList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.adminNotesMockAlignedPage .adminMockQuickList button {
+  width: 100%;
+  min-height: 64px;
+  padding: 0 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  text-align: left;
+  color: #0f172a;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+.adminNotesMockAlignedPage .adminMockQuickList button:hover {
+  border-color: rgba(249, 115, 22, 0.22);
+  transform: translateY(-1px);
+}
+
+.adminNotesMockAlignedPage .adminMockQuickList button > span {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.adminNotesMockAlignedPage .adminMockQuickList button strong {
+  color: #0f172a;
+  font-size: 1rem;
+  line-height: 1.1;
+  font-weight: 1000;
+  letter-spacing: -0.03em;
+}
+
+.adminNotesMockAlignedPage .adminMockQuickList button small {
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  font-weight: 850;
+}
+
+.adminNotesMockAlignedPage .adminMockQuickList button em {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: #f97316;
+  background: #fff7ed;
+  border: 1px solid rgba(249, 115, 22, 0.1);
+  font-style: normal;
+  font-size: 0.95rem;
+  font-weight: 1000;
+}
+
+/* Home footer */
+.adminNotesMockAlignedPage .adminMockHomeFooter {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.adminNotesMockAlignedPage .adminMockBackButton {
+  min-height: 52px;
+  padding: 0 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  cursor: pointer;
+  color: #0f172a;
+  background: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 1000;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+}
+
+/* Generic admin notes route layout for plan/subject/chapter pages */
 .adminNotesPage {
-    min-height: calc(100vh - 92px);
-    padding: 34px 7vw 74px;
-    background:
-      radial-gradient(circle at 8% 14%, rgba(249, 115, 22, 0.14), transparent 30%),
-      radial-gradient(circle at 92% 18%, rgba(59, 130, 246, 0.16), transparent 32%),
-      linear-gradient(180deg, #f8fbff 0%, #ffffff 54%, #f8fbff 100%);
+  min-height: calc(100vh - 92px);
+  padding: 34px 7vw 74px;
+  background:
+    radial-gradient(circle at 8% 14%, rgba(249, 115, 22, 0.14), transparent 30%),
+    radial-gradient(circle at 92% 18%, rgba(59, 130, 246, 0.16), transparent 32%),
+    linear-gradient(180deg, #f8fbff 0%, #ffffff 54%, #f8fbff 100%);
+}
+
+.adminNotesShelf {
+  margin-top: 28px;
+  padding: 34px;
+  border-radius: 34px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 10% 12%, rgba(249, 115, 22, 0.1), transparent 34%),
+    radial-gradient(circle at 92% 10%, rgba(59, 130, 246, 0.13), transparent 34%),
+    rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+}
+
+.adminNotesShelfHeader {
+  margin-bottom: 24px;
+}
+
+.adminNotesShelfHeader > span {
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  color: #ea580c;
+  background: #fff7ed;
+  font-size: 0.74rem;
+  font-weight: 1000;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.adminNotesShelfHeader h2 {
+  max-width: 940px;
+  margin: 16px 0 0;
+  color: #0f172a;
+  font-size: clamp(2.35rem, 4vw, 4.25rem);
+  line-height: 0.94;
+  letter-spacing: -0.078em;
+  font-weight: 1000;
+}
+
+.adminNotesShelfHeader p {
+  max-width: 780px;
+  margin: 14px 0 0;
+  color: #64748b;
+  font-size: 0.94rem;
+  line-height: 1.55;
+  font-weight: 850;
+}
+
+.adminNotesStatusGrid,
+.adminNotesPlanGrid,
+.adminNotesQuickGrid,
+.adminNotesPdfGrid {
+  display: grid;
+  gap: 16px;
+}
+
+.adminNotesStatusGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 28px;
+}
+
+.adminNotesPlanGrid,
+.adminNotesQuickGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.adminNotesPdfGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.adminNotesBackRow {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.adminNotesStudioBackBtn {
+  min-height: 52px;
+  padding: 0 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  cursor: pointer;
+  color: #0f172a;
+  background: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 1000;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+}
+
+@media (max-width: 1280px) {
+  .adminNotesMockAlignedPage .adminMockCommandLayout {
+    grid-template-columns: 1fr;
   }
-  
-  .adminNotesShelf {
-    margin-top: 28px;
-    padding: 34px;
-    border-radius: 34px;
-    overflow: hidden;
-    background:
-      radial-gradient(circle at 10% 12%, rgba(249, 115, 22, 0.1), transparent 34%),
-      radial-gradient(circle at 92% 10%, rgba(59, 130, 246, 0.13), transparent 34%),
-      rgba(255, 255, 255, 0.94);
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
-  }
-  
-  .adminNotesShelfHeader {
-    margin-bottom: 24px;
-  }
-  
-  .adminNotesShelfHeader > span {
-    min-height: 34px;
-    padding: 0 14px;
-    border-radius: 999px;
-    display: inline-flex;
-    align-items: center;
-    width: max-content;
-    color: #ea580c;
-    background: #fff7ed;
-    font-size: 0.74rem;
-    font-weight: 1000;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-  
-  .adminNotesShelfHeader h2 {
-    max-width: 940px;
-    margin: 16px 0 0;
-    color: #0f172a;
-    font-size: clamp(2.35rem, 4vw, 4.25rem);
-    line-height: 0.94;
-    letter-spacing: -0.078em;
-    font-weight: 1000;
-  }
-  
-  .adminNotesShelfHeader p {
-    max-width: 780px;
-    margin: 14px 0 0;
-    color: #64748b;
-    font-size: 0.94rem;
-    line-height: 1.55;
-    font-weight: 850;
-  }
-  
-  .adminNotesStatusGrid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 16px;
-    margin-top: 28px;
-  }
-  
+
+  .adminNotesStatusGrid,
+  .adminNotesPlanGrid,
   .adminNotesQuickGrid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  
-  .adminNotesPlanGrid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 16px;
-  }
-  
+
   .adminNotesPdfGrid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  
-  @media (max-width: 1280px) {
-    .adminNotesStatusGrid,
-    .adminNotesQuickGrid,
-    .adminNotesPlanGrid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  
-    .adminNotesPdfGrid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+}
+
+@media (max-width: 760px) {
+  .adminNotesMockAlignedPage,
+  .adminNotesPage {
+    padding: 26px 16px 60px;
   }
-  
-  @media (max-width: 760px) {
-    .adminNotesPage {
-      padding: 26px 16px 60px;
-    }
-  
-    .adminNotesShelf {
-      padding: 22px;
-      border-radius: 26px;
-    }
-  
-    .adminNotesShelfHeader h2 {
-      font-size: clamp(2.15rem, 11vw, 3.15rem);
-    }
-  
-    .adminNotesStatusGrid,
-    .adminNotesQuickGrid,
-    .adminNotesPlanGrid,
-    .adminNotesPdfGrid {
-      grid-template-columns: 1fr;
-    }
+
+  .adminNotesMockAlignedPage .adminMockCommandCenter,
+  .adminNotesShelf {
+    padding: 22px;
+    border-radius: 26px;
   }
+
+  .adminNotesMockAlignedPage .adminMockSectionTitle h2,
+  .adminNotesShelfHeader h2 {
+    font-size: clamp(2.15rem, 11vw, 3.15rem);
+  }
+
+  .adminNotesMockAlignedPage .adminMockPrimaryGrid,
+  .adminNotesStatusGrid,
+  .adminNotesPlanGrid,
+  .adminNotesQuickGrid,
+  .adminNotesPdfGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminNotesMockAlignedPage .adminMockActionCard {
+    min-height: auto;
+  }
+
+  .adminNotesMockAlignedPage .adminMockQuickList button {
+    align-items: flex-start;
+  }
+}

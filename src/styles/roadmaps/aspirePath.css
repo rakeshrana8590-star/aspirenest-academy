@@ -1,16 +1,33 @@
 /* =========================================================
-   AspirePath™ — Smart Study Roadmaps
-   Scoped premium UI foundation
-   Admin: Roadmap Studio
-   Student: My AspirePath
+   AspirePath™ Roadmap System
+   1 App • 1 System premium UI
+   Student + Admin Roadmap Studio
    ========================================================= */
 
    .aspirePathShell,
    .roadmapStudioShell {
-     width: min(1180px, calc(100% - 32px));
+     --ap-orange: #ff7a00;
+     --ap-orange-deep: #ea580c;
+     --ap-gold: #ffd08a;
+     --ap-ink: #07111f;
+     --ap-navy: #0b1220;
+     --ap-blue: #173b78;
+     --ap-blue-soft: #2563eb;
+     --ap-slate: #64748b;
+     --ap-muted: #94a3b8;
+     --ap-line: rgba(148, 163, 184, 0.22);
+     --ap-line-strong: rgba(255, 255, 255, 0.14);
+     --ap-white: #ffffff;
+     --ap-soft: #f8fafc;
+     --ap-danger: #ef4444;
+     --ap-success: #22c55e;
+     --ap-shadow: 0 34px 90px rgba(15, 23, 42, 0.18);
+     --ap-dark-shadow: 0 34px 100px rgba(2, 6, 23, 0.34);
+   
+     width: min(1400px, calc(100% - 48px));
      margin: 0 auto;
-     padding: 34px 0 70px;
-     color: #111827;
+     padding: 34px 0 78px;
+     color: var(--ap-ink);
    }
    
    .aspirePathShell *,
@@ -18,18 +35,29 @@
      box-sizing: border-box;
    }
    
+   .aspirePathShell a,
+   .roadmapStudioShell a {
+     color: inherit;
+   }
+   
+   /* =========================================================
+      Premium Hero
+      ========================================================= */
+   
    .aspirePathHero,
    .roadmapStudioHero {
      position: relative;
      overflow: hidden;
      border-radius: 34px;
-     padding: clamp(26px, 4vw, 54px);
+     padding: clamp(30px, 4.5vw, 62px);
      background:
-       radial-gradient(circle at top left, rgba(255, 122, 0, 0.18), transparent 34%),
-       radial-gradient(circle at bottom right, rgba(15, 23, 42, 0.12), transparent 36%),
-       linear-gradient(135deg, #fff7ed 0%, #ffffff 52%, #f8fafc 100%);
-     border: 1px solid rgba(251, 146, 60, 0.22);
-     box-shadow: 0 28px 90px rgba(15, 23, 42, 0.09);
+       radial-gradient(circle at 8% 8%, rgba(255, 122, 0, 0.34), transparent 29%),
+       radial-gradient(circle at 84% 18%, rgba(37, 99, 235, 0.34), transparent 32%),
+       radial-gradient(circle at 76% 90%, rgba(255, 208, 138, 0.16), transparent 36%),
+       linear-gradient(135deg, #261917 0%, #0b1220 42%, #07111f 100%);
+     border: 1px solid rgba(255, 255, 255, 0.13);
+     box-shadow: var(--ap-dark-shadow);
+     isolation: isolate;
    }
    
    .aspirePathHero::before,
@@ -37,9 +65,24 @@
      content: "";
      position: absolute;
      inset: 16px;
-     border-radius: 28px;
-     border: 1px solid rgba(255, 255, 255, 0.7);
+     border-radius: 26px;
+     border: 1px solid rgba(255, 255, 255, 0.11);
      pointer-events: none;
+     z-index: 0;
+   }
+   
+   .aspirePathHero::after,
+   .roadmapStudioHero::after {
+     content: "";
+     position: absolute;
+     width: 380px;
+     height: 380px;
+     right: -150px;
+     top: -130px;
+     border-radius: 999px;
+     background: rgba(255, 255, 255, 0.08);
+     filter: blur(2px);
+     z-index: 0;
    }
    
    .aspirePathHeroGrid,
@@ -47,8 +90,8 @@
      position: relative;
      z-index: 1;
      display: grid;
-     grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
-     gap: 28px;
+     grid-template-columns: minmax(0, 1.12fr) minmax(330px, 0.78fr);
+     gap: clamp(24px, 4vw, 46px);
      align-items: center;
    }
    
@@ -56,39 +99,42 @@
    .roadmapStudioEyebrow {
      display: inline-flex;
      align-items: center;
-     gap: 9px;
+     gap: 10px;
      width: fit-content;
-     padding: 9px 14px;
+     min-height: 38px;
+     padding: 0 16px;
      border-radius: 999px;
-     background: rgba(255, 255, 255, 0.78);
-     border: 1px solid rgba(251, 146, 60, 0.24);
-     color: #ea580c;
+     color: #fed7aa;
+     background: rgba(255, 255, 255, 0.09);
+     border: 1px solid rgba(255, 208, 138, 0.34);
+     box-shadow: 0 16px 36px rgba(255, 122, 0, 0.16);
      font-size: 12px;
-     font-weight: 900;
-     letter-spacing: 0.12em;
+     font-weight: 950;
+     letter-spacing: 0.14em;
      text-transform: uppercase;
-     box-shadow: 0 14px 34px rgba(249, 115, 22, 0.1);
    }
    
    .aspirePathTitle,
    .roadmapStudioTitle {
-     margin: 18px 0 12px;
-     max-width: 760px;
-     color: #0f172a;
-     font-size: clamp(36px, 5vw, 72px);
-     line-height: 0.94;
-     font-weight: 950;
-     letter-spacing: -0.065em;
+     margin: 20px 0 14px;
+     max-width: 820px;
+     color: #ffffff;
+     font-size: clamp(46px, 6vw, 88px);
+     line-height: 0.92;
+     font-weight: 1000;
+     letter-spacing: -0.075em;
+     text-wrap: balance;
+     text-shadow: 0 22px 60px rgba(0, 0, 0, 0.24);
    }
    
    .aspirePathSubtitle,
    .roadmapStudioSubtitle {
-     max-width: 660px;
+     max-width: 760px;
      margin: 0;
-     color: #64748b;
-     font-size: clamp(16px, 1.8vw, 21px);
+     color: rgba(226, 232, 240, 0.78);
+     font-size: clamp(16px, 1.65vw, 21px);
      line-height: 1.72;
-     font-weight: 650;
+     font-weight: 750;
    }
    
    .aspirePathHeroActions,
@@ -96,8 +142,88 @@
      display: flex;
      flex-wrap: wrap;
      gap: 12px;
-     margin-top: 26px;
+     margin-top: 28px;
    }
+   
+   .aspirePathHeroPanel,
+   .roadmapStudioHeroPanel {
+     position: relative;
+     min-height: 270px;
+     padding: 26px;
+     border-radius: 30px;
+     background:
+       radial-gradient(circle at 12% 0%, rgba(255, 122, 0, 0.18), transparent 35%),
+       linear-gradient(145deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.06));
+     border: 1px solid rgba(255, 255, 255, 0.16);
+     box-shadow:
+       0 34px 80px rgba(0, 0, 0, 0.28),
+       inset 0 1px 0 rgba(255, 255, 255, 0.16);
+     backdrop-filter: blur(18px);
+   }
+   
+   .aspirePathHeroPanel::before,
+   .roadmapStudioHeroPanel::before {
+     content: "AspirePath";
+     position: absolute;
+     top: 20px;
+     right: 24px;
+     color: rgba(255, 255, 255, 0.72);
+     font-size: 13px;
+     font-weight: 1000;
+     letter-spacing: -0.02em;
+   }
+   
+   .roadmapStudioHeroPanel::before {
+     content: "Roadmap Studio";
+   }
+   
+   .aspirePathMetricGrid,
+   .roadmapStudioMetricGrid {
+     display: grid;
+     grid-template-columns: repeat(2, minmax(0, 1fr));
+     gap: 14px;
+     height: 100%;
+     align-content: end;
+     padding-top: 42px;
+   }
+   
+   .aspirePathMetricCard,
+   .roadmapStudioMetricCard {
+     min-height: 104px;
+     border-radius: 22px;
+     padding: 18px 18px 16px;
+     background:
+       linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.06));
+     border: 1px solid rgba(255, 255, 255, 0.13);
+     box-shadow:
+       inset 0 1px 0 rgba(255, 255, 255, 0.18),
+       0 18px 40px rgba(0, 0, 0, 0.18);
+   }
+   
+   .aspirePathMetricValue,
+   .roadmapStudioMetricValue {
+     display: block;
+     color: #ffffff;
+     font-size: clamp(26px, 3vw, 38px);
+     line-height: 1;
+     font-weight: 1000;
+     letter-spacing: -0.06em;
+   }
+   
+   .aspirePathMetricLabel,
+   .roadmapStudioMetricLabel {
+     display: block;
+     margin-top: 10px;
+     color: rgba(226, 232, 240, 0.72);
+     font-size: 12px;
+     font-weight: 950;
+     letter-spacing: 0.08em;
+     text-transform: uppercase;
+   }
+   
+   /* =========================================================
+      Buttons
+      ========================================================= */
    
    .aspirePathPrimaryBtn,
    .roadmapStudioPrimaryBtn,
@@ -108,52 +234,64 @@
    .aspirePathDangerBtn,
    .roadmapStudioDangerBtn {
      appearance: none;
-     border: 0;
-     cursor: pointer;
-     min-height: 44px;
+     min-height: 46px;
      border-radius: 999px;
-     padding: 0 18px;
+     padding: 0 19px;
      display: inline-flex;
      align-items: center;
      justify-content: center;
      gap: 9px;
-     font-size: 14px;
-     font-weight: 900;
+     border: 0;
+     cursor: pointer;
      text-decoration: none;
+     font-size: 14px;
+     font-weight: 950;
+     letter-spacing: -0.02em;
      transition:
        transform 0.18s ease,
        box-shadow 0.18s ease,
        border-color 0.18s ease,
-       background 0.18s ease;
+       background 0.18s ease,
+       opacity 0.18s ease;
    }
    
    .aspirePathPrimaryBtn,
    .roadmapStudioPrimaryBtn {
      color: #ffffff;
-     background: linear-gradient(135deg, #f97316, #ea580c);
-     box-shadow: 0 16px 36px rgba(249, 115, 22, 0.28);
+     background: linear-gradient(135deg, #ff8a1f, #f97316 48%, #ea580c);
+     box-shadow:
+       0 18px 38px rgba(249, 115, 22, 0.34),
+       inset 0 1px 0 rgba(255, 255, 255, 0.24);
    }
    
    .aspirePathSecondaryBtn,
    .roadmapStudioSecondaryBtn {
      color: #0f172a;
      background: #ffffff;
-     border: 1px solid rgba(15, 23, 42, 0.12);
-     box-shadow: 0 14px 30px rgba(15, 23, 42, 0.07);
+     border: 1px solid rgba(15, 23, 42, 0.11);
+     box-shadow: 0 16px 34px rgba(15, 23, 42, 0.10);
+   }
+   
+   .aspirePathHero .aspirePathSecondaryBtn,
+   .roadmapStudioHero .roadmapStudioSecondaryBtn {
+     color: #ffffff;
+     background: rgba(255, 255, 255, 0.09);
+     border-color: rgba(255, 255, 255, 0.17);
+     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.13);
    }
    
    .aspirePathGhostBtn,
    .roadmapStudioGhostBtn {
      color: #334155;
-     background: rgba(255, 255, 255, 0.72);
-     border: 1px solid rgba(148, 163, 184, 0.28);
+     background: rgba(255, 255, 255, 0.78);
+     border: 1px solid rgba(148, 163, 184, 0.24);
    }
    
    .aspirePathDangerBtn,
    .roadmapStudioDangerBtn {
      color: #991b1b;
      background: #fff1f2;
-     border: 1px solid rgba(244, 63, 94, 0.18);
+     border: 1px solid rgba(244, 63, 94, 0.2);
    }
    
    .aspirePathPrimaryBtn:hover,
@@ -167,453 +305,466 @@
      transform: translateY(-2px);
    }
    
-   .aspirePathHeroPanel,
-   .roadmapStudioHeroPanel {
-     border-radius: 28px;
-     padding: 22px;
-     background: rgba(255, 255, 255, 0.86);
-     border: 1px solid rgba(255, 255, 255, 0.72);
-     box-shadow: 0 24px 70px rgba(15, 23, 42, 0.11);
-     backdrop-filter: blur(18px);
+   .aspirePathPrimaryBtn:disabled,
+   .roadmapStudioPrimaryBtn:disabled,
+   .aspirePathSecondaryBtn:disabled,
+   .roadmapStudioSecondaryBtn:disabled,
+   .aspirePathGhostBtn:disabled,
+   .roadmapStudioGhostBtn:disabled,
+   .aspirePathDangerBtn:disabled,
+   .roadmapStudioDangerBtn:disabled {
+     cursor: not-allowed;
+     opacity: 0.58;
+     transform: none;
    }
    
-   .aspirePathMetricGrid,
-   .roadmapStudioMetricGrid {
-     display: grid;
-     grid-template-columns: repeat(2, minmax(0, 1fr));
-     gap: 12px;
-   }
-   
-   .aspirePathMetricCard,
-   .roadmapStudioMetricCard {
-     border-radius: 22px;
-     padding: 18px;
-     background: linear-gradient(180deg, #ffffff, #f8fafc);
-     border: 1px solid rgba(226, 232, 240, 0.9);
-   }
-   
-   .aspirePathMetricValue,
-   .roadmapStudioMetricValue {
-     display: block;
-     color: #0f172a;
-     font-size: 28px;
-     line-height: 1;
-     font-weight: 950;
-     letter-spacing: -0.045em;
-   }
-   
-   .aspirePathMetricLabel,
-   .roadmapStudioMetricLabel {
-     display: block;
-     margin-top: 7px;
-     color: #64748b;
-     font-size: 12px;
-     font-weight: 850;
-     letter-spacing: 0.035em;
-     text-transform: uppercase;
-   }
+   /* =========================================================
+      Sections
+      ========================================================= */
    
    .aspirePathSection,
    .roadmapStudioSection {
-     margin-top: 28px;
+     position: relative;
+     margin-top: 34px;
+     padding: clamp(24px, 3.2vw, 38px);
+     border-radius: 30px;
+     background:
+       radial-gradient(circle at 4% 8%, rgba(255, 122, 0, 0.10), transparent 28%),
+       radial-gradient(circle at 96% 12%, rgba(37, 99, 235, 0.10), transparent 30%),
+       linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
+     border: 1px solid rgba(148, 163, 184, 0.22);
+     box-shadow: 0 26px 76px rgba(15, 23, 42, 0.09);
    }
    
    .aspirePathSectionHeader,
    .roadmapStudioSectionHeader {
      display: flex;
-     align-items: flex-end;
      justify-content: space-between;
-     gap: 18px;
-     margin-bottom: 16px;
+     gap: 22px;
+     align-items: flex-start;
+     margin-bottom: 24px;
    }
    
    .aspirePathSectionKicker,
    .roadmapStudioSectionKicker {
-     margin: 0 0 7px;
-     color: #ea580c;
+     margin: 0 0 9px;
+     color: var(--ap-orange-deep);
      font-size: 12px;
-     font-weight: 950;
-     letter-spacing: 0.12em;
+     font-weight: 1000;
+     letter-spacing: 0.14em;
      text-transform: uppercase;
    }
    
    .aspirePathSectionTitle,
    .roadmapStudioSectionTitle {
      margin: 0;
-     color: #0f172a;
-     font-size: clamp(24px, 3vw, 38px);
-     line-height: 1.05;
-     font-weight: 950;
-     letter-spacing: -0.045em;
+     max-width: 760px;
+     color: var(--ap-ink);
+     font-size: clamp(30px, 3.6vw, 54px);
+     line-height: 0.96;
+     font-weight: 1000;
+     letter-spacing: -0.065em;
    }
    
    .aspirePathSectionText,
    .roadmapStudioSectionText {
-     margin: 8px 0 0;
-     max-width: 680px;
+     max-width: 760px;
+     margin: 12px 0 0;
      color: #64748b;
      font-size: 15px;
      line-height: 1.65;
-     font-weight: 650;
+     font-weight: 750;
    }
+   
+   /* =========================================================
+      Grids / Cards
+      ========================================================= */
    
    .aspirePathGrid,
    .roadmapStudioGrid {
      display: grid;
      grid-template-columns: repeat(3, minmax(0, 1fr));
-     gap: 16px;
+     gap: 18px;
    }
    
    .aspirePathCard,
-   .roadmapStudioCard {
+   .roadmapStudioCard,
+   .aspirePathTodayCard,
+   .aspirePathLockCard {
      position: relative;
      overflow: hidden;
-     border-radius: 28px;
+     border-radius: 26px;
      padding: 22px;
-     background: #ffffff;
-     border: 1px solid rgba(226, 232, 240, 0.92);
-     box-shadow: 0 18px 52px rgba(15, 23, 42, 0.07);
+     background:
+       radial-gradient(circle at 0% 0%, rgba(255, 122, 0, 0.13), transparent 30%),
+       linear-gradient(145deg, #ffffff, #f8fafc);
+     border: 1px solid rgba(148, 163, 184, 0.22);
+     box-shadow: 0 22px 58px rgba(15, 23, 42, 0.10);
+   }
+   
+   .aspirePathTodayCard {
+     border-color: rgba(255, 122, 0, 0.26);
+     box-shadow: 0 26px 70px rgba(249, 115, 22, 0.13);
    }
    
    .aspirePathCard::before,
-   .roadmapStudioCard::before {
+   .roadmapStudioCard::before,
+   .aspirePathTodayCard::before,
+   .aspirePathLockCard::before {
      content: "";
      position: absolute;
-     inset: 0 0 auto;
-     height: 4px;
-     background: linear-gradient(90deg, #fb923c, #f97316, #0f172a);
-     opacity: 0.9;
+     inset: 0;
+     border-radius: inherit;
+     border-top: 1px solid rgba(255, 255, 255, 0.9);
+     pointer-events: none;
    }
    
-   .aspirePathCardTop,
-   .roadmapStudioCardTop {
+   .aspirePathCardTop {
      display: flex;
-     align-items: flex-start;
      justify-content: space-between;
+     align-items: flex-start;
      gap: 14px;
+     margin-bottom: 16px;
    }
    
    .aspirePathCardTitle,
    .roadmapStudioCardTitle {
      margin: 0;
      color: #0f172a;
-     font-size: 20px;
-     line-height: 1.18;
-     font-weight: 950;
-     letter-spacing: -0.035em;
+     font-size: clamp(18px, 2vw, 24px);
+     line-height: 1.08;
+     font-weight: 1000;
+     letter-spacing: -0.04em;
    }
    
    .aspirePathCardText,
    .roadmapStudioCardText {
-     margin: 10px 0 0;
+     margin: 9px 0 0;
      color: #64748b;
      font-size: 14px;
-     line-height: 1.62;
-     font-weight: 600;
-   }
-   
-   .aspirePathBadge,
-   .roadmapStudioBadge {
-     display: inline-flex;
-     align-items: center;
-     gap: 7px;
-     width: fit-content;
-     min-height: 28px;
-     padding: 0 10px;
-     border-radius: 999px;
-     color: #9a3412;
-     background: #ffedd5;
-     border: 1px solid rgba(251, 146, 60, 0.22);
-     font-size: 11px;
-     font-weight: 950;
-     letter-spacing: 0.08em;
-     text-transform: uppercase;
-   }
-   
-   .aspirePathBadgeFree,
-   .roadmapStudioBadgeFree {
-     color: #166534;
-     background: #dcfce7;
-     border-color: rgba(34, 197, 94, 0.24);
-   }
-   
-   .aspirePathBadgePremium,
-   .roadmapStudioBadgePremium {
-     color: #6d28d9;
-     background: #f3e8ff;
-     border-color: rgba(168, 85, 247, 0.24);
-   }
-   
-   .aspirePathBadgeDraft,
-   .roadmapStudioBadgeDraft {
-     color: #475569;
-     background: #f1f5f9;
-     border-color: rgba(148, 163, 184, 0.24);
-   }
-   
-   .aspirePathBadgePublished,
-   .roadmapStudioBadgePublished {
-     color: #047857;
-     background: #d1fae5;
-     border-color: rgba(16, 185, 129, 0.24);
-   }
-   
-   .aspirePathTimeline {
-     position: relative;
-     display: grid;
-     gap: 14px;
-   }
-   
-   .aspirePathWeekSection {
-     border-radius: 30px;
-     padding: 18px;
-     background: linear-gradient(180deg, #ffffff, #f8fafc);
-     border: 1px solid rgba(226, 232, 240, 0.92);
-     box-shadow: 0 18px 48px rgba(15, 23, 42, 0.055);
-   }
-   
-   .aspirePathWeekHeader {
-     display: flex;
-     align-items: center;
-     justify-content: space-between;
-     gap: 14px;
-     margin-bottom: 14px;
-   }
-   
-   .aspirePathWeekTitle {
-     margin: 0;
-     color: #0f172a;
-     font-size: 18px;
-     font-weight: 950;
-     letter-spacing: -0.025em;
-   }
-   
-   .aspirePathDayGrid {
-     display: grid;
-     gap: 12px;
-   }
-   
-   .aspirePathDayCard {
-     display: grid;
-     grid-template-columns: 110px minmax(0, 1fr);
-     gap: 16px;
-     border-radius: 24px;
-     padding: 16px;
-     background: #ffffff;
-     border: 1px solid rgba(226, 232, 240, 0.92);
-   }
-   
-   .aspirePathDayDate {
-     display: flex;
-     min-height: 92px;
-     flex-direction: column;
-     justify-content: center;
-     align-items: center;
-     border-radius: 20px;
-     background: #fff7ed;
-     border: 1px solid rgba(251, 146, 60, 0.2);
-     color: #ea580c;
-     text-align: center;
-   }
-   
-   .aspirePathDayNumber {
-     font-size: 26px;
-     font-weight: 950;
-     letter-spacing: -0.04em;
-     line-height: 1;
-   }
-   
-   .aspirePathDayMonth {
-     margin-top: 5px;
-     font-size: 11px;
-     font-weight: 950;
-     letter-spacing: 0.12em;
-     text-transform: uppercase;
-   }
-   
-   .aspirePathDayBody {
-     min-width: 0;
-   }
-   
-   .aspirePathDayMeta {
-     display: flex;
-     flex-wrap: wrap;
-     gap: 8px;
-     margin-bottom: 9px;
-   }
-   
-   .aspirePathDayTitle {
-     margin: 0;
-     color: #0f172a;
-     font-size: 18px;
-     line-height: 1.25;
-     font-weight: 950;
-     letter-spacing: -0.025em;
-   }
-   
-   .aspirePathTaskList {
-     display: grid;
-     gap: 10px;
-     margin-top: 12px;
-   }
-   
-   .aspirePathTaskCard {
-     border-radius: 20px;
-     padding: 14px;
-     background: #f8fafc;
-     border: 1px solid rgba(226, 232, 240, 0.95);
-   }
-   
-   .aspirePathTaskHeader {
-     display: flex;
-     align-items: flex-start;
-     justify-content: space-between;
-     gap: 12px;
-   }
-   
-   .aspirePathTaskTitle {
-     margin: 0;
-     color: #111827;
-     font-size: 15px;
-     line-height: 1.34;
-     font-weight: 900;
-   }
-   
-   .aspirePathTaskText {
-     margin: 7px 0 0;
-     color: #64748b;
-     font-size: 13px;
-     line-height: 1.55;
-     font-weight: 600;
-   }
-   
-   .aspirePathTaskTime {
-     white-space: nowrap;
-     color: #ea580c;
-     font-size: 12px;
-     font-weight: 950;
-   }
-   
-   .aspirePathProgressWrap {
-     margin-top: 14px;
-   }
-   
-   .aspirePathProgressTop {
-     display: flex;
-     align-items: center;
-     justify-content: space-between;
-     gap: 12px;
-     margin-bottom: 8px;
-     color: #475569;
-     font-size: 12px;
-     font-weight: 850;
-   }
-   
-   .aspirePathProgressTrack {
-     overflow: hidden;
-     height: 10px;
-     border-radius: 999px;
-     background: #e2e8f0;
-   }
-   
-   .aspirePathProgressFill {
-     height: 100%;
-     border-radius: inherit;
-     background: linear-gradient(90deg, #f97316, #22c55e);
-     transition: width 0.25s ease;
-   }
-   
-   .aspirePathTodayCard {
-     border-radius: 30px;
-     padding: 24px;
-     background:
-       radial-gradient(circle at top right, rgba(34, 197, 94, 0.14), transparent 34%),
-       linear-gradient(135deg, #0f172a, #1e293b);
-     color: #ffffff;
-     box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
-   }
-   
-   .aspirePathTodayCard .aspirePathCardTitle,
-   .aspirePathTodayCard .aspirePathCardText {
-     color: #ffffff;
-   }
-   
-   .aspirePathTodayCard .aspirePathCardText {
-     opacity: 0.78;
+     line-height: 1.6;
+     font-weight: 700;
    }
    
    .aspirePathResourceRow {
      display: flex;
      flex-wrap: wrap;
      gap: 9px;
-     margin-top: 12px;
+     margin-top: 16px;
    }
    
    .aspirePathResourceButton {
-     min-height: 36px;
-     padding: 0 12px;
-     border-radius: 999px;
-     border: 1px solid rgba(251, 146, 60, 0.22);
-     background: #fff7ed;
-     color: #ea580c;
-     font-size: 12px;
-     font-weight: 950;
-     text-decoration: none;
      display: inline-flex;
      align-items: center;
      justify-content: center;
+     min-height: 38px;
+     border-radius: 999px;
+     padding: 0 13px;
+     color: #0f172a;
+     background: #ffffff;
+     border: 1px solid rgba(148, 163, 184, 0.22);
+     text-decoration: none;
+     font-size: 13px;
+     font-weight: 900;
    }
    
-   .aspirePathLockCard {
-     border-radius: 28px;
-     padding: 26px;
-     background:
-       radial-gradient(circle at top left, rgba(249, 115, 22, 0.14), transparent 34%),
-       #ffffff;
-     border: 1px solid rgba(251, 146, 60, 0.22);
-     box-shadow: 0 18px 52px rgba(15, 23, 42, 0.08);
-     text-align: center;
+   /* =========================================================
+      Badges
+      ========================================================= */
+   
+   .aspirePathBadge,
+   .roadmapStudioBadge {
+     display: inline-flex;
+     align-items: center;
+     justify-content: center;
+     width: fit-content;
+     min-height: 32px;
+     padding: 0 12px;
+     border-radius: 999px;
+     color: #1e293b;
+     background: rgba(226, 232, 240, 0.72);
+     border: 1px solid rgba(148, 163, 184, 0.24);
+     font-size: 12px;
+     font-weight: 1000;
+     letter-spacing: 0.02em;
+     text-transform: uppercase;
    }
+   
+   .aspirePathBadgePremium,
+   .roadmapStudioBadgePremium {
+     color: #7c2d12;
+     background: linear-gradient(135deg, #ffedd5, #fed7aa);
+     border-color: rgba(249, 115, 22, 0.24);
+   }
+   
+   .aspirePathBadgeFree,
+   .roadmapStudioBadgeFree {
+     color: #065f46;
+     background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+     border-color: rgba(34, 197, 94, 0.22);
+   }
+   
+   .aspirePathBadgePublished,
+   .roadmapStudioBadgePublished {
+     color: #075985;
+     background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+     border-color: rgba(37, 99, 235, 0.22);
+   }
+   
+   .aspirePathBadgeDraft,
+   .roadmapStudioBadgeDraft {
+     color: #92400e;
+     background: linear-gradient(135deg, #fef3c7, #fde68a);
+     border-color: rgba(245, 158, 11, 0.22);
+   }
+   
+   /* =========================================================
+      Progress
+      ========================================================= */
+   
+   .aspirePathProgressWrap {
+     margin-top: 18px;
+   }
+   
+   .aspirePathProgressTop {
+     display: flex;
+     justify-content: space-between;
+     gap: 12px;
+     margin-bottom: 8px;
+     color: #475569;
+     font-size: 13px;
+     font-weight: 900;
+   }
+   
+   .aspirePathProgressTrack {
+     width: 100%;
+     height: 12px;
+     overflow: hidden;
+     border-radius: 999px;
+     background: rgba(226, 232, 240, 0.92);
+     box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.10);
+   }
+   
+   .aspirePathProgressFill {
+     height: 100%;
+     border-radius: inherit;
+     background: linear-gradient(90deg, #22c55e, #84cc16, #f97316);
+     box-shadow: 0 8px 18px rgba(34, 197, 94, 0.20);
+   }
+   
+   /* =========================================================
+      Empty / Lock
+      ========================================================= */
    
    .aspirePathEmptyState,
    .roadmapStudioEmptyState {
-     border-radius: 30px;
-     padding: 36px 24px;
-     background: #ffffff;
-     border: 1px dashed rgba(148, 163, 184, 0.7);
-     color: #64748b;
+     padding: clamp(26px, 4vw, 46px);
+     border-radius: 26px;
      text-align: center;
+     background:
+       radial-gradient(circle at 50% 0%, rgba(255, 122, 0, 0.10), transparent 34%),
+       linear-gradient(180deg, #ffffff, #f8fafc);
+     border: 1px dashed rgba(148, 163, 184, 0.36);
    }
    
-   .aspirePathEmptyState h3,
-   .roadmapStudioEmptyState h3 {
-     margin: 0 0 8px;
-     color: #0f172a;
-     font-size: 22px;
-     font-weight: 950;
-     letter-spacing: -0.035em;
+   .aspirePathEmptyIcon,
+   .roadmapStudioEmptyIcon {
+     width: 58px;
+     height: 58px;
+     margin: 0 auto 16px;
+     border-radius: 20px;
+     background: linear-gradient(135deg, #ffedd5, #dbeafe);
+     box-shadow: 0 16px 34px rgba(15, 23, 42, 0.10);
    }
    
-   .aspirePathEmptyState p,
-   .roadmapStudioEmptyState p {
+   .aspirePathEmptyTitle,
+   .roadmapStudioEmptyTitle {
      margin: 0;
-     font-size: 14px;
-     line-height: 1.65;
-     font-weight: 650;
+     color: #0f172a;
+     font-size: 24px;
+     font-weight: 1000;
+     letter-spacing: -0.04em;
    }
+   
+   .aspirePathEmptyText,
+   .roadmapStudioEmptyText {
+     max-width: 560px;
+     margin: 10px auto 0;
+     color: #64748b;
+     line-height: 1.65;
+     font-weight: 700;
+   }
+   
+   .aspirePathLockCard {
+     text-align: center;
+     max-width: 760px;
+     margin: 0 auto;
+   }
+   
+   /* =========================================================
+      Timeline / Day cards
+      ========================================================= */
+   
+   .aspirePathTimeline {
+     display: grid;
+     gap: 22px;
+   }
+   
+   .aspirePathWeekSection {
+     padding: 20px;
+     border-radius: 28px;
+     background:
+       linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.94));
+     border: 1px solid rgba(148, 163, 184, 0.22);
+     box-shadow: 0 20px 56px rgba(15, 23, 42, 0.08);
+   }
+   
+   .aspirePathWeekHeader {
+     display: flex;
+     justify-content: space-between;
+     gap: 16px;
+     align-items: center;
+     margin-bottom: 16px;
+   }
+   
+   .aspirePathWeekTitle {
+     margin: 0;
+     color: #0f172a;
+     font-size: 24px;
+     font-weight: 1000;
+     letter-spacing: -0.04em;
+   }
+   
+   .aspirePathDayGrid {
+     display: grid;
+     grid-template-columns: repeat(4, minmax(0, 1fr));
+     gap: 14px;
+   }
+   
+   .aspirePathDayCard {
+     display: grid;
+     grid-template-columns: 70px minmax(0, 1fr);
+     gap: 14px;
+     min-height: 146px;
+     padding: 16px;
+     border-radius: 24px;
+     background:
+       radial-gradient(circle at 0% 0%, rgba(255, 122, 0, 0.10), transparent 30%),
+       linear-gradient(145deg, #ffffff, #f8fafc);
+     border: 1px solid rgba(148, 163, 184, 0.22);
+     box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
+   }
+   
+   .aspirePathDayDate {
+     display: grid;
+     place-items: center;
+     align-self: start;
+     min-height: 78px;
+     border-radius: 20px;
+     color: #ffffff;
+     background:
+       radial-gradient(circle at 30% 0%, rgba(255, 255, 255, 0.22), transparent 35%),
+       linear-gradient(145deg, #0f172a, #1e3a8a);
+     box-shadow: 0 16px 32px rgba(15, 23, 42, 0.18);
+   }
+   
+   .aspirePathDayNumber {
+     display: block;
+     font-size: 25px;
+     line-height: 1;
+     font-weight: 1000;
+     letter-spacing: -0.04em;
+   }
+   
+   .aspirePathDayMonth {
+     display: block;
+     margin-top: 4px;
+     font-size: 11px;
+     font-weight: 950;
+     letter-spacing: 0.08em;
+     text-transform: uppercase;
+     color: rgba(226, 232, 240, 0.82);
+   }
+   
+   .aspirePathDayBody {
+     min-width: 0;
+   }
+   
+   .aspirePathDayTitle {
+     margin: 0;
+     color: #0f172a;
+     font-size: 16px;
+     line-height: 1.18;
+     font-weight: 1000;
+     letter-spacing: -0.03em;
+   }
+   
+   .aspirePathDayMeta {
+     margin: 8px 0 0;
+     color: #64748b;
+     font-size: 13px;
+     line-height: 1.45;
+     font-weight: 750;
+   }
+   
+   /* =========================================================
+      Student Tasks
+      ========================================================= */
+   
+   .aspirePathTaskList {
+     display: grid;
+     gap: 14px;
+   }
+   
+   .aspirePathTaskCard {
+     padding: 18px;
+     border-radius: 24px;
+     background: #ffffff;
+     border: 1px solid rgba(148, 163, 184, 0.22);
+     box-shadow: 0 18px 46px rgba(15, 23, 42, 0.08);
+   }
+   
+   .aspirePathTaskHeader {
+     display: flex;
+     justify-content: space-between;
+     gap: 16px;
+     align-items: flex-start;
+   }
+   
+   .aspirePathTaskTitle {
+     margin: 0;
+     color: #0f172a;
+     font-size: 18px;
+     font-weight: 1000;
+     letter-spacing: -0.03em;
+   }
+   
+   .aspirePathTaskText {
+     margin: 8px 0 0;
+     color: #64748b;
+     line-height: 1.6;
+     font-weight: 700;
+   }
+   
+   .aspirePathTaskTime {
+     white-space: nowrap;
+     color: #ea580c;
+     font-size: 12px;
+     font-weight: 1000;
+     letter-spacing: 0.07em;
+     text-transform: uppercase;
+   }
+   
+   /* =========================================================
+      Admin forms / import
+      ========================================================= */
    
    .roadmapStudioToolbar {
      display: flex;
      flex-wrap: wrap;
-     justify-content: space-between;
+     gap: 14px;
      align-items: center;
-     gap: 12px;
-     margin: 22px 0;
-     padding: 14px;
-     border-radius: 24px;
-     background: #ffffff;
-     border: 1px solid rgba(226, 232, 240, 0.92);
-     box-shadow: 0 12px 38px rgba(15, 23, 42, 0.055);
+     margin-bottom: 18px;
    }
    
    .roadmapStudioToolbarGroup {
@@ -624,204 +775,227 @@
    }
    
    .roadmapStudioInput,
-   .roadmapStudioSelect,
-   .roadmapStudioTextarea {
+   .roadmapStudioSelect {
      width: 100%;
-     border: 1px solid rgba(203, 213, 225, 0.9);
-     background: #ffffff;
-     color: #0f172a;
+     min-height: 46px;
      border-radius: 16px;
-     min-height: 44px;
      padding: 0 14px;
-     font-size: 14px;
-     font-weight: 700;
+     color: #0f172a;
+     background: #ffffff;
+     border: 1px solid rgba(148, 163, 184, 0.28);
      outline: none;
-     transition:
-       border-color 0.18s ease,
-       box-shadow 0.18s ease;
+     font-size: 14px;
+     font-weight: 750;
+     box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
    }
    
-   .roadmapStudioTextarea {
-     min-height: 110px;
-     padding: 13px 14px;
+   textarea.roadmapStudioInput {
+     min-height: 128px;
+     padding-top: 13px;
      resize: vertical;
-     line-height: 1.55;
    }
    
    .roadmapStudioInput:focus,
-   .roadmapStudioSelect:focus,
-   .roadmapStudioTextarea:focus {
-     border-color: rgba(249, 115, 22, 0.72);
-     box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.12);
+   .roadmapStudioSelect:focus {
+     border-color: rgba(249, 115, 22, 0.52);
+     box-shadow:
+       0 0 0 4px rgba(249, 115, 22, 0.12),
+       0 12px 28px rgba(15, 23, 42, 0.06);
    }
    
-   .roadmapStudioFormGrid {
+   .roadmapStudioImportPanel {
+     margin-top: 18px;
+     padding: 22px;
+     border-radius: 26px;
+     background:
+       radial-gradient(circle at 0% 0%, rgba(255, 122, 0, 0.10), transparent 30%),
+       linear-gradient(145deg, #ffffff, #f8fafc);
+     border: 1px solid rgba(148, 163, 184, 0.22);
+     box-shadow: 0 22px 58px rgba(15, 23, 42, 0.08);
+   }
+   
+   .roadmapStudioDropzone {
+     position: relative;
+     display: grid;
+     place-items: center;
+     min-height: 220px;
+     padding: 26px;
+     border-radius: 28px;
+     text-align: center;
+     background:
+       radial-gradient(circle at 50% 0%, rgba(255, 122, 0, 0.14), transparent 35%),
+       linear-gradient(145deg, #ffffff, #f8fafc);
+     border: 1px dashed rgba(249, 115, 22, 0.38);
+     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+   }
+   
+   .roadmapStudioDropzoneIcon {
+     width: 64px;
+     height: 64px;
+     margin: 0 auto 14px;
+     border-radius: 22px;
+     background:
+       radial-gradient(circle at 30% 0%, rgba(255, 255, 255, 0.7), transparent 32%),
+       linear-gradient(145deg, #ffedd5, #dbeafe);
+     box-shadow: 0 18px 40px rgba(15, 23, 42, 0.10);
+   }
+   
+   .roadmapStudioValidationGrid {
      display: grid;
      grid-template-columns: repeat(2, minmax(0, 1fr));
      gap: 14px;
    }
    
-   .roadmapStudioField {
-     display: grid;
-     gap: 7px;
-   }
-   
-   .roadmapStudioField label {
-     color: #334155;
-     font-size: 12px;
-     font-weight: 950;
-     letter-spacing: 0.06em;
-     text-transform: uppercase;
-   }
-   
-   .roadmapStudioImportPanel {
-     border-radius: 32px;
-     padding: 24px;
-     background:
-       radial-gradient(circle at top left, rgba(249, 115, 22, 0.1), transparent 36%),
-       #ffffff;
-     border: 1px solid rgba(226, 232, 240, 0.92);
-     box-shadow: 0 18px 52px rgba(15, 23, 42, 0.07);
-   }
-   
-   .roadmapStudioDropzone {
-     display: grid;
-     place-items: center;
-     gap: 12px;
-     min-height: 210px;
-     border-radius: 28px;
-     border: 1.5px dashed rgba(249, 115, 22, 0.42);
-     background: #fff7ed;
-     padding: 24px;
-     text-align: center;
-   }
-   
-   .roadmapStudioDropzoneIcon {
-     width: 56px;
-     height: 56px;
-     border-radius: 20px;
-     display: grid;
-     place-items: center;
-     background: #ffffff;
-     color: #ea580c;
-     box-shadow: 0 12px 30px rgba(249, 115, 22, 0.14);
-     font-size: 24px;
-   }
-   
-   .roadmapStudioValidationGrid {
-     display: grid;
-     grid-template-columns: repeat(3, minmax(0, 1fr));
-     gap: 12px;
-   }
-   
-   .roadmapStudioValidationCard {
-     border-radius: 22px;
-     padding: 16px;
-     border: 1px solid rgba(226, 232, 240, 0.92);
-     background: #ffffff;
-   }
-   
+   .roadmapStudioValidationCard,
+   .roadmapStudioValidationCardSuccess,
+   .roadmapStudioValidationCardWarning,
    .roadmapStudioValidationCardError {
-     background: #fff1f2;
-     border-color: rgba(244, 63, 94, 0.22);
-   }
-   
-   .roadmapStudioValidationCardWarning {
-     background: #fffbeb;
-     border-color: rgba(245, 158, 11, 0.24);
+     padding: 16px;
+     border-radius: 20px;
+     background: #ffffff;
+     border: 1px solid rgba(148, 163, 184, 0.22);
+     color: #334155;
+     font-weight: 750;
+     line-height: 1.55;
    }
    
    .roadmapStudioValidationCardSuccess {
-     background: #ecfdf5;
-     border-color: rgba(16, 185, 129, 0.24);
+     border-color: rgba(34, 197, 94, 0.25);
+     background: #f0fdf4;
+     color: #14532d;
    }
    
+   .roadmapStudioValidationCardWarning {
+     border-color: rgba(245, 158, 11, 0.28);
+     background: #fffbeb;
+     color: #78350f;
+   }
+   
+   .roadmapStudioValidationCardError {
+     border-color: rgba(239, 68, 68, 0.28);
+     background: #fef2f2;
+     color: #7f1d1d;
+   }
+   
+   /* =========================================================
+      Tables
+      ========================================================= */
+   
    .roadmapStudioTableWrap {
-     overflow: auto;
-     border-radius: 26px;
+     width: 100%;
+     overflow-x: auto;
+     border-radius: 24px;
+     border: 1px solid rgba(148, 163, 184, 0.22);
      background: #ffffff;
-     border: 1px solid rgba(226, 232, 240, 0.92);
-     box-shadow: 0 18px 52px rgba(15, 23, 42, 0.055);
+     box-shadow: 0 22px 58px rgba(15, 23, 42, 0.08);
    }
    
    .roadmapStudioTable {
      width: 100%;
+     min-width: 880px;
      border-collapse: collapse;
-     min-width: 900px;
+     color: #0f172a;
    }
    
    .roadmapStudioTable th,
    .roadmapStudioTable td {
-     padding: 15px 16px;
-     border-bottom: 1px solid rgba(226, 232, 240, 0.86);
+     padding: 16px;
      text-align: left;
      vertical-align: top;
+     border-bottom: 1px solid rgba(226, 232, 240, 0.9);
    }
    
    .roadmapStudioTable th {
-     background: #f8fafc;
      color: #475569;
-     font-size: 11px;
-     font-weight: 950;
+     background:
+       linear-gradient(180deg, #f8fafc, #f1f5f9);
+     font-size: 12px;
+     font-weight: 1000;
      letter-spacing: 0.08em;
      text-transform: uppercase;
    }
    
    .roadmapStudioTable td {
-     color: #334155;
-     font-size: 13px;
-     font-weight: 650;
-     line-height: 1.5;
+     font-size: 14px;
+     line-height: 1.55;
+     font-weight: 700;
    }
    
-   .roadmapStudioTable tr:hover td {
-     background: #fff7ed;
+   .roadmapStudioTable tr:last-child td {
+     border-bottom: 0;
    }
    
-   @media (max-width: 980px) {
+   /* =========================================================
+      Responsive
+      ========================================================= */
+   
+   @media (max-width: 1180px) {
+     .aspirePathShell,
+     .roadmapStudioShell {
+       width: min(100% - 32px, 1100px);
+     }
+   
      .aspirePathHeroGrid,
      .roadmapStudioHeroGrid {
        grid-template-columns: 1fr;
      }
    
-     .aspirePathGrid,
-     .roadmapStudioGrid {
-       grid-template-columns: repeat(2, minmax(0, 1fr));
+     .aspirePathHeroPanel,
+     .roadmapStudioHeroPanel {
+       min-height: auto;
      }
    
-     .roadmapStudioValidationGrid {
-       grid-template-columns: 1fr;
+     .aspirePathGrid,
+     .roadmapStudioGrid,
+     .aspirePathDayGrid {
+       grid-template-columns: repeat(2, minmax(0, 1fr));
      }
    }
    
-   @media (max-width: 720px) {
+   @media (max-width: 760px) {
      .aspirePathShell,
      .roadmapStudioShell {
-       width: min(100% - 22px, 1180px);
-       padding: 20px 0 54px;
+       width: min(100% - 24px, 640px);
+       padding: 22px 0 58px;
      }
    
      .aspirePathHero,
-     .roadmapStudioHero {
-       border-radius: 26px;
-       padding: 24px;
+     .roadmapStudioHero,
+     .aspirePathSection,
+     .roadmapStudioSection {
+       border-radius: 24px;
      }
    
      .aspirePathHero::before,
      .roadmapStudioHero::before {
        inset: 10px;
-       border-radius: 22px;
+       border-radius: 20px;
      }
    
      .aspirePathTitle,
      .roadmapStudioTitle {
-       font-size: clamp(34px, 12vw, 48px);
-       letter-spacing: -0.055em;
+       font-size: clamp(38px, 12vw, 54px);
+     }
+   
+     .aspirePathMetricGrid,
+     .roadmapStudioMetricGrid,
+     .aspirePathGrid,
+     .roadmapStudioGrid,
+     .aspirePathDayGrid,
+     .roadmapStudioValidationGrid {
+       grid-template-columns: 1fr;
+     }
+   
+     .aspirePathSectionHeader,
+     .roadmapStudioSectionHeader,
+     .aspirePathTaskHeader {
+       display: block;
      }
    
      .aspirePathHeroActions,
      .roadmapStudioHeroActions {
        flex-direction: column;
+       align-items: stretch;
      }
    
      .aspirePathPrimaryBtn,
@@ -835,58 +1009,302 @@
        width: 100%;
      }
    
-     .aspirePathMetricGrid,
-     .roadmapStudioMetricGrid,
-     .aspirePathGrid,
-     .roadmapStudioGrid,
-     .roadmapStudioFormGrid {
-       grid-template-columns: 1fr;
-     }
-   
-     .aspirePathSectionHeader,
-     .roadmapStudioSectionHeader {
-       display: grid;
-     }
-   
      .aspirePathDayCard {
        grid-template-columns: 1fr;
      }
    
      .aspirePathDayDate {
-       min-height: 76px;
-       flex-direction: row;
-       gap: 8px;
-     }
-   
-     .aspirePathTaskHeader {
-       display: grid;
-     }
-   
-     .aspirePathTaskTime {
-       white-space: normal;
-     }
-   
-     .roadmapStudioToolbar {
-       align-items: stretch;
-     }
-   
-     .roadmapStudioToolbarGroup {
-       width: 100%;
-     }
-   }
-   
-   @media (prefers-reduced-motion: reduce) {
-     .aspirePathPrimaryBtn,
-     .roadmapStudioPrimaryBtn,
-     .aspirePathSecondaryBtn,
-     .roadmapStudioSecondaryBtn,
-     .aspirePathGhostBtn,
-     .roadmapStudioGhostBtn,
-     .aspirePathDangerBtn,
-     .roadmapStudioDangerBtn,
-     .aspirePathProgressFill {
-       transition: none;
+       width: 86px;
      }
    }
 
-   
+   /* =========================================================
+   22C — AspirePath Launch Premium Alignment
+   Notes / Mock Test family polish
+   ========================================================= */
+
+.aspirePathHero {
+  width: min(100%, 1320px);
+  margin: 0 auto;
+  padding: clamp(34px, 4.8vw, 64px);
+  border-radius: 0 0 34px 34px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 122, 0, 0.34), transparent 28%),
+    radial-gradient(circle at 88% 8%, rgba(37, 99, 235, 0.34), transparent 30%),
+    radial-gradient(circle at 100% 90%, rgba(255, 122, 0, 0.10), transparent 36%),
+    linear-gradient(135deg, #281916 0%, #101827 36%, #07111f 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 36px 110px rgba(2, 6, 23, 0.36),
+    0 14px 44px rgba(249, 115, 22, 0.13);
+}
+
+.aspirePathHero::before {
+  inset: 14px;
+  border-radius: 0 0 26px 26px;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.aspirePathHeroGrid {
+  grid-template-columns: minmax(0, 1fr) minmax(390px, 0.74fr);
+  gap: clamp(28px, 4vw, 56px);
+}
+
+.aspirePathEyebrow {
+  min-height: 38px;
+  padding: 0 18px;
+  color: #fed7aa;
+  background:
+    linear-gradient(135deg, rgba(255, 122, 0, 0.18), rgba(255, 255, 255, 0.08));
+  border: 1px solid rgba(255, 208, 138, 0.32);
+  box-shadow:
+    0 16px 38px rgba(255, 122, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.aspirePathTitle {
+  max-width: 760px;
+  margin-top: 24px;
+  color: #ffffff;
+  font-size: clamp(58px, 6.4vw, 96px);
+  line-height: 0.9;
+  letter-spacing: -0.09em;
+}
+
+.aspirePathSubtitle {
+  max-width: 780px;
+  color: rgba(226, 232, 240, 0.72);
+  font-size: clamp(17px, 1.5vw, 22px);
+  line-height: 1.75;
+  font-weight: 850;
+}
+
+.aspirePathHeroActions {
+  margin-top: 30px;
+}
+
+.aspirePathHero .aspirePathPrimaryBtn {
+  color: #ffffff;
+  background: linear-gradient(135deg, #07111f, #0f172a);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow:
+    0 18px 42px rgba(2, 6, 23, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.aspirePathHero .aspirePathSecondaryBtn {
+  color: #ffffff;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 16px 34px rgba(2, 6, 23, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.13);
+}
+
+/* Right command card like Notes launch hero */
+.aspirePathHeroPanel {
+  min-height: 345px;
+  padding: 24px;
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 122, 0, 0.20), transparent 30%),
+    radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.26), transparent 34%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.055));
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  box-shadow:
+    0 34px 90px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.aspirePathHeroPanel::before {
+  content: "AspireNest Path";
+  top: 24px;
+  right: 26px;
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 14px;
+  font-weight: 1000;
+}
+
+.aspirePathHeroPanel::after {
+  content: "Plan  ━━━  Timeline  ━━━  Task  ━━━  Progress";
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 24px;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  border-radius: 999px;
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.48), rgba(30, 64, 175, 0.32));
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  font-size: 12px;
+  font-weight: 1000;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.aspirePathMetricGrid {
+  padding-top: 64px;
+  padding-bottom: 64px;
+  gap: 14px;
+}
+
+.aspirePathMetricCard {
+  min-height: 112px;
+  border-radius: 22px;
+  padding: 20px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06));
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 18px 42px rgba(0, 0, 0, 0.20);
+}
+
+.aspirePathMetricValue {
+  color: #ffffff;
+  font-size: clamp(30px, 3.4vw, 44px);
+  letter-spacing: -0.075em;
+}
+
+.aspirePathMetricLabel {
+  color: rgba(226, 232, 240, 0.72);
+}
+
+/* Section below hero — product shelf feeling */
+.aspirePathShell > .aspirePathSection {
+  width: min(100%, 1320px);
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 28px;
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 122, 0, 0.12), transparent 28%),
+    radial-gradient(circle at 96% 0%, rgba(37, 99, 235, 0.14), transparent 30%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.84));
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow:
+    0 28px 90px rgba(15, 23, 42, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+.aspirePathShell > .aspirePathSection:first-of-type {
+  padding-top: clamp(30px, 4vw, 46px);
+}
+
+.aspirePathSectionKicker {
+  color: #ea580c;
+  font-weight: 1000;
+}
+
+.aspirePathSectionTitle {
+  max-width: 840px;
+  font-size: clamp(42px, 4.8vw, 68px);
+  letter-spacing: -0.08em;
+}
+
+.aspirePathSectionText {
+  max-width: 720px;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+/* Single roadmap shelf should not feel empty */
+.aspirePathSection .aspirePathGrid:has(.aspirePathCard:only-child) {
+  grid-template-columns: minmax(390px, 590px) minmax(390px, 1fr);
+  gap: 24px;
+}
+
+.aspirePathSection .aspirePathGrid:has(.aspirePathCard:only-child)::after {
+  content: "AspirePath connects daily study, live sessions, notes, mock tests, revision, and progress tracking in one guided learning system.";
+  display: flex;
+  align-items: flex-end;
+  min-height: 390px;
+  padding: 30px;
+  border-radius: 32px;
+  color: rgba(15, 23, 42, 0.78);
+  background:
+    radial-gradient(circle at 12% 10%, rgba(255, 122, 0, 0.18), transparent 34%),
+    radial-gradient(circle at 92% 6%, rgba(37, 99, 235, 0.18), transparent 34%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.80), rgba(241, 245, 249, 0.62));
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 24px 70px rgba(15, 23, 42, 0.08);
+  font-size: 22px;
+  line-height: 1.35;
+  font-weight: 1000;
+  letter-spacing: -0.04em;
+}
+
+.aspirePathSection .aspirePathCard {
+  min-height: 390px;
+  border-radius: 32px;
+}
+
+.aspirePathSection .aspirePathCardTitle {
+  font-size: clamp(30px, 3vw, 42px);
+}
+
+.aspirePathSection .aspirePathCardText {
+  font-size: 16px;
+}
+
+/* Keep inner detail/day pages premium but not oversized */
+.aspirePathTimeline .aspirePathDayCard,
+.aspirePathTaskList .aspirePathTaskCard,
+.aspirePathTodayCard {
+  box-shadow:
+    0 24px 70px rgba(15, 23, 42, 0.11),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+@media (max-width: 1180px) {
+  .aspirePathHeroGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .aspirePathSection .aspirePathGrid:has(.aspirePathCard:only-child) {
+    grid-template-columns: 1fr;
+  }
+
+  .aspirePathSection .aspirePathGrid:has(.aspirePathCard:only-child)::after {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .aspirePathHero {
+    border-radius: 0 0 26px 26px;
+    padding: 28px 22px;
+  }
+
+  .aspirePathTitle {
+    font-size: clamp(42px, 13vw, 58px);
+  }
+
+  .aspirePathHeroPanel {
+    min-height: 310px;
+    padding: 20px;
+  }
+
+  .aspirePathHeroPanel::after {
+    left: 18px;
+    right: 18px;
+    bottom: 18px;
+    font-size: 10px;
+  }
+
+  .aspirePathMetricGrid {
+    padding-top: 54px;
+    padding-bottom: 58px;
+  }
+
+  .aspirePathSectionTitle {
+    font-size: clamp(34px, 10vw, 46px);
+  }
+}

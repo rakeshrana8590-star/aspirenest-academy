@@ -1,267 +1,329 @@
 /* ===============================
-   Admin Notes — Hero
-   AdminNotesHero.jsx only
+   Admin Notes — Launch Hero
+   AdminNotesHomeRoute.jsx hero only
+   Student Notes dark hero alignment
 ================================ */
 
-.adminNotesHero {
-    position: relative;
-    isolation: isolate;
-    width: 100%;
-    min-height: 430px;
-    padding: 34px;
-    border-radius: 36px;
-    overflow: hidden;
-    display: grid;
-    grid-template-columns: minmax(0, 1.05fr) minmax(430px, 0.62fr);
-    gap: 34px;
+.adminNotesLaunchHero {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: 430px;
+  padding: 34px;
+  border-radius: 36px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(430px, 0.62fr);
+  gap: 34px;
+  align-items: stretch;
+  background:
+    radial-gradient(circle at 9% 12%, rgba(249, 115, 22, 0.18), transparent 32%),
+    radial-gradient(circle at 92% 18%, rgba(59, 130, 246, 0.22), transparent 34%),
+    linear-gradient(135deg, #111827 0%, #0f172a 58%, #241917 100%);
+  box-shadow: 0 30px 90px rgba(15, 23, 42, 0.18);
+}
+
+.adminNotesLaunchHero::before {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.adminNotesLaunchHeroCopy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.adminNotesLaunchBadge {
+  width: max-content;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  color: #fed7aa;
+  background: rgba(255, 247, 237, 0.1);
+  border: 1px solid rgba(253, 186, 116, 0.22);
+  font-size: 0.74rem;
+  font-weight: 1000;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.adminNotesLaunchHero h1 {
+  max-width: 860px;
+  margin: 22px 0 0;
+  color: #ffffff;
+  font-size: clamp(3.05rem, 5vw, 5.28rem);
+  line-height: 0.92;
+  letter-spacing: -0.085em;
+  font-weight: 1000;
+}
+
+.adminNotesLaunchHero p {
+  max-width: 720px;
+  margin: 18px 0 0;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.98rem;
+  line-height: 1.6;
+  font-weight: 800;
+}
+
+.adminNotesLaunchHeroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.adminNotesLaunchPrimaryBtn,
+.adminNotesLaunchGhostBtn {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 1000;
+  white-space: nowrap;
+}
+
+.adminNotesLaunchPrimaryBtn {
+  color: #111827;
+  background: linear-gradient(135deg, #fb923c, #fed7aa);
+  box-shadow: 0 18px 40px rgba(249, 115, 22, 0.2);
+}
+
+.adminNotesLaunchGhostBtn {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.adminNotesLaunchTrustRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.adminNotesLaunchTrustRow span {
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.74);
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.adminNotesLaunchSystemCard {
+  min-width: 0;
+  padding: 24px;
+  border-radius: 30px;
+  display: flex;
+  flex-direction: column;
+  color: #ffffff;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(249, 115, 22, 0.16), transparent 34%),
+    radial-gradient(circle at 88% 18%, rgba(59, 130, 246, 0.24), transparent 36%),
+    linear-gradient(135deg, #0f172a 0%, #111827 64%, #241917 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 24px 70px rgba(15, 23, 42, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.adminNotesLaunchSystemTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.adminNotesLaunchSystemTop span {
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  color: #fed7aa;
+  background: rgba(255, 247, 237, 0.11);
+  border: 1px solid rgba(253, 186, 116, 0.18);
+  font-size: 0.72rem;
+  font-weight: 1000;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.adminNotesLaunchSystemTop strong {
+  color: #ffffff;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  font-weight: 1000;
+  letter-spacing: -0.02em;
+  text-align: right;
+}
+
+.adminNotesLaunchTitleCard {
+  min-height: 86px;
+  margin-top: 22px;
+  padding: 16px;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(59, 130, 246, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+}
+
+.adminNotesLaunchIcon {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 1.4rem;
+}
+
+.adminNotesLaunchTitleCard h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.05rem;
+  line-height: 1.18;
+  font-weight: 1000;
+}
+
+.adminNotesLaunchTitleCard p {
+  margin: 6px 0 0;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.72rem;
+  line-height: 1.2;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.adminNotesLaunchSystemGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.adminNotesLaunchFeatureCard {
+  min-height: 94px;
+  padding: 16px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  min-width: 0;
+}
+
+.adminNotesLaunchFeatureCard strong {
+  display: block;
+  color: #ffffff;
+  font-size: clamp(1.25rem, 1.9vw, 1.75rem);
+  line-height: 1.04;
+  letter-spacing: -0.055em;
+  font-weight: 1000;
+  overflow-wrap: anywhere;
+}
+
+.adminNotesLaunchFeatureCard span {
+  display: block;
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.7rem;
+  line-height: 1.25;
+  font-weight: 950;
+}
+
+.adminNotesLaunchSystemFlow {
+  display: grid;
+  grid-template-columns: auto 1fr auto 1fr auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding: 12px 14px;
+  border-radius: 999px;
+  background: rgba(30, 64, 175, 0.38);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 1000;
+}
+
+.adminNotesLaunchSystemFlow i {
+  display: block;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 1180px) {
+  .adminNotesLaunchHero {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .adminNotesLaunchHero {
+    min-height: auto;
+    padding: 22px;
+    border-radius: 26px;
+  }
+
+  .adminNotesLaunchHero h1 {
+    font-size: clamp(2.15rem, 11vw, 3.15rem);
+  }
+
+  .adminNotesLaunchHeroActions {
     align-items: stretch;
-    background:
-      radial-gradient(circle at 9% 12%, rgba(249, 115, 22, 0.18), transparent 32%),
-      radial-gradient(circle at 92% 18%, rgba(59, 130, 246, 0.22), transparent 34%),
-      linear-gradient(135deg, #111827 0%, #0f172a 58%, #241917 100%);
-    box-shadow: 0 30px 90px rgba(15, 23, 42, 0.18);
-  }
-  
-  .adminNotesHero::before {
-    content: "";
-    position: absolute;
-    inset: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 28px;
-    pointer-events: none;
-    z-index: -1;
-  }
-  
-  .adminNotesHeroCopy {
-    min-width: 0;
-    display: flex;
     flex-direction: column;
-    justify-content: center;
   }
-  
-  .adminNotesBadge {
-    width: max-content;
-    min-height: 34px;
-    padding: 0 14px;
-    border-radius: 999px;
-    display: inline-flex;
-    align-items: center;
-    color: #fed7aa;
-    background: rgba(255, 247, 237, 0.1);
-    border: 1px solid rgba(253, 186, 116, 0.22);
-    font-size: 0.74rem;
-    font-weight: 1000;
-    letter-spacing: 0.13em;
-    text-transform: uppercase;
+
+  .adminNotesLaunchBadge,
+  .adminNotesLaunchPrimaryBtn,
+  .adminNotesLaunchGhostBtn {
+    width: 100%;
   }
-  
-  .adminNotesHero h1 {
-    max-width: 860px;
-    margin: 22px 0 0;
-    color: #ffffff;
-    font-size: clamp(3.05rem, 5vw, 5.28rem);
-    line-height: 0.92;
-    letter-spacing: -0.085em;
-    font-weight: 1000;
-  }
-  
-  .adminNotesHero p {
-    max-width: 720px;
-    margin: 18px 0 0;
-    color: rgba(255, 255, 255, 0.76);
-    font-size: 0.98rem;
-    line-height: 1.6;
-    font-weight: 800;
-  }
-  
-  .adminNotesHeroActions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 24px;
-  }
-  
-  .adminNotesPrimaryBtn,
-  .adminNotesGhostBtn {
-    min-height: 44px;
-    padding: 0 16px;
-    border-radius: 999px;
-    border: 0;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.82rem;
-    font-weight: 1000;
-    white-space: nowrap;
-  }
-  
-  .adminNotesPrimaryBtn {
-    color: #111827;
-    background: linear-gradient(135deg, #fb923c, #fed7aa);
-    box-shadow: 0 18px 40px rgba(249, 115, 22, 0.2);
-  }
-  
-  .adminNotesGhostBtn {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.09);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-  }
-  
-  .adminNotesCommandCard {
-    min-width: 0;
-    padding: 24px;
-    border-radius: 30px;
-    display: flex;
+
+  .adminNotesLaunchSystemTop {
+    align-items: flex-start;
     flex-direction: column;
-    color: #ffffff;
-    background:
-      radial-gradient(circle at 12% 12%, rgba(249, 115, 22, 0.16), transparent 34%),
-      radial-gradient(circle at 88% 18%, rgba(59, 130, 246, 0.24), transparent 36%),
-      linear-gradient(135deg, #0f172a 0%, #111827 64%, #241917 100%);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    box-shadow:
-      0 24px 70px rgba(15, 23, 42, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
-  
-  .adminNotesCommandTop {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
+
+  .adminNotesLaunchSystemTop strong {
+    text-align: left;
   }
-  
-  .adminNotesCommandTop span {
-    min-height: 34px;
-    padding: 0 14px;
-    border-radius: 999px;
-    display: inline-flex;
-    align-items: center;
-    color: #fed7aa;
-    background: rgba(255, 247, 237, 0.11);
-    border: 1px solid rgba(253, 186, 116, 0.18);
-    font-size: 0.72rem;
-    font-weight: 1000;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    white-space: nowrap;
+
+  .adminNotesLaunchSystemGrid {
+    grid-template-columns: 1fr;
   }
-  
-  .adminNotesCommandTop strong {
-    color: #ffffff;
-    font-size: 0.8rem;
-    line-height: 1.2;
-    font-weight: 1000;
-    letter-spacing: -0.02em;
-    text-align: right;
+
+  .adminNotesLaunchSystemFlow {
+    grid-template-columns: 1fr;
+    border-radius: 18px;
   }
-  
-  .adminNotesCommandGrid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    margin-top: 22px;
+
+  .adminNotesLaunchSystemFlow i {
+    display: none;
   }
-  
-  .adminNotesCommandStat {
-    min-height: 94px;
-    padding: 16px;
-    border-radius: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.11);
-    min-width: 0;
-  }
-  
-  .adminNotesCommandStat strong {
-    display: block;
-    color: #ffffff;
-    font-size: clamp(1.25rem, 1.9vw, 1.75rem);
-    line-height: 1.04;
-    letter-spacing: -0.055em;
-    font-weight: 1000;
-    overflow-wrap: anywhere;
-  }
-  
-  .adminNotesCommandStat span {
-    display: block;
-    margin-top: 8px;
-    color: rgba(255, 255, 255, 0.68);
-    font-size: 0.7rem;
-    line-height: 1.25;
-    font-weight: 950;
-  }
-  
-  .adminNotesCommandFlow {
-    display: grid;
-    grid-template-columns: auto 1fr auto 1fr auto 1fr auto;
-    align-items: center;
-    gap: 10px;
-    margin-top: auto;
-    padding: 12px 14px;
-    border-radius: 999px;
-    background: rgba(30, 64, 175, 0.38);
-    color: #ffffff;
-    font-size: 0.72rem;
-    font-weight: 1000;
-  }
-  
-  .adminNotesCommandFlow i {
-    display: block;
-    height: 1px;
-    background: rgba(255, 255, 255, 0.3);
-  }
-  
-  @media (max-width: 1180px) {
-    .adminNotesHero {
-      grid-template-columns: 1fr;
-    }
-  }
-  
-  @media (max-width: 760px) {
-    .adminNotesHero {
-      min-height: auto;
-      padding: 22px;
-      border-radius: 26px;
-    }
-  
-    .adminNotesHero h1 {
-      font-size: clamp(2.15rem, 11vw, 3.15rem);
-    }
-  
-    .adminNotesHeroActions {
-      align-items: stretch;
-      flex-direction: column;
-    }
-  
-    .adminNotesBadge,
-    .adminNotesPrimaryBtn,
-    .adminNotesGhostBtn {
-      width: 100%;
-    }
-  
-    .adminNotesCommandTop {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-  
-    .adminNotesCommandTop strong {
-      text-align: left;
-    }
-  
-    .adminNotesCommandGrid {
-      grid-template-columns: 1fr;
-    }
-  
-    .adminNotesCommandFlow {
-      grid-template-columns: 1fr;
-      border-radius: 18px;
-    }
-  
-    .adminNotesCommandFlow i {
-      display: none;
-    }
-  }
+}

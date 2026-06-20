@@ -32,6 +32,10 @@ export default function StudentCurrentAffairsMonthRoute({
   const weekGroups = buildCurrentAffairsWeekGroups(monthItems);
   const monthTitle = monthItems[0]?.month || "Current Affairs Month";
 
+  const plansInMonth = new Set(
+    monthItems.map((item) => item.planType || "FREE")
+  ).size;
+
   const openCurrentAffairPdf = (item) => {
     const pdfUrl = getCurrentAffairsPdfUrl(item);
     const planName = item.planType || "FREE";
@@ -60,9 +64,11 @@ export default function StudentCurrentAffairsMonthRoute({
       <StudentCurrentAffairsHero
         badge="CURRENT AFFAIRS MONTH"
         title={monthTitle}
-        text="Weekly and monthly CTET/TET current affairs PDFs for focused revision."
-        backLabel="Back to Current Affairs"
+        text="Open weekly and monthly CTET/TET current affairs PDFs from this month."
+        backLabel="Back to Library"
         onBack={() => navigate("/ctet-tet/current-affairs")}
+        primaryLabel="Start Revision →"
+        secondaryLabel="PDF Library"
         stats={[
           {
             label: "Weeks",
@@ -73,8 +79,8 @@ export default function StudentCurrentAffairsMonthRoute({
             value: getCurrentAffairsPdfCount(monthItems),
           },
           {
-            label: "Month",
-            value: monthTitle,
+            label: "Plans",
+            value: plansInMonth,
           },
         ]}
       />
@@ -87,8 +93,8 @@ export default function StudentCurrentAffairsMonthRoute({
             <h2>Weekly PDF revision</h2>
 
             <p>
-              Open weekly current affairs PDFs. Locked plan PDFs will redirect
-              students to pricing.
+              Open weekly current affairs PDFs. Locked plan PDFs redirect
+              students to pricing, while admin preview can open all PDFs.
             </p>
           </div>
 

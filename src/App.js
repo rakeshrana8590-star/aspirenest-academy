@@ -131,6 +131,8 @@ import {
   StudentNotesChapterRoute,
 } from "./components/notes/student/index.js";
 
+import { AdminNotesHomeRoute } from "./components/notes/admin/index.js";
+
 import {
   StudentCurrentAffairsLibraryRoute,
   StudentCurrentAffairsMonthRoute,
@@ -5374,90 +5376,9 @@ isAdmin={isAdmin}
 <Route
   path="/admin/content/notes"
   element={
-    requireAdmin() ? (
-      <section className="coursePages">
-        <div className="sectionHeader">
-          <span className="badge">NOTES MANAGER</span>
-
-          <h1>Notes Content Manager</h1>
-
-          <p>
-            Manage CTET/TET notes by plan,
-            subject, chapter, PDF source,
-            publish status, and access level.
-          </p>
-        </div>
-
-        <div className="contentStudioForm">
-  <div className="contentStudioGrid">
-          <button onClick={() => navigate("/admin/content/notes/manage")}>
-            Manage All Notes
-          </button>
-
-          <button onClick={() => navigate("/admin/content/notes/form")}>
-            + Add New Note
-          </button>
-
-          <button
-  onClick={() =>
-    navigate("/admin/content/notes/plan/FREE")
-  }
->
-  FREE Notes
-</button>
-
-<button
-  onClick={() =>
-    navigate("/admin/content/notes/plan/BASIC")
-  }
->
-  BASIC Notes
-</button>
-
-<button
-  onClick={() =>
-    navigate("/admin/content/notes/plan/PREMIUM")
-  }
->
-  PREMIUM Notes
-</button>
-
-<button
-  onClick={() =>
-    navigate("/admin/content/notes/plan/MENTORSHIP")
-  }
->
-  MENTORSHIP Notes
-</button>
-          <button
-  onClick={() =>
-    navigate("/admin/content/notes/subjects")
-  }
->
-  Subjects
-</button>
-<button
-  onClick={() =>
-    navigate("/admin/content/notes/chapters")
-  }
->
-  Chapters
-</button>
-<button
-  onClick={() =>
-    navigate("/admin/content/notes/pdfs")
-  }
->
-  PDFs
-</button>
-
-          <button onClick={() => navigate("/admin/content")}>
-            ← Back to Content Studio
-          </button>
-          </div>
-</div>
-      </section>
-    ) : null
+    <AdminNotesHomeRoute
+      universalContent={universalContent}
+    />
   }
 />
 

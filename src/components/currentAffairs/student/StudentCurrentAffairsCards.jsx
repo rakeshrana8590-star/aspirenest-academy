@@ -6,34 +6,42 @@ import {
 } from "../shared/currentAffairsUtils";
 
 export function StudentCurrentAffairsMonthCard({ month, onOpen }) {
+  const planCount = Array.isArray(month.planTypes) ? month.planTypes.length : 0;
+
   return (
     <button
       type="button"
-      className="studentCaMonthCard"
+      className="studentCaPlanCard"
       onClick={() => onOpen(month)}
     >
-      <div className="studentCaMonthTop">
-        <span className="studentCaMonthIcon">{month.cover || "📰"}</span>
-
-        <span className="studentCaMonthCount">
-          {month.pdfCount} PDF{month.pdfCount === 1 ? "" : "s"}
-        </span>
+      <div className="studentCaPlanCardTop">
+        <span className="studentCaPlanIcon">{month.cover || "📰"}</span>
+        <span className="studentCaPlanPill">MONTH</span>
       </div>
 
       <h3>{month.title}</h3>
 
       <p>
-        {month.count} item{month.count === 1 ? "" : "s"} •{" "}
-        {month.latestWeek || "Monthly PDFs"}
+        Open weekly and monthly CTET/TET current affairs PDFs for quick
+        revision.
       </p>
 
-      <div className="studentCaPlanPills">
-        {(month.planTypes || []).slice(0, 4).map((plan) => (
-          <span key={plan}>{plan}</span>
-        ))}
+      <div className="studentCaPlanStats">
+        <div>
+          <strong>{month.pdfCount || 0}</strong>
+          <span>PDFs</span>
+        </div>
+
+        <div>
+          <strong>{planCount}</strong>
+          <span>Plans</span>
+        </div>
       </div>
 
-      <strong>Open month →</strong>
+      <div className="studentCaPlanFooter">
+        <span>Weekly PDF revision</span>
+        <strong>Open →</strong>
+      </div>
     </button>
   );
 }
@@ -46,6 +54,7 @@ export function StudentCurrentAffairsPdfCard({
 }) {
   const planName = item.planType || "FREE";
   const pdfUrl = getCurrentAffairsPdfUrl(item);
+
   const locked =
     !isAdmin &&
     !canAccessCurrentAffairsPlan({
@@ -61,7 +70,11 @@ export function StudentCurrentAffairsPdfCard({
     >
       <div className="studentCaPdfTop">
         <span className="studentCaPdfIcon">{locked ? "🔒" : "📄"}</span>
-        <span className="studentCaPdfPlan">{planName}</span>
+
+        <div className="studentCaPdfBadges">
+          <span>{planName}</span>
+          <span>{item.week || item.chapter || "Monthly"}</span>
+        </div>
       </div>
 
       <h3>{item.title}</h3>
@@ -72,11 +85,21 @@ export function StudentCurrentAffairsPdfCard({
       </p>
 
       <div className="studentCaPdfMeta">
-        <span>{pdfUrl ? "PDF Ready" : "PDF Missing"}</span>
-        <span>{locked ? "Upgrade required" : "Open access"}</span>
+        <div>
+          <span>Status</span>
+          <strong>{locked ? "Plan Locked" : "Access Ready"}</strong>
+        </div>
+
+        <div>
+          <span>Source</span>
+          <strong>{pdfUrl ? "PDF Ready" : "Pending"}</strong>
+        </div>
       </div>
 
-      <strong>{locked ? "View plan →" : "Open PDF →"}</strong>
+      <div className="studentCaPdfFooter">
+        <span>{locked ? "Upgrade required" : "Access ready"}</span>
+        <button type="button">{locked ? "Unlock" : "Open PDF"}</button>
+      </div>
     </button>
   );
 }

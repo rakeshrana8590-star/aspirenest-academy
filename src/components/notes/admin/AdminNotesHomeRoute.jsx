@@ -1,19 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-import AdminNotesHero from "./AdminNotesHero";
-
-import {
-  AdminNotesPlanCard,
-  AdminNotesQuickActionCard,
-  AdminNotesStatusCard,
-} from "./AdminNoteCards";
-
 import {
   getAdminNotes,
   getAdminNotesHealthSummary,
   getAdminNotesPlanSummary,
-  getAdminNotesStatusCounts,
 } from "../shared/adminNotesUtils";
 
 export default function AdminNotesHomeRoute({
@@ -23,153 +14,255 @@ export default function AdminNotesHomeRoute({
 
   const adminNotes = getAdminNotes(universalContent);
   const planSummary = getAdminNotesPlanSummary(universalContent);
-  const statusCounts = getAdminNotesStatusCounts(adminNotes);
   const healthSummary = getAdminNotesHealthSummary(adminNotes);
 
+  const systemStats = [
+    {
+      value: adminNotes.length,
+      label: "Admin Notes",
+    },
+    {
+      value: planSummary.length,
+      label: "Plans",
+    },
+    {
+      value: healthSummary.ready,
+      label: "Student Visible",
+    },
+    {
+      value:
+        healthSummary.missingPdf > 0
+          ? `${healthSummary.missingPdf} Fix`
+          : "Live",
+      label: "PDF Health",
+    },
+  ];
+
+  const primaryActions = [
+    {
+      icon: "✦",
+      label: "Builder",
+      title: "Add Note PDF",
+      description:
+        "Create notes with plan, subject, chapter, PDF URL, status, and publishing settings.",
+      route: "/admin/content/notes/form",
+      tone: "orange",
+    },
+    {
+      icon: "▣",
+      label: "Manager",
+      title: "Manage Notes",
+      description:
+        "Edit, preview, publish, unpublish, archive, and control every saved note.",
+      route: "/admin/content/notes/manage",
+      tone: "blue",
+    },
+    {
+      icon: "◈",
+      label: "Structure",
+      title: "Subject Library",
+      description:
+        "Review notes by subject and keep Plan → Subject → Chapter → PDF flow clean.",
+      route: "/admin/content/notes/subjects",
+      tone: "green",
+    },
+    {
+      icon: "✓",
+      label: "Student Visible",
+      title: "Published PDFs",
+      description:
+        "Audit all notes currently visible to students across free and paid shelves.",
+      route: "/admin/content/notes/pdfs",
+      tone: "purple",
+    },
+  ];
+
+  const compactActions = [
+    {
+      title: "Subjects",
+      meta: "Subject structure",
+      route: "/admin/content/notes/subjects",
+    },
+    {
+      title: "Chapters",
+      meta: "Chapter grouping",
+      route: "/admin/content/notes/chapters",
+    },
+    {
+      title: "PDF Library",
+      meta: "Student-visible audit",
+      route: "/admin/content/notes/pdfs",
+    },
+    ...planSummary.map((plan) => ({
+      title: `${plan.planName} Shelf`,
+      meta: `${plan.publishedPdfs} published PDFs`,
+      route: `/admin/content/notes/plan/${plan.planName}`,
+    })),
+    {
+      title: "Manage Notes",
+      meta: "Edit and publish",
+      route: "/admin/content/notes/manage",
+    },
+    {
+      title: "Content Studio",
+      meta: "Back to main studio",
+      route: "/admin/content",
+    },
+  ];
+
   return (
-    <section className="adminNotesPage">
-      <AdminNotesHero
-        badge="NOTES MANAGER"
-        title="Notes Content Manager"
-        text="Manage CTET/TET notes by plan, subject, chapter, PDF source, publish status, and student visibility."
-        stats={[
-          {
-            label: "Total Notes",
-            value: adminNotes.length,
-          },
-          {
-            label: "Published",
-            value: statusCounts.published,
-          },
-          {
-            label: "PDF Ready",
-            value: statusCounts.pdfReady,
-          },
-          {
-            label: "Needs Fix",
-            value: healthSummary.needsFix,
-          },
-        ]}
-        actions={
-          <>
-            <button
-              type="button"
-              className="adminNotesPrimaryBtn"
-              onClick={() => navigate("/admin/content/notes/form")}
+    <section className="coursePages adminMockHomePage adminNotesMockAlignedPage">
+      <div className="adminMockHomeShell">
+        <section className="adminNotesLaunchHero">
+          <div className="adminNotesLaunchHeroCopy">
+            <span className="adminNotesLaunchBadge">NOTES CMS</span>
+
+            <h1>Notes Manager</h1>
+
+            <p>
+              A premium command center for CTET/TET notes — create PDFs,
+              manage subject libraries, control chapter mapping, publish safely,
+              and audit student-visible material.
+            </p>
+
+            <div className="adminNotesLaunchHeroActions">
+              <button
+                type="button"
+                className="adminNotesLaunchPrimaryBtn"
+                onClick={() => navigate("/admin/content/notes/form")}
+              >
+                Add Note PDF
+              </button>
+
+              <button
+                type="button"
+                className="adminNotesLaunchGhostBtn"
+                onClick={() => navigate("/admin/content/notes/manage")}
+              >
+                Manage Notes
+              </button>
+            </div>
+
+            <div className="adminNotesLaunchTrustRow">
+              <span>✓ Plan protected</span>
+              <span>✓ Subject-wise</span>
+              <span>✓ Chapter PDFs</span>
+              <span>✓ Publish audit</span>
+            </div>
+          </div>
+
+          <div className="adminNotesLaunchSystemCard">
+            <div className="adminNotesLaunchSystemTop">
+              <span>Notes Command</span>
+              <strong>Admin Workspace</strong>
+            </div>
+
+            <div className="adminNotesLaunchTitleCard">
+              <span className="adminNotesLaunchIcon">📘</span>
+
+              <div>
+                <h3>Notes Manager</h3>
+                <p>CTET / TET NOTES CMS</p>
+              </div>
+            </div>
+
+            <div className="adminNotesLaunchSystemGrid">
+              {systemStats.map((stat) => (
+                <div className="adminNotesLaunchFeatureCard" key={stat.label}>
+                  <strong>{stat.value}</strong>
+                  <span>{stat.label}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="adminNotesLaunchSystemFlow">
+              <span>Plan</span>
+              <i />
+              <span>Subject</span>
+              <i />
+              <span>Chapter</span>
+              <i />
+              <span>PDF</span>
+            </div>
+          </div>
+        </section>
+
+        <section className="adminMockCommandCenter">
+          <div className="adminMockSectionTitle">
+            <span>Admin notes system</span>
+            <h2>Core notes workflow</h2>
+            <p>
+              Most-used notes actions stay above the fold. Structure, plans,
+              PDF health, and student visibility stay available from the right
+              rail.
+            </p>
+          </div>
+
+          <div className="adminMockCommandLayout">
+            <div className="adminMockPrimaryGrid">
+              {primaryActions.map((action) => (
+                <button
+                  type="button"
+                  key={action.route}
+                  className={`adminMockActionCard adminMockTone-${action.tone}`}
+                  onClick={() => navigate(action.route)}
+                >
+                  <span className="adminMockActionTop">
+                    <span className="adminMockActionIcon" aria-hidden="true">
+                      {action.icon}
+                    </span>
+
+                    <span className="adminMockActionArrow" aria-hidden="true">
+                      →
+                    </span>
+                  </span>
+
+                  <span className="adminMockActionLabel">{action.label}</span>
+
+                  <strong>{action.title}</strong>
+
+                  <small>{action.description}</small>
+                </button>
+              ))}
+            </div>
+
+            <aside
+              className="adminMockQuickRail"
+              aria-label="Admin notes shortcuts"
             >
-              + Add New Note
-            </button>
+              <div className="adminMockQuickRailHeader">
+                <span>Quick Access</span>
+                <strong>Structure · Plans · PDFs</strong>
+              </div>
 
-            <button
-              type="button"
-              className="adminNotesGhostBtn"
-              onClick={() => navigate("/admin/content/notes/manage")}
-            >
-              Manage All Notes
-            </button>
+              <div className="adminMockQuickList">
+                {compactActions.map((action) => (
+                  <button
+                    type="button"
+                    key={action.route}
+                    onClick={() => navigate(action.route)}
+                  >
+                    <span>
+                      <strong>{action.title}</strong>
+                      <small>{action.meta}</small>
+                    </span>
 
-            <button
-              type="button"
-              className="adminNotesGhostBtn"
-              onClick={() => navigate("/admin/content")}
-            >
-              ← Back to Content Studio
-            </button>
-          </>
-        }
-      />
+                    <em aria-hidden="true">→</em>
+                  </button>
+                ))}
+              </div>
+            </aside>
+          </div>
+        </section>
 
-      <div className="adminNotesStatusGrid">
-        <AdminNotesStatusCard
-          label="Student Visible"
-          value={healthSummary.ready}
-          text="Published notes with PDF URL ready for student side."
-        />
-
-        <AdminNotesStatusCard
-          label="Missing PDF"
-          value={healthSummary.missingPdf}
-          text="Notes that need PDF/source URL before launch."
-        />
-
-        <AdminNotesStatusCard
-          label="Draft"
-          value={statusCounts.draft}
-          text="Saved notes that are not public yet."
-        />
-
-        <AdminNotesStatusCard
-          label="Archived"
-          value={statusCounts.archived}
-          text="Hidden notes kept for admin reference."
-        />
-      </div>
-
-      <div className="adminNotesShelf">
-        <div className="adminNotesShelfHeader">
-          <span>Quick Workspace</span>
-
-          <h2>Manage notes workflow</h2>
-
-          <p>
-            Jump into form, manage list, subject library, chapter library, or
-            PDF audit without leaving the admin notes workspace.
-          </p>
-        </div>
-
-        <div className="adminNotesQuickGrid">
-          <AdminNotesQuickActionCard
-            icon="📝"
-            title="Add New Note"
-            text="Create a note with plan, subject, chapter, status, and PDF source."
-            onOpen={() => navigate("/admin/content/notes/form")}
-          />
-
-          <AdminNotesQuickActionCard
-            icon="🧾"
-            title="Manage All Notes"
-            text="Review, edit, open PDF, publish status, and note health."
-            onOpen={() => navigate("/admin/content/notes/manage")}
-          />
-
-          <AdminNotesQuickActionCard
-            icon="📚"
-            title="Subjects"
-            text="Manage subject-wise notes and chapter connections."
-            onOpen={() => navigate("/admin/content/notes/subjects")}
-          />
-
-          <AdminNotesQuickActionCard
-            icon="📄"
-            title="Chapters & PDFs"
-            text="Review chapter nodes and all PDF notes in one place."
-            onOpen={() => navigate("/admin/content/notes/chapters")}
-          />
-        </div>
-      </div>
-
-      <div className="adminNotesShelf">
-        <div className="adminNotesShelfHeader">
-          <span>Plan Library</span>
-
-          <h2>Plan-wise notes control</h2>
-
-          <p>
-            Open a plan to review its subjects, chapters, published PDFs, and
-            missing-source health.
-          </p>
-        </div>
-
-        <div className="adminNotesPlanGrid">
-          {planSummary.map((plan) => (
-            <AdminNotesPlanCard
-              key={plan.planName}
-              plan={plan}
-              onOpen={() =>
-                navigate(`/admin/content/notes/plan/${plan.planName}`)
-              }
-            />
-          ))}
+        <div className="adminMockHomeFooter">
+          <button
+            type="button"
+            className="adminMockBackButton"
+            onClick={() => navigate("/admin/content")}
+          >
+            ← Back to Content Studio
+          </button>
         </div>
       </div>
     </section>
