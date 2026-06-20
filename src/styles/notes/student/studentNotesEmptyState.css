@@ -1,0 +1,49 @@
+/* ===============================
+   Student Notes — Empty State
+   StudentNotesEmptyState.jsx only
+================================ */
+
+.studentNotesEmptyState {
+    min-height: 230px;
+    padding: 28px;
+    border-radius: 28px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    background:
+      radial-gradient(circle at 12% 12%, rgba(249, 115, 22, 0.08), transparent 32%),
+      radial-gradient(circle at 90% 12%, rgba(59, 130, 246, 0.1), transparent 34%),
+      rgba(248, 250, 252, 0.92);
+    border: 1px dashed rgba(15, 23, 42, 0.14);
+  }
+  
+  .studentNotesEmptyState span {
+    width: 62px;
+    height: 62px;
+    border-radius: 22px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto;
+    background: #fff7ed;
+    border: 1px solid rgba(249, 115, 22, 0.15);
+    font-size: 1.7rem;
+    box-shadow: 0 16px 30px rgba(249, 115, 22, 0.08);
+  }
+  
+  .studentNotesEmptyState h3 {
+    margin: 14px 0 0;
+    color: #0f172a;
+    font-size: 1.5rem;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    font-weight: 1000;
+  }
+  
+  .studentNotesEmptyState p {
+    max-width: 520px;
+    margin: 8px auto 0;
+    color: #64748b;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    font-weight: 850;
+  }

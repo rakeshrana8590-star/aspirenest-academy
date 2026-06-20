@@ -182,6 +182,9 @@ import "./styles/exam/submitCard.css";
 import "./styles/exam/reviewResult.css";
 import "./styles/exam/examStart.css";
 import "./styles/exam/studentMockTests.css";
+
+import "./styles/notes/studentNotes.css";
+
 import "./styles/exam/adminMockTests.css";
 import "./styles/exam/examLayoutLock.css";
 

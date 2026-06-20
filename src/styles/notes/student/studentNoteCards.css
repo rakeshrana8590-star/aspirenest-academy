@@ -1,0 +1,253 @@
+/* ===============================
+   Student Notes — Cards
+   StudentNoteCards.jsx only
+================================ */
+
+.studentNotesPlanCard,
+.studentNotesLevelCard,
+.studentNotesPdfCard {
+  min-width: 0;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  text-align: left;
+  color: #0f172a;
+  background:
+    radial-gradient(circle at 88% 10%, rgba(59, 130, 246, 0.13), transparent 35%),
+    radial-gradient(circle at 8% 12%, rgba(249, 115, 22, 0.1), transparent 35%),
+    linear-gradient(145deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: 0 20px 54px rgba(15, 23, 42, 0.08);
+}
+
+.studentNotesPlanCard,
+.studentNotesLevelCard {
+  appearance: none;
+  cursor: pointer;
+  min-height: 268px;
+  padding: 20px;
+  border-radius: 28px;
+  display: flex;
+  flex-direction: column;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.studentNotesPdfCard {
+  min-height: 340px;
+  padding: 22px;
+  border-radius: 28px;
+  display: flex;
+  flex-direction: column;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.studentNotesPlanCard:hover,
+.studentNotesLevelCard:hover,
+.studentNotesPdfCard:hover {
+  transform: translateY(-4px);
+  border-color: rgba(249, 115, 22, 0.3);
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.12);
+}
+
+.studentNotesPlanCard.isPremiumNotesPlan {
+  background:
+    radial-gradient(circle at 90% 10%, rgba(251, 146, 60, 0.2), transparent 36%),
+    radial-gradient(circle at 8% 12%, rgba(59, 130, 246, 0.13), transparent 35%),
+    linear-gradient(145deg, #ffffff 0%, #fff7ed 100%);
+  border-color: rgba(249, 115, 22, 0.18);
+}
+
+.studentNotesPlanCardTop,
+.studentNotesLevelCardTop,
+.studentNotesPdfTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.studentNotesPlanIcon,
+.studentNotesLevelIcon,
+.studentNotesPdfIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: #fff7ed;
+  border: 1px solid rgba(249, 115, 22, 0.15);
+  font-size: 1.32rem;
+  box-shadow: 0 16px 30px rgba(249, 115, 22, 0.08);
+}
+
+.studentNotesPlanPill,
+.studentNotesLevelPill,
+.studentNotesPdfBadges span {
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  color: #c2410c;
+  background: #fff7ed;
+  font-size: 0.7rem;
+  font-weight: 1000;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.studentNotesPdfBadges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+
+.studentNotesPlanCard h3,
+.studentNotesLevelCard h3,
+.studentNotesPdfCard h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: clamp(1.28rem, 1.55vw, 1.72rem);
+  line-height: 1.04;
+  letter-spacing: -0.052em;
+  font-weight: 1000;
+}
+
+.studentNotesPlanCard p,
+.studentNotesLevelCard p,
+.studentNotesPdfCard p {
+  min-height: 50px;
+  margin: 12px 0 0;
+  color: #64748b;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  font-weight: 850;
+}
+
+.studentNotesPlanStats,
+.studentNotesLevelMini,
+.studentNotesPdfMeta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.studentNotesPlanStats div,
+.studentNotesLevelMini div,
+.studentNotesPdfMeta div {
+  min-height: 68px;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(248, 250, 252, 0.94);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  min-width: 0;
+}
+
+.studentNotesPlanStats strong,
+.studentNotesLevelMini strong {
+  display: block;
+  color: #0f172a;
+  font-size: 1.42rem;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  font-weight: 1000;
+}
+
+.studentNotesPlanStats span,
+.studentNotesLevelMini span,
+.studentNotesPdfMeta span {
+  display: block;
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.studentNotesPdfMeta strong {
+  display: block;
+  margin-top: 6px;
+  color: #0f172a;
+  font-size: 0.86rem;
+  line-height: 1.25;
+  font-weight: 1000;
+  overflow-wrap: anywhere;
+}
+
+.studentNotesPlanFooter,
+.studentNotesLevelFooter,
+.studentNotesPdfFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.studentNotesPlanFooter span,
+.studentNotesLevelFooter span,
+.studentNotesPdfFooter span {
+  color: #64748b;
+  font-size: 0.76rem;
+  line-height: 1.3;
+  font-weight: 900;
+}
+
+.studentNotesPlanFooter strong,
+.studentNotesLevelFooter strong,
+.studentNotesPdfFooter button {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  background: #0f172a;
+  font-size: 0.76rem;
+  font-weight: 1000;
+  white-space: nowrap;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14);
+}
+
+.studentNotesPdfFooter button {
+  cursor: pointer;
+}
+
+@media (max-width: 760px) {
+  .studentNotesPlanCard,
+  .studentNotesLevelCard,
+  .studentNotesPdfCard {
+    min-height: auto;
+  }
+
+  .studentNotesPlanStats,
+  .studentNotesLevelMini,
+  .studentNotesPdfMeta {
+    grid-template-columns: 1fr;
+  }
+
+  .studentNotesPlanFooter,
+  .studentNotesLevelFooter,
+  .studentNotesPdfFooter {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .studentNotesPdfFooter button {
+    width: 100%;
+  }
+}
