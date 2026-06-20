@@ -14,14 +14,34 @@ import {
   normalizeNoteText,
 } from "../shared/notesUtils";
 
-function findNotesSubject(subjects = [], subjectId = "") {
+function findNotesSubject(shelves = [], subjectId = "") {
   const activeSubject = normalizeNoteText(subjectId);
 
-  return subjects.find(
-    (subject) =>
-      normalizeNoteText(subject.id) === activeSubject ||
-      normalizeNoteText(subject.title) === activeSubject
+  return shelves.find(
+    (shelf) =>
+      normalizeNoteText(shelf.id) === activeSubject ||
+      normalizeNoteText(shelf.title) === activeSubject
   );
+}
+
+function getPublicShelfTitle(shelf = {}) {
+  const title = shelf.title || "Notes Shelf";
+
+  if (normalizeNoteText(title) === "ctet-tet") {
+    return "CTET/TET Revision Notes";
+  }
+
+  return title;
+}
+
+function getPublicShelfText(shelf = {}) {
+  const title = shelf.title || "";
+
+  if (normalizeNoteText(title) === "ctet-tet") {
+    return "Open chapter-wise CTET/TET PDF notes from this revision shelf.";
+  }
+
+  return shelf.description || "Open chapter-wise PDF notes from this revision shelf.";
 }
 
 export default function StudentNotesSubjectRoute({
@@ -31,34 +51,35 @@ export default function StudentNotesSubjectRoute({
   const { plan, subjectId } = useParams();
 
   const activePlan = decodeURIComponent(plan || "FREE").toUpperCase();
-  const activeSubject = decodeURIComponent(subjectId || "");
+  const activeShelf = decodeURIComponent(subjectId || "");
 
   const planNotes = getPlanNotes(universalContent, activePlan);
-  const subjects = buildNotesSubjectList(planNotes);
-  const subjectInfo = findNotesSubject(subjects, activeSubject);
+  const shelves = buildNotesSubjectList(planNotes);
+  const shelfInfo = findNotesSubject(shelves, activeShelf);
 
-  const subjectNotes = getSubjectNotes(planNotes, activeSubject);
-  const chapters = buildNotesChapterList(subjectNotes);
+  const shelfNotes = getSubjectNotes(planNotes, activeShelf);
+  const chapters = buildNotesChapterList(shelfNotes);
+  const shelfTitle = getPublicShelfTitle(shelfInfo);
 
   return (
     <section className="studentNotesPage">
       <StudentNotesHero
         badge={`${activePlan} NOTES`}
-        title={subjectInfo?.title || "Subject Library"}
-        text="Open a chapter shelf and continue into PDF notes with connected revision flow."
+        title={shelfTitle}
+        text="Open a chapter shelf and continue into student-visible PDF notes."
         backLabel="Back to Plan"
         onBack={() => navigate(`/ctet-tet/notes/plan/${activePlan}`)}
         stats={[
           {
-            label: "Chapters",
+            label: "Chapter Shelves",
             value: chapters.length,
           },
           {
             label: "PDFs",
-            value: getNotesPdfCount(subjectNotes),
+            value: getNotesPdfCount(shelfNotes),
           },
           {
-            label: "Access",
+            label: "Plan",
             value: activePlan,
           },
         ]}
@@ -67,14 +88,11 @@ export default function StudentNotesSubjectRoute({
       <div className="studentNotesShelf studentNotesLevelShelf">
         <div className="studentNotesLevelHeader">
           <div>
-            <span>{subjectInfo?.title || activePlan}</span>
+            <span>{shelfTitle}</span>
 
-            <h2>Chapter-wise notes library</h2>
+            <h2>Choose a chapter shelf</h2>
 
-            <p>
-              Every chapter stays connected with plan access, subject node, and
-              student-visible PDF material.
-            </p>
+            <p>{getPublicShelfText(shelfInfo)}</p>
           </div>
 
           <div className="studentNotesLevelStatus">
@@ -86,7 +104,7 @@ export default function StudentNotesSubjectRoute({
         {chapters.length === 0 ? (
           <StudentNotesEmptyState
             title="No chapters found"
-            text="Published chapter notes for this subject will appear here."
+            text="Published chapter notes for this shelf will appear here."
           />
         ) : (
           <div className="studentNotesLevelGrid">
@@ -109,7 +127,7 @@ export default function StudentNotesSubjectRoute({
                 onOpen={() =>
                   navigate(
                     `/ctet-tet/notes/plan/${activePlan}/${encodeURIComponent(
-                      activeSubject
+                      activeShelf
                     )}/${encodeURIComponent(chapter.id)}`
                   )
                 }

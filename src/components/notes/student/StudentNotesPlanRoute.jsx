@@ -10,28 +10,7 @@ import {
   buildNotesSubjectList,
   getNotesPdfCount,
   getPlanNotes,
-  normalizeNoteText,
 } from "../shared/notesUtils";
-
-function getPublicNotesShelfTitle(subject = {}) {
-  const title = subject.title || "Notes Shelf";
-
-  if (normalizeNoteText(title) === "ctet-tet") {
-    return "CTET/TET Revision Notes";
-  }
-
-  return title;
-}
-
-function getPublicNotesShelfText(subject = {}) {
-  const title = subject.title || "";
-
-  if (normalizeNoteText(title) === "ctet-tet") {
-    return "Complete CTET/TET notes arranged into chapter-wise PDF shelves.";
-  }
-
-  return subject.description || "Open chapter-wise PDF notes inside this shelf.";
-}
 
 export default function StudentNotesPlanRoute({
   universalContent = [],
@@ -50,12 +29,12 @@ export default function StudentNotesPlanRoute({
       <StudentNotesHero
         badge={`${activePlan} NOTES`}
         title={`${planLabel} Library`}
-        text="Choose a notes shelf and continue into chapter-wise revision PDFs."
+        text="Choose a subject shelf and continue into chapter-wise revision PDFs."
         backLabel="Back to Notes"
         onBack={() => navigate("/ctet-tet/notes")}
         stats={[
           {
-            label: "Notes Shelves",
+            label: "Subjects",
             value: subjects.length,
           },
           {
@@ -74,17 +53,17 @@ export default function StudentNotesPlanRoute({
           <div>
             <span>{planLabel}</span>
 
-            <h2>Choose a notes shelf</h2>
+            <h2>Choose a subject shelf</h2>
 
             <p>
-              Open a notes shelf, enter chapters, and continue into
+              Open a subject, enter chapters, and continue into
               student-visible PDF notes from the AspireNest learning flow.
             </p>
           </div>
 
           <div className="studentNotesLevelStatus">
             <strong>{subjects.length}</strong>
-            <span>Notes shelves</span>
+            <span>Subjects</span>
           </div>
         </div>
 
@@ -100,8 +79,8 @@ export default function StudentNotesPlanRoute({
                 key={subject.id}
                 icon={subject.cover || "📘"}
                 pill={activePlan}
-                title={getPublicNotesShelfTitle(subject)}
-                text={getPublicNotesShelfText(subject)}
+                title={subject.title}
+                text={subject.description}
                 firstStat={{
                   label: "PDFs",
                   value: subject.count,
@@ -110,7 +89,7 @@ export default function StudentNotesPlanRoute({
                   label: "Chapters",
                   value: subject.chapterCount || 1,
                 }}
-                footerText="Open notes shelf"
+                footerText="Open subject shelf"
                 onOpen={() =>
                   navigate(
                     `/ctet-tet/notes/plan/${activePlan}/${encodeURIComponent(

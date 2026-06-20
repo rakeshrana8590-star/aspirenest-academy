@@ -56,13 +56,15 @@ export default function StudentNotesChapterRoute({
   const chapterInfo = findNotesChapter(chapters, activeChapter);
 
   const chapterNotes = getChapterNotes(subjectNotes, activeChapter);
+  const subjectTitle = subjectInfo?.title || "Subject Notes";
+  const chapterTitle = chapterInfo?.title || "Chapter PDF Notes";
 
   return (
     <section className="studentNotesPage">
       <StudentNotesHero
-        badge={`${activePlan} NOTES CHAPTER`}
-        title={chapterInfo?.title || "Chapter PDFs"}
-        text="Open student-visible PDF notes from the correct subject and chapter node."
+        badge={`${activePlan} NOTES`}
+        title={chapterTitle}
+        text={`Open PDF notes from ${subjectTitle}.`}
         backLabel="Back to Chapters"
         onBack={() =>
           navigate(
@@ -78,10 +80,10 @@ export default function StudentNotesChapterRoute({
           },
           {
             label: "Subject",
-            value: subjectInfo?.title || activePlan,
+            value: subjectTitle,
           },
           {
-            label: "Access",
+            label: "Plan",
             value: activePlan,
           },
         ]}
@@ -90,13 +92,13 @@ export default function StudentNotesChapterRoute({
       <div className="studentNotesShelf studentNotesLevelShelf">
         <div className="studentNotesLevelHeader">
           <div>
-            <span>{subjectInfo?.title || activePlan}</span>
+            <span>{subjectTitle}</span>
 
             <h2>Available PDF notes</h2>
 
             <p>
-              Open chapter PDFs from one connected notes system. Access remains
-              plan-aware and linked with the student learning flow.
+              Open chapter PDFs from this subject. Only published notes from
+              the selected plan, subject, and chapter appear here.
             </p>
           </div>
 
