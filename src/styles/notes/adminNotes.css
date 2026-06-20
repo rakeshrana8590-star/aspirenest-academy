@@ -1,0 +1,9 @@
+/* ===============================
+   ADMIN NOTES CSS INDEX
+   /admin/content/notes only
+================================ */
+
+@import "./admin/adminNotesLayout.css";
+@import "./admin/adminNotesHero.css";
+@import "./admin/adminNoteCards.css";
+@import "./admin/adminNotesEmptyState.css";

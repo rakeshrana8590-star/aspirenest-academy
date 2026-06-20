@@ -1,0 +1,9 @@
+/* ===============================
+   STUDENT CURRENT AFFAIRS CSS INDEX
+   /ctet-tet/current-affairs only
+================================ */
+
+@import "./student/studentCurrentAffairsLayout.css";
+@import "./student/studentCurrentAffairsHero.css";
+@import "./student/studentCurrentAffairsCards.css";
+@import "./student/studentCurrentAffairsEmptyState.css";

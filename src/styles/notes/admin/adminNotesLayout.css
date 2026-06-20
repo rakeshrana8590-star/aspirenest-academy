@@ -1,0 +1,123 @@
+/* ===============================
+   Admin Notes — Route Layout
+   Page + Shelf + Grids only
+================================ */
+
+.adminNotesPage {
+    min-height: calc(100vh - 92px);
+    padding: 34px 7vw 74px;
+    background:
+      radial-gradient(circle at 8% 14%, rgba(249, 115, 22, 0.14), transparent 30%),
+      radial-gradient(circle at 92% 18%, rgba(59, 130, 246, 0.16), transparent 32%),
+      linear-gradient(180deg, #f8fbff 0%, #ffffff 54%, #f8fbff 100%);
+  }
+  
+  .adminNotesShelf {
+    margin-top: 28px;
+    padding: 34px;
+    border-radius: 34px;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 10% 12%, rgba(249, 115, 22, 0.1), transparent 34%),
+      radial-gradient(circle at 92% 10%, rgba(59, 130, 246, 0.13), transparent 34%),
+      rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+  }
+  
+  .adminNotesShelfHeader {
+    margin-bottom: 24px;
+  }
+  
+  .adminNotesShelfHeader > span {
+    min-height: 34px;
+    padding: 0 14px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    width: max-content;
+    color: #ea580c;
+    background: #fff7ed;
+    font-size: 0.74rem;
+    font-weight: 1000;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  
+  .adminNotesShelfHeader h2 {
+    max-width: 940px;
+    margin: 16px 0 0;
+    color: #0f172a;
+    font-size: clamp(2.35rem, 4vw, 4.25rem);
+    line-height: 0.94;
+    letter-spacing: -0.078em;
+    font-weight: 1000;
+  }
+  
+  .adminNotesShelfHeader p {
+    max-width: 780px;
+    margin: 14px 0 0;
+    color: #64748b;
+    font-size: 0.94rem;
+    line-height: 1.55;
+    font-weight: 850;
+  }
+  
+  .adminNotesStatusGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 28px;
+  }
+  
+  .adminNotesQuickGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+  
+  .adminNotesPlanGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+  
+  .adminNotesPdfGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+  
+  @media (max-width: 1280px) {
+    .adminNotesStatusGrid,
+    .adminNotesQuickGrid,
+    .adminNotesPlanGrid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  
+    .adminNotesPdfGrid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  
+  @media (max-width: 760px) {
+    .adminNotesPage {
+      padding: 26px 16px 60px;
+    }
+  
+    .adminNotesShelf {
+      padding: 22px;
+      border-radius: 26px;
+    }
+  
+    .adminNotesShelfHeader h2 {
+      font-size: clamp(2.15rem, 11vw, 3.15rem);
+    }
+  
+    .adminNotesStatusGrid,
+    .adminNotesQuickGrid,
+    .adminNotesPlanGrid,
+    .adminNotesPdfGrid {
+      grid-template-columns: 1fr;
+    }
+  }

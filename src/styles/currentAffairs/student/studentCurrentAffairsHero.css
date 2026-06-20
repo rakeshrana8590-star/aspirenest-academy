@@ -1,0 +1,350 @@
+.studentCaHero {
+    max-width: 100%;
+    margin: 0 auto 28px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+    gap: 24px;
+    align-items: stretch;
+    padding: 34px;
+    border-radius: 36px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+      radial-gradient(circle at 6% 12%, rgba(249, 115, 22, 0.16), transparent 34%),
+      radial-gradient(circle at 92% 12%, rgba(37, 99, 235, 0.16), transparent 34%),
+      linear-gradient(135deg, #241718 0%, #0f172a 48%, #08111f 100%);
+    box-shadow:
+      0 28px 80px rgba(15, 23, 42, 0.18),
+      0 50px 130px rgba(15, 23, 42, 0.12);
+    overflow: hidden;
+  }
+  
+  .studentCaHeroCopy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+  }
+  
+  .studentCaHeroTopActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  
+  .studentCaBadge {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    min-height: 38px;
+    padding: 0 16px;
+    border-radius: 999px;
+    color: #fed7aa;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    font-size: 0.82rem;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  
+  .studentCaHero h1 {
+    max-width: 760px;
+    margin: 18px 0 14px;
+    color: #ffffff;
+    font-size: clamp(2.65rem, 5.4vw, 5.25rem);
+    line-height: 0.94;
+    letter-spacing: -0.08em;
+    text-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+  }
+  
+  .studentCaHero p {
+    max-width: 780px;
+    margin: 0;
+    color: rgba(226, 232, 240, 0.72);
+    font-size: 1.04rem;
+    font-weight: 800;
+    line-height: 1.72;
+  }
+  
+  .studentCaHeroActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 26px;
+  }
+  
+  .studentCaPrimaryBtn,
+  .studentCaGhostBtn,
+  .studentCaBackBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    border-radius: 999px;
+    padding: 0 18px;
+    font-size: 0.88rem;
+    font-weight: 950;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease;
+  }
+  
+  .studentCaPrimaryBtn {
+    border: 0;
+    color: #ffffff;
+    background: #0f172a;
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24);
+  }
+  
+  .studentCaGhostBtn,
+  .studentCaBackBtn {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    background: rgba(15, 23, 42, 0.72);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16);
+  }
+  
+  .studentCaPrimaryBtn:hover,
+  .studentCaGhostBtn:hover,
+  .studentCaBackBtn:hover {
+    transform: translateY(-1px);
+  }
+  
+  .studentCaBackBtn {
+    margin: 0;
+    min-height: 38px;
+    padding: 0 15px;
+  }
+  
+  .studentCaTrustRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 26px;
+  }
+  
+  .studentCaTrustRow span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 13px;
+    border-radius: 999px;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    font-size: 0.78rem;
+    font-weight: 950;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+  
+  .studentCaTrustRow span::before {
+    content: "✓";
+    margin-right: 5px;
+    color: #e2e8f0;
+  }
+  
+  .studentCaSystemCard {
+    position: relative;
+    min-height: 430px;
+    padding: 22px;
+    border-radius: 30px;
+    color: #ffffff;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(249, 115, 22, 0.2), transparent 30%),
+      radial-gradient(circle at 90% 20%, rgba(59, 130, 246, 0.24), transparent 34%),
+      linear-gradient(135deg, rgba(43, 31, 32, 0.92) 0%, rgba(15, 23, 42, 0.95) 54%, rgba(8, 17, 31, 0.96) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    box-shadow:
+      0 28px 70px rgba(0, 0, 0, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+  }
+  
+  .studentCaSystemCard::after {
+    content: "";
+    position: absolute;
+    inset: auto -70px -90px auto;
+    width: 210px;
+    height: 210px;
+    border-radius: 999px;
+    background: rgba(249, 115, 22, 0.16);
+    filter: blur(24px);
+  }
+  
+  .studentCaSystemTop {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+  
+  .studentCaSystemTop span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 14px;
+    border-radius: 999px;
+    color: #fed7aa;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 0.78rem;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+  }
+  
+  .studentCaSystemTop strong {
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 950;
+  }
+  
+  .studentCaSystemFeature {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 16px;
+    align-items: center;
+    min-height: 96px;
+    margin-bottom: 18px;
+    padding: 18px;
+    border-radius: 24px;
+    background:
+      radial-gradient(circle at 12% 16%, rgba(255, 255, 255, 0.13), transparent 36%),
+      linear-gradient(135deg, rgba(59, 130, 246, 0.24), rgba(37, 99, 235, 0.16));
+    border: 1px solid rgba(147, 197, 253, 0.18);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  }
+  
+  .studentCaSystemIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 58px;
+    height: 58px;
+    border-radius: 20px;
+    background:
+      radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.28), transparent 42%),
+      rgba(255, 255, 255, 0.1);
+    font-size: 1.5rem;
+  }
+  
+  .studentCaSystemFeature strong {
+    display: block;
+    color: #ffffff;
+    font-size: 1.06rem;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+  }
+  
+  .studentCaSystemFeature span {
+    display: block;
+    margin-top: 6px;
+    color: rgba(226, 232, 240, 0.62);
+    font-size: 0.72rem;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  
+  .studentCaSystemGrid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  
+  .studentCaSystemGrid div {
+    min-height: 102px;
+    padding: 18px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  }
+  
+  .studentCaSystemGrid strong {
+    display: block;
+    color: #ffffff;
+    font-size: 2rem;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    overflow-wrap: anywhere;
+  }
+  
+  .studentCaSystemGrid span {
+    display: block;
+    margin-top: 9px;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.82rem;
+    font-weight: 850;
+  }
+  
+  .studentCaFlow {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: auto 1fr auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+    margin-top: 24px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(37, 99, 235, 0.28);
+  }
+  
+  .studentCaFlow span {
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 950;
+  }
+  
+  .studentCaFlow i {
+    display: block;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.24);
+  }
+  
+  @media (max-width: 980px) {
+    .studentCaHero {
+      grid-template-columns: 1fr;
+    }
+  
+    .studentCaSystemCard {
+      min-height: auto;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .studentCaHero {
+      padding: 18px;
+      border-radius: 24px;
+    }
+  
+    .studentCaHero h1 {
+      font-size: clamp(2.2rem, 14vw, 3.2rem);
+    }
+  
+    .studentCaHeroActions,
+    .studentCaHeroActions button,
+    .studentCaBackBtn {
+      width: 100%;
+    }
+  
+    .studentCaSystemFeature,
+    .studentCaSystemGrid {
+      grid-template-columns: 1fr;
+    }
+  }

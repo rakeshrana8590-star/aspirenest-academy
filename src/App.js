@@ -131,6 +131,11 @@ import {
   StudentNotesChapterRoute,
 } from "./components/notes/student/index.js";
 
+import {
+  StudentCurrentAffairsLibraryRoute,
+  StudentCurrentAffairsMonthRoute,
+} from "./components/currentAffairs/student/index.js";
+
 import AdminMockTestHomeRoute from "./components/exam/AdminMockTestHomeRoute.jsx";
 import AdminMockTestAddRoute from "./components/exam/AdminMockTestAddRoute.jsx";
 import AdminMockTestManageRoute from "./components/exam/AdminMockTestManageRoute.jsx";
@@ -192,6 +197,9 @@ import "./styles/exam/examStart.css";
 import "./styles/exam/studentMockTests.css";
 
 import "./styles/notes/studentNotes.css";
+import "./styles/currentAffairs/studentCurrentAffairs.css";
+
+import "./styles/notes/adminNotes.css";
 
 import "./styles/exam/adminMockTests.css";
 import "./styles/exam/examLayoutLock.css";
@@ -8882,293 +8890,30 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   }
 />
 
-
-
-
 <Route
   path="/ctet-tet/current-affairs"
   element={
-    <section className="coursePages currentAffairsPremiumPage">
-      <div className="sectionHeader">
-        <span className="badge">CTET / TET Current Affairs</span>
-
-        <h1>Current Affairs Library</h1>
-
-        <p>
-          Month-wise current affairs PDFs with weekly grouping,
-          plan access, and exam-focused preparation material.
-        </p>
-      </div>
-
-      <div className="notesNetflixLibrary currentAffairsNetflixLibrary">
-        <div className="notesShelf">
-          
-
-          <div className="notesShelfScrollWrap">
-            {notesScrollState["current-affairs-month-row"]?.canScroll &&
-              !notesScrollState["current-affairs-month-row"]?.atStart && (
-                <button
-                  type="button"
-                  className="notesShelfArrow notesShelfArrowLeft"
-                  onClick={() =>
-                    scrollShelf("current-affairs-month-row", "left")
-                  }
-                >
-                  ‹
-                </button>
-              )}
-
-            <div
-              className="notesSubjectRow currentAffairsMonthRow"
-              id="current-affairs-month-row"
-              onScroll={() =>
-                updateNotesScrollState("current-affairs-month-row")
-              }
-              onMouseEnter={() =>
-                updateNotesScrollState("current-affairs-month-row")
-              }
-            >
-              {Object.entries(
-                [...universalCurrentAffairs, ...currentAffairsList]
-                  .filter(
-                    (item) =>
-                      item.status === CONTENT_STATUS.PUBLISHED ||
-                      item.status === "published"
-                  )
-                  .reduce((months, item) => {
-                    const monthName = item.month || "Current Affairs";
-
-                    if (!months[monthName]) {
-                      months[monthName] = [];
-                    }
-
-                    months[monthName].push(item);
-                    return months;
-                  }, {})
-              )
-                .sort(([a], [b]) => {
-                  const monthOrder = [
-                    "january",
-                    "february",
-                    "march",
-                    "april",
-                    "may",
-                    "june",
-                    "july",
-                    "august",
-                    "september",
-                    "october",
-                    "november",
-                    "december",
-                  ];
-
-                  const [monthA, yearA] = a.toLowerCase().split(" ");
-                  const [monthB, yearB] = b.toLowerCase().split(" ");
-
-                  if (yearA !== yearB) {
-                    return Number(yearB || 0) - Number(yearA || 0);
-                  }
-
-                  return (
-                    monthOrder.indexOf(monthB) -
-                    monthOrder.indexOf(monthA)
-                  );
-                })
-                .map(([monthName, items]) => {
-                  const monthSlug = monthName
-                    .toLowerCase()
-                    .trim()
-                    .replace(/\s+/g, "-");
-
-                  return (
-                    <button
-                      type="button"
-                      className="notesSubjectCard currentAffairsMonthCard"
-                      key={monthName}
-                      onClick={() =>
-                        navigate(`/ctet-tet/current-affairs/${monthSlug}`)
-                      }
-                    >
-                      <div className="notesSubjectIcon">📰</div>
-
-                      <h3>{monthName}</h3>
-
-                      <p>
-                        {items.length} PDF
-                        {items.length > 1 ? "s" : ""} available
-                      </p>
-
-                      <span className="notesSubjectTag">
-                        Open Month →
-                      </span>
-                    </button>
-                  );
-                })}
-            </div>
-
-            {notesScrollState["current-affairs-month-row"]?.canScroll &&
-              !notesScrollState["current-affairs-month-row"]?.atEnd && (
-                <button
-                  type="button"
-                  className="notesShelfArrow notesShelfArrowRight"
-                  onClick={() =>
-                    scrollShelf("current-affairs-month-row", "right")
-                  }
-                >
-                  ›
-                </button>
-              )}
-          </div>
-        </div>
-      </div>
-    </section>
+    <StudentCurrentAffairsLibraryRoute
+      universalContent={universalContent}
+      currentAffairsList={currentAffairsList}
+    />
   }
 />
 
 <Route
   path="/ctet-tet/current-affairs/:monthId"
   element={
-    <section className="coursePages currentAffairsPremiumPage">
-      {(() => {
-        const formatSlug = (value = "") =>
-          value.toString().toLowerCase().trim().replace(/\s+/g, "-");
-
-        const activeMonthId = location.pathname.split("/").pop();
-
-        const publishedCurrentAffairs = [
-          ...universalCurrentAffairs,
-          ...currentAffairsList,
-        ].filter(
-          (item) =>
-            item.status === CONTENT_STATUS.PUBLISHED ||
-            item.status === "published"
-        );
-
-        const monthItems = publishedCurrentAffairs.filter(
-          (item) => formatSlug(item.month) === activeMonthId
-        );
-
-        const monthTitle = monthItems[0]?.month || "Current Affairs Month";
-
-        const groupedWeeks = monthItems.reduce((groups, item) => {
-          const weekName =
-            item.week?.trim() || item.chapter?.trim() || "Monthly PDFs";
-
-          if (!groups[weekName]) groups[weekName] = [];
-
-          groups[weekName].push(item);
-          return groups;
-        }, {});
-
-        const openCurrentAffairPdf = (item) => {
-          const finalPdfUrl =
-            item.fileUrl || item.pdfUrl || item.pdf || item.url || "";
-
-          const accessPlan = item.planType || item.plan || PLAN_TYPES.FREE;
-
-          if (!finalPdfUrl) {
-            alert("PDF URL missing in this current affair item.");
-            return;
-          }
-
-          if (
-            !isAdmin &&
-            accessPlan !== PLAN_TYPES.FREE &&
-            hasPlanAccess &&
-            !hasPlanAccess(accessPlan)
-          ) {
-            navigate("/ctet-tet/pricing");
-            return;
-          }
-
-          window.open(finalPdfUrl, "_blank", "noopener,noreferrer");
-        };
-
-        return (
-          <>
-            <div className="sectionHeader">
-              <span className="badge">CURRENT AFFAIRS MONTH</span>
-
-              <h1>{monthTitle}</h1>
-
-              <p>Weekly and monthly CTET/TET current affairs PDFs.</p>
-            </div>
-
-            <div className="caMonthPage">
-              {Object.keys(groupedWeeks).length === 0 ? (
-                <div className="caEmptyCard">
-                  <strong>No PDFs found.</strong>
-                  <p>No published current affairs available for this month.</p>
-                </div>
-              ) : (
-                Object.entries(groupedWeeks)
-                  .sort(([a], [b]) => {
-                    const getWeekNumber = (weekName = "") => {
-                      const match = weekName.match(/\d+/);
-                      return match ? Number(match[0]) : 99;
-                    };
-
-                    return getWeekNumber(a) - getWeekNumber(b);
-                  })
-                  .map(([weekName, items]) => (
-                    <div className="caWeekBlock" key={weekName}>
-                      <div className="caWeekHeader">
-                        <h2>{weekName}</h2>
-                        <span>
-                          {items.length} PDF{items.length > 1 ? "s" : ""} in{" "}
-                          {monthTitle}
-                        </span>
-                      </div>
-
-                      <div className="caPdfShelf">
-                        {items.map((item) => (
-                          <button
-                            type="button"
-                            className="caPdfCard"
-                            key={item.id}
-                            onClick={() => openCurrentAffairPdf(item)}
-                          >
-                            <div className="caPdfTop">
-                              <span className="caPdfIcon">📄</span>
-                              <span className="caPdfPlan">
-                                {item.planType || PLAN_TYPES.FREE}
-                              </span>
-                            </div>
-
-                            <h3>{item.title}</h3>
-
-                            <p>
-                              {item.month || "No Month"} •{" "}
-                              {item.week || item.chapter || "Monthly PDFs"}
-                            </p>
-
-                            <span className="caPdfOpen">Open PDF →</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))
-              )}
-            </div>
-
-            <div className="contentStudioActions">
-              <button
-                className="backButton"
-                onClick={() => navigate("/ctet-tet/current-affairs")}
-              >
-                ← Back to Current Affairs
-              </button>
-
-              <button className="backButton" onClick={() => navigate("/ctet-tet")}>
-                Back to CTET/TET Hub
-              </button>
-            </div>
-          </>
-        );
-      })()}
-    </section>
+    <StudentCurrentAffairsMonthRoute
+      universalContent={universalContent}
+      currentAffairsList={currentAffairsList}
+      hasPlanAccess={hasPlanAccess}
+      isAdmin={isAdmin}
+    />
   }
 />
+
+
+
 
 <Route
   path="/ctet-tet/pricing"
