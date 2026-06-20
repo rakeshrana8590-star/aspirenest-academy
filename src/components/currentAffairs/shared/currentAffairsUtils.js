@@ -175,6 +175,8 @@ export const CURRENT_AFFAIRS_PLAN_ORDER = [
   }
   
   export function getCurrentAffairsWeek(item = {}) {
+    const monthName = getCurrentAffairsMonth(item);
+  
     const directWeek = cleanCurrentAffairsText(
       item.week ||
         item.weekName ||
@@ -183,7 +185,13 @@ export const CURRENT_AFFAIRS_PLAN_ORDER = [
       ""
     );
   
-    if (directWeek) return directWeek;
+    if (
+      directWeek &&
+      normalizeCurrentAffairsText(directWeek) !==
+        normalizeCurrentAffairsText(monthName)
+    ) {
+      return directWeek;
+    }
   
     const type = cleanCurrentAffairsText(item.type, "");
   
@@ -191,7 +199,8 @@ export const CURRENT_AFFAIRS_PLAN_ORDER = [
       type &&
       !["FREE", "BASIC", "PREMIUM", "MENTORSHIP", "COMING_SOON"].includes(
         type.toUpperCase()
-      )
+      ) &&
+      normalizeCurrentAffairsText(type) !== normalizeCurrentAffairsText(monthName)
     ) {
       return type;
     }

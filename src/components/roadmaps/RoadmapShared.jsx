@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "../../styles/roadmaps/aspirePath.css";
+import "../../styles/roadmaps/roadmapPremium.css";
 
 const formatDateLabel = (dateValue = "") => {
   if (!dateValue) {

@@ -13,6 +13,7 @@ export function StudentCurrentAffairsMonthCard({ month, onOpen }) {
       type="button"
       className="studentCaPlanCard"
       onClick={() => onOpen(month)}
+      aria-label={`Open ${month.title} current affairs`}
     >
       <div className="studentCaPlanCardTop">
         <span className="studentCaPlanIcon">{month.cover || "📰"}</span>
@@ -67,13 +68,18 @@ export function StudentCurrentAffairsPdfCard({
       type="button"
       className={`studentCaPdfCard ${locked ? "isLocked" : ""}`}
       onClick={() => onOpen(item)}
+      aria-label={
+        locked
+          ? `Unlock ${item.title}`
+          : `Open ${item.title} current affairs PDF`
+      }
     >
       <div className="studentCaPdfTop">
         <span className="studentCaPdfIcon">{locked ? "🔒" : "📄"}</span>
 
         <div className="studentCaPdfBadges">
           <span>{planName}</span>
-          <span>{item.week || item.chapter || "Monthly"}</span>
+          <span>{item.week || item.chapter || "Monthly PDFs"}</span>
         </div>
       </div>
 
@@ -97,8 +103,10 @@ export function StudentCurrentAffairsPdfCard({
       </div>
 
       <div className="studentCaPdfFooter">
-        <span>{locked ? "Upgrade required" : "Access ready"}</span>
-        <button type="button">{locked ? "Unlock" : "Open PDF"}</button>
+        <span>{locked ? "Premium access required" : "Access ready"}</span>
+        <strong className="studentCaPdfOpenPill">
+          {locked ? "View Plan →" : "Open PDF →"}
+        </strong>
       </div>
     </button>
   );

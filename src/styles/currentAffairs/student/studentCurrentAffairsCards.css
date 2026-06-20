@@ -208,7 +208,7 @@
 }
 
 .studentCaPlanFooter strong,
-.studentCaPdfFooter button {
+.studentCaPdfOpenPill {
   min-height: 34px !important;
   padding: 0 12px !important;
   border-radius: 999px !important;
@@ -224,9 +224,7 @@
   box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14) !important;
 }
 
-.studentCaPdfFooter button {
-  cursor: pointer !important;
-}
+
 
 /* Weekly section on month detail page */
 .studentCaWeekBlock {
@@ -292,7 +290,7 @@
     flex-direction: column !important;
   }
 
-  .studentCaPdfFooter button {
+  .studentCaPdfOpenPill {
     width: 100% !important;
   }
 }

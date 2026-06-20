@@ -131,7 +131,12 @@ import {
   StudentNotesChapterRoute,
 } from "./components/notes/student/index.js";
 
-import { AdminNotesHomeRoute } from "./components/notes/admin/index.js";
+import {
+  AdminNotesHomeRoute,
+  AdminNotesPlanRoute,
+  AdminNotesSubjectRoute,
+  AdminNotesChapterRoute,
+} from "./components/notes/admin/index.js";
 
 import {
   StudentCurrentAffairsLibraryRoute,
@@ -6225,336 +6230,27 @@ This action cannot be undone.`
 <Route
   path="/admin/content/notes/plan/:planType"
   element={
-    requireAdmin() ? (
-      <section className="coursePages">
-        <div className="sectionHeader">
-          <span className="badge">
-            PLAN LIBRARY
-          </span>
-
-          <h1>
-            {location.pathname.split("/").pop()} Notes Library
-          </h1>
-
-          <p>
-            Manage subjects, chapters,
-            and PDFs inside each plan.
-          </p>
-        </div>
-
-        <div className="contentStudioForm">
-          <button
-            className="backButton"
-            onClick={() =>
-              navigate("/admin/content/notes")
-            }
-          >
-            ← Back to Notes Manager
-          </button>
-
-          <h3>
-            {location.pathname.split("/").pop()} Plan Content
-          </h3>
-
-          <div className="contentStudioList">
-            <h3>Subjects in this Plan</h3>
-
-            {(() => {
-              const activePlan =
-                location.pathname.split("/").pop();
-
-              const subjectsInPlan = [
-                ...new Set(
-                  universalNotes
-                    .filter(
-                      (note) =>
-                        note.planType === activePlan &&
-                        (note.status || "published")
-  .toLowerCase() === "published"
-                    )
-                    .map((note) => {
-                    
-                        return getSubjectDisplayName(note.subject);
-                    })
-                    .filter(Boolean)
-                ),
-              ];
-
-              return subjectsInPlan.length === 0 ? (
-                <p>No subjects found in this plan.</p>
-              ) : (
-                <div className="contentStudioGrid">
-                  {subjectsInPlan.map((subjectName) => (
-                <button
-                key={subjectName}
-                className="publishButton"
-                onClick={() =>
-                  navigate(
-                    `/admin/content/notes/plan/${activePlan}/${encodeURIComponent(
-                      getSubjectDisplayName(subjectName)
-                    )}`
-                  )
-                }
-              >
-                {getSubjectDisplayName(subjectName)}
-              </button>
-                  ))}
-                </div>
-              );
-            })()}
-          </div>
-        </div>
-      </section>
-    ) : null
+    <AdminNotesPlanRoute
+      universalContent={universalContent}
+    />
   }
 />
 
 <Route
   path="/admin/content/notes/plan/:planType/:subjectName"
   element={
-    requireAdmin() ? (
-      <section className="coursePages">
-        <div className="sectionHeader">
-          <span className="badge">
-            SUBJECT LIBRARY
-          </span>
-
-          <h1>
-            {decodeURIComponent(
-              location.pathname.split("/").pop()
-            )}
-          </h1>
-
-          <p>
-            Manage chapters and PDFs inside this subject.
-          </p>
-        </div>
-
-        <div className="contentStudioForm">
-          <button
-            className="backButton"
-            onClick={() => {
-              const parts = location.pathname.split("/");
-              navigate(`/admin/content/notes/plan/${parts[4]}`);
-            }}
-          >
-            ← Back to Plan Library
-          </button>
-
-          <h3>
-            Chapters in{" "}
-            {decodeURIComponent(
-              location.pathname.split("/").pop()
-            )}
-          </h3>
-
-          <div className="contentStudioList">
-            {[
-              ...new Set(
-                universalNotes
-                  .filter(
-                    (note) =>
-                      note.planType ===
-                        location.pathname.split("/").slice(-2)[0] &&
-                      note.subject ===
-                        decodeURIComponent(
-                          location.pathname.split("/").pop()
-                        )
-                  )
-                  .map((note) => note.chapter)
-                  .filter(Boolean)
-              ),
-            ].length === 0 ? (
-              <p>No chapters found in this subject.</p>
-            ) : (
-              <div className="contentStudioGrid">
-                {[
-                  ...new Set(
-                    universalNotes
-                      .filter(
-                        (note) =>
-                          note.planType ===
-                            location.pathname.split("/").slice(-2)[0] &&
-                          note.subject ===
-                            decodeURIComponent(
-                              location.pathname.split("/").pop()
-                            )
-                      )
-                      .map((note) => note.chapter)
-                      .filter(Boolean)
-                  ),
-                ].map((chapterName) => (
-                  <button
-                  key={chapterName}
-                  className="publishButton"
-                  onClick={() =>
-                    navigate(
-                      `/admin/content/notes/plan/${
-                        location.pathname.split("/").slice(-2)[0]
-                      }/${
-                        location.pathname.split("/").pop()
-                      }/${encodeURIComponent(chapterName)}`
-                    )
-                  }
-                >
-                  {chapterName}
-                </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-    ) : null
+    <AdminNotesSubjectRoute
+      universalContent={universalContent}
+    />
   }
 />
 
 <Route
   path="/admin/content/notes/plan/:planType/:subjectName/:chapterName"
   element={
-    requireAdmin() ? (
-      <section className="coursePages">
-        <div className="sectionHeader">
-          <span className="badge">
-            PDF LIBRARY
-          </span>
-
-          <h1>
-            {decodeURIComponent(
-              location.pathname.split("/").pop()
-            )}
-          </h1>
-
-          <p>
-            PDFs inside this chapter / topic.
-          </p>
-        </div>
-
-        <div className="contentStudioForm">
-          <button
-            className="backButton"
-            onClick={() => {
-              const parts = location.pathname.split("/");
-              navigate(`/admin/content/notes/plan/${parts[4]}/${parts[5]}`);
-            }}
-          >
-            ← Back to Subject
-          </button>
-
-          <h3>PDFs</h3>
-
-          <div className="contentStudioList">
-            {universalNotes
-              .filter(
-                (note) =>
-                  note.planType ===
-                    location.pathname.split("/").slice(-3)[0] &&
-                  note.subject ===
-                    decodeURIComponent(
-                      location.pathname.split("/").slice(-2)[0]
-                    ) &&
-                  note.chapter ===
-                    decodeURIComponent(
-                      location.pathname.split("/").pop()
-                    )
-              )
-              .length === 0 ? (
-              <p>No PDFs found in this chapter / topic.</p>
-            ) : (
-              universalNotes
-                .filter(
-                  (note) =>
-                    note.planType ===
-                      location.pathname.split("/").slice(-3)[0] &&
-                    note.subject ===
-                      decodeURIComponent(
-                        location.pathname.split("/").slice(-2)[0]
-                      ) &&
-                    note.chapter ===
-                      decodeURIComponent(
-                        location.pathname.split("/").pop()
-                      )
-                )
-                .map((note) => (
-                  <div
-                    className="contentStudioItem"
-                    key={note.id}
-                  >
-                    <strong>{note.title}</strong>
-
-                    <p>
-                      {note.subject} • {note.chapter} •{" "}
-                      {note.planType} • {note.status}
-                    </p>
-
-                    <div className="contentStudioActions">
-                      <button
-                        className="publishButton"
-                        onClick={() => {
-                          const pdfLink =
-                            note.pdfUrl ||
-                            note.fileUrl ||
-                            note.pdf ||
-                            "";
-                        
-                          if (!pdfLink) {
-                            alert("PDF URL not found for this note.");
-                            return;
-                          }
-                        
-                          window.open(pdfLink, "_blank");
-                        }}
-                      >
-                        Open PDF
-                      </button>
-
-                      <button
-                        className="backButton"
-                        onClick={() => {
-                          setEditingNotesCmsId(note.id);
-                          setNotesCmsTitle(note.title || "");
-                          setNotesCmsDescription(note.description || "");
-                          setNotesCmsPlanType(note.planType || "FREE");
-                          setNotesCmsSubject(note.subject || "");
-                          setNotesCmsChapter(note.chapter || "");
-                          setNotesCmsMonth(note.month || "");
-                          setNotesCmsYear(note.year || "");
-                          setNotesCmsPdfUrl(note.pdfUrl || "");
-                          setNotesCmsThumbnailUrl(note.thumbnailUrl || "");
-                          setNotesCmsStatus(note.status || "Draft");
-
-                          navigate("/admin/content/notes/form");
-                        }}
-                      >
-                        Edit PDF
-                      </button>
-
-                      <button
-  className="deleteContentButton"
-  onClick={() => {
-    if (
-      window.confirm(
-        `Delete "${note.title}" permanently?
-      
-      This PDF record will be removed from AspireNest Content Studio.
-      This action cannot be undone.`
-      )
-    ) {
-      handleDeleteLocalContentItem(note.id);
-    }
-  }}
->
-  Delete PDF
-</button>
-
-                    </div>
-                  </div>
-                ))
-            )}
-          </div>
-        </div>
-      </section>
-    ) : null
+    <AdminNotesChapterRoute
+      universalContent={universalContent}
+    />
   }
 />
 

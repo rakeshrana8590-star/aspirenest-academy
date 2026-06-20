@@ -1,140 +1,277 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import StudentNotesHero from "./StudentNotesHero";
-import StudentNotesEmptyState from "./StudentNotesEmptyState";
-import { StudentNotesLevelCard } from "./StudentNoteCards";
+import {
+  getAdminNotesByChapter,
+  getAdminNotesByPlan,
+  getAdminNotesBySubject,
+  getAdminNotesHealthSummary,
+  getAdminNotesStatusCounts,
+  getAdminPlanLabel,
+  getUniqueAdminNoteChapters,
+  getUniqueAdminNoteSubjects,
+} from "../shared/adminNotesUtils";
 
 import {
-  buildNotesChapterList,
-  buildNotesSubjectList,
-  getNotesPdfCount,
-  getPlanNotes,
-  getSubjectNotes,
+  hasNotePdf,
   normalizeNoteText,
 } from "../shared/notesUtils";
 
-function findNotesSubject(shelves = [], subjectId = "") {
-  const activeSubject = normalizeNoteText(subjectId);
+function findAdminSubject(subjects = [], subjectName = "") {
+  const activeSubject = normalizeNoteText(subjectName);
 
-  return shelves.find(
-    (shelf) =>
-      normalizeNoteText(shelf.id) === activeSubject ||
-      normalizeNoteText(shelf.title) === activeSubject
+  return subjects.find(
+    (subject) =>
+      normalizeNoteText(subject.id) === activeSubject ||
+      normalizeNoteText(subject.title) === activeSubject
   );
 }
 
-function getPublicShelfTitle(shelf = {}) {
-  const title = shelf.title || "Notes Shelf";
-
-  if (normalizeNoteText(title) === "ctet-tet") {
-    return "CTET/TET Revision Notes";
-  }
-
-  return title;
-}
-
-function getPublicShelfText(shelf = {}) {
-  const title = shelf.title || "";
-
-  if (normalizeNoteText(title) === "ctet-tet") {
-    return "Open chapter-wise CTET/TET PDF notes from this revision shelf.";
-  }
-
-  return shelf.description || "Open chapter-wise PDF notes from this revision shelf.";
-}
-
-export default function StudentNotesSubjectRoute({
+export default function AdminNotesSubjectRoute({
   universalContent = [],
 }) {
   const navigate = useNavigate();
-  const { plan, subjectId } = useParams();
+  const { planType, subjectName } = useParams();
 
-  const activePlan = decodeURIComponent(plan || "FREE").toUpperCase();
-  const activeShelf = decodeURIComponent(subjectId || "");
+  const activePlan = decodeURIComponent(planType || "FREE").toUpperCase();
+  const activeSubject = decodeURIComponent(subjectName || "");
 
-  const planNotes = getPlanNotes(universalContent, activePlan);
-  const shelves = buildNotesSubjectList(planNotes);
-  const shelfInfo = findNotesSubject(shelves, activeShelf);
+  const planLabel = getAdminPlanLabel(activePlan);
+  const planNotes = getAdminNotesByPlan(universalContent, activePlan);
 
-  const shelfNotes = getSubjectNotes(planNotes, activeShelf);
-  const chapters = buildNotesChapterList(shelfNotes);
-  const shelfTitle = getPublicShelfTitle(shelfInfo);
+  const subjects = getUniqueAdminNoteSubjects(planNotes);
+  const subjectInfo = findAdminSubject(subjects, activeSubject);
+  const subjectTitle = subjectInfo?.title || "Subject Notes";
+  const subjectKey = subjectInfo?.id || activeSubject;
+
+  const subjectNotes = getAdminNotesBySubject(planNotes, activeSubject);
+  const chapters = getUniqueAdminNoteChapters(subjectNotes);
+
+  const statusCounts = getAdminNotesStatusCounts(subjectNotes);
+  const healthSummary = getAdminNotesHealthSummary(subjectNotes);
+  const pdfReady = subjectNotes.filter((note) => hasNotePdf(note)).length;
+
+  const systemStats = [
+    {
+      value: chapters.length,
+      label: "Chapters",
+    },
+    {
+      value: subjectNotes.length,
+      label: "Total Notes",
+    },
+    {
+      value: pdfReady,
+      label: "PDF Ready",
+    },
+    {
+      value: healthSummary.ready,
+      label: "Student Visible",
+    },
+  ];
+
+  const chapterCards = chapters.map((chapter) => {
+    const chapterNotes = getAdminNotesByChapter(subjectNotes, chapter.id);
+    const chapterHealth = getAdminNotesHealthSummary(chapterNotes);
+    const chapterPdfReady = chapterNotes.filter((note) => hasNotePdf(note)).length;
+
+    return {
+      ...chapter,
+      notesCount: chapterNotes.length,
+      pdfReady: chapterPdfReady,
+      studentVisible: chapterHealth.ready,
+    };
+  });
 
   return (
-    <section className="studentNotesPage">
-      <StudentNotesHero
-        badge={`${activePlan} NOTES`}
-        title={shelfTitle}
-        text="Open a chapter shelf and continue into student-visible PDF notes."
-        backLabel="Back to Plan"
-        onBack={() => navigate(`/ctet-tet/notes/plan/${activePlan}`)}
-        stats={[
-          {
-            label: "Chapter Shelves",
-            value: chapters.length,
-          },
-          {
-            label: "PDFs",
-            value: getNotesPdfCount(shelfNotes),
-          },
-          {
-            label: "Plan",
-            value: activePlan,
-          },
-        ]}
-      />
+    <section className="coursePages adminMockPlanPage adminNotesPlanAlignedPage">
+      <section className="adminNotesLaunchHero">
+        <div className="adminNotesLaunchHeroCopy">
+          <span className="adminNotesLaunchBadge">{activePlan} NOTES</span>
 
-      <div className="studentNotesShelf studentNotesLevelShelf">
-        <div className="studentNotesLevelHeader">
-          <div>
-            <span>{shelfTitle}</span>
+          <h1>{subjectTitle}</h1>
 
-            <h2>Choose a chapter shelf</h2>
+          <p>
+            Review chapter-wise notes, PDF readiness, publish status, and
+            student visibility inside {planLabel}.
+          </p>
 
-            <p>{getPublicShelfText(shelfInfo)}</p>
+          <div className="adminNotesLaunchHeroActions">
+            <button
+              type="button"
+              className="adminNotesLaunchPrimaryBtn"
+              onClick={() => navigate("/admin/content/notes/form")}
+            >
+              + Add Note PDF
+            </button>
+
+            <button
+              type="button"
+              className="adminNotesLaunchGhostBtn"
+              onClick={() => navigate("/admin/content/notes/manage")}
+            >
+              Manage Notes
+            </button>
+
+            <button
+              type="button"
+              className="adminNotesLaunchGhostBtn"
+              onClick={() =>
+                navigate(`/admin/content/notes/plan/${activePlan}`)
+              }
+            >
+              ← Back
+            </button>
           </div>
 
-          <div className="studentNotesLevelStatus">
-            <strong>{chapters.length}</strong>
-            <span>Chapter shelves</span>
+          <div className="adminNotesLaunchTrustRow">
+            <span>✓ Plan protected</span>
+            <span>✓ Subject-wise</span>
+            <span>✓ Chapter PDFs</span>
+            <span>✓ Publish audit</span>
           </div>
         </div>
 
-        {chapters.length === 0 ? (
-          <StudentNotesEmptyState
-            title="No chapters found"
-            text="Published chapter notes for this shelf will appear here."
-          />
+        <div className="adminNotesLaunchSystemCard">
+          <div className="adminNotesLaunchSystemTop">
+            <span>Subject Status</span>
+            <strong>{activePlan}</strong>
+          </div>
+
+          <div className="adminNotesLaunchTitleCard">
+            <span className="adminNotesLaunchIcon">📚</span>
+
+            <div>
+              <h3>{subjectTitle}</h3>
+              <p>{activePlan} NOTES CMS</p>
+            </div>
+          </div>
+
+          <div className="adminNotesLaunchSystemGrid">
+            {systemStats.map((stat) => (
+              <div className="adminNotesLaunchFeatureCard" key={stat.label}>
+                <strong>{stat.value}</strong>
+                <span>{stat.label}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="adminNotesLaunchSystemFlow">
+            <span>Plan</span>
+            <i />
+            <span>Subject</span>
+            <i />
+            <span>Chapter</span>
+            <i />
+            <span>PDF</span>
+          </div>
+        </div>
+      </section>
+
+      <div className="adminMockPlanKpiGrid">
+        <div className="adminMockPlanKpiCard">
+          <span>Total Notes</span>
+          <strong>{subjectNotes.length}</strong>
+          <p>{subjectTitle} note records</p>
+        </div>
+
+        <div className="adminMockPlanKpiCard">
+          <span>Total Chapters</span>
+          <strong>{chapters.length}</strong>
+          <p>Chapter-wise shelves</p>
+        </div>
+
+        <div className="adminMockPlanKpiCard">
+          <span>PDF Ready</span>
+          <strong>{pdfReady}</strong>
+          <p>Notes with PDF source</p>
+        </div>
+
+        <div className="adminMockPlanKpiCard">
+          <span>Published</span>
+          <strong>{statusCounts.published}</strong>
+          <p>Student-ready notes</p>
+        </div>
+      </div>
+
+      <div className="adminMockPlanPanel">
+        <div className="adminMockPlanPanelHeader">
+          <div>
+            <span>SUBJECT CHAPTER LIBRARY</span>
+            <h2>{subjectTitle} Chapter Shelves</h2>
+          </div>
+
+          <small>{chapterCards.length} chapters</small>
+        </div>
+
+        {chapterCards.length === 0 ? (
+          <div className="adminMockPlanEmpty">
+            <strong>No chapters found.</strong>
+            <p>Add a note PDF in this subject first.</p>
+          </div>
         ) : (
-          <div className="studentNotesLevelGrid">
-            {chapters.map((chapter) => (
-              <StudentNotesLevelCard
+          <div className="adminMockPlanGrid">
+            {chapterCards.map((chapter) => (
+              <button
+                type="button"
                 key={chapter.id}
-                icon={chapter.cover || "📄"}
-                pill={activePlan}
-                title={chapter.title}
-                text={chapter.description}
-                firstStat={{
-                  label: "PDFs",
-                  value: chapter.count,
-                }}
-                secondStat={{
-                  label: "Plan",
-                  value: activePlan,
-                }}
-                footerText="Open chapter shelf"
-                onOpen={() =>
+                className="adminMockPlanCard"
+                onClick={() =>
                   navigate(
-                    `/ctet-tet/notes/plan/${activePlan}/${encodeURIComponent(
-                      activeShelf
+                    `/admin/content/notes/plan/${activePlan}/${encodeURIComponent(
+                      subjectKey
                     )}/${encodeURIComponent(chapter.id)}`
                   )
                 }
-              />
+              >
+                <span className="adminMockPlanIcon" aria-hidden="true">
+                  📄
+                </span>
+
+                <span className="adminMockPlanBody">
+                  <strong>{chapter.title}</strong>
+
+                  <small>
+                    {chapter.notesCount} Notes • {chapter.pdfReady} PDFs •{" "}
+                    {chapter.studentVisible} Student Visible
+                  </small>
+                </span>
+
+                <span className="adminMockPlanArrow" aria-hidden="true">
+                  →
+                </span>
+              </button>
             ))}
           </div>
         )}
+      </div>
+
+      <div className="adminMockPlanBottomActions">
+        <button
+          type="button"
+          className="adminMockPlanPrimaryBtn"
+          onClick={() => navigate("/admin/content/notes/form")}
+        >
+          + Add Note PDF
+        </button>
+
+        <button
+          type="button"
+          className="adminMockPlanGhostBtn"
+          onClick={() => navigate("/admin/content/notes/manage")}
+        >
+          Manage Notes
+        </button>
+
+        <button
+          type="button"
+          className="adminMockPlanGhostBtn"
+          onClick={() =>
+            navigate(`/admin/content/notes/plan/${activePlan}`)
+          }
+        >
+          ← Back to Plan
+        </button>
       </div>
     </section>
   );

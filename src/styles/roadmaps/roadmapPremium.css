@@ -1,0 +1,6 @@
+/* Roadmap premium CSS bridge
+   RoadmapShared.jsx imports this file.
+   Main hub remains aspirePath.css.
+*/
+
+@import "./aspirePath.css";

@@ -1,14 +1,6 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import AdminNotesHero from "./AdminNotesHero";
-import AdminNotesEmptyState from "./AdminNotesEmptyState";
-
-import {
-  AdminNotePdfCard,
-  AdminNotesStatusCard,
-} from "./AdminNoteCards";
-
 import {
   getAdminNotesByChapter,
   getAdminNotesByPlan,
@@ -22,6 +14,7 @@ import {
 
 import {
   getNotePdfUrl,
+  hasNotePdf,
   normalizeNoteText,
 } from "../shared/notesUtils";
 
@@ -47,8 +40,6 @@ function findAdminChapter(chapters = [], chapterName = "") {
 
 export default function AdminNotesChapterRoute({
   universalContent = [],
-  onEditNote,
-  onOpenNotePdf,
 }) {
   const navigate = useNavigate();
   const { planType, subjectName, chapterName } = useParams();
@@ -62,34 +53,31 @@ export default function AdminNotesChapterRoute({
 
   const subjects = getUniqueAdminNoteSubjects(planNotes);
   const subjectInfo = findAdminSubject(subjects, activeSubject);
+  const subjectTitle = subjectInfo?.title || "Subject Notes";
+  const subjectKey = subjectInfo?.id || activeSubject;
 
   const subjectNotes = getAdminNotesBySubject(planNotes, activeSubject);
   const chapters = getUniqueAdminNoteChapters(subjectNotes);
   const chapterInfo = findAdminChapter(chapters, activeChapter);
+  const chapterTitle = chapterInfo?.title || "Chapter PDF Notes";
 
   const chapterNotes = getAdminNotesByChapter(subjectNotes, activeChapter);
   const statusCounts = getAdminNotesStatusCounts(chapterNotes);
   const healthSummary = getAdminNotesHealthSummary(chapterNotes);
+  const pdfReady = chapterNotes.filter((note) => hasNotePdf(note)).length;
 
-  const subjectTitle = subjectInfo?.title || "Subject Notes";
-  const chapterTitle = chapterInfo?.title || "Chapter PDF Notes";
+  const systemStats = [
+    { value: chapterNotes.length, label: "PDF Notes" },
+    { value: statusCounts.published, label: "Published" },
+    { value: pdfReady, label: "PDF Ready" },
+    { value: healthSummary.ready, label: "Student Visible" },
+  ];
 
   const openPdf = (note) => {
-    if (typeof onOpenNotePdf === "function") {
-      onOpenNotePdf(note);
-      return;
-    }
-
     const pdfUrl = getNotePdfUrl(note);
 
     if (pdfUrl) {
       window.open(pdfUrl, "_blank", "noopener,noreferrer");
-    }
-  };
-
-  const editNote = (note) => {
-    if (typeof onEditNote === "function") {
-      onEditNote(note);
       return;
     }
 
@@ -97,42 +85,31 @@ export default function AdminNotesChapterRoute({
   };
 
   return (
-    <section className="adminNotesPage">
-      <AdminNotesHero
-        badge={`${activePlan} NOTES`}
-        title={chapterTitle}
-        text={`Review PDF notes mapped to ${subjectTitle} inside ${planLabel}.`}
-        stats={[
-          {
-            label: "PDF Notes",
-            value: chapterNotes.length,
-          },
-          {
-            label: "Published",
-            value: statusCounts.published,
-          },
-          {
-            label: "PDF Ready",
-            value: statusCounts.pdfReady,
-          },
-          {
-            label: "Needs Fix",
-            value: healthSummary.needsFix,
-          },
-        ]}
-        actions={
-          <>
+    <section className="coursePages adminMockPlanPage adminNotesPlanAlignedPage">
+      <section className="adminNotesLaunchHero">
+        <div className="adminNotesLaunchHeroCopy">
+          <span className="adminNotesLaunchBadge">{activePlan} NOTES</span>
+
+          <h1>{chapterTitle}</h1>
+
+          <p>
+            Review PDF notes mapped to {subjectTitle} inside {planLabel}.
+            Verify PDF readiness, publish status, and student visibility before
+            launch.
+          </p>
+
+          <div className="adminNotesLaunchHeroActions">
             <button
               type="button"
-              className="adminNotesPrimaryBtn"
+              className="adminNotesLaunchPrimaryBtn"
               onClick={() => navigate("/admin/content/notes/form")}
             >
-              + Add Note
+              + Add Note PDF
             </button>
 
             <button
               type="button"
-              className="adminNotesGhostBtn"
+              className="adminNotesLaunchGhostBtn"
               onClick={() => navigate("/admin/content/notes/manage")}
             >
               Manage Notes
@@ -140,86 +117,170 @@ export default function AdminNotesChapterRoute({
 
             <button
               type="button"
-              className="adminNotesGhostBtn"
+              className="adminNotesLaunchGhostBtn"
               onClick={() =>
                 navigate(
                   `/admin/content/notes/plan/${activePlan}/${encodeURIComponent(
-                    activeSubject
+                    subjectKey
                   )}`
                 )
               }
             >
-              ← Back to Subject
+              ← Back
             </button>
-          </>
-        }
-      />
+          </div>
 
-      <div className="adminNotesStatusGrid">
-        <AdminNotesStatusCard
-          label="Student Visible"
-          value={healthSummary.ready}
-          text="Published chapter PDFs ready for student notes flow."
-        />
+          <div className="adminNotesLaunchTrustRow">
+            <span>✓ Plan protected</span>
+            <span>✓ Subject-wise</span>
+            <span>✓ Chapter PDFs</span>
+            <span>✓ Publish audit</span>
+          </div>
+        </div>
 
-        <AdminNotesStatusCard
-          label="Missing PDF"
-          value={healthSummary.missingPdf}
-          text="Chapter notes missing PDF/source URL."
-        />
+        <div className="adminNotesLaunchSystemCard">
+          <div className="adminNotesLaunchSystemTop">
+            <span>Chapter Status</span>
+            <strong>{activePlan}</strong>
+          </div>
 
-        <AdminNotesStatusCard
-          label="Draft"
-          value={statusCounts.draft}
-          text="Chapter notes saved as draft."
-        />
+          <div className="adminNotesLaunchTitleCard">
+            <span className="adminNotesLaunchIcon">📄</span>
 
-        <AdminNotesStatusCard
-          label="Archived"
-          value={statusCounts.archived}
-          text="Chapter notes archived from student flow."
-        />
+            <div>
+              <h3>{chapterTitle}</h3>
+              <p>{subjectTitle}</p>
+            </div>
+          </div>
+
+          <div className="adminNotesLaunchSystemGrid">
+            {systemStats.map((stat) => (
+              <div className="adminNotesLaunchFeatureCard" key={stat.label}>
+                <strong>{stat.value}</strong>
+                <span>{stat.label}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="adminNotesLaunchSystemFlow">
+            <span>Plan</span>
+            <i />
+            <span>Subject</span>
+            <i />
+            <span>Chapter</span>
+            <i />
+            <span>PDF</span>
+          </div>
+        </div>
+      </section>
+
+      <div className="adminMockPlanKpiGrid">
+        <div className="adminMockPlanKpiCard">
+          <span>PDF Notes</span>
+          <strong>{chapterNotes.length}</strong>
+          <p>{chapterTitle} note records</p>
+        </div>
+
+        <div className="adminMockPlanKpiCard">
+          <span>Published</span>
+          <strong>{statusCounts.published}</strong>
+          <p>Student-ready notes</p>
+        </div>
+
+        <div className="adminMockPlanKpiCard">
+          <span>PDF Ready</span>
+          <strong>{pdfReady}</strong>
+          <p>Notes with PDF source</p>
+        </div>
+
+        <div className="adminMockPlanKpiCard">
+          <span>Needs Fix</span>
+          <strong>{healthSummary.needsFix}</strong>
+          <p>Missing source or visibility issue</p>
+        </div>
       </div>
 
-      <div className="adminNotesShelf">
-        <div className="adminNotesShelfHeader">
-          <span>{subjectTitle}</span>
+      <div className="adminMockPlanPanel">
+        <div className="adminMockPlanPanelHeader">
+          <div>
+            <span>CHAPTER PDF LIBRARY</span>
+            <h2>Available PDF Notes</h2>
+          </div>
 
-          <h2>Available PDF notes</h2>
-
-          <p>
-            Only notes from selected plan, subject, and chapter appear here.
-            Use this page to verify PDF readiness before student launch.
-          </p>
+          <small>{chapterNotes.length} PDFs</small>
         </div>
 
         {chapterNotes.length === 0 ? (
-          <AdminNotesEmptyState
-            icon="📑"
-            title="No PDFs found"
-            text="Create notes for this chapter to build the PDF library."
-            action={
-              <button
-                type="button"
-                className="adminNotesPrimaryBtn"
-                onClick={() => navigate("/admin/content/notes/form")}
-              >
-                + Add PDF Note
-              </button>
-            }
-          />
+          <div className="adminMockPlanEmpty">
+            <strong>No PDFs found.</strong>
+            <p>Add a note PDF in this chapter first.</p>
+          </div>
         ) : (
-          <div className="adminNotesPdfGrid">
-            {chapterNotes.map((note) => (
-              <AdminNotePdfCard
-                key={note.id}
-                note={note}
-                onEdit={editNote}
-                onOpenPdf={openPdf}
-              />
-            ))}
+          <div className="adminMockPlanGrid">
+            {chapterNotes.map((note) => {
+              const pdfUrl = getNotePdfUrl(note);
+              const noteTitle = note.title || chapterTitle;
+
+              return (
+                <button
+                  type="button"
+                  key={note.id}
+                  className="adminMockPlanCard"
+                  onClick={() => openPdf(note)}
+                >
+                  <span className="adminMockPlanIcon" aria-hidden="true">
+                    📑
+                  </span>
+
+                  <span className="adminMockPlanBody">
+                    <strong>{noteTitle}</strong>
+
+                    <small>
+                      {pdfUrl ? "PDF Ready" : "Missing PDF"} •{" "}
+                      {(note.status || "draft").toUpperCase()} • {subjectTitle}
+                    </small>
+                  </span>
+
+                  <span className="adminMockPlanArrow" aria-hidden="true">
+                    →
+                  </span>
+                </button>
+              );
+            })}
           </div>
         )}
+      </div>
+
+      <div className="adminMockPlanBottomActions">
+        <button
+          type="button"
+          className="adminMockPlanPrimaryBtn"
+          onClick={() => navigate("/admin/content/notes/form")}
+        >
+          + Add Note PDF
+        </button>
+
+        <button
+          type="button"
+          className="adminMockPlanGhostBtn"
+          onClick={() => navigate("/admin/content/notes/manage")}
+        >
+          Manage Notes
+        </button>
+
+        <button
+          type="button"
+          className="adminMockPlanGhostBtn"
+          onClick={() =>
+            navigate(
+              `/admin/content/notes/plan/${activePlan}/${encodeURIComponent(
+                subjectKey
+              )}`
+            )
+          }
+        >
+          ← Back to Subject
+        </button>
       </div>
     </section>
   );

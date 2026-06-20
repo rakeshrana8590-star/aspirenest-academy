@@ -59,6 +59,47 @@ export default function StudentCurrentAffairsMonthRoute({
     window.open(pdfUrl, "_blank", "noopener,noreferrer");
   };
 
+  if (monthItems.length === 0) {
+    return (
+      <section className="studentCaPage">
+        <StudentCurrentAffairsHero
+          badge="CURRENT AFFAIRS MONTH"
+          title="Current Affairs Not Found"
+          text="This month does not have any published current affairs PDFs yet."
+          backLabel="Back to Library"
+          onBack={() => navigate("/ctet-tet/current-affairs")}
+          primaryLabel="Back to Library →"
+          secondaryLabel="View Pricing"
+          onPrimary={() => navigate("/ctet-tet/current-affairs")}
+          onSecondary={() => navigate("/ctet-tet/pricing")}
+          stats={[
+            {
+              label: "Weeks",
+              value: 0,
+            },
+            {
+              label: "PDFs",
+              value: 0,
+            },
+            {
+              label: "Plans",
+              value: 0,
+            },
+          ]}
+        />
+
+        <div className="studentCaShelf">
+          <StudentCurrentAffairsEmptyState
+            title="No current affairs PDFs found"
+            text="Open the current affairs library and choose an available month."
+            actionLabel="Back to Current Affairs"
+            onAction={() => navigate("/ctet-tet/current-affairs")}
+          />
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="studentCaPage">
       <StudentCurrentAffairsHero
@@ -94,7 +135,8 @@ export default function StudentCurrentAffairsMonthRoute({
 
             <p>
               Open weekly current affairs PDFs. Locked plan PDFs redirect
-              students to pricing, while admin preview can open all PDFs.
+              students to pricing, while accessible PDFs open directly for
+              revision.
             </p>
           </div>
 
@@ -104,26 +146,17 @@ export default function StudentCurrentAffairsMonthRoute({
           </div>
         </div>
 
-        {weekGroups.length === 0 ? (
-          <StudentCurrentAffairsEmptyState
-            title="No PDFs found"
-            text="No published current affairs PDFs are available for this month."
-            actionLabel="Back to Current Affairs"
-            onAction={() => navigate("/ctet-tet/current-affairs")}
-          />
-        ) : (
-          <div className="studentCaWeekStack">
-            {weekGroups.map((weekGroup) => (
-              <StudentCurrentAffairsWeekBlock
-                key={weekGroup.id}
-                weekGroup={weekGroup}
-                isAdmin={isAdmin}
-                hasPlanAccess={hasPlanAccess}
-                onOpenPdf={openCurrentAffairPdf}
-              />
-            ))}
-          </div>
-        )}
+        <div className="studentCaWeekStack">
+          {weekGroups.map((weekGroup) => (
+            <StudentCurrentAffairsWeekBlock
+              key={weekGroup.id}
+              weekGroup={weekGroup}
+              isAdmin={isAdmin}
+              hasPlanAccess={hasPlanAccess}
+              onOpenPdf={openCurrentAffairPdf}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );
