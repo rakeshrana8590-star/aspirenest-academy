@@ -1,0 +1,142 @@
+/* =========================================================
+   Roadmap Buttons
+   ========================================================= */
+
+   .aspirePathPrimaryBtn,
+   .roadmapStudioPrimaryBtn,
+   .aspirePathSecondaryBtn,
+   .roadmapStudioSecondaryBtn,
+   .aspirePathGhostBtn,
+   .roadmapStudioGhostBtn,
+   .aspirePathDangerBtn,
+   .roadmapStudioDangerBtn {
+     appearance: none;
+     min-height: 46px;
+     border-radius: 999px;
+     padding: 0 19px;
+     display: inline-flex;
+     align-items: center;
+     justify-content: center;
+     gap: 9px;
+     border: 0;
+     cursor: pointer;
+     text-decoration: none;
+     font-size: 14px;
+     font-weight: 950;
+     letter-spacing: -0.02em;
+     transition:
+       transform 0.18s ease,
+       box-shadow 0.18s ease,
+       border-color 0.18s ease,
+       background 0.18s ease,
+       opacity 0.18s ease;
+   }
+   
+   .aspirePathPrimaryBtn,
+   .roadmapStudioPrimaryBtn {
+     color: #ffffff;
+     background: linear-gradient(135deg, #ff8a1f, #f97316 48%, #ea580c);
+     box-shadow:
+       0 18px 38px rgba(249, 115, 22, 0.34),
+       inset 0 1px 0 rgba(255, 255, 255, 0.24);
+   }
+   
+   .aspirePathSecondaryBtn,
+   .roadmapStudioSecondaryBtn {
+     color: #0f172a;
+     background: #ffffff;
+     border: 1px solid rgba(15, 23, 42, 0.11);
+     box-shadow: 0 16px 34px rgba(15, 23, 42, 0.10);
+   }
+   
+   .aspirePathGhostBtn,
+   .roadmapStudioGhostBtn {
+     color: #334155;
+     background: rgba(255, 255, 255, 0.78);
+     border: 1px solid rgba(148, 163, 184, 0.24);
+   }
+   
+   .aspirePathDangerBtn,
+   .roadmapStudioDangerBtn {
+     color: #991b1b;
+     background: #fff1f2;
+     border: 1px solid rgba(244, 63, 94, 0.2);
+   }
+   
+   .aspirePathPrimaryBtn:hover,
+   .roadmapStudioPrimaryBtn:hover,
+   .aspirePathSecondaryBtn:hover,
+   .roadmapStudioSecondaryBtn:hover,
+   .aspirePathGhostBtn:hover,
+   .roadmapStudioGhostBtn:hover,
+   .aspirePathDangerBtn:hover,
+   .roadmapStudioDangerBtn:hover {
+     transform: translateY(-2px);
+   }
+   
+   .aspirePathPrimaryBtn:disabled,
+   .roadmapStudioPrimaryBtn:disabled,
+   .aspirePathSecondaryBtn:disabled,
+   .roadmapStudioSecondaryBtn:disabled,
+   .aspirePathGhostBtn:disabled,
+   .roadmapStudioGhostBtn:disabled,
+   .aspirePathDangerBtn:disabled,
+   .roadmapStudioDangerBtn:disabled {
+     cursor: not-allowed;
+     opacity: 0.58;
+     transform: none;
+   }
+   
+   .aspirePathHeroActions,
+   .roadmapStudioHeroActions {
+     display: flex;
+     flex-wrap: wrap;
+     gap: 12px;
+     margin-top: 28px;
+   }
+   
+   .aspirePathHero .aspirePathPrimaryBtn {
+     color: #ffffff;
+     background: linear-gradient(135deg, #07111f, #0f172a);
+     border: 1px solid rgba(255, 255, 255, 0.09);
+     box-shadow:
+       0 18px 42px rgba(2, 6, 23, 0.34),
+       inset 0 1px 0 rgba(255, 255, 255, 0.12);
+   }
+   
+   .aspirePathHero .aspirePathSecondaryBtn,
+   .roadmapStudioHero .roadmapStudioSecondaryBtn {
+     color: #ffffff;
+     background:
+       linear-gradient(135deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.05));
+     border: 1px solid rgba(255, 255, 255, 0.18);
+     box-shadow:
+       0 16px 34px rgba(2, 6, 23, 0.22),
+       inset 0 1px 0 rgba(255, 255, 255, 0.13);
+   }
+   
+   .aspirePathSection .aspirePathPrimaryBtn,
+   .aspirePathSection .aspirePathSecondaryBtn,
+   .aspirePathSection .aspirePathGhostBtn {
+     min-height: 48px;
+     padding: 0 22px;
+   }
+   
+   @media (max-width: 760px) {
+     .aspirePathHeroActions,
+     .roadmapStudioHeroActions {
+       flex-direction: column;
+       align-items: stretch;
+     }
+   
+     .aspirePathPrimaryBtn,
+     .roadmapStudioPrimaryBtn,
+     .aspirePathSecondaryBtn,
+     .roadmapStudioSecondaryBtn,
+     .aspirePathGhostBtn,
+     .roadmapStudioGhostBtn,
+     .aspirePathDangerBtn,
+     .roadmapStudioDangerBtn {
+       width: 100%;
+     }
+   }

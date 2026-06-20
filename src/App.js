@@ -136,12 +136,14 @@ import {
   AdminNotesPlanRoute,
   AdminNotesSubjectRoute,
   AdminNotesChapterRoute,
+  AdminNotesManageRoute,
 } from "./components/notes/admin/index.js";
 
 import {
   StudentCurrentAffairsLibraryRoute,
   StudentCurrentAffairsMonthRoute,
 } from "./components/currentAffairs/student/index.js";
+import { AdminCurrentAffairsHomeRoute } from "./components/currentAffairs/admin/index.js";
 
 import AdminMockTestHomeRoute from "./components/exam/AdminMockTestHomeRoute.jsx";
 import AdminMockTestAddRoute from "./components/exam/AdminMockTestAddRoute.jsx";
@@ -205,6 +207,7 @@ import "./styles/exam/studentMockTests.css";
 
 import "./styles/notes/studentNotes.css";
 import "./styles/currentAffairs/studentCurrentAffairs.css";
+import "./styles/currentAffairs/adminCurrentAffairs.css";
 
 import "./styles/notes/adminNotes.css";
 
@@ -5580,146 +5583,36 @@ isAdmin={isAdmin}
   path="/admin/content/notes/manage"
   element={
     requireAdmin() ? (
-      <section className="coursePages">
-        <div className="sectionHeader">
-          <span className="badge">MANAGE NOTES</span>
+      <AdminNotesManageRoute
+        universalContent={universalContent}
+        notesPlanFilter={notesPlanFilter}
+        setNotesPlanFilter={setNotesPlanFilter}
+        onEditNote={(item) => {
+          setEditingNotesCmsId(item.id);
+          setNotesCmsTitle(item.title || "");
+          setNotesCmsDescription(item.description || "");
+          setNotesCmsPlanType(item.planType || "FREE");
+          setNotesCmsSubject(item.subject || "");
+          setNotesCmsChapter(item.chapter || "");
+          setNotesCmsMonth(item.month || "");
+          setNotesCmsYear(item.year || "");
+          setNotesCmsWeek(item.week || "");
+          setNotesCmsPdfUrl(
+            item.pdfUrl ||
+              item.fileUrl ||
+              item.pdf ||
+              item.url ||
+              ""
+          );
+          setNotesCmsThumbnailUrl(item.thumbnailUrl || "");
+          setNotesCmsStatus(item.status || "Draft");
 
-          <h1>Published Notes Manager</h1>
-
-          <p>
-            Review, edit, update, delete,
-            and organize all saved notes.
-          </p>
-        </div>
-
-        <div className="contentStudioForm">
-          <div className="contentStudioGrid">
-            <button onClick={() => setNotesPlanFilter("ALL")}>
-              ALL
-            </button>
-
-            <button onClick={() => setNotesPlanFilter("FREE")}>
-              FREE
-            </button>
-
-            <button onClick={() => setNotesPlanFilter("BASIC")}>
-              BASIC
-            </button>
-
-            <button onClick={() => setNotesPlanFilter("PREMIUM")}>
-              PREMIUM
-            </button>
-
-            <button onClick={() => setNotesPlanFilter("MENTORSHIP")}>
-              MENTORSHIP
-            </button>
-          </div>
-        </div>
-
-        <div className="contentStudioList">
-          <h3>Published Notes Preview</h3>
-
-          {universalContent
-            .filter(
-              (item) =>
-                item.section === "notes" &&
-                (
-                  notesPlanFilter === "ALL" ||
-                  item.planType === notesPlanFilter
-                )
-            )
-            .map((item) => (
-              <div className="contentStudioItem" key={item.id}>
-                <strong>{item.title}</strong>
-
-                <p>{item.description}</p>
-
-                <span>
-                  {item.planType} • {item.subject} • {item.status}
-                </span>
-
-                <div className="contentStudioActions">
-                  <button
-                    className="backButton"
-                    onClick={() => {
-                      const finalPdfUrl =
-                        item.pdfUrl ||
-                        item.fileUrl ||
-                        item.pdf ||
-                        item.url ||
-                        "";
-
-                      if (!finalPdfUrl) {
-                        alert("PDF URL missing for this note.");
-                        return;
-                      }
-
-                      window.open(
-                        finalPdfUrl,
-                        "_blank",
-                        "noopener,noreferrer"
-                      );
-                    }}
-                  >
-                    Open PDF
-                  </button>
-
-                  <button
-                    className="publishButton"
-                    onClick={() => {
-                      setEditingNotesCmsId(item.id);
-                      setNotesCmsTitle(item.title || "");
-                      setNotesCmsDescription(item.description || "");
-                      setNotesCmsPlanType(item.planType || "FREE");
-                      setNotesCmsSubject(item.subject || "");
-                      setNotesCmsChapter(item.chapter || "");
-                      setNotesCmsMonth(item.month || "");
-                      setNotesCmsYear(item.year || "");
-                      setNotesCmsWeek(item.week || "");
-                      setNotesCmsPdfUrl(
-                        item.pdfUrl ||
-                          item.fileUrl ||
-                          item.pdf ||
-                          item.url ||
-                          ""
-                      );
-                      setNotesCmsThumbnailUrl(item.thumbnailUrl || "");
-                      setNotesCmsStatus(item.status || "Draft");
-
-                      navigate("/admin/content/notes/form");
-                    }}
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    className="deleteContentButton"
-                    onClick={() => {
-                      const confirmDelete = window.confirm(
-                        `Delete "${item.title}" permanently?\n\n` +
-                          `Students may lose access to this content.\n\n` +
-                          `This action cannot be undone.`
-                      );
-
-                      if (!confirmDelete) return;
-
-                      handleDeleteLocalContentItem(item.id);
-                    }}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-        </div>
-
-        <button
-          className="backButton"
-          onClick={() => navigate("/admin/content/notes")}
-        >
-          ← Back to Notes Manager
-        </button>
-      </section>
+          navigate("/admin/content/notes/form");
+        }}
+        onDeleteNote={(item) => {
+          handleDeleteLocalContentItem(item.id);
+        }}
+      />
     ) : null
   }
 />
@@ -6258,64 +6151,10 @@ This action cannot be undone.`
   path="/admin/content/current-affairs"
   element={
     requireAdmin() ? (
-      <section className="coursePages">
-        <div className="sectionHeader">
-          <span className="badge">
-            CURRENT AFFAIRS MANAGER
-          </span>
-
-          <h1>
-            Current Affairs Manager
-          </h1>
-
-          <p>
-            Manage CTET/TET current affairs by month, week,
-            PDF source, plan access, publish status, and student visibility.
-          </p>
-        </div>
-
-        <div className="subjectHubGrid">
-          <button
-            onClick={() =>
-              navigate("/admin/content/current-affairs/manage")
-            }
-          >
-            Manage Current Affairs
-          </button>
-
-          <button
-            onClick={() =>
-              navigate("/admin/content/current-affairs/add")
-            }
-          >
-            + Add Current Affair
-          </button>
-
-          <button
-            onClick={() =>
-              navigate("/admin/content/current-affairs/months")
-            }
-          >
-            Months
-          </button>
-
-          <button
-            onClick={() =>
-              navigate("/admin/content/current-affairs/published")
-            }
-          >
-            Published PDFs
-          </button>
-
-          <button
-            onClick={() =>
-              navigate("/admin/content")
-            }
-          >
-            ← Back to Content Studio
-          </button>
-        </div>
-      </section>
+      <AdminCurrentAffairsHomeRoute
+        universalCurrentAffairs={universalCurrentAffairs}
+        currentAffairsList={currentAffairsList}
+      />
     ) : null
   }
 />
