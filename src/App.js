@@ -468,6 +468,19 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
   const [userPlanType, setUserPlanType] = useState("FREE");
   const [membershipExpiry, setMembershipExpiry] = useState(null);
+  const EMERGENCY_PREMIUM_EMAILS = new Set([
+    "jamilanri786@gmail.com",
+    "ansarineha340@gmail.com",
+    "1990amala@gmail.com",
+    "qureshihoor1986@gmail.com",
+    "gratitude.pb@gmail.com",
+    "yasmeen.shaikh@hkce.edu.in",
+    "ruhiipatel.18@gmail.com",
+    "dianapithawala@gmail.com",
+  ]);
+
+  const isEmergencyPremiumLearner = (email = "") =>
+    EMERGENCY_PREMIUM_EMAILS.has(String(email || "").trim().toLowerCase());
   const requireLogin = () => {
     if (!user) {
       navigate("/login", { replace: true });
@@ -500,6 +513,10 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
   };
   const hasPlanAccess = (requiredPlan) => {
     if (isAdmin(user)) {
+      return true;
+    }
+
+    if (isEmergencyPremiumLearner(user?.email)) {
       return true;
     }
 
