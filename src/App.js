@@ -1643,6 +1643,18 @@ const [paymentHistory, setPaymentHistory] = useState([]);
     
     return () => unsubscribe();
   }, []);
+
+  React.useEffect(() => {
+    if (authLoading || !user) return;
+
+    const isLandingOrLoginPage =
+      location.pathname === "/" || location.pathname === "/login";
+
+    if (isLandingOrLoginPage) {
+      navigate("/ctet-tet", { replace: true });
+    }
+  }, [authLoading, user, location.pathname, navigate]);
+
   React.useEffect(() => {
     const routeToSection = {
       "/": null,
