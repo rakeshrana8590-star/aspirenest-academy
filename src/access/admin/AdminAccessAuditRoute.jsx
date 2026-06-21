@@ -1,21 +1,31 @@
 import React from "react";
-import "../../styles/access/adminAccessManager.css";
+import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
+
+const actions = [
+  { icon: "C", label: "Create", title: "Created Access", description: "Review manual access creation events and admin actor details.", route: "/admin/content/access/audit", tone: "orange" },
+  { icon: "E", label: "Extend", title: "Expiry Changes", description: "Trace expiry extensions with date and reason.", route: "/admin/content/access/audit", tone: "blue" },
+  { icon: "U", label: "Upgrade", title: "Plan Changes", description: "Track plan upgrades and downgrade history safely.", route: "/admin/content/access/audit", tone: "green" },
+  { icon: "R", label: "Revoke", title: "Blocks / Revokes", description: "Review blocked or revoked learner access with confirmation notes.", route: "/admin/content/access/audit", tone: "purple" },
+];
 
 export default function AdminAccessAuditRoute() {
   return (
-    <main className="adminAccessPage">
-      <section className="adminAccessHero">
-        <div className="adminAccessHeroCopy"><span className="adminAccessBadge">AUDIT LOGS</span><h1>Audit Logs</h1><p>Review admin access actions with traceability across create, extend, upgrade, revoke, and block events.</p></div>
-        <aside className="adminAccessCommandPanel"><div className="adminAccessPanelTop"><div className="adminAccessPanelTitle"><strong>Audit Logs</strong><span>Access engine workspace</span></div><span className="adminAccessLivePill">Ready</span></div><div className="adminAccessStatsGrid"><div className="adminAccessStatCard"><strong>Safe</strong><span>Admin only</span></div><div className="adminAccessStatCard"><strong>Audit</strong><span>Traceable</span></div></div></aside>
-      </section>
-      <section className="adminAccessTablePanel">
-        <div className="adminAccessSectionHead"><div><span className="adminAccessBadge">WORKSPACE</span><h2>Audit Logs</h2><p>Premium shell ready for Phase 7 wiring. Existing student routes and module pages are untouched.</p></div></div>
-        <div className="adminAccessTable">
-          <div className="adminAccessRow"><strong>Admin confirmation</strong><span>Required before write</span><span className="adminAccessPill">Protected</span><span>Ready</span></div>
-          <div className="adminAccessRow"><strong>Audit logging</strong><span>Every action tracked</span><span className="adminAccessPill">Enabled</span><span>Ready</span></div>
-          <div className="adminAccessRow"><strong>Access engine</strong><span>Central service based</span><span className="adminAccessPill">Phase 3</span><span>Ready</span></div>
-        </div>
-      </section>
-    </main>
+    <AdminAccessRouteShell
+      badge="AUDIT LOGS"
+      title="Audit Logs"
+      description="Review admin access actions with traceability across create, extend, upgrade, revoke, and block events."
+      icon="A"
+      primaryAction={{ label: "Manage Access", route: "/admin/content/access/manage" }}
+      secondaryAction={{ label: "Add Access", route: "/admin/content/access/add" }}
+      sectionTitle="Access audit trail"
+      sectionDescription="Every access-changing action should be traceable by actor, learner, timestamp, status, and reason."
+      actions={actions}
+      stats={[
+        { value: "Create", label: "Logs" },
+        { value: "Extend", label: "Expiry" },
+        { value: "Upgrade", label: "Plan" },
+        { value: "Revoke", label: "Block" },
+      ]}
+    />
   );
 }

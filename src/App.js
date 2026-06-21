@@ -173,6 +173,13 @@ import AdminMockTestChapterRoute from "./components/exam/AdminMockTestChapterRou
 import AdminMockTestChaptersRoute from "./components/exam/AdminMockTestChaptersRoute.jsx";
 import AdminMockTestChapterDetailRoute from "./components/exam/AdminMockTestChapterDetailRoute.jsx";
 import AdminMockTestPublishedRoute from "./components/exam/AdminMockTestPublishedRoute.jsx";
+import AdminAccessHomeRoute from "./access/admin/AdminAccessHomeRoute.jsx";
+import AdminAccessAddRoute from "./access/admin/AdminAccessAddRoute.jsx";
+import AdminAccessManageRoute from "./access/admin/AdminAccessManageRoute.jsx";
+import AdminAccessBulkRoute from "./access/admin/AdminAccessBulkRoute.jsx";
+import AdminAccessInvitesRoute from "./access/admin/AdminAccessInvitesRoute.jsx";
+import AdminAccessProfileRoute from "./access/admin/AdminAccessProfileRoute.jsx";
+import AdminAccessAuditRoute from "./access/admin/AdminAccessAuditRoute.jsx";
 
 import MockTestActionMenu from "./components/exam/MockTestActionMenu.jsx";
 import { deleteMockTest } from "./components/exam/mockTestAdminActions.js";
@@ -5142,6 +5149,41 @@ isAdmin={isAdmin}
 />
 
 <Route
+  path="/admin/content/access"
+  element={requireAdmin() ? <AdminAccessHomeRoute /> : null}
+/>
+
+<Route
+  path="/admin/content/access/add"
+  element={requireAdmin() ? <AdminAccessAddRoute /> : null}
+/>
+
+<Route
+  path="/admin/content/access/manage"
+  element={requireAdmin() ? <AdminAccessManageRoute /> : null}
+/>
+
+<Route
+  path="/admin/content/access/bulk"
+  element={requireAdmin() ? <AdminAccessBulkRoute /> : null}
+/>
+
+<Route
+  path="/admin/content/access/invites"
+  element={requireAdmin() ? <AdminAccessInvitesRoute /> : null}
+/>
+
+<Route
+  path="/admin/content/access/profile/:emailKey"
+  element={requireAdmin() ? <AdminAccessProfileRoute /> : null}
+/>
+
+<Route
+  path="/admin/content/access/audit"
+  element={requireAdmin() ? <AdminAccessAuditRoute /> : null}
+/>
+
+<Route
   path="/admin/content"
   element={
     <section className="coursePages">
@@ -5239,6 +5281,16 @@ isAdmin={isAdmin}
           }
         >
           🛣️ Roadmap Studio
+        </button>
+
+        <button
+          onClick={() =>
+            navigate(
+              "/admin/content/access"
+            )
+          }
+        >
+          🔐 Access Manager
         </button>
 
         <button

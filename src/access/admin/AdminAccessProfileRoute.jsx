@@ -1,21 +1,31 @@
 import React from "react";
-import "../../styles/access/adminAccessManager.css";
+import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
 
 export default function AdminAccessProfileRoute() {
   return (
-    <main className="adminAccessPage">
-      <section className="adminAccessHero">
-        <div className="adminAccessHeroCopy"><span className="adminAccessBadge">LEARNER PROFILE</span><h1>Learner Profile / Biodata</h1><p>Review learner access profile, plan history, contact email, expiry, and activity context.</p></div>
-        <aside className="adminAccessCommandPanel"><div className="adminAccessPanelTop"><div className="adminAccessPanelTitle"><strong>Learner Profile / Biodata</strong><span>Access engine workspace</span></div><span className="adminAccessLivePill">Ready</span></div><div className="adminAccessStatsGrid"><div className="adminAccessStatCard"><strong>Safe</strong><span>Admin only</span></div><div className="adminAccessStatCard"><strong>Audit</strong><span>Traceable</span></div></div></aside>
-      </section>
-      <section className="adminAccessTablePanel">
-        <div className="adminAccessSectionHead"><div><span className="adminAccessBadge">WORKSPACE</span><h2>Learner Profile / Biodata</h2><p>Premium shell ready for Phase 7 wiring. Existing student routes and module pages are untouched.</p></div></div>
+    <AdminAccessRouteShell
+      badge="LEARNER PROFILE"
+      title="Learner Profile"
+      description="Review learner access profile, plan history, contact email, expiry, and activity context."
+      icon="P"
+      primaryAction={{ label: "Manage Access", route: "/admin/content/access/manage" }}
+      secondaryAction={{ label: "Audit Logs", route: "/admin/content/access/audit" }}
+      sectionTitle="Learner biodata"
+      sectionDescription="Learner-wise profile shell for registered email, active plan, expiry, source, and audit history."
+      stats={[
+        { value: "Email", label: "Profile" },
+        { value: "Plan", label: "Access" },
+        { value: "Expiry", label: "Status" },
+        { value: "Audit", label: "History" },
+      ]}
+    >
+      <div className="adminAccessTablePanel">
         <div className="adminAccessTable">
-          <div className="adminAccessRow"><strong>Admin confirmation</strong><span>Required before write</span><span className="adminAccessPill">Protected</span><span>Ready</span></div>
-          <div className="adminAccessRow"><strong>Audit logging</strong><span>Every action tracked</span><span className="adminAccessPill">Enabled</span><span>Ready</span></div>
-          <div className="adminAccessRow"><strong>Access engine</strong><span>Central service based</span><span className="adminAccessPill">Phase 3</span><span>Ready</span></div>
+          <div className="adminAccessRow"><strong>Registered Email</strong><span>profile emailKey route</span><span className="adminAccessPill">Ready</span><span>Shell</span></div>
+          <div className="adminAccessRow"><strong>Current Plan</strong><span>Active access record</span><span className="adminAccessPill">Access</span><span>Pending data</span></div>
+          <div className="adminAccessRow"><strong>Audit History</strong><span>Create, extend, revoke logs</span><span className="adminAccessPill">Trace</span><span>Ready</span></div>
         </div>
-      </section>
-    </main>
+      </div>
+    </AdminAccessRouteShell>
   );
 }

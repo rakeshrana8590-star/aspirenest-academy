@@ -1,21 +1,32 @@
 import React from "react";
-import "../../styles/access/adminAccessManager.css";
+import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
 
 export default function AdminAccessBulkRoute() {
   return (
-    <main className="adminAccessPage">
-      <section className="adminAccessHero">
-        <div className="adminAccessHeroCopy"><span className="adminAccessBadge">BULK IMPORT</span><h1>Bulk Gmail Import</h1><p>Prepare and verify bulk Gmail access imports with normalized email safety and audit-ready admin controls.</p></div>
-        <aside className="adminAccessCommandPanel"><div className="adminAccessPanelTop"><div className="adminAccessPanelTitle"><strong>Bulk Gmail Import</strong><span>Access engine workspace</span></div><span className="adminAccessLivePill">Ready</span></div><div className="adminAccessStatsGrid"><div className="adminAccessStatCard"><strong>Safe</strong><span>Admin only</span></div><div className="adminAccessStatCard"><strong>Audit</strong><span>Traceable</span></div></div></aside>
-      </section>
-      <section className="adminAccessTablePanel">
-        <div className="adminAccessSectionHead"><div><span className="adminAccessBadge">WORKSPACE</span><h2>Bulk Gmail Import</h2><p>Premium shell ready for Phase 7 wiring. Existing student routes and module pages are untouched.</p></div></div>
-        <div className="adminAccessTable">
-          <div className="adminAccessRow"><strong>Admin confirmation</strong><span>Required before write</span><span className="adminAccessPill">Protected</span><span>Ready</span></div>
-          <div className="adminAccessRow"><strong>Audit logging</strong><span>Every action tracked</span><span className="adminAccessPill">Enabled</span><span>Ready</span></div>
-          <div className="adminAccessRow"><strong>Access engine</strong><span>Central service based</span><span className="adminAccessPill">Phase 3</span><span>Ready</span></div>
+    <AdminAccessRouteShell
+      badge="BULK IMPORT"
+      title="Bulk Gmail Import"
+      description="Prepare and verify bulk Gmail access imports with normalized email safety and audit-ready admin controls."
+      icon="B"
+      primaryAction={{ label: "Add Single Access", route: "/admin/content/access/add" }}
+      secondaryAction={{ label: "Pending Invites", route: "/admin/content/access/invites" }}
+      sectionTitle="Bulk import workspace"
+      sectionDescription="Paste learner Gmail IDs, normalize emails, review duplicates, and prepare access before final confirmation."
+      stats={[
+        { value: "Paste", label: "Emails" },
+        { value: "Clean", label: "Normalize" },
+        { value: "Review", label: "Duplicates" },
+        { value: "Audit", label: "Ready" },
+      ]}
+    >
+      <div className="adminAccessFormPanel">
+        <div className="adminAccessFormGrid">
+          <div className="adminAccessField adminAccessFull"><label>Registered Gmail List</label><textarea placeholder="one learner email per line" /></div>
+          <div className="adminAccessField"><label>Default Plan</label><select defaultValue="PREMIUM"><option>FREE</option><option>BASIC</option><option>PREMIUM</option><option>MENTORSHIP</option></select></div>
+          <div className="adminAccessField"><label>Source</label><select defaultValue="bulk_import"><option value="bulk_import">Bulk Import</option><option value="admin_manual">Admin Manual</option><option value="trial">Trial</option></select></div>
         </div>
-      </section>
-    </main>
+        <div className="adminAccessNotice">Bulk write is not connected yet. Next phase will add validation, duplicate check, confirmation, and audit logs.</div>
+      </div>
+    </AdminAccessRouteShell>
   );
 }
