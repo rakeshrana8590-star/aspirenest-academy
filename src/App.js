@@ -28,6 +28,10 @@ import {
 } from "./utils/authAccountService";
 
 import {
+  canAccessContent,
+} from "./access/accessUtils";
+
+import {
   LineChart,
   Line,
   PieChart,
@@ -511,7 +515,13 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
 
     return true;
   };
-  const hasPlanAccess = (requiredPlan) => {
+  const hasPlanAccess = (requiredPlan = "FREE") => {
+    const normalizedRequiredPlan = String(requiredPlan || "FREE").trim().toUpperCase();
+
+    if (normalizedRequiredPlan === "FREE") {
+      return true;
+    }
+
     if (isAdmin(user)) {
       return true;
     }
@@ -520,24 +530,15 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
       return true;
     }
 
-    const hierarchy = {
-      FREE: 0,
-      BASIC: 1,
-      PREMIUM: 2,
-      MENTORSHIP: 3,
-    };
-    const openProtectedSection = (sectionName, requiredPlan = "PREMIUM") => {
-      if (hasPlanAccess(requiredPlan)) {
-        navigate(`/${sectionName}`);
-      } else {
-        navigate("/ctet-tet/pricing");;
-      }
-    };
-  
-    return (
-      hierarchy[userPlanType || "FREE"] >=
-      hierarchy[requiredPlan]
-    );
+    if (membershipExpiry && new Date(membershipExpiry) < new Date()) {
+      return false;
+    }
+
+    return canAccessContent({
+      requiredPlan: normalizedRequiredPlan,
+      userPlan: userPlanType || "FREE",
+      isAdmin: isAdmin(user),
+    });
   };
 
   const getMockTestScheduleStatus = (test) => {
