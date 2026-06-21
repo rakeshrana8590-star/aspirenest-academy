@@ -6,11 +6,8 @@ export const getVerifiedAuthSession = async (auth, currentUser) => {
     return null;
   }
 
-  if (!currentUser.emailVerified) {
-    await signOut(auth);
-    return null;
-  }
-
+  // Launch-safe auth: keep Firebase-authenticated user logged in.
+  // Student access is still controlled by Firestore plan/status gates.
   return currentUser;
 };
 
@@ -19,12 +16,14 @@ export const syncVerifiedStudentAccountStatus = (db, verifiedUser) => {
     return Promise.resolve();
   }
 
+  const isEmailVerified = verifiedUser.emailVerified === true;
+
   const verifiedProfileSync = {
     uid: verifiedUser.uid,
     email: verifiedUser.email || "",
-    emailVerified: true,
-    accountStatus: "active",
-    profileStatus: "verified",
+    emailVerified: isEmailVerified,
+    accountStatus: isEmailVerified ? "active" : "loginActive",
+    profileStatus: isEmailVerified ? "verified" : "loginActive",
     role: "student",
     updatedAt: new Date(),
   };
@@ -45,14 +44,14 @@ export const resendVerificationEmailAndLogout = async (auth, firebaseUser) => {
 
     return {
       message:
-        "Email verification pending 📩 A fresh verification email has been sent. Please verify your Gmail before login.",
+        "Email verification pending. A fresh verification email has been sent. Please verify your Gmail before login.",
     };
   } catch (verificationError) {
     console.error("Verification resend failed:", verificationError);
 
     return {
       message:
-        "Email verification pending 📩 Please check your Gmail verification link. If needed, try again after some time.",
+        "Email verification pending. Please check your Gmail verification link. If needed, try again after some time.",
     };
   } finally {
     await signOut(auth);

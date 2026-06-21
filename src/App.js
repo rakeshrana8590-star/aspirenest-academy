@@ -478,16 +478,24 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
   };
   
   const requireAdmin = () => {
+    const isAdminRoute = location.pathname.startsWith("/admin");
+
     if (!user) {
-      navigate("/login", { replace: true });
+      if (isAdminRoute) {
+        navigate("/login", { replace: true });
+      }
+
       return false;
     }
-  
+
     if (!isAdmin(user)) {
-      navigate("/", { replace: true });
+      if (isAdminRoute) {
+        navigate("/", { replace: true });
+      }
+
       return false;
     }
-  
+
     return true;
   };
   const hasPlanAccess = (requiredPlan) => {
@@ -1644,16 +1652,6 @@ const [paymentHistory, setPaymentHistory] = useState([]);
     return () => unsubscribe();
   }, []);
 
-  React.useEffect(() => {
-    if (authLoading || !user) return;
-
-    const isLandingOrLoginPage =
-      location.pathname === "/" || location.pathname === "/login";
-
-    if (isLandingOrLoginPage) {
-      navigate("/ctet-tet", { replace: true });
-    }
-  }, [authLoading, user, location.pathname, navigate]);
 
   React.useEffect(() => {
     const routeToSection = {
@@ -1759,11 +1757,8 @@ const [paymentHistory, setPaymentHistory] = useState([]);
         loginPassword
       );
   
-      if (!userCredential.user.emailVerified) {
-        alert("Please verify your email before login 📩");
-        await signOut(auth);
-        return;
-      }
+      // Launch-safe login: Firebase-authenticated users can enter.
+      // Email verification can be completed later; paid access stays Firestore-gated.
   
       setEmail(loginEmail);
       setPassword(loginPassword);
@@ -3866,145 +3861,622 @@ return (
 />
 
 <Route
-  path="/ctet-tet"
-  element={
-    <section className="coursePages subjectHubPage">
-      <div className="sectionHeader">
-        <span className="badge">CTET / TET Subject Hub</span>
+    path="/ctet-tet"
+    element={
+      <>
+ <div
+  style={{
+    padding: "20px",
+    textAlign: "center",
+    position: "fixed",
+    top: "20px",
+    left: "20px",
+    zIndex: "99999",
+  }}
+>
 
-        <h2>CTET & TET Preparation Ecosystem</h2>
+</div>
+  <section className="hero">
+  <div className="heroContent">
+    <div className="taglineCard">
+      <div className="taglineIcon">🏆</div>
 
+      <div>
+        <h3>Where Aspirations Turn Into Selections</h3>
         <p>
-          A complete mentor-guided learning system with courses,
-          notes, mock tests, current affairs, premium plans,
-          dashboard, and guidance by Dr. Varsha D. Maru.
+          Empowering students with the right guidance,
+          resources and practice.
         </p>
       </div>
-      <div className="subjectHubGrid">
-<div
-  className="subjectHubCard"
-  onClick={() => navigate("/ctet-tet/courses")}
->
-  <div className="subjectHubIcon">📚</div>
+    </div>
 
-  <h3>Courses</h3>
+    <span className="badge">CTET • TETs</span>
 
-  <p>
-    Structured CTET/TET learning paths with concept-wise preparation.
-  </p>
+    <h2>
+      Crack CTET/TETs
+      <br />
+      with Smart Learning
+    </h2>
 
-  <span>Explore Courses →</span>
-</div>
-
-<div
-  className="subjectHubCard"
+    <p>Bilingual preparation platform for Indian students.</p>
+    <div className="heroButtons">
+    <button onClick={() => navigate("/learning")}>
+  Start Learning
+</button>
+{user && (
+  <button
+    onClick={() =>
+      navigate(isAdmin(user) ? "/admin" : "/student-dashboard")
+    }
+  >
+    {isAdmin(user)
+      ? "Admin Dashboard"
+      : "My Dashboard"}
+  </button>
+)}
+<button
   onClick={() => navigate("/ctet-tet/notes")}
 >
-  <div className="subjectHubIcon">📘</div>
-
-  <h3>Notes Library</h3>
-
-  <p>
-    Free, premium, revision, and mentor-curated study notes.
-  </p>
-
-  <span>Open Notes →</span>
+  Free Notes
+</button>
+</div>
 </div>
 
-<div
-  className="subjectHubCard"
-  onClick={() => navigate("/ctet-tet/videos")}
+{false && (
+  <div className="heroStats">
+    <div className="statCard">
+      <h3>5K+</h3>
+      <p>Students</p>
+    </div>
+
+    <div className="statCard">
+      <h3>120+</h3>
+      <p>Visual Notes</p>
+    </div>
+
+    <div className="statCard">
+      <h3>50+</h3>
+      <p>Mock Tests</p>
+    </div>
+
+    <div className="statCard">
+      <h3>92%</h3>
+      <p>Success Rate</p>
+    </div>
+  </div>
+)}
+
+{user && (
+  <div
+    className="dashboardQuickCard"
+    onClick={() =>
+      navigate(isAdmin(user) ? "/admin" : "/student-dashboard")
+    }
+  >
+    <div className="dashboardQuickLeft">
+      <span className="dashboardQuickBadge">
+        {isAdmin(user) ? "ADMIN ACCESS" : "STUDENT ACCESS"}
+      </span>
+
+      <h3>
+        {isAdmin(user)
+          ? "Admin Dashboard"
+          : `Welcome back, ${
+              user?.displayName ||
+              user?.email?.split("@")[0] ||
+              "Student"
+            }`}
+      </h3>
+
+      <p>
+  {isAdmin(user)
+    ? "Manage students, payments, notes, mock tests, announcements and platform analytics from one admin workspace."
+    : "Continue your learning journey, track progress, access tests, analytics and premium resources."}
+</p>
+
+      <button>
+        {isAdmin(user)
+          ? "Open Admin Dashboard"
+          : "Open My Dashboard"}
+      </button>
+    </div>
+
+    <div className="dashboardQuickRight">
+      📊
+    </div>
+  </div>
+)}
+
+{false && (
+  <div className="card heroGoalCard">
+    <div className="goalTop">
+      <div className="goalIcon">🎯</div>
+
+      <div>
+        <h3>Today's Goal</h3>
+        <p>Child Development Practice</p>
+      </div>
+    </div>
+
+    <div className="progress">
+      <div className="fill"></div>
+    </div>
+
+    <span>
+      <strong>75%</strong> Completed
+    </span>
+  </div>
+)}
+
+</section>
+
+<section className="mentor" id="about">
+
+<div className="mentorLeft">
+
+  <span className="badge">Meet Your Expert Educator</span>
+
+  <h2>Dr. Varsha D. Maru</h2>
+
+  <p className="mentorIntro">
+    Learn from a Ph.D. qualified educator, I/C Principal,
+    Assistant Professor, researcher, and CTET/TET mentor
+    with strong expertise in Education, Psychology,
+    Pedagogy, Teacher Training, and Digital Learning.
+  </p>
+
+  <div className="mentorStats">
+
+    <div className="mentorStat">
+      <h3>Ph.D.</h3>
+      <span>Education</span>
+    </div>
+
+    <div className="mentorStat">
+  <h3>UGC-NET</h3>
+  <p>Education Qualified</p>
+</div>
+
+    <div className="mentorStat">
+      <h3>CTET</h3>
+      <span>Paper II Qualified</span>
+    </div>
+
+  </div>
+
+  <div className="mentorQuote">
+    “Concept clarity, practical pedagogy, bilingual explanation,
+    and exam-focused preparation are at the heart of our teaching.”
+  </div>
+
+  <div className="buttons">
+  <button
+    className="btnLink"
+    onClick={() => navigate("/ctet-tet/courses")}
+  >
+    Explore Courses
+  </button>
+
+  <button
+    className="secondaryBtn"
+    onClick={() => setShowMentorProfile(true)}
+  >
+  Contact Mentor
+</button>
+<button
+  className="secondaryBtn"
+  onClick={() => setShowProfile(true)}
 >
-  <div className="subjectHubIcon">🎬</div>
+  View Full Profile
+</button>
 
-  <h3>Recorded Videos</h3>
+  </div>
 
-  <p>
-    Watch chapter-wise recorded lectures with related notes,
-    next lectures, and classroom learning flow.
-  </p>
-
-  <span>Open Videos →</span>
 </div>
 
-<div
-  className="subjectHubCard"
+<div className="mentorCard premiumMentorCard">
+
+  <div className="mentorCardTop">
+    <div className="mentorAvatar">VM</div>
+
+    <div>
+      <h3>Academic Profile</h3>
+      <p>Educator • Researcher • Academic Leader</p>
+    </div>
+  </div>
+
+  <div className="mentorHighlights">
+
+    <div className="mentorHighlight">
+      <strong>🏫 Current Role</strong>
+      <span>I/C Principal & Assistant Professor</span>
+    </div>
+
+    <div className="mentorHighlight">
+      <strong>🎓 Qualification</strong>
+      <span>Ph.D. in Education, M.Ed., M.A. Psychology</span>
+    </div>
+
+    <div className="mentorHighlight">
+      <strong>📚 Exam Expertise</strong>
+      <span>CTET Paper II Qualified, TAIT Qualified</span>
+    </div>
+
+    <div className="mentorHighlight">
+      <strong>🧠 Research Area</strong>
+      <span>Cyberbullying, Mental Health, Education & Psychology</span>
+    </div>
+
+    <div className="mentorHighlight">
+      <strong>🏆 Recognition</strong>
+      <span>Best Excellence Teacher Award</span>
+    </div>
+
+    <div className="mentorHighlight">
+      <strong>💻 Digital Learning</strong>
+      <span>Google Certified Educator, AI & NEP 2020 Training</span>
+    </div>
+
+  </div>
+
+</div>
+
+</section>
+{showMentorProfile && (
+  <div className="mentorProfileOverlay">
+    <div className="mentorProfileModal">
+      <button
+        className="closeMentorProfile"
+        onClick={() => setShowMentorProfile(false)}
+      >
+        ×
+      </button>
+
+      <h2>Connect with your mentor</h2>
+
+      <h3>Dr. Varsha Dalpat Maru</h3>
+
+      <p>
+        <strong>
+          Founder & Academic Mentor
+        </strong>{" "}
+        — AspireNest Academy
+      </p>
+
+      <p>
+        “Guiding future educators with
+        knowledge, confidence, and the right
+        mentorship to transform aspirations
+        into success.”
+      </p>
+
+      <p>
+        <strong>📍 Location:</strong>
+        {" "}Mumbai, Maharashtra, India
+      </p>
+
+      <p>
+        <strong>📧 Email:</strong>
+        {" "}dr.varshamaru@gmail.com
+      </p>
+
+      <p>
+        <strong>📞 Phone:</strong>
+        {" "}+91 97736 92578
+      </p>
+
+      <p>
+        <strong>🔗 LinkedIn:</strong>
+        <br />
+        linkedin.com/in/dr-varsha-maru-4a71b614b
+      </p>
+
+      <p>
+        <strong>
+          🌐 Professional Portfolio:
+        </strong>
+        <br />
+        bold.pro/my/drvarshadalpatmaru
+      </p>
+    </div>
+  </div>
+)}
+
+{showProfile && (
+  <div
+  className="mentorProfileOverlay"
+    onClick={() => setShowProfile(false)}
+  >
+    <div
+     className="mentorProfileModal profileModal"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button
+       className="closeMentorProfile"
+        onClick={() => setShowProfile(false)}
+      >
+        ✕
+      </button>
+
+      <h2>Professional Academic Profile</h2>
+
+      <h3>Dr. Varsha Dalpat Maru</h3>
+
+      <p className="profileTag">
+        Founder & Academic Mentor — AspireNest Academy
+      </p>
+
+      <p>
+        “Where Aspirations Turn Into Selections”
+      </p>
+
+      <div className="profileContent">
+
+        <h4>Professional Profile</h4>
+
+        <p>
+          Dr. Varsha Dalpat Maru is an accomplished educator,
+          academic leader, researcher, and mentor with
+          extensive experience in teacher education,
+          psychology, educational research, and academic leadership.
+        </p>
+
+        <p>
+          Currently serving as I/C Principal and Assistant
+          Professor at Humera Khan College of Education, Mumbai.
+        </p>
+
+        <h4>Academic Qualifications</h4>
+
+        <ul>
+          <li>Ph.D. in Education</li>
+          <li>UGC-NET Qualified – Education & Psychology</li>
+          <li>CTET Paper-II Qualified</li>
+          <li>TAIT Qualified</li>
+          <li>M.Ed. – Education</li>
+          <li>M.A. Psychology</li>
+          <li>Google Certified Educator</li>
+        </ul>
+
+        <h4>Research Areas</h4>
+
+        <p>
+          Cyberbullying, Mental Health, Educational Psychology,
+          Digital Education & Teacher Training.
+        </p>
+
+      </div>
+    </div>
+  </div>
+)}<AppDashboard
+setActiveSection={setActiveSection}
+setActiveAdminTab={setActiveAdminTab}
+user={user}
+isAdmin={isAdmin}
+/>
+
+{(leaderboard || []).length > 0 && (
+<section className="leaderboardSection">
+  <div className="leaderboardHeader">
+    <span className="badge">Top Performers</span>
+
+    <h2>Mock Test Leaderboard</h2>
+
+    <p>
+      Highest scoring students from recent CTET/TET mock practice.
+    </p>
+  </div>
+
+  <div className="leaderboardGrid">
+    {(leaderboard || []).map((student, index) => (
+      <div className="leaderCard" key={student.id || index}>
+        <div className="rankBadge">
+          #{index + 1}
+        </div>
+
+        <h3>
+          {student.email || "Student"}
+        </h3>
+
+        <p className="leaderScore">
+          {student.percentage || 0}%
+        </p>
+
+        <span className="leaderTag">
+          Top Score
+        </span>
+      </div>
+    ))}
+  </div>
+</section>
+)}
+
+<section className="premium" id="premium-section">
+        <div className="premiumLeft">
+          <span className="premiumBadge">PREMIUM LEARNING EXPERIENCE</span>
+
+          <h2>
+            India’s Smartest
+            <br />
+            CTET/TET Preparation Platform
+          </h2>
+
+          <p>
+            AI-powered visual learning, bilingual notes, premium mock tests,
+            revision systems and mentor guidance for serious aspirants.
+          </p>
+
+          <div className="premiumFeatures">
+            <div className="feature">✅ Visual Learning Notes</div>
+
+            <div className="feature">✅ Full Mock Test Series</div>
+
+            <div className="feature">✅ Smart Revision System</div>
+
+            <div className="feature">✅ Hindi + English Support</div>
+          </div>
+
+          <button onClick={handlePremiumSectionAccess}>
+  Explore Premium
+</button>
+        </div>
+
+        <div className="premiumCard">
+          <div className="glow"></div>
+
+          <h3>CTET Master Dashboard</h3>
+
+          <div className="dashboardStat">
+            <span>Course Progress</span>
+            <strong>82%</strong>
+          </div>
+
+          <div className="dashboardBar">
+            <div className="dashboardFill"></div>
+          </div>
+
+          <div className="dashboardGrid">
+            <div className="miniCard">📘 150+ Notes</div>
+
+            <div className="miniCard">🎯 50+ Tests</div>
+
+            <div className="miniCard">🧠 AI Revision</div>
+
+            <div className="miniCard">🏆 Top Scores</div>
+          </div>
+        </div>
+      </section>
+
+<section className="freeResources">
+  <div className="container">
+    <h2>Free Resources</h2>
+
+    <p>
+    Start your preparation with free notes and study tools.
+    </p>
+
+    <div className="freeGrid">
+    <div
+  className="freeCard"
+  onClick={() => navigate("/ctet-tet/notes")}
+>
+        📘 Free CDP Notes
+      </div>
+
+      <div className="freeCard">
+        🗓️ 7-Day Study Plan
+      </div>
+
+      <div
+  className="freeCard"
   onClick={() => navigate("/ctet-tet/mock-tests")}
 >
-  <div className="subjectHubIcon">📝</div>
+        📝 Free Mock Test
+      </div>
 
-  <h3>Mock Tests</h3>
+      <div className="freeCard">
+        📄 PYQ Starter Pack
+      </div>
 
-  <p>
-    Practice tests with analytics, ranking, and performance tracking.
-  </p>
+      <div className="freeCard">
+        🎯 Exam Strategy Guide
+      </div>
 
-  <span>Start Practice →</span>
-</div>
+      <div className="freeCard">
+        ✅ Revision Checklist
+      </div>
+    </div>
+  </div>
+</section>
 
-<div
-  className="subjectHubCard"
-  onClick={() => navigate("/ctet-tet/current-affairs")}
->
-  <div className="subjectHubIcon">📰</div>
 
-  <h3>Current Affairs</h3>
+      <section className="footerPanels" id="contact">
+  <div className="footerPanelCard">
+    <span>STUDENT REVIEWS</span>
+    <h3>Trusted by CTET/TET learners.</h3>
+    <p className="stars">⭐⭐⭐⭐⭐</p>
+    <p>Visual notes se revision bahut fast ho gaya.</p>
+    <strong>Priya Sharma</strong>
+  </div>
 
-  <p>
-    Daily educational updates and exam-focused current affairs.
-  </p>
+  <div className="footerPanelCard enquiryPanel">
+    <span>GET IN TOUCH</span>
+    <h3>Need guidance? Send enquiry.</h3>
 
-  <span>Read Updates →</span>
-</div>
+    <input
+      value={fullName}
+      onChange={(e) => setFullName(e.target.value)}
+      placeholder="Full Name"
+    />
 
-<div
-  className="subjectHubCard"
-  onClick={() => navigate("/ctet-tet/roadmaps")}
->
-  <div className="subjectHubIcon">🛣️</div>
+    <input
+      value={mobile}
+      onChange={(e) => setMobile(e.target.value)}
+      placeholder="Mobile Number"
+    />
 
-  <h3>AspirePath</h3>
+    <input
+      value={contactEmail}
+      onChange={(e) => setContactEmail(e.target.value)}
+      placeholder="Email"
+    />
 
-  <p>
-    Follow smart study roadmaps with daily tasks, live sessions,
-    mock tests, revision, and progress tracking.
-  </p>
+    <button type="button" onClick={handleContactSubmit}>
+      Submit Enquiry
+    </button>
+  </div>
 
-  <span>Open Roadmaps →</span>
-</div>
+  <div className="footerPanelCard">
+    <span>FAQ</span>
+    <h3>Quick answers before joining.</h3>
+    <p>▶ Is this course bilingual?</p>
+    <p>▶ Are mock tests included?</p>
+    <p>▶ Can I use this on mobile?</p>
+    <p>▶ Is pricing in INR?</p>
+  </div>
+</section>
 
-<div
-  className="subjectHubCard"
-  onClick={() => navigate("/ctet-tet/pricing")}
->
-  <div className="subjectHubIcon">💎</div>
+    <footer className="premiumFooter">
+  <div className="footerGrid">
+    <div className="footerBrand">
+      <h2>AspireNest Academy</h2>
 
-  <h3>Premium Plans</h3>
+      <p>
+        Premium bilingual CTET/TET learning platform
+        for future educators in India.
+      </p>
+    </div>
 
-  <p>
-    Unlock premium mentorship, notes, tests, and learning tools.
-  </p>
+    <div className="footerLinks">
+      <h3>Quick Links</h3>
+      <button onClick={() => navigate("/ctet-tet/courses")}>
+  Courses
+</button>
+<button onClick={() => navigate("/cdp")}>
+  CDP Module
+</button>
+<button onClick={() => navigate("/resources")}>
+  Free Resources
+</button>
+      <button onClick={() => navigate("/ctet-tet/pricing")}>
+  Pricing
+</button>
+    </div>
 
-  <span>View Plans →</span>
-</div>
+    <div className="footerContact">
+      <h3>Contact</h3>
+      <p>📞 +917304256002</p>
+      <p>📧 aspirenestacademy@gmail.com</p>
+      <p>📍 India</p>
+    </div>
+  </div>
 
-<div
-  className="subjectHubCard"
-  onClick={() => navigate("/student-dashboard")}
->
-  <div className="subjectHubIcon">📊</div>
+  <div className="footerBottom">
+    © 2026 AspireNest Academy • All Rights Reserved
+  </div>
+</footer>
 
-  <h3>Student Dashboard</h3>
-
-  <p>
-    Track progress, performance analytics, targets, and study growth.
-  </p>
-
-  <span>Open Dashboard →</span>
-</div>
-
-</div>
-    </section>
+</>
   }
 />
 
