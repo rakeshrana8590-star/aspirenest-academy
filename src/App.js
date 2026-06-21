@@ -30,6 +30,7 @@ import {
 import {
   canAccessContent,
 } from "./access/accessUtils";
+import useAccessProfile from "./access/useAccessProfile";
 
 import {
   LineChart,
@@ -485,6 +486,25 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
 
   const isEmergencyPremiumLearner = (email = "") =>
     EMERGENCY_PREMIUM_EMAILS.has(String(email || "").trim().toLowerCase());
+
+  const accessProfile = useAccessProfile({
+    user,
+    profile: {
+      email: user?.email,
+      uid: user?.uid,
+      isPremium: isPremiumUser,
+      subscriptionType: userPlanType,
+      membershipExpiry,
+      expiryDate: membershipExpiry,
+    },
+    fallbackPlanType: userPlanType || "FREE",
+    fallbackExpiry: membershipExpiry,
+    enabled: Boolean(user),
+  });
+
+  const activeAccessPlan = accessProfile?.activePlan || userPlanType || "FREE";
+  const activeAccessExpiry =
+    accessProfile?.membershipExpiry || membershipExpiry || null;
   const requireLogin = () => {
     if (!user) {
       navigate("/login", { replace: true });
@@ -530,13 +550,27 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
       return true;
     }
 
-    if (membershipExpiry && new Date(membershipExpiry) < new Date()) {
+    if (accessProfile?.isBlocked) {
       return false;
+    }
+
+    if (accessProfile?.isExpired) {
+      return false;
+    }
+
+    if (activeAccessExpiry && new Date(activeAccessExpiry) < new Date()) {
+      return false;
+    }
+
+    if (typeof accessProfile?.hasAccess === "function" && accessProfile.hasAccess(normalizedRequiredPlan)) {
+      return true;
     }
 
     return canAccessContent({
       requiredPlan: normalizedRequiredPlan,
-      userPlan: userPlanType || "FREE",
+      userPlan: activeAccessPlan || "FREE",
+      accessRecord: accessProfile?.bestAccess || null,
+      accessRecords: accessProfile?.accessRecords || [],
       isAdmin: isAdmin(user),
     });
   };

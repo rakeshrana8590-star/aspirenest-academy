@@ -140,12 +140,17 @@ export default function useAccessProfile({
 
       const seen = new Set();
       const mergedRecords = [...uidRecords, ...emailRecords].filter((record) => {
-        const key = record?.id || ;
+        const recordId = record && record.id ? record.id : "";
+        const recordUid = record && record.uid ? record.uid : "";
+        const recordEmail = record && (record.normalizedEmail || record.email) ? record.normalizedEmail || record.email : "";
+        const recordPlan = record && record.planType ? record.planType : "";
+        const key = recordId || [recordUid, recordEmail, recordPlan].join("-");
+
         if (seen.has(key)) return false;
+
         seen.add(key);
         return true;
       });
-
       setAccessRecords(mergedRecords);
     } catch (accessError) {
       setError(accessError);
