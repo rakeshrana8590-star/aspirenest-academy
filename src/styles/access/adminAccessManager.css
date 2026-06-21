@@ -1,0 +1,363 @@
+.adminAccessPage {
+  min-height: 100vh;
+  padding: 34px 7vw 58px;
+  background: radial-gradient(circle at 8% 10%, rgba(255, 123, 0, 0.10), transparent 28%), radial-gradient(circle at 92% 12%, rgba(37, 99, 235, 0.12), transparent 30%), linear-gradient(180deg, #f8fbff 0%, #ffffff 46%, #fff7ed 100%);
+  color: #0f172a;
+}
+
+.adminAccessHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+  gap: 34px;
+  align-items: stretch;
+  padding: 42px;
+  border-radius: 34px;
+  background: linear-gradient(135deg, #0f172a 0%, #111827 58%, #2b160d 100%);
+  box-shadow: 0 32px 90px rgba(15, 23, 42, 0.18);
+  color: #fff;
+  overflow: hidden;
+  position: relative;
+}
+
+.adminAccessHero::before {
+  content: "";
+  position: absolute;
+  inset: -30% -10% auto auto;
+  width: 420px;
+  height: 420px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 123, 0, 0.28), transparent 68%);
+}
+
+.adminAccessHeroCopy,
+.adminAccessCommandPanel {
+  position: relative;
+  z-index: 1;
+}
+
+.adminAccessBadge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 10px 15px;
+  color: #fed7aa;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.adminAccessHero h1 {
+  margin: 28px 0 16px;
+  max-width: 760px;
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.07em;
+}
+
+.adminAccessHero p {
+  max-width: 690px;
+  margin: 0;
+  color: rgba(226, 232, 240, 0.78);
+  font-size: 1.08rem;
+  line-height: 1.75;
+  font-weight: 700;
+}
+
+.adminAccessHeroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.adminAccessPrimaryBtn,
+.adminAccessGhostBtn {
+  border: 0;
+  border-radius: 999px;
+  padding: 13px 19px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.adminAccessPrimaryBtn {
+  color: #0f172a;
+  background: linear-gradient(135deg, #ffffff, #fed7aa);
+  box-shadow: 0 18px 38px rgba(249, 115, 22, 0.22);
+}
+
+.adminAccessGhostBtn {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.adminAccessCommandPanel {
+  border-radius: 28px;
+  padding: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.10), rgba(37, 99, 235, 0.16));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+.adminAccessPanelTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.adminAccessPanelTitle {
+  display: grid;
+  gap: 4px;
+}
+
+.adminAccessPanelTitle strong {
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.adminAccessPanelTitle span {
+  color: rgba(226, 232, 240, 0.68);
+  font-weight: 900;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.adminAccessLivePill {
+  border-radius: 999px;
+  padding: 8px 11px;
+  color: #bbf7d0;
+  background: rgba(34, 197, 94, 0.14);
+  font-weight: 900;
+}
+
+.adminAccessStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.adminAccessStatCard {
+  border-radius: 22px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.adminAccessStatCard strong {
+  display: block;
+  font-size: 2rem;
+  color: #fff;
+  letter-spacing: -0.04em;
+}
+
+.adminAccessStatCard span {
+  color: rgba(226, 232, 240, 0.72);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.adminAccessWorkflow {
+  margin-top: 34px;
+  border-radius: 34px;
+  padding: 34px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.09);
+}
+
+.adminAccessSectionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.adminAccessSectionHead h2 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.3rem);
+  letter-spacing: -0.06em;
+}
+
+.adminAccessSectionHead p {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.adminAccessCardGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.adminAccessCard {
+  min-height: 220px;
+  border-radius: 26px;
+  padding: 24px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: linear-gradient(145deg, #ffffff, #f8fafc);
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+  cursor: pointer;
+  text-align: left;
+}
+
+.adminAccessIcon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  color: #fff;
+  background: linear-gradient(135deg, #f97316, #2563eb);
+  font-size: 1.5rem;
+  box-shadow: 0 18px 38px rgba(37, 99, 235, 0.18);
+  margin-bottom: 24px;
+}
+
+.adminAccessCard small {
+  display: block;
+  margin-bottom: 8px;
+  color: #f97316;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.adminAccessCard h3 {
+  margin: 0 0 10px;
+  font-size: 1.6rem;
+  letter-spacing: -0.04em;
+}
+
+.adminAccessCard p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.6;
+  font-weight: 700;
+}
+
+.adminAccessFormPanel,
+.adminAccessTablePanel {
+  margin-top: 34px;
+  border-radius: 34px;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+}
+
+.adminAccessFormGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.adminAccessField {
+  display: grid;
+  gap: 8px;
+}
+
+.adminAccessField label {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.adminAccessField input,
+.adminAccessField select,
+.adminAccessField textarea {
+  width: 100%;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  border-radius: 18px;
+  padding: 14px 16px;
+  background: #fff;
+  color: #0f172a;
+  font-weight: 800;
+  outline: none;
+}
+
+.adminAccessField textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.adminAccessFull {
+  grid-column: 1 / -1;
+}
+
+.adminAccessNotice {
+  margin-top: 18px;
+  border-radius: 22px;
+  padding: 18px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.adminAccessTable {
+  display: grid;
+  gap: 12px;
+}
+
+.adminAccessRow {
+  display: grid;
+  grid-template-columns: 1.2fr 0.7fr 0.7fr 0.8fr;
+  gap: 14px;
+  align-items: center;
+  border-radius: 20px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.07);
+}
+
+.adminAccessRow strong {
+  color: #0f172a;
+}
+
+.adminAccessRow span {
+  color: #64748b;
+  font-weight: 800;
+}
+
+.adminAccessPill {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+
+.adminAccessDangerPill {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+@media (max-width: 980px) {
+  .adminAccessHero,
+.adminAccessCardGrid,
+.adminAccessFormGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminAccessRow {
+    grid-template-columns: 1fr;
+  }
+}
