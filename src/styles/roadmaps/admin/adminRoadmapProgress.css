@@ -1,0 +1,23 @@
+/* =========================================================
+   Admin Roadmap Progress / Resources
+   ========================================================= */
+
+   .roadmapStudioShell .roadmapStudioTable td {
+    color: #475569;
+  }
+  
+  .roadmapStudioShell .roadmapStudioTable td strong {
+    color: #0f172a;
+  }
+  
+  .roadmapStudioShell .roadmapStudioBadge {
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+  }
+  
+  .roadmapStudioShell .roadmapStudioGrid .roadmapStudioCard {
+    min-height: 170px;
+  }
+  
+  .roadmapStudioShell .roadmapStudioDangerBtn {
+    box-shadow: 0 14px 30px rgba(239, 68, 68, 0.10);
+  }

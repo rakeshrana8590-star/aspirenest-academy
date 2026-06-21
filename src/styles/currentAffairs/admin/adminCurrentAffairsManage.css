@@ -1,0 +1,793 @@
+/* ===============================
+   ADMIN CURRENT AFFAIRS MANAGE
+   Launch library system
+================================ */
+
+.adminCaManagePage {
+    width: 100%;
+    max-width: 1268px;
+    margin: 0 auto;
+    padding: 18px 0 72px;
+  }
+  
+  .adminCaManagePage,
+  .adminCaManagePage *,
+  .adminCaManagePage *::before,
+  .adminCaManagePage *::after {
+    box-sizing: border-box;
+  }
+  
+  .adminCaManageFilterShell,
+  .adminCaBulkShell,
+  .adminCaPriorityShell,
+  .adminCaLibraryShell,
+  .adminCaToolsShell {
+    width: 100%;
+    margin-bottom: 24px;
+    border: 1px solid rgba(249, 115, 22, 0.16);
+    border-radius: 30px;
+    background:
+      radial-gradient(circle at 88% 8%, rgba(249, 115, 22, 0.08), transparent 34%),
+      linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+    box-shadow:
+      0 22px 52px rgba(15, 23, 42, 0.06),
+      0 48px 110px rgba(15, 23, 42, 0.045);
+  }
+  
+  .adminCaManageFilterShell {
+    display: grid;
+    grid-template-columns: minmax(280px, 1.5fr) minmax(180px, 0.8fr) minmax(180px, 0.8fr) minmax(180px, 0.8fr);
+    gap: 14px;
+    padding: 28px 26px 24px;
+  }
+  
+  .adminCaManageField {
+    min-width: 0;
+  }
+  
+  .adminCaManageField label {
+    display: block;
+    margin: 0 0 9px;
+    color: #64748b;
+    font-size: 0.76rem;
+    font-weight: 1000;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  
+  .adminCaManageField input,
+  .adminCaManageField select {
+    width: 100%;
+    min-height: 58px;
+    border-radius: 16px;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    background: rgba(255, 255, 255, 0.82);
+    color: #0f172a;
+    padding: 0 16px;
+    font-size: 0.98rem;
+    font-weight: 850;
+    outline: none;
+  }
+  
+  .adminCaManageField input:focus,
+  .adminCaManageField select:focus {
+    border-color: rgba(249, 115, 22, 0.45);
+    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.08);
+  }
+  
+  .adminCaManagePlanTabs {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 4px;
+  }
+  
+  .adminCaManagePlanTabs button,
+  .adminCaBulkActions button,
+  .adminCaPriorityCard button,
+  .adminCaPreviewBtn,
+  .adminCaActionsBtn,
+  .adminCaPagination button,
+  .adminCaToolsGrid button {
+    appearance: none !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 46px !important;
+    aspect-ratio: auto !important;
+    clip-path: none !important;
+    border-radius: 999px !important;
+    border: 0 !important;
+    background: #0f172a !important;
+    color: #ffffff !important;
+    font-size: 0.88rem !important;
+    font-weight: 950 !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    padding: 0 18px !important;
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.12) !important;
+  }
+  
+  .adminCaManagePlanTabs button {
+    justify-content: space-between !important;
+    min-height: 58px !important;
+    padding: 0 18px !important;
+  }
+  
+  .adminCaManagePlanTabs button.active {
+    background: #f97316 !important;
+    box-shadow: 0 18px 38px rgba(249, 115, 22, 0.2) !important;
+  }
+  
+  .adminCaManagePlanTabs button strong {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    color: #0f172a;
+    background: #e2e8f0;
+    font-size: 0.86rem;
+  }
+  
+  .adminCaManageStatsGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+  
+  .adminCaManageStatsGrid div {
+    min-height: 140px;
+    padding: 24px;
+    border-radius: 24px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: #ffffff;
+    box-shadow:
+      0 16px 34px rgba(15, 23, 42, 0.055),
+      0 30px 80px rgba(15, 23, 42, 0.04);
+  }
+  
+  .adminCaManageStatsGrid div.dark {
+    color: #ffffff;
+    background:
+      radial-gradient(circle at 95% 5%, rgba(249, 115, 22, 0.16), transparent 34%),
+      linear-gradient(135deg, #0f172a, #1d1823);
+    border-color: rgba(15, 23, 42, 0.12);
+  }
+  
+  .adminCaManageStatsGrid span {
+    display: block;
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 1000;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  
+  .adminCaManageStatsGrid div.dark span {
+    color: rgba(226, 232, 240, 0.72);
+  }
+  
+  .adminCaManageStatsGrid strong {
+    display: block;
+    margin-top: 14px;
+    color: #0f172a;
+    font-size: 2.35rem;
+    line-height: 1;
+    letter-spacing: -0.07em;
+  }
+  
+  .adminCaManageStatsGrid div.dark strong {
+    color: #ffffff;
+  }
+  
+  .adminCaManageStatsGrid p {
+    margin: 12px 0 0;
+    color: #64748b;
+    font-size: 0.88rem;
+    font-weight: 850;
+  }
+  
+  .adminCaManageStatsGrid div.dark p {
+    color: rgba(226, 232, 240, 0.62);
+  }
+  
+  .adminCaBulkShell {
+    display: grid;
+    grid-template-columns: 170px 1fr;
+    align-items: center;
+    gap: 18px;
+    padding: 18px;
+  }
+  
+  .adminCaBulkSelected {
+    min-height: 70px;
+    padding: 14px 18px;
+    border-radius: 18px;
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+  }
+  
+  .adminCaBulkSelected span {
+    display: block;
+    color: #64748b;
+    font-size: 0.74rem;
+    font-weight: 1000;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  
+  .adminCaBulkSelected strong {
+    display: block;
+    margin-top: 6px;
+    color: #0f172a;
+    font-size: 1.4rem;
+    line-height: 1;
+  }
+  
+  .adminCaBulkActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  
+  .adminCaBulkActions button:disabled,
+  .adminCaPagination button:disabled,
+  .adminCaPreviewBtn:disabled {
+    opacity: 0.48 !important;
+    cursor: not-allowed !important;
+  }
+  
+  .adminCaPriorityShell,
+  .adminCaLibraryShell,
+  .adminCaToolsShell {
+    padding: 26px;
+  }
+  
+  .adminCaSectionHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 22px;
+  }
+  
+  .adminCaSectionHeader span,
+  .adminCaToolsShell > div > span {
+    display: block;
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 1000;
+    text-transform: uppercase;
+    letter-spacing: 0.11em;
+  }
+  
+  .adminCaSectionHeader h2,
+  .adminCaToolsShell h2 {
+    margin: 10px 0 0;
+    color: #0f172a;
+    font-size: clamp(2.25rem, 4vw, 3.75rem);
+    line-height: 0.95;
+    letter-spacing: -0.075em;
+  }
+  
+  .adminCaSectionHeader > strong {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 999px;
+    color: #334155;
+    background: #eaf2ff;
+    font-size: 0.88rem;
+    font-weight: 950;
+    white-space: nowrap;
+  }
+  
+  .adminCaManageNotice {
+    padding: 28px;
+    border-radius: 20px;
+    border: 1px dashed rgba(15, 23, 42, 0.14);
+    background: rgba(255, 255, 255, 0.78);
+  }
+  
+  .adminCaManageNotice strong {
+    display: block;
+    color: #0f172a;
+    font-size: 1.02rem;
+    font-weight: 1000;
+  }
+  
+  .adminCaManageNotice p {
+    margin: 10px 0 0;
+    color: #64748b;
+    font-weight: 850;
+  }
+  
+  .adminCaPriorityGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+  
+  .adminCaPriorityCard {
+    min-width: 0;
+    padding: 20px;
+    border-radius: 22px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: #ffffff;
+    box-shadow: 0 18px 44px rgba(15, 23, 42, 0.055);
+  }
+  
+  .adminCaPriorityCard span {
+    display: inline-flex;
+    min-height: 28px;
+    align-items: center;
+    padding: 0 10px;
+    border-radius: 999px;
+    color: #ea580c;
+    background: rgba(249, 115, 22, 0.1);
+    font-size: 0.72rem;
+    font-weight: 1000;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  
+  .adminCaPriorityCard h3 {
+    margin: 14px 0 8px;
+    color: #0f172a;
+    font-size: 1.16rem;
+    line-height: 1.12;
+    letter-spacing: -0.04em;
+  }
+  
+  .adminCaPriorityCard p {
+    margin: 0 0 16px;
+    color: #64748b;
+    font-size: 0.86rem;
+    font-weight: 850;
+    line-height: 1.45;
+  }
+  
+  .adminCaPriorityCard button {
+    min-height: 40px !important;
+  }
+  
+  .adminCaLibraryStack {
+    display: grid;
+    gap: 18px;
+  }
+  
+  .adminCaLibraryCard {
+    display: grid;
+    grid-template-columns: 98px minmax(0, 1fr);
+    gap: 18px;
+    padding: 22px;
+    border-radius: 26px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background:
+      radial-gradient(circle at 92% 8%, rgba(249, 115, 22, 0.06), transparent 34%),
+      linear-gradient(145deg, #ffffff, #f8fbff);
+    box-shadow:
+      0 16px 34px rgba(15, 23, 42, 0.055),
+      0 34px 92px rgba(15, 23, 42, 0.045);
+  }
+  
+  .adminCaLibrarySelect {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 10px;
+    min-height: 86px;
+    border-radius: 22px;
+    color: #ffffff;
+    background: #0f172a;
+  }
+  
+  .adminCaLibrarySelect input {
+    width: 18px;
+    height: 18px;
+    accent-color: #f97316;
+  }
+  
+  .adminCaLibrarySelect span {
+    color: #ffffff;
+    font-size: 0.76rem;
+    font-weight: 1000;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  
+  .adminCaLibraryBody {
+    min-width: 0;
+  }
+  
+  .adminCaLibraryTop {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 16px;
+  }
+  
+  .adminCaLibraryPills {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  
+  .adminCaLibraryPills span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 0 11px;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 1000;
+  }
+  
+  .adminCaLibraryPills .plan {
+    color: #ea580c;
+    background: #fff7ed;
+    border: 1px solid rgba(249, 115, 22, 0.16);
+  }
+  
+  .adminCaLibraryPills .status {
+    color: #ffffff;
+    background: #64748b;
+  }
+  
+  .adminCaLibraryPills .status-published {
+    background: #16a34a;
+  }
+  
+  .adminCaLibraryPills .status-draft,
+  .adminCaLibraryPills .status-unpublished {
+    background: #f97316;
+  }
+  
+  .adminCaLibraryPills .status-archived {
+    background: #475569;
+  }
+  
+  .adminCaLibraryPills .source {
+    color: #334155;
+    background: #f1f5f9;
+  }
+  
+  .adminCaLibraryPills .source.ready {
+    color: #166534;
+    background: #dcfce7;
+  }
+  
+  .adminCaLibraryPills .source.missing {
+    color: #991b1b;
+    background: #fee2e2;
+  }
+  
+  .adminCaLibraryCard h3 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.35rem;
+    line-height: 1.14;
+    letter-spacing: -0.045em;
+    overflow-wrap: anywhere;
+  }
+  
+  .adminCaLibraryCard p {
+    margin: 10px 0 0;
+    color: #64748b;
+    font-size: 0.92rem;
+    font-weight: 850;
+    line-height: 1.45;
+  }
+  
+  .adminCaLibraryMetrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  
+  .adminCaLibraryMetrics div {
+    min-width: 0;
+    padding: 14px;
+    border-radius: 16px;
+    background: #f8fafc;
+    border: 1px solid rgba(15, 23, 42, 0.07);
+  }
+  
+  .adminCaLibraryMetrics span {
+    display: block;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 1000;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+  }
+  
+  .adminCaLibraryMetrics strong {
+    display: block;
+    margin-top: 8px;
+    color: #0f172a;
+    font-size: 0.95rem;
+    line-height: 1.18;
+    overflow-wrap: anywhere;
+  }
+  
+  .adminCaLibraryAudit {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  
+  .adminCaLibraryAudit span {
+    display: inline-flex;
+    min-height: 32px;
+    align-items: center;
+    padding: 0 12px;
+    border-radius: 999px;
+    color: #334155;
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    font-size: 0.78rem;
+    font-weight: 850;
+  }
+  
+  .adminCaLibraryFooter {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+  }
+  
+  .adminCaPreviewBtn,
+  .adminCaActionsBtn {
+    min-width: 112px !important;
+  }
+  
+  .adminCaActionsWrap {
+    position: relative;
+  }
+  
+  .adminCaActionsMenu {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 10px);
+    z-index: 20;
+    width: 240px;
+    padding: 12px;
+    border-radius: 18px;
+    background: #0f172a;
+    box-shadow: 0 28px 60px rgba(15, 23, 42, 0.24);
+  }
+  
+  .adminCaActionsMenu button {
+    appearance: none;
+    width: 100%;
+    min-height: 42px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    font-size: 0.9rem;
+    font-weight: 850;
+    cursor: pointer;
+  }
+  
+  .adminCaActionsMenu button:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  
+  .adminCaActionsMenu button.danger {
+    color: #fecaca;
+  }
+  
+  .adminCaPagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    margin-top: 24px;
+  }
+  
+  .adminCaPagination span {
+    color: #334155;
+    font-size: 0.9rem;
+    font-weight: 950;
+  }
+  
+  .adminCaToolsShell {
+    display: grid;
+    gap: 22px;
+  }
+  
+  .adminCaToolsGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+  
+  @media (max-width: 1180px) {
+    .adminCaManagePage {
+      max-width: calc(100% - 32px);
+    }
+  
+    .adminCaManageFilterShell {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  
+    .adminCaManageStatsGrid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  
+    .adminCaPriorityGrid,
+    .adminCaToolsGrid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  
+    .adminCaLibraryMetrics {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  
+  @media (max-width: 760px) {
+    .adminCaManagePage {
+      max-width: calc(100% - 20px);
+      padding-bottom: 50px;
+    }
+  
+    .adminCaManageFilterShell,
+    .adminCaManageStatsGrid,
+    .adminCaPriorityGrid,
+    .adminCaToolsGrid,
+    .adminCaLibraryMetrics {
+      grid-template-columns: 1fr;
+    }
+  
+    .adminCaManagePlanTabs {
+      grid-template-columns: 1fr;
+    }
+  
+    .adminCaBulkShell,
+    .adminCaLibraryCard {
+      grid-template-columns: 1fr;
+    }
+  
+    .adminCaBulkActions,
+    .adminCaLibraryFooter,
+    .adminCaPagination {
+      align-items: stretch;
+      flex-direction: column;
+    }
+  
+    .adminCaManagePlanTabs button,
+    .adminCaBulkActions button,
+    .adminCaPriorityCard button,
+    .adminCaPreviewBtn,
+    .adminCaActionsBtn,
+    .adminCaPagination button,
+    .adminCaToolsGrid button {
+      width: 100% !important;
+    }
+  
+    .adminCaActionsWrap {
+      width: 100%;
+    }
+  
+    .adminCaActionsMenu {
+      left: 0;
+      right: auto;
+      width: 100%;
+    }
+  }
+
+  /* ===============================
+   38E3 — CA MANAGE CARD / ACTION MENU LOCK
+   Match mock-test manage card behavior.
+================================ */
+
+.adminCaLibraryCard {
+    align-items: start !important;
+  }
+  
+  .adminCaLibrarySelect {
+    align-self: start !important;
+    width: 82px !important;
+    min-height: 92px !important;
+    height: 92px !important;
+    border-radius: 20px !important;
+  }
+  
+  .adminCaLibrarySelect span {
+    font-size: 0.72rem !important;
+  }
+  
+  .adminCaLibraryFooter {
+    position: relative !important;
+    z-index: 4 !important;
+  }
+  
+  .adminCaActionsWrap {
+    position: relative !important;
+    z-index: 30 !important;
+  }
+  
+  .adminCaActionsBtn {
+    min-width: 124px !important;
+  }
+  
+  .adminCaActionsMenu {
+    width: 268px !important;
+    min-width: 268px !important;
+    padding: 12px !important;
+    border-radius: 18px !important;
+    right: 0 !important;
+    bottom: calc(100% + 12px) !important;
+    background: #0f172a !important;
+    box-shadow:
+      0 24px 58px rgba(15, 23, 42, 0.28),
+      0 0 0 1px rgba(255, 255, 255, 0.06) !important;
+  }
+  
+  .adminCaActionsMenu button {
+    width: 100% !important;
+    min-height: 44px !important;
+    padding: 0 12px !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    color: #ffffff !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    font-size: 0.9rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    text-align: left !important;
+  }
+  
+  .adminCaActionsMenu button + button {
+    margin-top: 4px !important;
+  }
+  
+  .adminCaActionsMenu button:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    transform: none !important;
+  }
+  
+  .adminCaActionsMenu button.danger {
+    color: #fecaca !important;
+    margin-top: 8px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding-top: 10px !important;
+  }
+  
+  @media (max-width: 760px) {
+    .adminCaLibrarySelect {
+      width: 100% !important;
+    }
+  
+    .adminCaActionsMenu {
+      width: 100% !important;
+      min-width: 100% !important;
+    }
+  }

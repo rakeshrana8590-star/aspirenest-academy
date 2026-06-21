@@ -144,6 +144,8 @@ import {
   StudentCurrentAffairsMonthRoute,
 } from "./components/currentAffairs/student/index.js";
 import { AdminCurrentAffairsHomeRoute } from "./components/currentAffairs/admin/index.js";
+import AdminCurrentAffairsManageRoute from "./components/currentAffairs/admin/AdminCurrentAffairsManageRoute";
+import AdminCurrentAffairsAddRoute from "./components/currentAffairs/admin/AdminCurrentAffairsAddRoute";
 
 import AdminMockTestHomeRoute from "./components/exam/AdminMockTestHomeRoute.jsx";
 import AdminMockTestAddRoute from "./components/exam/AdminMockTestAddRoute.jsx";
@@ -6163,115 +6165,26 @@ This action cannot be undone.`
   path="/admin/content/current-affairs/add"
   element={
     requireAdmin() ? (
-      <section className="coursePages">
-        <div className="sectionHeader">
-        <span className="badge">
-  {editingCmsId
-    ? "EDIT CURRENT AFFAIR"
-    : "ADD CURRENT AFFAIR"}
-</span>
-
-<h1>
-  {editingCmsId
-    ? "Edit Current Affair PDF"
-    : "Add Current Affair PDF"}
-</h1>
-          <p>
-            Add CTET/TET current affairs by month, week, plan,
-            PDF source, and publish status.
-          </p>
-        </div>
-
-        <div className="contentStudioForm">
-          <div className="contentStudioGrid">
-            <input
-              type="text"
-              placeholder="Title e.g. June 2026 Weekly Capsule"
-              value={cmsTitle}
-              onChange={(e) => setCmsTitle(e.target.value)}
-            />
-
-            <select
-              value={cmsMonth}
-              onChange={(e) => setCmsMonth(e.target.value)}
-            >
-              <option value="">Select Month</option>
-              <option value="June">June</option>
-              <option value="May">May</option>
-              <option value="April">April</option>
-              <option value="March">March</option>
-              <option value="February">February</option>
-              <option value="January">January</option>
-            </select>
-
-            <input
-              type="text"
-              placeholder="Year e.g. 2026"
-              value={cmsDuration}
-              onChange={(e) => setCmsDuration(e.target.value)}
-            />
-
-            <select
-              value={cmsChapter}
-              onChange={(e) => setCmsChapter(e.target.value)}
-            >
-              <option value="">Select Week / Type</option>
-              <option value="Week 1">Week 1</option>
-              <option value="Week 2">Week 2</option>
-              <option value="Week 3">Week 3</option>
-              <option value="Week 4">Week 4</option>
-              <option value="Monthly Revision">Monthly Revision</option>
-              <option value="Yearly Compilation">Yearly Compilation</option>
-            </select>
-
-            <select
-              value={cmsPlanType}
-              onChange={(e) => setCmsPlanType(e.target.value)}
-            >
-              <option value={PLAN_TYPES.FREE}>FREE</option>
-              <option value={PLAN_TYPES.BASIC}>BASIC</option>
-              <option value={PLAN_TYPES.PREMIUM}>PREMIUM</option>
-              <option value={PLAN_TYPES.MENTORSHIP}>MENTORSHIP</option>
-            </select>
-
-            <input
-              type="text"
-              placeholder="PDF URL"
-              value={cmsFileUrl}
-              onChange={(e) => setCmsFileUrl(e.target.value)}
-            />
-
-            <select
-              value={cmsStatus}
-              onChange={(e) => setCmsStatus(e.target.value)}
-            >
-              <option value={CONTENT_STATUS.PUBLISHED}>published</option>
-              <option value={CONTENT_STATUS.DRAFT}>draft</option>
-              <option value={CONTENT_STATUS.UNPUBLISHED}>unpublished</option>
-            </select>
-          </div>
-
-          <div className="contentStudioActions">
-          <button
-  className="publishButton"
-  onClick={handleSaveCurrentAffairsContent}
->
-  {editingCmsId
-    ? "Update Current Affair"
-    : "Publish Current Affair"}
-</button>
-
-            <button
-              className="backButton"
-              onClick={() =>
-                navigate("/admin/content/current-affairs")
-              }
-            >
-              ← Back to Current Affairs
-            </button>
-          </div>
-        </div>
-      </section>
+      <AdminCurrentAffairsAddRoute
+        editingCmsId={editingCmsId}
+        cmsTitle={cmsTitle}
+        setCmsTitle={setCmsTitle}
+        cmsMonth={cmsMonth}
+        setCmsMonth={setCmsMonth}
+        cmsDuration={cmsDuration}
+        setCmsDuration={setCmsDuration}
+        cmsChapter={cmsChapter}
+        setCmsChapter={setCmsChapter}
+        cmsPlanType={cmsPlanType}
+        setCmsPlanType={setCmsPlanType}
+        cmsFileUrl={cmsFileUrl}
+        setCmsFileUrl={setCmsFileUrl}
+        cmsStatus={cmsStatus}
+        setCmsStatus={setCmsStatus}
+        handleSaveCurrentAffairsContent={handleSaveCurrentAffairsContent}
+        planTypes={PLAN_TYPES}
+        contentStatus={CONTENT_STATUS}
+      />
     ) : null
   }
 />
@@ -6280,100 +6193,21 @@ This action cannot be undone.`
   path="/admin/content/current-affairs/manage"
   element={
     requireAdmin() ? (
-      <section className="coursePages">
-        <div className="sectionHeader">
-          <span className="badge">
-            MANAGE CURRENT AFFAIRS
-          </span>
-
-          <h1>Published Current Affairs</h1>
-
-          <p>
-            Review, edit, delete, and manage all saved CTET/TET current affairs PDFs.
-          </p>
-        </div>
-
-        <div className="contentStudioList">
-          {universalCurrentAffairs.length === 0 ? (
-            <div className="contentStudioItem">
-              <strong>No current affairs added yet.</strong>
-              <p>Add your first current affairs PDF from the Add Current Affair page.</p>
-            </div>
-          ) : (
-            universalCurrentAffairs.map((item) => (
-              <div className="contentStudioItem" key={item.id}>
-                <strong>{item.title}</strong>
-
-                <p>
-                  {item.month} • {item.chapter} • {item.planType} • {item.status}
-                </p>
-
-                <div className="contentStudioActions">
-                  <button
-                    className="backButton"
-                    onClick={() => window.open(item.fileUrl, "_blank")}
-                  >
-                    Open PDF
-                  </button>
-
-                  <button
-  className="backButton"
-  onClick={() => {
-    setEditingCmsId(item.id);
-
-    setCmsTitle(item.title || "");
-
-    const monthParts = (item.month || "").split(" ");
-    setCmsMonth(monthParts[0] || "");
-    setCmsDuration(monthParts[1] || "");
-
-    setCmsChapter(item.chapter || "");
-    setCmsPlanType(item.planType || PLAN_TYPES.FREE);
-    setCmsFileUrl(item.fileUrl || "");
-    setCmsStatus(item.status || CONTENT_STATUS.PUBLISHED);
-
-    navigate("/admin/content/current-affairs/add");
-  }}
->
-  Edit
-</button>
-
-                  <button
-                    className="backButton"
-                    onClick={async () => {
-                      const confirmDelete = window.confirm(
-                        `Delete "${item.title}" permanently?
-                        
-                        Students may lose access to this current affair PDF.
-                        
-                        This action cannot be undone.`
-                        );
-
-                        if (!confirmDelete) return;
-
-                      await deleteContentItem(item.id);
-                      await loadContentItemsFromFirestore();
-
-                      alert("Current affair deleted successfully ✅");
-                    }}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        <div className="contentStudioActions">
-          <button
-            className="backButton"
-            onClick={() => navigate("/admin/content/current-affairs")}
-          >
-            ← Back to Current Affairs
-          </button>
-        </div>
-      </section>
+      <AdminCurrentAffairsManageRoute
+        universalCurrentAffairs={universalCurrentAffairs}
+        setEditingCmsId={setEditingCmsId}
+        setCmsTitle={setCmsTitle}
+        setCmsMonth={setCmsMonth}
+        setCmsDuration={setCmsDuration}
+        setCmsChapter={setCmsChapter}
+        setCmsPlanType={setCmsPlanType}
+        setCmsFileUrl={setCmsFileUrl}
+        setCmsStatus={setCmsStatus}
+        deleteContentItem={deleteContentItem}
+        loadContentItemsFromFirestore={loadContentItemsFromFirestore}
+        planTypes={PLAN_TYPES}
+        contentStatus={CONTENT_STATUS}
+      />
     ) : null
   }
 />

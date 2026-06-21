@@ -1,0 +1,25 @@
+/* =========================================================
+   My AspirePath Dashboard
+   /my-aspirepath
+   ========================================================= */
+
+   .aspirePathGrid .aspirePathTodayCard,
+   .aspirePathGrid .aspirePathCard {
+     transition:
+       transform 0.18s ease,
+       box-shadow 0.18s ease,
+       border-color 0.18s ease;
+   }
+   
+   .aspirePathGrid .aspirePathTodayCard:hover,
+   .aspirePathGrid .aspirePathCard:hover {
+     transform: translateY(-3px);
+     border-color: rgba(249, 115, 22, 0.24);
+     box-shadow:
+       0 30px 88px rgba(15, 23, 42, 0.15),
+       0 14px 34px rgba(249, 115, 22, 0.09);
+   }
+   
+   .aspirePathGrid .aspirePathTodayCard {
+     min-height: 280px;
+   }

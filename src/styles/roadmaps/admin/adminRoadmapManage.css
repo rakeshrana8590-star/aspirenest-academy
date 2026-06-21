@@ -1,0 +1,44 @@
+/* =========================================================
+   Admin Roadmap Manage / Edit / Schedule
+   ========================================================= */
+
+   .roadmapStudioToolbar {
+    padding: 16px;
+    border-radius: 24px;
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, 0.88), rgba(248, 250, 252, 0.72));
+    border: 1px solid rgba(148, 163, 184, 0.18);
+  }
+  
+  .roadmapStudioToolbarGroup {
+    min-width: 0;
+  }
+  
+  .roadmapStudioInput,
+  .roadmapStudioSelect {
+    border-radius: 18px;
+    min-height: 48px;
+  }
+  
+  .roadmapStudioTableWrap {
+    border-radius: 28px;
+    box-shadow:
+      0 26px 78px rgba(15, 23, 42, 0.10),
+      inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  }
+  
+  .roadmapStudioTable th {
+    background:
+      linear-gradient(180deg, #f8fafc, #eef2ff);
+  }
+  
+  .roadmapStudioTable td strong {
+    color: #0f172a;
+    font-weight: 1000;
+  }
+  
+  .roadmapStudioTable .roadmapStudioToolbarGroup {
+    padding: 0;
+    background: transparent;
+    border: 0;
+  }

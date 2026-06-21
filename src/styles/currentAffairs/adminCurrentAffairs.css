@@ -4,3 +4,5 @@
 ================================ */
 
 @import "./admin/adminCurrentAffairsHome.css";
+@import "./admin/adminCurrentAffairsManage.css";
+@import "./admin/adminCurrentAffairsForm.css";
