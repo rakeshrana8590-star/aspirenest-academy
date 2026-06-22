@@ -1,0 +1,250 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        request.auth.token.email == "aspirenestplatform@gmail.com";
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isProgressOwner() {
+      return isSignedIn() &&
+        request.resource.data.userId == request.auth.uid;
+    }
+
+    function isExistingProgressOwner() {
+      return isSignedIn() &&
+        resource.data.userId == request.auth.uid;
+    }
+
+    match /students/{docId} {
+      allow create: if isSignedIn();
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow create: if isOwner(userId) || isAdmin();
+
+      allow read: if isOwner(userId) || isAdmin();
+
+      allow update: if isOwner(userId)
+        && request.resource.data.isPremium == resource.data.isPremium
+        && request.resource.data.subscriptionType == resource.data.subscriptionType
+        && request.resource.data.premiumStatus == resource.data.premiumStatus;
+
+      allow update, delete: if isAdmin();
+    }
+
+    match /enquiries/{docId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /contentItems/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /universalContent/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /mockResults/{docId} {
+      allow create: if isSignedIn()
+        && request.resource.data.email == request.auth.token.email;
+
+      allow read: if isAdmin() ||
+        (isSignedIn() && request.auth.token.email == resource.data.email);
+
+      allow update, delete: if isAdmin();
+    }
+
+    match /mockLeaderboard/{docId} {
+      allow read: if true;
+
+      allow create: if isSignedIn()
+        && (
+          request.resource.data.email == request.auth.token.email ||
+          request.resource.data.studentEmail == request.auth.token.email
+        );
+
+      allow update, delete: if isAdmin();
+    }
+
+    match /questionBank/{docId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+
+    match /mockQuestions/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /notesSubjects/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /notesChapters/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /notes/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /currentAffairs/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /announcements/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /payments/{docId} {
+      allow create: if isSignedIn();
+
+      allow read: if isAdmin() ||
+        (isSignedIn() && request.auth.uid == resource.data.userId);
+
+      allow update: if isAdmin() ||
+        (isSignedIn() && request.auth.uid == resource.data.userId);
+
+      allow delete: if isAdmin();
+    }
+
+    match /banners/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /pricingPlans/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /courses/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /studentActivity/{docId} {
+      allow create: if isSignedIn();
+
+      allow read: if isAdmin() ||
+        (isSignedIn() && request.auth.uid == resource.data.userId);
+
+      allow update, delete: if isAdmin();
+    }
+
+    /* ================================
+       AspirePath / Roadmap Studio
+       ================================ */
+
+    match /studyRoadmaps/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /studyRoadmapDays/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /studyRoadmapResourceLinks/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /studyRoadmapProgress/{docId} {
+      allow create: if isProgressOwner();
+
+      allow read: if isAdmin() || isExistingProgressOwner();
+
+      allow update: if isAdmin() ||
+        (
+          isExistingProgressOwner() &&
+          request.resource.data.userId == resource.data.userId &&
+          request.resource.data.roadmapId == resource.data.roadmapId &&
+          request.resource.data.dayId == resource.data.dayId
+        );
+
+      allow delete: if isAdmin();
+    }
+
+    match /studyRoadmapAnalytics/{docId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+
+    /* ================================
+       Access Engine
+       ================================ */
+
+    match /studentAccess/{docId} {
+      allow read: if isAdmin() ||
+        (
+          isSignedIn() &&
+          (
+            resource.data.uid == request.auth.uid ||
+            resource.data.normalizedEmail == request.auth.token.email ||
+            resource.data.email == request.auth.token.email
+          )
+        );
+
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /accessInvites/{docId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+
+    match /accessAuditLogs/{docId} {
+      allow read, create: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    /* ================================
+       Access Engine — Future Admin Workflows
+       ================================ */
+
+    match /accessBulkImports/{docId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+
+    match /accessBulkImportRows/{docId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+
+    match /accessEmailQueue/{docId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+
+    match /accessNotifications/{docId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+
+    match /accessPlanHistory/{docId} {
+      allow read, create: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    match /accessActionLogs/{docId} {
+      allow read, create: if isAdmin();
+      allow update, delete: if false;
+    }
+  }
+}
