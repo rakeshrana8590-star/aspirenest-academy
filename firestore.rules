@@ -44,6 +44,111 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    /* ================================
+       Learner Profile / Biodata System
+       ================================ */
+
+    function isLearnerProfileOwnerExisting(profileId) {
+      return isSignedIn() &&
+        (
+          profileId == request.auth.uid ||
+          resource.data.uid == request.auth.uid ||
+          resource.data.normalizedEmail == request.auth.token.email ||
+          resource.data.email == request.auth.token.email
+        );
+    }
+
+    function isLearnerProfileOwnerRequest(profileId) {
+      return isSignedIn() &&
+        (
+          profileId == request.auth.uid ||
+          request.resource.data.uid == request.auth.uid ||
+          request.resource.data.normalizedEmail == request.auth.token.email ||
+          request.resource.data.email == request.auth.token.email
+        );
+    }
+
+    function studentProfileIdentitySafe() {
+      return request.resource.data.uid == request.auth.uid &&
+        request.resource.data.email == request.auth.token.email &&
+        request.resource.data.normalizedEmail == request.auth.token.email &&
+        request.resource.data.role == "student" &&
+        request.resource.data.updatedBy == request.auth.uid;
+    }
+
+    function studentProfileCreateKeysOnly() {
+      return request.resource.data.keys().hasOnly([
+        "uid",
+        "email",
+        "normalizedEmail",
+        "role",
+        "name",
+        "phone",
+        "targetExam",
+        "state",
+        "city",
+        "language",
+        "authProvider",
+        "emailVerified",
+        "lastLoginAt",
+        "profileCompletion",
+        "profileMissingFields",
+        "profileStatus",
+        "source",
+        "updatedAt",
+        "updatedBy",
+        "createdAt",
+        "createdBy"
+      ]);
+    }
+
+    function studentProfileUpdateKeysOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        "uid",
+        "email",
+        "normalizedEmail",
+        "role",
+        "name",
+        "phone",
+        "targetExam",
+        "state",
+        "city",
+        "language",
+        "authProvider",
+        "emailVerified",
+        "lastLoginAt",
+        "profileCompletion",
+        "profileMissingFields",
+        "profileStatus",
+        "source",
+        "updatedAt",
+        "updatedBy",
+        "createdAt",
+        "createdBy"
+      ]);
+    }
+
+    match /learnerProfiles/{profileId} {
+      allow create: if isAdmin() ||
+        (
+          isLearnerProfileOwnerRequest(profileId) &&
+          studentProfileIdentitySafe() &&
+          studentProfileCreateKeysOnly()
+        );
+
+      allow read: if isAdmin() || isLearnerProfileOwnerExisting(profileId);
+
+      allow update: if isAdmin() ||
+        (
+          isLearnerProfileOwnerExisting(profileId) &&
+          isLearnerProfileOwnerRequest(profileId) &&
+          studentProfileIdentitySafe() &&
+          studentProfileUpdateKeysOnly()
+        );
+
+      allow delete: if isAdmin();
+    }
+
     match /enquiries/{docId} {
       allow create: if true;
       allow read, update, delete: if isAdmin();

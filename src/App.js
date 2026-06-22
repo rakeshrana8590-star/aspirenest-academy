@@ -31,6 +31,7 @@ import {
   canAccessContent,
 } from "./access/accessUtils";
 import useAccessProfile from "./access/useAccessProfile";
+import { upsertLearnerLoginSnapshot } from "./profile/learnerProfileService";
 
 import {
   LineChart,
@@ -180,6 +181,7 @@ import AdminAccessBulkRoute from "./access/admin/AdminAccessBulkRoute.jsx";
 import AdminAccessInvitesRoute from "./access/admin/AdminAccessInvitesRoute.jsx";
 import AdminAccessProfileRoute from "./access/admin/AdminAccessProfileRoute.jsx";
 import AdminAccessAuditRoute from "./access/admin/AdminAccessAuditRoute.jsx";
+import StudentLearnerProfileRoute from "./profile/StudentLearnerProfileRoute.jsx";
 
 import MockTestActionMenu from "./components/exam/MockTestActionMenu.jsx";
 import { deleteMockTest } from "./components/exam/mockTestAdminActions.js";
@@ -1672,6 +1674,13 @@ const [paymentHistory, setPaymentHistory] = useState([]);
 
         if (verifiedUser && !isAdmin(verifiedUser)) {
           syncVerifiedStudentAccountStatus(db, verifiedUser);
+
+          upsertLearnerLoginSnapshot({ user: verifiedUser }).catch((error) => {
+            console.warn(
+              "Learner login snapshot skipped:",
+              error?.message || error
+            );
+          });
         }
         
         if (!verifiedUser) {
@@ -4855,6 +4864,10 @@ isAdmin={isAdmin}
             🏆 Leaderboard
           </button>
 
+          <button onClick={() => navigate("/my-profile")}>
+            👤 My Profile
+          </button>
+
           <button onClick={() => navigate("/ai-classroom")}>
             🤖 AI Classroom
           </button>
@@ -4896,6 +4909,21 @@ isAdmin={isAdmin}
     ) : null
   }
 />
+
+<Route
+  path="/my-profile"
+  element={
+    requireLogin() ? (
+      <StudentLearnerProfileRoute
+        user={user}
+        activePlan={activeAccessPlan}
+        accessStatus={accessProfile?.accessStatus || "active"}
+        membershipExpiry={activeAccessExpiry}
+      />
+    ) : null
+  }
+/>
+
 
 <Route
   path="/my-courses"
