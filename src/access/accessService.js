@@ -6,6 +6,7 @@ import {
   getDocs,
   query,
   serverTimestamp,
+  setDoc,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -98,8 +99,13 @@ const buildAccessPayload = (data = {}) => {
     source: data.source || ACCESS_SOURCE.ADMIN_MANUAL,
     course: data.course || ACCESS_COURSE.CTET_TET,
     module: data.module || null,
+    learnerName: String(data.learnerName || data.name || "").trim(),
+    name: String(data.name || data.learnerName || "").trim(),
+    phone: String(data.phone || "").trim(),
+    accessFrom: data.accessFrom || null,
     accessUntil: data.accessUntil || null,
-    notes: data.notes || "",
+    notes: data.notes || data.adminNote || "",
+    adminNote: data.adminNote || data.notes || "",
     updatedAt: serverTimestamp(),
   };
 };
@@ -167,6 +173,110 @@ export const createManualAccess = async (data = {}) => {
     email: payload.email,
     uid: payload.uid,
     after: payload,
+  });
+
+  return {
+    id: docRef.id,
+    ...payload,
+  };
+};
+
+export const createUserAccessShell = async (data = {}) => {
+  const actor = requireAdminActor(data.actor);
+  const normalizedEmail = normalizeAccessEmail(data.email);
+  const uid = String(data.uid || "").trim();
+  const name = String(data.name || data.learnerName || "").trim();
+  const phone = String(data.phone || "").trim();
+
+  if (!normalizedEmail) {
+    throw new Error("User shell email is required.");
+  }
+
+  const userId = uid || normalizedEmail;
+  const payload = {
+    uid: uid || null,
+    email: normalizedEmail,
+    normalizedEmail,
+    role: data.role || "student",
+    accessCourse: data.course || ACCESS_COURSE.CTET_TET,
+    accessPlanType: normalizeAccessPlan(data.planType || ACCESS_PLAN_TYPES.FREE),
+    accessStatus: data.status || ACCESS_STATUS.ACTIVE,
+    membershipExpiry: data.accessUntil || null,
+    updatedAt: serverTimestamp(),
+    updatedBy: actor.uid,
+    actorEmail: actor.email,
+  };
+
+  if (name) {
+    payload.displayName = name;
+    payload.name = name;
+  }
+
+  if (phone) {
+    payload.phone = phone;
+  }
+
+  await setDoc(doc(db, ACCESS_COLLECTIONS.USERS, userId), payload, { merge: true });
+
+  await createAccessAuditLog({
+    actor,
+    action: "create_user_access_shell",
+    email: normalizedEmail,
+    uid: uid || null,
+    after: payload,
+  });
+
+  return {
+    id: userId,
+    ...payload,
+  };
+};
+
+export const createAccessInvite = async (data = {}) => {
+  const actor = requireAdminActor(data.actor);
+  const normalizedEmail = normalizeAccessEmail(data.email);
+  const name = String(data.name || data.learnerName || "").trim();
+  const phone = String(data.phone || "").trim();
+
+  if (!normalizedEmail) {
+    throw new Error("Invite email is required.");
+  }
+
+  const payload = {
+    email: normalizedEmail,
+    normalizedEmail,
+    learnerName: name,
+    name,
+    phone,
+    course: data.course || ACCESS_COURSE.CTET_TET,
+    planType: normalizeAccessPlan(data.planType || ACCESS_PLAN_TYPES.FREE),
+    status: data.status || ACCESS_STATUS.PENDING,
+    inviteStatus: data.inviteStatus || "pending",
+    sendInvite: data.sendInvite === true,
+    emailSent: false,
+    accessFrom: data.accessFrom || null,
+    accessUntil: data.accessUntil || null,
+    notes: data.notes || data.adminNote || "",
+    adminNote: data.adminNote || data.notes || "",
+    accessId: data.accessId || null,
+    createdAt: serverTimestamp(),
+    createdBy: actor.uid,
+    actorEmail: actor.email,
+    updatedAt: serverTimestamp(),
+  };
+
+  const docRef = await addDoc(collection(db, ACCESS_COLLECTIONS.ACCESS_INVITES), payload);
+
+  await createAccessAuditLog({
+    actor,
+    action: "create_access_invite",
+    accessId: data.accessId || null,
+    email: normalizedEmail,
+    uid: data.uid || null,
+    after: {
+      id: docRef.id,
+      ...payload,
+    },
   });
 
   return {
