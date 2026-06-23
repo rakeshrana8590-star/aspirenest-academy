@@ -299,6 +299,92 @@ service cloud.firestore {
        Access Engine
        ================================ */
 
+    function isRedeemEmailMatch(emailValue) {
+      return emailValue == request.auth.token.email;
+    }
+
+    function isAccessKeyAssignedToRequester() {
+      return resource.data.assignedEmail == null ||
+        resource.data.assignedEmail == "" ||
+        resource.data.assignedEmail == request.auth.token.email;
+    }
+
+    function isAccessKeyRedeemUpdate(keyCode) {
+      return isSignedIn() &&
+        keyCode == resource.data.normalizedCode &&
+        resource.data.status == "active" &&
+        resource.data.usedCount < resource.data.maxUses &&
+        isAccessKeyAssignedToRequester() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "usedCount",
+          "status",
+          "lastRedeemedByEmail",
+          "lastRedeemedByUid",
+          "lastRedeemedAt",
+          "redeemedByEmail",
+          "redeemedByUid",
+          "redeemedAt",
+          "updatedAt",
+          "updatedBy"
+        ]) &&
+        request.resource.data.usedCount == resource.data.usedCount + 1 &&
+        (
+          (
+            request.resource.data.usedCount < request.resource.data.maxUses &&
+            request.resource.data.status == "active"
+          ) ||
+          (
+            request.resource.data.usedCount >= request.resource.data.maxUses &&
+            request.resource.data.status == "used"
+          )
+        ) &&
+        request.resource.data.lastRedeemedByEmail == request.auth.token.email &&
+        request.resource.data.lastRedeemedByUid == request.auth.uid &&
+        (
+          request.resource.data.redeemedByEmail == resource.data.redeemedByEmail ||
+          request.resource.data.redeemedByEmail == request.auth.token.email
+        ) &&
+        (
+          request.resource.data.redeemedByUid == resource.data.redeemedByUid ||
+          request.resource.data.redeemedByUid == request.auth.uid
+        ) &&
+        request.resource.data.updatedBy == request.auth.uid;
+    }
+
+    function isRedeemStudentAccessCreate() {
+      return isSignedIn() &&
+        request.resource.data.source == "redeem_key" &&
+        request.resource.data.status == "active" &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.email == request.auth.token.email &&
+        request.resource.data.normalizedEmail == request.auth.token.email &&
+        request.resource.data.createdBy == request.auth.uid &&
+        exists(/databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId));
+    }
+
+    function isRedeemAuditCreate() {
+      return isSignedIn() &&
+        request.resource.data.action == "redeem_access_key" &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.actorEmail == request.auth.token.email &&
+        request.resource.data.actorRole == "student" &&
+        request.resource.data.metadata.source == "redeem_key";
+    }
+
+    match /accessProducts/{docId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+
+    match /accessKeys/{keyCode} {
+      allow read, create, update, delete: if isAdmin();
+
+      allow get: if isSignedIn() &&
+        keyCode == resource.data.normalizedCode &&
+        isAccessKeyAssignedToRequester();
+
+      allow update: if isAccessKeyRedeemUpdate(keyCode);
+    }
+
     match /studentAccess/{docId} {
       allow read: if isAdmin() ||
         (
@@ -310,7 +396,8 @@ service cloud.firestore {
           )
         );
 
-      allow create, update, delete: if isAdmin();
+      allow create: if isAdmin() || isRedeemStudentAccessCreate();
+      allow update, delete: if isAdmin();
     }
 
     match /accessInvites/{docId} {
@@ -318,7 +405,8 @@ service cloud.firestore {
     }
 
     match /accessAuditLogs/{docId} {
-      allow read, create: if isAdmin();
+      allow read: if isAdmin();
+      allow create: if isAdmin() || isRedeemAuditCreate();
       allow update, delete: if false;
     }
 

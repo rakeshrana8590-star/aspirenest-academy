@@ -543,13 +543,11 @@ export const readAccessKeyByCode = async (code = "") => {
 
   if (!normalizedCode) return null;
 
-  const keyQuery = query(
-    collection(db, ACCESS_COLLECTIONS.ACCESS_KEYS),
-    where("normalizedCode", "==", normalizedCode)
+  const keySnap = await getDoc(
+    doc(db, ACCESS_COLLECTIONS.ACCESS_KEYS, normalizedCode)
   );
-  const keySnap = await getDocs(keyQuery);
 
-  return keySnap.docs.map(toAccessRecord).filter(Boolean)[0] || null;
+  return toAccessRecord(keySnap);
 };
 
 export const buildAccessKeyPayload = (data = {}) => {
@@ -603,10 +601,8 @@ export const createAccessKey = async (data = {}) => {
     throw new Error("Access key code already exists.");
   }
 
-  const docRef = await addDoc(
-    collection(db, ACCESS_COLLECTIONS.ACCESS_KEYS),
-    payload
-  );
+  const docRef = doc(db, ACCESS_COLLECTIONS.ACCESS_KEYS, payload.code);
+  await setDoc(docRef, payload);
 
   await createAccessAuditLog({
     actor,
