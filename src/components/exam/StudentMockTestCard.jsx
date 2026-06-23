@@ -28,9 +28,13 @@ export default function StudentMockTestCard({
     Boolean(savedCardAttempt?.startedAt) &&
     !hasSubmittedCardAttempt;
 
-  const isPlanLocked =
+    const isPlanLocked =
     test.planType !== "FREE" &&
-    !hasPlanAccess(test.planType);
+    !hasPlanAccess(test.planType, {
+      module: "mockTest",
+      itemType: "mockTest",
+      itemId: test.id,
+    });
 
   const totalQuestions =
     Number(test.totalQuestions || test.questions?.length || 0);

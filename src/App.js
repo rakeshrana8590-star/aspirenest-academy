@@ -28,6 +28,10 @@ import {
 } from "./utils/authAccountService";
 
 import {
+  ACCESS_ITEM_TYPES,
+  ACCESS_MODULE,
+} from "./access/accessConstants";
+import {
   canAccessContent,
 } from "./access/accessUtils";
 import useAccessProfile from "./access/useAccessProfile";
@@ -544,12 +548,12 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
 
     return true;
   };
-  const hasPlanAccess = (requiredPlan = "FREE") => {
+  const hasPlanAccess = (requiredPlan = "FREE", options = {}) => {
     const normalizedRequiredPlan = String(requiredPlan || "FREE").trim().toUpperCase();
-
-    if (normalizedRequiredPlan === "FREE") {
-      return true;
-    }
+    const accessOptions =
+      options && typeof options === "object" && !Array.isArray(options)
+        ? options
+        : {};
 
     if (isAdmin(user)) {
       return true;
@@ -571,7 +575,10 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
       return false;
     }
 
-    if (typeof accessProfile?.hasAccess === "function" && accessProfile.hasAccess(normalizedRequiredPlan)) {
+    if (
+      typeof accessProfile?.hasAccess === "function" &&
+      accessProfile.hasAccess(normalizedRequiredPlan, accessOptions)
+    ) {
       return true;
     }
 
@@ -580,6 +587,10 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
       userPlan: activeAccessPlan || "FREE",
       accessRecord: accessProfile?.bestAccess || null,
       accessRecords: accessProfile?.accessRecords || [],
+      module: accessOptions.module || "",
+      itemType: accessOptions.itemType || "",
+      itemId: accessOptions.itemId || "",
+      emergencyAccess: Boolean(accessOptions.emergencyAccess),
       isAdmin: isAdmin(user),
     });
   };
@@ -635,7 +646,14 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
       return "LOGIN_REQUIRED";
     }
   
-    if (test.planType && !hasPlanAccess(test.planType)) {
+    if (
+      test.planType &&
+      !hasPlanAccess(test.planType, {
+        module: ACCESS_MODULE.MOCK_TEST,
+        itemType: ACCESS_ITEM_TYPES.MOCK_TEST,
+        itemId: test.id,
+      })
+    ) {
       return "PLAN_LOCKED";
     }
   
