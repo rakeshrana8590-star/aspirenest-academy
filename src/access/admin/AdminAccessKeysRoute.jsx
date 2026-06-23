@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import { auth } from "../../firebase";
 import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
@@ -12,7 +12,11 @@ import {
   ACCESS_SCOPE_TYPES,
 } from "../accessConstants";
 
-import { createAccessKey, normalizeAccessKeyCode } from "../accessService";
+import {
+  createAccessKey,
+  listAccessKeys,
+  normalizeAccessKeyCode,
+} from "../accessService";
 
 const initialForm = {
   code: "",
@@ -67,6 +71,8 @@ export default function AdminAccessKeysRoute() {
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [saveError, setSaveError] = useState("");
+  const [accessKeys, setAccessKeys] = useState([]);
+  const [loadingKeys, setLoadingKeys] = useState(false);
 
   const normalizedCode = useMemo(
     () => normalizeAccessKeyCode(form.code),
@@ -103,6 +109,22 @@ export default function AdminAccessKeysRoute() {
     };
   };
 
+  const loadAccessKeys = async () => {
+    setLoadingKeys(true);
+
+    try {
+      const keys = await listAccessKeys({ maxCount: 25 });
+      setAccessKeys(keys);
+    } catch (error) {
+      setSaveError(error && error.message ? error.message : "Access keys load failed.");
+    } finally {
+      setLoadingKeys(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAccessKeys();
+  }, []);
   const validateForm = () => {
     const nextErrors = [];
 
@@ -225,6 +247,7 @@ export default function AdminAccessKeysRoute() {
       );
       setForm(initialForm);
       setErrors([]);
+      await loadAccessKeys();
     } catch (error) {
       setSaveError(error?.message || "Access key save failed.");
     } finally {
@@ -518,6 +541,45 @@ export default function AdminAccessKeysRoute() {
           </div>
         ) : null}
 
+        <div className="adminAccessPreviewPanel">
+          <div className="adminAccessPreviewHeader">
+            <span>Recent Access Keys</span>
+            <strong>{loadingKeys ? "Loading..." : accessKeys.length + " keys"}</strong>
+          </div>
+
+          <div className="adminAccessRows">
+            {accessKeys.length ? (
+              accessKeys.map((key) => (
+                <div className="adminAccessRow" key={key.id}>
+                  <strong>{key.code || key.id}</strong>
+                  <span>
+                    {key.status || "unknown"} • {Number(key.usedCount || 0)}/
+                    {Number(key.maxUses || 1)} used • {" "}
+                    {key.lastRedeemedByEmail ||
+                      key.redeemedByEmail ||
+                      key.assignedEmail ||
+                      "open key"}{" "}
+                    • {key.scopeType || "plan"} • {key.planType || "FREE"}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="adminAccessRow">
+                <strong>No keys loaded</strong>
+                <span>Create a key or refresh this page after Firestore rules are live.</span>
+              </div>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="adminAccessSecondaryButton"
+            onClick={loadAccessKeys}
+            disabled={loadingKeys}
+          >
+            {loadingKeys ? "Refreshing..." : "Refresh Keys"}
+          </button>
+        </div>
         <div className="adminAccessPreviewGrid">
           <article className="adminAccessPreviewCard">
             <span>Preview</span>

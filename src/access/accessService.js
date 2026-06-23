@@ -550,6 +550,20 @@ export const readAccessKeyByCode = async (code = "") => {
   return toAccessRecord(keySnap);
 };
 
+export const listAccessKeys = async ({ maxCount = 25 } = {}) => {
+  const keySnap = await getDocs(collection(db, ACCESS_COLLECTIONS.ACCESS_KEYS));
+
+  return keySnap.docs
+    .map(toAccessRecord)
+    .filter(Boolean)
+    .sort((first, second) => {
+      const firstTime = first.createdAt && first.createdAt.seconds ? first.createdAt.seconds : 0;
+      const secondTime = second.createdAt && second.createdAt.seconds ? second.createdAt.seconds : 0;
+
+      return secondTime - firstTime;
+    })
+    .slice(0, maxCount);
+};
 export const buildAccessKeyPayload = (data = {}) => {
   const code = normalizeAccessKeyCode(data.code);
 
