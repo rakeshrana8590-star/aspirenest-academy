@@ -10,6 +10,8 @@ import {
   Cell,
 } from "recharts";
 
+import { useNavigate } from "react-router-dom";
+
 export default function StudentDashboard({
   user,
   isPremiumUser,
@@ -38,6 +40,8 @@ export default function StudentDashboard({
   subjectChartData,
   chartColors,
 }) {
+  const navigate = useNavigate();
+
   const getDaysRemaining = () => {
     if (!membershipExpiry) return null;
 
@@ -68,14 +72,17 @@ export default function StudentDashboard({
         </div>
 
         <div className="dashboardMenu">
-          <button>📚 My Courses</button>
+        <button>📚 My Courses</button>
+          <button onClick={() => navigate("/ctet-tet/redeem")}>
+            🔑 Redeem Access Key
+          </button>
           <button>📝 Mock Tests</button>
           <button>📈 Progress</button>
           <button>📥 Download Notes</button>
           <button>🎯 Revision Planner</button>
         </div>
 
-        {isAdmin() && (
+        {(typeof isAdmin === "function" ? isAdmin() : Boolean(isAdmin)) && (
           <button className="logoutBtn" onClick={loadAdminData}>
             👑 Load Admin Data
           </button>

@@ -8241,6 +8241,22 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 
         <div
           className="pricingActionCard"
+          onClick={() => navigate("/ctet-tet/redeem")}
+        >
+          <div className="pricingActionIcon">🔑</div>
+
+          <h3>Redeem Access Key</h3>
+
+          <p>
+            Already received an AspireNest access key? Redeem it here to
+            activate your plan, module, item, or bundle access.
+          </p>
+
+          <span>Redeem Key →</span>
+        </div>
+
+        <div
+          className="pricingActionCard"
           onClick={() => navigate("/ctet-tet")}
         >
           <div className="pricingActionIcon">🔙</div>
