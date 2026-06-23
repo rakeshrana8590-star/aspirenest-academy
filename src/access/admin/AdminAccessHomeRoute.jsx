@@ -12,6 +12,8 @@ const primaryActions = [
   { icon: "+", label: "Builder", title: "Add Learner Access", description: "Create premium, mentorship, trial, or manual access for a learner.", route: "/admin/content/access/add", tone: "orange" },
   { icon: "✓", label: "Control", title: "Manage Access", description: "Search, extend, upgrade, block, or revoke student access safely.", route: "/admin/content/access/manage", tone: "blue" },
   { icon: "B", label: "Bulk", title: "Bulk Gmail Import", description: "Prepare access for multiple registered learner emails from one workspace.", route: "/admin/content/access/bulk", tone: "green" },
+  { icon: "P", label: "Products", title: "Access Products", description: "Prepare catalog products for plan, module, item, and bundle entitlement scopes.", route: "/admin/content/access/products", tone: "orange" },
+  { icon: "K", label: "Keys", title: "Access Keys", description: "Prepare redeem-key architecture linked with products and learner entitlement scopes.", route: "/admin/content/access/keys", tone: "blue" },
   { icon: "A", label: "Audit", title: "Audit Logs", description: "Review every admin action with confirmation and traceability.", route: "/admin/content/access/audit", tone: "purple" },
 ];
 
@@ -20,6 +22,8 @@ const compactActions = [
   { title: "Manage Access", meta: "Extend, block, revoke", route: "/admin/content/access/manage" },
   { title: "Bulk Import", meta: "Gmail learner list", route: "/admin/content/access/bulk" },
   { title: "Pending Invites", meta: "Onboarding queue", route: "/admin/content/access/invites" },
+  { title: "Access Products", meta: "Catalog foundation", route: "/admin/content/access/products" },
+  { title: "Access Keys", meta: "Redeem foundation", route: "/admin/content/access/keys" },
   { title: "Learner Profile", meta: "Biodata and plan", route: "/admin/content/access/profile/demo" },
   { title: "Audit Logs", meta: "Admin traceability", route: "/admin/content/access/audit" },
   { title: "Content Studio", meta: "Back to main studio", route: "/admin/content" },

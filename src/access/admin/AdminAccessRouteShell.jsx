@@ -8,6 +8,8 @@ const defaultQuickActions = [
   { title: "Manage Access", meta: "Extend, block, revoke", route: "/admin/content/access/manage" },
   { title: "Bulk Import", meta: "Gmail learner list", route: "/admin/content/access/bulk" },
   { title: "Pending Invites", meta: "Onboarding queue", route: "/admin/content/access/invites" },
+  { title: "Access Products", meta: "Catalog foundation", route: "/admin/content/access/products" },
+  { title: "Access Keys", meta: "Redeem foundation", route: "/admin/content/access/keys" },
   { title: "Audit Logs", meta: "Admin traceability", route: "/admin/content/access/audit" },
 ];
 

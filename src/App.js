@@ -185,6 +185,8 @@ import AdminAccessBulkRoute from "./access/admin/AdminAccessBulkRoute.jsx";
 import AdminAccessInvitesRoute from "./access/admin/AdminAccessInvitesRoute.jsx";
 import AdminAccessProfileRoute from "./access/admin/AdminAccessProfileRoute.jsx";
 import AdminAccessAuditRoute from "./access/admin/AdminAccessAuditRoute.jsx";
+import AdminAccessProductsRoute from "./access/admin/AdminAccessProductsRoute.jsx";
+import AdminAccessKeysRoute from "./access/admin/AdminAccessKeysRoute.jsx";
 import StudentLearnerProfileRoute from "./profile/StudentLearnerProfileRoute.jsx";
 
 import MockTestActionMenu from "./components/exam/MockTestActionMenu.jsx";
@@ -5217,6 +5219,16 @@ isAdmin={isAdmin}
 <Route
   path="/admin/content/access/invites"
   element={requireAdmin() ? <AdminAccessInvitesRoute /> : null}
+/>
+
+<Route
+  path="/admin/content/access/products"
+  element={requireAdmin() ? <AdminAccessProductsRoute /> : null}
+/>
+
+<Route
+  path="/admin/content/access/keys"
+  element={requireAdmin() ? <AdminAccessKeysRoute /> : null}
 />
 
 <Route
