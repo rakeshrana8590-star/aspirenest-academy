@@ -164,6 +164,24 @@ export const createAccessAuditLog = async (data = {}) => {
   return addDoc(collection(db, ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS), auditPayload);
 };
 
+export const listStudentAccess = async ({ maxCount = 50, email = "" } = {}) => {
+  const normalizedEmail = normalizeAccessEmail(email);
+  const records = normalizedEmail
+    ? await getAccessByEmail(normalizedEmail)
+    : (await getDocs(collection(db, ACCESS_COLLECTIONS.STUDENT_ACCESS))).docs
+        .map(toAccessRecord)
+        .filter(Boolean);
+
+  return records
+    .filter(Boolean)
+    .sort((first, second) => {
+      const firstTime = first.createdAt && first.createdAt.seconds ? first.createdAt.seconds : 0;
+      const secondTime = second.createdAt && second.createdAt.seconds ? second.createdAt.seconds : 0;
+
+      return secondTime - firstTime;
+    })
+    .slice(0, maxCount);
+};
 export const createManualAccess = async (data = {}) => {
   const actor = requireAdminActor(data.actor);
   const payload = {

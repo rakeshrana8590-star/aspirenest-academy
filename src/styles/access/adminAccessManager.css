@@ -755,3 +755,17 @@ button.adminAccessCard p {
     grid-template-columns: 1fr;
   }
 }
+.adminAccessPreviewHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.adminAccessPreviewHeader span,
+.adminAccessPreviewHeader strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
