@@ -61,6 +61,11 @@ export function StudentCurrentAffairsPdfCard({
     !canAccessCurrentAffairsPlan({
       planName,
       hasPlanAccess,
+      accessOptions: {
+        module: "currentAffairs",
+        itemType: "currentAffairsPdf",
+        itemId: item.id,
+      },
     });
 
   return (

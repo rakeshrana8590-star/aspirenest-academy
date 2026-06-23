@@ -50,6 +50,11 @@ export default function StudentCurrentAffairsMonthRoute({
       !canAccessCurrentAffairsPlan({
         planName,
         hasPlanAccess,
+        accessOptions: {
+          module: "currentAffairs",
+          itemType: "currentAffairsPdf",
+          itemId: item.id,
+        },
       })
     ) {
       navigate("/ctet-tet/pricing");

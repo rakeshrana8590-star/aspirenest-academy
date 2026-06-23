@@ -401,6 +401,7 @@ export const CURRENT_AFFAIRS_PLAN_ORDER = [
   export function canAccessCurrentAffairsPlan({
     planName = "FREE",
     hasPlanAccess,
+    accessOptions = {},
   } = {}) {
     const activePlan = String(planName || "FREE").trim().toUpperCase();
   
@@ -412,5 +413,5 @@ export const CURRENT_AFFAIRS_PLAN_ORDER = [
       return false;
     }
   
-    return Boolean(hasPlanAccess(activePlan));
+    return Boolean(hasPlanAccess(activePlan, accessOptions));
   }
