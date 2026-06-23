@@ -217,7 +217,11 @@ export const NOTES_PLAN_ORDER = [
     return notes.filter((note) => hasNotePdf(note)).length;
   }
   
-  export function canAccessNotePlan({ planName = "FREE", hasPlanAccess } = {}) {
+  export function canAccessNotePlan({
+    planName = "FREE",
+    hasPlanAccess,
+    accessOptions = {},
+  } = {}) {
     const activePlan = String(planName || "FREE").trim().toUpperCase();
   
     if (activePlan === "FREE") {
@@ -228,5 +232,5 @@ export const NOTES_PLAN_ORDER = [
       return false;
     }
   
-    return Boolean(hasPlanAccess(activePlan));
+    return Boolean(hasPlanAccess(activePlan, accessOptions));
   }

@@ -118,6 +118,11 @@ export function StudentNotePdfCard({
   const canOpen = canAccessNotePlan({
     planName,
     hasPlanAccess,
+    accessOptions: {
+      module: "notes",
+      itemType: "notesPdf",
+      itemId: note.id,
+    },
   });
 
   const openNote = () => {
