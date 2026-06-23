@@ -25,10 +25,21 @@ const resolvePlanAccess = ({
   requiredPlan,
   userPlanType,
   hasPlanAccess,
+  accessOptions = {},
 }) => {
   if (normalizePlanType(requiredPlan) === "FREE") return true;
 
   if (typeof hasPlanAccess === "function") {
+    try {
+      const scopedResult = hasPlanAccess(requiredPlan, accessOptions);
+
+      if (typeof scopedResult === "boolean") {
+        return scopedResult;
+      }
+    } catch {
+      // fallback below
+    }
+
     try {
       const oneArgResult = hasPlanAccess(requiredPlan);
 
@@ -174,6 +185,11 @@ export default function VideoAccessGuard({
         requiredPlan,
         userPlanType,
         hasPlanAccess,
+        accessOptions: {
+          module: "video",
+          itemType: "video",
+          itemId: item.id,
+        },
       });
 
   if (!hasAccess) {

@@ -7967,6 +7967,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
       universalContent={universalContent}
       userPlanType={userPlanType}
       isAdmin={isAdmin(user)}
+      hasPlanAccess={hasPlanAccess}
     />
   }
 />

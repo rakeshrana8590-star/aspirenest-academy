@@ -11,6 +11,7 @@ export default function StudentVideoChapterRoute({
   universalContent = [],
   userPlanType = "FREE",
   isAdmin = false,
+  hasPlanAccess,
 }) {
   const navigate = useNavigate();
 
@@ -38,8 +39,12 @@ export default function StudentVideoChapterRoute({
       char.toUpperCase()
     );
 
-  const hasAccess =
+    const hasAccess =
     isAdmin ||
+    (typeof hasPlanAccess === "function" &&
+      hasPlanAccess(activePlan, {
+        module: "video",
+      })) ||
     canAccessVideoPlan({
       requiredPlan: activePlan,
       userPlanType,
