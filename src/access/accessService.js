@@ -14,7 +14,9 @@ import {
 import { db } from "../firebase";
 import {
   ACCESS_COURSE,
+  ACCESS_ITEM_TYPES,
   ACCESS_PLAN_TYPES,
+  ACCESS_SCOPE_TYPES,
   ACCESS_SOURCE,
   ACCESS_STATUS,
 } from "./accessConstants";
@@ -22,6 +24,8 @@ import { normalizeAccessPlan } from "./accessUtils";
 
 export const ACCESS_COLLECTIONS = Object.freeze({
   STUDENT_ACCESS: "studentAccess",
+  ACCESS_PRODUCTS: "accessProducts",
+  ACCESS_KEYS: "accessKeys",
   ACCESS_INVITES: "accessInvites",
   ACCESS_AUDIT_LOGS: "accessAuditLogs",
   USERS: "users",
@@ -95,10 +99,18 @@ const buildAccessPayload = (data = {}) => {
     normalizedEmail,
     uid: uid || null,
     planType: normalizeAccessPlan(data.planType || ACCESS_PLAN_TYPES.FREE),
+    scopeType: data.scopeType || ACCESS_SCOPE_TYPES.PLAN,
     status: String(data.status || ACCESS_STATUS.ACTIVE).trim().toLowerCase(),
     source: data.source || ACCESS_SOURCE.ADMIN_MANUAL,
     course: data.course || ACCESS_COURSE.CTET_TET,
     module: data.module || null,
+    itemType: data.itemType || null,
+    itemId: data.itemId || null,
+    itemTitle: data.itemTitle || "",
+    itemIds: Array.isArray(data.itemIds) ? data.itemIds : [],
+    bundleId: data.bundleId || null,
+    productId: data.productId || null,
+    accessKeyId: data.accessKeyId || null,
     learnerName: String(data.learnerName || data.name || "").trim(),
     name: String(data.name || data.learnerName || "").trim(),
     phone: String(data.phone || "").trim(),

@@ -5,7 +5,10 @@ import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
 
 import {
   ACCESS_COURSE,
+  ACCESS_ITEM_TYPES,
+  ACCESS_MODULE,
   ACCESS_PLAN_TYPES,
+  ACCESS_SCOPE_TYPES,
   ACCESS_SOURCE,
   ACCESS_STATUS,
 } from "../accessConstants";
@@ -23,7 +26,16 @@ const initialForm = {
   name: "",
   phone: "",
   course: ACCESS_COURSE.CTET_TET,
+  scopeType: ACCESS_SCOPE_TYPES.PLAN,
   planType: ACCESS_PLAN_TYPES.PREMIUM,
+  module: "",
+  itemType: "",
+  itemId: "",
+  itemTitle: "",
+  itemIdsText: "",
+  bundleId: "",
+  productId: "",
+  accessKeyId: "",
   source: ACCESS_SOURCE.ADMIN_MANUAL,
   accessFrom: "",
   accessUntil: "",
@@ -49,6 +61,15 @@ export default function AdminAccessAddRoute() {
   const normalizedEmail = useMemo(
     () => normalizeAccessEmail(form.email),
     [form.email]
+  );
+
+  const bundleItemIds = useMemo(
+    () =>
+      form.itemIdsText
+        .split(/[\n,]+/)
+        .map((item) => item.replace(/^\d+[\).\-\s]+/, "").trim())
+        .filter(Boolean),
+    [form.itemIdsText]
   );
 
   const duplicateCourseMatches = useMemo(() => {
@@ -98,8 +119,28 @@ export default function AdminAccessAddRoute() {
       nextErrors.push("Course is required.");
     }
 
-    if (!form.planType) {
-      nextErrors.push("Plan is required.");
+    if (!form.scopeType) {
+      nextErrors.push("Access scope is required.");
+    }
+
+    if (form.scopeType === ACCESS_SCOPE_TYPES.PLAN && !form.planType) {
+      nextErrors.push("Plan is required for plan access.");
+    }
+
+    if (form.scopeType === ACCESS_SCOPE_TYPES.MODULE && !form.module) {
+      nextErrors.push("Module is required for module access.");
+    }
+
+    if (form.scopeType === ACCESS_SCOPE_TYPES.ITEM) {
+      if (!form.module) nextErrors.push("Module is required for item access.");
+      if (!form.itemType) nextErrors.push("Item type is required for item access.");
+      if (!form.itemId.trim()) nextErrors.push("Item ID is required for item access.");
+    }
+
+    if (form.scopeType === ACCESS_SCOPE_TYPES.BUNDLE) {
+      if (!form.bundleId.trim() && bundleItemIds.length === 0) {
+        nextErrors.push("Bundle ID or bundle item IDs are required for bundle access.");
+      }
     }
 
     if (!form.status) {
@@ -133,7 +174,16 @@ export default function AdminAccessAddRoute() {
     name: form.name.trim(),
     phone: form.phone.trim(),
     course: form.course,
+    scopeType: form.scopeType,
     planType: form.planType,
+    module: form.module || null,
+    itemType: form.itemType || null,
+    itemId: form.itemId.trim() || null,
+    itemTitle: form.itemTitle.trim(),
+    itemIds: bundleItemIds,
+    bundleId: form.bundleId.trim() || null,
+    productId: form.productId.trim() || null,
+    accessKeyId: form.accessKeyId.trim() || null,
     source: form.source,
     accessFrom: form.accessFrom || null,
     accessUntil: form.accessUntil || null,
@@ -294,7 +344,16 @@ export default function AdminAccessAddRoute() {
     ["Name", form.name.trim() || "Optional"],
     ["Phone", form.phone.trim() || "Optional"],
     ["Course", form.course],
-    ["Plan", form.planType],
+    ["Scope", form.scopeType],
+    ["Plan", form.scopeType === ACCESS_SCOPE_TYPES.PLAN ? form.planType : "Not plan scoped"],
+    ["Module", form.module || "Not module scoped"],
+    ["Item Type", form.itemType || "Not item scoped"],
+    ["Item ID", form.itemId.trim() || "Not item scoped"],
+    ["Item Title", form.itemTitle.trim() || "Optional"],
+    ["Bundle ID", form.bundleId.trim() || "Not bundle scoped"],
+    ["Bundle Items", bundleItemIds.length ? String(bundleItemIds.length) + " items" : "No bundle items"],
+    ["Product ID", form.productId.trim() || "Optional"],
+    ["Access Key ID", form.accessKeyId.trim() || "Optional"],
     ["Source", form.source],
     ["Access From", form.accessFrom || "Immediate"],
     ["Access Until", form.accessUntil || "No expiry set"],
@@ -375,16 +434,132 @@ export default function AdminAccessAddRoute() {
           </div>
 
           <div className="adminAccessField">
-            <label>Plan</label>
+            <label>Access Scope</label>
             <select
-              value={form.planType}
-              onChange={(event) => updateField("planType", event.target.value)}
+              value={form.scopeType}
+              onChange={(event) => updateField("scopeType", event.target.value)}
             >
-              <option value={ACCESS_PLAN_TYPES.FREE}>FREE</option>
-              <option value={ACCESS_PLAN_TYPES.BASIC}>BASIC</option>
-              <option value={ACCESS_PLAN_TYPES.PREMIUM}>PREMIUM</option>
-              <option value={ACCESS_PLAN_TYPES.MENTORSHIP}>MENTORSHIP</option>
+              <option value={ACCESS_SCOPE_TYPES.PLAN}>Plan Access</option>
+              <option value={ACCESS_SCOPE_TYPES.MODULE}>Module Access</option>
+              <option value={ACCESS_SCOPE_TYPES.ITEM}>Single Item Access</option>
+              <option value={ACCESS_SCOPE_TYPES.BUNDLE}>Bundle Access</option>
             </select>
+            <small>Password/Google login is identity. Scope decides entitlement.</small>
+          </div>
+
+          {form.scopeType === ACCESS_SCOPE_TYPES.PLAN ? (
+            <div className="adminAccessField">
+              <label>Plan</label>
+              <select
+                value={form.planType}
+                onChange={(event) => updateField("planType", event.target.value)}
+              >
+                <option value={ACCESS_PLAN_TYPES.FREE}>FREE</option>
+                <option value={ACCESS_PLAN_TYPES.BASIC}>BASIC</option>
+                <option value={ACCESS_PLAN_TYPES.PREMIUM}>PREMIUM</option>
+                <option value={ACCESS_PLAN_TYPES.MENTORSHIP}>MENTORSHIP</option>
+              </select>
+            </div>
+          ) : null}
+
+          {form.scopeType === ACCESS_SCOPE_TYPES.MODULE ||
+          form.scopeType === ACCESS_SCOPE_TYPES.ITEM ? (
+            <div className="adminAccessField">
+              <label>Module</label>
+              <select
+                value={form.module}
+                onChange={(event) => updateField("module", event.target.value)}
+              >
+                <option value="">Select module</option>
+                <option value={ACCESS_MODULE.MOCK_TEST}>Mock Tests</option>
+                <option value={ACCESS_MODULE.NOTES}>Notes / PDFs</option>
+                <option value={ACCESS_MODULE.VIDEO}>Videos</option>
+                <option value={ACCESS_MODULE.CURRENT_AFFAIRS}>Current Affairs</option>
+                <option value={ACCESS_MODULE.ROADMAP}>Roadmap</option>
+              </select>
+            </div>
+          ) : null}
+
+          {form.scopeType === ACCESS_SCOPE_TYPES.ITEM ? (
+            <>
+              <div className="adminAccessField">
+                <label>Item Type</label>
+                <select
+                  value={form.itemType}
+                  onChange={(event) => updateField("itemType", event.target.value)}
+                >
+                  <option value="">Select item type</option>
+                  <option value={ACCESS_ITEM_TYPES.MOCK_TEST}>Mock Test</option>
+                  <option value={ACCESS_ITEM_TYPES.NOTES_PDF}>Notes PDF</option>
+                  <option value={ACCESS_ITEM_TYPES.VIDEO}>Video</option>
+                  <option value={ACCESS_ITEM_TYPES.CURRENT_AFFAIRS_PDF}>
+                    Current Affairs PDF
+                  </option>
+                  <option value={ACCESS_ITEM_TYPES.ROADMAP}>Roadmap</option>
+                </select>
+              </div>
+
+              <div className="adminAccessField">
+                <label>Item ID</label>
+                <input
+                  value={form.itemId}
+                  onChange={(event) => updateField("itemId", event.target.value)}
+                  placeholder="Exact content/test/video/PDF id"
+                />
+              </div>
+
+              <div className="adminAccessField">
+                <label>Item Title optional</label>
+                <input
+                  value={form.itemTitle}
+                  onChange={(event) => updateField("itemTitle", event.target.value)}
+                  placeholder="Human readable item name"
+                />
+              </div>
+            </>
+          ) : null}
+
+          {form.scopeType === ACCESS_SCOPE_TYPES.BUNDLE ? (
+            <>
+              <div className="adminAccessField">
+                <label>Bundle ID</label>
+                <input
+                  value={form.bundleId}
+                  onChange={(event) => updateField("bundleId", event.target.value)}
+                  placeholder="bundle-cdp-practice-pack"
+                />
+              </div>
+
+              <div className="adminAccessField adminAccessFull">
+                <label>Bundle Item IDs</label>
+                <textarea
+                  value={form.itemIdsText}
+                  onChange={(event) =>
+                    updateField("itemIdsText", event.target.value)
+                  }
+                  placeholder="One item id per line, or comma-separated IDs"
+                />
+                <small>{bundleItemIds.length} item IDs parsed for bundle access.</small>
+              </div>
+            </>
+          ) : null}
+
+          <div className="adminAccessField">
+            <label>Product ID optional</label>
+            <input
+              value={form.productId}
+              onChange={(event) => updateField("productId", event.target.value)}
+              placeholder="Future catalog product id"
+            />
+          </div>
+
+          <div className="adminAccessField">
+            <label>Access Key ID optional</label>
+            <input
+              value={form.accessKeyId}
+              onChange={(event) => updateField("accessKeyId", event.target.value)}
+              placeholder="Future redeem key reference"
+            />
           </div>
 
           <div className="adminAccessField">

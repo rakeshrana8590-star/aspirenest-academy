@@ -4,6 +4,7 @@ import {
   ACCESS_BLOCKED_STATUS_VALUES,
   ACCESS_PLAN_LEVELS,
   ACCESS_PLAN_TYPES,
+  ACCESS_SCOPE_TYPES,
   ACCESS_STATUS,
 } from "./accessConstants";
 
@@ -75,22 +76,109 @@ export const hasAdminAccessBypass = ({ isAdmin = false, role = "" } = {}) => {
   return ACCESS_ADMIN_ROLES.has(String(role || "").trim().toLowerCase());
 };
 
+export const normalizeScopeType = (scopeType = ACCESS_SCOPE_TYPES.PLAN) => {
+  const value = String(scopeType || ACCESS_SCOPE_TYPES.PLAN).trim().toLowerCase();
+
+  if (value === ACCESS_SCOPE_TYPES.MODULE) return ACCESS_SCOPE_TYPES.MODULE;
+  if (value === ACCESS_SCOPE_TYPES.ITEM) return ACCESS_SCOPE_TYPES.ITEM;
+  if (value === ACCESS_SCOPE_TYPES.BUNDLE) return ACCESS_SCOPE_TYPES.BUNDLE;
+
+  return ACCESS_SCOPE_TYPES.PLAN;
+};
+
+export const accessRecordMatchesModule = (record = {}, module = "") => {
+  if (!module) return true;
+  const scopeType = normalizeScopeType(record.scopeType);
+
+  if (scopeType === ACCESS_SCOPE_TYPES.PLAN) return true;
+  return record.module === module;
+};
+
+export const accessRecordMatchesItem = (
+  record = {},
+  { module = "", itemType = "", itemId = "" } = {}
+) => {
+  if (!itemId) return false;
+
+  const scopeType = normalizeScopeType(record.scopeType);
+
+  if (scopeType === ACCESS_SCOPE_TYPES.PLAN) return false;
+
+  if (module && record.module && record.module !== module) {
+    return false;
+  }
+
+  if (itemType && record.itemType && record.itemType !== itemType) {
+    return false;
+  }
+
+  if (scopeType === ACCESS_SCOPE_TYPES.ITEM) {
+    return record.itemId === itemId;
+  }
+
+  if (scopeType === ACCESS_SCOPE_TYPES.BUNDLE) {
+    return Array.isArray(record.itemIds) && record.itemIds.includes(itemId);
+  }
+
+  return false;
+};
+
 export const canAccessContent = ({
   requiredPlan = ACCESS_PLAN_TYPES.FREE,
   userPlan = ACCESS_PLAN_TYPES.FREE,
   accessRecord = null,
   accessRecords = [],
+  module = "",
+  itemType = "",
+  itemId = "",
+  emergencyAccess = false,
   isAdmin = false,
   role = "",
 } = {}) => {
   if (hasAdminAccessBypass({ isAdmin, role })) return true;
+  if (emergencyAccess) return true;
+
+  const activeRecords = [accessRecord, ...accessRecords].filter((record) =>
+    record && isAccessActive(record)
+  );
+
+  if (itemId) {
+    const hasExactItemAccess = activeRecords.some((record) =>
+      accessRecordMatchesItem(record, { module, itemType, itemId })
+    );
+
+    if (hasExactItemAccess) return true;
+  }
+
+  if (module) {
+    const hasModuleAccess = activeRecords.some((record) => {
+      const scopeType = normalizeScopeType(record.scopeType);
+
+      if (scopeType === ACCESS_SCOPE_TYPES.MODULE) {
+        return accessRecordMatchesModule(record, module);
+      }
+
+      return false;
+    });
+
+    if (hasModuleAccess) return true;
+  }
+
   if (normalizeAccessPlan(requiredPlan) === ACCESS_PLAN_TYPES.FREE) return true;
 
-  if (accessRecord && isAccessActive(accessRecord) && canUsePlan(accessRecord.planType, requiredPlan)) {
+  if (
+    accessRecord &&
+    isAccessActive(accessRecord) &&
+    canUsePlan(accessRecord.planType, requiredPlan)
+  ) {
     return true;
   }
 
-  const bestAccess = resolveBestAccess(accessRecords);
+  const planRecords = activeRecords.filter(
+    (record) => normalizeScopeType(record.scopeType) === ACCESS_SCOPE_TYPES.PLAN
+  );
+
+  const bestAccess = resolveBestAccess(planRecords);
 
   if (bestAccess && canUsePlan(bestAccess.planType, requiredPlan)) {
     return true;

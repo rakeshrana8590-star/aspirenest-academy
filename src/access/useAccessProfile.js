@@ -186,34 +186,54 @@ export default function useAccessProfile({
         ? ACCESS_STATUS.ACTIVE
         : ACCESS_STATUS.PENDING;
 
-  const hasAccess = useCallback(
-    (requiredPlan = ACCESS_PLAN_TYPES.FREE) =>
-      canAccessContent({
-        requiredPlan,
-        userPlan: activePlan,
-        accessRecord: bestFirestoreAccess,
-        accessRecords,
-      }),
-    [activePlan, bestFirestoreAccess, accessRecords]
-  );
+        const hasAccess = useCallback(
+          (requiredPlan = ACCESS_PLAN_TYPES.FREE, options = {}) =>
+            canAccessContent({
+              requiredPlan,
+              userPlan: activePlan,
+              accessRecord: bestFirestoreAccess,
+              accessRecords,
+              module: options.module || "",
+              itemType: options.itemType || "",
+              itemId: options.itemId || "",
+              emergencyAccess: Boolean(options.emergencyAccess),
+            }),
+          [activePlan, bestFirestoreAccess, accessRecords]
+        );
 
-  const canAccessModule = useCallback(
-    (module = ACCESS_MODULE.NOTES, requiredPlan = ACCESS_PLAN_TYPES.FREE) => {
-      if (!module) return hasAccess(requiredPlan);
-
-      const moduleRecords = accessRecords.filter((record) =>
-        !record.module || record.module === module
-      );
-
-      return canAccessContent({
-        requiredPlan,
-        userPlan: activePlan,
-        accessRecord: bestFirestoreAccess,
-        accessRecords: moduleRecords,
-      });
-    },
-    [activePlan, bestFirestoreAccess, accessRecords, hasAccess]
-  );
+        const canAccessModule = useCallback(
+          (module = ACCESS_MODULE.NOTES, requiredPlan = ACCESS_PLAN_TYPES.FREE) => {
+            if (!module) return hasAccess(requiredPlan);
+      
+            return canAccessContent({
+              requiredPlan,
+              userPlan: activePlan,
+              accessRecord: bestFirestoreAccess,
+              accessRecords,
+              module,
+            });
+          },
+          [activePlan, bestFirestoreAccess, accessRecords, hasAccess]
+        );
+      
+        const canAccessItem = useCallback(
+          ({
+            module = "",
+            itemType = "",
+            itemId = "",
+            requiredPlan = ACCESS_PLAN_TYPES.FREE,
+          } = {}) =>
+            canAccessContent({
+              requiredPlan,
+              userPlan: activePlan,
+              accessRecord: bestFirestoreAccess,
+              accessRecords,
+              module,
+              itemType,
+              itemId,
+            }),
+          [activePlan, bestFirestoreAccess, accessRecords]
+        );
 
   return {
     loading,
@@ -227,6 +247,7 @@ export default function useAccessProfile({
     isExpired,
     hasAccess,
     canAccessModule,
+    canAccessItem,
     refreshAccess: loadAccessProfile,
   };
 }

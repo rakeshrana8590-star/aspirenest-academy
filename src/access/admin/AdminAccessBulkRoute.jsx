@@ -5,7 +5,10 @@ import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
 
 import {
   ACCESS_COURSE,
+  ACCESS_ITEM_TYPES,
+  ACCESS_MODULE,
   ACCESS_PLAN_TYPES,
+  ACCESS_SCOPE_TYPES,
   ACCESS_SOURCE,
   ACCESS_STATUS,
 } from "../accessConstants";
@@ -24,7 +27,16 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const initialForm = {
   rawEmails: "",
   course: ACCESS_COURSE.CTET_TET,
+  scopeType: ACCESS_SCOPE_TYPES.PLAN,
   planType: ACCESS_PLAN_TYPES.PREMIUM,
+  module: "",
+  itemType: "",
+  itemId: "",
+  itemTitle: "",
+  itemIdsText: "",
+  bundleId: "",
+  productId: "",
+  accessKeyId: "",
   source: ACCESS_SOURCE.BULK_IMPORT,
   accessFrom: "",
   accessUntil: "",
@@ -97,12 +109,71 @@ const parseBulkEmails = (rawEmails = "") => {
   };
 };
 
-const hasSameCourseAccess = (records = [], course = "") => {
-  const selectedCourse = String(course || "").trim().toLowerCase();
+const normalizeAccessTargetValue = (value = "") =>
+  String(value || "").trim().toLowerCase();
+
+const normalizeAccessItemIds = (itemIds = []) =>
+  Array.isArray(itemIds)
+    ? itemIds.map((itemId) => normalizeAccessTargetValue(itemId)).filter(Boolean).sort()
+    : [];
+
+const hasSameBulkAccessTarget = (records = [], target = {}) => {
+  const selectedCourse = normalizeAccessTargetValue(target.course);
+  const selectedScope = normalizeAccessTargetValue(
+    target.scopeType || ACCESS_SCOPE_TYPES.PLAN
+  );
 
   return records.some((record) => {
-    const recordCourse = String(record.course || "").trim().toLowerCase();
-    return !recordCourse || recordCourse === selectedCourse;
+    const recordCourse = normalizeAccessTargetValue(record.course);
+    const recordScope = normalizeAccessTargetValue(
+      record.scopeType || ACCESS_SCOPE_TYPES.PLAN
+    );
+
+    if (recordCourse && selectedCourse && recordCourse !== selectedCourse) {
+      return false;
+    }
+
+    if (recordScope !== selectedScope) {
+      return false;
+    }
+
+    if (selectedScope === ACCESS_SCOPE_TYPES.MODULE) {
+      return (
+        normalizeAccessTargetValue(record.module) ===
+        normalizeAccessTargetValue(target.module)
+      );
+    }
+
+    if (selectedScope === ACCESS_SCOPE_TYPES.ITEM) {
+      return (
+        normalizeAccessTargetValue(record.module) ===
+          normalizeAccessTargetValue(target.module) &&
+        normalizeAccessTargetValue(record.itemType) ===
+          normalizeAccessTargetValue(target.itemType) &&
+        normalizeAccessTargetValue(record.itemId) ===
+          normalizeAccessTargetValue(target.itemId)
+      );
+    }
+
+    if (selectedScope === ACCESS_SCOPE_TYPES.BUNDLE) {
+      const recordBundleId = normalizeAccessTargetValue(record.bundleId);
+      const targetBundleId = normalizeAccessTargetValue(target.bundleId);
+
+      if (recordBundleId && targetBundleId && recordBundleId === targetBundleId) {
+        return true;
+      }
+
+      const recordItems = normalizeAccessItemIds(record.itemIds);
+      const targetItems = normalizeAccessItemIds(target.itemIds);
+
+      return (
+        recordItems.length > 0 &&
+        targetItems.length > 0 &&
+        recordItems.join("|") === targetItems.join("|")
+      );
+    }
+
+    return selectedScope === ACCESS_SCOPE_TYPES.PLAN;
   });
 };
 
@@ -124,12 +195,42 @@ export default function AdminAccessBulkRoute() {
     [form.rawEmails]
   );
 
+  const bundleItemIds = useMemo(
+    () =>
+      form.itemIdsText
+        .split(/[\n,]+/)
+        .map((item) => item.replace(/^\d+[\).\-\s]+/, "").trim())
+        .filter(Boolean),
+    [form.itemIdsText]
+  );
+
+  const bulkAccessTarget = useMemo(
+    () => ({
+      course: form.course,
+      scopeType: form.scopeType,
+      module: form.module,
+      itemType: form.itemType,
+      itemId: form.itemId.trim(),
+      itemIds: bundleItemIds,
+      bundleId: form.bundleId.trim(),
+    }),
+    [
+      form.course,
+      form.scopeType,
+      form.module,
+      form.itemType,
+      form.itemId,
+      form.bundleId,
+      bundleItemIds,
+    ]
+  );
+
   const firestoreDuplicateEmails = useMemo(() => {
     return parsed.validUniqueEmails.filter((email) => {
       const records = firestoreDuplicateMap[email] || [];
-      return hasSameCourseAccess(records, form.course);
+      return hasSameBulkAccessTarget(records, bulkAccessTarget);
     });
-  }, [firestoreDuplicateMap, parsed.validUniqueEmails, form.course]);
+  }, [firestoreDuplicateMap, parsed.validUniqueEmails, bulkAccessTarget]);
 
   const safeToCreateEmails = useMemo(() => {
     return parsed.validUniqueEmails.filter(
@@ -183,8 +284,28 @@ export default function AdminAccessBulkRoute() {
       nextErrors.push("Course is required.");
     }
 
-    if (!form.planType) {
-      nextErrors.push("Plan is required.");
+    if (!form.scopeType) {
+      nextErrors.push("Access scope is required.");
+    }
+
+    if (form.scopeType === ACCESS_SCOPE_TYPES.PLAN && !form.planType) {
+      nextErrors.push("Plan is required for plan access.");
+    }
+
+    if (form.scopeType === ACCESS_SCOPE_TYPES.MODULE && !form.module) {
+      nextErrors.push("Module is required for module access.");
+    }
+
+    if (form.scopeType === ACCESS_SCOPE_TYPES.ITEM) {
+      if (!form.module) nextErrors.push("Module is required for item access.");
+      if (!form.itemType) nextErrors.push("Item type is required for item access.");
+      if (!form.itemId.trim()) nextErrors.push("Item ID is required for item access.");
+    }
+
+    if (form.scopeType === ACCESS_SCOPE_TYPES.BUNDLE) {
+      if (!form.bundleId.trim() && bundleItemIds.length === 0) {
+        nextErrors.push("Bundle ID or bundle item IDs are required for bundle access.");
+      }
     }
 
     if (!form.status) {
@@ -229,7 +350,16 @@ export default function AdminAccessBulkRoute() {
     name: "",
     phone: "",
     course: form.course,
+    scopeType: form.scopeType,
     planType: form.planType,
+    module: form.module || null,
+    itemType: form.itemType || null,
+    itemId: form.itemId.trim() || null,
+    itemTitle: form.itemTitle.trim(),
+    itemIds: bundleItemIds,
+    bundleId: form.bundleId.trim() || null,
+    productId: form.productId.trim() || null,
+    accessKeyId: form.accessKeyId.trim() || null,
     source: form.source,
     accessFrom: form.accessFrom || null,
     accessUntil: form.accessUntil || null,
@@ -239,6 +369,7 @@ export default function AdminAccessBulkRoute() {
     metadata: {
       batchId,
       bulkImport: true,
+      scopeType: form.scopeType,
     },
   });
 
@@ -330,7 +461,15 @@ export default function AdminAccessBulkRoute() {
         metadata: {
           batchId,
           course: form.course,
+          scopeType: form.scopeType,
           planType: form.planType,
+          module: form.module || null,
+          itemType: form.itemType || null,
+          itemId: form.itemId.trim() || null,
+          itemIds: bundleItemIds,
+          bundleId: form.bundleId.trim() || null,
+          productId: form.productId.trim() || null,
+          accessKeyId: form.accessKeyId.trim() || null,
           source: form.source,
           accessFrom: form.accessFrom || null,
           accessUntil: form.accessUntil || null,
@@ -454,7 +593,7 @@ export default function AdminAccessBulkRoute() {
     <AdminAccessRouteShell
       badge="BULK IMPORT"
       title="Bulk Gmail Import"
-      description="Paste multiple learner Gmail IDs, normalize them safely, detect invalid entries, paste duplicates, existing Firestore access, and save only safe learners after confirmation."
+      description="Paste multiple learner Gmail IDs, assign plan/module/item/bundle entitlement safely, detect invalid entries, paste duplicates, existing matching access, and save only safe learners after confirmation."
       icon="B"
       primaryAction={{
         label: "Add Single Access",
@@ -465,7 +604,7 @@ export default function AdminAccessBulkRoute() {
         route: "/admin/content/access/invites",
       }}
       sectionTitle="Bulk import workspace"
-      sectionDescription="Paste learner Gmail IDs, assign one plan and validity to all, preview validation and Firestore duplicate counts, then confirm bulk save."
+      sectionDescription="Paste learner Gmail IDs, assign one entitlement scope and validity to all, preview validation and matching Firestore duplicate counts, then confirm bulk save."
       stats={[
         { value: "Paste", label: "Emails" },
         { value: "Clean", label: "Normalize" },
@@ -499,16 +638,132 @@ export default function AdminAccessBulkRoute() {
           </div>
 
           <div className="adminAccessField">
-            <label>Plan assign to all</label>
+            <label>Access Scope for all</label>
             <select
-              value={form.planType}
-              onChange={(event) => updateField("planType", event.target.value)}
+              value={form.scopeType}
+              onChange={(event) => updateField("scopeType", event.target.value)}
             >
-              <option value={ACCESS_PLAN_TYPES.FREE}>FREE</option>
-              <option value={ACCESS_PLAN_TYPES.BASIC}>BASIC</option>
-              <option value={ACCESS_PLAN_TYPES.PREMIUM}>PREMIUM</option>
-              <option value={ACCESS_PLAN_TYPES.MENTORSHIP}>MENTORSHIP</option>
+              <option value={ACCESS_SCOPE_TYPES.PLAN}>Plan Access</option>
+              <option value={ACCESS_SCOPE_TYPES.MODULE}>Module Access</option>
+              <option value={ACCESS_SCOPE_TYPES.ITEM}>Single Item Access</option>
+              <option value={ACCESS_SCOPE_TYPES.BUNDLE}>Bundle Access</option>
             </select>
+            <small>Same entitlement scope will be assigned to all safe learners.</small>
+          </div>
+
+          {form.scopeType === ACCESS_SCOPE_TYPES.PLAN ? (
+            <div className="adminAccessField">
+              <label>Plan assign to all</label>
+              <select
+                value={form.planType}
+                onChange={(event) => updateField("planType", event.target.value)}
+              >
+                <option value={ACCESS_PLAN_TYPES.FREE}>FREE</option>
+                <option value={ACCESS_PLAN_TYPES.BASIC}>BASIC</option>
+                <option value={ACCESS_PLAN_TYPES.PREMIUM}>PREMIUM</option>
+                <option value={ACCESS_PLAN_TYPES.MENTORSHIP}>MENTORSHIP</option>
+              </select>
+            </div>
+          ) : null}
+
+          {form.scopeType === ACCESS_SCOPE_TYPES.MODULE ||
+          form.scopeType === ACCESS_SCOPE_TYPES.ITEM ? (
+            <div className="adminAccessField">
+              <label>Module assign to all</label>
+              <select
+                value={form.module}
+                onChange={(event) => updateField("module", event.target.value)}
+              >
+                <option value="">Select module</option>
+                <option value={ACCESS_MODULE.MOCK_TEST}>Mock Tests</option>
+                <option value={ACCESS_MODULE.NOTES}>Notes / PDFs</option>
+                <option value={ACCESS_MODULE.VIDEO}>Videos</option>
+                <option value={ACCESS_MODULE.CURRENT_AFFAIRS}>Current Affairs</option>
+                <option value={ACCESS_MODULE.ROADMAP}>Roadmap</option>
+              </select>
+            </div>
+          ) : null}
+
+          {form.scopeType === ACCESS_SCOPE_TYPES.ITEM ? (
+            <>
+              <div className="adminAccessField">
+                <label>Item Type for all</label>
+                <select
+                  value={form.itemType}
+                  onChange={(event) => updateField("itemType", event.target.value)}
+                >
+                  <option value="">Select item type</option>
+                  <option value={ACCESS_ITEM_TYPES.MOCK_TEST}>Mock Test</option>
+                  <option value={ACCESS_ITEM_TYPES.NOTES_PDF}>Notes PDF</option>
+                  <option value={ACCESS_ITEM_TYPES.VIDEO}>Video</option>
+                  <option value={ACCESS_ITEM_TYPES.CURRENT_AFFAIRS_PDF}>
+                    Current Affairs PDF
+                  </option>
+                  <option value={ACCESS_ITEM_TYPES.ROADMAP}>Roadmap</option>
+                </select>
+              </div>
+
+              <div className="adminAccessField">
+                <label>Item ID for all</label>
+                <input
+                  value={form.itemId}
+                  onChange={(event) => updateField("itemId", event.target.value)}
+                  placeholder="Exact content/test/video/PDF id"
+                />
+              </div>
+
+              <div className="adminAccessField">
+                <label>Item Title optional</label>
+                <input
+                  value={form.itemTitle}
+                  onChange={(event) => updateField("itemTitle", event.target.value)}
+                  placeholder="Human readable item name"
+                />
+              </div>
+            </>
+          ) : null}
+
+          {form.scopeType === ACCESS_SCOPE_TYPES.BUNDLE ? (
+            <>
+              <div className="adminAccessField">
+                <label>Bundle ID for all</label>
+                <input
+                  value={form.bundleId}
+                  onChange={(event) => updateField("bundleId", event.target.value)}
+                  placeholder="bundle-cdp-practice-pack"
+                />
+              </div>
+
+              <div className="adminAccessField adminAccessFull">
+                <label>Bundle Item IDs for all</label>
+                <textarea
+                  value={form.itemIdsText}
+                  onChange={(event) =>
+                    updateField("itemIdsText", event.target.value)
+                  }
+                  placeholder="One item id per line, or comma-separated IDs"
+                />
+                <small>{bundleItemIds.length} item IDs parsed for bundle access.</small>
+              </div>
+            </>
+          ) : null}
+
+          <div className="adminAccessField">
+            <label>Product ID optional</label>
+            <input
+              value={form.productId}
+              onChange={(event) => updateField("productId", event.target.value)}
+              placeholder="Future catalog product id"
+            />
+          </div>
+
+          <div className="adminAccessField">
+            <label>Access Key ID optional</label>
+            <input
+              value={form.accessKeyId}
+              onChange={(event) => updateField("accessKeyId", event.target.value)}
+              placeholder="Future redeem key reference"
+            />
           </div>
 
           <div className="adminAccessField">

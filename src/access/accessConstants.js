@@ -62,6 +62,28 @@ export const ACCESS_MODULE = Object.freeze({
   ROADMAP: "roadmap",
 });
 
+export const ACCESS_SCOPE_TYPES = Object.freeze({
+  PLAN: "plan",
+  MODULE: "module",
+  ITEM: "item",
+  BUNDLE: "bundle",
+});
+
+export const ACCESS_ITEM_TYPES = Object.freeze({
+  MOCK_TEST: "mockTest",
+  NOTES_PDF: "notesPdf",
+  VIDEO: "video",
+  CURRENT_AFFAIRS_PDF: "currentAffairsPdf",
+  ROADMAP: "roadmap",
+});
+
+export const ACCESS_KEY_STATUS = Object.freeze({
+  ACTIVE: "active",
+  USED: "used",
+  EXPIRED: "expired",
+  BLOCKED: "blocked",
+});
+
 export const ACCESS_ADMIN_ROLES = new Set([
   "admin",
   "super_admin",
