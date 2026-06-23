@@ -15,6 +15,7 @@ import { db } from "../firebase";
 import {
   ACCESS_COURSE,
   ACCESS_ITEM_TYPES,
+  ACCESS_KEY_STATUS,
   ACCESS_PLAN_TYPES,
   ACCESS_SCOPE_TYPES,
   ACCESS_SOURCE,
@@ -417,6 +418,254 @@ export const revokeAccess = async (id, actor = {}) => {
 
   return {
     id: accessId,
+    ...payload,
+  };
+};
+
+const requireAccessEntityId = (id, label = "Access entity id") => {
+  const value = String(id || "").trim();
+
+  if (!value) {
+    throw new Error(`${label} is required.`);
+  }
+
+  return value;
+};
+
+export const normalizeAccessKeyCode = (code = "") =>
+  String(code || "").trim().toUpperCase();
+
+export const buildAccessProductPayload = (data = {}) => ({
+  title: String(data.title || data.name || "").trim(),
+  name: String(data.name || data.title || "").trim(),
+  description: String(data.description || "").trim(),
+  course: data.course || ACCESS_COURSE.CTET_TET,
+  planType: normalizeAccessPlan(data.planType || ACCESS_PLAN_TYPES.FREE),
+  scopeType: data.scopeType || ACCESS_SCOPE_TYPES.PLAN,
+  module: data.module || null,
+  itemType: data.itemType || null,
+  itemId: data.itemId || null,
+  itemTitle: data.itemTitle || "",
+  itemIds: Array.isArray(data.itemIds) ? data.itemIds : [],
+  bundleId: data.bundleId || null,
+  validityDays: Number(data.validityDays || 0),
+  accessFrom: data.accessFrom || null,
+  accessUntil: data.accessUntil || null,
+  price: Number(data.price || 0),
+  compareAtPrice: Number(data.compareAtPrice || 0),
+  currency: data.currency || "INR",
+  status: String(data.status || ACCESS_STATUS.ACTIVE).trim().toLowerCase(),
+  isActive: data.isActive !== false,
+  notes: data.notes || data.adminNote || "",
+  adminNote: data.adminNote || data.notes || "",
+  updatedAt: serverTimestamp(),
+});
+
+export const createAccessProduct = async (data = {}) => {
+  const actor = requireAdminActor(data.actor);
+  const payload = {
+    ...buildAccessProductPayload(data),
+    createdAt: serverTimestamp(),
+    createdBy: actor.uid,
+    actorEmail: actor.email,
+  };
+
+  if (!payload.title) {
+    throw new Error("Access product title is required.");
+  }
+
+  const docRef = await addDoc(
+    collection(db, ACCESS_COLLECTIONS.ACCESS_PRODUCTS),
+    payload
+  );
+
+  await createAccessAuditLog({
+    actor,
+    action: "create_access_product",
+    accessId: docRef.id,
+    after: {
+      id: docRef.id,
+      ...payload,
+    },
+    metadata: {
+      collection: ACCESS_COLLECTIONS.ACCESS_PRODUCTS,
+      productId: docRef.id,
+      scopeType: payload.scopeType,
+      planType: payload.planType,
+    },
+  });
+
+  return {
+    id: docRef.id,
+    ...payload,
+  };
+};
+
+export const updateAccessProductStatus = async (id, status, actor = {}) => {
+  const productId = requireAccessEntityId(id, "Access product id");
+  const adminActor = requireAdminActor(actor);
+  const productRef = doc(db, ACCESS_COLLECTIONS.ACCESS_PRODUCTS, productId);
+  const beforeSnap = await getDoc(productRef);
+  const before = toAccessRecord(beforeSnap);
+  const payload = {
+    status: String(status || "").trim().toLowerCase(),
+    isActive: String(status || "").trim().toLowerCase() === ACCESS_STATUS.ACTIVE,
+    updatedAt: serverTimestamp(),
+    updatedBy: adminActor.uid,
+  };
+
+  if (!payload.status) {
+    throw new Error("Access product status is required.");
+  }
+
+  await updateDoc(productRef, payload);
+
+  await createAccessAuditLog({
+    actor: adminActor,
+    action: "update_access_product_status",
+    accessId: productId,
+    before,
+    after: payload,
+    metadata: {
+      collection: ACCESS_COLLECTIONS.ACCESS_PRODUCTS,
+      productId,
+    },
+  });
+
+  return {
+    id: productId,
+    ...payload,
+  };
+};
+
+export const readAccessKeyByCode = async (code = "") => {
+  const normalizedCode = normalizeAccessKeyCode(code);
+
+  if (!normalizedCode) return null;
+
+  const keyQuery = query(
+    collection(db, ACCESS_COLLECTIONS.ACCESS_KEYS),
+    where("normalizedCode", "==", normalizedCode)
+  );
+  const keySnap = await getDocs(keyQuery);
+
+  return keySnap.docs.map(toAccessRecord).filter(Boolean)[0] || null;
+};
+
+export const buildAccessKeyPayload = (data = {}) => {
+  const code = normalizeAccessKeyCode(data.code);
+
+  if (!code) {
+    throw new Error("Access key code is required.");
+  }
+
+  return {
+    code,
+    normalizedCode: code,
+    productId: data.productId || null,
+    course: data.course || ACCESS_COURSE.CTET_TET,
+    planType: normalizeAccessPlan(data.planType || ACCESS_PLAN_TYPES.FREE),
+    scopeType: data.scopeType || ACCESS_SCOPE_TYPES.PLAN,
+    module: data.module || null,
+    itemType: data.itemType || null,
+    itemId: data.itemId || null,
+    itemTitle: data.itemTitle || "",
+    itemIds: Array.isArray(data.itemIds) ? data.itemIds : [],
+    bundleId: data.bundleId || null,
+    status: String(data.status || ACCESS_KEY_STATUS.ACTIVE).trim().toLowerCase(),
+    maxUses: Number(data.maxUses || 1),
+    usedCount: Number(data.usedCount || 0),
+    assignedEmail: normalizeAccessEmail(data.assignedEmail || data.email || ""),
+    redeemedByEmail: null,
+    redeemedByUid: null,
+    redeemedAt: null,
+    accessFrom: data.accessFrom || null,
+    accessUntil: data.accessUntil || null,
+    validityDays: Number(data.validityDays || 0),
+    notes: data.notes || data.adminNote || "",
+    adminNote: data.adminNote || data.notes || "",
+    updatedAt: serverTimestamp(),
+  };
+};
+
+export const createAccessKey = async (data = {}) => {
+  const actor = requireAdminActor(data.actor);
+  const payload = {
+    ...buildAccessKeyPayload(data),
+    createdAt: serverTimestamp(),
+    createdBy: actor.uid,
+    actorEmail: actor.email,
+  };
+
+  const existingKey = await readAccessKeyByCode(payload.code);
+
+  if (existingKey) {
+    throw new Error("Access key code already exists.");
+  }
+
+  const docRef = await addDoc(
+    collection(db, ACCESS_COLLECTIONS.ACCESS_KEYS),
+    payload
+  );
+
+  await createAccessAuditLog({
+    actor,
+    action: "create_access_key",
+    accessId: docRef.id,
+    email: payload.assignedEmail,
+    after: {
+      id: docRef.id,
+      ...payload,
+    },
+    metadata: {
+      collection: ACCESS_COLLECTIONS.ACCESS_KEYS,
+      accessKeyId: docRef.id,
+      productId: payload.productId,
+      scopeType: payload.scopeType,
+      planType: payload.planType,
+    },
+  });
+
+  return {
+    id: docRef.id,
+    ...payload,
+  };
+};
+
+export const updateAccessKeyStatus = async (id, status, actor = {}) => {
+  const accessKeyId = requireAccessEntityId(id, "Access key id");
+  const adminActor = requireAdminActor(actor);
+  const keyRef = doc(db, ACCESS_COLLECTIONS.ACCESS_KEYS, accessKeyId);
+  const beforeSnap = await getDoc(keyRef);
+  const before = toAccessRecord(beforeSnap);
+  const payload = {
+    status: String(status || "").trim().toLowerCase(),
+    updatedAt: serverTimestamp(),
+    updatedBy: adminActor.uid,
+  };
+
+  if (!payload.status) {
+    throw new Error("Access key status is required.");
+  }
+
+  await updateDoc(keyRef, payload);
+
+  await createAccessAuditLog({
+    actor: adminActor,
+    action: "update_access_key_status",
+    accessId: accessKeyId,
+    email: before?.assignedEmail,
+    before,
+    after: payload,
+    metadata: {
+      collection: ACCESS_COLLECTIONS.ACCESS_KEYS,
+      accessKeyId,
+      productId: before?.productId || null,
+    },
+  });
+
+  return {
+    id: accessKeyId,
     ...payload,
   };
 };
