@@ -669,3 +669,241 @@ export const updateAccessKeyStatus = async (id, status, actor = {}) => {
     ...payload,
   };
 };
+
+const getTodayDateString = () => new Date().toISOString().slice(0, 10);
+
+const addDaysToDateString = (days = 0) => {
+  const safeDays = Number(days || 0);
+
+  if (!Number.isFinite(safeDays) || safeDays <= 0) {
+    return null;
+  }
+
+  const date = new Date();
+  date.setDate(date.getDate() + safeDays);
+
+  return date.toISOString().slice(0, 10);
+};
+
+const normalizeDateOnlyTime = (value = "") => {
+  if (!value) return null;
+
+  const date = new Date(String(value).slice(0, 10) + "T00:00:00");
+
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date.getTime();
+};
+
+const validateAccessKeyRecordForRedeem = ({
+  keyRecord,
+  normalizedEmail = "",
+  uid = "",
+} = {}) => {
+  const errors = [];
+
+  if (!keyRecord?.id) {
+    return {
+      isValid: false,
+      errors: ["Access key was not found."],
+    };
+  }
+
+  const status = String(keyRecord.status || "").trim().toLowerCase();
+  const maxUses = Math.max(Number(keyRecord.maxUses || 1), 1);
+  const usedCount = Math.max(Number(keyRecord.usedCount || 0), 0);
+  const assignedEmail = normalizeAccessEmail(keyRecord.assignedEmail || "");
+  const todayTime = normalizeDateOnlyTime(getTodayDateString());
+  const accessFromTime = normalizeDateOnlyTime(keyRecord.accessFrom || "");
+  const accessUntilTime = normalizeDateOnlyTime(keyRecord.accessUntil || "");
+
+  if (!normalizedEmail && !uid) {
+    errors.push("Learner email or uid is required to redeem access key.");
+  }
+
+  if (status !== ACCESS_KEY_STATUS.ACTIVE) {
+    errors.push("Access key is not active.");
+  }
+
+  if (usedCount >= maxUses) {
+    errors.push("Access key usage limit is already reached.");
+  }
+
+  if (assignedEmail && normalizedEmail && assignedEmail !== normalizedEmail) {
+    errors.push("Access key is assigned to another learner email.");
+  }
+
+  if (accessFromTime && todayTime && accessFromTime > todayTime) {
+    errors.push("Access key is not active yet.");
+  }
+
+  if (accessUntilTime && todayTime && accessUntilTime < todayTime) {
+    errors.push("Access key has expired.");
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+};
+
+export const validateAccessKeyForRedeem = async ({
+  code = "",
+  email = "",
+  uid = "",
+} = {}) => {
+  const normalizedCode = normalizeAccessKeyCode(code);
+  const normalizedEmail = normalizeAccessEmail(email);
+  const normalizedUid = String(uid || "").trim();
+
+  if (!normalizedCode) {
+    return {
+      isValid: false,
+      errors: ["Access key code is required."],
+      keyRecord: null,
+      normalizedCode,
+      normalizedEmail,
+      uid: normalizedUid,
+    };
+  }
+
+  const keyRecord = await readAccessKeyByCode(normalizedCode);
+  const validation = validateAccessKeyRecordForRedeem({
+    keyRecord,
+    normalizedEmail,
+    uid: normalizedUid,
+  });
+
+  return {
+    ...validation,
+    keyRecord,
+    normalizedCode,
+    normalizedEmail,
+    uid: normalizedUid,
+  };
+};
+
+export const redeemAccessKeyFoundation = async ({
+  code = "",
+  email = "",
+  uid = "",
+  learnerName = "",
+  name = "",
+  phone = "",
+} = {}) => {
+  const validation = await validateAccessKeyForRedeem({
+    code,
+    email,
+    uid,
+  });
+
+  if (!validation.isValid) {
+    throw new Error(validation.errors.join(" "));
+  }
+
+  const keyRecord = validation.keyRecord;
+  const normalizedEmail = validation.normalizedEmail;
+  const normalizedUid = validation.uid;
+  const keyRef = doc(db, ACCESS_COLLECTIONS.ACCESS_KEYS, keyRecord.id);
+
+  const maxUses = Math.max(Number(keyRecord.maxUses || 1), 1);
+  const nextUsedCount = Math.max(Number(keyRecord.usedCount || 0), 0) + 1;
+  const nextKeyStatus =
+    nextUsedCount >= maxUses ? ACCESS_KEY_STATUS.USED : ACCESS_KEY_STATUS.ACTIVE;
+
+  const accessUntil =
+    keyRecord.accessUntil || addDaysToDateString(keyRecord.validityDays);
+
+  const accessPayload = {
+    ...buildAccessPayload({
+      email: normalizedEmail,
+      uid: normalizedUid,
+      learnerName: learnerName || name || "",
+      name: name || learnerName || "",
+      phone,
+      course: keyRecord.course || ACCESS_COURSE.CTET_TET,
+      planType: keyRecord.planType || ACCESS_PLAN_TYPES.FREE,
+      scopeType: keyRecord.scopeType || ACCESS_SCOPE_TYPES.PLAN,
+      module: keyRecord.module || null,
+      itemType: keyRecord.itemType || null,
+      itemId: keyRecord.itemId || null,
+      itemTitle: keyRecord.itemTitle || "",
+      itemIds: Array.isArray(keyRecord.itemIds) ? keyRecord.itemIds : [],
+      bundleId: keyRecord.bundleId || null,
+      productId: keyRecord.productId || null,
+      accessKeyId: keyRecord.id,
+      source: ACCESS_SOURCE.REDEEM_KEY,
+      status: ACCESS_STATUS.ACTIVE,
+      accessFrom: keyRecord.accessFrom || getTodayDateString(),
+      accessUntil,
+      adminNote: "Redeemed access key " + validation.normalizedCode,
+      notes: "Redeemed access key " + validation.normalizedCode,
+    }),
+    createdAt: serverTimestamp(),
+    createdBy: normalizedUid || null,
+    actorEmail: normalizedEmail,
+  };
+
+  const accessRef = await addDoc(
+    collection(db, ACCESS_COLLECTIONS.STUDENT_ACCESS),
+    accessPayload
+  );
+
+  const keyUpdate = {
+    usedCount: nextUsedCount,
+    status: nextKeyStatus,
+    lastRedeemedByEmail: normalizedEmail || null,
+    lastRedeemedByUid: normalizedUid || null,
+    lastRedeemedAt: serverTimestamp(),
+    redeemedByEmail: keyRecord.redeemedByEmail || normalizedEmail || null,
+    redeemedByUid: keyRecord.redeemedByUid || normalizedUid || null,
+    redeemedAt: keyRecord.redeemedAt || serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    updatedBy: normalizedUid || normalizedEmail || "redeem_key",
+  };
+
+  await updateDoc(keyRef, keyUpdate);
+
+  await addDoc(collection(db, ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS), {
+    action: "redeem_access_key",
+    accessId: accessRef.id,
+    email: normalizedEmail,
+    uid: normalizedUid || null,
+    before: keyRecord,
+    after: {
+      access: {
+        id: accessRef.id,
+        ...accessPayload,
+      },
+      accessKey: {
+        id: keyRecord.id,
+        ...keyUpdate,
+      },
+    },
+    metadata: {
+      collection: ACCESS_COLLECTIONS.ACCESS_KEYS,
+      accessKeyId: keyRecord.id,
+      productId: keyRecord.productId || null,
+      scopeType: keyRecord.scopeType || ACCESS_SCOPE_TYPES.PLAN,
+      planType: keyRecord.planType || ACCESS_PLAN_TYPES.FREE,
+      source: ACCESS_SOURCE.REDEEM_KEY,
+    },
+    createdAt: serverTimestamp(),
+    createdBy: normalizedUid || null,
+    actorEmail: normalizedEmail,
+    actorRole: "student",
+  });
+
+  return {
+    access: {
+      id: accessRef.id,
+      ...accessPayload,
+    },
+    accessKey: {
+      id: keyRecord.id,
+      ...keyUpdate,
+    },
+  };
+};

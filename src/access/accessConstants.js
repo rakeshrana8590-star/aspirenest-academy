@@ -47,6 +47,7 @@ export const ACCESS_SOURCE = Object.freeze({
   PAYMENT: "payment",
   ADMIN_MANUAL: "admin_manual",
   BULK_IMPORT: "bulk_import",
+  REDEEM_KEY: "redeem_key",
   TRIAL: "trial",
 });
 
