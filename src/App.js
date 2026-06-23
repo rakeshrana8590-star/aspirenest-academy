@@ -185,6 +185,7 @@ import AdminAccessBulkRoute from "./access/admin/AdminAccessBulkRoute.jsx";
 import AdminAccessInvitesRoute from "./access/admin/AdminAccessInvitesRoute.jsx";
 import AdminAccessProfileRoute from "./access/admin/AdminAccessProfileRoute.jsx";
 import AdminAccessAuditRoute from "./access/admin/AdminAccessAuditRoute.jsx";
+import StudentRedeemAccessRoute from "./access/StudentRedeemAccessRoute.jsx";
 import AdminAccessProductsRoute from "./access/admin/AdminAccessProductsRoute.jsx";
 import AdminAccessKeysRoute from "./access/admin/AdminAccessKeysRoute.jsx";
 import StudentLearnerProfileRoute from "./profile/StudentLearnerProfileRoute.jsx";
@@ -8264,6 +8265,11 @@ handleSaveUniversalContent={handleSaveUniversalContent}
       </div>
     </section>
   }
+/>
+
+<Route
+  path="/ctet-tet/redeem"
+  element={<StudentRedeemAccessRoute user={user} />}
 />
 
 </Routes>
