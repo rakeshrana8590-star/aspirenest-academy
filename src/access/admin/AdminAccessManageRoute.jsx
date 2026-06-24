@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
-import { extendAccess, listStudentAccess, normalizeAccessEmail } from "../accessService";
+import { extendAccess, listStudentAccess, normalizeAccessEmail, updateAccessStatus } from "../accessService";
 import { AdminButton, AdminConfirmDialog, AdminEmptyState, AdminErrorBox, AdminFilterBar, AdminFilterField, AdminPortalActionMenu, AdminStatusPill } from "../../components/shared/admin";
 import "../../styles/shared/adminSystem.css";
 
@@ -27,8 +27,8 @@ const lockedActionConfigs = {
     tone: "warning",
   },
   status: {
-    title: "Status Change Locked",
-    message: "This confirmation flow is ready, but the status update write action is not connected yet.",
+    title: "Status Change",
+    message: "This will update the selected access status and create an audit log.",
     requiresText: "STATUS",
     tone: "info",
   },
@@ -315,6 +315,44 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
       } catch (actionError) {
         const errorMessage =
           "Extend access failed: " +
+          (actionError?.message || "Unknown error.");
+        setMessage(errorMessage);
+        setLockedActionResult(errorMessage);
+      } finally {
+        setActionSubmitting(false);
+      }
+
+      return;
+    }
+
+    if (lockedActionConfirm.type === "status") {
+      if (!selectedRecord?.id) {
+        setMessage("Select an access record before changing status.");
+        return;
+      }
+
+      if (!actionDraft.status) {
+        setMessage("Select new access status before confirming status change.");
+        return;
+      }
+
+      setActionSubmitting(true);
+
+      try {
+        await updateAccessStatus(selectedRecord.id, actionDraft.status, adminActor);
+        const resultMessage =
+          "Status Change completed. Access status updated to " +
+          actionDraft.status +
+          " and audit log created.";
+
+        setMessage(resultMessage);
+        setLockedActionResult(resultMessage);
+        closeLockedActionConfirm();
+        await loadRecords(normalizedEmail || searchEmail);
+        setSelectedRecordId(selectedRecord.id);
+      } catch (actionError) {
+        const errorMessage =
+          "Status change failed: " +
           (actionError?.message || "Unknown error.");
         setMessage(errorMessage);
         setLockedActionResult(errorMessage);
@@ -618,7 +656,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
         <div className="adminAccessPreviewPanel">
           <div className="adminAccessPreviewHeader">
             <span>Selected Record Safety</span>
-            <strong>Extend live • others locked</strong>
+            <strong>Extend + Status live • Revoke locked</strong>
           </div>
 
           <div className="adminAccessRows">
@@ -635,8 +673,8 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
               <strong>Source / Key</strong>
               <span>{getSourceLabel(selectedRecord.source)} • {getText(selectedRecord.accessKeyId, "No key")}</span>
 
-              <strong>Future Actions</strong>
-              <span>Extend is live with audit logging. Status change, plan change, and soft revoke remain locked for the next phase.</span>
+              <strong>Access Actions</strong>
+              <span>Extend and status change are live with audit logging. Plan change and soft revoke remain locked for the next phase.</span>
 
               {lockedActionResult ? (
                 <div className="adminAccessLockedResult">{lockedActionResult}</div>
@@ -663,7 +701,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
         open={lockedActionConfirm.open}
         title={lockedActionConfirm.title || "Locked Action"}
         message={lockedActionConfirm.message || "This action is locked for the audited action phase."}
-        confirmLabel={lockedActionConfirm.type === "extend" ? "Extend Access" : "Confirm Locked Check"}
+        confirmLabel={lockedActionConfirm.type === "extend" ? "Extend Access" : lockedActionConfirm.type === "status" ? "Update Status" : "Confirm Locked Check"}
         cancelLabel="Cancel"
         tone={lockedActionConfirm.tone}
         requiresText={lockedActionConfirm.requiresText}
@@ -722,7 +760,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
             </label>
           ) : null}
 
-          <p>Input foundation only. Real write will connect in the next audited phase.</p>
+          <p>{lockedActionConfirm.type === "revoke" ? "Input foundation only. Real write will connect in the next audited phase." : "This action will update access and create an audit log."}</p>
         </div>
       </AdminConfirmDialog>
 
@@ -747,8 +785,8 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
           },
           {
             key: "status-locked",
-            label: "Status Locked",
-            description: "Open confirmation flow only. No write yet.",
+            label: "Status Change",
+            description: "Update status with audit log.",
             tone: "info",
             onClick: () => openLockedActionConfirm("status"),
           },
