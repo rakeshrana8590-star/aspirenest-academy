@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 
 import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
 import { listStudentAccess, normalizeAccessEmail } from "../accessService";
+import { AdminPortalActionMenu } from "../../components/shared/admin";
+import "../../styles/shared/adminSystem.css";
 
 const actions = [
   { icon: "S", label: "Search", title: "Find Learner", description: "Search by registered email and review exact entitlement.", route: "/admin/content/access/manage", tone: "orange" },
@@ -130,6 +132,11 @@ export default function AdminAccessManageRoute() {
   const [scopeFilter, setScopeFilter] = useState("all");
   const [moduleFilter, setModuleFilter] = useState("all");
   const [selectedRecordId, setSelectedRecordId] = useState("");
+  const [accessActionMenu, setAccessActionMenu] = useState({
+    open: false,
+    anchorRect: null,
+    recordId: "",
+  });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -488,21 +495,59 @@ export default function AdminAccessManageRoute() {
               <strong>Future Actions</strong>
               <span>Extend, change status, change plan, and soft revoke will require confirmation and audit in the next phase.</span>
 
-              <button type="button" className="adminAccessSecondaryButton" disabled>
-                Extend Locked
-              </button>
-
-              <button type="button" className="adminAccessSecondaryButton" disabled>
-                Status Locked
-              </button>
-
-              <button type="button" className="adminAccessSecondaryButton" disabled>
-                Revoke Locked
+              <button
+                type="button"
+                className="adminAccessSecondaryButton"
+                onClick={(event) =>
+                  setAccessActionMenu({
+                    open: true,
+                    anchorRect: event.currentTarget.getBoundingClientRect(),
+                    recordId: selectedRecord.id,
+                  })
+                }
+              >
+                Open Locked Actions
               </button>
             </div>
           </div>
         </div>
       ) : null}
+
+      <AdminPortalActionMenu
+        open={accessActionMenu.open}
+        anchorRect={accessActionMenu.anchorRect}
+        title="Access Actions"
+        onClose={() =>
+          setAccessActionMenu({
+            open: false,
+            anchorRect: null,
+            recordId: "",
+          })
+        }
+        actions={[
+          {
+            key: "extend-locked",
+            label: "Extend Locked",
+            description: "Requires confirmation and audit in next phase.",
+            tone: "warning",
+            disabled: true,
+          },
+          {
+            key: "status-locked",
+            label: "Status Locked",
+            description: "Requires confirmation and audit in next phase.",
+            tone: "info",
+            disabled: true,
+          },
+          {
+            key: "revoke-locked",
+            label: "Revoke Locked",
+            description: "Requires confirmation and audit in next phase.",
+            tone: "danger",
+            disabled: true,
+          },
+        ]}
+      />
     </AdminAccessRouteShell>
   );
 }
