@@ -769,3 +769,144 @@ button.adminAccessCard p {
   align-items: center;
   gap: 8px;
 }
+
+
+/* UI-1G Access row and selected safety premium polish */
+.adminAccessPreviewPanel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background:
+    radial-gradient(circle at 94% 0%, rgba(249, 115, 22, 0.08), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+}
+
+.adminAccessPreviewPanel::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, #0f172a, #f97316, rgba(37, 99, 235, 0.48));
+  opacity: 0.88;
+}
+
+.adminAccessPreviewHeader {
+  padding: 20px 22px 0;
+  position: relative;
+}
+
+.adminAccessPreviewHeader span {
+  color: #f97316;
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.adminAccessPreviewHeader strong {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.05);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  color: #0f172a;
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
+.adminAccessRows {
+  padding: 22px;
+  gap: 16px;
+}
+
+.adminAccessRow {
+  position: relative;
+  grid-template-columns: minmax(140px, 0.5fr) minmax(0, 1.5fr);
+  align-items: start;
+  gap: 12px 16px;
+  padding: 20px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(249, 115, 22, 0.07), transparent 28%),
+    linear-gradient(180deg, #ffffff, #f8fafc);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+}
+
+.adminAccessRow > strong:first-child {
+  grid-column: 1 / -1;
+  font-size: 1.05rem;
+  font-weight: 950;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+  padding-bottom: 2px;
+}
+
+.adminAccessRow > span:nth-child(2) {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  width: fit-content;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.05);
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.adminAccessRow strong {
+  color: #334155;
+  font-size: 0.75rem;
+  font-weight: 950;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.adminAccessRow span {
+  color: #475569;
+  font-weight: 750;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.adminAccessRowActions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 16px;
+  margin-top: 4px;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.adminAccessRowActions .adminBtn {
+  min-width: 132px;
+}
+
+.adminAccessRow .adminBtn--primary {
+  background: linear-gradient(135deg, #0f172a, #111827);
+}
+
+.adminAccessRow .adminBtn--secondary {
+  background: rgba(15, 23, 42, 0.04);
+  color: #0f172a;
+  border-color: rgba(15, 23, 42, 0.08);
+  box-shadow: none;
+}
+
+@media (max-width: 720px) {
+  .adminAccessRow {
+    grid-template-columns: 1fr;
+  }
+
+  .adminAccessRow > *,
+  .adminAccessRow > strong:first-child,
+  .adminAccessRow > span:nth-child(2) {
+    grid-column: 1 / -1;
+  }
+
+  .adminAccessRowActions .adminBtn {
+    width: 100%;
+  }
+}

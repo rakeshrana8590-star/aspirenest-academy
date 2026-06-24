@@ -423,37 +423,35 @@ export default function AdminAccessManageRoute() {
                     {getText(record.adminNote || record.notes, "No note")} • {formatDateTimeValue(record.updatedAt || record.createdAt)}
                   </span>
 
-                  <button
-                    type="button"
-                    className="adminAccessSecondaryButton"
-                    onClick={() => setSelectedRecordId(record.id)}
-                  >
-                    {isSelected ? "Selected" : "Select Record"}
-                  </button>
+                  <div className="adminAccessRowActions">
+                    <AdminButton
+                      variant={isSelected ? "primary" : "secondary"}
+                      onClick={() => setSelectedRecordId(record.id)}
+                    >
+                      {isSelected ? "Selected" : "Select Record"}
+                    </AdminButton>
 
-                  <button
-                    type="button"
-                    className="adminAccessSecondaryButton"
-                    onClick={() => openLearnerProfile(record)}
-                  >
-                    Open Profile
-                  </button>
+                    <AdminButton
+                      variant="secondary"
+                      onClick={() => openLearnerProfile(record)}
+                    >
+                      Open Profile
+                    </AdminButton>
 
-                  <button
-                    type="button"
-                    className="adminAccessSecondaryButton"
-                    onClick={() => handleCopy(email, "Learner email")}
-                  >
-                    Copy Email
-                  </button>
+                    <AdminButton
+                      variant="secondary"
+                      onClick={() => handleCopy(email, "Learner email")}
+                    >
+                      Copy Email
+                    </AdminButton>
 
-                  <button
-                    type="button"
-                    className="adminAccessSecondaryButton"
-                    onClick={() => handleCopy(record.accessKeyId, "Access key ID")}
-                  >
-                    Copy Key
-                  </button>
+                    <AdminButton
+                      variant="secondary"
+                      onClick={() => handleCopy(record.accessKeyId, "Access key ID")}
+                    >
+                      Copy Key
+                    </AdminButton>
+                  </div>
                 </div>
               );
             })
