@@ -3,6 +3,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 import {
   AdminButton,
+  AdminConfirmDialog,
   AdminEmptyState,
   AdminErrorBox,
   AdminFilterBar,
@@ -63,6 +64,7 @@ export default function AdminPaymentVerificationRoute({
   const [adminProofs, setAdminProofs] = useState({});
   const [routeError, setRouteError] = useState("");
   const [loadingId, setLoadingId] = useState("");
+  const [confirmAction, setConfirmAction] = useState(null);
 
   const safePayments = Array.isArray(paymentRequests) ? paymentRequests : [];
 
@@ -105,10 +107,18 @@ export default function AdminPaymentVerificationRoute({
     }
   }
 
-  async function rejectPayment(payment) {
+  function openRejectConfirm(payment) {
+    setConfirmAction({
+      type: "reject",
+      payment,
+      title: "Reject payment request?",
+      message: "This will mark the payment request as rejected.",
+    });
+  }
+
+  async function confirmRejectPayment() {
+    const payment = confirmAction?.payment;
     if (!payment?.id) return;
-    const ok = window.confirm("Reject this payment request?");
-    if (!ok) return;
     try {
       setLoadingId(payment.id);
       setRouteError("");
@@ -117,6 +127,7 @@ export default function AdminPaymentVerificationRoute({
         rejectedAt: new Date(),
       });
       await loadPaymentRequests?.();
+      setConfirmAction(null);
     } catch (error) {
       setRouteError(error?.message || "Payment reject failed.");
     } finally {
@@ -228,7 +239,7 @@ export default function AdminPaymentVerificationRoute({
                     <>
                       <AdminButton variant="primary" size="sm" loading={busy} onClick={() => approvePayment(payment)}>Approve Payment</AdminButton>
                       <AdminButton variant="secondary" size="sm" disabled={busy} onClick={() => markReviewRequired(payment)}>Mark Review</AdminButton>
-                      <AdminButton variant="danger" size="sm" disabled={busy} onClick={() => rejectPayment(payment)}>Reject</AdminButton>
+                      <AdminButton variant="danger" size="sm" disabled={busy} onClick={() => openRejectConfirm(payment)}>Reject</AdminButton>
                     </>
                   )}
                 </div>
@@ -246,6 +257,17 @@ export default function AdminPaymentVerificationRoute({
           onAction={() => loadPaymentRequests?.()}
         />
       )}
+
+      <AdminConfirmDialog
+        open={Boolean(confirmAction)}
+        title={confirmAction?.title || "Confirm payment action"}
+        message={confirmAction?.message || "Please confirm before continuing."}
+        confirmLabel="Reject Payment"
+        tone="danger"
+        loading={Boolean(confirmAction?.payment?.id && loadingId === confirmAction.payment.id)}
+        onCancel={() => setConfirmAction(null)}
+        onConfirm={confirmRejectPayment}
+      />
     </section>
   );
 }
