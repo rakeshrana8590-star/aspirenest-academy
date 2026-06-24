@@ -142,8 +142,15 @@ const getScopeLabel = (scopeType) => {
 const getLearnerEmail = (record = {}) =>
   record.email || record.normalizedEmail || record.learnerEmail || record.userEmail || "";
 
-export default function AdminAccessManageRoute() {
+export default function AdminAccessManageRoute({ user = null, isAdmin = () => false } = {}) {
   const navigate = useNavigate();
+
+  const adminActor = useMemo(() => ({
+    uid: user?.uid || null,
+    email: user?.email || "",
+    isAdmin: typeof isAdmin === "function" ? isAdmin(user) : Boolean(isAdmin),
+    role: "admin",
+  }), [user, isAdmin]);
 
   const [records, setRecords] = useState([]);
   const [searchEmail, setSearchEmail] = useState("");
@@ -242,6 +249,12 @@ export default function AdminAccessManageRoute() {
 
   const openLockedActionConfirm = (type) => {
     const config = lockedActionConfigs[type];
+
+    if (!adminActor.isAdmin || !adminActor.email) {
+      setAccessActionMenu({ open: false, anchorRect: null, recordId: "" });
+      setMessage("Admin actor is not ready for access actions.");
+      return;
+    }
     setLockedActionResult("");
 
     if (!selectedRecord || !config) {

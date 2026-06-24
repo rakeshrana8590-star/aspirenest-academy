@@ -5209,7 +5209,7 @@ isAdmin={isAdmin}
 
 <Route
   path="/admin/content/access/manage"
-  element={requireAdmin() ? <AdminAccessManageRoute /> : null}
+  element={requireAdmin() ? <AdminAccessManageRoute user={user} isAdmin={isAdmin} /> : null}
 />
 
 <Route
