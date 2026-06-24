@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
 import { listStudentAccess, normalizeAccessEmail } from "../accessService";
-import { AdminButton, AdminFilterBar, AdminFilterField, AdminPortalActionMenu } from "../../components/shared/admin";
+import { AdminButton, AdminEmptyState, AdminErrorBox, AdminFilterBar, AdminFilterField, AdminPortalActionMenu, AdminStatusPill } from "../../components/shared/admin";
 import "../../styles/shared/adminSystem.css";
 
 const actions = [
@@ -369,10 +369,7 @@ export default function AdminAccessManageRoute() {
         ) : null}
 
         {error ? (
-          <div className="adminAccessErrorBox">
-            <strong>Load failed:</strong>
-            <span>{error}</span>
-          </div>
+          <AdminErrorBox title="Load failed" message={error} />
         ) : null}
       </div>
 
@@ -392,8 +389,9 @@ export default function AdminAccessManageRoute() {
               return (
                 <div className="adminAccessRow" key={record.id}>
                   <strong>{email || record.uid || record.id}</strong>
-                  <span>
-                    {getText(record.planType, "FREE")} • {getScopeLabel(record.scopeType)} • {effectiveStatus}
+                  <span className="adminAccessRecordMeta">
+                    <span>{getText(record.planType, "FREE")} • {getScopeLabel(record.scopeType)}</span>
+                    <AdminStatusPill status={effectiveStatus} label={effectiveStatus} size="sm" />
                   </span>
 
                   <strong>Source</strong>
@@ -456,10 +454,12 @@ export default function AdminAccessManageRoute() {
               );
             })
           ) : (
-            <div className="adminAccessRow">
-              <strong>No access records loaded</strong>
-              <span>Search Gmail, clear filters, or refresh records.</span>
-            </div>
+            <AdminEmptyState
+              eyebrow="No access records"
+              title="No access records loaded"
+              description="Search Gmail, clear filters, or refresh records."
+              icon="A"
+            />
           )}
         </div>
       </div>

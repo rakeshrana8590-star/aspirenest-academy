@@ -910,3 +910,59 @@ button.adminAccessCard p {
     width: 100%;
   }
 }
+
+
+/* UI-1H Shared empty error status consumer polish */
+.adminAccessRecordMeta {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  width: fit-content;
+}
+
+.adminAccessRecordMeta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.adminAccessRow .adminStatusPill {
+  min-height: 23px;
+  padding: 4px 9px;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+}
+
+.adminAccessRow .adminStatusPill--success {
+  color: #047857;
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.22);
+}
+
+.adminAccessRow .adminStatusPill--warning {
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.13);
+  border-color: rgba(245, 158, 11, 0.22);
+}
+
+.adminAccessRow .adminStatusPill--danger {
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.22);
+}
+
+.adminAccessRow .adminStatusPill--neutral {
+  color: #475569;
+  background: rgba(100, 116, 139, 0.1);
+  border-color: rgba(100, 116, 139, 0.18);
+}
+
+.adminAccessRows .adminEmptyState {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.adminAccessFormPanel .adminErrorBox {
+  margin-top: 14px;
+}
