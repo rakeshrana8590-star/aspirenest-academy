@@ -24,7 +24,6 @@ export default function AdminPanel({
   enquiries,
   leaderboard,
   handlePremiumControl,
-  approvePaymentRequest,
 
   adminNoteTitle,
   setAdminNoteTitle,
