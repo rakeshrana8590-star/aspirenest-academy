@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
-import { listStudentAccess, normalizeAccessEmail } from "../accessService";
+import { extendAccess, listStudentAccess, normalizeAccessEmail } from "../accessService";
 import { AdminButton, AdminConfirmDialog, AdminEmptyState, AdminErrorBox, AdminFilterBar, AdminFilterField, AdminPortalActionMenu, AdminStatusPill } from "../../components/shared/admin";
 import "../../styles/shared/adminSystem.css";
 
@@ -21,8 +21,8 @@ const moduleOptions = ["all", "mock_test", "notes", "video", "current_affairs", 
 
 const lockedActionConfigs = {
   extend: {
-    title: "Extend Access Locked",
-    message: "This confirmation flow is ready, but the access extension write action is not connected yet.",
+    title: "Extend Access",
+    message: "This will update the selected access expiry date and create an audit log.",
     requiresText: "EXTEND",
     tone: "warning",
   },
@@ -179,6 +179,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
     status: "active",
     note: "",
   });
+  const [actionSubmitting, setActionSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -285,11 +286,46 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
     });
   };
 
-  const handleLockedActionConfirm = () => {
-    const draftParts = [];
-    if (lockedActionConfirm.type === "extend" && actionDraft.accessUntil) {
-      draftParts.push("New expiry: " + actionDraft.accessUntil);
+  const handleLockedActionConfirm = async () => {
+    if (lockedActionConfirm.type === "extend") {
+      if (!selectedRecord?.id) {
+        setMessage("Select an access record before extending access.");
+        return;
+      }
+
+      if (!actionDraft.accessUntil) {
+        setMessage("Select new access expiry date before confirming extend.");
+        return;
+      }
+
+      setActionSubmitting(true);
+
+      try {
+        await extendAccess(selectedRecord.id, actionDraft.accessUntil, adminActor);
+        const resultMessage =
+          "Extend Access completed. Access expiry updated to " +
+          actionDraft.accessUntil +
+          " and audit log created.";
+
+        setMessage(resultMessage);
+        setLockedActionResult(resultMessage);
+        closeLockedActionConfirm();
+        await loadRecords(normalizedEmail || searchEmail);
+        setSelectedRecordId(selectedRecord.id);
+      } catch (actionError) {
+        const errorMessage =
+          "Extend access failed: " +
+          (actionError?.message || "Unknown error.");
+        setMessage(errorMessage);
+        setLockedActionResult(errorMessage);
+      } finally {
+        setActionSubmitting(false);
+      }
+
+      return;
     }
+
+    const draftParts = [];
     if (lockedActionConfirm.type === "status" && actionDraft.status) {
       draftParts.push("New status: " + actionDraft.status);
     }
@@ -582,7 +618,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
         <div className="adminAccessPreviewPanel">
           <div className="adminAccessPreviewHeader">
             <span>Selected Record Safety</span>
-            <strong>Read-only locked</strong>
+            <strong>Extend live • others locked</strong>
           </div>
 
           <div className="adminAccessRows">
@@ -600,7 +636,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
               <span>{getSourceLabel(selectedRecord.source)} • {getText(selectedRecord.accessKeyId, "No key")}</span>
 
               <strong>Future Actions</strong>
-              <span>Extend, change status, change plan, and soft revoke will require confirmation and audit in the next phase.</span>
+              <span>Extend is live with audit logging. Status change, plan change, and soft revoke remain locked for the next phase.</span>
 
               {lockedActionResult ? (
                 <div className="adminAccessLockedResult">{lockedActionResult}</div>
@@ -616,7 +652,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
                   })
                 }
               >
-                Open Locked Actions
+                Open Access Actions
               </AdminButton>
             </div>
           </div>
@@ -627,11 +663,11 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
         open={lockedActionConfirm.open}
         title={lockedActionConfirm.title || "Locked Action"}
         message={lockedActionConfirm.message || "This action is locked for the audited action phase."}
-        confirmLabel="Confirm Locked Check"
+        confirmLabel={lockedActionConfirm.type === "extend" ? "Extend Access" : "Confirm Locked Check"}
         cancelLabel="Cancel"
         tone={lockedActionConfirm.tone}
         requiresText={lockedActionConfirm.requiresText}
-        loading={false}
+        loading={actionSubmitting}
         onCancel={closeLockedActionConfirm}
         onConfirm={handleLockedActionConfirm}
       >
@@ -704,8 +740,8 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
         actions={[
           {
             key: "extend-locked",
-            label: "Extend Locked",
-            description: "Open confirmation flow only. No write yet.",
+            label: "Extend Access",
+            description: "Update expiry with audit log.",
             tone: "warning",
             onClick: () => openLockedActionConfirm("extend"),
           },
