@@ -18,3 +18,23 @@ export async function rejectPaymentRequest(paymentId) {
     rejectedAt: new Date(),
   });
 }
+
+
+export async function saveAdminPaymentVerification(paymentId, verification = {}) {
+  if (!paymentId) throw new Error("Payment id is required");
+  const isVerified = verification.verificationStatus === "verified";
+  await updateDoc(doc(db, "payments", paymentId), {
+    adminProof: verification.adminProof || "",
+    studentUtr: verification.studentUtr || "",
+    adminUtr: verification.adminUtr || "",
+    utrMatch: Boolean(verification.utrMatch),
+    amountMatch: Boolean(verification.amountMatch),
+    duplicateUtr: Boolean(verification.duplicateUtr),
+    verificationStatus: verification.verificationStatus || "review_required",
+    reviewReason: verification.reviewReason || "Verification failed",
+    matchStatus: isVerified ? "auto_verified" : "review_required",
+    status: isVerified ? "student_proof_submitted" : "review_required",
+    verifiedAt: isVerified ? new Date() : null,
+    reviewedAt: new Date(),
+  });
+}

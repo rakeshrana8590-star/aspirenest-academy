@@ -9,8 +9,8 @@ import {
   AdminSectionHeader,
   AdminStatusPill,
 } from "../../components/shared/admin";
-import { extractUtr, formatDate, getIdentity, getMs, statusLabel } from "../paymentUtils";
-import { markPaymentReviewRequired, rejectPaymentRequest } from "../paymentService";
+import { comparePaymentProofs, extractUtr, formatDate, getIdentity, getMs, statusLabel } from "../paymentUtils";
+import { markPaymentReviewRequired, rejectPaymentRequest, saveAdminPaymentVerification } from "../paymentService";
 import "../../styles/payments/adminPaymentVerification.css";
 
 const STATUS_OPTIONS = [
@@ -97,10 +97,18 @@ export default function AdminPaymentVerificationRoute({
 
   async function approvePayment(payment) {
     if (!payment?.id) return;
+    const adminProof = adminProofs[payment.id] || "";
+    const verification = comparePaymentProofs(payment, adminProof, safePayments);
     try {
       setLoadingId(payment.id);
       setRouteError("");
-      await approvePaymentRequest?.(payment);
+      await saveAdminPaymentVerification(payment.id, verification);
+      if (!verification.isVerified) {
+        await loadPaymentRequests?.();
+        alert("Payment moved to review: " + verification.reviewReason);
+        return;
+      }
+      await approvePaymentRequest?.(Object.assign({}, payment, verification, { adminProof }));
     } catch (error) {
       setRouteError(error?.message || "Payment approval failed.");
     } finally {
@@ -197,7 +205,7 @@ export default function AdminPaymentVerificationRoute({
                     <AdminStatusPill status="approved" label="Premium Activated" />
                   ) : (
                     <>
-                      <AdminButton variant="primary" size="sm" loading={busy} onClick={() => approvePayment(payment)}>Approve Payment</AdminButton>
+                      <AdminButton variant="primary" size="sm" loading={busy} onClick={() => approvePayment(payment)}>Auto Verify & Approve</AdminButton>
                       <AdminButton variant="secondary" size="sm" disabled={busy} onClick={() => markReviewRequired(payment)}>Mark Review</AdminButton>
                       <AdminButton variant="danger" size="sm" disabled={busy} onClick={() => openRejectConfirm(payment)}>Reject</AdminButton>
                     </>
