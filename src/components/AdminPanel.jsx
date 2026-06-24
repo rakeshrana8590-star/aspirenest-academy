@@ -15,6 +15,7 @@ import {
   CONTENT_SECTIONS,
   PLAN_TYPES,
 } from "../contentSystem";
+import { AdminButton, AdminStatusPill } from "./shared/admin";
 export default function AdminPanel({
   isAdmin,
   activeAdminTab,
@@ -1183,22 +1184,15 @@ const isDuplicateUtr = duplicateUtrCount > 1;
   />
 )}
             {payment.status === "approved" ? (
-  <div
-    style={{
-      marginTop: "12px",
-      padding: "12px 16px",
-      borderRadius: "14px",
-      background: "#dcfce7",
-      color: "#166534",
-      fontWeight: "800",
-      display: "inline-block",
-    }}
-  >
-    ✅ Premium Activated
-  </div>
+  <AdminStatusPill
+    status="approved"
+    label="✅ Premium Activated"
+    size="md"
+  />
 ) : (
-<button
-  className="btnLink"
+<AdminButton
+  variant="primary"
+  size="sm"
   onClick={async () => {
     const adminProof = adminProofs[payment.id] || "";
     const studentProof = payment.studentProof || "";
@@ -1238,7 +1232,7 @@ const amountMatch =
   }}
 >
   Auto Match & Approve
-</button>
+</AdminButton>
 )}
 {adminProofs[payment.id] && payment.studentProof && (
   <div
@@ -1332,18 +1326,17 @@ const amountMatch =
             flexWrap: "wrap",
           }}
         >
-          <button
-            className="btnLink"
+          <AdminButton
+            variant="primary"
+            size="sm"
             onClick={() => approvePaymentRequest(payment)}
-            style={{
-              background: "#16a34a",
-            }}
           >
             ✅ Approve Manually
-          </button>
+          </AdminButton>
 
-          <button
-            className="btnLink"
+          <AdminButton
+            variant="danger"
+            size="sm"
             onClick={async () => {
               await updateDoc(
                 doc(db, "paymentRequests", payment.id),
@@ -1355,12 +1348,9 @@ const amountMatch =
 
               alert("Payment request rejected.");
             }}
-            style={{
-              background: "#dc2626",
-            }}
           >
             ❌ Reject Request
-          </button>
+          </AdminButton>
         </div>
       </>
     )}
