@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
-import { extendAccess, listStudentAccess, normalizeAccessEmail, updateAccessStatus } from "../accessService";
+import { extendAccess, listStudentAccess, normalizeAccessEmail, revokeAccess, updateAccessStatus } from "../accessService";
 import { AdminButton, AdminConfirmDialog, AdminEmptyState, AdminErrorBox, AdminFilterBar, AdminFilterField, AdminPortalActionMenu, AdminStatusPill } from "../../components/shared/admin";
 import "../../styles/shared/adminSystem.css";
 
@@ -33,8 +33,8 @@ const lockedActionConfigs = {
     tone: "info",
   },
   revoke: {
-    title: "Revoke Access Locked",
-    message: "This confirmation flow is ready, but revoke will stay blocked until audit-backed writes are added.",
+    title: "Revoke Access",
+    message: "This will block the selected access record and create an audit log. This does not delete the learner record.",
     requiresText: "REVOKE",
     tone: "danger",
   },
@@ -363,6 +363,45 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
       return;
     }
 
+    if (lockedActionConfirm.type === "revoke") {
+      if (!selectedRecord?.id) {
+        setMessage("Select an access record before revoking access.");
+        return;
+      }
+
+      if (!actionDraft.note.trim()) {
+        setMessage("Write revoke note before confirming revoke.");
+        return;
+      }
+
+      setActionSubmitting(true);
+
+      try {
+        await revokeAccess(selectedRecord.id, adminActor, {
+          note: actionDraft.note.trim(),
+          source: "admin_access_manage",
+        });
+        const resultMessage =
+          "Revoke Access completed. Access status updated to blocked and audit log created.";
+
+        setMessage(resultMessage);
+        setLockedActionResult(resultMessage);
+        closeLockedActionConfirm();
+        await loadRecords(normalizedEmail || searchEmail);
+        setSelectedRecordId(selectedRecord.id);
+      } catch (actionError) {
+        const errorMessage =
+          "Revoke access failed: " +
+          (actionError?.message || "Unknown error.");
+        setMessage(errorMessage);
+        setLockedActionResult(errorMessage);
+      } finally {
+        setActionSubmitting(false);
+      }
+
+      return;
+    }
+
     const draftParts = [];
     if (lockedActionConfirm.type === "status" && actionDraft.status) {
       draftParts.push("New status: " + actionDraft.status);
@@ -656,7 +695,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
         <div className="adminAccessPreviewPanel">
           <div className="adminAccessPreviewHeader">
             <span>Selected Record Safety</span>
-            <strong>Extend + Status live • Revoke locked</strong>
+            <strong>Extend + Status + Revoke live</strong>
           </div>
 
           <div className="adminAccessRows">
@@ -674,7 +713,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
               <span>{getSourceLabel(selectedRecord.source)} • {getText(selectedRecord.accessKeyId, "No key")}</span>
 
               <strong>Access Actions</strong>
-              <span>Extend and status change are live with audit logging. Plan change and soft revoke remain locked for the next phase.</span>
+              <span>Extend, status change, and revoke are live with audit logging. Plan change remains locked for the next phase.</span>
 
               {lockedActionResult ? (
                 <div className="adminAccessLockedResult">{lockedActionResult}</div>
@@ -701,7 +740,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
         open={lockedActionConfirm.open}
         title={lockedActionConfirm.title || "Locked Action"}
         message={lockedActionConfirm.message || "This action is locked for the audited action phase."}
-        confirmLabel={lockedActionConfirm.type === "extend" ? "Extend Access" : lockedActionConfirm.type === "status" ? "Update Status" : "Confirm Locked Check"}
+        confirmLabel={lockedActionConfirm.type === "extend" ? "Extend Access" : lockedActionConfirm.type === "status" ? "Update Status" : lockedActionConfirm.type === "revoke" ? "Revoke Access" : "Confirm Locked Check"}
         cancelLabel="Cancel"
         tone={lockedActionConfirm.tone}
         requiresText={lockedActionConfirm.requiresText}
@@ -742,7 +781,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
               <textarea
                 value={actionDraft.note}
                 onChange={(event) => handleActionDraftChange("note", event.target.value)}
-                placeholder="Write reason for audit trail before real revoke is connected."
+                placeholder="Write reason for audit trail. Required before revoke."
                 rows="3"
               />
             </label>
@@ -760,7 +799,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
             </label>
           ) : null}
 
-          <p>{lockedActionConfirm.type === "revoke" ? "Input foundation only. Real write will connect in the next audited phase." : "This action will update access and create an audit log."}</p>
+          <p>This action will update access and create an audit log.</p>
         </div>
       </AdminConfirmDialog>
 
@@ -792,7 +831,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
           },
           {
             key: "revoke-locked",
-            label: "Revoke Locked",
+            label: "Revoke Access",
             description: "Open confirmation flow only. No write yet.",
             tone: "danger",
             onClick: () => openLockedActionConfirm("revoke"),

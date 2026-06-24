@@ -411,7 +411,7 @@ export const upgradeAccess = async (id, planType, actor = {}) => {
   };
 };
 
-export const revokeAccess = async (id, actor = {}) => {
+export const revokeAccess = async (id, actor = {}, metadata = {}) => {
   const accessId = requireAccessId(id);
   const adminActor = requireAdminActor(actor);
   const before = await readAccessById(accessId);
@@ -432,6 +432,7 @@ export const revokeAccess = async (id, actor = {}) => {
     uid: before?.uid,
     before,
     after: payload,
+    metadata,
   });
 
   return {
