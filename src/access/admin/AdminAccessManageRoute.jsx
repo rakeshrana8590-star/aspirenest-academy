@@ -174,6 +174,11 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
     tone: "warning",
   });
   const [lockedActionResult, setLockedActionResult] = useState("");
+  const [actionDraft, setActionDraft] = useState({
+    accessUntil: "",
+    status: "active",
+    note: "",
+  });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -256,6 +261,11 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
       return;
     }
     setLockedActionResult("");
+    setActionDraft({
+      accessUntil: "",
+      status: getEffectiveStatus(selectedRecord || {}) || "active",
+      note: "",
+    });
 
     if (!selectedRecord || !config) {
       setMessage("Select an access record before opening a locked action.");
@@ -276,12 +286,31 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
   };
 
   const handleLockedActionConfirm = () => {
+    const draftParts = [];
+    if (lockedActionConfirm.type === "extend" && actionDraft.accessUntil) {
+      draftParts.push("New expiry: " + actionDraft.accessUntil);
+    }
+    if (lockedActionConfirm.type === "status" && actionDraft.status) {
+      draftParts.push("New status: " + actionDraft.status);
+    }
+    if (actionDraft.note) {
+      draftParts.push("Note: " + actionDraft.note);
+    }
+    const draftText = draftParts.length ? " Draft: " + draftParts.join(" • ") + "." : "";
     const resultMessage =
       lockedActionConfirm.title +
-      " confirmed as a safe placeholder. No access record was changed."; 
+      " confirmed as a safe placeholder. No access record was changed." +
+      draftText;
     setMessage(resultMessage);
     setLockedActionResult(resultMessage);
     closeLockedActionConfirm();
+  };
+
+  const handleActionDraftChange = (field, value) => {
+    setActionDraft((current) => ({
+      ...current,
+      [field]: value,
+    }));
   };
 
   const stats = useMemo(() => {
@@ -594,7 +623,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
         </div>
       ) : null}
 
-     <AdminConfirmDialog
+      <AdminConfirmDialog
         open={lockedActionConfirm.open}
         title={lockedActionConfirm.title || "Locked Action"}
         message={lockedActionConfirm.message || "This action is locked for the audited action phase."}
@@ -605,7 +634,61 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
         loading={false}
         onCancel={closeLockedActionConfirm}
         onConfirm={handleLockedActionConfirm}
-      />
+      >
+        <div className="adminAccessActionDraft">
+          {lockedActionConfirm.type === "extend" ? (
+            <label>
+              <span>New access expiry date</span>
+              <input
+                type="date"
+                value={actionDraft.accessUntil}
+                onChange={(event) => handleActionDraftChange("accessUntil", event.target.value)}
+              />
+            </label>
+          ) : null}
+
+          {lockedActionConfirm.type === "status" ? (
+            <label>
+              <span>New access status</span>
+              <select
+                value={actionDraft.status}
+                onChange={(event) => handleActionDraftChange("status", event.target.value)}
+              >
+                <option value="active">Active</option>
+                <option value="blocked">Blocked</option>
+                <option value="expired">Expired</option>
+                <option value="pending">Pending</option>
+              </select>
+            </label>
+          ) : null}
+
+          {lockedActionConfirm.type === "revoke" ? (
+            <label>
+              <span>Revoke note</span>
+              <textarea
+                value={actionDraft.note}
+                onChange={(event) => handleActionDraftChange("note", event.target.value)}
+                placeholder="Write reason for audit trail before real revoke is connected."
+                rows="3"
+              />
+            </label>
+          ) : null}
+
+          {lockedActionConfirm.type !== "revoke" ? (
+            <label>
+              <span>Action note</span>
+              <textarea
+                value={actionDraft.note}
+                onChange={(event) => handleActionDraftChange("note", event.target.value)}
+                placeholder="Optional action note for audit trail."
+                rows="2"
+              />
+            </label>
+          ) : null}
+
+          <p>Input foundation only. Real write will connect in the next audited phase.</p>
+        </div>
+      </AdminConfirmDialog>
 
       <AdminPortalActionMenu
         open={accessActionMenu.open}
