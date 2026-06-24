@@ -257,3 +257,158 @@
   max-height: min(360px, calc(100vh - 104px));
   overflow-y: auto;
 }
+
+/* UI-1C — Shared admin confirm dialog */
+.adminConfirmOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.44);
+  backdrop-filter: blur(10px);
+}
+
+.adminConfirmDialog {
+  width: min(520px, calc(100vw - 32px));
+  border-radius: 24px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: 0 30px 90px rgba(15, 23, 42, 0.28);
+}
+
+.adminConfirmHeader {
+  min-height: 50px;
+  padding: 12px 14px 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.adminConfirmHeader span {
+  color: #0f172a;
+  font-size: 0.78rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.adminConfirmHeader button {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.adminConfirmBody {
+  padding: 20px;
+}
+
+.adminConfirmBody h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.2rem;
+  letter-spacing: -0.03em;
+}
+
+.adminConfirmBody p {
+  margin: 8px 0 0;
+  color: #64748b;
+  line-height: 1.6;
+  font-weight: 700;
+}
+
+.adminConfirmCustomBody {
+  margin-top: 14px;
+}
+
+.adminConfirmTypeBox {
+  margin-top: 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.adminConfirmTypeBox span {
+  color: #334155;
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.adminConfirmTypeBox input {
+  width: 100%;
+  min-height: 42px;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.36);
+  padding: 10px 12px;
+  font: inherit;
+  font-weight: 800;
+  outline: none;
+}
+
+.adminConfirmTypeBox input:focus {
+  border-color: rgba(249, 115, 22, 0.72);
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.12);
+}
+
+.adminConfirmFooter {
+  padding: 14px 18px 18px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.adminConfirmButton {
+  border: 0;
+  border-radius: 14px;
+  min-height: 40px;
+  padding: 10px 14px;
+  font: inherit;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.adminConfirmButton:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+}
+
+.adminConfirmButton--ghost {
+  color: #334155;
+  background: rgba(241, 245, 249, 0.95);
+}
+
+.adminConfirmButton--warning {
+  color: #ffffff;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.adminConfirmButton--danger {
+  color: #ffffff;
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+}
+
+.adminConfirmButton--info,
+.adminConfirmButton--success {
+  color: #ffffff;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+@media (max-width: 560px) {
+  .adminConfirmFooter {
+    display: grid;
+  }
+
+  .adminConfirmButton {
+    width: 100%;
+  }
+}
