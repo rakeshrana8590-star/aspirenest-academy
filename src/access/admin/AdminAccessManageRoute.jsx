@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
 import { listStudentAccess, normalizeAccessEmail } from "../accessService";
-import { AdminPortalActionMenu } from "../../components/shared/admin";
+import { AdminFilterBar, AdminFilterField, AdminPortalActionMenu } from "../../components/shared/admin";
 import "../../styles/shared/adminSystem.css";
 
 const actions = [
@@ -275,9 +275,17 @@ export default function AdminAccessManageRoute() {
       stats={stats}
     >
       <div className="adminAccessFormPanel">
-        <div className="adminAccessFormGrid">
-          <div className="adminAccessField adminAccessFieldWide">
-            <label>Search by Registered Gmail</label>
+        <AdminFilterBar
+          eyebrow="Manage Controls"
+          title="Search & Filter Access"
+          description="Find learner entitlements by Gmail, status, source, plan, scope, and module without changing any access record."
+          rightSlot={<strong>{loading ? "Loading..." : filteredRecords.length + " shown"}</strong>}
+        >
+          <AdminFilterField
+            label="Search by Registered Gmail"
+            hint="Email is normalized before Firestore search."
+            className="adminAccessFieldWide"
+          >
             <input
               value={searchEmail}
               onChange={(event) => {
@@ -286,59 +294,48 @@ export default function AdminAccessManageRoute() {
               }}
               placeholder="learner@gmail.com"
             />
-            <small>Email is normalized before Firestore search.</small>
-          </div>
+          </AdminFilterField>
 
-          <div className="adminAccessField">
-            <label>Status</label>
+          <AdminFilterField label="Status">
             <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
               {statusOptions.map((option) => (
                 <option value={option} key={option}>{option}</option>
               ))}
             </select>
-          </div>
+          </AdminFilterField>
 
-          <div className="adminAccessField">
-            <label>Source</label>
+          <AdminFilterField label="Source">
             <select value={sourceFilter} onChange={(event) => setSourceFilter(event.target.value)}>
               {sourceOptions.map((option) => (
                 <option value={option} key={option}>{option}</option>
               ))}
             </select>
-          </div>
+          </AdminFilterField>
 
-          <div className="adminAccessField">
-            <label>Plan</label>
+          <AdminFilterField label="Plan">
             <select value={planFilter} onChange={(event) => setPlanFilter(event.target.value)}>
               {planOptions.map((option) => (
                 <option value={option} key={option}>{option}</option>
               ))}
             </select>
-          </div>
+          </AdminFilterField>
 
-          <div className="adminAccessField">
-            <label>Scope</label>
+          <AdminFilterField label="Scope">
             <select value={scopeFilter} onChange={(event) => setScopeFilter(event.target.value)}>
               {scopeOptions.map((option) => (
                 <option value={option} key={option}>{option}</option>
               ))}
             </select>
-          </div>
+          </AdminFilterField>
 
-          <div className="adminAccessField">
-            <label>Module</label>
+          <AdminFilterField label="Module">
             <select value={moduleFilter} onChange={(event) => setModuleFilter(event.target.value)}>
               {moduleOptions.map((option) => (
                 <option value={option} key={option}>{option}</option>
               ))}
             </select>
-          </div>
-        </div>
-
-        <div className="adminAccessPreviewHeader">
-          <span>Manage Controls</span>
-          <strong>{loading ? "Loading..." : filteredRecords.length + " shown"}</strong>
-        </div>
+          </AdminFilterField>
+        </AdminFilterBar>
 
         <div className="adminAccessHeroActions">
           <button
