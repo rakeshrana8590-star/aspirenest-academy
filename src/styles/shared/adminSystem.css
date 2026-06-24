@@ -247,3 +247,13 @@
     left: 12px !important;
   }
 }
+
+/* UI-1B — Shared portal menu viewport safety */
+.adminPortalMenu {
+  max-height: calc(100vh - 24px);
+}
+
+.adminPortalMenuList {
+  max-height: min(360px, calc(100vh - 104px));
+  overflow-y: auto;
+}

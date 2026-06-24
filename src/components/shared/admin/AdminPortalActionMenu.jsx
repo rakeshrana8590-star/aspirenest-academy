@@ -40,7 +40,7 @@ export default function AdminPortalActionMenu({
   left = Math.max(12, Math.min(left, viewportWidth - width - 12));
 
   let top = anchorRect.bottom + gap;
-  const estimatedHeight = Math.min(420, 54 + safeActions.length * 48);
+  const estimatedHeight = Math.min(420, 72 + safeActions.length * 86);
 
   if (top + estimatedHeight > viewportHeight - 12) {
     top = Math.max(12, anchorRect.top - estimatedHeight - gap);
