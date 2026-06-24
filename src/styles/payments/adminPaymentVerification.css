@@ -1,0 +1,22 @@
+.adminPaymentRoute{display:flex;flex-direction:column;gap:18px;}
+.adminPaymentKpiGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;}
+.adminPaymentKpiGrid>div,.adminPaymentCard,.adminPaymentProofBox{border:1px solid rgba(148,163,184,.22);background:rgba(15,23,42,.74);box-shadow:0 24px 70px rgba(2,6,23,.26);backdrop-filter:blur(18px);}
+.adminPaymentKpiGrid>div{border-radius:22px;padding:18px;}
+.adminPaymentKpiGrid span,.adminPaymentCardHeader span,.adminPaymentMetaGrid span,.adminPaymentProofBox span,.adminPaymentProofInput span{display:block;color:rgba(226,232,240,.68);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
+.adminPaymentKpiGrid strong{display:block;margin-top:8px;color:#f8fafc;font-size:28px;line-height:1;}
+.adminPaymentToggleBtn{width:100%;min-height:42px;border:1px solid rgba(148,163,184,.25);border-radius:14px;color:#f8fafc;background:rgba(15,23,42,.88);font-weight:900;cursor:pointer;}
+.adminPaymentGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
+.adminPaymentCard{border-radius:28px;padding:18px;display:flex;flex-direction:column;gap:14px;}
+.adminPaymentCardHeader,.adminPaymentActions{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.adminPaymentCard h3{margin:6px 0 0;color:#f8fafc;font-size:20px;line-height:1.2;overflow-wrap:anywhere;}
+.adminPaymentMetaGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+.adminPaymentMetaGrid div{min-width:0;border-radius:18px;padding:12px;background:rgba(2,6,23,.32);}
+.adminPaymentMetaGrid strong{display:block;margin-top:5px;color:#f8fafc;font-size:14px;overflow-wrap:anywhere;}
+.adminPaymentProofBox{border-radius:20px;padding:14px;}
+.adminPaymentProofBox p{margin:8px 0 0;color:rgba(248,250,252,.88);line-height:1.55;overflow-wrap:anywhere;}
+.adminPaymentProofInput{display:flex;flex-direction:column;gap:8px;}
+.adminPaymentProofInput textarea{width:100%;min-height:92px;resize:vertical;border:1px solid rgba(148,163,184,.28);border-radius:18px;padding:13px 14px;color:#f8fafc;background:rgba(2,6,23,.46);outline:none;}
+.adminPaymentProofInput textarea:focus{border-color:rgba(56,189,248,.68);box-shadow:0 0 0 4px rgba(56,189,248,.14);}
+.adminPaymentActions{justify-content:flex-start;flex-wrap:wrap;}
+@media(max-width:980px){.adminPaymentKpiGrid,.adminPaymentGrid{grid-template-columns:1fr;}}
+@media(max-width:640px){.adminPaymentMetaGrid{grid-template-columns:1fr;}.adminPaymentCardHeader{flex-direction:column;}}

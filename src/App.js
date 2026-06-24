@@ -186,6 +186,7 @@ import AdminAccessBulkRoute from "./access/admin/AdminAccessBulkRoute.jsx";
 import AdminAccessInvitesRoute from "./access/admin/AdminAccessInvitesRoute.jsx";
 import AdminAccessProfileRoute from "./access/admin/AdminAccessProfileRoute.jsx";
 import AdminAccessAuditRoute from "./access/admin/AdminAccessAuditRoute.jsx";
+import AdminPaymentVerificationRoute from "./payments/admin/AdminPaymentVerificationRoute.jsx";
 import StudentRedeemAccessRoute from "./access/StudentRedeemAccessRoute.jsx";
 import AdminAccessProductsRoute from "./access/admin/AdminAccessProductsRoute.jsx";
 import AdminAccessKeysRoute from "./access/admin/AdminAccessKeysRoute.jsx";
@@ -5142,7 +5143,7 @@ isAdmin={isAdmin}
             📰 Current Affairs CMS
           </button>
 
-          <button onClick={() => { setActiveAdminTab("Payments"); navigate("/admin/payments"); }}>
+          <button onClick={() => { setActiveAdminTab("Payments"); navigate("/admin/content/payments"); }}>
             💳 Payments
           </button>
 
@@ -5275,6 +5276,19 @@ isAdmin={isAdmin}
 />
 
 <Route
+  path="/admin/content/payments"
+  element={
+    requireAdmin() ? (
+      <AdminPaymentVerificationRoute
+        paymentRequests={paymentRequests || []}
+        loadPaymentRequests={loadPaymentRequests}
+        approvePaymentRequest={approvePaymentRequest}
+      />
+    ) : null
+  }
+/>
+
+<Route
   path="/admin/content"
   element={
     <section className="coursePages">
@@ -5392,6 +5406,16 @@ isAdmin={isAdmin}
           }
         >
           💳 Pricing Manager
+        </button>
+
+        <button
+          onClick={() =>
+            navigate(
+              "/admin/content/payments"
+            )
+          }
+        >
+          Payment Verification
         </button>
 
       </div>
@@ -7615,53 +7639,10 @@ This action cannot be undone.`
   path="/admin/payments"
   element={
     requireAdmin() ? (
-      <section className="coursePages">
-        {(() => {
-          setTimeout(() => setActiveAdminTab("Payments"), 0);
-
-          return (
-            <AdminPanel
-              user={user}
-              isAdmin={isAdmin}
-              activeAdminTab="Payments"
-              setActiveAdminTab={setActiveAdminTab}
-              students={students || []}
-              enquiries={enquiries || []}
-              mockResults={mockResults || []}
-              leaderboard={leaderboard || []}
-              mockQuestions={mockQuestions || []}
-              notesData={[]}
-              firebaseNotes={firebaseNotes || []}
-              currentAffairs={currentAffairsList || []}
-              currentAffairsList={currentAffairsList || []}
-              fallbackCurrentAffairs={currentAffairsList || []}
-              announcements={announcements || []}
-              paymentHistory={paymentHistory || []}
-              paymentRequests={paymentRequests || []}
-              loadPaymentRequests={loadPaymentRequests}
-              loadAdminData={loadAdminData}
-              loadLeaderboard={loadLeaderboard}
-              loadPaymentHistory={loadPaymentHistory}
-              handlePremiumControl={handlePremiumControl}
-              approvePaymentRequest={approvePaymentRequest}
-              handleDeleteMockQuestion={handleDeleteMockQuestion}
-              handleAddMockQuestion={handleAddMockQuestion}
-              handleSaveNote={handleSaveNote}
-              handleEditNote={handleEditNote}
-              handleDeleteNote={handleDeleteNote}
-              handleSaveCurrentAffairs={handleSaveCurrentAffairs}
-              handleEditCurrentAffairs={handleEditCurrentAffairs}
-              handleDeleteCurrentAffairs={handleDeleteCurrentAffairs}
-              handleAddAnnouncement={handleAddAnnouncement}
-              handleDeleteAnnouncement={handleDeleteAnnouncement}
-            />
-          );
-        })()}
-      </section>
+      <Navigate to="/admin/content/payments" replace />
     ) : null
   }
 />
-
 <Route
   path="/admin/analytics"
   element={

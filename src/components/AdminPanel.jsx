@@ -294,7 +294,7 @@ const isDuplicateUtr = duplicateUtrCount > 1;
               "Current Affairs": "/admin/current-affairs",
               "Mock Tests": "/admin/mock-tests",
               Analytics: "/admin/analytics",
-              Payments: "/admin/payments",
+              Payments: "/admin/content/payments",
               Announcements: "/admin/announcements",
             };
         
