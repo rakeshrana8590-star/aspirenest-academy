@@ -412,3 +412,114 @@
     width: 100%;
   }
 }
+
+/* UI-1D Shared admin filter bar */
+.adminFilterBar {
+  border-radius: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
+  padding: 18px;
+  display: grid;
+  gap: 16px;
+}
+
+.adminFilterBarHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.adminFilterEyebrow {
+  display: inline-flex;
+  margin-bottom: 5px;
+  color: #f97316;
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.adminFilterBarHeader h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.04rem;
+  letter-spacing: -0.03em;
+}
+
+.adminFilterBarHeader p {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  font-weight: 700;
+}
+
+.adminFilterBarRight {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.adminFilterBarGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.adminFilterField {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+}
+
+.adminFilterLabel {
+  color: #475569;
+  font-size: 0.76rem;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.adminFilterField input,
+.adminFilterField select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.92);
+  color: #0f172a;
+  font: inherit;
+  font-weight: 800;
+  padding: 9px 12px;
+  outline: none;
+}
+
+.adminFilterField input:focus,
+.adminFilterField select:focus {
+  border-color: rgba(249, 115, 22, 0.72);
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.12);
+  background: #ffffff;
+}
+
+.adminFilterHint {
+  color: #94a3b8;
+  font-size: 0.74rem;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+@media (max-width: 720px) {
+  .adminFilterBarHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .adminFilterBarRight {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
