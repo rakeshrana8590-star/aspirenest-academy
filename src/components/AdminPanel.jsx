@@ -89,7 +89,6 @@ export default function AdminPanel({
   handleDeleteMockQuestion,
 
   paymentHistory,
-  paymentRequests,
   loadPaymentRequests,
 
   announcementTitle,
@@ -149,9 +148,7 @@ export default function AdminPanel({
   handleSaveUniversalContent,
 }) {
   const navigate = useNavigate();
-const [showRecentOnly, setShowRecentOnly] = useState(true);
 const [adminProofs, setAdminProofs] = useState({});
-const [paymentFilter, setPaymentFilter] = useState("student_proof_submitted");
 const [cmsFilter, setCmsFilter] = useState("ALL");
 const [cmsPlanFilter, setCmsPlanFilter] = useState("ALL");
 
@@ -170,75 +167,6 @@ if (!isAdmin()) return null;
     { name: "Fri", students: 9, enquiries: 5 },
     { name: "Sat", students: 12, enquiries: 6 },
   ];
-
-  const getPaymentPriority = (payment) => {
-    const proofText = payment.studentProof || "";
-  
-    const hasUtr = /\d{6,}/.test(proofText);
-    const currentUtr = proofText.match(/\d{6,}/)?.[0];
-
-const duplicateUtrCount = paymentRequests.filter((p) => {
-  const utr = (p.studentProof || "").match(/\d{6,}/)?.[0];
-
-  return utr && currentUtr && utr === currentUtr;
-}).length;
-
-const isDuplicateUtr = duplicateUtrCount > 1;
-    const isHighAmount = Number(payment.amount) >= 1499;
-  
-    if (isDuplicateUtr) {
-      return {
-        label: "🚨 Duplicate UTR Detected",
-        bg: "#fee2e2",
-        color: "#991b1b",
-      };
-    }
-    if (payment.status === "approved") {
-      return {
-        label: "✅ Verified",
-        bg: "#dcfce7",
-        color: "#166534",
-      };
-    }
-  
-    if (payment.status === "review_required") {
-      return {
-        label: "🔴 Needs Manual Review",
-        bg: "#fee2e2",
-        color: "#991b1b",
-      };
-    }
-  
-    if (payment.status === "student_proof_submitted" && !hasUtr) {
-      return {
-        label: "⚠️ UTR Missing",
-        bg: "#fef3c7",
-        color: "#92400e",
-      };
-    }
-  
-    if (payment.status === "student_proof_submitted" && isHighAmount) {
-      return {
-        label: "🚨 High Amount Verify Carefully",
-        bg: "#ffedd5",
-        color: "#9a3412",
-      };
-    }
-  
-    if (payment.status === "student_proof_submitted") {
-      return {
-        label: "🔥 Needs Verification",
-        bg: "#dbeafe",
-        color: "#1d4ed8",
-      };
-    }
-  
-    return {
-      label: "⏳ Waiting",
-      bg: "#f1f5f9",
-      color: "#475569",
-    };
-  };
 
   const allNotes =
     firebaseNotes.length > 0 ? firebaseNotes : notesData;
