@@ -21,7 +21,7 @@ export default function AdminConfirmDialog({
     [requiresText]
   );
 
-  const canConfirm = !requiredText || typedText.trim() === requiredText;
+  const canConfirm = !requiredText || typedText.trim().toUpperCase() === requiredText.toUpperCase();
 
   useEffect(() => {
     if (open) {

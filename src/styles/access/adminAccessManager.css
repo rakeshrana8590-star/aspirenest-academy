@@ -966,3 +966,15 @@ button.adminAccessCard p {
 .adminAccessFormPanel .adminErrorBox {
   margin-top: 14px;
 }
+
+/* ACCESS-11A locked action result */
+.adminAccessLockedResult {
+  grid-column: 1 / -1;
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  color: #0f5132;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  font-weight: 900;
+}

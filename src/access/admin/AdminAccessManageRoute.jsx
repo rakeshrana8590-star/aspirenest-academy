@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
 import { listStudentAccess, normalizeAccessEmail } from "../accessService";
-import { AdminButton, AdminEmptyState, AdminErrorBox, AdminFilterBar, AdminFilterField, AdminPortalActionMenu, AdminStatusPill } from "../../components/shared/admin";
+import { AdminButton, AdminConfirmDialog, AdminEmptyState, AdminErrorBox, AdminFilterBar, AdminFilterField, AdminPortalActionMenu, AdminStatusPill } from "../../components/shared/admin";
 import "../../styles/shared/adminSystem.css";
 
 const actions = [
@@ -18,6 +18,27 @@ const sourceOptions = ["all", "redeem_key", "admin_manual", "bulk_import", "paym
 const planOptions = ["all", "FREE", "BASIC", "PREMIUM", "MENTORSHIP"];
 const scopeOptions = ["all", "plan", "module", "item", "bundle"];
 const moduleOptions = ["all", "mock_test", "notes", "video", "current_affairs", "roadmap"];
+
+const lockedActionConfigs = {
+  extend: {
+    title: "Extend Access Locked",
+    message: "This confirmation flow is ready, but the access extension write action is not connected yet.",
+    requiresText: "EXTEND",
+    tone: "warning",
+  },
+  status: {
+    title: "Status Change Locked",
+    message: "This confirmation flow is ready, but the status update write action is not connected yet.",
+    requiresText: "STATUS",
+    tone: "info",
+  },
+  revoke: {
+    title: "Revoke Access Locked",
+    message: "This confirmation flow is ready, but revoke will stay blocked until audit-backed writes are added.",
+    requiresText: "REVOKE",
+    tone: "danger",
+  },
+};
 
 const getDateObject = (value) => {
   if (!value) return null;
@@ -137,6 +158,15 @@ export default function AdminAccessManageRoute() {
     anchorRect: null,
     recordId: "",
   });
+  const [lockedActionConfirm, setLockedActionConfirm] = useState({
+    open: false,
+    type: "",
+    title: "",
+    message: "",
+    requiresText: "",
+    tone: "warning",
+  });
+  const [lockedActionResult, setLockedActionResult] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -198,6 +228,48 @@ export default function AdminAccessManageRoute() {
     () => records.find((record) => record.id === selectedRecordId) || null,
     [records, selectedRecordId]
   );
+
+  const closeLockedActionConfirm = () => {
+    setLockedActionConfirm({
+      open: false,
+      type: "",
+      title: "",
+      message: "",
+      requiresText: "",
+      tone: "warning",
+    });
+  };
+
+  const openLockedActionConfirm = (type) => {
+    const config = lockedActionConfigs[type];
+    setLockedActionResult("");
+
+    if (!selectedRecord || !config) {
+      setMessage("Select an access record before opening a locked action.");
+      return;
+    }
+
+    setAccessActionMenu({
+      open: false,
+      anchorRect: null,
+      recordId: "",
+    });
+
+    setLockedActionConfirm({
+      open: true,
+      type,
+      ...config,
+    });
+  };
+
+  const handleLockedActionConfirm = () => {
+    const resultMessage =
+      lockedActionConfirm.title +
+      " confirmed as a safe placeholder. No access record was changed."; 
+    setMessage(resultMessage);
+    setLockedActionResult(resultMessage);
+    closeLockedActionConfirm();
+  };
 
   const stats = useMemo(() => {
     const activeCount = records.filter((record) => getEffectiveStatus(record) === "active").length;
@@ -488,6 +560,10 @@ export default function AdminAccessManageRoute() {
               <strong>Future Actions</strong>
               <span>Extend, change status, change plan, and soft revoke will require confirmation and audit in the next phase.</span>
 
+              {lockedActionResult ? (
+                <div className="adminAccessLockedResult">{lockedActionResult}</div>
+              ) : null}
+
               <AdminButton
                 variant="secondary"
                 onClick={(event) =>
@@ -505,6 +581,19 @@ export default function AdminAccessManageRoute() {
         </div>
       ) : null}
 
+     <AdminConfirmDialog
+        open={lockedActionConfirm.open}
+        title={lockedActionConfirm.title || "Locked Action"}
+        message={lockedActionConfirm.message || "This action is locked for the audited action phase."}
+        confirmLabel="Confirm Locked Check"
+        cancelLabel="Cancel"
+        tone={lockedActionConfirm.tone}
+        requiresText={lockedActionConfirm.requiresText}
+        loading={false}
+        onCancel={closeLockedActionConfirm}
+        onConfirm={handleLockedActionConfirm}
+      />
+
       <AdminPortalActionMenu
         open={accessActionMenu.open}
         anchorRect={accessActionMenu.anchorRect}
@@ -520,23 +609,23 @@ export default function AdminAccessManageRoute() {
           {
             key: "extend-locked",
             label: "Extend Locked",
-            description: "Requires confirmation and audit in next phase.",
+            description: "Open confirmation flow only. No write yet.",
             tone: "warning",
-            disabled: true,
+            onClick: () => openLockedActionConfirm("extend"),
           },
           {
             key: "status-locked",
             label: "Status Locked",
-            description: "Requires confirmation and audit in next phase.",
+            description: "Open confirmation flow only. No write yet.",
             tone: "info",
-            disabled: true,
+            onClick: () => openLockedActionConfirm("status"),
           },
           {
             key: "revoke-locked",
             label: "Revoke Locked",
-            description: "Requires confirmation and audit in next phase.",
+            description: "Open confirmation flow only. No write yet.",
             tone: "danger",
-            disabled: true,
+            onClick: () => openLockedActionConfirm("revoke"),
           },
         ]}
       />
