@@ -1,6 +1,4 @@
 import React, { useMemo, useState } from "react";
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "../../firebase";
 import {
   AdminButton,
   AdminConfirmDialog,
@@ -12,6 +10,7 @@ import {
   AdminStatusPill,
 } from "../../components/shared/admin";
 import { extractUtr, formatDate, getIdentity, getMs, statusLabel } from "../paymentUtils";
+import { markPaymentReviewRequired, rejectPaymentRequest } from "../paymentService";
 import "../../styles/payments/adminPaymentVerification.css";
 
 const STATUS_OPTIONS = [
@@ -62,12 +61,7 @@ export default function AdminPaymentVerificationRoute({
     try {
       setLoadingId(payment.id);
       setRouteError("");
-      await updateDoc(doc(db, "payments", payment.id), {
-        status: "review_required",
-        reviewRequired: true,
-        reviewReason: "UTR or amount mismatch",
-        reviewedAt: new Date(),
-      });
+      await markPaymentReviewRequired(payment.id, "UTR or amount mismatch");
       await loadPaymentRequests?.();
     } catch (error) {
       setRouteError(error?.message || "Payment review update failed.");
@@ -91,10 +85,7 @@ export default function AdminPaymentVerificationRoute({
     try {
       setLoadingId(payment.id);
       setRouteError("");
-      await updateDoc(doc(db, "payments", payment.id), {
-        status: "rejected",
-        rejectedAt: new Date(),
-      });
+      await rejectPaymentRequest(payment.id);
       await loadPaymentRequests?.();
       setConfirmAction(null);
     } catch (error) {
