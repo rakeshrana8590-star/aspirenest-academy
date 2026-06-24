@@ -17,6 +17,7 @@ import {
   ACCESS_ITEM_TYPES,
   ACCESS_KEY_STATUS,
   ACCESS_PLAN_TYPES,
+  ACCESS_PLAN_LEVELS,
   ACCESS_SCOPE_TYPES,
   ACCESS_SOURCE,
   ACCESS_STATUS,
@@ -937,3 +938,205 @@ export const redeemAccessKeyFoundation = async ({
     },
   };
 };
+
+const PAYMENT_PLAN_NAME_MAP = Object.freeze({
+  "Personal Mentorship": ACCESS_PLAN_TYPES.MENTORSHIP,
+  "Premium Batch": ACCESS_PLAN_TYPES.PREMIUM,
+  "Topic-wise Courses": ACCESS_PLAN_TYPES.BASIC,
+});
+
+function resolvePaymentPlanType(payment = {}) {
+  const mappedPlan =
+    PAYMENT_PLAN_NAME_MAP[payment.planName] ||
+    payment.planType ||
+    payment.activePlan ||
+    payment.subscriptionType ||
+    ACCESS_PLAN_TYPES.PREMIUM;
+
+  return normalizeAccessPlan(mappedPlan);
+}
+
+function resolvePaymentValidityMonths(payment = {}) {
+  const rawMonths =
+    payment.validityMonths ||
+    payment.durationMonths ||
+    payment.durationInMonths ||
+    payment.selectedDurationMonths ||
+    payment.duration;
+
+  const parsedMonths = Number(rawMonths);
+
+  if (Number.isFinite(parsedMonths) && Math.max(parsedMonths, 0) === parsedMonths && parsedMonths !== 0) {
+    return parsedMonths;
+  }
+
+  return 6;
+}
+
+function toPaymentAccessDate(value) {
+  if (!value) return null;
+
+  if (value instanceof Date) return value;
+
+  if (typeof value.toDate === "function") {
+    return value.toDate();
+  }
+
+  if (typeof value.seconds === "number") {
+    return new Date(value.seconds * 1000);
+  }
+
+  const parsed = new Date(value);
+
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function addPaymentAccessMonths(date, months) {
+  const baseDate = toPaymentAccessDate(date) || new Date();
+  const nextDate = new Date(baseDate.getTime());
+
+  nextDate.setMonth(nextDate.getMonth() + months);
+
+  return nextDate;
+}
+
+function getPaymentPlanLevel(planType) {
+  return ACCESS_PLAN_LEVELS[normalizeAccessPlan(planType)] || 0;
+}
+
+function uniquePaymentAccessRecords(records = []) {
+  const recordMap = new Map();
+
+  records.filter(Boolean).forEach(function(record) {
+    const key =
+      record.id ||
+      (String(record.uid || "") + ":" + String(record.normalizedEmail || record.email || ""));
+
+    if (key && !recordMap.has(key)) {
+      recordMap.set(key, record);
+    }
+  });
+
+  return Array.from(recordMap.values());
+}
+
+function pickPaymentAccessRecord(records = []) {
+  return records.find(function(record) {
+    return (record.course || ACCESS_COURSE.CTET_TET) === ACCESS_COURSE.CTET_TET && (record.scopeType || ACCESS_SCOPE_TYPES.PLAN) === ACCESS_SCOPE_TYPES.PLAN;
+  }) || records[0] || null;
+}
+
+export async function grantPaymentAccess(payment = {}, actor = {}) {
+  const adminActor = requireAdminActor(actor);
+  const normalizedEmail = normalizeAccessEmail(payment.studentEmail || payment.email || payment.userEmail);
+  const uid = String(payment.userId || payment.uid || "").trim();
+
+  if (!normalizedEmail && !uid) {
+    throw new Error("Payment access requires learner email or user id.");
+  }
+
+  const paymentPlanType = resolvePaymentPlanType(payment);
+  const validityMonths = resolvePaymentValidityMonths(payment);
+  const accessFrom = payment.accessFrom || payment.purchaseDate || new Date();
+  const paymentAccessUntil =
+    payment.accessUntil ||
+    payment.expiryDate ||
+    addPaymentAccessMonths(accessFrom, validityMonths);
+
+  const uidMatches = uid ? await getAccessByUid(uid) : [];
+  const emailMatches = normalizedEmail ? await getAccessByEmail(normalizedEmail) : [];
+  const existingAccess = pickPaymentAccessRecord(uniquePaymentAccessRecords(uidMatches.concat(emailMatches)));
+
+  const before = existingAccess ? Object.assign({}, existingAccess) : null;
+  const existingPlanLevel = before ? getPaymentPlanLevel(before.planType) : -1;
+  const paymentPlanLevel = getPaymentPlanLevel(paymentPlanType);
+  const shouldPreserveExistingPlan = Boolean(before && Math.max(existingPlanLevel, paymentPlanLevel) === existingPlanLevel && existingPlanLevel !== paymentPlanLevel);
+  const finalPlanType = shouldPreserveExistingPlan ? normalizeAccessPlan(before.planType) : paymentPlanType;
+
+  const existingUntilDate = before ? toPaymentAccessDate(before.accessUntil) : null;
+  const paymentUntilDate = toPaymentAccessDate(paymentAccessUntil);
+  const shouldPreserveExistingUntil = Boolean(existingUntilDate && paymentUntilDate && Math.max(existingUntilDate.getTime(), paymentUntilDate.getTime()) === existingUntilDate.getTime() && existingUntilDate.getTime() !== paymentUntilDate.getTime());
+  const finalAccessUntil = shouldPreserveExistingUntil ? before.accessUntil : paymentAccessUntil;
+
+  const payload = Object.assign({}, buildAccessPayload({
+    email: normalizedEmail,
+    uid,
+    name: payment.studentName || payment.name || "",
+    learnerName: payment.studentName || payment.learnerName || payment.name || "",
+    phone: payment.studentMobile || payment.phone || "",
+    planType: finalPlanType,
+    status: ACCESS_STATUS.ACTIVE,
+    source: ACCESS_SOURCE.PAYMENT,
+    course: payment.course || ACCESS_COURSE.CTET_TET,
+    scopeType: ACCESS_SCOPE_TYPES.PLAN,
+    accessFrom,
+    accessUntil: finalAccessUntil,
+    notes: payment.notes || payment.adminNote || ("Payment approved" + (payment.orderId ? ": " + payment.orderId : "")),
+  }), {
+    paymentId: payment.paymentId || payment.id || null,
+    paymentRequestId: payment.paymentRequestId || payment.id || null,
+    orderId: payment.orderId || "",
+    amount: payment.amount || null,
+    paymentPlanName: payment.planName || "",
+    validityMonths,
+    updatedBy: adminActor.uid,
+  });
+
+  const auditMetadata = {
+    source: ACCESS_SOURCE.PAYMENT,
+    paymentId: payload.paymentId,
+    paymentRequestId: payload.paymentRequestId,
+    orderId: payload.orderId,
+    amount: payload.amount,
+    requestedPlanType: paymentPlanType,
+    finalPlanType,
+    validityMonths,
+    conflictSafe: Boolean(before),
+    preservedHigherPlan: shouldPreserveExistingPlan,
+    preservedLongerValidity: shouldPreserveExistingUntil,
+  };
+
+  if (before && before.id) {
+    await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, before.id), payload);
+
+    await createAccessAuditLog({
+      actor: adminActor,
+      action: "payment_access_granted",
+      accessId: before.id,
+      email: payload.email,
+      uid: payload.uid,
+      before,
+      after: payload,
+      metadata: auditMetadata,
+    });
+
+    return Object.assign({}, before, payload, {
+      id: before.id,
+      accessWriteMode: "updated",
+    });
+  }
+
+  const createPayload = Object.assign({}, payload, {
+    createdAt: serverTimestamp(),
+    createdBy: adminActor.uid,
+    actorEmail: adminActor.email,
+  });
+
+  const docRef = await addDoc(collection(db, ACCESS_COLLECTIONS.STUDENT_ACCESS), createPayload);
+
+  await createAccessAuditLog({
+    actor: adminActor,
+    action: "payment_access_granted",
+    accessId: docRef.id,
+    email: createPayload.email,
+    uid: createPayload.uid,
+    before: null,
+    after: createPayload,
+    metadata: auditMetadata,
+  });
+
+  return Object.assign({}, createPayload, {
+    id: docRef.id,
+    accessWriteMode: "created",
+  });
+}

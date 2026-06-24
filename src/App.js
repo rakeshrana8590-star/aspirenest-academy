@@ -35,6 +35,7 @@ import {
   canAccessContent,
 } from "./access/accessUtils";
 import useAccessProfile from "./access/useAccessProfile";
+import { grantPaymentAccess } from "./access/accessService";
 import { upsertLearnerLoginSnapshot } from "./profile/learnerProfileService";
 
 import {
@@ -3241,32 +3242,60 @@ subjectName:
   
     alert("Announcement deleted successfully ✅");
   };
-  const approvePaymentRequest = async (payment) => {
-    if (!payment?.id) {
+  const approvePaymentRequest = async function(payment) {
+    if (!payment || !payment.id) {
       alert("Payment record not found.");
       return;
     }
-  
+
     try {
       if (!payment.userId) {
         alert("Student user ID not found in this payment.");
         return;
       }
-  
+
       const userRef = doc(db, "users", payment.userId);
       const planType =
-  payment.planName === "Personal Mentorship"
-    ? "MENTORSHIP"
-    : payment.planName === "Premium Batch"
-    ? "PREMIUM"
-    : payment.planName === "Topic-wise Courses"
-    ? "BASIC"
-    : "PREMIUM";
-  
+        payment.planName === "Personal Mentorship"
+          ? "MENTORSHIP"
+          : payment.planName === "Premium Batch"
+          ? "PREMIUM"
+          : payment.planName === "Topic-wise Courses"
+          ? "BASIC"
+          : payment.planType || "PREMIUM";
+
       const purchaseDate = new Date();
+      const validityMonthsRaw =
+        payment.validityMonths ||
+        payment.durationMonths ||
+        payment.durationInMonths ||
+        payment.selectedDurationMonths ||
+        payment.duration ||
+        6;
+      const validityMonths = Number(validityMonthsRaw);
+      const safeValidityMonths =
+        Number.isFinite(validityMonths) && Math.max(validityMonths, 0) === validityMonths && validityMonths !== 0
+          ? validityMonths
+          : 6;
+
       const expiryDate = new Date();
-      expiryDate.setMonth(expiryDate.getMonth() + 6);
-  
+      expiryDate.setMonth(expiryDate.getMonth() + safeValidityMonths);
+
+      await grantPaymentAccess(
+        Object.assign({}, payment, {
+          planType,
+          accessFrom: purchaseDate,
+          accessUntil: expiryDate,
+          validityMonths: safeValidityMonths,
+        }),
+        {
+          uid: user && user.uid ? user.uid : null,
+          email: user && user.email ? user.email : "aspirenestplatform@gmail.com",
+          role: "admin",
+          isAdmin: true,
+        }
+      );
+
       await setDoc(
         userRef,
         {
@@ -3281,15 +3310,18 @@ subjectName:
         },
         { merge: true }
       );
-  
+
       await updateDoc(doc(db, "payments", payment.id), {
         status: "approved",
         matchStatus: "admin_approved",
         approvedAt: new Date(),
+        approvedPlanType: planType,
+        accessEngineSynced: true,
+        accessUntil: expiryDate,
       });
-  
-      alert("Payment approved and premium access activated ✅");
-  
+
+      alert("Payment approved and access activated ✅");
+
       loadPaymentRequests();
       loadPaymentHistory();
       loadAdminData();
