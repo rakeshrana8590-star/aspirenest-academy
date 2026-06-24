@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
 import { listStudentAccess, normalizeAccessEmail } from "../accessService";
-import { AdminFilterBar, AdminFilterField, AdminPortalActionMenu } from "../../components/shared/admin";
+import { AdminButton, AdminFilterBar, AdminFilterField, AdminPortalActionMenu } from "../../components/shared/admin";
 import "../../styles/shared/adminSystem.css";
 
 const actions = [
@@ -280,6 +280,33 @@ export default function AdminAccessManageRoute() {
           title="Search & Filter Access"
           description="Find learner entitlements by Gmail, status, source, plan, scope, and module without changing any access record."
           rightSlot={<strong>{loading ? "Loading..." : filteredRecords.length + " shown"}</strong>}
+          footerSlot={
+            <div className="adminAccessHeroActions adminAccessHeroActions--filterBar">
+              <AdminButton
+                variant="primary"
+                onClick={handleSearch}
+                disabled={loading}
+              >
+                {loading ? "Searching..." : "Search Access"}
+              </AdminButton>
+
+              <AdminButton
+                variant="secondary"
+                onClick={() => loadRecords(searchEmail.trim())}
+                disabled={loading}
+              >
+                Refresh Records
+              </AdminButton>
+
+              <AdminButton
+                variant="secondary"
+                onClick={handleClear}
+                disabled={loading}
+              >
+                Clear Filters
+              </AdminButton>
+            </div>
+          }
         >
           <AdminFilterField
             label="Search by Registered Gmail"
@@ -336,35 +363,6 @@ export default function AdminAccessManageRoute() {
             </select>
           </AdminFilterField>
         </AdminFilterBar>
-
-        <div className="adminAccessHeroActions">
-          <button
-            type="button"
-            className="adminAccessPrimaryButton"
-            onClick={handleSearch}
-            disabled={loading}
-          >
-            {loading ? "Searching..." : "Search Access"}
-          </button>
-
-          <button
-            type="button"
-            className="adminAccessSecondaryButton"
-            onClick={() => loadRecords(searchEmail.trim())}
-            disabled={loading}
-          >
-            Refresh Records
-          </button>
-
-          <button
-            type="button"
-            className="adminAccessSecondaryButton"
-            onClick={handleClear}
-            disabled={loading}
-          >
-            Clear Filters
-          </button>
-        </div>
 
         {message ? (
           <div className="adminAccessNotice">{message}</div>
@@ -492,9 +490,8 @@ export default function AdminAccessManageRoute() {
               <strong>Future Actions</strong>
               <span>Extend, change status, change plan, and soft revoke will require confirmation and audit in the next phase.</span>
 
-              <button
-                type="button"
-                className="adminAccessSecondaryButton"
+              <AdminButton
+                variant="secondary"
                 onClick={(event) =>
                   setAccessActionMenu({
                     open: true,
@@ -504,7 +501,7 @@ export default function AdminAccessManageRoute() {
                 }
               >
                 Open Locked Actions
-              </button>
+              </AdminButton>
             </div>
           </div>
         </div>

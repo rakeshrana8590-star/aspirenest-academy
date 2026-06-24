@@ -22,6 +22,7 @@ export default function AdminFilterBar({
   title = "Manage Controls",
   description = "",
   rightSlot,
+  footerSlot,
   children,
   className = "",
 }) {
@@ -40,6 +41,8 @@ export default function AdminFilterBar({
       </div>
 
       <div className="adminFilterBarGrid">{children}</div>
+
+      {footerSlot ? <div className="adminFilterBarFooter">{footerSlot}</div> : null}
     </section>
   );
 }
