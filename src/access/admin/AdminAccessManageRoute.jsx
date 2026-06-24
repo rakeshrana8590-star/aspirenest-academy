@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
-import { extendAccess, listStudentAccess, normalizeAccessEmail, revokeAccess, updateAccessStatus } from "../accessService";
+import { extendAccess, listStudentAccess, normalizeAccessEmail, revokeAccess, updateAccessStatus, upgradeAccess } from "../accessService";
 import { AdminButton, AdminConfirmDialog, AdminEmptyState, AdminErrorBox, AdminFilterBar, AdminFilterField, AdminPortalActionMenu, AdminStatusPill } from "../../components/shared/admin";
 import "../../styles/shared/adminSystem.css";
 
@@ -37,6 +37,12 @@ const lockedActionConfigs = {
     message: "This will block the selected access record and create an audit log. This does not delete the learner record.",
     requiresText: "REVOKE",
     tone: "danger",
+  },
+  plan: {
+    title: "Plan Change",
+    message: "This will update the selected access plan and set the access status to ACTIVE. Audit log will be created.",
+    requiresText: "PLAN",
+    tone: "info",
   },
 };
 
@@ -178,6 +184,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
     accessUntil: "",
     status: "active",
     note: "",
+    planType: "FREE",
   });
   const [actionSubmitting, setActionSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -266,6 +273,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
       accessUntil: "",
       status: getEffectiveStatus(selectedRecord || {}) || "active",
       note: "",
+      planType: selectedRecord?.planType || "FREE",
     });
 
     if (!selectedRecord || !config) {
@@ -392,6 +400,47 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
       } catch (actionError) {
         const errorMessage =
           "Revoke access failed: " +
+          (actionError?.message || "Unknown error.");
+        setMessage(errorMessage);
+        setLockedActionResult(errorMessage);
+      } finally {
+        setActionSubmitting(false);
+      }
+
+      return;
+    }
+
+    if (lockedActionConfirm.type === "plan") {
+      if (!selectedRecord?.id) {
+        setMessage("Select an access record before changing plan.");
+        return;
+      }
+
+      if (!actionDraft.planType) {
+        setMessage("Select new access plan before confirming plan change.");
+        return;
+      }
+
+      setActionSubmitting(true);
+
+      try {
+        await upgradeAccess(selectedRecord.id, actionDraft.planType, adminActor, {
+          note: actionDraft.note.trim(),
+          source: "admin_access_manage",
+        });
+        const resultMessage =
+          "Plan Change completed. Access plan updated to " +
+          actionDraft.planType +
+          " and audit log created. Status set to active.";
+
+        setMessage(resultMessage);
+        setLockedActionResult(resultMessage);
+        closeLockedActionConfirm();
+        await loadRecords(normalizedEmail || searchEmail);
+        setSelectedRecordId(selectedRecord.id);
+      } catch (actionError) {
+        const errorMessage =
+          "Plan change failed: " +
           (actionError?.message || "Unknown error.");
         setMessage(errorMessage);
         setLockedActionResult(errorMessage);
@@ -695,7 +744,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
         <div className="adminAccessPreviewPanel">
           <div className="adminAccessPreviewHeader">
             <span>Selected Record Safety</span>
-            <strong>Extend + Status + Revoke live</strong>
+            <strong>All access actions live</strong>
           </div>
 
           <div className="adminAccessRows">
@@ -713,7 +762,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
               <span>{getSourceLabel(selectedRecord.source)} • {getText(selectedRecord.accessKeyId, "No key")}</span>
 
               <strong>Access Actions</strong>
-              <span>Extend, status change, and revoke are live with audit logging. Plan change remains locked for the next phase.</span>
+              <span>Extend, status change, revoke, and plan change are live with audit logging.</span>
 
               {lockedActionResult ? (
                 <div className="adminAccessLockedResult">{lockedActionResult}</div>
@@ -740,7 +789,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
         open={lockedActionConfirm.open}
         title={lockedActionConfirm.title || "Locked Action"}
         message={lockedActionConfirm.message || "This action is locked for the audited action phase."}
-        confirmLabel={lockedActionConfirm.type === "extend" ? "Extend Access" : lockedActionConfirm.type === "status" ? "Update Status" : lockedActionConfirm.type === "revoke" ? "Revoke Access" : "Confirm Locked Check"}
+        confirmLabel={lockedActionConfirm.type === "extend" ? "Extend Access" : lockedActionConfirm.type === "status" ? "Update Status" : lockedActionConfirm.type === "revoke" ? "Revoke Access" : lockedActionConfirm.type === "plan" ? "Change Plan" : "Confirm Locked Check"}
         cancelLabel="Cancel"
         tone={lockedActionConfirm.tone}
         requiresText={lockedActionConfirm.requiresText}
@@ -773,6 +822,25 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
                 <option value="pending">Pending</option>
               </select>
             </label>
+          ) : null}
+
+          {lockedActionConfirm.type === "plan" ? (
+            <label>
+              <span>New access plan</span>
+              <select
+                value={actionDraft.planType}
+                onChange={(event) => handleActionDraftChange("planType", event.target.value)}
+              >
+                <option value="FREE">FREE</option>
+                <option value="BASIC">BASIC</option>
+                <option value="PREMIUM">PREMIUM</option>
+                <option value="MENTORSHIP">MENTORSHIP</option>
+              </select>
+            </label>
+          ) : null}
+
+          {lockedActionConfirm.type === "plan" ? (
+            <p>Plan change will also set this access record status to ACTIVE.</p>
           ) : null}
 
           {lockedActionConfirm.type === "revoke" ? (
@@ -832,9 +900,16 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
           {
             key: "revoke-locked",
             label: "Revoke Access",
-            description: "Open confirmation flow only. No write yet.",
+            description: "Block access with audit log.",
             tone: "danger",
             onClick: () => openLockedActionConfirm("revoke"),
+          },
+          {
+            key: "plan-change",
+            label: "Plan Change",
+            description: "Update plan with audit log.",
+            tone: "info",
+            onClick: () => openLockedActionConfirm("plan"),
           },
         ]}
       />

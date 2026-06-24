@@ -382,7 +382,7 @@ export const extendAccess = async (id, accessUntil, actor = {}) => {
   };
 };
 
-export const upgradeAccess = async (id, planType, actor = {}) => {
+export const upgradeAccess = async (id, planType, actor = {}, metadata = {}) => {
   const accessId = requireAccessId(id);
   const adminActor = requireAdminActor(actor);
   const before = await readAccessById(accessId);
@@ -403,6 +403,7 @@ export const upgradeAccess = async (id, planType, actor = {}) => {
     uid: before?.uid,
     before,
     after: payload,
+    metadata,
   });
 
   return {
