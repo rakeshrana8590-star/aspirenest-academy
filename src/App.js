@@ -3250,6 +3250,11 @@ subjectName:
     }
 
     try {
+
+      if (payment.status === "approved" || payment.accessEngineSynced === true) {
+        alert("Payment is already approved and synced.");
+        return;
+      }
       if (!payment.userId) {
         alert("Student user ID not found in this payment.");
         return;
