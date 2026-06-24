@@ -11,6 +11,7 @@ import {
   AdminSectionHeader,
   AdminStatusPill,
 } from "../../components/shared/admin";
+import { extractUtr, formatDate, getIdentity, getMs, statusLabel } from "../paymentUtils";
 import "../../styles/payments/adminPaymentVerification.css";
 
 const STATUS_OPTIONS = [
@@ -21,38 +22,6 @@ const STATUS_OPTIONS = [
   { value: "rejected", label: "Rejected" },
   { value: "pending_payment", label: "Pending Payment" },
 ];
-
-function getMs(value) {
-  if (!value) return 0;
-  if (value.toDate) return value.toDate().getTime();
-  const ms = new Date(value).getTime();
-  return Number.isFinite(ms) ? ms : 0;
-}
-
-function formatDate(value) {
-  const ms = getMs(value);
-  if (!ms) return "Recently";
-  return new Date(ms).toLocaleString();
-}
-
-function extractUtr(text) {
-  return String(text || "").match(/d{6,}/)?.[0] || "";
-}
-
-function statusLabel(status) {
-  const map = {
-    pending_payment: "Pending Payment",
-    student_proof_submitted: "Proof Submitted",
-    review_required: "Review Required",
-    approved: "Approved",
-    rejected: "Rejected",
-  };
-  return map[status] || status || "Unknown";
-}
-
-function getIdentity(payment) {
-  return payment.studentEmail || payment.email || payment.studentName || "Student";
-}
 
 export default function AdminPaymentVerificationRoute({
   paymentRequests = [],
