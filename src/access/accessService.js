@@ -149,6 +149,30 @@ export const getAccessByUid = async (uid) => {
   return readAccessQuery("uid", normalizedUid);
 };
 
+const getRedeemedAccessByKeyForLearner = async ({
+  accessKeyId = "",
+  normalizedEmail = "",
+  uid = "",
+} = {}) => {
+  const normalizedAccessKeyId = String(accessKeyId || "").trim();
+  const learnerEmail = normalizeAccessEmail(normalizedEmail);
+  const learnerUid = String(uid || "").trim();
+
+  if (!normalizedAccessKeyId || (!learnerEmail && !learnerUid)) {
+    return null;
+  }
+
+  const emailMatches = learnerEmail ? await getAccessByEmail(learnerEmail) : [];
+  const uidMatches = learnerUid ? await getAccessByUid(learnerUid) : [];
+  const learnerMatches = [...emailMatches, ...uidMatches];
+
+  return (
+    learnerMatches.find((record) =>
+      String(record.accessKeyId || "").trim() === normalizedAccessKeyId
+    ) || null
+  );
+};
+
 export const createAccessAuditLog = async (data = {}) => {
   const actor = requireAdminActor(data.actor);
   const auditPayload = {
@@ -831,8 +855,23 @@ export const validateAccessKeyForRedeem = async ({
     uid: normalizedUid,
   });
 
+  const duplicateAccessRecord = keyRecord?.id
+    ? await getRedeemedAccessByKeyForLearner({
+        accessKeyId: keyRecord.id,
+        normalizedEmail,
+        uid: normalizedUid,
+      })
+    : null;
+
+  const duplicateErrors = duplicateAccessRecord
+    ? ["This access key is already redeemed for this learner account."]
+    : [];
+
   return {
     ...validation,
+    isValid: validation.isValid && duplicateErrors.length === 0,
+    errors: [...validation.errors, ...duplicateErrors],
+    duplicateAccessRecord,
     keyRecord,
     normalizedCode,
     normalizedEmail,
