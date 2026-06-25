@@ -1936,29 +1936,49 @@ const [paymentHistory, setPaymentHistory] = useState([]);
     if (!note) {
       return;
     }
-  
-    const accessType =
-      note.accessPlan || note.type || "FREE";
-  
-    if (
-      accessType !== "FREE" &&
-      !hasPlanAccess(accessType)
-    ) {
-      navigate("/ctet-tet/pricing");
-  
+
+    const rawAccessType =
+      note.accessPlan || note.planType || note.plan || note.type || "FREE";
+
+    const normalizedAccessType = String(rawAccessType || "FREE")
+      .trim()
+      .toUpperCase();
+
+    const knownPlanTypes = ["FREE", "BASIC", "PREMIUM", "MENTORSHIP"];
+    const isKnownPlan = knownPlanTypes.includes(normalizedAccessType);
+    const accessType = isKnownPlan ? normalizedAccessType : "PREMIUM";
+    const accessLabel = isKnownPlan ? accessType : normalizedAccessType;
+
+    const notePdfUrl = note.pdfUrl || note.fileUrl || note.pdf || "";
+
+    const canOpenNote = hasPlanAccess(accessType, {
+      module: "notes",
+      itemType: "notesPdf",
+      itemId: String(note.id || note.slug || note.title || ""),
+    });
+
+    if (!canOpenNote) {
+      if (!user) {
+        navigate("/login");
+      } else {
+        navigate("/ctet-tet/pricing");
+      }
+
       alert(
-        `This content requires ${accessType} membership access.`
+        accessLabel === "FREE"
+          ? "This content is currently locked for your account."
+          : "This content requires " + accessLabel + " access."
       );
-  
+
       return;
     }
-  
-    if (!note.pdf || note.pdf === "#") {
+
+    if (!notePdfUrl || notePdfUrl === "#") {
       alert("PDF will be uploaded soon.");
       return;
     }
-  
-    window.open(note.pdf, "_blank");
+
+    window.open(notePdfUrl, "_blank", "noopener,noreferrer");
   };
   const handlePremiumSectionAccess = () => {
     if (!user) {
