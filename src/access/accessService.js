@@ -70,6 +70,20 @@ const requireAdminActor = (actor = {}) => {
   throw new Error("Admin access is required for this access write action.");
 };
 
+const getInviteExpiryDate = (days = 7) => {
+  const expiryDays = Number(days) > 0 ? Number(days) : 7;
+  return new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000);
+};
+
+const toInviteRecord = (docSnap) => {
+  if (!docSnap || !docSnap.exists()) return null;
+
+  return {
+    id: docSnap.id,
+    ...docSnap.data(),
+  };
+};
+
 const readAccessById = async (id) => {
   const accessId = requireAccessId(id);
   const accessRef = doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId);
@@ -312,6 +326,16 @@ export const createAccessInvite = async (data = {}) => {
     status: data.status || ACCESS_STATUS.PENDING,
     inviteStatus: data.inviteStatus || "pending",
     sendInvite: data.sendInvite === true,
+    inviteType: data.inviteType || "manual",
+    deliveryStatus: data.deliveryStatus || "queued",
+    provider: data.provider || "phase14_backend_pending",
+    actionMode: data.actionMode || "password_setup_or_google_login",
+    expiresAt: data.expiresAt || getInviteExpiryDate(data.expiryDays || 7),
+    sentAt: data.sentAt || null,
+    usedAt: data.usedAt || null,
+    resendCount: Number(data.resendCount || 0),
+    profileCompletionRequired: data.profileCompletionRequired !== false,
+    profileCompletedAt: data.profileCompletedAt || null,
     emailSent: false,
     accessFrom: data.accessFrom || null,
     accessUntil: data.accessUntil || null,
@@ -340,6 +364,111 @@ export const createAccessInvite = async (data = {}) => {
 
   return {
     id: docRef.id,
+    ...payload,
+  };
+};
+
+export const listAccessInvites = async (filters = {}) => {
+  requireAdminActor(filters.actor);
+  const inviteSnap = await getDocs(collection(db, ACCESS_COLLECTIONS.ACCESS_INVITES));
+  let records = inviteSnap.docs.map(toInviteRecord).filter(Boolean);
+
+  if (filters.email) {
+    const email = normalizeAccessEmail(filters.email);
+    records = records.filter((record) => normalizeAccessEmail(record.email || record.normalizedEmail) === email);
+  }
+
+  if (filters.inviteStatus && filters.inviteStatus !== "all") {
+    const status = String(filters.inviteStatus || "").trim().toLowerCase();
+    records = records.filter((record) => String(record.inviteStatus || "").trim().toLowerCase() === status);
+  }
+
+  return records.sort((a, b) => {
+    const aDate = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
+    const bDate = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt || 0).getTime();
+    return bDate - aDate;
+  });
+};
+
+export const updateAccessInviteStatus = async (id, inviteStatus, actor = {}, metadata = {}) => {
+  const inviteId = requireAccessEntityId(id, "Invite id");
+  const adminActor = requireAdminActor(actor);
+  const inviteRef = doc(db, ACCESS_COLLECTIONS.ACCESS_INVITES, inviteId);
+  const beforeSnap = await getDoc(inviteRef);
+  const before = toInviteRecord(beforeSnap);
+  const nextStatus = String(inviteStatus || "").trim().toLowerCase();
+
+  if (!nextStatus) {
+    throw new Error("Invite status is required.");
+  }
+
+  const payload = {
+    inviteStatus: nextStatus,
+    updatedAt: serverTimestamp(),
+    updatedBy: adminActor.uid,
+  };
+
+  if (nextStatus === "sent") payload.sentAt = serverTimestamp();
+  if (nextStatus === "used") payload.usedAt = serverTimestamp();
+  if (nextStatus === "revoked") payload.revokedAt = serverTimestamp();
+  if (nextStatus === "expired") payload.expiredAt = serverTimestamp();
+
+  await updateDoc(inviteRef, payload);
+
+  await createAccessAuditLog({
+    actor: adminActor,
+    action: metadata.action || "update_access_invite_status",
+    accessId: before?.accessId || null,
+    email: before?.email || before?.normalizedEmail,
+    uid: before?.uid || null,
+    before,
+    after: payload,
+    metadata,
+  });
+
+  return {
+    id: inviteId,
+    ...payload,
+  };
+};
+
+export const queueAccessInviteResend = async (id, actor = {}, metadata = {}) => {
+  const inviteId = requireAccessEntityId(id, "Invite id");
+  const adminActor = requireAdminActor(actor);
+  const inviteRef = doc(db, ACCESS_COLLECTIONS.ACCESS_INVITES, inviteId);
+  const beforeSnap = await getDoc(inviteRef);
+  const before = toInviteRecord(beforeSnap);
+
+  if (!before) {
+    throw new Error("Invite record not found.");
+  }
+
+  const payload = {
+    inviteStatus: "queued",
+    deliveryStatus: "queued_for_backend",
+    emailSent: false,
+    resendCount: Number(before.resendCount || 0) + 1,
+    lastResentAt: serverTimestamp(),
+    expiresAt: getInviteExpiryDate(metadata.expiryDays || 7),
+    updatedAt: serverTimestamp(),
+    updatedBy: adminActor.uid,
+  };
+
+  await updateDoc(inviteRef, payload);
+
+  await createAccessAuditLog({
+    actor: adminActor,
+    action: "queue_access_invite_resend",
+    accessId: before.accessId || null,
+    email: before.email || before.normalizedEmail,
+    uid: before.uid || null,
+    before,
+    after: payload,
+    metadata,
+  });
+
+  return {
+    id: inviteId,
     ...payload,
   };
 };
