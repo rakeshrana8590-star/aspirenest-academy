@@ -84,6 +84,32 @@ const toInviteRecord = (docSnap) => {
   };
 };
 
+const createInviteCode = () => {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+  let randomPart = "";
+
+  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+    const values = new Uint32Array(16);
+    crypto.getRandomValues(values);
+    randomPart = Array.from(values).map((value) => chars[value % chars.length]).join("");
+  } else {
+    randomPart = Array.from({ length: 16 }).map(() => chars[Math.floor(Math.random() * chars.length)]).join("");
+  }
+
+  return "AN-INV-" + Date.now().toString(36).toUpperCase() + "-" + randomPart;
+};
+
+const getInviteBaseUrl = () => {
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return window.location.origin;
+  }
+
+  return "https://aspirenestacademy.in";
+};
+
+const buildAccessInviteLink = (inviteCode = "") =>
+  getInviteBaseUrl() + "/access/invite/" + encodeURIComponent(inviteCode);
+
 const readAccessById = async (id) => {
   const accessId = requireAccessId(id);
   const accessRef = doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId);
@@ -113,6 +139,8 @@ const buildAccessPayload = (data = {}) => {
   return {
     email: normalizedEmail || null,
     normalizedEmail,
+    inviteCode,
+    inviteLink,
     uid: uid || null,
     planType: normalizeAccessPlan(data.planType || ACCESS_PLAN_TYPES.FREE),
     scopeType: data.scopeType || ACCESS_SCOPE_TYPES.PLAN,
@@ -260,6 +288,8 @@ export const createUserAccessShell = async (data = {}) => {
   const uid = String(data.uid || "").trim();
   const name = String(data.name || data.learnerName || "").trim();
   const phone = String(data.phone || "").trim();
+  const inviteCode = data.inviteCode || createInviteCode();
+  const inviteLink = data.inviteLink || buildAccessInviteLink(inviteCode);
 
   if (!normalizedEmail) {
     throw new Error("User shell email is required.");
@@ -336,6 +366,9 @@ export const createAccessInvite = async (data = {}) => {
     resendCount: Number(data.resendCount || 0),
     profileCompletionRequired: data.profileCompletionRequired !== false,
     profileCompletedAt: data.profileCompletedAt || null,
+    linkCopiedAt: data.linkCopiedAt || null,
+    manualSentAt: data.manualSentAt || null,
+    openedAt: data.openedAt || null,
     emailSent: false,
     accessFrom: data.accessFrom || null,
     accessUntil: data.accessUntil || null,
@@ -348,7 +381,8 @@ export const createAccessInvite = async (data = {}) => {
     updatedAt: serverTimestamp(),
   };
 
-  const docRef = await addDoc(collection(db, ACCESS_COLLECTIONS.ACCESS_INVITES), payload);
+  const docRef = doc(db, ACCESS_COLLECTIONS.ACCESS_INVITES, inviteCode);
+  await setDoc(docRef, payload);
 
   await createAccessAuditLog({
     actor,
@@ -408,7 +442,15 @@ export const updateAccessInviteStatus = async (id, inviteStatus, actor = {}, met
     updatedBy: adminActor.uid,
   };
 
-  if (nextStatus === "sent") payload.sentAt = serverTimestamp();
+  if (nextStatus === "copied") {
+    payload.linkCopiedAt = serverTimestamp();
+    payload.deliveryStatus = "manual_copy";
+  }
+  if (nextStatus === "sent") {
+    payload.sentAt = serverTimestamp();
+    payload.manualSentAt = serverTimestamp();
+    payload.deliveryStatus = "manual_sent";
+  }
   if (nextStatus === "used") payload.usedAt = serverTimestamp();
   if (nextStatus === "revoked") payload.revokedAt = serverTimestamp();
   if (nextStatus === "expired") payload.expiredAt = serverTimestamp();

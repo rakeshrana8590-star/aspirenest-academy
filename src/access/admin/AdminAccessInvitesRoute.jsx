@@ -26,7 +26,7 @@ const actions = [
   { icon: "L", label: "Logs", title: "Invite Audit", description: "Track invite status changes and admin notes.", route: "/admin/content/access/audit", tone: "purple" },
 ];
 
-const inviteStatusOptions = ["all", "pending", "queued", "sent", "used", "expired", "revoked"];
+const inviteStatusOptions = ["all", "pending", "copied", "queued", "sent", "used", "expired", "revoked"];
 
 const formatDateValue = (value) => {
   if (!value) return "Not set";
@@ -34,6 +34,13 @@ const formatDateValue = (value) => {
   if (value.toDate) return value.toDate().toLocaleDateString();
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? "Not set" : parsed.toLocaleDateString();
+};
+
+const buildInviteLinkForAdmin = (invite = {}) => {
+  if (invite.inviteLink) return invite.inviteLink;
+  if (!invite.inviteCode) return "";
+  const origin = typeof window !== "undefined" && window.location && window.location.origin ? window.location.origin : "https://aspirenestacademy.in";
+  return origin + "/access/invite/" + encodeURIComponent(invite.inviteCode);
 };
 
 const buildAdminActor = () => ({
@@ -96,6 +103,51 @@ export default function AdminAccessInvitesRoute() {
       { value: String(countByStatus("used")), label: "Used" },
     ];
   }, [invites]);
+
+  const handleCopyLink = async (invite) => {
+    const inviteLink = buildInviteLinkForAdmin(invite);
+
+    if (!inviteLink) {
+      setError("Invite link is not available for this record.");
+      return;
+    }
+
+    setActionLoadingId(invite.id);
+    setMessage("");
+    setError("");
+
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      await updateAccessInviteStatus(invite.id, "copied", adminActor, {
+        source: "admin_access_invites_route",
+      });
+      setMessage("Invite link copied for " + (invite.email || invite.normalizedEmail) + ".");
+      await loadInvites();
+    } catch (copyError) {
+      setError(copyError?.message || "Invite link copy failed.");
+    } finally {
+      setActionLoadingId("");
+    }
+  };
+
+  const handleMarkSent = async (invite) => {
+    setActionLoadingId(invite.id);
+    setMessage("");
+    setError("");
+
+    try {
+      await updateAccessInviteStatus(invite.id, "sent", adminActor, {
+        source: "admin_access_invites_route",
+        delivery: "manual",
+      });
+      setMessage("Invite marked sent for " + (invite.email || invite.normalizedEmail) + ".");
+      await loadInvites();
+    } catch (sentError) {
+      setError(sentError?.message || "Mark sent failed.");
+    } finally {
+      setActionLoadingId("");
+    }
+  };
 
   const handleQueueResend = async (invite) => {
     setActionLoadingId(invite.id);
@@ -244,6 +296,20 @@ export default function AdminAccessInvitesRoute() {
                   <td>{Number(invite.resendCount || 0)}</td>
                   <td>
                     <div className="adminInlineActions">
+                      <AdminButton
+                        size="sm"
+                        variant="primary"
+                        loading={actionLoadingId === invite.id}
+                        disabled={invite.inviteStatus === "used" || !buildInviteLinkForAdmin(invite)}
+                        onClick={() => handleCopyLink(invite)}
+                      >Copy Link</AdminButton>
+                      <AdminButton
+                        size="sm"
+                        variant="secondary"
+                        loading={actionLoadingId === invite.id}
+                        disabled={invite.inviteStatus === "used"}
+                        onClick={() => handleMarkSent(invite)}
+                      >Mark Sent</AdminButton>
                       <AdminButton
                         size="sm"
                         variant="secondary"
