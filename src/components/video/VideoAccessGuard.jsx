@@ -27,11 +27,11 @@ const resolvePlanAccess = ({
   hasPlanAccess,
   accessOptions = {},
 }) => {
-  if (normalizePlanType(requiredPlan) === "FREE") return true;
+  const normalizedRequiredPlan = normalizePlanType(requiredPlan);
 
   if (typeof hasPlanAccess === "function") {
     try {
-      const scopedResult = hasPlanAccess(requiredPlan, accessOptions);
+      const scopedResult = hasPlanAccess(normalizedRequiredPlan, accessOptions);
 
       if (typeof scopedResult === "boolean") {
         return scopedResult;
@@ -41,7 +41,7 @@ const resolvePlanAccess = ({
     }
 
     try {
-      const oneArgResult = hasPlanAccess(requiredPlan);
+      const oneArgResult = hasPlanAccess(normalizedRequiredPlan);
 
       if (typeof oneArgResult === "boolean") {
         return oneArgResult;
@@ -51,7 +51,7 @@ const resolvePlanAccess = ({
     }
 
     try {
-      const twoArgResult = hasPlanAccess(userPlanType, requiredPlan);
+      const twoArgResult = hasPlanAccess(userPlanType, normalizedRequiredPlan);
 
       if (typeof twoArgResult === "boolean") {
         return twoArgResult;
@@ -61,7 +61,7 @@ const resolvePlanAccess = ({
     }
   }
 
-  return canAccessByPlanLevel(requiredPlan, userPlanType);
+  return canAccessByPlanLevel(normalizedRequiredPlan, userPlanType);
 };
 
 function GuardScreen({

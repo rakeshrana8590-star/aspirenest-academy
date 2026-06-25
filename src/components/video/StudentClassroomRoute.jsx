@@ -176,23 +176,37 @@ export default function StudentClassroomRoute({
   };
 
   const openNote = (note = {}) => {
-    const notePlan = normalizePlanType(note.planType || "FREE");
+    const rawNotePlan =
+      note.accessPlan || note.planType || note.plan || note.type || "FREE";
 
-    if (!isAdmin && notePlan !== "FREE") {
+    const normalizedNotePlan = String(rawNotePlan || "FREE")
+      .trim()
+      .toUpperCase();
+
+    const knownPlanTypes = ["FREE", "BASIC", "PREMIUM", "MENTORSHIP"];
+    const isKnownPlan = knownPlanTypes.includes(normalizedNotePlan);
+    const notePlan = isKnownPlan ? normalizedNotePlan : "PREMIUM";
+
+    const noteAccessOptions = {
+      module: "notes",
+      itemType: "notesPdf",
+      itemId: String(note.id || note.slug || note.title || ""),
+    };
+
+    if (!isAdmin) {
       const hasAccess =
         typeof hasPlanAccess === "function"
-          ? hasPlanAccess(notePlan)
+          ? hasPlanAccess(notePlan, noteAccessOptions)
           : canAccessVideoPlan({ requiredPlan: notePlan, userPlanType });
 
       if (!hasAccess) {
-        navigate("/ctet-tet/pricing");
+        navigate(user ? "/ctet-tet/pricing" : "/login");
         return;
       }
     }
 
     openExternalUrl(getNoteUrl(note));
   };
-
   const goBackToChapter = () => {
     if (!classroomItem) {
       navigate("/ctet-tet/videos");
