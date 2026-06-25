@@ -5103,7 +5103,7 @@ isAdmin={isAdmin}
         <div style={{ marginTop: "30px" }}>
           <AdminPanel
             user={user}
-            isAdmin={isAdmin}
+            isAdmin={isAdmin(user)}
             activeAdminTab="Dashboard"
             setActiveAdminTab={setActiveAdminTab}
             students={students || []}
@@ -8099,7 +8099,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
       universalContent={universalContent}
       currentAffairsList={currentAffairsList}
       hasPlanAccess={hasPlanAccess}
-      isAdmin={isAdmin}
+      isAdmin={isAdmin(user)}
     />
   }
 />

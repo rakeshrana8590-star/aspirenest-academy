@@ -404,14 +404,10 @@ export const CURRENT_AFFAIRS_PLAN_ORDER = [
     accessOptions = {},
   } = {}) {
     const activePlan = String(planName || "FREE").trim().toUpperCase();
-  
-    if (activePlan === "FREE") {
-      return true;
+
+    if (typeof hasPlanAccess === "function") {
+      return Boolean(hasPlanAccess(activePlan, accessOptions));
     }
-  
-    if (typeof hasPlanAccess !== "function") {
-      return false;
-    }
-  
-    return Boolean(hasPlanAccess(activePlan, accessOptions));
+
+    return activePlan === "FREE";
   }
