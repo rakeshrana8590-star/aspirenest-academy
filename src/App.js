@@ -191,6 +191,7 @@ import StudentRedeemAccessRoute from "./access/StudentRedeemAccessRoute.jsx";
 import AdminAccessProductsRoute from "./access/admin/AdminAccessProductsRoute.jsx";
 import AdminAccessKeysRoute from "./access/admin/AdminAccessKeysRoute.jsx";
 import StudentLearnerProfileRoute from "./profile/StudentLearnerProfileRoute.jsx";
+import StudentAccessInviteRoute from "./access/student/StudentAccessInviteRoute.jsx";
 
 import MockTestActionMenu from "./components/exam/MockTestActionMenu.jsx";
 import { deleteMockTest } from "./components/exam/mockTestAdminActions.js";
@@ -3914,6 +3915,11 @@ return (
       handleRegister={handleRegister}
     />
   }
+/>
+
+<Route
+  path="/access/invite/:inviteCode"
+  element={<StudentAccessInviteRoute user={user} handleGoogleLogin={handleGoogleLogin} />}
 />
 
 <Route

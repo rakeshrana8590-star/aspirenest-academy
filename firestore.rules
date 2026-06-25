@@ -41,7 +41,8 @@ service cloud.firestore {
         && request.resource.data.subscriptionType == resource.data.subscriptionType
         && request.resource.data.premiumStatus == resource.data.premiumStatus;
 
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin() || isInviteStudentAccessUpdate();
+      allow delete: if isAdmin();
     }
 
     /* ================================
@@ -405,6 +406,63 @@ service cloud.firestore {
         exists(/databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId));
     }
 
+    function isInviteOwnRecord() {
+      return isSignedIn() && (
+        resource.data.normalizedEmail == request.auth.token.email ||
+        resource.data.email == request.auth.token.email
+      );
+    }
+
+    function isInviteRedeemUpdate(inviteCode) {
+      return isInviteOwnRecord() &&
+        inviteCode == resource.data.inviteCode &&
+        request.time < resource.data.expiresAt &&
+        resource.data.inviteStatus in ["pending", "copied", "sent", "opened"] &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "inviteStatus",
+          "usedAt",
+          "redeemedByUid",
+          "redeemedByEmail",
+          "redeemSource",
+          "updatedAt",
+          "updatedBy"
+        ]) &&
+        request.resource.data.inviteStatus == "used" &&
+        request.resource.data.redeemedByUid == request.auth.uid &&
+        request.resource.data.redeemedByEmail == request.auth.token.email &&
+        request.resource.data.redeemSource == "manual_invite_link" &&
+        request.resource.data.updatedBy == request.auth.uid;
+    }
+
+    function isInviteStudentAccessUpdate() {
+      return isSignedIn() &&
+        (resource.data.normalizedEmail == request.auth.token.email || resource.data.email == request.auth.token.email) &&
+        (!resource.data.keys().hasAny(["uid"]) || resource.data.uid == null || resource.data.uid == "" || resource.data.uid == request.auth.uid) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "uid",
+          "inviteId",
+          "inviteRedeemedAt",
+          "inviteRedeemedByUid",
+          "inviteRedeemedByEmail",
+          "lastInviteRedeemedAt",
+          "updatedAt",
+          "updatedBy"
+        ]) &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.inviteRedeemedByUid == request.auth.uid &&
+        request.resource.data.inviteRedeemedByEmail == request.auth.token.email &&
+        request.resource.data.updatedBy == request.auth.uid;
+    }
+
+    function isInviteRedeemAuditCreate() {
+      return isSignedIn() &&
+        request.resource.data.action == "redeem_access_invite" &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.actorEmail == request.auth.token.email &&
+        request.resource.data.actorRole == "student" &&
+        request.resource.data.metadata.source == "manual_invite_link";
+    }
+
     function isRedeemAuditCreate() {
       return isSignedIn() &&
         request.resource.data.action == "redeem_access_key" &&
@@ -444,12 +502,15 @@ service cloud.firestore {
     }
 
     match /accessInvites/{docId} {
-      allow read, create, update, delete: if isAdmin();
+      allow read: if isAdmin() || isInviteOwnRecord();
+      allow create: if isAdmin();
+      allow update: if isAdmin() || isInviteRedeemUpdate(docId);
+      allow delete: if isAdmin();
     }
 
     match /accessAuditLogs/{docId} {
       allow read: if isAdmin();
-      allow create: if isAdmin() || isRedeemAuditCreate();
+      allow create: if isAdmin() || isRedeemAuditCreate() || isInviteRedeemAuditCreate();
       allow update, delete: if false;
     }
 

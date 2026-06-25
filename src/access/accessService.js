@@ -8,6 +8,7 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
+  writeBatch,
   where,
 } from "firebase/firestore";
 
@@ -472,6 +473,95 @@ export const updateAccessInviteStatus = async (id, inviteStatus, actor = {}, met
     id: inviteId,
     ...payload,
   };
+};
+
+export const getAccessInviteByCode = async (inviteCode = "") => {
+  const code = String(inviteCode || "").trim();
+
+  if (!code) return null;
+
+  const inviteSnap = await getDoc(doc(db, ACCESS_COLLECTIONS.ACCESS_INVITES, code));
+  return toInviteRecord(inviteSnap);
+};
+
+export const redeemAccessInvite = async (inviteCode = "", user = {}) => {
+  const code = String(inviteCode || "").trim();
+  const uid = user?.uid || "";
+  const email = normalizeAccessEmail(user?.email);
+
+  if (!code) throw new Error("Invite code is required.");
+  if (!uid || !email) throw new Error("Please login with invited email to redeem access.");
+
+  const inviteRef = doc(db, ACCESS_COLLECTIONS.ACCESS_INVITES, code);
+  const inviteSnap = await getDoc(inviteRef);
+  const invite = toInviteRecord(inviteSnap);
+
+  if (!invite) throw new Error("Invite not found.");
+
+  const inviteEmail = normalizeAccessEmail(invite.normalizedEmail || invite.email);
+  if (inviteEmail !== email) throw new Error("This invite belongs to another email.");
+
+  if (invite.inviteStatus === "used") throw new Error("Invite already used.");
+  if (invite.inviteStatus === "revoked") throw new Error("Invite has been revoked.");
+  if (invite.inviteStatus === "expired") throw new Error("Invite has expired.");
+
+  const expiryDate = invite.expiresAt?.toDate ? invite.expiresAt.toDate() : invite.expiresAt ? new Date(invite.expiresAt) : null;
+  if (expiryDate && expiryDate.getTime() < Date.now()) throw new Error("Invite has expired.");
+
+  if (!invite.accessId) throw new Error("Access record missing for this invite.");
+
+  const accessRef = doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, invite.accessId);
+  const accessSnap = await getDoc(accessRef);
+
+  if (!accessSnap.exists()) throw new Error("Student access record not found.");
+
+  const accessData = accessSnap.data() || {};
+  const accessEmail = normalizeAccessEmail(accessData.normalizedEmail || accessData.email);
+
+  if (accessEmail !== email) throw new Error("Access record email does not match invite email.");
+  if (accessData.uid && accessData.uid !== uid) throw new Error("This access is already linked to another account.");
+
+  const batch = writeBatch(db);
+
+  batch.update(inviteRef, {
+    inviteStatus: "used",
+    usedAt: serverTimestamp(),
+    redeemedByUid: uid,
+    redeemedByEmail: email,
+    redeemSource: "manual_invite_link",
+    updatedAt: serverTimestamp(),
+    updatedBy: uid,
+  });
+
+  batch.update(accessRef, {
+    uid,
+    inviteId: invite.id || code,
+    inviteRedeemedAt: serverTimestamp(),
+    inviteRedeemedByUid: uid,
+    inviteRedeemedByEmail: email,
+    lastInviteRedeemedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    updatedBy: uid,
+  });
+
+  const auditRef = doc(collection(db, ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS));
+  batch.set(auditRef, {
+    action: "redeem_access_invite",
+    accessId: invite.accessId,
+    email,
+    uid,
+    before: null,
+    after: { inviteStatus: "used" },
+    metadata: { source: "manual_invite_link", inviteCode: code, inviteId: invite.id || code },
+    createdAt: serverTimestamp(),
+    createdBy: uid,
+    actorEmail: email,
+    actorRole: "student",
+  });
+
+  await batch.commit();
+
+  return { success: true, inviteId: invite.id || code, accessId: invite.accessId, email };
 };
 
 export const queueAccessInviteResend = async (id, actor = {}, metadata = {}) => {
