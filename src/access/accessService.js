@@ -425,6 +425,81 @@ export const listAccessInvites = async (filters = {}) => {
   });
 };
 
+export const regenerateAccessInviteLink = async (id = "", actor = {}, metadata = {}) => {
+  const adminActor = requireAdminActor(actor);
+  const oldCode = String(id || "").trim();
+
+  if (!oldCode) throw new Error("Invite id is required.");
+
+  const oldRef = doc(db, ACCESS_COLLECTIONS.ACCESS_INVITES, oldCode);
+  const oldSnap = await getDoc(oldRef);
+  const oldInvite = toInviteRecord(oldSnap);
+
+  if (!oldInvite) throw new Error("Invite not found.");
+  if (oldInvite.inviteStatus === "used") throw new Error("Used invite cannot be regenerated.");
+
+  const newInviteCode = createInviteCode();
+  const newInviteLink = buildAccessInviteLink(newInviteCode);
+  const newRef = doc(db, ACCESS_COLLECTIONS.ACCESS_INVITES, newInviteCode);
+  const batch = writeBatch(db);
+
+  const newPayload = {
+    ...oldInvite,
+    id: null,
+    inviteCode: newInviteCode,
+    inviteLink: newInviteLink,
+    inviteStatus: "pending",
+    deliveryStatus: "manual_copy",
+    emailSent: false,
+    sentAt: null,
+    usedAt: null,
+    openedAt: null,
+    openedByUid: null,
+    openedByEmail: null,
+    redeemedByUid: null,
+    redeemedByEmail: null,
+    redeemSource: null,
+    replacedInviteCode: oldCode,
+    regeneratedFrom: oldCode,
+    regeneratedAt: serverTimestamp(),
+    createdAt: serverTimestamp(),
+    createdBy: adminActor.uid,
+    updatedAt: serverTimestamp(),
+    updatedBy: adminActor.uid,
+  };
+
+  batch.update(oldRef, {
+    inviteStatus: "revoked",
+    deliveryStatus: "regenerated",
+    revokedAt: serverTimestamp(),
+    replacedByInviteCode: newInviteCode,
+    replacedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    updatedBy: adminActor.uid,
+  });
+
+  batch.set(newRef, newPayload);
+
+  const auditRef = doc(collection(db, ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS));
+  batch.set(auditRef, {
+    action: "regenerate_access_invite_link",
+    accessId: oldInvite.accessId || null,
+    email: normalizeAccessEmail(oldInvite.normalizedEmail || oldInvite.email),
+    uid: oldInvite.uid || null,
+    before: { inviteCode: oldCode, inviteStatus: oldInvite.inviteStatus || null },
+    after: { inviteCode: newInviteCode, inviteStatus: "pending" },
+    metadata: { source: metadata.source || "admin_access_invites_route", oldInviteCode: oldCode, newInviteCode },
+    createdAt: serverTimestamp(),
+    createdBy: adminActor.uid,
+    actorEmail: adminActor.email,
+    actorRole: adminActor.role,
+  });
+
+  await batch.commit();
+
+  return { success: true, oldInviteCode: oldCode, inviteCode: newInviteCode, inviteLink: newInviteLink };
+};
+
 export const updateAccessInviteStatus = async (id, inviteStatus, actor = {}, metadata = {}) => {
   const inviteId = requireAccessEntityId(id, "Invite id");
   const adminActor = requireAdminActor(actor);

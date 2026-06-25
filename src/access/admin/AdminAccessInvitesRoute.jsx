@@ -8,6 +8,7 @@ import {
   normalizeAccessEmail,
   queueAccessInviteResend,
   updateAccessInviteStatus,
+  regenerateAccessInviteLink,
 } from "../accessService";
 
 import {
@@ -197,6 +198,29 @@ export default function AdminAccessInvitesRoute() {
     }
   };
 
+  const handleRegenerateLink = async (invite) => {
+    setActionLoadingId(invite.id);
+    setMessage("");
+    setError("");
+
+    try {
+      const result = await regenerateAccessInviteLink(invite.id, adminActor, {
+        source: "admin_access_invites_route",
+      });
+
+      if (result?.inviteLink) {
+        await navigator.clipboard.writeText(result.inviteLink);
+      }
+
+      setMessage("New invite link generated and copied for " + (invite.email || invite.normalizedEmail) + ".");
+      await loadInvites();
+    } catch (regenError) {
+      setError(regenError?.message || "Invite link regeneration failed.");
+    } finally {
+      setActionLoadingId("");
+    }
+  };
+
   const handleQueueResend = async (invite) => {
     setActionLoadingId(invite.id);
     setMessage("");
@@ -365,6 +389,13 @@ export default function AdminAccessInvitesRoute() {
                         disabled={invite.inviteStatus === "used"}
                         onClick={() => handleMarkSent(invite)}
                       >Mark Sent</AdminButton>
+                      <AdminButton
+                        size="sm"
+                        variant="secondary"
+                        loading={actionLoadingId === invite.id}
+                        disabled={invite.inviteStatus === "used"}
+                        onClick={() => handleRegenerateLink(invite)}
+                      >Regenerate Link</AdminButton>
                       <AdminButton
                         size="sm"
                         variant="secondary"
