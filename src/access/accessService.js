@@ -571,6 +571,18 @@ export const readAccessKeyByCode = async (code = "") => {
   return toAccessRecord(keySnap);
 };
 
+export const readAccessProductById = async (productId = "") => {
+  const normalizedProductId = String(productId || "").trim();
+
+  if (!normalizedProductId) return null;
+
+  const productSnap = await getDoc(
+    doc(db, ACCESS_COLLECTIONS.ACCESS_PRODUCTS, normalizedProductId)
+  );
+
+  return toAccessRecord(productSnap);
+};
+
 export const listAccessKeys = async ({ maxCount = 25 } = {}) => {
   const keySnap = await getDocs(collection(db, ACCESS_COLLECTIONS.ACCESS_KEYS));
 
@@ -816,6 +828,106 @@ export const validateAccessKeyForRedeem = async ({
   };
 };
 
+const resolveEntitlementValue = (primaryValue, fallbackValue, emptyValue = null) => {
+  if (Array.isArray(primaryValue)) {
+    return primaryValue.length ? primaryValue : Array.isArray(fallbackValue) ? fallbackValue : [];
+  }
+
+  if (primaryValue !== undefined && primaryValue !== null && String(primaryValue).trim() !== "") {
+    return primaryValue;
+  }
+
+  if (fallbackValue !== undefined && fallbackValue !== null && String(fallbackValue).trim() !== "") {
+    return fallbackValue;
+  }
+
+  return emptyValue;
+};
+
+const assertResolvableAccessProduct = (productRecord = null, productId = "") => {
+  if (!String(productId || "").trim()) return null;
+
+  if (!productRecord?.id) {
+    throw new Error("Linked access product was not found.");
+  }
+
+  const productStatus = String(productRecord.status || ACCESS_STATUS.ACTIVE)
+    .trim()
+    .toLowerCase();
+
+  if (productRecord.isActive === false || productStatus !== ACCESS_STATUS.ACTIVE) {
+    throw new Error("Linked access product is not active.");
+  }
+
+  return productRecord;
+};
+
+const resolveAccessKeyEntitlement = ({ keyRecord = {}, productRecord = null } = {}) => {
+  const hasProduct = Boolean(productRecord?.id);
+  const entitlementSource = hasProduct ? productRecord : keyRecord;
+  const fallbackSource = hasProduct ? keyRecord : {};
+
+  return {
+    course: resolveEntitlementValue(
+      entitlementSource.course,
+      fallbackSource.course,
+      ACCESS_COURSE.CTET_TET
+    ),
+    planType: normalizeAccessPlan(
+      resolveEntitlementValue(
+        entitlementSource.planType,
+        fallbackSource.planType,
+        ACCESS_PLAN_TYPES.FREE
+      )
+    ),
+    scopeType: resolveEntitlementValue(
+      entitlementSource.scopeType,
+      fallbackSource.scopeType,
+      ACCESS_SCOPE_TYPES.PLAN
+    ),
+    module: resolveEntitlementValue(entitlementSource.module, fallbackSource.module, null),
+    itemType: resolveEntitlementValue(
+      entitlementSource.itemType,
+      fallbackSource.itemType,
+      null
+    ),
+    itemId: resolveEntitlementValue(entitlementSource.itemId, fallbackSource.itemId, null),
+    itemTitle: resolveEntitlementValue(
+      entitlementSource.itemTitle,
+      fallbackSource.itemTitle,
+      ""
+    ),
+    itemIds: resolveEntitlementValue(
+      entitlementSource.itemIds,
+      fallbackSource.itemIds,
+      []
+    ),
+    bundleId: resolveEntitlementValue(
+      entitlementSource.bundleId,
+      fallbackSource.bundleId,
+      null
+    ),
+    productId: keyRecord.productId || productRecord?.id || null,
+    accessFrom: resolveEntitlementValue(
+      keyRecord.accessFrom,
+      productRecord?.accessFrom,
+      getTodayDateString()
+    ),
+    accessUntil: resolveEntitlementValue(
+      keyRecord.accessUntil,
+      productRecord?.accessUntil,
+      null
+    ),
+    validityDays: Number(
+      resolveEntitlementValue(
+        keyRecord.validityDays,
+        productRecord?.validityDays,
+        0
+      ) || 0
+    ),
+  };
+};
+
 export const redeemAccessKeyFoundation = async ({
   code = "",
   email = "",
@@ -835,6 +947,11 @@ export const redeemAccessKeyFoundation = async ({
   }
 
   const keyRecord = validation.keyRecord;
+  const productRecord = assertResolvableAccessProduct(
+    keyRecord.productId ? await readAccessProductById(keyRecord.productId) : null,
+    keyRecord.productId || ""
+  );
+  const entitlement = resolveAccessKeyEntitlement({ keyRecord, productRecord });
   const normalizedEmail = validation.normalizedEmail;
   const normalizedUid = validation.uid;
   const keyRef = doc(db, ACCESS_COLLECTIONS.ACCESS_KEYS, keyRecord.id);
@@ -845,7 +962,7 @@ export const redeemAccessKeyFoundation = async ({
     nextUsedCount >= maxUses ? ACCESS_KEY_STATUS.USED : ACCESS_KEY_STATUS.ACTIVE;
 
   const accessUntil =
-    keyRecord.accessUntil || addDaysToDateString(keyRecord.validityDays);
+    entitlement.accessUntil || addDaysToDateString(entitlement.validityDays);
 
   const accessPayload = {
     ...buildAccessPayload({
@@ -854,20 +971,20 @@ export const redeemAccessKeyFoundation = async ({
       learnerName: learnerName || name || "",
       name: name || learnerName || "",
       phone,
-      course: keyRecord.course || ACCESS_COURSE.CTET_TET,
-      planType: keyRecord.planType || ACCESS_PLAN_TYPES.FREE,
-      scopeType: keyRecord.scopeType || ACCESS_SCOPE_TYPES.PLAN,
-      module: keyRecord.module || null,
-      itemType: keyRecord.itemType || null,
-      itemId: keyRecord.itemId || null,
-      itemTitle: keyRecord.itemTitle || "",
-      itemIds: Array.isArray(keyRecord.itemIds) ? keyRecord.itemIds : [],
-      bundleId: keyRecord.bundleId || null,
-      productId: keyRecord.productId || null,
+      course: entitlement.course,
+      planType: entitlement.planType,
+      scopeType: entitlement.scopeType,
+      module: entitlement.module,
+      itemType: entitlement.itemType,
+      itemId: entitlement.itemId,
+      itemTitle: entitlement.itemTitle,
+      itemIds: Array.isArray(entitlement.itemIds) ? entitlement.itemIds : [],
+      bundleId: entitlement.bundleId,
+      productId: entitlement.productId,
       accessKeyId: keyRecord.id,
       source: ACCESS_SOURCE.REDEEM_KEY,
       status: ACCESS_STATUS.ACTIVE,
-      accessFrom: keyRecord.accessFrom || getTodayDateString(),
+      accessFrom: entitlement.accessFrom || getTodayDateString(),
       accessUntil,
       adminNote: "Redeemed access key " + validation.normalizedCode,
       notes: "Redeemed access key " + validation.normalizedCode,
@@ -902,7 +1019,7 @@ export const redeemAccessKeyFoundation = async ({
     accessId: accessRef.id,
     email: normalizedEmail,
     uid: normalizedUid || null,
-    before: keyRecord,
+    before: { accessKey: keyRecord, product: productRecord },
     after: {
       access: {
         id: accessRef.id,
@@ -916,9 +1033,9 @@ export const redeemAccessKeyFoundation = async ({
     metadata: {
       collection: ACCESS_COLLECTIONS.ACCESS_KEYS,
       accessKeyId: keyRecord.id,
-      productId: keyRecord.productId || null,
-      scopeType: keyRecord.scopeType || ACCESS_SCOPE_TYPES.PLAN,
-      planType: keyRecord.planType || ACCESS_PLAN_TYPES.FREE,
+      productId: entitlement.productId || null,
+      scopeType: entitlement.scopeType || ACCESS_SCOPE_TYPES.PLAN,
+      planType: entitlement.planType || ACCESS_PLAN_TYPES.FREE,
       source: ACCESS_SOURCE.REDEEM_KEY,
     },
     createdAt: serverTimestamp(),
