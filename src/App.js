@@ -3788,6 +3788,7 @@ return (
     <StudentRoadmapHub
       user={user}
       userPlanType={userPlanType}
+      hasPlanAccess={hasPlanAccess}
       isAdminUser={isAdmin(user)}
     />
   }
@@ -3799,6 +3800,7 @@ return (
     <StudentRoadmapDetail
       user={user}
       userPlanType={userPlanType}
+      hasPlanAccess={hasPlanAccess}
       isAdminUser={isAdmin(user)}
     />
   }
@@ -3810,6 +3812,7 @@ return (
     <StudentRoadmapDay
       user={user}
       userPlanType={userPlanType}
+      hasPlanAccess={hasPlanAccess}
       isAdminUser={isAdmin(user)}
     />
   }
@@ -3821,6 +3824,7 @@ return (
     <MyAspirePath
       user={user}
       userPlanType={userPlanType}
+      hasPlanAccess={hasPlanAccess}
       isAdminUser={isAdmin(user)}
     />
   }

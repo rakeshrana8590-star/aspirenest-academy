@@ -95,19 +95,26 @@ import {
   };
   
   export const canAccessRoadmap = ({
-    roadmapPlanType = "FREE",
-    userPlanType = "FREE",
-    isAdmin = false,
-  }) => {
-    if (isAdmin) return true;
-  
-    return (
-      getRoadmapAccessLevel(userPlanType) >=
-      getRoadmapAccessLevel(roadmapPlanType)
-    );
-  };
-  
-  export const loadStudyRoadmaps = async ({
+  roadmapPlanType = "FREE",
+  userPlanType = "FREE",
+  isAdmin = false,
+  hasPlanAccess,
+  accessOptions = {},
+}) => {
+  const activePlan = String(roadmapPlanType || "FREE").trim().toUpperCase();
+
+  if (isAdmin) return true;
+
+  if (typeof hasPlanAccess === "function") {
+    return Boolean(hasPlanAccess(activePlan, accessOptions));
+  }
+
+  return (
+    getRoadmapAccessLevel(userPlanType) >=
+    getRoadmapAccessLevel(activePlan)
+  );
+};
+export const loadStudyRoadmaps = async ({
     status = "",
     includeArchived = false,
   } = {}) => {

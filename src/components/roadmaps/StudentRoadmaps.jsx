@@ -23,6 +23,7 @@ import StudentRoadmapDayRoute from "./student/StudentRoadmapDayRoute.jsx";
 export const StudentRoadmapHub = ({
   user = null,
   userPlanType = "FREE",
+  hasPlanAccess,
   isAdminUser = false,
 }) => {
   const navigate = useNavigate();
@@ -113,6 +114,12 @@ export const StudentRoadmapHub = ({
                 roadmapPlanType: roadmap.planType,
                 userPlanType,
                 isAdmin: isAdminUser,
+                hasPlanAccess,
+                accessOptions: {
+                  module: "roadmap",
+                  itemType: "roadmap",
+                  itemId: roadmap.id,
+                },
               });
 
               return (

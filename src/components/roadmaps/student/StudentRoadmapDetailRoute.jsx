@@ -32,6 +32,7 @@ import {
 export default function StudentRoadmapDetailRoute({
   user = null,
   userPlanType = "FREE",
+  hasPlanAccess,
   isAdminUser = false,
 }) {
   const { roadmapId } = useParams();
@@ -90,6 +91,12 @@ export default function StudentRoadmapDetailRoute({
     roadmapPlanType: roadmap?.planType,
     userPlanType,
     isAdmin: isAdminUser,
+    hasPlanAccess,
+    accessOptions: {
+      module: "roadmap",
+      itemType: "roadmap",
+      itemId: roadmap?.id || roadmapId,
+    },
   });
 
   const progressPercent = calculateRoadmapProgressPercent({

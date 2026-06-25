@@ -28,6 +28,7 @@ import {
 export default function StudentRoadmapDayRoute({
   user = null,
   userPlanType = "FREE",
+  hasPlanAccess,
   isAdminUser = false,
 }) {
   const { roadmapId, dayId } = useParams();
@@ -86,11 +87,31 @@ export default function StudentRoadmapDayRoute({
     };
   }, [roadmapId, user]);
 
-  const hasAccess = canAccessRoadmap({
+  const hasRoadmapAccess = canAccessRoadmap({
     roadmapPlanType: roadmap?.planType,
     userPlanType,
     isAdmin: isAdminUser,
+    hasPlanAccess,
+    accessOptions: {
+      module: "roadmap",
+      itemType: "roadmap",
+      itemId: roadmap?.id || roadmapId,
+    },
   });
+
+  const hasDayAccess = canAccessRoadmap({
+    roadmapPlanType: roadmap?.planType,
+    userPlanType,
+    isAdmin: isAdminUser,
+    hasPlanAccess,
+    accessOptions: {
+      module: "roadmap",
+      itemType: "roadmapDay",
+      itemId: dayId,
+    },
+  });
+
+  const hasAccess = hasRoadmapAccess || hasDayAccess;
 
   const activeDay = roadmap?.days?.find((day) => day.id === dayId);
 
@@ -137,6 +158,30 @@ export default function StudentRoadmapDayRoute({
       mounted = false;
     };
   }, [activeDay?.id]);
+
+  const canOpenRecommendation = (item = {}) => {
+    const itemPlan = String(item.planType || roadmap?.planType || "FREE")
+      .trim()
+      .toUpperCase();
+
+    if (isAdminUser) return true;
+
+    if (typeof hasPlanAccess === "function") {
+      return Boolean(
+        hasPlanAccess(itemPlan, {
+          module: "roadmap",
+          itemType: "roadmapResource",
+          itemId: String(item.id || item.href || item.title || ""),
+        })
+      );
+    }
+
+    return canAccessRoadmap({
+      roadmapPlanType: itemPlan,
+      userPlanType,
+      isAdmin: isAdminUser,
+    });
+  };
 
   const handleToggleTask = async (task) => {
     if (!user?.uid) {
@@ -302,7 +347,7 @@ export default function StudentRoadmapDayRoute({
                     </div>
 
                     <div className="aspirePathHeroActions">
-                      {item.href ? (
+                      {canOpenRecommendation(item) && item.href ? (
                         item.href.startsWith("/") ? (
                           <Link
                             className="aspirePathPrimaryBtn"
@@ -324,9 +369,9 @@ export default function StudentRoadmapDayRoute({
                         <button
                           className="aspirePathSecondaryBtn"
                           type="button"
-                          disabled
+                          onClick={() => navigate(user ? "/ctet-tet/pricing" : "/login")}
                         >
-                          No Link Available
+                          Unlock Recommendation
                         </button>
                       )}
                     </div>
