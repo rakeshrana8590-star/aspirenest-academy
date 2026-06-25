@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getAccessInviteByCode, redeemAccessInvite } from "../accessService";
+import { markAccessInviteOpened, redeemAccessInvite } from "../accessService";
 
 const getInviteStatus = (invite) => {
   if (!invite) return "loading";
@@ -34,7 +34,7 @@ const StudentAccessInviteRoute = ({ user, handleGoogleLogin }) => {
       setLoading(true);
       setError("");
       try {
-        const record = await getAccessInviteByCode(inviteCode);
+        const record = await markAccessInviteOpened(inviteCode, user);
         if (mounted) setInvite(record);
       } catch (loadError) {
         if (mounted) setError(loadError?.message || "Invite could not be loaded. Please login with invited email.");

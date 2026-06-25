@@ -413,6 +413,25 @@ service cloud.firestore {
       );
     }
 
+    function isInviteOpenUpdate(inviteCode) {
+      return isInviteOwnRecord() &&
+        inviteCode == resource.data.inviteCode &&
+        request.time < resource.data.expiresAt &&
+        resource.data.inviteStatus in ["pending", "copied", "sent"] &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "inviteStatus",
+          "openedAt",
+          "openedByUid",
+          "openedByEmail",
+          "updatedAt",
+          "updatedBy"
+        ]) &&
+        request.resource.data.inviteStatus == "opened" &&
+        request.resource.data.openedByUid == request.auth.uid &&
+        request.resource.data.openedByEmail == request.auth.token.email &&
+        request.resource.data.updatedBy == request.auth.uid;
+    }
+
     function isInviteRedeemUpdate(inviteCode) {
       return isInviteOwnRecord() &&
         inviteCode == resource.data.inviteCode &&
@@ -504,7 +523,7 @@ service cloud.firestore {
     match /accessInvites/{docId} {
       allow read: if isAdmin() || isInviteOwnRecord();
       allow create: if isAdmin();
-      allow update: if isAdmin() || isInviteRedeemUpdate(docId);
+      allow update: if isAdmin() || isInviteOpenUpdate(docId) || isInviteRedeemUpdate(docId);
       allow delete: if isAdmin();
     }
 

@@ -484,6 +484,40 @@ export const getAccessInviteByCode = async (inviteCode = "") => {
   return toInviteRecord(inviteSnap);
 };
 
+export const markAccessInviteOpened = async (inviteCode = "", user = {}) => {
+  const code = String(inviteCode || "").trim();
+  const uid = user?.uid || "";
+  const email = normalizeAccessEmail(user?.email);
+
+  if (!code || !uid || !email) return null;
+
+  const inviteRef = doc(db, ACCESS_COLLECTIONS.ACCESS_INVITES, code);
+  const inviteSnap = await getDoc(inviteRef);
+  const invite = toInviteRecord(inviteSnap);
+
+  if (!invite) return null;
+
+  const inviteEmail = normalizeAccessEmail(invite.normalizedEmail || invite.email);
+  const openableStatuses = ["pending", "copied", "sent"];
+
+  if (inviteEmail !== email) return invite;
+  if (!openableStatuses.includes(invite.inviteStatus)) return invite;
+
+  const expiryDate = invite.expiresAt?.toDate ? invite.expiresAt.toDate() : invite.expiresAt ? new Date(invite.expiresAt) : null;
+  if (expiryDate && expiryDate.getTime() < Date.now()) return invite;
+
+  await updateDoc(inviteRef, {
+    inviteStatus: "opened",
+    openedAt: serverTimestamp(),
+    openedByUid: uid,
+    openedByEmail: email,
+    updatedAt: serverTimestamp(),
+    updatedBy: uid,
+  });
+
+  return { ...invite, inviteStatus: "opened", openedByUid: uid, openedByEmail: email };
+};
+
 export const redeemAccessInvite = async (inviteCode = "", user = {}) => {
   const code = String(inviteCode || "").trim();
   const uid = user?.uid || "";
