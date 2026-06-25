@@ -22,6 +22,9 @@ const initialForm = {
   code: "",
   assignedEmail: "",
   productId: "",
+  campaignId: "",
+  campaignName: "",
+  campaignSource: "",
   course: ACCESS_COURSE.CTET_TET,
   scopeType: ACCESS_SCOPE_TYPES.PLAN,
   planType: ACCESS_PLAN_TYPES.PREMIUM,
@@ -189,6 +192,9 @@ export default function AdminAccessKeysRoute() {
     code: normalizedCode,
     assignedEmail: form.assignedEmail.trim(),
     productId: form.productId.trim() || null,
+    campaignId: form.campaignId.trim() || null,
+    campaignName: form.campaignName.trim(),
+    campaignSource: form.campaignSource.trim(),
     course: form.course,
     scopeType: form.scopeType,
     planType: form.planType,
@@ -259,6 +265,9 @@ export default function AdminAccessKeysRoute() {
     ["Code", normalizedCode || "Required"],
     ["Assigned Email", form.assignedEmail.trim() || "Open key"],
     ["Product ID", form.productId.trim() || "Optional"],
+    ["Campaign ID", form.campaignId.trim() || "Optional"],
+    ["Campaign Name", form.campaignName.trim() || "Optional"],
+    ["Campaign Source", form.campaignSource.trim() || "Manual"],
     ["Scope", form.scopeType],
     ["Plan", form.scopeType === ACCESS_SCOPE_TYPES.PLAN ? form.planType : "Not plan scoped"],
     ["Module", form.module || "Not module scoped"],
@@ -337,6 +346,33 @@ export default function AdminAccessKeysRoute() {
               value={form.productId}
               onChange={(event) => updateField("productId", event.target.value)}
               placeholder="accessProducts document id"
+            />
+          </div>
+
+          <div className="adminAccessField">
+            <label>Campaign ID optional</label>
+            <input
+              value={form.campaignId}
+              onChange={(event) => updateField("campaignId", event.target.value)}
+              placeholder="summer-2026 / whatsapp-june"
+            />
+          </div>
+
+          <div className="adminAccessField">
+            <label>Campaign Name optional</label>
+            <input
+              value={form.campaignName}
+              onChange={(event) => updateField("campaignName", event.target.value)}
+              placeholder="June WhatsApp Campaign"
+            />
+          </div>
+
+          <div className="adminAccessField">
+            <label>Campaign Source optional</label>
+            <input
+              value={form.campaignSource}
+              onChange={(event) => updateField("campaignSource", event.target.value)}
+              placeholder="whatsapp / seminar / manual / referral"
             />
           </div>
 
