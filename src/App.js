@@ -1978,122 +1978,23 @@ const [paymentHistory, setPaymentHistory] = useState([]);
       document.body.appendChild(script);
     });
   };
-  const savePaymentRecord = async (paymentResponse) => {
-    if (!user) return;
-  
-    try {
-      const purchaseDate = new Date();
+  const savePaymentRecord = async function() {
+  console.warn("Razorpay gateway payment record is parked. Use verified payment flow only.");
+  return null;
+};
+const unlockPremiumAccess = async function() {
+  alert("Premium access is activated only after admin payment verification.");
+  return null;
+};
+const handlePremiumPurchase = async function() {
+  if (!user) {
+    alert("Please login first.");
+    return;
+  }
 
-const expiryDate = new Date();
-expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-      await addDoc(collection(db, "payments"), {
-        userId: user.uid,
-        email: user.email,
-        amount: 199,
-        currency: "INR",
-        plan: "Premium Membership",
-        status: "SUCCESS",
-        paymentId: paymentResponse?.razorpay_payment_id || "DEMO_PAYMENT",
-        orderId: paymentResponse?.razorpay_order_id || "DEMO_ORDER",
-        signature: paymentResponse?.razorpay_signature || "DEMO_SIGNATURE",
-        purchaseDate: purchaseDate,
-expiryDate: expiryDate,
-premiumStatus: "ACTIVE",
-activePlan: payment.planName || planType,
-        createdAt: new Date(),
-      });
-  
-      loadPaymentHistory();
-    } catch (error) {
-      alert(error.message);
-    }
-  };
-  const unlockPremiumAccess = async (planName = "PREMIUM") => {
-    if (!user) {
-      alert("Please login first.");
-      return;
-    }
-  
-    try {
-      const userRef = doc(db, "users", user.uid);
-  
-      const purchaseDate = new Date();
-
-      const expiryDate = new Date();
-      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-      
-      await setDoc(
-        userRef,
-        {
-          email: user.email,
-          isPremium: true,
-          subscriptionType: planType,
-          purchasedCourses: [planType],
-          purchaseDate: purchaseDate,
-          expiryDate: expiryDate,
-          premiumStatus: "ACTIVE",
-        },
-        { merge: true }
-      );
-  
-      setIsPremiumUser(true);
-      setActivePlan(planType);
-
-      alert("Premium access unlocked successfully ✅");
-    } catch (error) {
-      alert(error.message);
-    }
-  };
-  const handlePremiumPurchase = async () => {
-    if (!user) {
-      alert("Please login first.");
-      return;
-    }
-    
-    if (isPremiumUser) {
-      alert("You already have premium access ✅");
-      return;
-    }
-    const loaded = await loadRazorpayScript();
-  
-    if (!loaded) {
-      alert("Razorpay SDK failed to load.");
-      return;
-    }
-  
-    const options = {
-      key: "rzp_test_1DP5mmOlF5G5ag",
-  
-      amount: 19900,
-  
-      currency: "INR",
-  
-      name: "AspireNest Academy",
-  
-      description: "Premium Membership",
-  
-      handler: async function (response) {
-        await savePaymentRecord(response);
-      
-        await unlockPremiumAccess();
-      
-        alert("Payment successful ✅");
-      },
-  
-      prefill: {
-        email: user?.email || "",
-      },
-  
-      theme: {
-        color: "#ff7b00",
-      },
-    };
-  
-    const paymentObject = new window.Razorpay(options);
-  
-    paymentObject.open();
-  };
-  const loadAdminData = async () => {
+  alert("Online payment gateway is parked for future. Please use the UPI payment request flow. Access will be activated after admin verification.");
+};
+const loadAdminData = async () => {
     try {
       const studentsSnap = await getDocs(collection(db, "students"));
       const usersSnap = await getDocs(collection(db, "users"));

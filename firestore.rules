@@ -221,13 +221,56 @@ service cloud.firestore {
     }
 
     match /payments/{docId} {
-      allow create: if isSignedIn();
+      function isPaymentOwner() {
+        return isSignedIn() && resource.data.userId == request.auth.uid;
+      }
 
-      allow read: if isAdmin() ||
-        (isSignedIn() && request.auth.uid == resource.data.userId);
+      function isNewPaymentOwner() {
+        return isSignedIn() && request.resource.data.userId == request.auth.uid;
+      }
 
-      allow update: if isAdmin() ||
-        (isSignedIn() && request.auth.uid == resource.data.userId);
+      function isStudentPaymentCreate() {
+        return isNewPaymentOwner() &&
+          request.resource.data.keys().hasOnly([
+            "orderId",
+            "userId",
+            "upiLink",
+            "studentEmail",
+            "studentMobile",
+            "studentName",
+            "planName",
+            "amount",
+            "status",
+            "studentProof",
+            "adminProof",
+            "matchStatus",
+            "createdAt"
+          ]) &&
+          request.resource.data.status == "pending_payment" &&
+          request.resource.data.studentProof == "" &&
+          request.resource.data.adminProof == "" &&
+          request.resource.data.matchStatus == "waiting";
+      }
+
+      function isStudentProofSubmit() {
+        return isPaymentOwner() &&
+          resource.data.status in ["pending_payment", "student_proof_submitted"] &&
+          request.resource.data.userId == resource.data.userId &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "studentProof",
+            "status",
+            "updatedAt"
+          ]) &&
+          request.resource.data.status == "student_proof_submitted" &&
+          request.resource.data.studentProof is string &&
+          request.resource.data.studentProof.size() > 0;
+      }
+
+      allow create: if isAdmin() || isStudentPaymentCreate();
+
+      allow read: if isAdmin() || isPaymentOwner();
+
+      allow update: if isAdmin() || isStudentProofSubmit();
 
       allow delete: if isAdmin();
     }
