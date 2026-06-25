@@ -97,7 +97,7 @@ export default function AdminPaymentVerificationRoute({
 
   async function approvePayment(payment) {
     if (!payment?.id) return;
-    const adminProof = adminProofs[payment.id] || "";
+    const adminProof = adminProofs[payment.id] || payment.adminProof || "";
     const verification = comparePaymentProofs(payment, adminProof, safePayments);
     try {
       setLoadingId(payment.id);
@@ -164,8 +164,13 @@ export default function AdminPaymentVerificationRoute({
           {filteredPayments.map((payment) => {
             const proof = payment.studentProof || "";
             const utr = extractUtr(proof);
-            const adminProof = adminProofs[payment.id] || "";
+            const adminProof = adminProofs[payment.id] || payment.adminProof || "";
             const busy = loadingId === payment.id;
+            const verificationPreview = adminProof ? comparePaymentProofs(payment, adminProof, safePayments) : null;
+            const isApproved = payment.status === "approved" || payment.accessEngineSynced === true;
+            const isRejected = payment.status === "rejected";
+            const isLocked = isApproved || isRejected;
+            const needsAdminProof = !adminProof.trim();
             return (
               <article className="adminPaymentCard" key={payment.id}>
                 <div className="adminPaymentCardHeader">
@@ -188,7 +193,7 @@ export default function AdminPaymentVerificationRoute({
                   <p>{proof || "No proof submitted yet."}</p>
                 </div>
 
-                {payment.status !== "approved" ? (
+                {!isLocked ? (
                   <label className="adminPaymentProofInput">
                     <span>Admin Received Message / UTR</span>
                     <textarea
@@ -200,12 +205,26 @@ export default function AdminPaymentVerificationRoute({
                   </label>
                 ) : null}
 
+                {(verificationPreview || payment.reviewReason || payment.duplicateUtr || payment.verificationStatus) ? (
+                  <div className={verificationPreview?.isVerified ? "adminPaymentReviewBox success" : "adminPaymentReviewBox warning"}>
+                    <strong>{verificationPreview?.isVerified ? "Verification Ready" : "Verification Review"}</strong>
+                    <p>{verificationPreview?.reviewReason || payment.reviewReason || payment.verificationStatus || "Proof details saved for audit."}</p>
+                    <div className="adminPaymentReviewChips">
+                      <span>{verificationPreview?.utrMatch || payment.utrMatch ? "UTR Match" : "UTR Pending"}</span>
+                      <span>{verificationPreview?.amountMatch || payment.amountMatch ? "Amount Match" : "Amount Pending"}</span>
+                      {(verificationPreview?.duplicateUtr || payment.duplicateUtr) ? <span className="danger">Duplicate UTR</span> : null}
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="adminPaymentActions">
-                  {payment.status === "approved" ? (
-                    <AdminStatusPill status="approved" label="Premium Activated" />
+                  {isApproved ? (
+                    <AdminStatusPill status="approved" label={payment.accessEngineSynced ? "Access Synced" : "Premium Activated"} />
+                  ) : isRejected ? (
+                    <AdminStatusPill status="rejected" label="Rejected" />
                   ) : (
                     <>
-                      <AdminButton variant="primary" size="sm" loading={busy} onClick={() => approvePayment(payment)}>Auto Verify & Approve</AdminButton>
+                      <AdminButton variant="primary" size="sm" loading={busy} disabled={busy || needsAdminProof} onClick={() => approvePayment(payment)}>{needsAdminProof ? "Paste Admin Proof First" : "Auto Verify & Approve"}</AdminButton>
                       <AdminButton variant="secondary" size="sm" disabled={busy} onClick={() => markReviewRequired(payment)}>Mark Review</AdminButton>
                       <AdminButton variant="danger" size="sm" disabled={busy} onClick={() => openRejectConfirm(payment)}>Reject</AdminButton>
                     </>
