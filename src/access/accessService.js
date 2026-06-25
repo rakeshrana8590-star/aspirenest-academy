@@ -344,7 +344,7 @@ export const createAccessInvite = async (data = {}) => {
   };
 };
 
-export const updateAccessStatus = async (id, status, actor = {}) => {
+export const updateAccessStatus = async (id, status, actor = {}, metadata = {}) => {
   const accessId = requireAccessId(id);
   const adminActor = requireAdminActor(actor);
   const before = await readAccessById(accessId);
@@ -362,12 +362,13 @@ export const updateAccessStatus = async (id, status, actor = {}) => {
 
   await createAccessAuditLog({
     actor: adminActor,
-    action: "update_access_status",
+    action: metadata.action || "update_access_status",
     accessId,
     email: before?.email,
     uid: before?.uid,
     before,
     after: payload,
+    metadata,
   });
 
   return {
@@ -376,7 +377,7 @@ export const updateAccessStatus = async (id, status, actor = {}) => {
   };
 };
 
-export const extendAccess = async (id, accessUntil, actor = {}) => {
+export const extendAccess = async (id, accessUntil, actor = {}, metadata = {}) => {
   const accessId = requireAccessId(id);
   const adminActor = requireAdminActor(actor);
   const before = await readAccessById(accessId);
@@ -396,12 +397,49 @@ export const extendAccess = async (id, accessUntil, actor = {}) => {
 
   await createAccessAuditLog({
     actor: adminActor,
-    action: "extend_access",
+    action: metadata.action || "extend_access",
     accessId,
     email: before?.email,
     uid: before?.uid,
     before,
     after: payload,
+    metadata,
+  });
+
+  return {
+    id: accessId,
+    ...payload,
+  };
+};
+
+export const addAccessNote = async (id, note = "", actor = {}, metadata = {}) => {
+  const accessId = requireAccessId(id);
+  const adminActor = requireAdminActor(actor);
+  const before = await readAccessById(accessId);
+  const cleanNote = String(note || "").trim();
+
+  if (!cleanNote) {
+    throw new Error("Admin note is required.");
+  }
+
+  const payload = {
+    notes: cleanNote,
+    adminNote: cleanNote,
+    updatedAt: serverTimestamp(),
+    updatedBy: adminActor.uid,
+  };
+
+  await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId), payload);
+
+  await createAccessAuditLog({
+    actor: adminActor,
+    action: "add_access_note",
+    accessId,
+    email: before?.email,
+    uid: before?.uid,
+    before,
+    after: payload,
+    metadata,
   });
 
   return {

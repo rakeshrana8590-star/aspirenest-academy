@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
-import { extendAccess, listStudentAccess, normalizeAccessEmail, revokeAccess, updateAccessStatus, upgradeAccess } from "../accessService";
+import { addAccessNote, extendAccess, listStudentAccess, normalizeAccessEmail, revokeAccess, updateAccessStatus, upgradeAccess } from "../accessService";
 import { AdminButton, AdminConfirmDialog, AdminEmptyState, AdminErrorBox, AdminFilterBar, AdminFilterField, AdminPortalActionMenu, AdminStatusPill } from "../../components/shared/admin";
 import "../../styles/shared/adminSystem.css";
 
@@ -26,6 +26,12 @@ const lockedActionConfigs = {
     requiresText: "EXTEND",
     tone: "warning",
   },
+  shorten: {
+    title: "Shorten Validity",
+    message: "This will shorten the selected access expiry date and create an audit log.",
+    requiresText: "SHORTEN",
+    tone: "warning",
+  },
   status: {
     title: "Status Change",
     message: "This will update the selected access status and create an audit log.",
@@ -37,6 +43,24 @@ const lockedActionConfigs = {
     message: "This will block the selected access record and create an audit log. This does not delete the learner record.",
     requiresText: "REVOKE",
     tone: "danger",
+  },
+  expire: {
+    title: "Expire Access",
+    message: "This will immediately mark the selected access record as expired and create an audit log.",
+    requiresText: "EXPIRE",
+    tone: "danger",
+  },
+  unblock: {
+    title: "Unblock Learner",
+    message: "This will set the selected access record back to active and create an audit log.",
+    requiresText: "UNBLOCK",
+    tone: "info",
+  },
+  note: {
+    title: "Add Admin Note",
+    message: "This will save an admin note on the selected access record and create an audit log.",
+    requiresText: "NOTE",
+    tone: "info",
   },
   plan: {
     title: "Plan Change",
@@ -309,7 +333,10 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
       setActionSubmitting(true);
 
       try {
-        await extendAccess(selectedRecord.id, actionDraft.accessUntil, adminActor);
+        await extendAccess(selectedRecord.id, actionDraft.accessUntil, adminActor, {
+          note: actionDraft.note.trim(),
+          source: "admin_access_manage",
+        });
         const resultMessage =
           "Extend Access completed. Access expiry updated to " +
           actionDraft.accessUntil +
@@ -347,7 +374,10 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
       setActionSubmitting(true);
 
       try {
-        await updateAccessStatus(selectedRecord.id, actionDraft.status, adminActor);
+        await updateAccessStatus(selectedRecord.id, actionDraft.status, adminActor, {
+          note: actionDraft.note.trim(),
+          source: "admin_access_manage",
+        });
         const resultMessage =
           "Status Change completed. Access status updated to " +
           actionDraft.status +
@@ -441,6 +471,156 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
       } catch (actionError) {
         const errorMessage =
           "Plan change failed: " +
+          (actionError?.message || "Unknown error.");
+        setMessage(errorMessage);
+        setLockedActionResult(errorMessage);
+      } finally {
+        setActionSubmitting(false);
+      }
+
+      return;
+    }
+
+    if (lockedActionConfirm.type === "shorten") {
+      if (!selectedRecord?.id) {
+        setMessage("Select an access record before shortening validity.");
+        return;
+      }
+
+      if (!actionDraft.accessUntil) {
+        setMessage("Select shortened access expiry date before confirming.");
+        return;
+      }
+
+      setActionSubmitting(true);
+
+      try {
+        await extendAccess(selectedRecord.id, actionDraft.accessUntil, adminActor, {
+          action: "shorten_access_validity",
+          note: actionDraft.note.trim(),
+          source: "admin_access_manage",
+        });
+        const resultMessage =
+          "Shorten Validity completed. Access expiry updated to " +
+          actionDraft.accessUntil +
+          " and audit log created.";
+
+        setMessage(resultMessage);
+        setLockedActionResult(resultMessage);
+        closeLockedActionConfirm();
+        await loadRecords(normalizedEmail || searchEmail);
+        setSelectedRecordId(selectedRecord.id);
+      } catch (actionError) {
+        const errorMessage =
+          "Shorten validity failed: " +
+          (actionError?.message || "Unknown error.");
+        setMessage(errorMessage);
+        setLockedActionResult(errorMessage);
+      } finally {
+        setActionSubmitting(false);
+      }
+
+      return;
+    }
+
+    if (lockedActionConfirm.type === "expire") {
+      if (!selectedRecord?.id) {
+        setMessage("Select an access record before expiring access.");
+        return;
+      }
+
+      setActionSubmitting(true);
+
+      try {
+        await updateAccessStatus(selectedRecord.id, "expired", adminActor, {
+          action: "expire_access",
+          note: actionDraft.note.trim(),
+          source: "admin_access_manage",
+        });
+        const resultMessage =
+          "Expire Access completed. Access status updated to expired and audit log created.";
+
+        setMessage(resultMessage);
+        setLockedActionResult(resultMessage);
+        closeLockedActionConfirm();
+        await loadRecords(normalizedEmail || searchEmail);
+        setSelectedRecordId(selectedRecord.id);
+      } catch (actionError) {
+        const errorMessage =
+          "Expire access failed: " +
+          (actionError?.message || "Unknown error.");
+        setMessage(errorMessage);
+        setLockedActionResult(errorMessage);
+      } finally {
+        setActionSubmitting(false);
+      }
+
+      return;
+    }
+
+    if (lockedActionConfirm.type === "unblock") {
+      if (!selectedRecord?.id) {
+        setMessage("Select an access record before unblocking learner.");
+        return;
+      }
+
+      setActionSubmitting(true);
+
+      try {
+        await updateAccessStatus(selectedRecord.id, "active", adminActor, {
+          action: "unblock_access",
+          note: actionDraft.note.trim(),
+          source: "admin_access_manage",
+        });
+        const resultMessage =
+          "Unblock Learner completed. Access status updated to active and audit log created.";
+
+        setMessage(resultMessage);
+        setLockedActionResult(resultMessage);
+        closeLockedActionConfirm();
+        await loadRecords(normalizedEmail || searchEmail);
+        setSelectedRecordId(selectedRecord.id);
+      } catch (actionError) {
+        const errorMessage =
+          "Unblock learner failed: " +
+          (actionError?.message || "Unknown error.");
+        setMessage(errorMessage);
+        setLockedActionResult(errorMessage);
+      } finally {
+        setActionSubmitting(false);
+      }
+
+      return;
+    }
+
+    if (lockedActionConfirm.type === "note") {
+      if (!selectedRecord?.id) {
+        setMessage("Select an access record before adding note.");
+        return;
+      }
+
+      if (!actionDraft.note.trim()) {
+        setMessage("Write admin note before confirming.");
+        return;
+      }
+
+      setActionSubmitting(true);
+
+      try {
+        await addAccessNote(selectedRecord.id, actionDraft.note.trim(), adminActor, {
+          source: "admin_access_manage",
+        });
+        const resultMessage =
+          "Add Admin Note completed. Note saved and audit log created.";
+
+        setMessage(resultMessage);
+        setLockedActionResult(resultMessage);
+        closeLockedActionConfirm();
+        await loadRecords(normalizedEmail || searchEmail);
+        setSelectedRecordId(selectedRecord.id);
+      } catch (actionError) {
+        const errorMessage =
+          "Add note failed: " +
           (actionError?.message || "Unknown error.");
         setMessage(errorMessage);
         setLockedActionResult(errorMessage);
@@ -789,7 +969,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
         open={lockedActionConfirm.open}
         title={lockedActionConfirm.title || "Locked Action"}
         message={lockedActionConfirm.message || "This action is locked for the audited action phase."}
-        confirmLabel={lockedActionConfirm.type === "extend" ? "Extend Access" : lockedActionConfirm.type === "status" ? "Update Status" : lockedActionConfirm.type === "revoke" ? "Revoke Access" : lockedActionConfirm.type === "plan" ? "Change Plan" : "Confirm Locked Check"}
+        confirmLabel={lockedActionConfirm.type === "extend" ? "Extend Access" : lockedActionConfirm.type === "shorten" ? "Shorten Validity" : lockedActionConfirm.type === "expire" ? "Expire Access" : lockedActionConfirm.type === "unblock" ? "Unblock Learner" : lockedActionConfirm.type === "note" ? "Add Note" : lockedActionConfirm.type === "status" ? "Update Status" : lockedActionConfirm.type === "revoke" ? "Revoke Access" : lockedActionConfirm.type === "plan" ? "Change Plan" : "Confirm Locked Check"}
         cancelLabel="Cancel"
         tone={lockedActionConfirm.tone}
         requiresText={lockedActionConfirm.requiresText}
@@ -798,9 +978,9 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
         onConfirm={handleLockedActionConfirm}
       >
         <div className="adminAccessActionDraft">
-          {lockedActionConfirm.type === "extend" ? (
+          {lockedActionConfirm.type === "extend" || lockedActionConfirm.type === "shorten" ? (
             <label>
-              <span>New access expiry date</span>
+              <span>{lockedActionConfirm.type === "shorten" ? "Shortened expiry date" : "New access expiry date"}</span>
               <input
                 type="date"
                 value={actionDraft.accessUntil}
@@ -857,7 +1037,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
 
           {lockedActionConfirm.type !== "revoke" ? (
             <label>
-              <span>Action note</span>
+              <span>{lockedActionConfirm.type === "note" ? "Admin note" : "Action note"}</span>
               <textarea
                 value={actionDraft.note}
                 onChange={(event) => handleActionDraftChange("note", event.target.value)}
@@ -891,11 +1071,39 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
             onClick: () => openLockedActionConfirm("extend"),
           },
           {
+            key: "shorten-validity",
+            label: "Shorten Validity",
+            description: "Shorten expiry with audit log.",
+            tone: "warning",
+            onClick: () => openLockedActionConfirm("shorten"),
+          },
+          {
             key: "status-locked",
             label: "Status Change",
             description: "Update status with audit log.",
             tone: "info",
             onClick: () => openLockedActionConfirm("status"),
+          },
+          {
+            key: "expire-access",
+            label: "Expire Access",
+            description: "Mark expired with audit log.",
+            tone: "danger",
+            onClick: () => openLockedActionConfirm("expire"),
+          },
+          {
+            key: "unblock-access",
+            label: "Unblock Learner",
+            description: "Set status active with audit log.",
+            tone: "info",
+            onClick: () => openLockedActionConfirm("unblock"),
+          },
+          {
+            key: "add-note",
+            label: "Add Note",
+            description: "Save admin note with audit log.",
+            tone: "info",
+            onClick: () => openLockedActionConfirm("note"),
           },
           {
             key: "revoke-locked",
