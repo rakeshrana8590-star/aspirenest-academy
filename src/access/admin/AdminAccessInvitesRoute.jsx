@@ -43,6 +43,26 @@ const buildInviteLinkForAdmin = (invite = {}) => {
   return origin + "/access/invite/" + encodeURIComponent(invite.inviteCode);
 };
 
+const buildInviteWhatsAppMessage = (invite = {}) => {
+  const inviteLink = buildInviteLinkForAdmin(invite);
+  const learnerName = invite.learnerName || invite.name || "Student";
+  const planName = invite.planType || "AspireNest Access";
+
+  return [
+    "Hello " + learnerName + ",",
+    "",
+    "Your AspireNest Academy learning access is ready.",
+    "Plan: " + planName,
+    "",
+    "Open this secure invite link and continue with your registered Gmail:",
+    inviteLink,
+    "",
+    "Note: Do not share this link. It works only with your registered email.",
+    "",
+    "AspireNest Academy"
+  ].join(String.fromCharCode(10));
+};
+
 const buildAdminActor = () => ({
   uid: auth.currentUser?.uid || null,
   email: auth.currentUser?.email || "",
@@ -125,6 +145,34 @@ export default function AdminAccessInvitesRoute() {
       await loadInvites();
     } catch (copyError) {
       setError(copyError?.message || "Invite link copy failed.");
+    } finally {
+      setActionLoadingId("");
+    }
+  };
+
+  const handleCopyWhatsAppMessage = async (invite) => {
+    const inviteLink = buildInviteLinkForAdmin(invite);
+    const messageText = buildInviteWhatsAppMessage(invite);
+
+    if (!inviteLink) {
+      setError("Invite link is not available for this record.");
+      return;
+    }
+
+    setActionLoadingId(invite.id);
+    setMessage("");
+    setError("");
+
+    try {
+      await navigator.clipboard.writeText(messageText);
+      await updateAccessInviteStatus(invite.id, "copied", adminActor, {
+        source: "admin_access_invites_route",
+        delivery: "whatsapp_manual",
+      });
+      setMessage("WhatsApp invite message copied for " + (invite.email || invite.normalizedEmail) + ".");
+      await loadInvites();
+    } catch (copyError) {
+      setError(copyError?.message || "WhatsApp message copy failed.");
     } finally {
       setActionLoadingId("");
     }
@@ -303,6 +351,13 @@ export default function AdminAccessInvitesRoute() {
                         disabled={invite.inviteStatus === "used" || !buildInviteLinkForAdmin(invite)}
                         onClick={() => handleCopyLink(invite)}
                       >Copy Link</AdminButton>
+                      <AdminButton
+                        size="sm"
+                        variant="secondary"
+                        loading={actionLoadingId === invite.id}
+                        disabled={invite.inviteStatus === "used" || !buildInviteLinkForAdmin(invite)}
+                        onClick={() => handleCopyWhatsAppMessage(invite)}
+                      >Copy WhatsApp</AdminButton>
                       <AdminButton
                         size="sm"
                         variant="secondary"
