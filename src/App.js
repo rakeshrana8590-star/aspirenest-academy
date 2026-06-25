@@ -5112,13 +5112,10 @@ isAdmin={isAdmin}
             fallbackCurrentAffairs={currentAffairsList || []}
             announcements={announcements || []}
             paymentHistory={paymentHistory || []}
-            paymentRequests={paymentRequests || []}
-            loadPaymentRequests={loadPaymentRequests}
             loadAdminData={loadAdminData}
             loadLeaderboard={loadLeaderboard}
             loadPaymentHistory={loadPaymentHistory}
             handlePremiumControl={handlePremiumControl}
-            approvePaymentRequest={approvePaymentRequest}
             handleDeleteMockQuestion={handleDeleteMockQuestion}
             handleAddMockQuestion={handleAddMockQuestion}
             handleSaveNote={handleSaveNote}
@@ -7226,13 +7223,10 @@ This action cannot be undone.`
               setAnnouncementMessage={setAnnouncementMessage}
               announcements={announcements || []}
               paymentHistory={paymentHistory || []}
-              paymentRequests={paymentRequests || []}
-              loadPaymentRequests={loadPaymentRequests}
               loadAdminData={loadAdminData}
               loadLeaderboard={loadLeaderboard}
               loadPaymentHistory={loadPaymentHistory}
               handlePremiumControl={handlePremiumControl}
-              approvePaymentRequest={approvePaymentRequest}
               handleDeleteMockQuestion={handleDeleteMockQuestion}
               handleAddMockQuestion={handleAddMockQuestion}
               handleSaveNote={handleSaveNote}
@@ -7290,13 +7284,10 @@ This action cannot be undone.`
             fallbackCurrentAffairs={currentAffairsList || []}
             announcements={announcements || []}
             paymentHistory={paymentHistory || []}
-            paymentRequests={paymentRequests || []}
-            loadPaymentRequests={loadPaymentRequests}
             loadAdminData={loadAdminData}
             loadLeaderboard={loadLeaderboard}
             loadPaymentHistory={loadPaymentHistory}
             handlePremiumControl={handlePremiumControl}
-            approvePaymentRequest={approvePaymentRequest}
             handleDeleteMockQuestion={handleDeleteMockQuestion}
             handleAddMockQuestion={handleAddMockQuestion}
             handleSaveNote={handleSaveNote}
@@ -7354,13 +7345,10 @@ This action cannot be undone.`
               fallbackCurrentAffairs={currentAffairsList || []}
               announcements={announcements || []}
               paymentHistory={paymentHistory || []}
-              paymentRequests={paymentRequests || []}
-              loadPaymentRequests={loadPaymentRequests}
               loadAdminData={loadAdminData}
               loadLeaderboard={loadLeaderboard}
               loadPaymentHistory={loadPaymentHistory}
               handlePremiumControl={handlePremiumControl}
-              approvePaymentRequest={approvePaymentRequest}
               handleDeleteMockQuestion={handleDeleteMockQuestion}
               handleAddMockQuestion={handleAddMockQuestion}
               handleSaveNote={handleSaveNote}
@@ -7405,13 +7393,10 @@ This action cannot be undone.`
               fallbackCurrentAffairs={currentAffairsList || []}
               announcements={announcements || []}
               paymentHistory={paymentHistory || []}
-              paymentRequests={paymentRequests || []}
-              loadPaymentRequests={loadPaymentRequests}
               loadAdminData={loadAdminData}
               loadLeaderboard={loadLeaderboard}
               loadPaymentHistory={loadPaymentHistory}
               handlePremiumControl={handlePremiumControl}
-              approvePaymentRequest={approvePaymentRequest}
               handleDeleteMockQuestion={handleDeleteMockQuestion}
               handleAddMockQuestion={handleAddMockQuestion}
               handleSaveNote={handleSaveNote}
@@ -7514,15 +7499,12 @@ This action cannot be undone.`
               announcements={announcements || []}
 
               paymentHistory={paymentHistory || []}
-              paymentRequests={paymentRequests || []}
 
-              loadPaymentRequests={loadPaymentRequests}
               loadAdminData={loadAdminData}
               loadLeaderboard={loadLeaderboard}
               loadPaymentHistory={loadPaymentHistory}
 
               handlePremiumControl={handlePremiumControl}
-              approvePaymentRequest={approvePaymentRequest}
 
               handleDeleteMockQuestion={handleDeleteMockQuestion}
               handleAddMockQuestion={handleAddMockQuestion}
@@ -7575,13 +7557,10 @@ This action cannot be undone.`
               fallbackCurrentAffairs={currentAffairsList || []}
               announcements={announcements || []}
               paymentHistory={paymentHistory || []}
-              paymentRequests={paymentRequests || []}
-              loadPaymentRequests={loadPaymentRequests}
               loadAdminData={loadAdminData}
               loadLeaderboard={loadLeaderboard}
               loadPaymentHistory={loadPaymentHistory}
               handlePremiumControl={handlePremiumControl}
-              approvePaymentRequest={approvePaymentRequest}
               handleDeleteMockQuestion={handleDeleteMockQuestion}
               handleAddMockQuestion={handleAddMockQuestion}
               handleSaveNote={handleSaveNote}
@@ -7634,15 +7613,12 @@ This action cannot be undone.`
               announcements={announcements || []}
 
               paymentHistory={paymentHistory || []}
-              paymentRequests={paymentRequests || []}
 
-              loadPaymentRequests={loadPaymentRequests}
               loadAdminData={loadAdminData}
               loadLeaderboard={loadLeaderboard}
               loadPaymentHistory={loadPaymentHistory}
 
               handlePremiumControl={handlePremiumControl}
-              approvePaymentRequest={approvePaymentRequest}
 
               handleDeleteMockQuestion={handleDeleteMockQuestion}
               handleAddMockQuestion={handleAddMockQuestion}
@@ -7689,13 +7665,10 @@ This action cannot be undone.`
               fallbackCurrentAffairs={currentAffairsList || []}
               announcements={announcements || []}
               paymentHistory={paymentHistory || []}
-              paymentRequests={paymentRequests || []}
-              loadPaymentRequests={loadPaymentRequests}
               loadAdminData={loadAdminData}
               loadLeaderboard={loadLeaderboard}
               loadPaymentHistory={loadPaymentHistory}
               handlePremiumControl={handlePremiumControl}
-              approvePaymentRequest={approvePaymentRequest}
               handleDeleteMockQuestion={handleDeleteMockQuestion}
               handleAddMockQuestion={handleAddMockQuestion}
               handleSaveNote={handleSaveNote}
