@@ -572,6 +572,10 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
       return false;
     }
 
+    if (normalizedRequiredPlan === "FREE") {
+      return true;
+    }
+
     if (accessProfile?.isExpired) {
       return false;
     }
