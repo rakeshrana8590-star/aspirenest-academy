@@ -1101,7 +1101,7 @@ export async function grantPaymentAccess(payment = {}, actor = {}) {
 
     await createAccessAuditLog({
       actor: adminActor,
-      action: "payment_access_granted",
+      action: "PAYMENT_ACCESS_GRANTED",
       accessId: before.id,
       email: payload.email,
       uid: payload.uid,
@@ -1126,7 +1126,7 @@ export async function grantPaymentAccess(payment = {}, actor = {}) {
 
   await createAccessAuditLog({
     actor: adminActor,
-    action: "payment_access_granted",
+    action: "PAYMENT_ACCESS_GRANTED",
     accessId: docRef.id,
     email: createPayload.email,
     uid: createPayload.uid,
