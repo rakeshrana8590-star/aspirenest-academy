@@ -524,36 +524,36 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
   const activeAccessPlan = accessProfile?.activePlan || userPlanType || "FREE";
   const activeAccessExpiry =
     accessProfile?.membershipExpiry || membershipExpiry || null;
-  const requireLogin = () => {
-    if (!user) {
-      navigate("/login", { replace: true });
-      return false;
-    }
-  
-    return true;
-  };
-  
-  const requireAdmin = () => {
+  const requireLogin = () => Boolean(user);
+
+  const requireAdmin = () => Boolean(user && isAdmin(user));
+
+  React.useEffect(() => {
+    const studentProtectedRoutes = new Set([
+      "/student-dashboard",
+      "/profile/setup",
+      "/my-profile",
+      "/my-courses",
+      "/my-notes",
+      "/my-tests",
+      "/payment",
+      "/payment-history",
+      "/ai-classroom",
+    ]);
+
+    const isStudentProtectedRoute = studentProtectedRoutes.has(location.pathname);
     const isAdminRoute = location.pathname.startsWith("/admin");
 
-    if (!user) {
-      if (isAdminRoute) {
-        navigate("/login", { replace: true });
-      }
-
-      return false;
+    if (!user && (isStudentProtectedRoute || isAdminRoute)) {
+      navigate("/login", { replace: true });
+      return;
     }
 
-    if (!isAdmin(user)) {
-      if (isAdminRoute) {
-        navigate("/", { replace: true });
-      }
-
-      return false;
+    if (user && isAdminRoute && !isAdmin(user)) {
+      navigate("/", { replace: true });
     }
+  }, [location.pathname, navigate, user]);
 
-    return true;
-  };
   const hasPlanAccess = (requiredPlan = "FREE", options = {}) => {
     const normalizedRequiredPlan = String(requiredPlan || "FREE").trim().toUpperCase();
     const accessOptions =

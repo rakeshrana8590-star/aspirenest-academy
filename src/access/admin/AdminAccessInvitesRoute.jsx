@@ -46,6 +46,8 @@ const buildInviteLinkForAdmin = (invite = {}) => {
   return origin + "/access/invite/" + encodeURIComponent(invite.inviteCode);
 };
 
+const getInviteActionId = (invite = {}) => invite.id || invite.inviteCode || "";
+
 const buildInviteWhatsAppMessage = (invite = {}) => {
   const inviteLink = buildInviteLinkForAdmin(invite);
   const learnerName = invite.learnerName || invite.name || "Student";
@@ -128,6 +130,15 @@ export default function AdminAccessInvitesRoute() {
     ];
   }, [invites]);
 
+  const patchInviteLocally = (invite, patch = {}) => {
+    const targetId = getInviteActionId(invite);
+    setInvites((current) =>
+      current.map((item) =>
+        getInviteActionId(item) === targetId ? { ...item, ...patch } : item
+      )
+    );
+  };
+
   const handleCopyLink = async (invite) => {
     const inviteLink = buildInviteLinkForAdmin(invite);
 
@@ -136,18 +147,21 @@ export default function AdminAccessInvitesRoute() {
       return;
     }
 
-    setActionLoadingId(invite.id);
+    setActionLoadingId(getInviteActionId(invite));
     setMessage("");
     setError("");
 
     try {
       await navigator.clipboard.writeText(inviteLink);
-      await updateAccessInviteStatus(invite.id, "copied", adminActor, {
+      await updateAccessInviteStatus(getInviteActionId(invite), "copied", adminActor, {
         source: "admin_access_invites_route",
         action: "copy_access_invite_link",
       });
+      patchInviteLocally(invite, {
+        inviteStatus: "copied",
+        deliveryStatus: "manual_copy",
+      });
       setMessage("Invite link copied for " + (invite.email || invite.normalizedEmail) + ".");
-      await loadInvites();
     } catch (copyError) {
       setError(copyError?.message || "Invite link copy failed.");
     } finally {
@@ -164,19 +178,22 @@ export default function AdminAccessInvitesRoute() {
       return;
     }
 
-    setActionLoadingId(invite.id);
+    setActionLoadingId(getInviteActionId(invite));
     setMessage("");
     setError("");
 
     try {
       await navigator.clipboard.writeText(messageText);
-      await updateAccessInviteStatus(invite.id, "copied", adminActor, {
+      await updateAccessInviteStatus(getInviteActionId(invite), "copied", adminActor, {
         source: "admin_access_invites_route",
         action: "copy_access_invite_link",
         delivery: "whatsapp_manual",
       });
+      patchInviteLocally(invite, {
+        inviteStatus: "copied",
+        deliveryStatus: "manual_copy",
+      });
       setMessage("WhatsApp invite message copied for " + (invite.email || invite.normalizedEmail) + ".");
-      await loadInvites();
     } catch (copyError) {
       setError(copyError?.message || "WhatsApp message copy failed.");
     } finally {
@@ -185,18 +202,21 @@ export default function AdminAccessInvitesRoute() {
   };
 
   const handleMarkSent = async (invite) => {
-    setActionLoadingId(invite.id);
+    setActionLoadingId(getInviteActionId(invite));
     setMessage("");
     setError("");
 
     try {
-      await updateAccessInviteStatus(invite.id, "sent", adminActor, {
+      await updateAccessInviteStatus(getInviteActionId(invite), "sent", adminActor, {
         source: "admin_access_invites_route",
         action: "mark_access_invite_sent",
         delivery: "manual",
       });
+      patchInviteLocally(invite, {
+        inviteStatus: "sent",
+        deliveryStatus: "manual_sent",
+      });
       setMessage("Invite marked sent for " + (invite.email || invite.normalizedEmail) + ".");
-      await loadInvites();
     } catch (sentError) {
       setError(sentError?.message || "Mark sent failed.");
     } finally {
@@ -205,12 +225,12 @@ export default function AdminAccessInvitesRoute() {
   };
 
   const handleRegenerateLink = async (invite) => {
-    setActionLoadingId(invite.id);
+    setActionLoadingId(getInviteActionId(invite));
     setMessage("");
     setError("");
 
     try {
-      const result = await regenerateAccessInviteLink(invite.id, adminActor, {
+      const result = await regenerateAccessInviteLink(getInviteActionId(invite), adminActor, {
         source: "admin_access_invites_route",
       });
 
@@ -228,12 +248,12 @@ export default function AdminAccessInvitesRoute() {
   };
 
   const handleQueueResend = async (invite) => {
-    setActionLoadingId(invite.id);
+    setActionLoadingId(getInviteActionId(invite));
     setMessage("");
     setError("");
 
     try {
-      await queueAccessInviteResend(invite.id, adminActor, {
+      await queueAccessInviteResend(getInviteActionId(invite), adminActor, {
         source: "admin_access_invites_route",
         expiryDays: 7,
       });
@@ -247,12 +267,12 @@ export default function AdminAccessInvitesRoute() {
   };
 
   const handleMarkStatus = async (invite, nextStatus) => {
-    setActionLoadingId(invite.id);
+    setActionLoadingId(getInviteActionId(invite));
     setMessage("");
     setError("");
 
     try {
-      await updateAccessInviteStatus(invite.id, nextStatus, adminActor, {
+      await updateAccessInviteStatus(getInviteActionId(invite), nextStatus, adminActor, {
         source: "admin_access_invites_route",
         action:
           nextStatus === "revoked"
@@ -400,7 +420,7 @@ export default function AdminAccessInvitesRoute() {
                       variant="secondary"
                       onClick={(event) =>
                         setActiveInviteMenu({
-                          id: invite.id,
+                          id: getInviteActionId(invite),
                           anchorRect: event.currentTarget.getBoundingClientRect(),
                         })
                       }
@@ -409,7 +429,7 @@ export default function AdminAccessInvitesRoute() {
                     </AdminButton>
 
                     <AdminPortalActionMenu
-                      open={activeInviteMenu.id === invite.id}
+                      open={activeInviteMenu.id === getInviteActionId(invite)}
                       anchorRect={activeInviteMenu.anchorRect}
                       title="Invite actions"
                       width={280}
@@ -418,7 +438,7 @@ export default function AdminAccessInvitesRoute() {
                         {
                           key: "mark-sent",
                           label: "Mark Sent",
-                          description: "Mark this invite as sent manually.",
+                          description: "WhatsApp/Gmail se bhejne ke baad sent mark kare.",
                           icon: "✓",
                           disabled: isUsed,
                           onClick: () => handleMarkSent(invite),
@@ -426,7 +446,7 @@ export default function AdminAccessInvitesRoute() {
                         {
                           key: "regenerate",
                           label: "Regenerate Link",
-                          description: "Create a fresh secure invite link.",
+                          description: "Old link revoke karke naya secure link copy kare.",
                           icon: "R",
                           disabled: isUsed,
                           onClick: () => handleRegenerateLink(invite),
@@ -434,7 +454,7 @@ export default function AdminAccessInvitesRoute() {
                         {
                           key: "queue",
                           label: "Queue Resend",
-                          description: "Add this invite to resend queue.",
+                          description: "Future email backend ke liye resend queue me rakhe.",
                           icon: "Q",
                           disabled: isUsed,
                           onClick: () => handleQueueResend(invite),
@@ -442,7 +462,7 @@ export default function AdminAccessInvitesRoute() {
                         {
                           key: "expire",
                           label: "Expire Invite",
-                          description: "Mark this invite as expired.",
+                          description: "Old/unused link ko expired mark kare.",
                           icon: "E",
                           tone: "warning",
                           disabled: isExpired || isUsed,
@@ -451,7 +471,7 @@ export default function AdminAccessInvitesRoute() {
                         {
                           key: "revoke",
                           label: "Revoke Invite",
-                          description: "Block this invite link permanently.",
+                          description: "Link permanently block kare; student redeem nahi kar payega.",
                           icon: "!",
                           tone: "danger",
                           disabled: isRevoked || isUsed,
