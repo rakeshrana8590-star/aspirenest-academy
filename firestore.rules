@@ -517,7 +517,8 @@ service cloud.firestore {
         );
 
       allow create: if isAdmin() || isRedeemStudentAccessCreate();
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin() || isInviteStudentAccessUpdate();
+      allow delete: if isAdmin();
     }
 
     match /accessInvites/{docId} {

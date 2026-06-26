@@ -140,8 +140,6 @@ const buildAccessPayload = (data = {}) => {
   return {
     email: normalizedEmail || null,
     normalizedEmail,
-    inviteCode,
-    inviteLink,
     uid: uid || null,
     planType: normalizeAccessPlan(data.planType || ACCESS_PLAN_TYPES.FREE),
     scopeType: data.scopeType || ACCESS_SCOPE_TYPES.PLAN,
@@ -341,19 +339,18 @@ export const createAccessInvite = async (data = {}) => {
   const normalizedEmail = normalizeAccessEmail(data.email);
   const name = String(data.name || data.learnerName || "").trim();
   const phone = String(data.phone || "").trim();
+  const inviteCode = String(data.inviteCode || createInviteCode()).trim();
+  const inviteLink = data.inviteLink || buildAccessInviteLink(inviteCode);
 
   if (!normalizedEmail) {
     throw new Error("Invite email is required.");
   }
 
-  const inviteCode = data.inviteCode || createInviteCode();
-  const inviteLink = data.inviteLink || buildAccessInviteLink(inviteCode);
-
   const payload = {
-    inviteCode,
-    inviteLink,
     email: normalizedEmail,
     normalizedEmail,
+    inviteCode,
+    inviteLink,
     learnerName: name,
     name,
     phone,
