@@ -473,6 +473,15 @@ service cloud.firestore {
         request.resource.data.updatedBy == request.auth.uid;
     }
 
+    function isInviteOpenAuditCreate() {
+      return isSignedIn() &&
+        request.resource.data.action == "open_access_invite" &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.actorEmail == request.auth.token.email &&
+        request.resource.data.actorRole == "student" &&
+        request.resource.data.metadata.source == "manual_invite_link";
+    }
+
     function isInviteRedeemAuditCreate() {
       return isSignedIn() &&
         request.resource.data.action == "redeem_access_invite" &&
@@ -530,7 +539,7 @@ service cloud.firestore {
 
     match /accessAuditLogs/{docId} {
       allow read: if isAdmin();
-      allow create: if isAdmin() || isRedeemAuditCreate() || isInviteRedeemAuditCreate();
+      allow create: if isAdmin() || isRedeemAuditCreate() || isInviteOpenAuditCreate() || isInviteRedeemAuditCreate();
       allow update, delete: if false;
     }
 

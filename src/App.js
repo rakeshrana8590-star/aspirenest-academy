@@ -1878,10 +1878,11 @@ const [paymentHistory, setPaymentHistory] = useState([]);
   
     try {
       await signInWithPopup(auth, provider);
-  
       navigate(redirectPath || "/ctet-tet", { replace: true });
-  
     } catch (error) {
+      if (error?.code === "auth/cancelled-popup-request") {
+        return;
+      }
       alert(error.message);
     }
   };
