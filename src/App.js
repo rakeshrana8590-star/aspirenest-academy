@@ -4906,6 +4906,20 @@ isAdmin={isAdmin}
 />
 
 <Route
+  path="/profile/setup"
+  element={
+    requireLogin() ? (
+      <StudentLearnerProfileRoute
+        user={user}
+        activePlan={activeAccessPlan}
+        accessStatus={accessProfile?.accessStatus || "active"}
+        membershipExpiry={activeAccessExpiry}
+      />
+    ) : null
+  }
+/>
+
+<Route
   path="/my-profile"
   element={
     requireLogin() ? (

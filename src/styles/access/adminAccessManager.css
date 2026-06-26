@@ -1022,3 +1022,600 @@ button.adminAccessCard p {
   font-size: 0.82rem;
   font-weight: 900;
 }
+/* Phase 14B-4A: Compact Add Access confirmation */
+.adminAccessConfirmCompact {
+  margin-top: 18px;
+  border-radius: 28px;
+  padding: 20px;
+  border: 1px solid rgba(249, 115, 22, 0.22);
+  background:
+    radial-gradient(circle at 96% 0%, rgba(249, 115, 22, 0.10), transparent 30%),
+    linear-gradient(180deg, rgba(255, 247, 237, 0.98), rgba(255, 255, 255, 0.96));
+  box-shadow: 0 22px 58px rgba(15, 23, 42, 0.10);
+}
+
+.adminAccessConfirmHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.adminAccessConfirmHead span,
+.adminAccessConfirmCard span {
+  color: #f97316;
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.adminAccessConfirmHead strong {
+  display: block;
+  margin-top: 6px;
+  color: #0f172a;
+  font-size: 1.35rem;
+  font-weight: 950;
+  letter-spacing: -0.04em;
+}
+
+.adminAccessConfirmHead p {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-weight: 800;
+}
+
+.adminAccessConfirmActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.adminAccessConfirmGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.adminAccessConfirmCard {
+  min-height: 116px;
+  border-radius: 20px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.adminAccessConfirmPrimary {
+  background:
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 35%),
+    #ffffff;
+}
+
+.adminAccessConfirmCard strong {
+  display: block;
+  margin-top: 10px;
+  color: #0f172a;
+  font-size: 0.98rem;
+  font-weight: 950;
+  word-break: break-word;
+}
+
+.adminAccessConfirmCard p {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 0.86rem;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.adminAccessConfirmWide {
+  grid-column: span 2;
+}
+
+@media (max-width: 980px) {
+  .adminAccessConfirmHead {
+    flex-direction: column;
+  }
+
+  .adminAccessConfirmGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminAccessConfirmWide {
+    grid-column: auto;
+  }
+}
+
+/* Shared Admin Review Panel */
+.adminReviewPanel {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.94));
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.18);
+}
+
+.adminReviewPanelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.adminReviewPanelHeader span {
+  display: block;
+  color: #f97316;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.adminReviewPanelHeader strong {
+  display: block;
+  margin-top: 4px;
+  color: #f8fafc;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.adminReviewPanelHeader p {
+  margin: 6px 0 0;
+  color: rgba(226, 232, 240, 0.72);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.adminReviewHighlights {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.adminReviewHighlight,
+.adminReviewCell {
+  min-width: 0;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.66);
+}
+
+.adminReviewHighlight {
+  padding: 12px 14px;
+}
+
+.adminReviewHighlight span,
+.adminReviewCell span {
+  display: block;
+  color: rgba(203, 213, 225, 0.72);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.adminReviewHighlight strong,
+.adminReviewCell strong {
+  display: block;
+  overflow: hidden;
+  margin-top: 4px;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 900;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adminReviewGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.adminReviewCell {
+  padding: 10px 12px;
+}
+
+.adminReviewCellWide {
+  grid-column: span 2;
+}
+
+.adminReviewTone-warning {
+  border-color: rgba(251, 191, 36, 0.38);
+  background: rgba(120, 53, 15, 0.24);
+}
+
+.adminReviewTone-success {
+  border-color: rgba(34, 197, 94, 0.34);
+  background: rgba(20, 83, 45, 0.22);
+}
+
+.adminReviewTone-danger {
+  border-color: rgba(248, 113, 113, 0.34);
+  background: rgba(127, 29, 29, 0.22);
+}
+
+.adminReviewFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.adminReviewFooter p {
+  margin: 0;
+  color: rgba(226, 232, 240, 0.72);
+  font-size: 0.82rem;
+}
+
+@media (max-width: 980px) {
+  .adminReviewHighlights,
+  .adminReviewGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .adminReviewCellWide {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 620px) {
+  .adminReviewPanel {
+    padding: 14px;
+    border-radius: 20px;
+  }
+
+  .adminReviewHighlights,
+  .adminReviewGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminReviewCellWide {
+    grid-column: span 1;
+  }
+
+  .adminReviewFooter {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+.adminReviewFooterActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Access Invite Premium Cards */
+.adminInviteListPanel {
+  margin-top: 20px;
+  padding: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,250,252,0.92));
+  box-shadow: 0 28px 80px rgba(15,23,42,0.08);
+}
+
+.adminInviteListHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.adminInviteListHead span,
+.adminInviteIdentity span,
+.adminInviteMetaGrid span {
+  display: block;
+  color: #f97316;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.adminInviteListHead strong,
+.adminInviteIdentity strong,
+.adminInviteMetaGrid strong {
+  display: block;
+  overflow: hidden;
+  margin-top: 4px;
+  color: #0f172a;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adminInviteListHead p,
+.adminInviteIdentity p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.adminInviteCardList {
+  display: grid;
+  gap: 14px;
+}
+
+.adminInviteCard {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.2fr) minmax(340px, 1fr) minmax(260px, 0.8fr);
+  gap: 16px;
+  align-items: center;
+  padding: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 18px 48px rgba(15,23,42,0.06);
+}
+
+.adminInviteIdentity {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.adminInviteStatusStack {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.adminInviteMetaGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.adminInviteMetaGrid div {
+  min-width: 0;
+  padding: 10px 11px;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.adminInviteActionDock {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.adminInviteMoreActions {
+  grid-column: 1 / -1;
+}
+
+.adminInviteMoreActions summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 900;
+  cursor: pointer;
+  list-style: none;
+}
+
+.adminInviteMoreActions summary::-webkit-details-marker {
+  display: none;
+}
+
+.adminInviteMoreActions div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px;
+  border-radius: 20px;
+  background: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+@media (max-width: 1180px) {
+  .adminInviteCard {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .adminInviteListPanel {
+    padding: 16px;
+  }
+
+  .adminInviteListHead,
+  .adminInviteIdentity {
+    flex-direction: column;
+  }
+
+  .adminInviteStatusStack {
+    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .adminInviteMetaGrid,
+  .adminInviteActionDock,
+  .adminInviteMoreActions div {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Access Invite Premium Cards — DNA Polish */
+.adminInviteListPanel {
+  padding: 24px;
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(249, 115, 22, 0.08), transparent 30%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
+}
+
+.adminInviteCard {
+  grid-template-columns: minmax(330px, 1.15fr) minmax(310px, 0.9fr) minmax(250px, 0.65fr);
+  padding: 18px 20px;
+  border-radius: 26px;
+  background:
+    linear-gradient(135deg, #ffffff 0%, #fbfdff 100%);
+  box-shadow: 0 20px 55px rgba(15, 23, 42, 0.07);
+}
+
+.adminInviteCard:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 26px 70px rgba(15, 23, 42, 0.11);
+}
+
+.adminInviteIdentity {
+  align-items: center;
+}
+
+.adminInviteIdentity strong {
+  max-width: 320px;
+  font-size: 1.02rem;
+}
+
+.adminInviteIdentity p {
+  margin-top: 6px;
+}
+
+.adminInviteStatusStack {
+  align-items: flex-start;
+  min-width: 130px;
+}
+
+.adminInviteMetaGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.adminInviteMetaGrid div {
+  padding: 11px 12px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #f8fafc, #ffffff);
+}
+
+.adminInviteMetaGrid strong {
+  max-width: 100%;
+  font-size: 0.9rem;
+}
+
+.adminInviteActionDock {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 9px;
+}
+
+.adminInviteActionDock .adminButton,
+.adminInviteActionDock button {
+  min-height: 40px;
+  white-space: nowrap;
+}
+
+.adminInviteMoreActions {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.adminInviteMoreActions summary {
+  min-height: 40px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: linear-gradient(135deg, #0f172a, #111827);
+}
+
+.adminInviteMoreActions[open] summary {
+  border-radius: 18px 18px 12px 12px;
+}
+
+.adminInviteMoreActions div {
+  grid-template-columns: 1fr;
+  margin-top: 7px;
+  padding: 9px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #f8fafc, #ffffff);
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.16);
+}
+
+@media (max-width: 1180px) {
+  .adminInviteCard {
+    grid-template-columns: 1fr;
+  }
+
+  .adminInviteActionDock {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .adminInviteMoreActions {
+    grid-column: auto;
+  }
+}
+
+/* Access Invite No-Cut + Portal Menu Polish */
+.adminInviteCard {
+  align-items: stretch;
+  grid-template-columns: minmax(360px, 1.15fr) minmax(380px, 1fr) minmax(210px, 0.58fr);
+}
+
+.adminInviteIdentity strong,
+.adminInviteMetaGrid strong {
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.adminInviteMetaGrid div {
+  min-height: 66px;
+}
+
+.adminInviteActionDock {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-content: center;
+  min-width: 0;
+}
+
+.adminInviteActionDock button {
+  width: 100%;
+}
+
+@media (max-width: 1280px) {
+  .adminInviteCard {
+    grid-template-columns: 1fr;
+  }
+
+  .adminInviteMetaGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .adminInviteMetaGrid {
+    grid-template-columns: 1fr;
+  }
+}

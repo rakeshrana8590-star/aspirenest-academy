@@ -6,3 +6,4 @@ export { default as AdminErrorBox } from "./AdminErrorBox";
 export { default as AdminSectionHeader } from "./AdminSectionHeader";
 export { default as AdminConfirmDialog } from "./AdminConfirmDialog";
 export { default as AdminFilterBar, AdminFilterField } from "./AdminFilterBar";
+export { default as AdminReviewPanel } from "./AdminReviewPanel";

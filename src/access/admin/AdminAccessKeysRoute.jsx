@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 
 import { auth } from "../../firebase";
 import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
+import { AdminReviewPanel } from "../../components/shared/admin";
 
 import {
   ACCESS_COURSE,
@@ -643,30 +644,23 @@ export default function AdminAccessKeysRoute() {
           </article>
         </div>
 
-        <div className="adminAccessPreviewPanel">
-          <div className="adminAccessPreviewHeader">
-            <span>Confirmation Preview</span>
-            <strong>Review key payload</strong>
-          </div>
-
-          <div className="adminAccessRows">
-            {previewRows.map(([label, value]) => (
-              <div className="adminAccessRow" key={label}>
-                <strong>{label}</strong>
-                <span>{value}</span>
-              </div>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            className="adminAccessPrimaryButton"
-            onClick={handleSaveKey}
-            disabled={saving}
-          >
-            {saving ? "Saving..." : "Create Access Key"}
-          </button>
-        </div>
+        <AdminReviewPanel
+          eyebrow="Confirmation Preview"
+          title="Review key payload"
+          description="Compact review of the key record before saving. Optional fields stay visible without stretching the page."
+          highlights={[
+            ["Code", normalizedCode || "Required", normalizedCode ? "success" : "warning"],
+            ["Assigned Email", form.assignedEmail.trim() || "Open key"],
+            ["Scope", form.scopeType],
+          ]}
+          rows={previewRows}
+          actionLabel="Create Access Key"
+          loadingLabel="Saving..."
+          actionLoading={saving}
+          actionDisabled={saving}
+          onAction={handleSaveKey}
+          footerNote="Key save writes redeem key + audit only. Student access is not created here."
+        />
       </div>
     </AdminAccessRouteShell>
   );

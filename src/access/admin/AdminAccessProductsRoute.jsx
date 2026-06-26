@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 
 import { auth } from "../../firebase";
 import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
+import { AdminReviewPanel } from "../../components/shared/admin";
 
 import {
   ACCESS_COURSE,
@@ -490,30 +491,23 @@ export default function AdminAccessProductsRoute() {
           </article>
         </div>
 
-        <div className="adminAccessPreviewPanel">
-          <div className="adminAccessPreviewHeader">
-            <span>Confirmation Preview</span>
-            <strong>Review product payload</strong>
-          </div>
-
-          <div className="adminAccessRows">
-            {previewRows.map(([label, value]) => (
-              <div className="adminAccessRow" key={label}>
-                <strong>{label}</strong>
-                <span>{value}</span>
-              </div>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            className="adminAccessPrimaryButton"
-            onClick={handleSaveProduct}
-            disabled={saving}
-          >
-            {saving ? "Saving..." : "Create Access Product"}
-          </button>
-        </div>
+        <AdminReviewPanel
+          eyebrow="Confirmation Preview"
+          title="Review product payload"
+          description="Compact review of the product record before saving. Learner access is not granted from this page."
+          highlights={[
+            ["Title", form.title.trim() || "Required", form.title.trim() ? "success" : "warning"],
+            ["Scope", form.scopeType],
+            ["Price", form.price ? "₹" + form.price : "₹0"],
+          ]}
+          rows={previewRows}
+          actionLabel="Create Access Product"
+          loadingLabel="Saving..."
+          actionLoading={saving}
+          actionDisabled={saving}
+          onAction={handleSaveProduct}
+          footerNote="Product save writes catalog + audit only. Student access is not created here."
+        />
       </div>
     </AdminAccessRouteShell>
   );

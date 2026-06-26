@@ -13,7 +13,7 @@ const defaultQuickActions = [
   { title: "Audit Logs", meta: "Admin traceability", route: "/admin/content/access/audit" },
 ];
 
-export default function AdminAccessRouteShell({ badge, title, description, icon = "A", moduleMeta = "CTET / TET PREMIUM CONTROL", stats, trustItems, primaryAction, secondaryAction, sectionTitle, sectionDescription, actions = [], quickActions = defaultQuickActions, children }) {
+export default function AdminAccessRouteShell({ badge, title, description, icon = "A", moduleMeta = "CTET / TET PREMIUM CONTROL", stats, trustItems, primaryAction, secondaryAction, sectionTitle, sectionDescription, actions = [], quickActions = defaultQuickActions, compactMode = true, backLabel = "Back to Access Manager", backRoute = "/admin/content/access", children }) {
   const navigate = useNavigate();
   const safeStats = stats || [
     { value: "Active", label: "Access" },
@@ -24,7 +24,7 @@ export default function AdminAccessRouteShell({ badge, title, description, icon 
   const safeTrustItems = trustItems || ["Plan protected", "Email-wise", "Expiry control", "Audit ready"];
 
   return (
-    <section className="coursePages adminMockHomePage adminNotesMockAlignedPage">
+    <section className={compactMode ? "coursePages adminNotesManagePage" : "coursePages adminMockHomePage adminNotesMockAlignedPage"}>
       <div className="adminMockHomeShell">
         <section className="adminNotesLaunchHero">
           <div className="adminNotesLaunchHeroCopy">
@@ -73,7 +73,7 @@ export default function AdminAccessRouteShell({ badge, title, description, icon 
             <p>{sectionDescription}</p>
           </div>
 
-          {actions.length ? <div className="adminMockCommandLayout">
+          {!compactMode && actions.length ? <div className="adminMockCommandLayout">
             <div className="adminMockPrimaryGrid">
               {actions.map((action) => <button type="button" key={action.route} className={"adminMockActionCard adminMockTone-" + action.tone} onClick={() => navigate(action.route)}><span className="adminMockActionTop"><span className="adminMockActionIcon" aria-hidden="true">{action.icon}</span><span className="adminMockActionArrow" aria-hidden="true">&rarr;</span></span><span className="adminMockActionLabel">{action.label}</span><strong>{action.title}</strong><p>{action.description}</p></button>)}
             </div>
@@ -90,7 +90,7 @@ export default function AdminAccessRouteShell({ badge, title, description, icon 
         </section>
 
         <div className="adminMockHomeFooter">
-          <button type="button" className="adminMockBackButton" onClick={() => navigate("/admin/content/access")}>Back to Access Manager</button>
+          <button type="button" className="adminMockBackButton" onClick={() => navigate(backRoute)}>{backLabel}</button>
         </div>
       </div>
     </section>

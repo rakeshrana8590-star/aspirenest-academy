@@ -592,6 +592,24 @@ export const markAccessInviteOpened = async (inviteCode = "", user = {}) => {
     updatedBy: uid,
   });
 
+  await setDoc(doc(collection(db, ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS)), {
+    action: "open_access_invite",
+    accessId: invite.accessId || null,
+    email,
+    uid,
+    before: { inviteStatus: invite.inviteStatus || null },
+    after: { inviteStatus: "opened" },
+    metadata: {
+      source: "manual_invite_link",
+      inviteCode: code,
+      inviteId: invite.id || code,
+    },
+    createdAt: serverTimestamp(),
+    createdBy: uid,
+    actorEmail: email,
+    actorRole: "student",
+  });
+
   return { ...invite, inviteStatus: "opened", openedByUid: uid, openedByEmail: email };
 };
 

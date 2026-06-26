@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 
-import { auth } from "../../firebase";
+import {
+  auth } from "../../firebase";
 import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
 
 import {
@@ -9,7 +10,7 @@ import {
   queueAccessInviteResend,
   updateAccessInviteStatus,
   regenerateAccessInviteLink,
-} from "../accessService";
+  } from "../accessService";
 
 import {
   AdminButton,
@@ -18,6 +19,7 @@ import {
   AdminFilterBar,
   AdminFilterField,
   AdminStatusPill,
+  AdminPortalActionMenu,
 } from "../../components/shared/admin";
 
 const actions = [
@@ -78,6 +80,7 @@ export default function AdminAccessInvitesRoute() {
   const [emailFilter, setEmailFilter] = useState("");
   const [loading, setLoading] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState("");
+  const [activeInviteMenu, setActiveInviteMenu] = useState({ id: "", anchorRect: null });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -141,6 +144,7 @@ export default function AdminAccessInvitesRoute() {
       await navigator.clipboard.writeText(inviteLink);
       await updateAccessInviteStatus(invite.id, "copied", adminActor, {
         source: "admin_access_invites_route",
+        action: "copy_access_invite_link",
       });
       setMessage("Invite link copied for " + (invite.email || invite.normalizedEmail) + ".");
       await loadInvites();
@@ -168,6 +172,7 @@ export default function AdminAccessInvitesRoute() {
       await navigator.clipboard.writeText(messageText);
       await updateAccessInviteStatus(invite.id, "copied", adminActor, {
         source: "admin_access_invites_route",
+        action: "copy_access_invite_link",
         delivery: "whatsapp_manual",
       });
       setMessage("WhatsApp invite message copied for " + (invite.email || invite.normalizedEmail) + ".");
@@ -187,6 +192,7 @@ export default function AdminAccessInvitesRoute() {
     try {
       await updateAccessInviteStatus(invite.id, "sent", adminActor, {
         source: "admin_access_invites_route",
+        action: "mark_access_invite_sent",
         delivery: "manual",
       });
       setMessage("Invite marked sent for " + (invite.email || invite.normalizedEmail) + ".");
@@ -248,6 +254,12 @@ export default function AdminAccessInvitesRoute() {
     try {
       await updateAccessInviteStatus(invite.id, nextStatus, adminActor, {
         source: "admin_access_invites_route",
+        action:
+          nextStatus === "revoked"
+            ? "revoke_access_invite"
+            : nextStatus === "expired"
+              ? "expire_access_invite"
+              : "update_access_invite_status",
       });
       setMessage("Invite status updated to " + nextStatus + ".");
       await loadInvites();
@@ -294,6 +306,7 @@ export default function AdminAccessInvitesRoute() {
             Reset Filters
           </AdminButton>
         }
+        compactMode={true}
       >
         <AdminFilterField label="Learner email">
           <input
@@ -332,103 +345,125 @@ export default function AdminAccessInvitesRoute() {
           <p>Please wait while the invite queue is loaded.</p>
         </div>
       ) : filteredInvites.length ? (
-        <div className="adminAccessTableWrap">
-          <table className="adminAccessTable">
-            <thead>
-              <tr>
-                <th>Learner</th>
-                <th>Status</th>
-                <th>Delivery</th>
-                <th>Plan</th>
-                <th>Expiry</th>
-                <th>Resend</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredInvites.map((invite) => (
-                <tr key={invite.id}>
-                  <td>
-                    <strong>{invite.email || invite.normalizedEmail}</strong>
-                    <small>{invite.learnerName || invite.name || "Name not set"}</small>
-                  </td>
-                  <td>
-                    <AdminStatusPill status={invite.inviteStatus || "pending"} />
-                  </td>
-                  <td>
-                    <AdminStatusPill
-                      status={invite.deliveryStatus || (invite.emailSent ? "sent" : "pending")}
-                      label={invite.deliveryStatus || (invite.emailSent ? "sent" : "backend pending")}
-                      tone={invite.emailSent ? "success" : "warning"}
-                      size="sm"
-                    />
-                  </td>
-                  <td>{invite.planType || "FREE"}</td>
-                  <td>{formatDateValue(invite.expiresAt || invite.accessUntil)}</td>
-                  <td>{Number(invite.resendCount || 0)}</td>
-                  <td>
-                    <div className="adminInlineActions">
-                      <AdminButton
-                        size="sm"
-                        variant="primary"
-                        loading={actionLoadingId === invite.id}
-                        disabled={invite.inviteStatus === "used" || !buildInviteLinkForAdmin(invite)}
-                        onClick={() => handleCopyLink(invite)}
-                      >Copy Link</AdminButton>
-                      <AdminButton
-                        size="sm"
-                        variant="secondary"
-                        loading={actionLoadingId === invite.id}
-                        disabled={invite.inviteStatus === "used" || !buildInviteLinkForAdmin(invite)}
-                        onClick={() => handleCopyWhatsAppMessage(invite)}
-                      >Copy WhatsApp</AdminButton>
-                      <AdminButton
-                        size="sm"
-                        variant="secondary"
-                        loading={actionLoadingId === invite.id}
-                        disabled={invite.inviteStatus === "used"}
-                        onClick={() => handleMarkSent(invite)}
-                      >Mark Sent</AdminButton>
-                      <AdminButton
-                        size="sm"
-                        variant="secondary"
-                        loading={actionLoadingId === invite.id}
-                        disabled={invite.inviteStatus === "used"}
-                        onClick={() => handleRegenerateLink(invite)}
-                      >Regenerate Link</AdminButton>
-                      <AdminButton
-                        size="sm"
-                        variant="secondary"
-                        loading={actionLoadingId === invite.id}
-                        disabled={invite.inviteStatus === "used"}
-                        onClick={() => handleQueueResend(invite)}
-                      >
-                        Queue Resend
-                      </AdminButton>
-                      <AdminButton
-                        size="sm"
-                        variant="secondary"
-                        loading={actionLoadingId === invite.id}
-                        disabled={invite.inviteStatus === "expired" || invite.inviteStatus === "used"}
-                        onClick={() => handleMarkStatus(invite, "expired")}
-                      >
-                        Expire
-                      </AdminButton>
-                      <AdminButton
-                        size="sm"
-                        variant="danger"
-                        loading={actionLoadingId === invite.id}
-                        disabled={invite.inviteStatus === "revoked" || invite.inviteStatus === "used"}
-                        onClick={() => handleMarkStatus(invite, "revoked")}
-                      >
-                        Revoke
-                      </AdminButton>
+        <div className="adminInviteListPanel">
+          <div className="adminInviteListHead">
+            <div>
+              <span>Invite Queue</span>
+              <strong>{filteredInvites.length} learner invites</strong>
+            </div>
+            <p>Secure invite links, delivery state, expiry, resend count, and admin actions in one clean manager view.</p>
+          </div>
+
+          <div className="adminInviteCardList">
+            {filteredInvites.map((invite) => {
+              const inviteLink = buildInviteLinkForAdmin(invite);
+              const inviteStatus = invite.inviteStatus || "pending";
+              const deliveryStatus = invite.deliveryStatus || (invite.emailSent ? "sent" : "backend pending");
+              const isUsed = inviteStatus === "used";
+              const isExpired = inviteStatus === "expired";
+              const isRevoked = inviteStatus === "revoked";
+              const linkDisabled = isUsed || !inviteLink;
+
+              return (
+                <article className="adminInviteCard" key={invite.id}>
+                  <div className="adminInviteIdentity">
+                    <div>
+                      <span>Learner</span>
+                      <strong>{invite.email || invite.normalizedEmail || "Email missing"}</strong>
+                      <p>{invite.learnerName || invite.name || "Name not set"}</p>
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+
+                    <div className="adminInviteStatusStack">
+                      <AdminStatusPill status={inviteStatus} />
+                      <AdminStatusPill
+                        status={deliveryStatus}
+                        label={deliveryStatus}
+                        tone={invite.emailSent ? "success" : "warning"}
+                        size="sm"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="adminInviteMetaGrid">
+                    <div><span>Plan</span><strong>{invite.planType || "FREE"}</strong></div>
+                    <div><span>Expiry</span><strong>{formatDateValue(invite.expiresAt || invite.accessUntil)}</strong></div>
+                    <div><span>Resend</span><strong>{Number(invite.resendCount || 0)}</strong></div>
+                    <div><span>Code</span><strong>{invite.inviteCode || "Not set"}</strong></div>
+                  </div>
+
+                  <div className="adminInviteActionDock">
+                    <AdminButton size="sm" variant="primary" loading={actionLoadingId === invite.id} disabled={linkDisabled} onClick={() => handleCopyLink(invite)}>Copy Link</AdminButton>
+                    <AdminButton size="sm" variant="secondary" loading={actionLoadingId === invite.id} disabled={linkDisabled} onClick={() => handleCopyWhatsAppMessage(invite)}>WhatsApp</AdminButton>
+
+                    <AdminButton
+                      size="sm"
+                      variant="secondary"
+                      onClick={(event) =>
+                        setActiveInviteMenu({
+                          id: invite.id,
+                          anchorRect: event.currentTarget.getBoundingClientRect(),
+                        })
+                      }
+                    >
+                      More Actions
+                    </AdminButton>
+
+                    <AdminPortalActionMenu
+                      open={activeInviteMenu.id === invite.id}
+                      anchorRect={activeInviteMenu.anchorRect}
+                      title="Invite actions"
+                      width={280}
+                      onClose={() => setActiveInviteMenu({ id: "", anchorRect: null })}
+                      actions={[
+                        {
+                          key: "mark-sent",
+                          label: "Mark Sent",
+                          description: "Mark this invite as sent manually.",
+                          icon: "✓",
+                          disabled: isUsed,
+                          onClick: () => handleMarkSent(invite),
+                        },
+                        {
+                          key: "regenerate",
+                          label: "Regenerate Link",
+                          description: "Create a fresh secure invite link.",
+                          icon: "R",
+                          disabled: isUsed,
+                          onClick: () => handleRegenerateLink(invite),
+                        },
+                        {
+                          key: "queue",
+                          label: "Queue Resend",
+                          description: "Add this invite to resend queue.",
+                          icon: "Q",
+                          disabled: isUsed,
+                          onClick: () => handleQueueResend(invite),
+                        },
+                        {
+                          key: "expire",
+                          label: "Expire Invite",
+                          description: "Mark this invite as expired.",
+                          icon: "E",
+                          tone: "warning",
+                          disabled: isExpired || isUsed,
+                          onClick: () => handleMarkStatus(invite, "expired"),
+                        },
+                        {
+                          key: "revoke",
+                          label: "Revoke Invite",
+                          description: "Block this invite link permanently.",
+                          icon: "!",
+                          tone: "danger",
+                          disabled: isRevoked || isUsed,
+                          onClick: () => handleMarkStatus(invite, "revoked"),
+                        },
+                      ]}
+                    />
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         </div>
       ) : (
         <AdminEmptyState

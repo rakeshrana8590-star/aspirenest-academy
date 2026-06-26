@@ -632,7 +632,8 @@ export default function AdminAccessBulkRoute() {
             <select
               value={form.course}
               onChange={(event) => updateField("course", event.target.value)}
-            >
+              compactMode={true}
+      >
               <option value={ACCESS_COURSE.CTET_TET}>CTET / TET</option>
             </select>
           </div>

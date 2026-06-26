@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 
 import { auth } from "../../firebase";
 import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
+import { AdminReviewPanel } from "../../components/shared/admin";
 
 import {
   ACCESS_COURSE,
@@ -339,36 +340,25 @@ export default function AdminAccessAddRoute() {
     setSaveError("");
   };
 
-  const previewRows = [
-    ["Email", normalizedEmail || "Not set"],
-    ["Name", form.name.trim() || "Optional"],
-    ["Phone", form.phone.trim() || "Optional"],
-    ["Course", form.course],
-    ["Scope", form.scopeType],
-    ["Plan", form.scopeType === ACCESS_SCOPE_TYPES.PLAN ? form.planType : "Not plan scoped"],
-    ["Module", form.module || "Not module scoped"],
-    ["Item Type", form.itemType || "Not item scoped"],
-    ["Item ID", form.itemId.trim() || "Not item scoped"],
-    ["Item Title", form.itemTitle.trim() || "Optional"],
-    ["Bundle ID", form.bundleId.trim() || "Not bundle scoped"],
-    ["Bundle Items", bundleItemIds.length ? String(bundleItemIds.length) + " items" : "No bundle items"],
-    ["Product ID", form.productId.trim() || "Optional"],
-    ["Access Key ID", form.accessKeyId.trim() || "Optional"],
-    ["Source", form.source],
-    ["Access From", form.accessFrom || "Immediate"],
-    ["Access Until", form.accessUntil || "No expiry set"],
-    ["Status", form.status],
-    [
-      "Send Invite",
-      form.sendInvite === "yes" ? "Yes - create invite record" : "No",
-    ],
-    [
-      "User Shell",
-      form.createUserShell === "yes" ? "Yes - sync users shell" : "No",
-    ],
-    ["Duplicate Warning", duplicateStatusText],
-    ["Admin Note", form.adminNote.trim()],
-  ];
+  const compactAccessLabel =
+    form.scopeType === ACCESS_SCOPE_TYPES.PLAN
+      ? form.planType
+      : form.scopeType === ACCESS_SCOPE_TYPES.MODULE
+        ? "Module: " + (form.module || "-")
+        : form.scopeType === ACCESS_SCOPE_TYPES.ITEM
+          ? "Item: " + (form.itemTitle.trim() || form.itemId.trim() || "-")
+          : form.scopeType === ACCESS_SCOPE_TYPES.BUNDLE
+            ? "Bundle: " + (form.bundleId.trim() || (bundleItemIds.length ? String(bundleItemIds.length) + " items" : "-"))
+            : "Access";
+
+  const compactAccessHint =
+    form.scopeType === ACCESS_SCOPE_TYPES.MODULE
+      ? "Only selected module unlocks. Full plan is not unlocked."
+      : form.scopeType === ACCESS_SCOPE_TYPES.ITEM
+        ? "Only selected item unlocks. Full module or full plan is not unlocked."
+        : form.scopeType === ACCESS_SCOPE_TYPES.BUNDLE
+          ? "Only bundle items unlock. Full plan is not unlocked."
+          : "Plan-level entitlement applies by selected plan.";
 
   return (
     <AdminAccessRouteShell
@@ -428,7 +418,8 @@ export default function AdminAccessAddRoute() {
             <select
               value={form.course}
               onChange={(event) => updateField("course", event.target.value)}
-            >
+              compactMode={true}
+      >
               <option value={ACCESS_COURSE.CTET_TET}>CTET / TET</option>
             </select>
           </div>
@@ -685,41 +676,37 @@ export default function AdminAccessAddRoute() {
         </div>
 
         {showConfirm ? (
-          <div className="adminAccessNotice">
-            <strong>Confirmation required:</strong> Review details before
-            creating access. Save will write studentAccess and audit logs.
-
-            <div className="adminAccessTable">
-              {previewRows.map(([label, value]) => (
-                <div className="adminAccessRow" key={label}>
-                  <strong>{label}</strong>
-                  <span>{value}</span>
-                  <span className="adminAccessPill">Review</span>
-                  <span>Ready</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="adminNotesLaunchHeroActions">
-              <button
-                type="button"
-                className="adminNotesLaunchPrimaryBtn"
-                onClick={handleConfirmSave}
-                disabled={saving}
-              >
-                {saving ? "Saving..." : "Confirm & Save Access"}
-              </button>
-
-              <button
-                type="button"
-                className="adminNotesLaunchGhostBtn"
-                onClick={() => setShowConfirm(false)}
-                disabled={saving}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
+          <AdminReviewPanel
+            eyebrow="Confirmation required"
+            title="Review final access summary"
+            description="Save will write studentAccess, optional invite, user shell, and audit logs."
+            highlights={[
+              ["Learner", normalizedEmail || "Email missing", normalizedEmail ? "success" : "warning"],
+              ["Entitlement", compactAccessLabel],
+              ["Validity", (form.accessFrom || "Immediate") + " → " + (form.accessUntil || "No expiry")],
+            ]}
+            rows={[
+              ["Name", form.name.trim() || "Name optional"],
+              ["Phone", form.phone.trim() || "Phone optional"],
+              ["Course", form.course],
+              ["Source", form.source],
+              ["Invite", form.sendInvite === "yes" ? "Create invite link" : "No invite"],
+              ["User Shell", form.createUserShell === "yes" ? "Sync on" : "Off"],
+              ["Status", form.status],
+              ["Safety", duplicateStatusText, duplicateStatusText.includes("Duplicate") ? "warning" : "success"],
+              ["Admin Note", form.adminNote.trim() || "No admin note", "default", "wide"],
+              ["Scope Detail", compactAccessHint, "default", "wide"],
+            ]}
+            actionLabel="Confirm & Save"
+            loadingLabel="Saving..."
+            actionLoading={saving}
+            actionDisabled={saving}
+            onAction={handleConfirmSave}
+            secondaryActionLabel="Edit"
+            onSecondaryAction={() => setShowConfirm(false)}
+            secondaryActionDisabled={saving}
+            footerNote="Access save is audit-ready and keeps invite/user shell actions explicit."
+          />
         ) : null}
       </div>
     </AdminAccessRouteShell>

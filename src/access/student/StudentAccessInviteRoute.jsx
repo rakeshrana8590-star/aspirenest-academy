@@ -59,7 +59,7 @@ const StudentAccessInviteRoute = ({ user, handleGoogleLogin }) => {
     try {
       await redeemAccessInvite(inviteCode, user);
       setMessage("Access invite redeemed successfully. Complete your learner profile to continue.");
-      setTimeout(() => navigate("/my-profile"), 900);
+      setTimeout(() => navigate("/profile/setup"), 900);
     } catch (redeemError) {
       setError(redeemError?.message || "Invite redeem failed.");
     } finally {
@@ -121,7 +121,7 @@ const StudentAccessInviteRoute = ({ user, handleGoogleLogin }) => {
             <button className="adminPrimaryBtn" disabled={redeeming} onClick={handleRedeem}>
               {redeeming ? "Redeeming..." : "Redeem Invite"}
             </button>
-            <button className="adminSecondaryBtn" onClick={() => navigate("/my-profile")}>Open Profile</button>
+            <button className="adminSecondaryBtn" onClick={() => navigate("/profile/setup")}>Open Profile</button>
           </div>
         )}
 

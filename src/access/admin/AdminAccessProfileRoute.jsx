@@ -149,7 +149,8 @@ export default function AdminAccessProfileRoute() {
             className="adminNotesLaunchPrimaryBtn"
             onClick={() => loadLearnerProfile(searchEmail)}
             disabled={loading}
-          >
+            compactMode={true}
+      >
             {loading ? "Loading..." : "Search Profile"}
           </button>
 

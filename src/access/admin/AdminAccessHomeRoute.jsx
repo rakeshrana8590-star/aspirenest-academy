@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import AdminAccessRouteShell from "./AdminAccessRouteShell";
 
 const systemStats = [
   { value: "Active", label: "Access" },
@@ -30,121 +30,24 @@ const compactActions = [
 ];
 
 export default function AdminAccessHomeRoute() {
-  const navigate = useNavigate();
-
   return (
-    <section className="coursePages adminMockHomePage adminNotesMockAlignedPage">
-      <div className="adminMockHomeShell">
-        <section className="adminNotesLaunchHero">
-          <div className="adminNotesLaunchHeroCopy">
-            <span className="adminNotesLaunchBadge">ACCESS COMMAND</span>
-            <h1>Access Manager</h1>
-            <p>
-              A premium command center for CTET/TET learner access - create manual approvals, manage plan upgrades, control expiry, block safely, and audit every admin action.
-            </p>
-
-            <div className="adminNotesLaunchHeroActions">
-              <button type="button" className="adminNotesLaunchPrimaryBtn" onClick={() => navigate("/admin/content/access/add")}>
-                Add Learner Access
-              </button>
-              <button type="button" className="adminNotesLaunchGhostBtn" onClick={() => navigate("/admin/content/access/manage")}>
-                Manage Access
-              </button>
-            </div>
-
-            <div className="adminNotesLaunchTrustRow">
-              <span>Plan protected</span>
-              <span>Email-wise</span>
-              <span>Expiry control</span>
-              <span>Audit ready</span>
-            </div>
-          </div>
-
-          <div className="adminNotesLaunchSystemCard">
-            <div className="adminNotesLaunchSystemTop">
-              <span>Access Command</span>
-              <strong>Admin Workspace</strong>
-            </div>
-
-            <div className="adminNotesLaunchTitleCard">
-              <span className="adminNotesLaunchIcon">A</span>
-              <div>
-                <h3>Access Manager</h3>
-                <p>CTET / TET PREMIUM CONTROL</p>
-              </div>
-            </div>
-
-            <div className="adminNotesLaunchSystemGrid">
-              {systemStats.map((stat) => (
-                <div className="adminNotesLaunchFeatureCard" key={stat.label}>
-                  <strong>{stat.value}</strong>
-                  <span>{stat.label}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="adminNotesLaunchSystemFlow">
-              <span>Plan</span>
-              <i />
-              <span>Learner</span>
-              <i />
-              <span>Expiry</span>
-              <i />
-              <span>Audit</span>
-            </div>
-          </div>
-        </section>
-
-        <section className="adminMockCommandCenter">
-          <div className="adminMockSectionTitle">
-            <span>Admin access system</span>
-            <h2>Core access workflow</h2>
-            <p>
-              Most-used access actions stay above the fold. Plans, learner emails, expiry, invites, and audit logs stay available from the right rail.
-            </p>
-          </div>
-
-          <div className="adminMockCommandLayout">
-            <div className="adminMockPrimaryGrid">
-              {primaryActions.map((action) => (
-                <button type="button" key={action.route} className={"adminMockActionCard adminMockTone-" + action.tone} onClick={() => navigate(action.route)}>
-                  <span className="adminMockActionTop">
-                    <span className="adminMockActionIcon" aria-hidden="true">{action.icon}</span>
-                    <span className="adminMockActionArrow" aria-hidden="true">&rarr;</span>
-                  </span>
-                  <span className="adminMockActionLabel">{action.label}</span>
-                  <strong>{action.title}</strong>
-                  <p>{action.description}</p>
-                </button>
-              ))}
-            </div>
-
-            <aside className="adminMockQuickRail">
-              <div className="adminMockQuickRailHeader">
-                <span>Quick Access</span>
-                <strong>Plans - Learners - Audit</strong>
-              </div>
-              <div className="adminMockQuickList">
-                {compactActions.map((item) => (
-                  <button type="button" key={item.title} onClick={() => navigate(item.route)}>
-                    <span>
-                      <strong>{item.title}</strong>
-                      <small>{item.meta}</small>
-                    </span>
-                    <i aria-hidden="true">&rarr;</i>
-                  </button>
-                ))}
-              </div>
-            </aside>
-          </div>
-        </section>
-
-        <div className="adminMockHomeFooter">
-          <button type="button" className="adminMockBackButton" onClick={() => navigate("/admin/content")}>
-            Back to Content Studio
-          </button>
-        </div>
-      </div>
-    </section>
+    <AdminAccessRouteShell
+      badge="ACCESS COMMAND"
+      title="Access Manager"
+      description="A premium command center for CTET/TET learner access - create manual approvals, manage plan upgrades, control expiry, block safely, and audit every admin action."
+      icon="A"
+      moduleMeta="CTET / TET PREMIUM CONTROL"
+      stats={systemStats}
+      trustItems={["Plan protected", "Email-wise", "Expiry control", "Audit ready"]}
+      primaryAction={{ label: "Add Learner Access", route: "/admin/content/access/add" }}
+      secondaryAction={{ label: "Manage Access", route: "/admin/content/access/manage" }}
+      sectionTitle="Core access workflow"
+      sectionDescription="Most-used access actions stay above the fold. Plans, learner emails, expiry, invites, and audit logs stay available from the right rail."
+      actions={primaryActions}
+      quickActions={compactActions}
+      compactMode={false}
+      backLabel="Back to Content Studio"
+      backRoute="/admin/content"
+    />
   );
 }

@@ -742,7 +742,8 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
                 variant="primary"
                 onClick={handleSearch}
                 disabled={loading}
-              >
+                compactMode={true}
+      >
                 {loading ? "Searching..." : "Search Access"}
               </AdminButton>
 
