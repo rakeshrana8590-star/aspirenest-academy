@@ -25,6 +25,7 @@ const StudentAccessInviteRoute = ({ user, handleGoogleLogin }) => {
   const normalizedInviteEmail = useMemo(() => String(invite?.normalizedEmail || invite?.email || "").trim().toLowerCase(), [invite]);
   const status = getInviteStatus(invite);
   const emailMatches = Boolean(normalizedUserEmail && normalizedInviteEmail && normalizedUserEmail === normalizedInviteEmail);
+  const invitePath = `/access/invite/${inviteCode || ""}`;
 
   useEffect(() => {
     let mounted = true;
@@ -78,8 +79,14 @@ const StudentAccessInviteRoute = ({ user, handleGoogleLogin }) => {
             <h3>Login required</h3>
             <p>Please continue with the Gmail address where this invite was issued.</p>
             <div className="adminAccessActions">
-              {handleGoogleLogin && <button className="adminPrimaryBtn" onClick={handleGoogleLogin}>Continue with Google</button>}
-              <button className="adminSecondaryBtn" onClick={() => navigate("/login")}>Go to Login</button>
+              {handleGoogleLogin && (
+                  <button className="adminPrimaryBtn" onClick={() => handleGoogleLogin(invitePath)}>
+                    Continue with Google
+                  </button>
+                )}
+                <button className="adminSecondaryBtn" onClick={() => navigate(`/login?returnTo=${encodeURIComponent(invitePath)}`)}>
+                  Go to Login
+                </button>
             </div>
           </div>
         )}

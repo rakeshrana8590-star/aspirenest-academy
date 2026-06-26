@@ -1858,14 +1858,15 @@ const [paymentHistory, setPaymentHistory] = useState([]);
   
       setEmail(loginEmail);
       setPassword(loginPassword);
-  
-      navigate("/ctet-tet", { replace: true });
+
+      const returnTo = new URLSearchParams(window.location.search).get("returnTo");
+      navigate(returnTo || "/ctet-tet", { replace: true });
     } catch (error) {
       alert(error.message);
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = async (redirectPath = "/ctet-tet") => {
     if (window.self !== window.top) {
       alert(
         "StackBlitz preview me Google login block hota hai. App new tab me open ho rahi hai."
@@ -1878,7 +1879,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
     try {
       await signInWithPopup(auth, provider);
   
-      navigate("/ctet-tet", { replace: true });
+      navigate(redirectPath || "/ctet-tet", { replace: true });
   
     } catch (error) {
       alert(error.message);
