@@ -346,7 +346,12 @@ export const createAccessInvite = async (data = {}) => {
     throw new Error("Invite email is required.");
   }
 
+  const inviteCode = data.inviteCode || createInviteCode();
+  const inviteLink = data.inviteLink || buildAccessInviteLink(inviteCode);
+
   const payload = {
+    inviteCode,
+    inviteLink,
     email: normalizedEmail,
     normalizedEmail,
     learnerName: name,
