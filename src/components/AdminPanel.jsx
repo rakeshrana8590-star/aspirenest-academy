@@ -17,6 +17,7 @@ import {
 } from "../contentSystem";
 import { AdminButton, AdminStatusPill } from "./shared/admin";
 export default function AdminPanel({
+  user = null,
   isAdmin,
   activeAdminTab,
   setActiveAdminTab,
@@ -147,11 +148,12 @@ export default function AdminPanel({
   handleSaveUniversalContent,
 }) {
   const navigate = useNavigate();
+  const canUseAdminPanel = typeof isAdmin === "function" ? isAdmin(user) : Boolean(isAdmin);
 const [adminProofs, setAdminProofs] = useState({});
 const [cmsFilter, setCmsFilter] = useState("ALL");
 const [cmsPlanFilter, setCmsPlanFilter] = useState("ALL");
 
-if (!isAdmin()) return null;
+if (!canUseAdminPanel) return null;
 
   const uniqueStudents = students.filter(
     (student, index, self) =>
