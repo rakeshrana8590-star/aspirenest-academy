@@ -32,6 +32,7 @@ export const ACCESS_COLLECTIONS = Object.freeze({
   ACCESS_INVITES: "accessInvites",
   ACCESS_AUDIT_LOGS: "accessAuditLogs",
   USERS: "users",
+  STUDENT_ENTITLEMENTS: "studentEntitlements",
 });
 
 const ADMIN_ROLES = new Set(["admin", "super_admin", "owner"]);
@@ -166,6 +167,88 @@ const buildAccessPayload = (data = {}) => {
     adminNote: data.adminNote || data.notes || "",
     updatedAt: serverTimestamp(),
   };
+};
+
+
+const cleanEntitlementSegment = (value = "") =>
+  String(value || "")
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 120) || "all";
+
+export const buildStudentEntitlementId = (accessRecord = {}) => {
+  const scopeType = String(accessRecord.scopeType || ACCESS_SCOPE_TYPES.PLAN)
+    .trim()
+    .toLowerCase();
+
+  if (scopeType === ACCESS_SCOPE_TYPES.MODULE) {
+    return "module_" + cleanEntitlementSegment(accessRecord.module);
+  }
+
+  if (scopeType === ACCESS_SCOPE_TYPES.ITEM) {
+    return [
+      "item",
+      cleanEntitlementSegment(accessRecord.module),
+      cleanEntitlementSegment(accessRecord.itemType),
+      cleanEntitlementSegment(accessRecord.itemId),
+    ].join("_");
+  }
+
+  if (scopeType === ACCESS_SCOPE_TYPES.BUNDLE) {
+    return "bundle_" + cleanEntitlementSegment(accessRecord.bundleId || accessRecord.itemId);
+  }
+
+  return "plan_" + cleanEntitlementSegment(normalizeAccessPlan(accessRecord.planType || ACCESS_PLAN_TYPES.FREE));
+};
+
+export const buildStudentEntitlementPayload = (accessRecord = {}, metadata = {}) => {
+  const uid = String(accessRecord.uid || metadata.uid || "").trim();
+  const normalizedEmail = normalizeAccessEmail(
+    accessRecord.normalizedEmail || accessRecord.email || metadata.email
+  );
+
+  if (!uid) {
+    throw new Error("Student entitlement requires uid.");
+  }
+
+  const entitlementId = buildStudentEntitlementId(accessRecord);
+
+  return {
+    id: entitlementId,
+    uid,
+    email: normalizedEmail || null,
+    normalizedEmail,
+    accessId: accessRecord.id || metadata.accessId || null,
+    planType: normalizeAccessPlan(accessRecord.planType || ACCESS_PLAN_TYPES.FREE),
+    scopeType: accessRecord.scopeType || ACCESS_SCOPE_TYPES.PLAN,
+    module: accessRecord.module || null,
+    itemType: accessRecord.itemType || null,
+    itemId: accessRecord.itemId || null,
+    itemIds: Array.isArray(accessRecord.itemIds) ? accessRecord.itemIds : [],
+    bundleId: accessRecord.bundleId || null,
+    course: accessRecord.course || ACCESS_COURSE.CTET_TET,
+    status: String(accessRecord.status || ACCESS_STATUS.ACTIVE).trim().toLowerCase(),
+    source: accessRecord.source || ACCESS_SOURCE.ADMIN_MANUAL,
+    accessFrom: accessRecord.accessFrom || null,
+    accessUntil: accessRecord.accessUntil || null,
+    updatedAt: serverTimestamp(),
+  };
+};
+
+export const syncStudentEntitlement = async (accessRecord = {}, metadata = {}) => {
+  const payload = buildStudentEntitlementPayload(accessRecord, metadata);
+  const entitlementRef = doc(
+    db,
+    ACCESS_COLLECTIONS.STUDENT_ENTITLEMENTS,
+    payload.uid,
+    "items",
+    payload.id
+  );
+
+  await setDoc(entitlementRef, payload, { merge: true });
+
+  return payload;
 };
 
 export const getAccessByEmail = async (email) => {
