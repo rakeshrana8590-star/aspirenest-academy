@@ -397,13 +397,70 @@ service cloud.firestore {
 
     function isRedeemStudentAccessCreate() {
       return isSignedIn() &&
+        request.resource.data.keys().hasOnly([
+          "email",
+          "normalizedEmail",
+          "uid",
+          "planType",
+          "scopeType",
+          "status",
+          "source",
+          "course",
+          "module",
+          "itemType",
+          "itemId",
+          "itemTitle",
+          "itemIds",
+          "bundleId",
+          "productId",
+          "accessKeyId",
+          "campaignId",
+          "campaignName",
+          "campaignSource",
+          "learnerName",
+          "name",
+          "phone",
+          "accessFrom",
+          "accessUntil",
+          "notes",
+          "adminNote",
+          "updatedAt",
+          "createdAt",
+          "createdBy",
+          "actorEmail"
+        ]) &&
+        request.resource.data.keys().hasAll([
+          "email",
+          "normalizedEmail",
+          "uid",
+          "planType",
+          "scopeType",
+          "status",
+          "source",
+          "course",
+          "accessKeyId",
+          "updatedAt",
+          "createdAt",
+          "createdBy",
+          "actorEmail"
+        ]) &&
         request.resource.data.source == "redeem_key" &&
         request.resource.data.status == "active" &&
         request.resource.data.uid == request.auth.uid &&
         request.resource.data.email == request.auth.token.email &&
         request.resource.data.normalizedEmail == request.auth.token.email &&
         request.resource.data.createdBy == request.auth.uid &&
-        exists(/databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId));
+        request.resource.data.actorEmail == request.auth.token.email &&
+        request.resource.data.accessKeyId is string &&
+        exists(/databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)) &&
+        get(/databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)).data.status == "active" &&
+        get(/databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)).data.usedCount <
+          get(/databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)).data.maxUses &&
+        (
+          get(/databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)).data.assignedEmail == null ||
+          get(/databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)).data.assignedEmail == "" ||
+          get(/databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)).data.assignedEmail == request.auth.token.email
+        );
     }
 
     function isInviteOwnRecord() {
