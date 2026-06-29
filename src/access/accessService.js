@@ -32,6 +32,7 @@ export const ACCESS_COLLECTIONS = Object.freeze({
   ACCESS_INVITES: "accessInvites",
   ACCESS_AUDIT_LOGS: "accessAuditLogs",
   USERS: "users",
+  STUDENT_ENTITLEMENTS: "studentEntitlements",
 });
 
 const ADMIN_ROLES = new Set(["admin", "super_admin", "owner"]);
@@ -168,6 +169,98 @@ const buildAccessPayload = (data = {}) => {
   };
 };
 
+
+const cleanEntitlementSegment = (value = "") =>
+  String(value || "")
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 120) || "all";
+
+export const buildStudentEntitlementId = (accessRecord = {}) => {
+  const scopeType = String(accessRecord.scopeType || ACCESS_SCOPE_TYPES.PLAN)
+    .trim()
+    .toLowerCase();
+
+  if (scopeType === ACCESS_SCOPE_TYPES.MODULE) {
+    return "module_" + cleanEntitlementSegment(accessRecord.module);
+  }
+
+  if (scopeType === ACCESS_SCOPE_TYPES.ITEM) {
+    return [
+      "item",
+      cleanEntitlementSegment(accessRecord.module),
+      cleanEntitlementSegment(accessRecord.itemType),
+      cleanEntitlementSegment(accessRecord.itemId),
+    ].join("_");
+  }
+
+  if (scopeType === ACCESS_SCOPE_TYPES.BUNDLE) {
+    return "bundle_" + cleanEntitlementSegment(accessRecord.bundleId || accessRecord.itemId);
+  }
+
+  return "plan_" + cleanEntitlementSegment(normalizeAccessPlan(accessRecord.planType || ACCESS_PLAN_TYPES.FREE));
+};
+
+export const buildStudentEntitlementPayload = (accessRecord = {}, metadata = {}) => {
+  const uid = String(accessRecord.uid || metadata.uid || "").trim();
+  const normalizedEmail = normalizeAccessEmail(
+    accessRecord.normalizedEmail || accessRecord.email || metadata.email
+  );
+
+  if (!uid) {
+    throw new Error("Student entitlement requires uid.");
+  }
+
+  const entitlementId = buildStudentEntitlementId(accessRecord);
+
+  return {
+    id: entitlementId,
+    uid,
+    email: normalizedEmail || null,
+    normalizedEmail,
+    accessId: accessRecord.id || metadata.accessId || null,
+    planType: normalizeAccessPlan(accessRecord.planType || ACCESS_PLAN_TYPES.FREE),
+    scopeType: accessRecord.scopeType || ACCESS_SCOPE_TYPES.PLAN,
+    module: accessRecord.module || null,
+    itemType: accessRecord.itemType || null,
+    itemId: accessRecord.itemId || null,
+    itemIds: Array.isArray(accessRecord.itemIds) ? accessRecord.itemIds : [],
+    bundleId: accessRecord.bundleId || null,
+    course: accessRecord.course || ACCESS_COURSE.CTET_TET,
+    status: String(accessRecord.status || ACCESS_STATUS.ACTIVE).trim().toLowerCase(),
+    source: accessRecord.source || ACCESS_SOURCE.ADMIN_MANUAL,
+    accessFrom: accessRecord.accessFrom || null,
+    accessUntil: accessRecord.accessUntil || null,
+    updatedAt: serverTimestamp(),
+  };
+};
+
+export const syncStudentEntitlement = async (accessRecord = {}, metadata = {}) => {
+  const payload = buildStudentEntitlementPayload(accessRecord, metadata);
+  const entitlementRef = doc(
+    db,
+    ACCESS_COLLECTIONS.STUDENT_ENTITLEMENTS,
+    payload.uid,
+    "items",
+    payload.id
+  );
+
+  await setDoc(entitlementRef, payload, { merge: true });
+
+  return payload;
+};
+
+const syncStudentEntitlementIfUid = async (accessRecord = {}, metadata = {}) => {
+  const uid = String(accessRecord.uid || metadata.uid || "").trim();
+
+  if (!uid) {
+    return null;
+  }
+
+  return syncStudentEntitlement(accessRecord, metadata);
+};
+
 export const getAccessByEmail = async (email) => {
   const normalizedEmail = normalizeAccessEmail(email);
 
@@ -265,6 +358,14 @@ export const createManualAccess = async (data = {}) => {
   };
 
   const docRef = await addDoc(collection(db, ACCESS_COLLECTIONS.STUDENT_ACCESS), payload);
+  const savedAccess = { id: docRef.id, ...payload };
+
+  await syncStudentEntitlementIfUid(savedAccess, {
+    accessId: docRef.id,
+    actorUid: actor.uid,
+    actorEmail: actor.email,
+    source: "create_manual_access",
+  });
 
   await createAccessAuditLog({
     actor,
@@ -690,6 +791,20 @@ export const redeemAccessInvite = async (inviteCode = "", user = {}) => {
 
   await batch.commit();
 
+  await syncStudentEntitlementIfUid(
+    {
+      id: invite.accessId,
+      ...accessData,
+      uid,
+    },
+    {
+      accessId: invite.accessId,
+      uid,
+      email,
+      source: "redeem_access_invite",
+    }
+  );
+
   return { success: true, inviteId: invite.id || code, accessId: invite.accessId, email };
 };
 
@@ -749,6 +864,14 @@ export const updateAccessStatus = async (id, status, actor = {}, metadata = {}) 
   }
 
   await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId), payload);
+  const after = { ...(before || {}), ...payload, id: accessId };
+
+  await syncStudentEntitlementIfUid(after, {
+    accessId,
+    actorUid: adminActor.uid,
+    actorEmail: adminActor.email,
+    source: "update_access_status",
+  });
 
   await createAccessAuditLog({
     actor: adminActor,
@@ -784,6 +907,14 @@ export const extendAccess = async (id, accessUntil, actor = {}, metadata = {}) =
   };
 
   await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId), payload);
+  const after = { ...(before || {}), ...payload, id: accessId };
+
+  await syncStudentEntitlementIfUid(after, {
+    accessId,
+    actorUid: adminActor.uid,
+    actorEmail: adminActor.email,
+    source: "extend_access",
+  });
 
   await createAccessAuditLog({
     actor: adminActor,
@@ -850,6 +981,14 @@ export const upgradeAccess = async (id, planType, actor = {}, metadata = {}) => 
   };
 
   await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId), payload);
+  const after = { ...(before || {}), ...payload, id: accessId };
+
+  await syncStudentEntitlementIfUid(after, {
+    accessId,
+    actorUid: adminActor.uid,
+    actorEmail: adminActor.email,
+    source: "upgrade_access",
+  });
 
   await createAccessAuditLog({
     actor: adminActor,
@@ -880,6 +1019,14 @@ export const revokeAccess = async (id, actor = {}, metadata = {}) => {
   };
 
   await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId), payload);
+  const after = { ...(before || {}), ...payload, id: accessId };
+
+  await syncStudentEntitlementIfUid(after, {
+    accessId,
+    actorUid: adminActor.uid,
+    actorEmail: adminActor.email,
+    source: "revoke_access",
+  });
 
   await createAccessAuditLog({
     actor: adminActor,
@@ -1483,6 +1630,14 @@ export const redeemAccessKeyFoundation = async ({
     collection(db, ACCESS_COLLECTIONS.STUDENT_ACCESS),
     accessPayload
   );
+  const savedAccess = { id: accessRef.id, ...accessPayload };
+
+  await syncStudentEntitlementIfUid(savedAccess, {
+    accessId: accessRef.id,
+    uid: normalizedUid,
+    email: normalizedEmail,
+    source: "redeem_access_key",
+  });
 
   const keyUpdate = {
     usedCount: nextUsedCount,
@@ -1703,6 +1858,14 @@ export async function grantPaymentAccess(payment = {}, actor = {}) {
 
   if (before && before.id) {
     await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, before.id), payload);
+    const updatedAccess = Object.assign({}, before, payload, { id: before.id });
+
+    await syncStudentEntitlementIfUid(updatedAccess, {
+      accessId: before.id,
+      actorUid: adminActor.uid,
+      actorEmail: adminActor.email,
+      source: "payment_access_updated",
+    });
 
     await createAccessAuditLog({
       actor: adminActor,
@@ -1728,6 +1891,14 @@ export async function grantPaymentAccess(payment = {}, actor = {}) {
   });
 
   const docRef = await addDoc(collection(db, ACCESS_COLLECTIONS.STUDENT_ACCESS), createPayload);
+  const createdAccess = { id: docRef.id, ...createPayload };
+
+  await syncStudentEntitlementIfUid(createdAccess, {
+    accessId: docRef.id,
+    actorUid: adminActor.uid,
+    actorEmail: adminActor.email,
+    source: "payment_access_created",
+  });
 
   await createAccessAuditLog({
     actor: adminActor,

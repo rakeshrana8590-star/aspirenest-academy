@@ -36,6 +36,11 @@ import {
 } from "./access/accessUtils";
 import useAccessProfile from "./access/useAccessProfile";
 import { grantPaymentAccess } from "./access/accessService";
+import {
+  getProtectedContentUrl,
+  readProtectedContentAsset,
+  saveProtectedContentAsset,
+} from "./protectedContentAssetsService";
 import { upsertLearnerLoginSnapshot } from "./profile/learnerProfileService";
 
 import {
@@ -1935,7 +1940,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
       alert(error.message);
     }
   };
-  const handleNoteAccess = (note) => {
+  const handleNoteAccess = async (note) => {
     if (!note) {
       return;
     }
@@ -1952,7 +1957,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
     const accessType = isKnownPlan ? normalizedAccessType : "PREMIUM";
     const accessLabel = isKnownPlan ? accessType : normalizedAccessType;
 
-    const notePdfUrl = note.pdfUrl || note.fileUrl || note.pdf || "";
+    let notePdfUrl = note.pdfUrl || note.fileUrl || note.pdf || "";
 
     const canOpenNote = hasPlanAccess(accessType, {
       module: "notes",
@@ -1975,6 +1980,27 @@ const [paymentHistory, setPaymentHistory] = useState([]);
 
       return;
     }
+
+    if (note.id) {
+        try {
+          const protectedAsset = await readProtectedContentAsset(note.id);
+          const protectedPdfUrl = getProtectedContentUrl(protectedAsset, [
+            "pdfUrl",
+            "fileUrl",
+            "sourceUrl",
+            "downloadUrl",
+            "assetUrl",
+          ]);
+
+          if (protectedPdfUrl) {
+            notePdfUrl = protectedPdfUrl;
+          }
+        } catch (error) {
+          console.warn("Protected notes PDF not available, using legacy URL fallback:", error);
+        }
+      }
+
+
 
     if (!notePdfUrl || notePdfUrl === "#") {
       alert("PDF will be uploaded soon.");
@@ -2889,13 +2915,41 @@ subjectName:
           doc(db, "contentItems", editingNotesCmsId),
           notesPayload
         );
+
+          if (notesCmsPdfUrl.trim()) {
+            await saveProtectedContentAsset(
+              editingNotesCmsId,
+              {
+                id: editingNotesCmsId,
+                ...notesPayload,
+              },
+              {
+                actorEmail: user?.email || "admin",
+                source: "notes_cms",
+              }
+            );
+          }
   
         alert("Notes updated successfully.");
       } else {
-        await addDoc(collection(db, "contentItems"), {
-          ...notesPayload,
-          createdAt: new Date().toISOString(),
-        });
+        const notesRef = await addDoc(collection(db, "contentItems"), {
+            ...notesPayload,
+            createdAt: new Date().toISOString(),
+          });
+
+          if (notesCmsPdfUrl.trim()) {
+            await saveProtectedContentAsset(
+              notesRef.id,
+              {
+                id: notesRef.id,
+                ...notesPayload,
+              },
+              {
+                actorEmail: user?.email || "admin",
+                source: "notes_cms",
+              }
+            );
+          }
   
         alert("Notes saved to Firestore successfully.");
       }
@@ -2916,6 +2970,94 @@ subjectName:
     } catch (error) {
       console.error("Notes save/update error:", error);
       alert("Notes save/update failed.");
+    }
+  };
+
+  const handleBackfillProtectedNotesAssets = async () => {
+    const confirmSync = window.confirm(
+      "Sync existing Notes PDF URLs into protectedContentAssets?\n\n" +
+        "This will not remove legacy URLs yet.\n" +
+        "Existing protected assets will be safely updated."
+    );
+
+    if (!confirmSync) return;
+
+    try {
+      const snapshot = await getDocs(collection(db, "contentItems"));
+      const noteItems = snapshot.docs
+        .map((docItem) => ({
+          id: docItem.id,
+          ...docItem.data(),
+        }))
+        .filter((item) => {
+          const section = String(
+            item.section || item.contentSection || item.type || ""
+          ).toLowerCase();
+          const itemType = String(
+            item.itemType || item.contentType || ""
+          ).toLowerCase();
+          const pdfUrl = String(
+            item.pdfUrl || item.fileUrl || item.pdf || item.url || ""
+          ).trim();
+
+          return Boolean(
+            pdfUrl &&
+              (section.includes("note") || itemType.includes("note"))
+          );
+        });
+
+      if (!noteItems.length) {
+        alert("No Notes PDF URLs found for protected sync.");
+        return;
+      }
+
+      let syncedCount = 0;
+      let failedCount = 0;
+
+      for (const item of noteItems) {
+        const pdfUrl = String(
+          item.pdfUrl || item.fileUrl || item.pdf || item.url || ""
+        ).trim();
+
+        if (!item.id || !pdfUrl) {
+          continue;
+        }
+
+        try {
+          await saveProtectedContentAsset(
+            item.id,
+            {
+              ...item,
+              id: item.id,
+              pdfUrl,
+              fileUrl: item.fileUrl || pdfUrl,
+              section: item.section || "notes",
+              planType: item.planType || "FREE",
+              course: item.course || "CTET_TET",
+            },
+            {
+              actorEmail: user?.email || "admin",
+              source: "notes_protected_backfill",
+            }
+          );
+
+          syncedCount += 1;
+        } catch (error) {
+          failedCount += 1;
+          console.error("Protected notes PDF backfill failed:", item.id, error);
+        }
+      }
+
+      alert(
+        "Protected Notes PDF sync complete.\n\n" +
+          "Synced: " +
+          syncedCount +
+          "\nFailed: " +
+          failedCount
+      );
+    } catch (error) {
+      console.error("Protected notes PDF sync error:", error);
+      alert("Protected Notes PDF sync failed.");
     }
   };
 
@@ -5583,6 +5725,7 @@ isAdmin={isAdmin}
         universalContent={universalContent}
         notesPlanFilter={notesPlanFilter}
         setNotesPlanFilter={setNotesPlanFilter}
+        onBackfillProtectedNotesAssets={handleBackfillProtectedNotesAssets}
         onEditNote={(item) => {
           setEditingNotesCmsId(item.id);
           setNotesCmsTitle(item.title || "");
