@@ -3834,7 +3834,7 @@ return (
             </div>
           }
         >
-{!isExamAttemptPage && (
+{!isExamAttemptPage && !ctetExperienceEnabled && (
   <header className="cleanHeader">
     <div className="cleanBrand">
       <AspireNestLogo />
@@ -4022,99 +4022,249 @@ return (
 >
 
 </div>
-  <ExperienceHero
-  badge="CTET • TETs"
-  tagline="Where Aspirations Turn Into Selections"
-  taglineText="Empowering students with the right guidance, resources and practice."
-  title="Crack CTET/TETs with Smart Learning"
-  description="Premium bilingual CTET/TET preparation with mentor guidance, smart mock tests, visual notes, live updates, and structured learning."
-  actions={[
-    {
-      label: "Start Learning",
-      variant: "primary",
-      onClick: () => navigate("/learning"),
-    },
-    ...(user
-      ? [
-          {
-            label: isAdmin(user) ? "Admin Dashboard" : "My Dashboard",
-            onClick: () => navigate(isAdmin(user) ? "/admin" : "/student-dashboard"),
-          },
-        ]
-      : []),
-    {
-      label: "Free Notes",
-      onClick: () => navigate("/ctet-tet/notes"),
-    },
-  ]}
-  stats={[
-    { value: "CTET", label: "Focused prep" },
-    { value: "Live", label: "Event heartbeat" },
-    { value: "Premium", label: "Learning system" },
-  ]}
-  quickCard={
-    user ? (
-      <button
-        type="button"
-        className="experienceHeroQuickCard"
-        onClick={() => navigate(isAdmin(user) ? "/admin" : "/student-dashboard")}
-      >
-        <span>{isAdmin(user) ? "ADMIN ACCESS" : "STUDENT ACCESS"}</span>
-        <h3>
-          {isAdmin(user)
-            ? "Admin Command Center"
-            : "Welcome back, " + (user?.displayName || user?.email?.split("@")[0] || "Student")}
-        </h3>
-        <p>
-          {isAdmin(user)
-            ? "Manage students, payments, notes, mock tests, announcements and analytics from one workspace."
-            : "Continue learning, track progress, access tests, analytics and premium resources."}
-        </p>
-        <strong>{isAdmin(user) ? "Open Admin Dashboard →" : "Open My Dashboard →"}</strong>
-      </button>
-    ) : (
-      <div className="experienceHeroQuickCard">
-        <span>PREMIUM CTET/TET SYSTEM</span>
-        <h3>Learn with structure, practice with confidence.</h3>
-        <p>Live updates, weekly learning plan, mock tests, notes, and premium classroom experience.</p>
-        <strong>Built for serious aspirants →</strong>
-      </div>
-    )
-  }
-/>
+  <section className="ctetTopEntryExperience" aria-label="AspireNest CTET TET top entry experience">
+    <div className="ctetTopEntryShell">
+      
+        <div className="ctetLockedNav">
+          <button type="button" className="ctetLockedBrand" onClick={() => navigate("/ctet-tet")}>
+            <AspireNestLogo />
+          </button>
 
-{ctetFeaturedExperienceEvent ? (
-  <div className="ctetExperienceLiveRibbon">
-    <ExperienceRibbon
-      badge={ctetFeaturedExperienceEvent.status === "live" ? "LIVE NOW" : "UPCOMING"}
-      title={ctetFeaturedExperienceEvent.title}
-      description={ctetFeaturedExperienceEvent.description || "Join the latest AspireNest CTET/TET learning event."}
-      meta={[ctetFeaturedExperienceEvent.typeLabel, ctetFeaturedExperienceEvent.subject, ctetFeaturedExperienceEvent.planType].filter(Boolean).join(" • ")}
-      actionLabel={ctetFeaturedExperienceEvent.cta?.label}
-      tone={ctetFeaturedExperienceEvent.status === "live" ? "live" : "default"}
-      onAction={() => {
-        const targetUrl = ctetFeaturedExperienceEvent.cta?.url;
-        if (targetUrl) navigate(targetUrl);
-      }}
-    />
-    {ctetFeaturedExperienceStartAt ? (
-      <ExperienceCountdown
-        targetAt={ctetFeaturedExperienceStartAt}
-        label="Starts in"
-        completedLabel={ctetFeaturedExperienceEvent.status === "live" ? "Live now" : "Started"}
-      />
-    ) : null}
-  </div>
-) : ctetExperienceLoading ? (
-  <div className="ctetExperienceLiveRibbon">
-    <ExperienceRibbon
-      badge="LOADING"
-      title="Checking latest AspireNest event"
-      description="Fetching live class, mock test, and event updates."
-      tone="default"
-    />
-  </div>
-) : null}
+          <nav className="ctetLockedLinks" aria-label="CTET TET navigation">
+            {[
+              ["Learning Hub", "/ctet-tet"],
+              ["Mock Tests", "/ctet-tet/mock-tests"],
+              ["Notes", "/ctet-tet/notes"],
+              ["Videos", "/ctet-tet/videos"],
+              ["Current Affairs", "/ctet-tet/current-affairs"],
+              ["Roadmaps", "/ctet-tet/roadmaps"],
+              ["Pricing", "/ctet-tet/pricing"],
+            ].map(([label, url]) => (
+              <button type="button" key={label} onClick={() => navigate(url)}>
+                {label}
+                {label === "Pricing" ? <em>Premium</em> : null}
+              </button>
+            ))}
+          </nav>
+
+          <div className="ctetLockedTools">
+            <button type="button" className="ctetLockedSearch" onClick={() => navigate("/ctet-tet/courses")}>
+              <span>⌕</span>
+              Search anything...
+              <kbd>⌘ K</kbd>
+            </button>
+
+            <button
+              type="button"
+              className="ctetLockedAccount"
+              onClick={() => navigate(user ? (isAdmin(user) ? "/admin" : "/student-dashboard") : "/login")}
+            >
+              <i />
+              <span>
+                <strong>{user ? (isAdmin(user) ? "Admin" : "Student") : "Login"}</strong>
+                <small>{user ? (isAdmin(user) ? "Premium Access" : "Learning Access") : "Start Learning"}</small>
+              </span>
+              <b>{user ? (isAdmin(user) ? "AN" : "ST") : "IN"}</b>
+            </button>
+          </div>
+        </div>
+
+<div className="ctetHeroCommandGrid">
+        <div className="ctetHeroStory">
+          <div className="ctetTrustBadge">
+            <span>🏆</span>
+            <strong>India’s Most Trusted CTET/TET Preparation Platform</strong>
+            <span>🛡️</span>
+          </div>
+
+          <h1>
+            Crack CTET/TETs
+            <span> with Smart Learning</span>
+          </h1>
+
+          <p>
+            Premium bilingual preparation for CTET & TET aspirants with expert mentorship,
+            smart practice, concise notes, videos, live updates and personalized progress —
+            all in one place.
+          </p>
+
+          <div className="ctetHeroCtas">
+            <button
+              type="button"
+              className="ctetPrimaryCta"
+              onClick={() => navigate(user ? "/ctet-tet/courses" : "/login")}
+            >
+              <span>📖</span>
+              Start Learning
+              <strong>›</strong>
+            </button>
+
+            <button type="button" onClick={() => navigate("/ctet-tet/mock-tests")}>
+              <span>🧾</span>
+              Mock Tests
+              <strong>›</strong>
+            </button>
+
+            <button type="button" onClick={() => navigate("/ctet-tet/notes")}>
+              <span>📄</span>
+              Free Notes
+              <strong>›</strong>
+            </button>
+          </div>
+
+          <div className="ctetHeroBenefitStrip">
+            {[
+              ["🌐", "Bilingual Learning", "Hindi & English"],
+              ["👥", "Expert Faculty", "CTET/TET Specialists"],
+              ["🎯", "Smart Practice", "Mocks & Analytics"],
+              ["🛡️", "Structured Progress", "Track. Improve. Succeed."],
+            ].map(([icon, title, text]) => (
+              <div className="ctetHeroBenefit" key={title}>
+                <span>{icon}</span>
+                <div>
+                  <strong>{title}</strong>
+                  <small>{text}</small>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <aside className="ctetHeroCommandDeck">
+          <div className="ctetCommandDeckHeader">
+            <div className="ctetCommandIcon">🎯</div>
+            <div>
+              <h2>Hero Command Deck</h2>
+              <p>Personalized guidance to keep you on track every day.</p>
+            </div>
+            <span className="ctetStreakChip">🔥 7 Day Streak</span>
+          </div>
+
+          <button
+            type="button"
+            className="ctetNextStepCard"
+            onClick={() => navigate(user ? "/ctet-tet/courses" : "/login")}
+          >
+            <span className="ctetNextIcon">📖</span>
+            <div>
+              <small>Next Up</small>
+              <h3>Child Development & Pedagogy</h3>
+              <p>Topic 1 of 8 • In Progress</p>
+              <div className="ctetProgressBar">
+                <span style={{ width: "35%" }} />
+              </div>
+            </div>
+            <strong>35%</strong>
+            <em>Resume ▶</em>
+          </button>
+
+          <div className="ctetQuickActionLabel">Quick Actions</div>
+
+          <div className="ctetHeroQuickActions">
+            {[
+              ["🧾", "Mock Tests", "Practice Now", "/ctet-tet/mock-tests"],
+              ["📰", "Current Affairs", "Daily PDF", "/ctet-tet/current-affairs"],
+              ["📄", "Notes", "Quick Revision", "/ctet-tet/notes"],
+              ["▶️", "Videos", "Watch Now", "/ctet-tet/videos"],
+              ["📊", "My Progress", "Track Growth", user ? "/student-dashboard" : "/login"],
+            ].map(([icon, title, text, url]) => (
+              <button type="button" key={title} onClick={() => navigate(url)}>
+                <span>{icon}</span>
+                <strong>{title}</strong>
+                <small>{text}</small>
+              </button>
+            ))}
+          </div>
+
+          <div className="ctetWeeklyGoalCard">
+            <div>
+              <span>🎯</span>
+              <strong>Weekly Goal</strong>
+              <small>Attempt 2 mock tests this week</small>
+            </div>
+            <b>0 / 2</b>
+            <div className="ctetWeeklyGoalTrack">
+              <i style={{ width: "0%" }} />
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div className="ctetLiveHeartbeat">
+        <div className="ctetLiveInfo">
+          <div className="ctetLiveBadgeRow">
+            <span className={ctetFeaturedExperienceEvent?.status === "live" ? "ctetLiveBadge isLive" : "ctetLiveBadge"}>
+              {ctetFeaturedExperienceEvent?.status === "live" ? "● LIVE CLASS" : ctetFeaturedExperienceEvent ? "UPCOMING" : ctetExperienceLoading ? "LOADING" : "SCHEDULE SOON"}
+            </span>
+            <strong>Today’s Featured Class</strong>
+          </div>
+
+          <h2>
+            {ctetFeaturedExperienceEvent?.title || (ctetExperienceLoading ? "Checking latest AspireNest event" : "Live class schedule will appear here soon")}
+          </h2>
+
+          <p>
+            {ctetFeaturedExperienceEvent?.description || (ctetExperienceLoading ? "Fetching live class, mock test, and event updates." : "Upcoming live class, mock test, or workshop details will be shown from real event data.")}
+          </p>
+        </div>
+
+        <div className="ctetLiveMentor">
+          <div className="ctetMentorAvatar">VM</div>
+          <div>
+            <h3>Dr. Varsha D. Maru</h3>
+            <p>Ph.D. Educator & CTET/TET Mentor</p>
+            <small>{ctetFeaturedExperienceEvent?.subject || "Expert guidance"}</small>
+          </div>
+        </div>
+
+        <div className="ctetLiveSchedule">
+          <div>
+            <span>📅</span>
+            <strong>{ctetFeaturedExperienceEvent?.typeLabel || "Live Learning"}</strong>
+          </div>
+          <div>
+            <span>⏱️</span>
+            <strong>{ctetFeaturedExperienceEvent?.planType || "CTET/TET"}</strong>
+          </div>
+        </div>
+
+        <div className="ctetLiveCountdown">
+          {ctetFeaturedExperienceStartAt ? (
+            <ExperienceCountdown
+              targetAt={ctetFeaturedExperienceStartAt}
+              label="Starts in"
+              completedLabel={ctetFeaturedExperienceEvent?.status === "live" ? "Live now" : "Started"}
+            />
+          ) : (
+            <div className="ctetCountdownEmpty">
+              <strong>Schedule</strong>
+              <span>Coming Soon</span>
+            </div>
+          )}
+        </div>
+
+        <div className="ctetLiveActions">
+          <button
+            type="button"
+            className="ctetPrimaryCta"
+            disabled={!ctetFeaturedExperienceEvent?.cta?.url}
+            onClick={() => {
+              const targetUrl = ctetFeaturedExperienceEvent?.cta?.url;
+              if (targetUrl) navigate(targetUrl);
+            }}
+          >
+            {ctetFeaturedExperienceEvent?.status === "live" ? "Join Live Class" : ctetFeaturedExperienceEvent ? "View Details" : "Schedule Soon"}
+            <strong>›</strong>
+          </button>
+
+          <button type="button" onClick={() => navigate("/ctet-tet/videos")}>
+            View Classes
+            <strong>›</strong>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
 
 <ExperienceMentorPanel
   id="about"
