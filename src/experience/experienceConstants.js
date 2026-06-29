@@ -1,0 +1,42 @@
+export const EXPERIENCE_COLLECTIONS = Object.freeze({
+  EVENTS: "experienceEvents",
+});
+
+export const EXPERIENCE_EVENT_TYPES = Object.freeze({
+  LIVE_CLASS: "LIVE_CLASS",
+  MOCK_TEST: "MOCK_TEST",
+  MARATHON: "MARATHON",
+  DOUBT_SESSION: "DOUBT_SESSION",
+  ANNOUNCEMENT: "ANNOUNCEMENT",
+  WORKSHOP: "WORKSHOP",
+});
+
+export const EXPERIENCE_EVENT_STATUS = Object.freeze({
+  DRAFT: "draft",
+  SCHEDULED: "scheduled",
+  PUBLISHED: "published",
+  LIVE: "live",
+  COMPLETED: "completed",
+  CANCELLED: "cancelled",
+  EXPIRED: "expired",
+  ARCHIVED: "archived",
+});
+
+export const EXPERIENCE_CTA_TYPES = Object.freeze({
+  JOIN_LIVE: "JOIN_LIVE",
+  START_MOCK: "START_MOCK",
+  VIEW_DETAILS: "VIEW_DETAILS",
+  OPEN_VIDEO: "OPEN_VIDEO",
+  READ_NOTES: "READ_NOTES",
+  START_MISSION: "START_MISSION",
+  UPGRADE_PLAN: "UPGRADE_PLAN",
+});
+
+export const EXPERIENCE_EVENT_TYPE_LABELS = Object.freeze({
+  [EXPERIENCE_EVENT_TYPES.LIVE_CLASS]: "Live Class",
+  [EXPERIENCE_EVENT_TYPES.MOCK_TEST]: "Mock Test",
+  [EXPERIENCE_EVENT_TYPES.MARATHON]: "Marathon",
+  [EXPERIENCE_EVENT_TYPES.DOUBT_SESSION]: "Doubt Session",
+  [EXPERIENCE_EVENT_TYPES.ANNOUNCEMENT]: "Announcement",
+  [EXPERIENCE_EVENT_TYPES.WORKSHOP]: "Workshop",
+});
