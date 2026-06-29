@@ -4591,6 +4591,36 @@ isAdmin={isAdmin}
   </section>
 ) : null}
 
+{ctetExperienceEvents.length > 0 ? (
+  <section className="ctetWhatsNewSection">
+    <ExperienceSectionHeader
+      badge="WHAT'S NEW"
+      title="Fresh Updates for CTET/TET Aspirants"
+      description="Latest AspireNest learning updates, new sessions, mock events, and important announcements in one place."
+      align="left"
+    />
+
+    <div className="experienceCardGrid">
+      {ctetExperienceEvents.slice(0, 3).map((event) => (
+        <ExperienceCard
+          key={event.id || event.title}
+          eyebrow={event.typeLabel}
+          title={event.title}
+          text={event.description || "New AspireNest update for your CTET/TET preparation."}
+          icon={event.status === "live" ? "🔴" : "✨"}
+          meta={[event.status, event.subject, event.planType].filter(Boolean).join(" • ")}
+          actionLabel={event.cta?.label || "View Details"}
+          tone={event.status === "live" ? "live" : "default"}
+          onClick={() => {
+            const targetUrl = event.cta?.url;
+            if (targetUrl) navigate(targetUrl);
+          }}
+        />
+      ))}
+    </div>
+  </section>
+) : null}
+
 {(leaderboard || []).length > 0 && (
 <section className="leaderboardSection">
   <div className="leaderboardHeader">
