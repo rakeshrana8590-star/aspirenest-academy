@@ -40,14 +40,18 @@ export default function ExperienceFeatureShowcase({
         <div className="experienceFeatureGlow"></div>
         {cardTitle ? <h3>{cardTitle}</h3> : null}
 
-        <div className="experienceFeatureProgress">
-          <span>{progressLabel}</span>
-          <strong>{progressValue}</strong>
-        </div>
+        {progressLabel || progressValue ? (
+          <div className="experienceFeatureProgress">
+            {progressLabel ? <span>{progressLabel}</span> : null}
+            {progressValue ? <strong>{progressValue}</strong> : null}
+          </div>
+        ) : null}
 
-        <div className="experienceFeatureBar">
-          <div style={{ width: progressValue || "82%" }}></div>
-        </div>
+        {progressValue ? (
+          <div className="experienceFeatureBar">
+            <div style={{ width: progressValue }}></div>
+          </div>
+        ) : null}
 
         <div className="experienceFeatureMiniGrid">
           {miniCards.map((item) => (

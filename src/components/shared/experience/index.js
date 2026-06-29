@@ -13,3 +13,5 @@ export { default as ExperienceHero } from "./ExperienceHero.jsx";
 export { default as ExperienceMentorPanel } from "./ExperienceMentorPanel.jsx";
 
 export { default as ExperienceFeatureShowcase } from "./ExperienceFeatureShowcase.jsx";
+
+export { default as ExperienceResourceGrid } from "./ExperienceResourceGrid.jsx";

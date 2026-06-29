@@ -228,7 +228,7 @@ import {
 } from "./components/exam/mockTestImportUtils.js";
 import './style.css';
 import "./styles/public/publicRoutes.css";
-import { ExperienceRibbon, ExperienceCountdown, ExperienceCarousel, ExperienceCard, ExperienceTimeline, ExperienceSectionHeader, ExperienceHero, ExperienceMentorPanel, ExperienceFeatureShowcase } from "./components/shared/experience";
+import { ExperienceRibbon, ExperienceCountdown, ExperienceCarousel, ExperienceCard, ExperienceTimeline, ExperienceSectionHeader, ExperienceHero, ExperienceMentorPanel, ExperienceFeatureShowcase, ExperienceResourceGrid } from "./components/shared/experience";
 import "./styles/shared/experienceSystem.css";
 import "./styles/exam/examHeader.css";
 import "./styles/exam/questionWorkspace.css";
@@ -4525,67 +4525,66 @@ isAdmin={isAdmin}
   actionLabel="Explore Premium"
   onAction={handlePremiumSectionAccess}
   cardTitle="CTET Master Dashboard"
-  progressLabel="Course Progress"
-  progressValue="82%"
+  progressLabel="Connected AspireNest Modules"
   miniCards={[
-    "📘 150+ Notes",
-    "🎯 50+ Tests",
-    "🧠 AI Revision",
-    "🏆 Top Scores",
+    "📘 Notes",
+    "📝 Mock Tests",
+    "🎥 Videos / Live Classes",
+    "🧭 AspirePath Roadmaps",
   ]}
 />
 
-<section className="freeResources">
-  <div className="container">
-    <h2>Free Resources</h2>
+<ExperienceResourceGrid
+  badge="REAL LEARNING MODULES"
+  title="Start with AspireNest Resources"
+  description="Open real CTET/TET modules already connected inside AspireNest Academy."
+  resources={[
+    {
+      icon: "📘",
+      title: "Notes",
+      text: "Open CTET/TET notes and revision material.",
+      onClick: () => navigate("/ctet-tet/notes"),
+    },
+    {
+      icon: "📝",
+      title: "Mock Tests",
+      text: "Practice with available CTET/TET mock tests.",
+      onClick: () => navigate("/ctet-tet/mock-tests"),
+    },
+    {
+      icon: "📰",
+      title: "Current Affairs",
+      text: "Open exam-focused current affairs updates.",
+      onClick: () => navigate("/ctet-tet/current-affairs"),
+    },
+    {
+      icon: "🎥",
+      title: "Videos / Live Classes",
+      text: "Open recorded videos and live classroom area.",
+      onClick: () => navigate("/ctet-tet/videos"),
+    },
+    {
+      icon: "🎓",
+      title: "Courses",
+      text: "Explore CTET/TET course structure.",
+      onClick: () => navigate("/ctet-tet/courses"),
+    },
+    {
+      icon: "🧭",
+      title: "AspirePath Roadmaps",
+      text: "Follow structured study roadmaps.",
+      onClick: () => navigate("/ctet-tet/roadmaps"),
+    },
+  ]}
+/>
 
-    <p>
-    Start your preparation with free notes and study tools.
-    </p>
-
-    <div className="freeGrid">
-    <div
-  className="freeCard"
-  onClick={() => navigate("/ctet-tet/notes")}
->
-        📘 Free CDP Notes
-      </div>
-
-      <div className="freeCard">
-        🗓️ 7-Day Study Plan
-      </div>
-
-      <div
-  className="freeCard"
-  onClick={() => navigate("/ctet-tet/mock-tests")}
->
-        📝 Free Mock Test
-      </div>
-
-      <div className="freeCard">
-        📄 PYQ Starter Pack
-      </div>
-
-      <div className="freeCard">
-        🎯 Exam Strategy Guide
-      </div>
-
-      <div className="freeCard">
-        ✅ Revision Checklist
-      </div>
-    </div>
-  </div>
-</section>
-
-
-      <section className="footerPanels" id="contact">
+<section className="footerPanels" id="contact">
   <div className="footerPanelCard">
-    <span>STUDENT REVIEWS</span>
-    <h3>Trusted by CTET/TET learners.</h3>
-    <p className="stars">⭐⭐⭐⭐⭐</p>
-    <p>Visual notes se revision bahut fast ho gaya.</p>
-    <strong>Priya Sharma</strong>
-  </div>
+      <span>ASPIRENEST SUPPORT</span>
+      <h3>Official guidance for CTET/TET learners.</h3>
+      <p>For courses, notes, mock tests, videos, roadmaps, payment, and access support, use the enquiry form.</p>
+      <strong>AspireNest Academy Helpdesk</strong>
+    </div>
 
   <div className="footerPanelCard enquiryPanel">
     <span>GET IN TOUCH</span>
@@ -4915,18 +4914,17 @@ isAdmin={isAdmin}
   element={
     <section className="footerPanels contactScreen">
       <div className="footerPanelCard">
-        <span>STUDENT REVIEWS</span>
+          <span>ASPIRENEST SUPPORT</span>
 
-        <h3>Trusted by CTET/TET learners.</h3>
+          <h3>Official guidance for CTET/TET learners.</h3>
 
-        <p className="stars">⭐⭐⭐⭐⭐</p>
+          <p>
+            For courses, notes, mock tests, videos, roadmaps, payment, and access support,
+            contact AspireNest Academy.
+          </p>
 
-        <p>
-          Visual notes se revision bahut fast ho gaya.
-        </p>
-
-        <strong>Priva Sharma</strong>
-      </div>
+          <strong>AspireNest Academy Helpdesk</strong>
+        </div>
 
       <div className="footerPanelCard">
         <span>CONTACT</span>
