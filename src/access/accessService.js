@@ -791,6 +791,20 @@ export const redeemAccessInvite = async (inviteCode = "", user = {}) => {
 
   await batch.commit();
 
+  await syncStudentEntitlementIfUid(
+    {
+      id: invite.accessId,
+      ...accessData,
+      uid,
+    },
+    {
+      accessId: invite.accessId,
+      uid,
+      email,
+      source: "redeem_access_invite",
+    }
+  );
+
   return { success: true, inviteId: invite.id || code, accessId: invite.accessId, email };
 };
 
@@ -1616,6 +1630,14 @@ export const redeemAccessKeyFoundation = async ({
     collection(db, ACCESS_COLLECTIONS.STUDENT_ACCESS),
     accessPayload
   );
+  const savedAccess = { id: accessRef.id, ...accessPayload };
+
+  await syncStudentEntitlementIfUid(savedAccess, {
+    accessId: accessRef.id,
+    uid: normalizedUid,
+    email: normalizedEmail,
+    source: "redeem_access_key",
+  });
 
   const keyUpdate = {
     usedCount: nextUsedCount,
