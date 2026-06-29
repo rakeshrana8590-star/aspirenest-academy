@@ -192,6 +192,7 @@ import AdminAccessInvitesRoute from "./access/admin/AdminAccessInvitesRoute.jsx"
 import AdminAccessProfileRoute from "./access/admin/AdminAccessProfileRoute.jsx";
 import AdminAccessAuditRoute from "./access/admin/AdminAccessAuditRoute.jsx";
 import AdminPaymentVerificationRoute from "./payments/admin/AdminPaymentVerificationRoute.jsx";
+import AdminExperienceEventsRoute from "./experience/admin/AdminExperienceEventsRoute.jsx";
 import StudentRedeemAccessRoute from "./access/StudentRedeemAccessRoute.jsx";
 import AdminAccessProductsRoute from "./access/admin/AdminAccessProductsRoute.jsx";
 import AdminAccessKeysRoute from "./access/admin/AdminAccessKeysRoute.jsx";
@@ -5372,6 +5373,11 @@ isAdmin={isAdmin}
 />
 
 <Route
+  path="/admin/content/experience"
+  element={requireAdmin() ? <AdminExperienceEventsRoute /> : null}
+/>
+
+<Route
   path="/admin/content/payments"
   element={
     requireAdmin() ? (
@@ -5484,7 +5490,15 @@ isAdmin={isAdmin}
           🛣️ Roadmap Studio
         </button>
 
-        <button
+                  <button
+            onClick={() =>
+              navigate("/admin/content/experience")
+            }
+          >
+            ✨ Experience Studio
+          </button>
+
+<button
           onClick={() =>
             navigate(
               "/admin/content/access"
