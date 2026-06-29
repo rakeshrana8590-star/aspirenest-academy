@@ -251,6 +251,16 @@ export const syncStudentEntitlement = async (accessRecord = {}, metadata = {}) =
   return payload;
 };
 
+const syncStudentEntitlementIfUid = async (accessRecord = {}, metadata = {}) => {
+  const uid = String(accessRecord.uid || metadata.uid || "").trim();
+
+  if (!uid) {
+    return null;
+  }
+
+  return syncStudentEntitlement(accessRecord, metadata);
+};
+
 export const getAccessByEmail = async (email) => {
   const normalizedEmail = normalizeAccessEmail(email);
 
@@ -348,6 +358,14 @@ export const createManualAccess = async (data = {}) => {
   };
 
   const docRef = await addDoc(collection(db, ACCESS_COLLECTIONS.STUDENT_ACCESS), payload);
+  const savedAccess = { id: docRef.id, ...payload };
+
+  await syncStudentEntitlementIfUid(savedAccess, {
+    accessId: docRef.id,
+    actorUid: actor.uid,
+    actorEmail: actor.email,
+    source: "create_manual_access",
+  });
 
   await createAccessAuditLog({
     actor,
@@ -832,6 +850,14 @@ export const updateAccessStatus = async (id, status, actor = {}, metadata = {}) 
   }
 
   await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId), payload);
+  const after = { ...(before || {}), ...payload, id: accessId };
+
+  await syncStudentEntitlementIfUid(after, {
+    accessId,
+    actorUid: adminActor.uid,
+    actorEmail: adminActor.email,
+    source: "update_access_status",
+  });
 
   await createAccessAuditLog({
     actor: adminActor,
@@ -867,6 +893,14 @@ export const extendAccess = async (id, accessUntil, actor = {}, metadata = {}) =
   };
 
   await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId), payload);
+  const after = { ...(before || {}), ...payload, id: accessId };
+
+  await syncStudentEntitlementIfUid(after, {
+    accessId,
+    actorUid: adminActor.uid,
+    actorEmail: adminActor.email,
+    source: "extend_access",
+  });
 
   await createAccessAuditLog({
     actor: adminActor,
@@ -933,6 +967,14 @@ export const upgradeAccess = async (id, planType, actor = {}, metadata = {}) => 
   };
 
   await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId), payload);
+  const after = { ...(before || {}), ...payload, id: accessId };
+
+  await syncStudentEntitlementIfUid(after, {
+    accessId,
+    actorUid: adminActor.uid,
+    actorEmail: adminActor.email,
+    source: "upgrade_access",
+  });
 
   await createAccessAuditLog({
     actor: adminActor,
@@ -963,6 +1005,14 @@ export const revokeAccess = async (id, actor = {}, metadata = {}) => {
   };
 
   await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId), payload);
+  const after = { ...(before || {}), ...payload, id: accessId };
+
+  await syncStudentEntitlementIfUid(after, {
+    accessId,
+    actorUid: adminActor.uid,
+    actorEmail: adminActor.email,
+    source: "revoke_access",
+  });
 
   await createAccessAuditLog({
     actor: adminActor,
@@ -1786,6 +1836,14 @@ export async function grantPaymentAccess(payment = {}, actor = {}) {
 
   if (before && before.id) {
     await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, before.id), payload);
+    const updatedAccess = Object.assign({}, before, payload, { id: before.id });
+
+    await syncStudentEntitlementIfUid(updatedAccess, {
+      accessId: before.id,
+      actorUid: adminActor.uid,
+      actorEmail: adminActor.email,
+      source: "payment_access_updated",
+    });
 
     await createAccessAuditLog({
       actor: adminActor,
@@ -1811,6 +1869,14 @@ export async function grantPaymentAccess(payment = {}, actor = {}) {
   });
 
   const docRef = await addDoc(collection(db, ACCESS_COLLECTIONS.STUDENT_ACCESS), createPayload);
+  const createdAccess = { id: docRef.id, ...createPayload };
+
+  await syncStudentEntitlementIfUid(createdAccess, {
+    accessId: docRef.id,
+    actorUid: adminActor.uid,
+    actorEmail: adminActor.email,
+    source: "payment_access_created",
+  });
 
   await createAccessAuditLog({
     actor: adminActor,
