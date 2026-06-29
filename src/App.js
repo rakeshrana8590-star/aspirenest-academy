@@ -228,7 +228,7 @@ import {
 } from "./components/exam/mockTestImportUtils.js";
 import './style.css';
 import "./styles/public/publicRoutes.css";
-import { ExperienceRibbon, ExperienceCountdown, ExperienceCarousel, ExperienceCard, ExperienceTimeline, ExperienceSectionHeader, ExperienceHero } from "./components/shared/experience";
+import { ExperienceRibbon, ExperienceCountdown, ExperienceCarousel, ExperienceCard, ExperienceTimeline, ExperienceSectionHeader, ExperienceHero, ExperienceMentorPanel } from "./components/shared/experience";
 import "./styles/shared/experienceSystem.css";
 import "./styles/exam/examHeader.css";
 import "./styles/exam/questionWorkspace.css";
@@ -4196,118 +4196,45 @@ return (
   </div>
 ) : null}
 
-<section className="mentor" id="about">
+<ExperienceMentorPanel
+  id="about"
+  badge="Meet Your Expert Educator"
+  title="Dr. Varsha D. Maru"
+  description="Learn from a Ph.D. qualified educator, I/C Principal, Assistant Professor, researcher, and CTET/TET mentor with strong expertise in Education, Psychology, Pedagogy, Teacher Training, and Digital Learning."
+  stats={[
+    { value: "Ph.D.", label: "Education" },
+    { value: "UGC-NET", label: "Education Qualified" },
+    { value: "CTET", label: "Paper II Qualified" },
+  ]}
+  quote="Concept clarity, practical pedagogy, bilingual explanation, and exam-focused preparation are at the heart of our teaching."
+  actions={[
+    {
+      label: "Explore Courses",
+      variant: "primary",
+      onClick: () => navigate("/ctet-tet/courses"),
+    },
+    {
+      label: "Contact Mentor",
+      onClick: () => setShowMentorProfile(true),
+    },
+    {
+      label: "View Full Profile",
+      onClick: () => setShowProfile(true),
+    },
+  ]}
+  avatar="VM"
+  profileTitle="Academic Profile"
+  profileSubtitle="Educator • Researcher • Academic Leader"
+  highlights={[
+    { label: "🏫 Current Role", text: "I/C Principal & Assistant Professor" },
+    { label: "🎓 Qualification", text: "Ph.D. in Education, M.Ed., M.A. Psychology" },
+    { label: "📚 Exam Expertise", text: "CTET Paper II Qualified, TAIT Qualified" },
+    { label: "🧠 Research Area", text: "Cyberbullying, Mental Health, Education & Psychology" },
+    { label: "🏆 Recognition", text: "Best Excellence Teacher Award" },
+    { label: "💻 Digital Learning", text: "Google Certified Educator, AI & NEP 2020 Training" },
+  ]}
+/>
 
-<div className="mentorLeft">
-
-  <span className="badge">Meet Your Expert Educator</span>
-
-  <h2>Dr. Varsha D. Maru</h2>
-
-  <p className="mentorIntro">
-    Learn from a Ph.D. qualified educator, I/C Principal,
-    Assistant Professor, researcher, and CTET/TET mentor
-    with strong expertise in Education, Psychology,
-    Pedagogy, Teacher Training, and Digital Learning.
-  </p>
-
-  <div className="mentorStats">
-
-    <div className="mentorStat">
-      <h3>Ph.D.</h3>
-      <span>Education</span>
-    </div>
-
-    <div className="mentorStat">
-  <h3>UGC-NET</h3>
-  <p>Education Qualified</p>
-</div>
-
-    <div className="mentorStat">
-      <h3>CTET</h3>
-      <span>Paper II Qualified</span>
-    </div>
-
-  </div>
-
-  <div className="mentorQuote">
-    “Concept clarity, practical pedagogy, bilingual explanation,
-    and exam-focused preparation are at the heart of our teaching.”
-  </div>
-
-  <div className="buttons">
-  <button
-    className="btnLink"
-    onClick={() => navigate("/ctet-tet/courses")}
-  >
-    Explore Courses
-  </button>
-
-  <button
-    className="secondaryBtn"
-    onClick={() => setShowMentorProfile(true)}
-  >
-  Contact Mentor
-</button>
-<button
-  className="secondaryBtn"
-  onClick={() => setShowProfile(true)}
->
-  View Full Profile
-</button>
-
-  </div>
-
-</div>
-
-<div className="mentorCard premiumMentorCard">
-
-  <div className="mentorCardTop">
-    <div className="mentorAvatar">VM</div>
-
-    <div>
-      <h3>Academic Profile</h3>
-      <p>Educator • Researcher • Academic Leader</p>
-    </div>
-  </div>
-
-  <div className="mentorHighlights">
-
-    <div className="mentorHighlight">
-      <strong>🏫 Current Role</strong>
-      <span>I/C Principal & Assistant Professor</span>
-    </div>
-
-    <div className="mentorHighlight">
-      <strong>🎓 Qualification</strong>
-      <span>Ph.D. in Education, M.Ed., M.A. Psychology</span>
-    </div>
-
-    <div className="mentorHighlight">
-      <strong>📚 Exam Expertise</strong>
-      <span>CTET Paper II Qualified, TAIT Qualified</span>
-    </div>
-
-    <div className="mentorHighlight">
-      <strong>🧠 Research Area</strong>
-      <span>Cyberbullying, Mental Health, Education & Psychology</span>
-    </div>
-
-    <div className="mentorHighlight">
-      <strong>🏆 Recognition</strong>
-      <span>Best Excellence Teacher Award</span>
-    </div>
-
-    <div className="mentorHighlight">
-      <strong>💻 Digital Learning</strong>
-      <span>Google Certified Educator, AI & NEP 2020 Training</span>
-    </div>
-
-  </div>
-
-</div>
-
-</section>
 {showMentorProfile && (
   <div className="mentorProfileOverlay">
     <div className="mentorProfileModal">
