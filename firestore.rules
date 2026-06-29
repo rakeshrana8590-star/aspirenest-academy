@@ -162,12 +162,39 @@ service cloud.firestore {
         get(/databases/$(database)/documents/studentEntitlements/$(request.auth.uid)/items/$(entitlementId)).data.status == "active";
     }
 
-    match /protectedContentAssets/{assetId} {
-      allow read: if isAdmin() ||
+    function hasProtectedPlanEntitlement(planType) {
+      return planType == "FREE" ||
         (
-          resource.data.status == "published" &&
-          hasProtectedStudentEntitlement(resource.data.requiredEntitlementId)
+          planType == "BASIC" &&
+          (
+            hasProtectedStudentEntitlement("plan_BASIC") ||
+            hasProtectedStudentEntitlement("plan_PREMIUM") ||
+            hasProtectedStudentEntitlement("plan_MENTORSHIP")
+          )
+        ) ||
+        (
+          planType == "PREMIUM" &&
+          (
+            hasProtectedStudentEntitlement("plan_PREMIUM") ||
+            hasProtectedStudentEntitlement("plan_MENTORSHIP")
+          )
+        ) ||
+        (
+          planType == "MENTORSHIP" &&
+          hasProtectedStudentEntitlement("plan_MENTORSHIP")
         );
+    }
+
+    function canReadProtectedContentAsset() {
+      return resource.data.status == "published" &&
+        (
+          hasProtectedStudentEntitlement(resource.data.requiredEntitlementId) ||
+          hasProtectedPlanEntitlement(resource.data.planType)
+        );
+    }
+
+    match /protectedContentAssets/{assetId} {
+      allow read: if isAdmin() || canReadProtectedContentAsset();
       allow create, update, delete: if isAdmin();
     }
 
