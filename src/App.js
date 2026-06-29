@@ -36,6 +36,7 @@ import {
 } from "./access/accessUtils";
 import useAccessProfile from "./access/useAccessProfile";
 import { grantPaymentAccess } from "./access/accessService";
+import { saveProtectedContentAsset } from "./protectedContentAssetsService";
 import { upsertLearnerLoginSnapshot } from "./profile/learnerProfileService";
 
 import {
@@ -2889,13 +2890,41 @@ subjectName:
           doc(db, "contentItems", editingNotesCmsId),
           notesPayload
         );
+
+          if (notesCmsPdfUrl.trim()) {
+            await saveProtectedContentAsset(
+              editingNotesCmsId,
+              {
+                id: editingNotesCmsId,
+                ...notesPayload,
+              },
+              {
+                actorEmail: user?.email || "admin",
+                source: "notes_cms",
+              }
+            );
+          }
   
         alert("Notes updated successfully.");
       } else {
-        await addDoc(collection(db, "contentItems"), {
-          ...notesPayload,
-          createdAt: new Date().toISOString(),
-        });
+        const notesRef = await addDoc(collection(db, "contentItems"), {
+            ...notesPayload,
+            createdAt: new Date().toISOString(),
+          });
+
+          if (notesCmsPdfUrl.trim()) {
+            await saveProtectedContentAsset(
+              notesRef.id,
+              {
+                id: notesRef.id,
+                ...notesPayload,
+              },
+              {
+                actorEmail: user?.email || "admin",
+                source: "notes_cms",
+              }
+            );
+          }
   
         alert("Notes saved to Firestore successfully.");
       }
