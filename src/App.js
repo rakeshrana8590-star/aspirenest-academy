@@ -36,7 +36,11 @@ import {
 } from "./access/accessUtils";
 import useAccessProfile from "./access/useAccessProfile";
 import { grantPaymentAccess } from "./access/accessService";
-import { saveProtectedContentAsset } from "./protectedContentAssetsService";
+import {
+  getProtectedContentUrl,
+  readProtectedContentAsset,
+  saveProtectedContentAsset,
+} from "./protectedContentAssetsService";
 import { upsertLearnerLoginSnapshot } from "./profile/learnerProfileService";
 
 import {
@@ -1936,7 +1940,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
       alert(error.message);
     }
   };
-  const handleNoteAccess = (note) => {
+  const handleNoteAccess = async (note) => {
     if (!note) {
       return;
     }
@@ -1953,7 +1957,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
     const accessType = isKnownPlan ? normalizedAccessType : "PREMIUM";
     const accessLabel = isKnownPlan ? accessType : normalizedAccessType;
 
-    const notePdfUrl = note.pdfUrl || note.fileUrl || note.pdf || "";
+    let notePdfUrl = note.pdfUrl || note.fileUrl || note.pdf || "";
 
     const canOpenNote = hasPlanAccess(accessType, {
       module: "notes",
@@ -1976,6 +1980,27 @@ const [paymentHistory, setPaymentHistory] = useState([]);
 
       return;
     }
+
+    if (note.id) {
+        try {
+          const protectedAsset = await readProtectedContentAsset(note.id);
+          const protectedPdfUrl = getProtectedContentUrl(protectedAsset, [
+            "pdfUrl",
+            "fileUrl",
+            "sourceUrl",
+            "downloadUrl",
+            "assetUrl",
+          ]);
+
+          if (protectedPdfUrl) {
+            notePdfUrl = protectedPdfUrl;
+          }
+        } catch (error) {
+          console.warn("Protected notes PDF not available, using legacy URL fallback:", error);
+        }
+      }
+
+
 
     if (!notePdfUrl || notePdfUrl === "#") {
       alert("PDF will be uploaded soon.");
