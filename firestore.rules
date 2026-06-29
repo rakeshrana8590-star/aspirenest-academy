@@ -586,6 +586,10 @@ service cloud.firestore {
       allow update: if isAdmin() || isInviteStudentAccessUpdate();
       allow delete: if isAdmin();
     }
+    match /studentEntitlements/{uid}/items/{entitlementId} {
+      allow read: if isAdmin() || (isSignedIn() && uid == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
 
     match /accessInvites/{docId} {
       allow read: if isAdmin() || isInviteOwnRecord();
