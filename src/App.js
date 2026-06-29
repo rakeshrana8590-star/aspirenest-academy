@@ -11,46 +11,23 @@ import html2canvas from "html2canvas";
 
 
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  sendPasswordResetEmail,
-  sendEmailVerification,
-  GoogleAuthProvider,
-  signInWithPopup,
-} from "firebase/auth";
+  createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification, GoogleAuthProvider, signInWithPopup, } from "firebase/auth";
 
 import {
-  getVerifiedAuthSession,
-  resendVerificationEmailAndLogout,
-  syncVerifiedStudentAccountStatus,
-} from "./utils/authAccountService";
+  getVerifiedAuthSession, resendVerificationEmailAndLogout, syncVerifiedStudentAccountStatus, } from "./utils/authAccountService";
 
 import {
-  ACCESS_ITEM_TYPES,
-  ACCESS_MODULE,
-} from "./access/accessConstants";
+  ACCESS_ITEM_TYPES, ACCESS_MODULE, } from "./access/accessConstants";
 import {
-  canAccessContent,
-} from "./access/accessUtils";
+  canAccessContent, } from "./access/accessUtils";
 import useAccessProfile from "./access/useAccessProfile";
 import { grantPaymentAccess } from "./access/accessService";
 import {
-  getProtectedContentUrl,
-  readProtectedContentAsset,
-  saveProtectedContentAsset,
-} from "./protectedContentAssetsService";
+  getProtectedContentUrl, readProtectedContentAsset, saveProtectedContentAsset, } from "./protectedContentAssetsService";
 import { upsertLearnerLoginSnapshot } from "./profile/learnerProfileService";
 
 import {
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer
+  LineChart, Line, PieChart, Pie, Cell, Tooltip, ResponsiveContainer
 } from "recharts";
 const AuthSection = React.lazy(() => import("./components/AuthSection.jsx"));
 const AdminPanel = React.lazy(() => import("./components/AdminPanel.jsx"));
@@ -61,34 +38,15 @@ const CurrentAffairs = React.lazy(() => import("./components/CurrentAffairs.jsx"
 const Pricing = React.lazy(() => import("./components/Pricing.jsx"));
 const Announcements = React.lazy(() => import("./components/Announcements.jsx"));
 import {
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  doc,
-  getDoc,
-  setDoc,
-deleteDoc,
-updateDoc,
-} from "firebase/firestore";
+  collection, addDoc, getDocs, query, where, doc, getDoc, setDoc, deleteDoc, updateDoc, } from "firebase/firestore";
 import {
-  ref,
-  uploadBytes,
-  getDownloadURL,
-} from "firebase/storage";
+  ref, uploadBytes, getDownloadURL, } from "firebase/storage";
 import React, { useState, useEffect } from 'react';
 
 
 
 import {
-  Routes,
-  Route,
-  Link,
-  useNavigate,
-  useLocation,
-  Navigate,
-} from "react-router-dom";
+  Routes, Route, Link, useNavigate, useLocation, Navigate, } from "react-router-dom";
 import AspireNestLogo from "./components/AspireNestLogo.jsx";
 import AcademyOverviewRoute from "./components/public/AcademyOverviewRoute.jsx";
 import AuthRoute from "./components/public/AuthRoute";
@@ -96,21 +54,10 @@ import AuthRoute from "./components/public/AuthRoute";
 
 import AppDashboard from "./components/AppDashboard.jsx";
 import {
-  StudentRoadmapHub,
-  StudentRoadmapDetail,
-  StudentRoadmapDay,
-  MyAspirePath,
-} from "./components/roadmaps/StudentRoadmaps.jsx";
+  StudentRoadmapHub, StudentRoadmapDetail, StudentRoadmapDay, MyAspirePath, } from "./components/roadmaps/StudentRoadmaps.jsx";
 
 import {
-  RoadmapStudioHome,
-  RoadmapImportRoute,
-  RoadmapEditRoute,
-  RoadmapManageRoute,
-  RoadmapScheduleRoute,
-  RoadmapProgressRoute,
-  RoadmapResourcesRoute,
-} from "./components/roadmaps/RoadmapStudio.jsx";
+  RoadmapStudioHome, RoadmapImportRoute, RoadmapEditRoute, RoadmapManageRoute, RoadmapScheduleRoute, RoadmapProgressRoute, RoadmapResourcesRoute, } from "./components/roadmaps/RoadmapStudio.jsx";
 
 import VideoManagerHome from "./components/video/VideoManagerHome.jsx";
 import VideoClassFormRoute from "./components/video/VideoClassFormRoute.jsx";
@@ -132,33 +79,16 @@ import ExamReviewRoute from "./components/exam/ExamReviewRoute.jsx";
 import ExamStartRoute from "./components/exam/ExamStartRoute.jsx";
 
 import {
-  StudentMockTestLibraryRoute,
-  StudentMockTestPlanRoute,
-  StudentMockTestSubjectRoute,
-  StudentMockTestChapterRoute,
-  StudentMockTestHistoryRoute,
-  StudentMockLeaderboardRoute,
-} from "./components/exam/StudentMockTestRoutes.jsx";
+  StudentMockTestLibraryRoute, StudentMockTestPlanRoute, StudentMockTestSubjectRoute, StudentMockTestChapterRoute, StudentMockTestHistoryRoute, StudentMockLeaderboardRoute, } from "./components/exam/StudentMockTestRoutes.jsx";
 
 import {
-  StudentNotesLibraryRoute,
-  StudentNotesPlanRoute,
-  StudentNotesSubjectRoute,
-  StudentNotesChapterRoute,
-} from "./components/notes/student/index.js";
+  StudentNotesLibraryRoute, StudentNotesPlanRoute, StudentNotesSubjectRoute, StudentNotesChapterRoute, } from "./components/notes/student/index.js";
 
 import {
-  AdminNotesHomeRoute,
-  AdminNotesPlanRoute,
-  AdminNotesSubjectRoute,
-  AdminNotesChapterRoute,
-  AdminNotesManageRoute,
-} from "./components/notes/admin/index.js";
+  AdminNotesHomeRoute, AdminNotesPlanRoute, AdminNotesSubjectRoute, AdminNotesChapterRoute, AdminNotesManageRoute, } from "./components/notes/admin/index.js";
 
 import {
-  StudentCurrentAffairsLibraryRoute,
-  StudentCurrentAffairsMonthRoute,
-} from "./components/currentAffairs/student/index.js";
+  StudentCurrentAffairsLibraryRoute, StudentCurrentAffairsMonthRoute, } from "./components/currentAffairs/student/index.js";
 import { AdminCurrentAffairsHomeRoute } from "./components/currentAffairs/admin/index.js";
 import AdminCurrentAffairsManageRoute from "./components/currentAffairs/admin/AdminCurrentAffairsManageRoute";
 import AdminCurrentAffairsAddRoute from "./components/currentAffairs/admin/AdminCurrentAffairsAddRoute";
@@ -205,11 +135,7 @@ import { deleteMockTest } from "./components/exam/mockTestAdminActions.js";
 
 
 import {
-  createEmptyMockQuestion,
-  createDefaultMockTestForm,
-  buildMockTestFormFromTest,
-  buildMockTestQuestionsFormFromTest,
-} from "./components/exam/mockTestFormUtils.js";
+  createEmptyMockQuestion, createDefaultMockTestForm, buildMockTestFormFromTest, buildMockTestQuestionsFormFromTest, } from "./components/exam/mockTestFormUtils.js";
 
 import { useExamAttemptState } from "./components/exam/useExamAttemptState.js";
 import { useExamTimer } from "./components/exam/useExamTimer.js";
@@ -217,18 +143,12 @@ import { useExamSecurity } from "./components/exam/useExamSecurity.js";
 import { useMockTestActionMenu } from "./components/exam/useMockTestActionMenu.js";
 import useExperienceEvents from "./experience/useExperienceEvents.js";
 import {
-  downloadMockTestXlsxTemplate,
-  downloadMockTestCsvTemplate,
-} from "./components/exam/mockTestTemplateDownloads.js";
+  downloadMockTestXlsxTemplate, downloadMockTestCsvTemplate, } from "./components/exam/mockTestTemplateDownloads.js";
 import {
-  convertGoogleDriveUrlToDownloadUrl,
-  importMockTestJsonAsDraft,
-  buildMockTestImportPayloadFromRows,
-  readMockTestWorkbookRowsFromArrayBuffer,
-} from "./components/exam/mockTestImportUtils.js";
+  convertGoogleDriveUrlToDownloadUrl, importMockTestJsonAsDraft, buildMockTestImportPayloadFromRows, readMockTestWorkbookRowsFromArrayBuffer, } from "./components/exam/mockTestImportUtils.js";
 import './style.css';
 import "./styles/public/publicRoutes.css";
-import { ExperienceRibbon, ExperienceCountdown, ExperienceCarousel, ExperienceCard, ExperienceTimeline, ExperienceSectionHeader, ExperienceHero, ExperienceMentorPanel, ExperienceFeatureShowcase, ExperienceResourceGrid } from "./components/shared/experience";
+import { ExperienceRibbon, ExperienceCountdown, ExperienceCarousel, ExperienceCard, ExperienceTimeline, ExperienceSectionHeader, ExperienceHero, ExperienceMentorPanel, ExperienceFeatureShowcase, ExperienceResourceGrid, ExperienceFooterPanels, ExperienceFooter } from "./components/shared/experience";
 import "./styles/shared/experienceSystem.css";
 import "./styles/exam/examHeader.css";
 import "./styles/exam/questionWorkspace.css";
@@ -4578,90 +4498,70 @@ isAdmin={isAdmin}
   ]}
 />
 
-<section className="footerPanels" id="contact">
-  <div className="footerPanelCard">
-      <span>ASPIRENEST SUPPORT</span>
-      <h3>Official guidance for CTET/TET learners.</h3>
-      <p>For courses, notes, mock tests, videos, roadmaps, payment, and access support, use the enquiry form.</p>
-      <strong>AspireNest Academy Helpdesk</strong>
-    </div>
+<ExperienceFooterPanels
+  id="contact"
+  support={{
+    badge: "ASPIRENEST SUPPORT",
+    title: "Official guidance for CTET/TET learners.",
+    description:
+      "For courses, notes, mock tests, videos, roadmaps, payment, and access support, use the enquiry form.",
+    strong: "AspireNest Academy Helpdesk",
+  }}
+  enquiryTitle="Need guidance? Send enquiry."
+  enquiryContent={
+    <>
+      <input
+        value={fullName}
+        onChange={(e) => setFullName(e.target.value)}
+        placeholder="Full Name"
+      />
 
-  <div className="footerPanelCard enquiryPanel">
-    <span>GET IN TOUCH</span>
-    <h3>Need guidance? Send enquiry.</h3>
+      <input
+        value={mobile}
+        onChange={(e) => setMobile(e.target.value)}
+        placeholder="Mobile Number"
+      />
 
-    <input
-      value={fullName}
-      onChange={(e) => setFullName(e.target.value)}
-      placeholder="Full Name"
-    />
+      <input
+        value={contactEmail}
+        onChange={(e) => setContactEmail(e.target.value)}
+        placeholder="Email"
+      />
 
-    <input
-      value={mobile}
-      onChange={(e) => setMobile(e.target.value)}
-      placeholder="Mobile Number"
-    />
+      <button type="button" onClick={handleContactSubmit}>
+        Submit Enquiry
+      </button>
+    </>
+  }
+  faqTitle="Quick answers before joining."
+  faqs={[
+    "Is this course bilingual?",
+    "Are mock tests included?",
+    "Can I use this on mobile?",
+    "Is pricing in INR?",
+  ]}
+/>
 
-    <input
-      value={contactEmail}
-      onChange={(e) => setContactEmail(e.target.value)}
-      placeholder="Email"
-    />
+<ExperienceFooter
+  brand="AspireNest Academy"
+  description="Premium bilingual CTET/TET learning platform for future educators in India."
+  links={[
+    { label: "Courses", onClick: () => navigate("/ctet-tet/courses") },
+    { label: "Notes", onClick: () => navigate("/ctet-tet/notes") },
+    { label: "Mock Tests", onClick: () => navigate("/ctet-tet/mock-tests") },
+    { label: "Videos / Live Classes", onClick: () => navigate("/ctet-tet/videos") },
+    { label: "AspirePath Roadmaps", onClick: () => navigate("/ctet-tet/roadmaps") },
+    { label: "Pricing", onClick: () => navigate("/ctet-tet/pricing") },
+  ]}
+  contact={[
+    "📞 +917304256002",
+    "📧 aspirenestacademy@gmail.com",
+    "📍 India",
+  ]}
+  copyright="© 2026 AspireNest Academy • All Rights Reserved"
+/>
 
-    <button type="button" onClick={handleContactSubmit}>
-      Submit Enquiry
-    </button>
-  </div>
 
-  <div className="footerPanelCard">
-    <span>FAQ</span>
-    <h3>Quick answers before joining.</h3>
-    <p>▶ Is this course bilingual?</p>
-    <p>▶ Are mock tests included?</p>
-    <p>▶ Can I use this on mobile?</p>
-    <p>▶ Is pricing in INR?</p>
-  </div>
-</section>
-
-    <footer className="premiumFooter">
-  <div className="footerGrid">
-    <div className="footerBrand">
-      <h2>AspireNest Academy</h2>
-
-      <p>
-        Premium bilingual CTET/TET learning platform
-        for future educators in India.
-      </p>
-    </div>
-
-    <div className="footerLinks">
-      <h3>Quick Links</h3>
-      <button onClick={() => navigate("/ctet-tet/courses")}>
-  Courses
-</button>
-<button onClick={() => navigate("/cdp")}>
-  CDP Module
-</button>
-<button onClick={() => navigate("/resources")}>
-  Free Resources
-</button>
-      <button onClick={() => navigate("/ctet-tet/pricing")}>
-  Pricing
-</button>
-    </div>
-
-    <div className="footerContact">
-      <h3>Contact</h3>
-      <p>📞 +917304256002</p>
-      <p>📧 aspirenestacademy@gmail.com</p>
-      <p>📍 India</p>
-    </div>
-  </div>
-
-  <div className="footerBottom">
-    © 2026 AspireNest Academy • All Rights Reserved
-  </div>
-</footer>
 
 </>
   }
@@ -4912,37 +4812,33 @@ isAdmin={isAdmin}
 <Route
   path="/contact"
   element={
-    <section className="footerPanels contactScreen">
-      <div className="footerPanelCard">
-          <span>ASPIRENEST SUPPORT</span>
-
-          <h3>Official guidance for CTET/TET learners.</h3>
-
-          <p>
-            For courses, notes, mock tests, videos, roadmaps, payment, and access support,
-            contact AspireNest Academy.
-          </p>
-
-          <strong>AspireNest Academy Helpdesk</strong>
-        </div>
-
-      <div className="footerPanelCard">
-        <span>CONTACT</span>
-
-        <h3>Let’s build your teaching career.</h3>
-
-        <p>Email: aspirenestacademy@gmail.com</p>
-
-        <p>WhatsApp Support Available</p>
-
-        <button
-          onClick={() => navigate("/")}
-          className="btnPrimary"
-        >
-          ← Back to Home
-        </button>
-      </div>
-    </section>
+    <ExperienceFooterPanels
+        id="contact"
+        support={{
+          badge: "ASPIRENEST SUPPORT",
+          title: "Official guidance for CTET/TET learners.",
+          description:
+            "For courses, notes, mock tests, videos, roadmaps, payment, and access support, contact AspireNest Academy.",
+          strong: "AspireNest Academy Helpdesk",
+        }}
+        enquiryTitle="Contact AspireNest Academy"
+        enquiryContent={
+          <>
+            <p>Email: aspirenestacademy@gmail.com</p>
+            <p>WhatsApp Support Available</p>
+            <button type="button" onClick={() => navigate("/")}>
+              ← Back to Home
+            </button>
+          </>
+        }
+        faqTitle="Support areas"
+        faqs={[
+          "Courses and batches",
+          "Notes and mock tests",
+          "Videos and roadmaps",
+          "Payment and access support",
+        ]}
+      />
   }
 />
 <Route
@@ -8877,7 +8773,6 @@ Premium
         <ul>
           <li>📘 Sample Notes</li>
           <li>📝 Free Mock Test</li>
-          <li>📅 7-Day Study Plan</li>
         </ul>
 
         <button onClick={() => navigate("/ctet-tet/notes")}>
@@ -9127,12 +9022,11 @@ Premium
             <ul>
               <li>📘 Sample Notes</li>
               <li>📝 Free Mock Test</li>
-              <li>📅 7-Day Study Plan</li>
             </ul>
 
             <button
   className="btnLink"
-  onClick={() => navigate("/resources")}
+  onClick={() => navigate("/ctet-tet/notes")}
 >
   Start Free
 </button>

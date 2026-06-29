@@ -15,3 +15,5 @@ export { default as ExperienceMentorPanel } from "./ExperienceMentorPanel.jsx";
 export { default as ExperienceFeatureShowcase } from "./ExperienceFeatureShowcase.jsx";
 
 export { default as ExperienceResourceGrid } from "./ExperienceResourceGrid.jsx";
+export { default as ExperienceFooterPanels } from "./ExperienceFooterPanels.jsx";
+export { default as ExperienceFooter } from "./ExperienceFooter.jsx";
