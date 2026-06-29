@@ -4022,53 +4022,56 @@ return (
 >
 
 </div>
-  <section className="ctetTopEntryExperience" aria-label="AspireNest CTET TET top entry experience">
+  
+    <div className="ctetExperienceStickyHeader">
+      <div className="ctetLockedNav">
+                <button type="button" className="ctetLockedBrand" onClick={() => navigate("/ctet-tet")}>
+                  <AspireNestLogo />
+                </button>
+      
+                <nav className="ctetLockedLinks" aria-label="CTET TET navigation">
+                  {[
+                    ["Learning Hub", "/ctet-tet"],
+                    ["Mock Tests", "/ctet-tet/mock-tests"],
+                    ["Notes", "/ctet-tet/notes"],
+                    ["Videos", "/ctet-tet/videos"],
+                    ["Current Affairs", "/ctet-tet/current-affairs"],
+                    ["Roadmaps", "/ctet-tet/roadmaps"],
+                    ["Pricing", "/ctet-tet/pricing"],
+                  ].map(([label, url]) => (
+                    <button type="button" key={label} onClick={() => navigate(url)}>
+                      {label}
+                      {label === "Pricing" ? <em>Premium</em> : null}
+                    </button>
+                  ))}
+                </nav>
+      
+                <div className="ctetLockedTools">
+                  <button type="button" className="ctetLockedSearch" onClick={() => navigate("/ctet-tet/courses")}>
+                    <span>⌕</span>
+                    Search anything...
+                    <kbd>⌘ K</kbd>
+                  </button>
+                        <button
+                    type="button"
+                    className="ctetLockedAccount"
+                    onClick={() => navigate(user ? (isAdmin(user) ? "/admin" : "/student-dashboard") : "/login")}
+                  >
+                    <i />
+                    <span>
+                      <strong>{user ? (isAdmin(user) ? "Admin" : "Student") : "Login"}</strong>
+                      <small>{user ? (isAdmin(user) ? "Premium Access" : "Learning Access") : "Start Learning"}</small>
+                    </span>
+                    <b>{user ? (isAdmin(user) ? "AN" : "ST") : "IN"}</b>
+                  </button>
+                </div>
+              </div>
+    </div>
+
+    <section className="ctetTopEntryExperience" aria-label="AspireNest CTET TET top entry experience">
     <div className="ctetTopEntryShell">
       
-        <div className="ctetLockedNav">
-          <button type="button" className="ctetLockedBrand" onClick={() => navigate("/ctet-tet")}>
-            <AspireNestLogo />
-          </button>
-
-          <nav className="ctetLockedLinks" aria-label="CTET TET navigation">
-            {[
-              ["Learning Hub", "/ctet-tet"],
-              ["Mock Tests", "/ctet-tet/mock-tests"],
-              ["Notes", "/ctet-tet/notes"],
-              ["Videos", "/ctet-tet/videos"],
-              ["Current Affairs", "/ctet-tet/current-affairs"],
-              ["Roadmaps", "/ctet-tet/roadmaps"],
-              ["Pricing", "/ctet-tet/pricing"],
-            ].map(([label, url]) => (
-              <button type="button" key={label} onClick={() => navigate(url)}>
-                {label}
-                {label === "Pricing" ? <em>Premium</em> : null}
-              </button>
-            ))}
-          </nav>
-
-          <div className="ctetLockedTools">
-            <button type="button" className="ctetLockedSearch" onClick={() => navigate("/ctet-tet/courses")}>
-              <span>⌕</span>
-              Search anything...
-              <kbd>⌘ K</kbd>
-            </button>
-
-            <button
-              type="button"
-              className="ctetLockedAccount"
-              onClick={() => navigate(user ? (isAdmin(user) ? "/admin" : "/student-dashboard") : "/login")}
-            >
-              <i />
-              <span>
-                <strong>{user ? (isAdmin(user) ? "Admin" : "Student") : "Login"}</strong>
-                <small>{user ? (isAdmin(user) ? "Premium Access" : "Learning Access") : "Start Learning"}</small>
-              </span>
-              <b>{user ? (isAdmin(user) ? "AN" : "ST") : "IN"}</b>
-            </button>
-          </div>
-        </div>
-
+        
 <div className="ctetHeroCommandGrid">
         <div className="ctetHeroStory">
           <div className="ctetTrustBadge">
@@ -4114,10 +4117,10 @@ return (
 
           <div className="ctetHeroBenefitStrip">
             {[
-              ["🌐", "Bilingual Learning", "Hindi & English"],
-              ["👥", "Expert Faculty", "CTET/TET Specialists"],
-              ["🎯", "Smart Practice", "Mocks & Analytics"],
-              ["🛡️", "Structured Progress", "Track. Improve. Succeed."],
+              ["🌐", "Bilingual Content", "Hindi + English"],
+              ["👥", "Expert Educators", "CTET/TET Experts"],
+              ["🎯", "Exam-Focused", "Selection-ready prep"],
+              ["🛡️", "Premium Support", "Guidance when needed"],
             ].map(([icon, title, text]) => (
               <div className="ctetHeroBenefit" key={title}>
                 <span>{icon}</span>
