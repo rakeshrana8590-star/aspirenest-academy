@@ -11,3 +11,5 @@ export { default as ExperienceCarousel } from "./ExperienceCarousel.jsx";
 export { default as ExperienceHero } from "./ExperienceHero.jsx";
 
 export { default as ExperienceMentorPanel } from "./ExperienceMentorPanel.jsx";
+
+export { default as ExperienceFeatureShowcase } from "./ExperienceFeatureShowcase.jsx";

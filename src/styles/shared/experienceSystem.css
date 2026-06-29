@@ -1033,3 +1033,177 @@ button.experienceHeroQuickCard {
     width: 100%;
   }
 }
+
+
+/* Shared Premium Feature Showcase */
+
+.experienceFeatureShowcase {
+  width: min(1220px, calc(100% - 36px));
+  margin: 54px auto 0;
+  padding: clamp(32px, 5vw, 62px);
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  gap: 30px;
+  align-items: center;
+  border-radius: 40px;
+  background:
+    radial-gradient(circle at top left, rgba(249, 115, 22, 0.14), transparent 32%),
+    linear-gradient(135deg, #ffffff, #fff7ed);
+  border: 1px solid rgba(251, 146, 60, 0.18);
+  box-shadow: 0 30px 90px rgba(15, 23, 42, 0.09);
+}
+
+.experienceFeatureBadge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 9px 14px;
+  border-radius: 999px;
+  color: #9a3412;
+  background: #ffedd5;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.experienceFeatureContent h2 {
+  margin: 16px 0 0;
+  color: #0f172a;
+  font-size: clamp(36px, 5vw, 62px);
+  line-height: 0.98;
+  letter-spacing: -0.06em;
+}
+
+.experienceFeatureContent p {
+  margin: 18px 0 0;
+  color: #64748b;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.experienceFeatureList {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.experienceFeatureItem {
+  padding: 18px;
+  border-radius: 22px;
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  font-weight: 900;
+}
+
+.experienceFeatureContent button {
+  margin-top: 26px;
+  min-height: 50px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 999px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 18px 42px rgba(249, 115, 22, 0.24);
+}
+
+.experienceFeatureCard {
+  position: relative;
+  overflow: hidden;
+  min-height: 320px;
+  padding: 30px;
+  border-radius: 34px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.18);
+}
+
+.experienceFeatureGlow {
+  position: absolute;
+  inset: -80px -80px auto auto;
+  width: 220px;
+  height: 220px;
+  border-radius: 999px;
+  background: rgba(249, 115, 22, 0.32);
+  filter: blur(12px);
+}
+
+.experienceFeatureCard h3,
+.experienceFeatureCard > *:not(.experienceFeatureGlow) {
+  position: relative;
+  z-index: 2;
+}
+
+.experienceFeatureCard h3 {
+  margin: 0;
+  font-size: 26px;
+  letter-spacing: -0.04em;
+}
+
+.experienceFeatureProgress {
+  margin-top: 26px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #cbd5e1;
+}
+
+.experienceFeatureProgress strong {
+  color: #ffffff;
+}
+
+.experienceFeatureBar {
+  position: relative;
+  z-index: 2;
+  height: 12px;
+  margin-top: 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+  overflow: hidden;
+}
+
+.experienceFeatureBar div {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(135deg, #f97316, #facc15);
+}
+
+.experienceFeatureMiniGrid {
+  position: relative;
+  z-index: 2;
+  margin-top: 26px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.experienceFeatureMiniCard {
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.12);
+  font-weight: 900;
+}
+
+@media (max-width: 980px) {
+  .experienceFeatureShowcase,
+  .experienceFeatureList,
+  .experienceFeatureMiniGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .experienceFeatureShowcase {
+    width: calc(100% - 28px);
+    margin-top: 28px;
+    padding: 28px 20px;
+    border-radius: 28px;
+  }
+
+  .experienceFeatureContent button {
+    width: 100%;
+  }
+}

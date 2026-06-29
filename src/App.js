@@ -228,7 +228,7 @@ import {
 } from "./components/exam/mockTestImportUtils.js";
 import './style.css';
 import "./styles/public/publicRoutes.css";
-import { ExperienceRibbon, ExperienceCountdown, ExperienceCarousel, ExperienceCard, ExperienceTimeline, ExperienceSectionHeader, ExperienceHero, ExperienceMentorPanel } from "./components/shared/experience";
+import { ExperienceRibbon, ExperienceCountdown, ExperienceCarousel, ExperienceCard, ExperienceTimeline, ExperienceSectionHeader, ExperienceHero, ExperienceMentorPanel, ExperienceFeatureShowcase } from "./components/shared/experience";
 import "./styles/shared/experienceSystem.css";
 import "./styles/exam/examHeader.css";
 import "./styles/exam/questionWorkspace.css";
@@ -4511,61 +4511,29 @@ isAdmin={isAdmin}
 </section>
 )}
 
-<section className="premium" id="premium-section">
-        <div className="premiumLeft">
-          <span className="premiumBadge">PREMIUM LEARNING EXPERIENCE</span>
-
-          <h2>
-            India’s Smartest
-            <br />
-            CTET/TET Preparation Platform
-          </h2>
-
-          <p>
-            AI-powered visual learning, bilingual notes, premium mock tests,
-            revision systems and mentor guidance for serious aspirants.
-          </p>
-
-          <div className="premiumFeatures">
-            <div className="feature">✅ Visual Learning Notes</div>
-
-            <div className="feature">✅ Full Mock Test Series</div>
-
-            <div className="feature">✅ Smart Revision System</div>
-
-            <div className="feature">✅ Hindi + English Support</div>
-          </div>
-
-          <button onClick={handlePremiumSectionAccess}>
-  Explore Premium
-</button>
-        </div>
-
-        <div className="premiumCard">
-          <div className="glow"></div>
-
-          <h3>CTET Master Dashboard</h3>
-
-          <div className="dashboardStat">
-            <span>Course Progress</span>
-            <strong>82%</strong>
-          </div>
-
-          <div className="dashboardBar">
-            <div className="dashboardFill"></div>
-          </div>
-
-          <div className="dashboardGrid">
-            <div className="miniCard">📘 150+ Notes</div>
-
-            <div className="miniCard">🎯 50+ Tests</div>
-
-            <div className="miniCard">🧠 AI Revision</div>
-
-            <div className="miniCard">🏆 Top Scores</div>
-          </div>
-        </div>
-      </section>
+<ExperienceFeatureShowcase
+  id="premium-section"
+  badge="PREMIUM LEARNING EXPERIENCE"
+  title="India’s Smartest CTET/TET Preparation Platform"
+  description="AI-powered visual learning, bilingual notes, premium mock tests, revision systems and mentor guidance for serious aspirants."
+  features={[
+    "✅ Visual Learning Notes",
+    "✅ Full Mock Test Series",
+    "✅ Smart Revision System",
+    "✅ Hindi + English Support",
+  ]}
+  actionLabel="Explore Premium"
+  onAction={handlePremiumSectionAccess}
+  cardTitle="CTET Master Dashboard"
+  progressLabel="Course Progress"
+  progressValue="82%"
+  miniCards={[
+    "📘 150+ Notes",
+    "🎯 50+ Tests",
+    "🧠 AI Revision",
+    "🏆 Top Scores",
+  ]}
+/>
 
 <section className="freeResources">
   <div className="container">
