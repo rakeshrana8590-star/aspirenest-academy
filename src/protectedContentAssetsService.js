@@ -90,7 +90,7 @@ export const buildProtectedContentAssetPayload = (
     contentType: cleanString(contentItem.contentType),
     planType: cleanString(contentItem.planType || "FREE"),
     course: cleanString(contentItem.course || "CTET_TET"),
-    status: cleanString(metadata.status || contentItem.status || "draft"),
+    status: cleanString(metadata.status || contentItem.status || "draft").toLowerCase(),
     requiredEntitlementId,
     urls,
     updatedAt: serverTimestamp(),

@@ -2973,6 +2973,94 @@ subjectName:
     }
   };
 
+  const handleBackfillProtectedNotesAssets = async () => {
+    const confirmSync = window.confirm(
+      "Sync existing Notes PDF URLs into protectedContentAssets?\n\n" +
+        "This will not remove legacy URLs yet.\n" +
+        "Existing protected assets will be safely updated."
+    );
+
+    if (!confirmSync) return;
+
+    try {
+      const snapshot = await getDocs(collection(db, "contentItems"));
+      const noteItems = snapshot.docs
+        .map((docItem) => ({
+          id: docItem.id,
+          ...docItem.data(),
+        }))
+        .filter((item) => {
+          const section = String(
+            item.section || item.contentSection || item.type || ""
+          ).toLowerCase();
+          const itemType = String(
+            item.itemType || item.contentType || ""
+          ).toLowerCase();
+          const pdfUrl = String(
+            item.pdfUrl || item.fileUrl || item.pdf || item.url || ""
+          ).trim();
+
+          return Boolean(
+            pdfUrl &&
+              (section.includes("note") || itemType.includes("note"))
+          );
+        });
+
+      if (!noteItems.length) {
+        alert("No Notes PDF URLs found for protected sync.");
+        return;
+      }
+
+      let syncedCount = 0;
+      let failedCount = 0;
+
+      for (const item of noteItems) {
+        const pdfUrl = String(
+          item.pdfUrl || item.fileUrl || item.pdf || item.url || ""
+        ).trim();
+
+        if (!item.id || !pdfUrl) {
+          continue;
+        }
+
+        try {
+          await saveProtectedContentAsset(
+            item.id,
+            {
+              ...item,
+              id: item.id,
+              pdfUrl,
+              fileUrl: item.fileUrl || pdfUrl,
+              section: item.section || "notes",
+              planType: item.planType || "FREE",
+              course: item.course || "CTET_TET",
+            },
+            {
+              actorEmail: user?.email || "admin",
+              source: "notes_protected_backfill",
+            }
+          );
+
+          syncedCount += 1;
+        } catch (error) {
+          failedCount += 1;
+          console.error("Protected notes PDF backfill failed:", item.id, error);
+        }
+      }
+
+      alert(
+        "Protected Notes PDF sync complete.\n\n" +
+          "Synced: " +
+          syncedCount +
+          "\nFailed: " +
+          failedCount
+      );
+    } catch (error) {
+      console.error("Protected notes PDF sync error:", error);
+      alert("Protected Notes PDF sync failed.");
+    }
+  };
+
   const handleDeleteLocalContentItem = async (itemId) => {
     try {
       await deleteDoc(
@@ -5671,6 +5759,7 @@ isAdmin={isAdmin}
         universalContent={universalContent}
         notesPlanFilter={notesPlanFilter}
         setNotesPlanFilter={setNotesPlanFilter}
+        onBackfillProtectedNotesAssets={handleBackfillProtectedNotesAssets}
         onEditNote={(item) => {
           setEditingNotesCmsId(item.id);
           setNotesCmsTitle(item.title || "");

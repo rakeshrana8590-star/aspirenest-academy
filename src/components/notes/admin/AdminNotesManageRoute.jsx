@@ -55,6 +55,7 @@ export default function AdminNotesManageRoute({
   setNotesPlanFilter = () => {},
   onEditNote,
   onDeleteNote,
+  onBackfillProtectedNotesAssets,
 }) {
   const navigate = useNavigate();
 
@@ -371,6 +372,16 @@ export default function AdminNotesManageRoute({
             >
               + Add Note PDF
             </button>
+
+            {typeof onBackfillProtectedNotesAssets === "function" ? (
+              <button
+                type="button"
+                className="adminNotesLaunchGhostBtn"
+                onClick={onBackfillProtectedNotesAssets}
+              >
+                🔒 Sync Protected PDFs
+              </button>
+            ) : null}
 
             <button
               type="button"
