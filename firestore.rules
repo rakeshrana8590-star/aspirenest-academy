@@ -438,6 +438,47 @@ service cloud.firestore {
         request.resource.data.updatedBy == request.auth.uid;
     }
 
+      function isRedeemDirectKeyAccessMatches(accessKeyId) {
+        let key = get(/databases/$(database)/documents/accessKeys/$(accessKeyId)).data;
+
+        return (key.productId == null || key.productId == "") &&
+          key.accessUntil != null &&
+          key.accessUntil != "" &&
+          request.resource.data.productId == key.productId &&
+          request.resource.data.course == key.course &&
+          request.resource.data.planType == key.planType &&
+          request.resource.data.scopeType == key.scopeType &&
+          request.resource.data.module == key.module &&
+          request.resource.data.itemType == key.itemType &&
+          request.resource.data.itemId == key.itemId &&
+          request.resource.data.itemIds == key.itemIds &&
+          request.resource.data.bundleId == key.bundleId &&
+          request.resource.data.accessUntil == key.accessUntil;
+      }
+
+      function isRedeemProductAccessMatches(accessKeyId) {
+        let key = get(/databases/$(database)/documents/accessKeys/$(accessKeyId)).data;
+        let product = get(/databases/$(database)/documents/accessProducts/$(key.productId)).data;
+
+        return key.productId is string &&
+          key.productId != "" &&
+          exists(/databases/$(database)/documents/accessProducts/$(key.productId)) &&
+          product.status == "active" &&
+          product.isActive != false &&
+          request.resource.data.productId == key.productId &&
+          request.resource.data.course == product.course &&
+          request.resource.data.planType == product.planType &&
+          request.resource.data.scopeType == product.scopeType &&
+          request.resource.data.module == product.module &&
+          request.resource.data.itemType == product.itemType &&
+          request.resource.data.itemId == product.itemId &&
+          request.resource.data.itemIds == product.itemIds &&
+          product.accessUntil != null &&
+          product.accessUntil != "" &&
+          request.resource.data.bundleId == product.bundleId &&
+          request.resource.data.accessUntil == product.accessUntil;
+      }
+
     function isRedeemStudentAccessCreate() {
       return isSignedIn() &&
         request.resource.data.keys().hasOnly([
@@ -503,7 +544,11 @@ service cloud.firestore {
           get(/databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)).data.assignedEmail == null ||
           get(/databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)).data.assignedEmail == "" ||
           get(/databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)).data.assignedEmail == request.auth.token.email
-        );
+          ) &&
+          (
+            isRedeemDirectKeyAccessMatches(request.resource.data.accessKeyId) ||
+            isRedeemProductAccessMatches(request.resource.data.accessKeyId)
+          );
     }
 
     function isInviteOwnRecord() {
