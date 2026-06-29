@@ -3090,10 +3090,44 @@ subjectName:
           editingCmsId,
           payload
         );
+
+        if (
+          String(cmsSection || "").trim() === CONTENT_SECTIONS.NOTES &&
+          cmsFileUrl.trim()
+        ) {
+          await saveProtectedContentAsset(
+            editingCmsId,
+            {
+              id: editingCmsId,
+              ...payload,
+            },
+            {
+              actorEmail: user?.email || "admin",
+              source: "universal_notes_cms",
+            }
+          );
+        }
   
         alert("Universal content updated ✅");
       } else {
-        await addContentItem(payload);
+        const contentId = await addContentItem(payload);
+
+          if (
+            String(cmsSection || "").trim() === CONTENT_SECTIONS.NOTES &&
+            cmsFileUrl.trim()
+          ) {
+            await saveProtectedContentAsset(
+              contentId,
+              {
+                id: contentId,
+                ...payload,
+              },
+              {
+                actorEmail: user?.email || "admin",
+                source: "universal_notes_cms",
+              }
+            );
+          }
   
         alert("Universal content published ✅");
       }
