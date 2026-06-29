@@ -4509,13 +4509,6 @@ return (
   </div>
 )}
 
-<AppDashboard
-setActiveSection={setActiveSection}
-setActiveAdminTab={setActiveAdminTab}
-user={user}
-isAdmin={isAdmin}
-/>
-
 {ctetExperienceEvents.length > 0 ? (
   <section className="ctetExperienceTv">
     <div className="experienceSectionHeader">
@@ -4547,6 +4540,13 @@ isAdmin={isAdmin}
     />
   </section>
 ) : null}
+
+  <AppDashboard
+setActiveSection={setActiveSection}
+setActiveAdminTab={setActiveAdminTab}
+user={user}
+isAdmin={isAdmin}
+/>
 
 {ctetUpcomingExperienceEvents.length > 0 ? (
   <section className="ctetThisWeekSection">
