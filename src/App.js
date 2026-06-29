@@ -228,7 +228,7 @@ import {
 } from "./components/exam/mockTestImportUtils.js";
 import './style.css';
 import "./styles/public/publicRoutes.css";
-import { ExperienceRibbon, ExperienceCountdown, ExperienceCarousel, ExperienceCard } from "./components/shared/experience";
+import { ExperienceRibbon, ExperienceCountdown, ExperienceCarousel, ExperienceCard, ExperienceTimeline, ExperienceSectionHeader } from "./components/shared/experience";
 import "./styles/shared/experienceSystem.css";
 import "./styles/exam/examHeader.css";
 import "./styles/exam/questionWorkspace.css";
@@ -285,6 +285,7 @@ export default function App() {
   const ctetExperienceEnabled = location.pathname === "/ctet-tet";
   const {
     events: ctetExperienceEvents,
+    upcomingEvents: ctetUpcomingExperienceEvents,
     featuredEvent: ctetFeaturedExperienceEvent,
     loading: ctetExperienceLoading,
   } = useExperienceEvents({
@@ -4543,6 +4544,49 @@ isAdmin={isAdmin}
           }}
         />
       )}
+    />
+  </section>
+) : null}
+
+{ctetUpcomingExperienceEvents.length > 0 ? (
+  <section className="ctetThisWeekSection">
+    <ExperienceSectionHeader
+      badge="THIS WEEK"
+      title="This Week at AspireNest"
+      description="A focused weekly learning plan with upcoming live sessions, mock tests, workshops, and important academic events."
+      align="left"
+    />
+
+    <ExperienceTimeline
+      items={ctetUpcomingExperienceEvents.slice(0, 5).map((event) => {
+        const rawStartAt =
+          typeof event.startAt?.toDate === "function"
+            ? event.startAt.toDate()
+            : event.startAt || null;
+
+        const startDate = rawStartAt ? new Date(rawStartAt) : null;
+        const time =
+          startDate && !Number.isNaN(startDate.getTime())
+            ? startDate.toLocaleString("en-IN", {
+                weekday: "short",
+                day: "2-digit",
+                month: "short",
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : "Schedule soon";
+
+        return {
+          id: event.id,
+          time,
+          badge: event.typeLabel,
+          tone: event.status === "live" ? "live" : "soft",
+          title: event.title,
+          description: event.description || "AspireNest learning event for CTET/TET aspirants.",
+          meta: [event.subject, event.chapter, event.planType].filter(Boolean).join(" • "),
+        };
+      })}
+      emptyText="Weekly schedule will appear here soon."
     />
   </section>
 ) : null}
