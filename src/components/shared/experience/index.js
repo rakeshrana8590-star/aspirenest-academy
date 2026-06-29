@@ -7,3 +7,5 @@ export { default as ExperienceRibbon } from "./ExperienceRibbon.jsx";
 export { default as ExperienceCountdown } from "./ExperienceCountdown.jsx";
 export { default as ExperienceTimeline } from "./ExperienceTimeline.jsx";
 export { default as ExperienceCarousel } from "./ExperienceCarousel.jsx";
+
+export { default as ExperienceHero } from "./ExperienceHero.jsx";

@@ -228,7 +228,7 @@ import {
 } from "./components/exam/mockTestImportUtils.js";
 import './style.css';
 import "./styles/public/publicRoutes.css";
-import { ExperienceRibbon, ExperienceCountdown, ExperienceCarousel, ExperienceCard, ExperienceTimeline, ExperienceSectionHeader } from "./components/shared/experience";
+import { ExperienceRibbon, ExperienceCountdown, ExperienceCarousel, ExperienceCard, ExperienceTimeline, ExperienceSectionHeader, ExperienceHero } from "./components/shared/experience";
 import "./styles/shared/experienceSystem.css";
 import "./styles/exam/examHeader.css";
 import "./styles/exam/questionWorkspace.css";
@@ -4102,139 +4102,66 @@ return (
 >
 
 </div>
-  <section className="hero">
-  <div className="heroContent">
-    <div className="taglineCard">
-      <div className="taglineIcon">🏆</div>
-
-      <div>
-        <h3>Where Aspirations Turn Into Selections</h3>
+  <ExperienceHero
+  badge="CTET • TETs"
+  tagline="Where Aspirations Turn Into Selections"
+  taglineText="Empowering students with the right guidance, resources and practice."
+  title="Crack CTET/TETs with Smart Learning"
+  description="Premium bilingual CTET/TET preparation with mentor guidance, smart mock tests, visual notes, live updates, and structured learning."
+  actions={[
+    {
+      label: "Start Learning",
+      variant: "primary",
+      onClick: () => navigate("/learning"),
+    },
+    ...(user
+      ? [
+          {
+            label: isAdmin(user) ? "Admin Dashboard" : "My Dashboard",
+            onClick: () => navigate(isAdmin(user) ? "/admin" : "/student-dashboard"),
+          },
+        ]
+      : []),
+    {
+      label: "Free Notes",
+      onClick: () => navigate("/ctet-tet/notes"),
+    },
+  ]}
+  stats={[
+    { value: "CTET", label: "Focused prep" },
+    { value: "Live", label: "Event heartbeat" },
+    { value: "Premium", label: "Learning system" },
+  ]}
+  quickCard={
+    user ? (
+      <button
+        type="button"
+        className="experienceHeroQuickCard"
+        onClick={() => navigate(isAdmin(user) ? "/admin" : "/student-dashboard")}
+      >
+        <span>{isAdmin(user) ? "ADMIN ACCESS" : "STUDENT ACCESS"}</span>
+        <h3>
+          {isAdmin(user)
+            ? "Admin Command Center"
+            : "Welcome back, " + (user?.displayName || user?.email?.split("@")[0] || "Student")}
+        </h3>
         <p>
-          Empowering students with the right guidance,
-          resources and practice.
+          {isAdmin(user)
+            ? "Manage students, payments, notes, mock tests, announcements and analytics from one workspace."
+            : "Continue learning, track progress, access tests, analytics and premium resources."}
         </p>
-      </div>
-    </div>
-
-    <span className="badge">CTET • TETs</span>
-
-    <h2>
-      Crack CTET/TETs
-      <br />
-      with Smart Learning
-    </h2>
-
-    <p>Bilingual preparation platform for Indian students.</p>
-    <div className="heroButtons">
-    <button onClick={() => navigate("/learning")}>
-  Start Learning
-</button>
-{user && (
-  <button
-    onClick={() =>
-      navigate(isAdmin(user) ? "/admin" : "/student-dashboard")
-    }
-  >
-    {isAdmin(user)
-      ? "Admin Dashboard"
-      : "My Dashboard"}
-  </button>
-)}
-<button
-  onClick={() => navigate("/ctet-tet/notes")}
->
-  Free Notes
-</button>
-</div>
-</div>
-
-{false && (
-  <div className="heroStats">
-    <div className="statCard">
-      <h3>5K+</h3>
-      <p>Students</p>
-    </div>
-
-    <div className="statCard">
-      <h3>120+</h3>
-      <p>Visual Notes</p>
-    </div>
-
-    <div className="statCard">
-      <h3>50+</h3>
-      <p>Mock Tests</p>
-    </div>
-
-    <div className="statCard">
-      <h3>92%</h3>
-      <p>Success Rate</p>
-    </div>
-  </div>
-)}
-
-{user && (
-  <div
-    className="dashboardQuickCard"
-    onClick={() =>
-      navigate(isAdmin(user) ? "/admin" : "/student-dashboard")
-    }
-  >
-    <div className="dashboardQuickLeft">
-      <span className="dashboardQuickBadge">
-        {isAdmin(user) ? "ADMIN ACCESS" : "STUDENT ACCESS"}
-      </span>
-
-      <h3>
-        {isAdmin(user)
-          ? "Admin Dashboard"
-          : `Welcome back, ${
-              user?.displayName ||
-              user?.email?.split("@")[0] ||
-              "Student"
-            }`}
-      </h3>
-
-      <p>
-  {isAdmin(user)
-    ? "Manage students, payments, notes, mock tests, announcements and platform analytics from one admin workspace."
-    : "Continue your learning journey, track progress, access tests, analytics and premium resources."}
-</p>
-
-      <button>
-        {isAdmin(user)
-          ? "Open Admin Dashboard"
-          : "Open My Dashboard"}
+        <strong>{isAdmin(user) ? "Open Admin Dashboard →" : "Open My Dashboard →"}</strong>
       </button>
-    </div>
-
-    <div className="dashboardQuickRight">
-      📊
-    </div>
-  </div>
-)}
-
-{false && (
-  <div className="card heroGoalCard">
-    <div className="goalTop">
-      <div className="goalIcon">🎯</div>
-
-      <div>
-        <h3>Today's Goal</h3>
-        <p>Child Development Practice</p>
+    ) : (
+      <div className="experienceHeroQuickCard">
+        <span>PREMIUM CTET/TET SYSTEM</span>
+        <h3>Learn with structure, practice with confidence.</h3>
+        <p>Live updates, weekly learning plan, mock tests, notes, and premium classroom experience.</p>
+        <strong>Built for serious aspirants →</strong>
       </div>
-    </div>
-
-    <div className="progress">
-      <div className="fill"></div>
-    </div>
-
-    <span>
-      <strong>75%</strong> Completed
-    </span>
-  </div>
-)}
-
-</section>
+    )
+  }
+/>
 
 {ctetFeaturedExperienceEvent ? (
   <div className="ctetExperienceLiveRibbon">
