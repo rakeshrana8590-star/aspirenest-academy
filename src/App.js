@@ -215,6 +215,7 @@ import { useExamAttemptState } from "./components/exam/useExamAttemptState.js";
 import { useExamTimer } from "./components/exam/useExamTimer.js";
 import { useExamSecurity } from "./components/exam/useExamSecurity.js";
 import { useMockTestActionMenu } from "./components/exam/useMockTestActionMenu.js";
+import useExperienceEvents from "./experience/useExperienceEvents.js";
 import {
   downloadMockTestXlsxTemplate,
   downloadMockTestCsvTemplate,
@@ -227,6 +228,7 @@ import {
 } from "./components/exam/mockTestImportUtils.js";
 import './style.css';
 import "./styles/public/publicRoutes.css";
+import { ExperienceRibbon, ExperienceCountdown } from "./components/shared/experience";
 import "./styles/shared/experienceSystem.css";
 import "./styles/exam/examHeader.css";
 import "./styles/exam/questionWorkspace.css";
@@ -280,6 +282,20 @@ export default function App() {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const ctetExperienceEnabled = location.pathname === "/ctet-tet";
+  const {
+    featuredEvent: ctetFeaturedExperienceEvent,
+    loading: ctetExperienceLoading,
+  } = useExperienceEvents({
+    enabled: ctetExperienceEnabled,
+    maxCount: 10,
+  });
+
+  const ctetFeaturedExperienceStartAt =
+    typeof ctetFeaturedExperienceEvent?.startAt?.toDate === "function"
+      ? ctetFeaturedExperienceEvent.startAt.toDate()
+      : ctetFeaturedExperienceEvent?.startAt || null;
+
   const isExamAttemptPage = location.pathname.includes(
     "/ctet-tet/mock-tests/attempt/"
   );
@@ -4217,6 +4233,39 @@ return (
 )}
 
 </section>
+
+{ctetFeaturedExperienceEvent ? (
+  <div className="ctetExperienceLiveRibbon">
+    <ExperienceRibbon
+      badge={ctetFeaturedExperienceEvent.status === "live" ? "LIVE NOW" : "UPCOMING"}
+      title={ctetFeaturedExperienceEvent.title}
+      description={ctetFeaturedExperienceEvent.description || "Join the latest AspireNest CTET/TET learning event."}
+      meta={[ctetFeaturedExperienceEvent.typeLabel, ctetFeaturedExperienceEvent.subject, ctetFeaturedExperienceEvent.planType].filter(Boolean).join(" • ")}
+      actionLabel={ctetFeaturedExperienceEvent.cta?.label}
+      tone={ctetFeaturedExperienceEvent.status === "live" ? "live" : "default"}
+      onAction={() => {
+        const targetUrl = ctetFeaturedExperienceEvent.cta?.url;
+        if (targetUrl) navigate(targetUrl);
+      }}
+    />
+    {ctetFeaturedExperienceStartAt ? (
+      <ExperienceCountdown
+        targetAt={ctetFeaturedExperienceStartAt}
+        label="Starts in"
+        completedLabel={ctetFeaturedExperienceEvent.status === "live" ? "Live now" : "Started"}
+      />
+    ) : null}
+  </div>
+) : ctetExperienceLoading ? (
+  <div className="ctetExperienceLiveRibbon">
+    <ExperienceRibbon
+      badge="LOADING"
+      title="Checking latest AspireNest event"
+      description="Fetching live class, mock test, and event updates."
+      tone="default"
+    />
+  </div>
+) : null}
 
 <section className="mentor" id="about">
 
