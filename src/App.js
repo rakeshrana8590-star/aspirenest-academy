@@ -228,7 +228,7 @@ import {
 } from "./components/exam/mockTestImportUtils.js";
 import './style.css';
 import "./styles/public/publicRoutes.css";
-import { ExperienceRibbon, ExperienceCountdown } from "./components/shared/experience";
+import { ExperienceRibbon, ExperienceCountdown, ExperienceCarousel, ExperienceCard } from "./components/shared/experience";
 import "./styles/shared/experienceSystem.css";
 import "./styles/exam/examHeader.css";
 import "./styles/exam/questionWorkspace.css";
@@ -284,6 +284,7 @@ export default function App() {
   const navigate = useNavigate();
   const ctetExperienceEnabled = location.pathname === "/ctet-tet";
   const {
+    events: ctetExperienceEvents,
     featuredEvent: ctetFeaturedExperienceEvent,
     loading: ctetExperienceLoading,
   } = useExperienceEvents({
@@ -4505,12 +4506,46 @@ return (
       </div>
     </div>
   </div>
-)}<AppDashboard
+)}
+
+<AppDashboard
 setActiveSection={setActiveSection}
 setActiveAdminTab={setActiveAdminTab}
 user={user}
 isAdmin={isAdmin}
 />
+
+{ctetExperienceEvents.length > 0 ? (
+  <section className="ctetExperienceTv">
+    <div className="experienceSectionHeader">
+      <div>
+        <span className="experienceSectionEyebrow">ASPIRENEST TV</span>
+        <h2>Live Learning Stream</h2>
+        <p>Upcoming classes, mega mocks, workshops, and important AspireNest learning updates in one premium feed.</p>
+      </div>
+    </div>
+
+    <ExperienceCarousel
+      items={ctetExperienceEvents.slice(0, 6)}
+      renderItem={(event) => (
+        <ExperienceCard
+          key={event.id || event.title}
+          eyebrow={event.status === "live" ? "LIVE NOW" : event.typeLabel}
+          title={event.title}
+          text={event.description || "Open the latest AspireNest learning event."}
+          icon={event.status === "live" ? "🔴" : "▶️"}
+          meta={[event.subject, event.chapter, event.planType].filter(Boolean).join(" • ")}
+          actionLabel={event.cta?.label || "View Details"}
+          tone={event.status === "live" ? "live" : "default"}
+          onClick={() => {
+            const targetUrl = event.cta?.url;
+            if (targetUrl) navigate(targetUrl);
+          }}
+        />
+      )}
+    />
+  </section>
+) : null}
 
 {(leaderboard || []).length > 0 && (
 <section className="leaderboardSection">
