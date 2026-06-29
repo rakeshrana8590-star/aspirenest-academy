@@ -520,3 +520,75 @@ button.experienceCard {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* CTET/TET Experience Launch Pack Sections */
+
+.ctetExperienceLiveRibbon {
+  width: 100%;
+  padding: 6px 0 10px;
+  background:
+    radial-gradient(circle at top right, rgba(249, 115, 22, 0.12), transparent 34%),
+    linear-gradient(180deg, rgba(255, 247, 237, 0.2), rgba(255, 255, 255, 0));
+}
+
+.ctetExperienceLiveRibbon .experienceRibbon {
+  margin-top: 16px;
+  margin-bottom: 14px;
+}
+
+.ctetExperienceLiveRibbon .experienceCountdown {
+  margin-top: 0;
+}
+
+.ctetExperienceTv,
+.ctetThisWeekSection,
+.ctetWhatsNewSection {
+  width: 100%;
+  padding: 56px 0;
+  background:
+    radial-gradient(circle at top left, rgba(251, 146, 60, 0.1), transparent 30%),
+    linear-gradient(180deg, rgba(255,255,255,0), rgba(255, 247, 237, 0.54));
+}
+
+.ctetExperienceTv + .ctetThisWeekSection,
+.ctetThisWeekSection + .ctetWhatsNewSection {
+  padding-top: 28px;
+}
+
+.experienceCardGrid {
+  width: min(1180px, calc(100% - 36px));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.ctetExperienceTv .experienceCarousel {
+  margin-top: 8px;
+}
+
+.ctetThisWeekSection .experienceTimeline {
+  margin-top: 10px;
+}
+
+.ctetWhatsNewSection .experienceCardGrid {
+  margin-top: 10px;
+}
+
+@media (max-width: 900px) {
+  .experienceCardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .ctetExperienceTv,
+  .ctetThisWeekSection,
+  .ctetWhatsNewSection {
+    padding: 40px 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .experienceCardGrid {
+    width: calc(100% - 32px);
+  }
+}
