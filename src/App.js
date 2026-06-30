@@ -53,6 +53,7 @@ import AuthRoute from "./components/public/AuthRoute";
 
 
 import AppDashboard from "./components/AppDashboard.jsx";
+import CtetLiveContentCenter from "./components/ctet/CtetLiveContentCenter.jsx";
 import {
   StudentRoadmapHub, StudentRoadmapDetail, StudentRoadmapDay, MyAspirePath, } from "./components/roadmaps/StudentRoadmaps.jsx";
 
@@ -4371,6 +4372,13 @@ isAdmin={isAdmin}
   </div>
 </section>
 
+
+  <CtetLiveContentCenter
+    events={ctetExperienceEvents}
+    upcomingEvents={ctetUpcomingExperienceEvents}
+    loading={ctetExperienceLoading}
+    navigate={navigate}
+  />
 
 {(leaderboard || []).length > 0 && (
 <section className="leaderboardSection">
