@@ -4269,284 +4269,108 @@ return (
     </div>
   </section>
 
-<ExperienceMentorPanel
-  id="about"
-  badge="Meet Your Expert Educator"
-  title="Dr. Varsha D. Maru"
-  description="Learn from a Ph.D. qualified educator, I/C Principal, Assistant Professor, researcher, and CTET/TET mentor with strong expertise in Education, Psychology, Pedagogy, Teacher Training, and Digital Learning."
-  stats={[
-    { value: "Ph.D.", label: "Education" },
-    { value: "UGC-NET", label: "Education Qualified" },
-    { value: "CTET", label: "Paper II Qualified" },
-  ]}
-  quote="Concept clarity, practical pedagogy, bilingual explanation, and exam-focused preparation are at the heart of our teaching."
-  actions={[
-    {
-      label: "Explore Courses",
-      variant: "primary",
-      onClick: () => navigate("/ctet-tet/courses"),
-    },
-    {
-      label: "Contact Mentor",
-      onClick: () => setShowMentorProfile(true),
-    },
-    {
-      label: "View Full Profile",
-      onClick: () => setShowProfile(true),
-    },
-  ]}
-  avatar="VM"
-  profileTitle="Academic Profile"
-  profileSubtitle="Educator • Researcher • Academic Leader"
-  highlights={[
-    { label: "🏫 Current Role", text: "I/C Principal & Assistant Professor" },
-    { label: "🎓 Qualification", text: "Ph.D. in Education, M.Ed., M.A. Psychology" },
-    { label: "📚 Exam Expertise", text: "CTET Paper II Qualified, TAIT Qualified" },
-    { label: "🧠 Research Area", text: "Cyberbullying, Mental Health, Education & Psychology" },
-    { label: "🏆 Recognition", text: "Best Excellence Teacher Award" },
-    { label: "💻 Digital Learning", text: "Google Certified Educator, AI & NEP 2020 Training" },
-  ]}
-/>
-
-{showMentorProfile && (
-  <div className="mentorProfileOverlay">
-    <div className="mentorProfileModal">
-      <button
-        className="closeMentorProfile"
-        onClick={() => setShowMentorProfile(false)}
-      >
-        ×
-      </button>
-
-      <h2>Connect with your mentor</h2>
-
-      <h3>Dr. Varsha Dalpat Maru</h3>
-
-      <p>
-        <strong>
-          Founder & Academic Mentor
-        </strong>{" "}
-        — AspireNest Academy
-      </p>
-
-      <p>
-        “Guiding future educators with
-        knowledge, confidence, and the right
-        mentorship to transform aspirations
-        into success.”
-      </p>
-
-      <p>
-        <strong>📍 Location:</strong>
-        {" "}Mumbai, Maharashtra, India
-      </p>
-
-      <p>
-        <strong>📧 Email:</strong>
-        {" "}dr.varshamaru@gmail.com
-      </p>
-
-      <p>
-        <strong>📞 Phone:</strong>
-        {" "}+91 97736 92578
-      </p>
-
-      <p>
-        <strong>🔗 LinkedIn:</strong>
-        <br />
-        linkedin.com/in/dr-varsha-maru-4a71b614b
-      </p>
-
-      <p>
-        <strong>
-          🌐 Professional Portfolio:
-        </strong>
-        <br />
-        bold.pro/my/drvarshadalpatmaru
-      </p>
-    </div>
-  </div>
-)}
-
-{showProfile && (
-  <div
-  className="mentorProfileOverlay"
-    onClick={() => setShowProfile(false)}
-  >
-    <div
-     className="mentorProfileModal profileModal"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <button
-       className="closeMentorProfile"
-        onClick={() => setShowProfile(false)}
-      >
-        ✕
-      </button>
-
-      <h2>Professional Academic Profile</h2>
-
-      <h3>Dr. Varsha Dalpat Maru</h3>
-
-      <p className="profileTag">
-        Founder & Academic Mentor — AspireNest Academy
-      </p>
-
-      <p>
-        “Where Aspirations Turn Into Selections”
-      </p>
-
-      <div className="profileContent">
-
-        <h4>Professional Profile</h4>
-
-        <p>
-          Dr. Varsha Dalpat Maru is an accomplished educator,
-          academic leader, researcher, and mentor with
-          extensive experience in teacher education,
-          psychology, educational research, and academic leadership.
-        </p>
-
-        <p>
-          Currently serving as I/C Principal and Assistant
-          Professor at Humera Khan College of Education, Mumbai.
-        </p>
-
-        <h4>Academic Qualifications</h4>
-
-        <ul>
-          <li>Ph.D. in Education</li>
-          <li>UGC-NET Qualified – Education & Psychology</li>
-          <li>CTET Paper-II Qualified</li>
-          <li>TAIT Qualified</li>
-          <li>M.Ed. – Education</li>
-          <li>M.A. Psychology</li>
-          <li>Google Certified Educator</li>
-        </ul>
-
-        <h4>Research Areas</h4>
-
-        <p>
-          Cyberbullying, Mental Health, Educational Psychology,
-          Digital Education & Teacher Training.
-        </p>
-
-      </div>
-    </div>
-  </div>
-)}
-
-{ctetExperienceEvents.length > 0 ? (
-  <section className="ctetExperienceTv">
-    <div className="experienceSectionHeader">
-      <div>
-        <span className="experienceSectionEyebrow">ASPIRENEST TV</span>
-        <h2>Live Learning Stream</h2>
-        <p>Upcoming classes, mega mocks, workshops, and important AspireNest learning updates in one premium feed.</p>
-      </div>
-    </div>
-
-    <ExperienceCarousel
-      items={ctetExperienceEvents.slice(0, 6)}
-      renderItem={(event) => (
-        <ExperienceCard
-          key={event.id || event.title}
-          eyebrow={event.status === "live" ? "LIVE NOW" : event.typeLabel}
-          title={event.title}
-          text={event.description || "Open the latest AspireNest learning event."}
-          icon={event.status === "live" ? "🔴" : "▶️"}
-          meta={[event.subject, event.chapter, event.planType].filter(Boolean).join(" • ")}
-          actionLabel={event.cta?.label || "View Details"}
-          tone={event.status === "live" ? "live" : "default"}
-          onClick={() => {
-            const targetUrl = event.cta?.url;
-            if (targetUrl) navigate(targetUrl);
-          }}
-        />
-      )}
-    />
-  </section>
-) : null}
-
-  <AppDashboard
+<AppDashboard
 setActiveSection={setActiveSection}
 setActiveAdminTab={setActiveAdminTab}
 user={user}
 isAdmin={isAdmin}
 />
 
-{ctetUpcomingExperienceEvents.length > 0 ? (
-  <section className="ctetThisWeekSection">
-    <ExperienceSectionHeader
-      badge="THIS WEEK"
-      title="This Week at AspireNest"
-      description="A focused weekly learning plan with upcoming live sessions, mock tests, workshops, and important academic events."
-      align="left"
+
+<section className="ctetS3FreshMentorAuthority" id="about">
+  <div className="ctetS3FreshPhotoPanel" aria-label="Dr. Varsha mentor photo">
+    <div className="ctetS3FreshPhotoGlow" />
+    <img
+      className="ctetS3FreshPhoto"
+      src="/mentor-varsha.png"
+      alt="Dr. Varsha D. Maru"
+      loading="lazy"
     />
+  </div>
 
-    <ExperienceTimeline
-      items={ctetUpcomingExperienceEvents.slice(0, 5).map((event) => {
-        const rawStartAt =
-          typeof event.startAt?.toDate === "function"
-            ? event.startAt.toDate()
-            : event.startAt || null;
+  <div className="ctetS3FreshContentPanel">
+    <div className="ctetS3FreshTopLine">
+      <span>Mentor Authority Panel</span>
+      <b>Academic Profile</b>
+    </div>
 
-        const startDate = rawStartAt ? new Date(rawStartAt) : null;
-        const time =
-          startDate && !Number.isNaN(startDate.getTime())
-            ? startDate.toLocaleString("en-IN", {
-                weekday: "short",
-                day: "2-digit",
-                month: "short",
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-            : "Schedule soon";
+    <h2>Dr. Varsha D. Maru</h2>
 
-        return {
-          id: event.id,
-          time,
-          badge: event.typeLabel,
-          tone: event.status === "live" ? "live" : "soft",
-          title: event.title,
-          description: event.description || "AspireNest learning event for CTET/TET aspirants.",
-          meta: [event.subject, event.chapter, event.planType].filter(Boolean).join(" • "),
-        };
-      })}
-      emptyText="Weekly schedule will appear here soon."
-    />
-  </section>
-) : null}
+    <p className="ctetS3FreshRoleLine">
+      Educator • Researcher • Academic Leader • CTET/TET Mentor
+    </p>
 
-{ctetExperienceEvents.length > 0 ? (
-  <section className="ctetWhatsNewSection">
-    <ExperienceSectionHeader
-      badge="WHAT'S NEW"
-      title="Fresh Updates for CTET/TET Aspirants"
-      description="Latest AspireNest learning updates, new sessions, mock events, and important announcements in one place."
-      align="left"
-    />
+    <p className="ctetS3FreshBio">
+      Learn from a Ph.D. qualified educator, I/C Principal, Assistant Professor,
+      researcher, and CTET/TET mentor with strong expertise in Education,
+      Psychology, Pedagogy, Teacher Training, and Digital Learning.
+    </p>
 
-    <div className="experienceCardGrid">
-      {ctetExperienceEvents.slice(0, 3).map((event) => (
-        <ExperienceCard
-          key={event.id || event.title}
-          eyebrow={event.typeLabel}
-          title={event.title}
-          text={event.description || "New AspireNest update for your CTET/TET preparation."}
-          icon={event.status === "live" ? "🔴" : "✨"}
-          meta={[event.status, event.subject, event.planType].filter(Boolean).join(" • ")}
-          actionLabel={event.cta?.label || "View Details"}
-          tone={event.status === "live" ? "live" : "default"}
-          onClick={() => {
-            const targetUrl = event.cta?.url;
-            if (targetUrl) navigate(targetUrl);
-          }}
-        />
+    <div className="ctetS3FreshCredentialGrid">
+      {[
+        ["🏫", "Current Role", "I/C Principal & Assistant Professor"],
+        ["🎓", "Qualification", "Ph.D. in Education, M.Ed., M.A. Psychology"],
+        ["📚", "Exam Expertise", "CTET Paper II Qualified, TAT Qualified"],
+        ["🧠", "Research Area", "Cyberbullying, Mental Health, Education & Psychology"],
+        ["🏆", "Recognition", "Best Excellence Teacher Award"],
+        ["💻", "Digital Learning", "Google Certified Educator, AI & NEP 2020 Training"],
+      ].map(([icon, title, text]) => (
+        <article className="ctetS3FreshCredentialCard" key={title}>
+          <span>{icon}</span>
+          <strong>{title}</strong>
+          <small>{text}</small>
+        </article>
       ))}
     </div>
-  </section>
-) : null}
+
+    <div className="ctetS3FreshLowerGrid">
+      <div className="ctetS3FreshWhyPanel">
+        <h3>Why Learn from Dr. Varsha</h3>
+
+        <div className="ctetS3FreshWhyGrid">
+          {[
+            ["💡", "Concept Clarity", "Simplifying complex concepts with clarity"],
+            ["📚", "Practical Pedagogy", "Real-classroom strategies and methods"],
+            ["💬", "Bilingual Explanation", "Hindi and English for better understanding"],
+            ["🎯", "Exam-Focused Preparation", "PYQs, strategies and smart shortcuts"],
+          ].map(([icon, title, text]) => (
+            <article className="ctetS3FreshWhyCard" key={title}>
+              <span>{icon}</span>
+              <strong>{title}</strong>
+              <small>{text}</small>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      <blockquote className="ctetS3FreshQuoteBox">
+        <span>“</span>
+        <p>
+          Concept clarity, practical pedagogy, bilingual explanation, and
+          exam-focused preparation are at the heart of our teaching.
+        </p>
+        <cite>– Dr. Varsha D. Maru</cite>
+      </blockquote>
+    </div>
+  </div>
+
+  <div className="ctetS3FreshImpactStrip">
+    {[
+      ["Academic Profile", "Verified educator background"],
+      ["Current Role", "I/C Principal & Assistant Professor"],
+      ["Exam Expertise", "CTET Paper II & TAT Qualified"],
+      ["Research Area", "Education, Psychology & Mental Health"],
+      ["Digital Learning", "Google Certified Educator"],
+      ["Recognition", "Best Excellence Teacher Award"],
+    ].map(([title, text]) => (
+      <article className="ctetS3FreshImpactItem" key={title}>
+        <strong>{title}</strong>
+        <span>{text}</span>
+      </article>
+    ))}
+  </div>
+</section>
+
 
 {(leaderboard || []).length > 0 && (
 <section className="leaderboardSection">

@@ -2944,580 +2944,1305 @@ html {
 }
 
 
-/* === CTET Screen 2: Premium Student Pathway Command Center === */
+/* === CTET Screen 2 locked reference final v23 === */
 
-.ctetCommandScreen {
-  position: relative;
-  padding: 34px clamp(16px, 3vw, 48px) 44px;
+.ctetS2Screen,
+.ctetS2Screen * {
+  box-sizing: border-box !important;
+}
+
+.ctetS2Screen {
+  width: 100% !important;
+  height: calc(100vh - 62px) !important;
+  min-height: 650px !important;
+  margin: 0 !important;
+  padding: 16px 0 10px !important;
+  overflow: hidden !important;
+  position: relative !important;
+  color: #f8fafc !important;
   background:
-    radial-gradient(circle at 8% 5%, rgba(255, 138, 0, 0.18), transparent 32%),
-    radial-gradient(circle at 86% 18%, rgba(90, 120, 255, 0.16), transparent 34%),
-    linear-gradient(135deg, #020814 0%, #07111f 48%, #03070f 100%);
-  color: #f8fafc;
+    radial-gradient(circle at 82% 10%, rgba(14, 77, 146, 0.2), transparent 34%),
+    linear-gradient(135deg, #020711 0%, #061323 48%, #020711 100%) !important;
+}
+
+.ctetS2Screen::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  background-image: radial-gradient(circle, rgba(255,145,0,0.08) 1px, transparent 1.5px) !important;
+  background-size: 22px 22px !important;
+  opacity: 0.08 !important;
+}
+
+.ctetS2Screen::after,
+.ctetS2Shell::before,
+.ctetS2Shell::after,
+.ctetS2Grid::before,
+.ctetS2Grid::after,
+.ctetS2Module::before,
+.ctetS2Module::after,
+.ctetS2MomentumCard::before,
+.ctetS2MomentumCard::after {
+  content: none !important;
+  display: none !important;
+}
+
+.ctetS2Shell {
+  position: relative !important;
+  z-index: 2 !important;
+  width: min(1510px, calc(100% - 88px)) !important;
+  height: 100% !important;
+  margin: 0 auto !important;
+  background: transparent !important;
+}
+
+.ctetS2Grid {
+  display: grid !important;
+  grid-template-columns: 340px minmax(490px, 1fr) 330px !important;
+  grid-template-areas:
+    "story rail momentum"
+    "modules modules momentum" !important;
+  gap: 10px 20px !important;
+  align-items: start !important;
+}
+
+.ctetS2Story { grid-area: story !important; }
+
+.ctetS2Badge,
+.ctetS2MentorBadge {
+  height: 30px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 0 13px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255,145,0,0.34) !important;
+  background: linear-gradient(180deg, rgba(255,145,0,0.14), rgba(255,255,255,0.04)) !important;
+  color: #f8fafc !important;
+  font-size: 0.78rem !important;
+  font-weight: 900 !important;
+}
+
+.ctetS2Story h2 {
+  max-width: 340px !important;
+  margin: 12px 0 7px !important;
+  color: #f8fafc !important;
+  font-size: clamp(1.9rem, 2.55vw, 2.85rem) !important;
+  line-height: 0.96 !important;
+  letter-spacing: -0.075em !important;
+}
+
+.ctetS2Story h2 span {
+  display: block !important;
+  color: #ff8a00 !important;
+}
+
+.ctetS2Story p {
+  max-width: 350px !important;
+  margin: 0 !important;
+  color: #cbd5e1 !important;
+  font-size: 0.9rem !important;
+  line-height: 1.32 !important;
+}
+
+.ctetS2Rail {
+  grid-area: rail !important;
+  height: 154px !important;
+  display: grid !important;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  align-items: center !important;
+  padding: 18px 34px 15px !important;
+  border-radius: 18px !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(circle at 7% 22%, rgba(255,145,0,0.12), transparent 22%),
+    linear-gradient(135deg, rgba(10,20,35,0.97), rgba(4,12,25,0.99)) !important;
+  border: 1px solid rgba(148,163,184,0.24) !important;
+}
+
+.ctetS2Step {
+  position: relative !important;
+  display: grid !important;
+  justify-items: center !important;
+  align-content: start !important;
+  text-align: center !important;
+}
+
+.ctetS2Step i { display: none !important; }
+
+.ctetS2Step::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 30px !important;
+  left: calc(50% + 38px) !important;
+  width: calc(100% - 56px) !important;
+  height: 2px !important;
+  border-radius: 999px !important;
+  background: rgba(100,116,139,0.58) !important;
+  z-index: 1 !important;
+}
+
+.ctetS2Step::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 27px !important;
+  left: calc(100% - 16px) !important;
+  width: 7px !important;
+  height: 7px !important;
+  border-radius: 999px !important;
+  background: rgba(100,116,139,0.78) !important;
+  box-shadow: 0 0 0 2px rgba(5,12,25,0.95) !important;
+  z-index: 3 !important;
+}
+
+.ctetS2Step:last-child::before,
+.ctetS2Step:last-child::after {
+  display: none !important;
+}
+
+.ctetS2Step.active::before {
+  background: linear-gradient(90deg, #ff970f 0, #ff970f 48px, rgba(100,116,139,0.58) 48px, rgba(100,116,139,0.58) 100%) !important;
+}
+
+.ctetS2Step.active::after {
+  background: #ff970f !important;
+}
+
+.ctetS2Node {
+  width: 58px !important;
+  height: 58px !important;
+  margin: 0 auto 8px !important;
+  position: relative !important;
+  z-index: 5 !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  border: 3px solid rgba(116,132,154,0.5) !important;
+  color: #e5edf8 !important;
+  background: radial-gradient(circle at 36% 24%, rgba(255,255,255,0.16), rgba(20,31,49,0.98)) !important;
+}
+
+.ctetS2Step.active .ctetS2Node {
+  color: #ffb020 !important;
+  border-color: #ff970f !important;
+  box-shadow: 0 0 0 8px rgba(255,145,0,0.08), 0 0 30px rgba(255,145,0,0.44) !important;
+}
+
+.ctetS2Step strong {
+  margin: 0 0 3px !important;
+  color: #f8fafc !important;
+  font-size: 0.88rem !important;
+  line-height: 1.05 !important;
+  font-weight: 950 !important;
+}
+
+.ctetS2Step.active strong { color: #ff9f1a !important; }
+
+.ctetS2Step small {
+  max-width: 88px !important;
+  color: #d1d5db !important;
+  font-size: 0.68rem !important;
+  line-height: 1.12 !important;
+}
+
+.ctetS2Momentum {
+  grid-area: momentum !important;
+  height: 470px !important;
+  padding: 17px !important;
+  border-radius: 22px !important;
+  border: 1px solid rgba(255,145,0,0.48) !important;
+  background:
+    radial-gradient(circle at 100% 6%, rgba(255,145,0,0.22), transparent 30%),
+    linear-gradient(145deg, rgba(39,24,12,0.94), rgba(3,10,22,0.98)) !important;
+  overflow: hidden !important;
+}
+
+.ctetS2MomentumHead {
+  display: flex !important;
+  gap: 12px !important;
+  margin-bottom: 11px !important;
+}
+
+.ctetS2MomentumHead b {
+  color: #ffb020 !important;
+  font-size: 1.35rem !important;
+}
+
+.ctetS2MomentumHead h3 {
+  margin: 0 0 6px !important;
+  color: #f8fafc !important;
+  font-size: 1.08rem !important;
+  font-weight: 950 !important;
+}
+
+.ctetS2MomentumHead p {
+  margin: 0 !important;
+  color: #d1d5db !important;
+  font-size: 0.82rem !important;
+  line-height: 1.35 !important;
+}
+
+.ctetS2MomentumList {
+  display: grid !important;
+  gap: 10px !important;
+}
+
+.ctetS2MomentumCard {
+  all: unset !important;
+  min-height: 86px !important;
+  display: grid !important;
+  grid-template-columns: 46px 1fr !important;
+  gap: 13px !important;
+  align-items: center !important;
+  padding: 11px 12px !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255,145,0,0.24) !important;
+  background: linear-gradient(145deg, rgba(13,23,40,0.98), rgba(5,12,25,0.98)) !important;
+  cursor: pointer !important;
+}
+
+.ctetS2MomentumCard > span {
+  width: 42px !important;
+  height: 42px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  color: #ffb020 !important;
+  border: 2px solid rgba(255,145,0,0.55) !important;
+}
+
+.ctetS2MomentumCard.target > span {
+  color: #a78bfa !important;
+  border-color: rgba(167,139,250,0.62) !important;
+}
+
+.ctetS2MomentumCard strong {
+  display: block !important;
+  margin-bottom: 4px !important;
+  color: #f8fafc !important;
+  font-size: 0.9rem !important;
+  font-weight: 950 !important;
+}
+
+.ctetS2MomentumCard small {
+  display: block !important;
+  color: #cbd5e1 !important;
+  font-size: 0.69rem !important;
+  line-height: 1.25 !important;
+}
+
+.ctetS2MomentumCard em {
+  display: inline-flex !important;
+  margin-top: 7px !important;
+  color: #ff9f1a !important;
+  font-style: normal !important;
+  font-size: 0.76rem !important;
+  font-weight: 950 !important;
+}
+
+.ctetS2Modules {
+  grid-area: modules !important;
+}
+
+.ctetS2ModuleTitle {
+  width: 100% !important;
+  height: 25px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  margin: 0 0 8px !important;
+  color: #f8fafc !important;
+  font-size: 0.96rem !important;
+  font-weight: 950 !important;
+  border-bottom: 1px solid rgba(148,163,184,0.24) !important;
+}
+
+.ctetS2ModuleGrid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px 16px !important;
+}
+
+.ctetS2Module {
+  all: unset !important;
+  min-height: 94px !important;
+  display: grid !important;
+  grid-template-columns: 46px 1fr !important;
+  gap: 13px !important;
+  align-items: start !important;
+  padding: 11px 14px !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(255,145,0,0.26) !important;
+  background: linear-gradient(145deg, rgba(9,18,33,0.98), rgba(2,9,21,0.98)) !important;
+  cursor: pointer !important;
+  overflow: hidden !important;
+}
+
+.ctetS2ModuleIcon {
+  width: 42px !important;
+  height: 42px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 13px !important;
+  background: rgba(255,255,255,0.075) !important;
+}
+
+.ctetS2ModuleBody {
+  display: grid !important;
+  gap: 6px !important;
+}
+
+.ctetS2ModuleBody > strong {
+  color: #f8fafc !important;
+  font-size: 0.94rem !important;
+  font-weight: 950 !important;
+}
+
+.ctetS2Meta {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 7px !important;
+}
+
+.ctetS2Meta em,
+.ctetS2Meta b {
+  width: fit-content !important;
+  padding: 5px 8px !important;
+  border-radius: 8px !important;
+  font-style: normal !important;
+  font-size: 0.65rem !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.ctetS2Meta em {
+  color: #dbeafe !important;
+  background: rgba(148,163,184,0.13) !important;
+}
+
+.ctetS2Meta b {
+  color: #fbbf24 !important;
+  background: rgba(255,145,0,0.13) !important;
+}
+
+.ctetS2Cta {
+  width: fit-content !important;
+  min-width: 108px !important;
+  height: 29px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 0 12px !important;
+  border-radius: 9px !important;
+  color: #ff9f1a !important;
+  border: 1px solid rgba(255,145,0,0.48) !important;
+  background: rgba(255,145,0,0.065) !important;
+  font-size: 0.74rem !important;
+  font-weight: 950 !important;
+}
+
+.ctetS2Mentor {
+  height: 92px !important;
+  margin-top: 8px !important;
+  display: grid !important;
+  grid-template-columns: 1.08fr 0.85fr 0.55fr !important;
+  gap: 24px !important;
+  align-items: center !important;
+  padding: 10px 18px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(255,145,0,0.54) !important;
+  background:
+    radial-gradient(circle at 5% 15%, rgba(255,145,0,0.24), transparent 24%),
+    radial-gradient(circle at 98% 14%, rgba(255,145,0,0.14), transparent 22%),
+    linear-gradient(135deg, rgba(38,23,10,0.94), rgba(3,10,22,0.98)) !important;
+}
+
+.ctetS2MentorLeft {
+  display: flex !important;
+  gap: 14px !important;
+  align-items: center !important;
+}
+
+.ctetS2MentorPhoto {
+  width: 58px !important;
+  height: 58px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  color: #fff7ed !important;
+  border: 4px solid rgba(255,176,32,0.94) !important;
+  background: linear-gradient(135deg, #1f2937, #78350f) !important;
+  font-weight: 1000 !important;
+  font-size: 1.2rem !important;
+}
+
+.ctetS2Mentor h3 {
+  margin: 4px 0 !important;
+  color: #f8fafc !important;
+  font-size: 0.96rem !important;
+  font-weight: 950 !important;
+}
+
+.ctetS2Mentor p {
+  margin: 0 !important;
+  color: #cbd5e1 !important;
+  font-size: 0.72rem !important;
+  line-height: 1.18 !important;
+}
+
+.ctetS2MentorMid {
+  padding-left: 24px !important;
+  border-left: 1px solid rgba(255,255,255,0.2) !important;
+}
+
+.ctetS2MentorMid strong {
+  display: block !important;
+  margin-bottom: 5px !important;
+  color: #ff9f1a !important;
+  font-size: 0.82rem !important;
+}
+
+.ctetS2MentorAction {
+  display: grid !important;
+  gap: 7px !important;
+  justify-items: start !important;
+}
+
+.ctetS2MentorAction button {
+  all: unset !important;
+  min-height: 40px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 0 18px !important;
+  border-radius: 10px !important;
+  color: #fff7ed !important;
+  background: linear-gradient(135deg, #ff6a00, #ff9f1a) !important;
+  box-shadow: 0 14px 30px rgba(255,106,0,0.30) !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
+}
+
+.ctetS2MentorAction small {
+  color: #cbd5e1 !important;
+  font-size: 0.72rem !important;
+}
+
+/* === END CTET Screen 2 locked reference final v23 === */
+
+
+/* === CTET screen boundary snap fix v25 === */
+
+/* Only CTET experience page: stop Screen 1 / Screen 2 half-mixing during scroll */
+html:has(.ctetS2Screen) {
+  scroll-snap-type: y proximity !important;
+  scroll-padding-top: 62px !important;
+}
+
+.ctetTopEntryExperience,
+.ctetS2Screen {
+  scroll-snap-align: start !important;
+  scroll-snap-stop: always !important;
+}
+
+/* Clean hard boundary between Screen 1 and Screen 2 */
+.ctetTopEntryExperience + .ctetS2Screen {
+  margin-top: 0 !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.18) !important;
+}
+
+/* === END CTET screen boundary snap fix v25 === */
+
+
+/* === CTET Screen 3 fresh mentor authority rebuild === */
+html:has(.ctetS3FreshMentorAuthority),
+body:has(.ctetS3FreshMentorAuthority) {
+  background: #020713 !important;
+}
+
+#about.ctetS3FreshMentorAuthority {
+  width: 100vw;
+  max-width: none;
+  margin: 0 calc(50% - 50vw);
+  min-height: calc(100vh - 76px);
+  display: grid;
+  grid-template-columns: minmax(470px, 670px) minmax(780px, 1fr);
+  grid-template-rows: auto 74px;
+  gap: 10px 28px;
+  padding: 14px 52px 0;
+  color: #ffffff;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 0% 12%, rgba(255, 115, 20, 0.13), transparent 30%),
+    radial-gradient(circle at 100% 4%, rgba(11, 71, 130, 0.28), transparent 34%),
+    linear-gradient(135deg, #170b0d 0%, #061021 42%, #030814 100%);
+}
+
+#about.ctetS3FreshMentorAuthority,
+#about.ctetS3FreshMentorAuthority * {
+  box-sizing: border-box;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshPhotoPanel,
+#about.ctetS3FreshMentorAuthority .ctetS3FreshContentPanel,
+#about.ctetS3FreshMentorAuthority .ctetS3FreshImpactStrip {
+  border: 1px solid rgba(245, 139, 22, 0.58);
+  background:
+    radial-gradient(circle at 78% 8%, rgba(255, 183, 77, 0.16), transparent 20%),
+    linear-gradient(135deg, rgba(2, 8, 20, 0.99), rgba(8, 13, 24, 0.99) 58%, rgba(29, 18, 14, 0.98));
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.42);
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshPhotoPanel {
+  grid-column: 1;
+  grid-row: 1;
+  height: clamp(590px, calc(100vh - 182px), 680px);
+  border-radius: 34px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshPhotoGlow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 82% 10%, rgba(255, 190, 94, 0.34), transparent 14%),
+    radial-gradient(circle at 73% 27%, rgba(255, 167, 38, 0.22), transparent 11%),
+    radial-gradient(circle at 34% 55%, rgba(16, 43, 72, 0.28), transparent 38%),
+    linear-gradient(180deg, #030711 0%, #050812 62%, #02040a 100%);
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshPhoto {
+  height: 104%;
+  width: auto;
+  max-width: none;
+  object-fit: contain;
+  object-position: center bottom;
+  position: relative;
+  z-index: 1;
+  display: block;
+  transform: translateY(10px);
+  filter: drop-shadow(0 26px 34px rgba(0, 0, 0, 0.45));
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshContentPanel {
+  grid-column: 2;
+  grid-row: 1;
+  height: clamp(590px, calc(100vh - 182px), 680px);
+  border-radius: 34px;
+  padding: 36px 36px 0;
   overflow: hidden;
 }
 
-.ctetCommandScreen::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    radial-gradient(circle, rgba(255, 145, 0, 0.24) 1px, transparent 1.6px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035), transparent 30%, rgba(255, 145, 0, 0.04));
-  background-size: 22px 22px, 100% 100%;
-  opacity: 0.2;
-  mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
-}
-
-.ctetCommandShell {
-  position: relative;
-  z-index: 1;
-  max-width: 1800px;
-  margin: 0 auto;
-}
-
-.ctetCommandTopGrid {
-  display: grid;
-  grid-template-columns: minmax(280px, 420px) 1fr;
-  gap: 34px;
-  align-items: center;
-  margin-bottom: 30px;
-}
-
-.ctetCommandBadge,
-.ctetModuleKicker,
-.ctetMentorBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  width: fit-content;
-  border: 1px solid rgba(255, 145, 0, 0.28);
-  background: linear-gradient(135deg, rgba(255, 145, 0, 0.14), rgba(255, 255, 255, 0.06));
-  color: #f8fafc;
-  border-radius: 999px;
-  padding: 10px 16px;
-  font-weight: 850;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-
-.ctetCommandStory h2 {
-  margin: 24px 0 14px;
-  font-size: clamp(2.25rem, 4vw, 4.45rem);
-  line-height: 0.96;
-  letter-spacing: -0.07em;
-  color: #f8fafc;
-}
-
-.ctetCommandStory h2 span {
-  display: block;
-  color: #ff8a00;
-  text-shadow: 0 0 32px rgba(255, 138, 0, 0.35);
-}
-
-.ctetCommandStory p {
-  max-width: 560px;
-  margin: 0;
-  color: #cbd5e1;
-  font-size: clamp(1rem, 1.25vw, 1.22rem);
-  line-height: 1.65;
-}
-
-.ctetJourneyRail {
-  min-height: 235px;
-  display: grid;
-  grid-template-columns: repeat(6, minmax(86px, 1fr));
-  gap: 16px;
-  align-items: center;
-  padding: 28px 30px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 24px;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)),
-    rgba(2, 8, 20, 0.82);
-  box-shadow:
-    0 28px 80px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07);
-}
-
-.ctetJourneyStep {
-  position: relative;
-  min-width: 0;
-  text-align: center;
-  color: #cbd5e1;
-}
-
-.ctetJourneyNode {
-  position: relative;
-  z-index: 2;
-  width: 76px;
-  height: 76px;
-  margin: 0 auto 15px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  color: #dbeafe;
-  border: 3px solid rgba(148, 163, 184, 0.24);
-  background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.18), rgba(15, 23, 42, 0.95));
-  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.35);
-}
-
-.ctetJourneyStep.isActive .ctetJourneyNode {
-  color: #ffb020;
-  border-color: rgba(255, 145, 0, 0.85);
-  box-shadow:
-    0 0 0 8px rgba(255, 145, 0, 0.08),
-    0 0 34px rgba(255, 145, 0, 0.46);
-}
-
-.ctetJourneyLine {
-  position: absolute;
-  top: 38px;
-  left: calc(50% + 47px);
-  width: calc(100% - 18px);
-  height: 3px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(255, 145, 0, 0.72), rgba(148, 163, 184, 0.25));
-}
-
-.ctetJourneyStep strong {
-  display: block;
-  margin-bottom: 7px;
-  color: #f8fafc;
-  font-size: 1.05rem;
-}
-
-.ctetJourneyStep small {
-  display: block;
-  max-width: 125px;
-  margin: 0 auto;
-  color: #b9c4d6;
-  line-height: 1.25;
-}
-
-.ctetCommandBodyGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 400px;
-  gap: 34px;
-  align-items: stretch;
-}
-
-.ctetModuleCommandZone {
-  min-width: 0;
-}
-
-.ctetModuleHeader {
+#about.ctetS3FreshMentorAuthority .ctetS3FreshTopLine {
   display: flex;
   align-items: center;
-  margin-bottom: 18px;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 22px;
 }
 
-.ctetModuleKicker {
-  border-color: rgba(148, 163, 184, 0.22);
-  background: transparent;
-  padding: 0 0 12px;
-  border-width: 0 0 1px;
-  border-radius: 0;
-  color: #f8fafc;
-}
-
-.ctetModuleGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(230px, 1fr));
-  gap: 20px 22px;
-}
-
-.ctetModuleCard,
-.ctetMomentumCard {
-  border: 1px solid rgba(255, 145, 0, 0.22);
-  border-radius: 20px;
-  background:
-    radial-gradient(circle at 95% 8%, rgba(255, 145, 0, 0.11), transparent 28%),
-    linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(3, 10, 22, 0.92));
-  color: #f8fafc;
-  text-align: left;
-  cursor: pointer;
-  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055);
-}
-
-.ctetModuleCard:hover,
-.ctetMomentumCard:hover {
-  transform: translateY(-3px);
-  border-color: rgba(255, 145, 0, 0.55);
-  box-shadow: 0 24px 52px rgba(0, 0, 0, 0.32);
-}
-
-.ctetModuleCard {
-  min-height: 168px;
-  display: grid;
-  grid-template-columns: 72px 1fr;
-  gap: 16px;
-  align-items: start;
-  padding: 24px 22px;
-}
-
-.ctetModuleIcon,
-.ctetMomentumIcon {
-  display: grid;
-  place-items: center;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.075);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    0 14px 34px rgba(0, 0, 0, 0.26);
-}
-
-.ctetModuleIcon {
-  width: 62px;
-  height: 62px;
-}
-
-.ctetModuleContent {
-  min-width: 0;
-  display: grid;
-  gap: 12px;
-}
-
-.ctetModuleContent > strong {
-  font-size: 1.25rem;
-  letter-spacing: -0.03em;
-}
-
-.ctetModuleMetaRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-}
-
-.ctetModuleMetaRow em,
-.ctetModuleMetaRow b {
-  font-style: normal;
-  width: fit-content;
-  border-radius: 9px;
-  padding: 8px 12px;
-  font-size: 0.82rem;
+#about.ctetS3FreshMentorAuthority .ctetS3FreshTopLine span {
+  color: #ffac22 !important;
+  -webkit-text-fill-color: #ffac22 !important;
+  font-size: 23px;
   line-height: 1;
+  font-weight: 1000;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
 }
 
-.ctetModuleMetaRow em {
-  color: #dbeafe;
-  background: rgba(148, 163, 184, 0.12);
-  border: 1px solid rgba(148, 163, 184, 0.18);
+#about.ctetS3FreshMentorAuthority .ctetS3FreshTopLine b {
+  min-width: 215px;
+  padding: 17px 28px;
+  border-radius: 999px;
+  border: 1px solid rgba(245, 139, 22, 0.74);
+  background: linear-gradient(135deg, rgba(255, 141, 17, 0.12), rgba(255, 255, 255, 0.04));
+  color: #ffad21 !important;
+  -webkit-text-fill-color: #ffad21 !important;
+  font-size: 18px;
+  font-weight: 1000;
+  text-align: center;
 }
 
-.ctetModuleMetaRow b {
-  color: #fbbf24;
-  background: rgba(255, 145, 0, 0.12);
-  border: 1px solid rgba(255, 145, 0, 0.18);
+#about.ctetS3FreshMentorAuthority h2 {
+  margin: 0;
+  background: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-size: clamp(44px, 3.9vw, 61px);
+  line-height: 0.95;
+  letter-spacing: -0.065em;
+  font-weight: 1000;
+  text-shadow: 0 12px 34px rgba(0, 0, 0, 0.38);
 }
 
-.ctetModuleCta {
-  width: fit-content;
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-  margin-top: 4px;
-  padding: 10px 18px;
-  border-radius: 11px;
-  color: #ff9f1a;
-  font-weight: 900;
-  border: 1px solid rgba(255, 145, 0, 0.45);
-  background: rgba(255, 145, 0, 0.06);
-}
-
-.ctetModuleCard.tone-gold .ctetModuleIcon { color: #fbbf24; }
-.ctetModuleCard.tone-blue .ctetModuleIcon { color: #93c5fd; }
-.ctetModuleCard.tone-violet .ctetModuleIcon { color: #a78bfa; }
-.ctetModuleCard.tone-cyan .ctetModuleIcon { color: #67e8f9; }
-.ctetModuleCard.tone-purple .ctetModuleIcon { color: #c084fc; }
-.ctetModuleCard.tone-amber .ctetModuleIcon { color: #f59e0b; }
-
-.ctetMomentumPanel {
-  border: 1px solid rgba(255, 145, 0, 0.45);
-  border-radius: 26px;
-  padding: 32px;
-  background:
-    radial-gradient(circle at 100% 6%, rgba(255, 145, 0, 0.24), transparent 31%),
-    linear-gradient(145deg, rgba(30, 20, 12, 0.88), rgba(3, 10, 22, 0.94));
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
-}
-
-.ctetMomentumHeader {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-  margin-bottom: 24px;
-}
-
-.ctetMomentumHeader > span {
-  color: #ffb020;
-  font-size: 1.6rem;
+#about.ctetS3FreshMentorAuthority .ctetS3FreshRoleLine {
+  margin: 13px 0 11px;
+  color: #ffad1f !important;
+  -webkit-text-fill-color: #ffad1f !important;
+  font-size: clamp(18px, 1.32vw, 24px);
+  line-height: 1.1;
   font-weight: 1000;
 }
 
-.ctetMomentumHeader h3 {
-  margin: 0 0 10px;
-  font-size: 1.35rem;
+#about.ctetS3FreshMentorAuthority .ctetS3FreshBio {
+  max-width: 1080px;
+  margin: 0 0 16px;
+  color: rgba(226, 232, 240, 0.9) !important;
+  -webkit-text-fill-color: rgba(226, 232, 240, 0.9) !important;
+  font-size: 18px;
+  line-height: 1.35;
+  font-weight: 650;
 }
 
-.ctetMomentumHeader p {
-  margin: 0;
-  color: #d1d5db;
-  line-height: 1.48;
-}
-
-.ctetMomentumStack {
+#about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialGrid {
   display: grid;
-  gap: 18px;
-}
-
-.ctetMomentumCard {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 64px 1fr;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 16px;
-  padding: 20px;
+  margin: 0 0 18px;
 }
 
-.ctetMomentumIcon {
-  width: 58px;
-  height: 58px;
-  border-radius: 999px;
-  color: #ffb020;
-  border: 2px solid rgba(255, 145, 0, 0.42);
-}
-
-.ctetMomentumCard.tone-target .ctetMomentumIcon {
-  color: #a78bfa;
-  border-color: rgba(167, 139, 250, 0.55);
-}
-
-.ctetMomentumCard strong,
-.ctetMomentumCard small,
-.ctetMomentumCard em {
-  display: block;
-}
-
-.ctetMomentumCard strong {
-  margin-bottom: 8px;
-  font-size: 1.05rem;
-}
-
-.ctetMomentumCard small {
-  color: #cbd5e1;
-  line-height: 1.45;
-}
-
-.ctetMomentumCard em {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 14px;
-  color: #ff9f1a;
-  font-style: normal;
-  font-weight: 900;
-}
-
-.ctetMentorTeaserStrip {
-  margin-top: 36px;
-  display: grid;
-  grid-template-columns: minmax(320px, 1.1fr) minmax(260px, 0.85fr) minmax(240px, 0.55fr);
-  gap: 34px;
-  align-items: center;
-  padding: 26px 34px;
-  border: 1px solid rgba(255, 145, 0, 0.48);
-  border-radius: 24px;
-  background:
-    radial-gradient(circle at 4% 15%, rgba(255, 145, 0, 0.28), transparent 22%),
-    radial-gradient(circle at 98% 16%, rgba(255, 145, 0, 0.18), transparent 24%),
-    linear-gradient(135deg, rgba(35, 21, 8, 0.82), rgba(3, 10, 22, 0.96));
-}
-
-.ctetMentorTeaserLeft {
+#about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialCard {
+  min-height: 136px;
+  border-radius: 15px;
+  padding: 19px 11px 13px;
   display: flex;
-  gap: 26px;
+  flex-direction: column;
   align-items: center;
-}
-
-.ctetMentorAura {
-  flex: 0 0 auto;
-  width: 118px;
-  height: 118px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  border: 5px solid rgba(255, 176, 32, 0.92);
+  text-align: center;
+  justify-content: flex-start;
+  border: 1px solid rgba(148, 163, 184, 0.26);
   background:
-    radial-gradient(circle at 35% 20%, rgba(255, 255, 255, 0.22), transparent 28%),
-    linear-gradient(135deg, #1f2937, #78350f);
-  box-shadow:
-    0 0 0 9px rgba(255, 145, 0, 0.12),
-    0 0 42px rgba(255, 145, 0, 0.42);
+    radial-gradient(circle at 50% 0%, rgba(255, 194, 92, 0.14), transparent 38%),
+    linear-gradient(180deg, rgba(22, 33, 51, 0.94), rgba(5, 13, 27, 0.96));
 }
 
-.ctetMentorAura span {
-  color: #fff7ed;
-  font-size: 2rem;
-  font-weight: 950;
-  letter-spacing: -0.08em;
+#about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialCard span {
+  font-size: 27px;
+  line-height: 1;
+  margin-bottom: 13px;
 }
 
-.ctetMentorTeaserStrip h3 {
-  margin: 12px 0 10px;
-  color: #f8fafc;
-  font-size: 1.35rem;
-  letter-spacing: -0.035em;
+#about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialCard strong {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-size: 15px;
+  line-height: 1.04;
+  font-weight: 1000;
+  margin-bottom: 9px;
 }
 
-.ctetMentorTeaserStrip p {
-  margin: 0;
-  color: #cbd5e1;
-  line-height: 1.52;
+#about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialCard small {
+  color: rgba(226, 232, 240, 0.88) !important;
+  -webkit-text-fill-color: rgba(226, 232, 240, 0.88) !important;
+  font-size: 12.7px;
+  line-height: 1.04;
+  font-weight: 650;
 }
 
-.ctetMentorTeaserCenter {
-  padding-left: 34px;
-  border-left: 1px solid rgba(255, 255, 255, 0.22);
-}
-
-.ctetMentorTeaserCenter strong {
-  display: block;
-  margin-bottom: 10px;
-  color: #ff9f1a;
-}
-
-.ctetMentorTeaserAction {
+#about.ctetS3FreshMentorAuthority .ctetS3FreshLowerGrid {
   display: grid;
-  justify-items: start;
-  gap: 14px;
+  grid-template-columns: 1.08fr 0.98fr;
+  gap: 20px;
 }
 
-.ctetMentorTeaserAction button {
-  display: inline-flex;
-  align-items: center;
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyPanel,
+#about.ctetS3FreshMentorAuthority .ctetS3FreshQuoteBox {
+  min-height: 218px;
+  border-radius: 18px;
+  border: 1px solid rgba(245, 139, 22, 0.54);
+  background: linear-gradient(135deg, rgba(17, 24, 39, 0.82), rgba(3, 10, 23, 0.95));
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyPanel {
+  padding: 19px 20px 16px;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyPanel h3 {
+  margin: 0 0 15px;
+  color: #ffad20 !important;
+  -webkit-text-fill-color: #ffad20 !important;
+  font-size: 21px;
+  line-height: 1.1;
+  font-weight: 1000;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyCard {
+  min-height: 137px;
+  border-radius: 13px;
+  padding: 15px 10px 11px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: linear-gradient(180deg, rgba(15, 27, 47, 0.84), rgba(4, 12, 27, 0.94));
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyCard span {
+  display: block;
+  font-size: 21px;
+  margin-bottom: 10px;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyCard strong {
+  display: block;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-size: 13.5px;
+  line-height: 0.98;
+  font-weight: 1000;
+  margin-bottom: 7px;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyCard small {
+  display: block;
+  color: rgba(226, 232, 240, 0.84) !important;
+  -webkit-text-fill-color: rgba(226, 232, 240, 0.84) !important;
+  font-size: 12px;
+  line-height: 1.04;
+  font-weight: 650;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshQuoteBox {
+  margin: 0;
+  padding: 14px 25px 17px;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
-  gap: 16px;
-  min-height: 58px;
-  padding: 0 26px;
-  border: 0;
-  border-radius: 12px;
-  color: #fff7ed;
-  font-weight: 950;
-  font-size: 1rem;
-  cursor: pointer;
-  background: linear-gradient(135deg, #ff6a00, #ff9f1a);
-  box-shadow: 0 18px 42px rgba(255, 106, 0, 0.38);
 }
 
-.ctetMentorTeaserAction small {
-  color: #cbd5e1;
+#about.ctetS3FreshMentorAuthority .ctetS3FreshQuoteBox span {
+  color: #ffad20 !important;
+  -webkit-text-fill-color: #ffad20 !important;
+  font-size: 62px;
+  line-height: 0.7;
+  font-weight: 1000;
+  margin-bottom: 11px;
 }
 
-@media (max-width: 1180px) {
-  .ctetCommandTopGrid,
-  .ctetCommandBodyGrid,
-  .ctetMentorTeaserStrip {
+#about.ctetS3FreshMentorAuthority .ctetS3FreshQuoteBox p {
+  margin: 0;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-size: 20px;
+  line-height: 1.38;
+  font-weight: 1000;
+  letter-spacing: -0.02em;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshQuoteBox cite {
+  margin-top: 18px;
+  color: #ffad20 !important;
+  -webkit-text-fill-color: #ffad20 !important;
+  font-size: 16px;
+  font-weight: 1000;
+  font-style: normal;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshImpactStrip {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  height: 74px;
+  border-radius: 22px;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  overflow: hidden;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshImpactItem {
+  padding: 15px 24px 12px;
+  border-right: 1px solid rgba(148, 163, 184, 0.2);
+  min-width: 0;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshImpactItem:last-child {
+  border-right: 0;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshImpactItem strong {
+  display: block;
+  color: #ffad20 !important;
+  -webkit-text-fill-color: #ffad20 !important;
+  font-size: 15px;
+  line-height: 1;
+  font-weight: 1000;
+  margin-bottom: 9px;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshImpactItem span {
+  display: block;
+  color: rgba(241, 245, 249, 0.9) !important;
+  -webkit-text-fill-color: rgba(241, 245, 249, 0.9) !important;
+  font-size: 13px;
+  line-height: 1.1;
+  font-weight: 650;
+}
+
+@media (max-width: 1200px) {
+  #about.ctetS3FreshMentorAuthority {
+    margin: 0;
+    width: 100%;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    min-height: auto;
+    padding: 18px 18px 26px;
+  }
+
+  #about.ctetS3FreshMentorAuthority .ctetS3FreshPhotoPanel,
+  #about.ctetS3FreshMentorAuthority .ctetS3FreshContentPanel,
+  #about.ctetS3FreshMentorAuthority .ctetS3FreshImpactStrip {
+    grid-column: 1;
+    height: auto;
+  }
+
+  #about.ctetS3FreshMentorAuthority .ctetS3FreshPhotoPanel {
+    min-height: 560px;
+  }
+
+  #about.ctetS3FreshMentorAuthority .ctetS3FreshContentPanel {
+    grid-row: 2;
+    padding-bottom: 24px;
+  }
+
+  #about.ctetS3FreshMentorAuthority .ctetS3FreshImpactStrip {
+    grid-row: 3;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #about.ctetS3FreshMentorAuthority .ctetS3FreshLowerGrid {
     grid-template-columns: 1fr;
   }
-
-  .ctetJourneyRail {
-    grid-template-columns: repeat(3, minmax(130px, 1fr));
-  }
-
-  .ctetJourneyLine {
-    display: none;
-  }
-
-  .ctetMomentumPanel {
-    padding: 26px;
-  }
-
-  .ctetMentorTeaserCenter {
-    padding-left: 0;
-    border-left: 0;
-  }
 }
 
-@media (max-width: 860px) {
-  .ctetModuleGrid {
-    grid-template-columns: 1fr;
+@media (max-width: 760px) {
+  #about.ctetS3FreshMentorAuthority {
+    padding: 12px 10px 22px;
+    gap: 10px;
   }
 
-  .ctetJourneyRail {
-    grid-template-columns: repeat(2, minmax(130px, 1fr));
-    padding: 22px;
+  #about.ctetS3FreshMentorAuthority .ctetS3FreshPhotoPanel {
+    min-height: 430px;
+    border-radius: 24px;
   }
 
-  .ctetModuleCard {
-    grid-template-columns: 58px 1fr;
-    padding: 20px;
+  #about.ctetS3FreshMentorAuthority .ctetS3FreshContentPanel {
+    border-radius: 24px;
+    padding: 24px 16px;
   }
 
-  .ctetModuleIcon {
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
-  }
-
-  .ctetMentorTeaserLeft {
+  #about.ctetS3FreshMentorAuthority .ctetS3FreshTopLine {
     align-items: flex-start;
-  }
-}
-
-@media (max-width: 560px) {
-  .ctetCommandScreen {
-    padding: 24px 14px 34px;
-  }
-
-  .ctetCommandStory h2 {
-    font-size: 2.35rem;
-  }
-
-  .ctetJourneyRail {
-    grid-template-columns: 1fr;
-  }
-
-  .ctetJourneyStep {
-    display: grid;
-    grid-template-columns: 66px 1fr;
-    gap: 12px;
-    text-align: left;
-    align-items: center;
-  }
-
-  .ctetJourneyNode {
-    width: 58px;
-    height: 58px;
-    margin: 0;
-  }
-
-  .ctetJourneyStep small {
-    max-width: none;
-    margin: 0;
-  }
-
-  .ctetMomentumCard {
-    grid-template-columns: 54px 1fr;
-    padding: 18px;
-  }
-
-  .ctetMomentumIcon {
-    width: 50px;
-    height: 50px;
-  }
-
-  .ctetMentorTeaserStrip {
-    padding: 22px;
-  }
-
-  .ctetMentorTeaserLeft {
     flex-direction: column;
   }
 
-  .ctetMentorAura {
-    width: 92px;
-    height: 92px;
+  #about.ctetS3FreshMentorAuthority .ctetS3FreshTopLine b {
+    min-width: 0;
+    width: 100%;
+  }
+
+  #about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialGrid,
+  #about.ctetS3FreshMentorAuthority .ctetS3FreshWhyGrid,
+  #about.ctetS3FreshMentorAuthority .ctetS3FreshImpactStrip {
+    grid-template-columns: 1fr;
   }
 }
+/* === END CTET Screen 3 fresh mentor authority rebuild === */
+
+
+/* === CTET Screen 3 compact viewport correction v3 === */
+#about.ctetS3FreshMentorAuthority {
+  min-height: calc(100vh - 76px) !important;
+  padding: 8px 52px 0 !important;
+  grid-template-columns: minmax(440px, 650px) minmax(760px, 1fr) !important;
+  grid-template-rows: minmax(0, 1fr) 72px !important;
+  gap: 8px 28px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshPhotoPanel,
+#about.ctetS3FreshMentorAuthority .ctetS3FreshContentPanel {
+  height: calc(100vh - 164px) !important;
+  min-height: 560px !important;
+  max-height: 648px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshContentPanel {
+  padding: 30px 36px 0 !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshPhoto {
+  height: 99% !important;
+  transform: translateY(8px) !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshTopLine {
+  margin-bottom: 18px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshTopLine span {
+  font-size: 21px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshTopLine b {
+  padding: 15px 25px !important;
+  font-size: 17px !important;
+}
+
+#about.ctetS3FreshMentorAuthority h2 {
+  font-size: clamp(40px, 3.45vw, 55px) !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshRoleLine {
+  margin: 10px 0 9px !important;
+  font-size: clamp(17px, 1.22vw, 22px) !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshBio {
+  margin-bottom: 14px !important;
+  font-size: 16.5px !important;
+  line-height: 1.3 !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialGrid {
+  gap: 14px !important;
+  margin-bottom: 14px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialCard {
+  min-height: 122px !important;
+  padding: 15px 10px 10px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialCard span {
+  font-size: 24px !important;
+  margin-bottom: 9px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialCard strong {
+  font-size: 14px !important;
+  margin-bottom: 7px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialCard small {
+  font-size: 11.8px !important;
+  line-height: 1.02 !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshLowerGrid {
+  gap: 18px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyPanel,
+#about.ctetS3FreshMentorAuthority .ctetS3FreshQuoteBox {
+  min-height: 192px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyPanel {
+  padding: 16px 18px 14px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyPanel h3 {
+  margin-bottom: 12px !important;
+  font-size: 19px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyGrid {
+  gap: 10px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyCard {
+  min-height: 116px !important;
+  padding: 12px 9px 9px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyCard span {
+  font-size: 19px !important;
+  margin-bottom: 7px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyCard strong {
+  font-size: 12.5px !important;
+  margin-bottom: 5px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyCard small {
+  font-size: 11px !important;
+  line-height: 1.02 !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshQuoteBox {
+  padding: 13px 22px 14px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshQuoteBox span {
+  font-size: 52px !important;
+  margin-bottom: 8px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshQuoteBox p {
+  font-size: 18px !important;
+  line-height: 1.32 !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshQuoteBox cite {
+  margin-top: 14px !important;
+  font-size: 15px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshImpactStrip {
+  height: 72px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshImpactItem {
+  padding: 14px 22px 10px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshImpactItem strong {
+  font-size: 14px !important;
+  margin-bottom: 8px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshImpactItem span {
+  font-size: 12px !important;
+}
+/* === END CTET Screen 3 compact viewport correction v3 === */
+
+
+/* === CTET Screen 3 left image fit correction v4 === */
+#about.ctetS3FreshMentorAuthority {
+  grid-template-columns: minmax(390px, 560px) minmax(820px, 1fr) !important;
+  gap: 8px 22px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshPhotoPanel {
+  width: 560px !important;
+  max-width: 560px !important;
+  justify-self: end !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshPhoto {
+  height: 106% !important;
+  transform: translateY(10px) scale(1.04) !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshContentPanel {
+  justify-self: stretch !important;
+}
+
+@media (max-width: 1200px) {
+  #about.ctetS3FreshMentorAuthority {
+    grid-template-columns: 1fr !important;
+  }
+
+  #about.ctetS3FreshMentorAuthority .ctetS3FreshPhotoPanel {
+    width: 100% !important;
+    max-width: none !important;
+    justify-self: stretch !important;
+  }
+}
+/* === END CTET Screen 3 left image fit correction v4 === */
+
+
+/* === CTET Screen 3 final fit: image body width + no cut === */
+#about.ctetS3FreshMentorAuthority {
+  padding: 6px 52px 0 !important;
+  grid-template-columns: 455px minmax(0, 1fr) !important;
+  gap: 8px 22px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshPhotoPanel {
+  width: 455px !important;
+  max-width: 455px !important;
+  justify-self: end !important;
+  height: calc(100vh - 162px) !important;
+  min-height: 540px !important;
+  max-height: 632px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshPhoto {
+  height: 103% !important;
+  transform: translateX(-10px) translateY(8px) scale(1.03) !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshContentPanel {
+  height: calc(100vh - 162px) !important;
+  min-height: 540px !important;
+  max-height: 632px !important;
+  padding: 28px 34px 0 !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshTopLine {
+  margin-bottom: 14px !important;
+}
+
+#about.ctetS3FreshMentorAuthority h2 {
+  font-size: clamp(38px, 3.25vw, 52px) !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshRoleLine {
+  margin: 9px 0 8px !important;
+  font-size: clamp(16px, 1.12vw, 20px) !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshBio {
+  font-size: 15.5px !important;
+  line-height: 1.25 !important;
+  margin-bottom: 12px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialGrid {
+  gap: 12px !important;
+  margin-bottom: 12px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialCard {
+  min-height: 112px !important;
+  padding: 12px 9px 8px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialCard span {
+  font-size: 21px !important;
+  margin-bottom: 7px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialCard strong {
+  font-size: 13px !important;
+  margin-bottom: 5px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialCard small {
+  font-size: 10.8px !important;
+  line-height: 1 !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyPanel,
+#about.ctetS3FreshMentorAuthority .ctetS3FreshQuoteBox {
+  min-height: 166px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyPanel {
+  padding: 13px 16px 11px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyPanel h3 {
+  font-size: 17.5px !important;
+  margin-bottom: 9px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyCard {
+  min-height: 96px !important;
+  padding: 9px 8px 7px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyCard span {
+  font-size: 17px !important;
+  margin-bottom: 5px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyCard strong {
+  font-size: 11.5px !important;
+  margin-bottom: 4px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshWhyCard small {
+  font-size: 10px !important;
+  line-height: 1 !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshQuoteBox {
+  padding: 11px 20px 12px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshQuoteBox span {
+  font-size: 44px !important;
+  margin-bottom: 6px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshQuoteBox p {
+  font-size: 16.5px !important;
+  line-height: 1.28 !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshQuoteBox cite {
+  margin-top: 10px !important;
+  font-size: 14px !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshImpactStrip {
+  height: 70px !important;
+}
+
+@media (max-width: 1200px) {
+  #about.ctetS3FreshMentorAuthority {
+    grid-template-columns: 1fr !important;
+  }
+
+  #about.ctetS3FreshMentorAuthority .ctetS3FreshPhotoPanel {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
+/* === END CTET Screen 3 final fit: image body width + no cut === */
+
+
+/* === CTET Screen 3 quote box only polish === */
+#about.ctetS3FreshMentorAuthority .ctetS3FreshQuoteBox {
+  position: relative !important;
+  overflow: hidden !important;
+  padding: 24px 56px 24px 58px !important;
+  justify-content: center !important;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(255, 173, 32, 0.18), transparent 28%),
+    radial-gradient(circle at 92% 86%, rgba(255, 173, 32, 0.16), transparent 30%),
+    linear-gradient(135deg, rgba(18, 28, 45, 0.92), rgba(5, 13, 28, 0.98)) !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshQuoteBox span {
+  position: absolute !important;
+  top: 18px !important;
+  left: 28px !important;
+  margin: 0 !important;
+  font-size: 58px !important;
+  line-height: 1 !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshQuoteBox::after {
+  content: "”";
+  position: absolute;
+  right: 28px;
+  bottom: 16px;
+  color: #ffad20;
+  font-size: 58px;
+  line-height: 1;
+  font-weight: 1000;
+  text-shadow: 0 0 24px rgba(255, 173, 32, 0.35);
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshQuoteBox p {
+  font-size: 16.8px !important;
+  line-height: 1.36 !important;
+  max-width: 92% !important;
+  margin: 0 !important;
+}
+
+#about.ctetS3FreshMentorAuthority .ctetS3FreshQuoteBox cite {
+  margin-top: 12px !important;
+  font-size: 14px !important;
+}
+/* === END CTET Screen 3 quote box only polish === */
+
