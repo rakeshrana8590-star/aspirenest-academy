@@ -54,6 +54,7 @@ import AuthRoute from "./components/public/AuthRoute";
 
 import AppDashboard from "./components/AppDashboard.jsx";
 import CtetLiveContentCenter from "./components/ctet/CtetLiveContentCenter.jsx";
+import CtetSupportFooterScreen from "./components/ctet/CtetSupportFooterScreen.jsx";
 import {
   StudentRoadmapHub, StudentRoadmapDetail, StudentRoadmapDay, MyAspirePath, } from "./components/roadmaps/StudentRoadmaps.jsx";
 
@@ -4069,7 +4070,8 @@ return (
               </div>
     </div>
 
-    <section className="ctetTopEntryExperience" aria-label="AspireNest CTET TET top entry experience">
+    <div className="ctetExperiencePage">
+  <section className="ctetTopEntryExperience" aria-label="AspireNest CTET TET top entry experience">
     <div className="ctetTopEntryShell">
       
         
@@ -4380,171 +4382,17 @@ isAdmin={isAdmin}
     navigate={navigate}
   />
 
-{(leaderboard || []).length > 0 && (
-<section className="leaderboardSection">
-  <div className="leaderboardHeader">
-    <span className="badge">Top Performers</span>
-
-    <h2>Mock Test Leaderboard</h2>
-
-    <p>
-      Highest scoring students from recent CTET/TET mock practice.
-    </p>
+  <CtetSupportFooterScreen
+    fullName={fullName}
+    setFullName={setFullName}
+    mobile={mobile}
+    setMobile={setMobile}
+    contactEmail={contactEmail}
+    setContactEmail={setContactEmail}
+    onSubmit={handleContactSubmit}
+    navigate={navigate}
+  />
   </div>
-
-  <div className="leaderboardGrid">
-    {(leaderboard || []).map((student, index) => (
-      <div className="leaderCard" key={student.id || index}>
-        <div className="rankBadge">
-          #{index + 1}
-        </div>
-
-        <h3>
-          {student.email || "Student"}
-        </h3>
-
-        <p className="leaderScore">
-          {student.percentage || 0}%
-        </p>
-
-        <span className="leaderTag">
-          Top Score
-        </span>
-      </div>
-    ))}
-  </div>
-</section>
-)}
-
-<ExperienceFeatureShowcase
-  id="premium-section"
-  badge="PREMIUM LEARNING EXPERIENCE"
-  title="India’s Smartest CTET/TET Preparation Platform"
-  description="AI-powered visual learning, bilingual notes, premium mock tests, revision systems and mentor guidance for serious aspirants."
-  features={[
-    "✅ Visual Learning Notes",
-    "✅ Full Mock Test Series",
-    "✅ Smart Revision System",
-    "✅ Hindi + English Support",
-  ]}
-  actionLabel="Explore Premium"
-  onAction={handlePremiumSectionAccess}
-  cardTitle="CTET Master Dashboard"
-  progressLabel="Connected AspireNest Modules"
-  miniCards={[
-    "📘 Notes",
-    "📝 Mock Tests",
-    "🎥 Videos / Live Classes",
-    "🧭 AspirePath Roadmaps",
-  ]}
-/>
-
-<ExperienceResourceGrid
-  badge="REAL LEARNING MODULES"
-  title="Start with AspireNest Resources"
-  description="Open real CTET/TET modules already connected inside AspireNest Academy."
-  resources={[
-    {
-      icon: "📘",
-      title: "Notes",
-      text: "Open CTET/TET notes and revision material.",
-      onClick: () => navigate("/ctet-tet/notes"),
-    },
-    {
-      icon: "📝",
-      title: "Mock Tests",
-      text: "Practice with available CTET/TET mock tests.",
-      onClick: () => navigate("/ctet-tet/mock-tests"),
-    },
-    {
-      icon: "📰",
-      title: "Current Affairs",
-      text: "Open exam-focused current affairs updates.",
-      onClick: () => navigate("/ctet-tet/current-affairs"),
-    },
-    {
-      icon: "🎥",
-      title: "Videos / Live Classes",
-      text: "Open recorded videos and live classroom area.",
-      onClick: () => navigate("/ctet-tet/videos"),
-    },
-    {
-      icon: "🎓",
-      title: "Courses",
-      text: "Explore CTET/TET course structure.",
-      onClick: () => navigate("/ctet-tet/courses"),
-    },
-    {
-      icon: "🧭",
-      title: "AspirePath Roadmaps",
-      text: "Follow structured study roadmaps.",
-      onClick: () => navigate("/ctet-tet/roadmaps"),
-    },
-  ]}
-/>
-
-<ExperienceFooterPanels
-  id="contact"
-  support={{
-    badge: "ASPIRENEST SUPPORT",
-    title: "Official guidance for CTET/TET learners.",
-    description:
-      "For courses, notes, mock tests, videos, roadmaps, payment, and access support, use the enquiry form.",
-    strong: "AspireNest Academy Helpdesk",
-  }}
-  enquiryTitle="Need guidance? Send enquiry."
-  enquiryContent={
-    <>
-      <input
-        value={fullName}
-        onChange={(e) => setFullName(e.target.value)}
-        placeholder="Full Name"
-      />
-
-      <input
-        value={mobile}
-        onChange={(e) => setMobile(e.target.value)}
-        placeholder="Mobile Number"
-      />
-
-      <input
-        value={contactEmail}
-        onChange={(e) => setContactEmail(e.target.value)}
-        placeholder="Email"
-      />
-
-      <button type="button" onClick={handleContactSubmit}>
-        Submit Enquiry
-      </button>
-    </>
-  }
-  faqTitle="Quick answers before joining."
-  faqs={[
-    "Is this course bilingual?",
-    "Are mock tests included?",
-    "Can I use this on mobile?",
-    "Is pricing in INR?",
-  ]}
-/>
-
-<ExperienceFooter
-  brand="AspireNest Academy"
-  description="Premium bilingual CTET/TET learning platform for future educators in India."
-  links={[
-    { label: "Courses", onClick: () => navigate("/ctet-tet/courses") },
-    { label: "Notes", onClick: () => navigate("/ctet-tet/notes") },
-    { label: "Mock Tests", onClick: () => navigate("/ctet-tet/mock-tests") },
-    { label: "Videos / Live Classes", onClick: () => navigate("/ctet-tet/videos") },
-    { label: "AspirePath Roadmaps", onClick: () => navigate("/ctet-tet/roadmaps") },
-    { label: "Pricing", onClick: () => navigate("/ctet-tet/pricing") },
-  ]}
-  contact={[
-    "📞 +917304256002",
-    "📧 aspirenestacademy@gmail.com",
-    "📍 India",
-  ]}
-  copyright="© 2026 AspireNest Academy • All Rights Reserved"
-/>
 
 
 
