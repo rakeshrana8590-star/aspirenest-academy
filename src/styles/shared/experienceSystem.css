@@ -2943,3 +2943,581 @@ html {
   }
 }
 
+
+/* === CTET Screen 2: Premium Student Pathway Command Center === */
+
+.ctetCommandScreen {
+  position: relative;
+  padding: 34px clamp(16px, 3vw, 48px) 44px;
+  background:
+    radial-gradient(circle at 8% 5%, rgba(255, 138, 0, 0.18), transparent 32%),
+    radial-gradient(circle at 86% 18%, rgba(90, 120, 255, 0.16), transparent 34%),
+    linear-gradient(135deg, #020814 0%, #07111f 48%, #03070f 100%);
+  color: #f8fafc;
+  overflow: hidden;
+}
+
+.ctetCommandScreen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, rgba(255, 145, 0, 0.24) 1px, transparent 1.6px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035), transparent 30%, rgba(255, 145, 0, 0.04));
+  background-size: 22px 22px, 100% 100%;
+  opacity: 0.2;
+  mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+}
+
+.ctetCommandShell {
+  position: relative;
+  z-index: 1;
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+.ctetCommandTopGrid {
+  display: grid;
+  grid-template-columns: minmax(280px, 420px) 1fr;
+  gap: 34px;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.ctetCommandBadge,
+.ctetModuleKicker,
+.ctetMentorBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  border: 1px solid rgba(255, 145, 0, 0.28);
+  background: linear-gradient(135deg, rgba(255, 145, 0, 0.14), rgba(255, 255, 255, 0.06));
+  color: #f8fafc;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-weight: 850;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.ctetCommandStory h2 {
+  margin: 24px 0 14px;
+  font-size: clamp(2.25rem, 4vw, 4.45rem);
+  line-height: 0.96;
+  letter-spacing: -0.07em;
+  color: #f8fafc;
+}
+
+.ctetCommandStory h2 span {
+  display: block;
+  color: #ff8a00;
+  text-shadow: 0 0 32px rgba(255, 138, 0, 0.35);
+}
+
+.ctetCommandStory p {
+  max-width: 560px;
+  margin: 0;
+  color: #cbd5e1;
+  font-size: clamp(1rem, 1.25vw, 1.22rem);
+  line-height: 1.65;
+}
+
+.ctetJourneyRail {
+  min-height: 235px;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(86px, 1fr));
+  gap: 16px;
+  align-items: center;
+  padding: 28px 30px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)),
+    rgba(2, 8, 20, 0.82);
+  box-shadow:
+    0 28px 80px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.ctetJourneyStep {
+  position: relative;
+  min-width: 0;
+  text-align: center;
+  color: #cbd5e1;
+}
+
+.ctetJourneyNode {
+  position: relative;
+  z-index: 2;
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 15px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: #dbeafe;
+  border: 3px solid rgba(148, 163, 184, 0.24);
+  background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.18), rgba(15, 23, 42, 0.95));
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.35);
+}
+
+.ctetJourneyStep.isActive .ctetJourneyNode {
+  color: #ffb020;
+  border-color: rgba(255, 145, 0, 0.85);
+  box-shadow:
+    0 0 0 8px rgba(255, 145, 0, 0.08),
+    0 0 34px rgba(255, 145, 0, 0.46);
+}
+
+.ctetJourneyLine {
+  position: absolute;
+  top: 38px;
+  left: calc(50% + 47px);
+  width: calc(100% - 18px);
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 145, 0, 0.72), rgba(148, 163, 184, 0.25));
+}
+
+.ctetJourneyStep strong {
+  display: block;
+  margin-bottom: 7px;
+  color: #f8fafc;
+  font-size: 1.05rem;
+}
+
+.ctetJourneyStep small {
+  display: block;
+  max-width: 125px;
+  margin: 0 auto;
+  color: #b9c4d6;
+  line-height: 1.25;
+}
+
+.ctetCommandBodyGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  gap: 34px;
+  align-items: stretch;
+}
+
+.ctetModuleCommandZone {
+  min-width: 0;
+}
+
+.ctetModuleHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.ctetModuleKicker {
+  border-color: rgba(148, 163, 184, 0.22);
+  background: transparent;
+  padding: 0 0 12px;
+  border-width: 0 0 1px;
+  border-radius: 0;
+  color: #f8fafc;
+}
+
+.ctetModuleGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(230px, 1fr));
+  gap: 20px 22px;
+}
+
+.ctetModuleCard,
+.ctetMomentumCard {
+  border: 1px solid rgba(255, 145, 0, 0.22);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 95% 8%, rgba(255, 145, 0, 0.11), transparent 28%),
+    linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(3, 10, 22, 0.92));
+  color: #f8fafc;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+.ctetModuleCard:hover,
+.ctetMomentumCard:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 145, 0, 0.55);
+  box-shadow: 0 24px 52px rgba(0, 0, 0, 0.32);
+}
+
+.ctetModuleCard {
+  min-height: 168px;
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 16px;
+  align-items: start;
+  padding: 24px 22px;
+}
+
+.ctetModuleIcon,
+.ctetMomentumIcon {
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.075);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 14px 34px rgba(0, 0, 0, 0.26);
+}
+
+.ctetModuleIcon {
+  width: 62px;
+  height: 62px;
+}
+
+.ctetModuleContent {
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.ctetModuleContent > strong {
+  font-size: 1.25rem;
+  letter-spacing: -0.03em;
+}
+
+.ctetModuleMetaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.ctetModuleMetaRow em,
+.ctetModuleMetaRow b {
+  font-style: normal;
+  width: fit-content;
+  border-radius: 9px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  line-height: 1;
+}
+
+.ctetModuleMetaRow em {
+  color: #dbeafe;
+  background: rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.ctetModuleMetaRow b {
+  color: #fbbf24;
+  background: rgba(255, 145, 0, 0.12);
+  border: 1px solid rgba(255, 145, 0, 0.18);
+}
+
+.ctetModuleCta {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 4px;
+  padding: 10px 18px;
+  border-radius: 11px;
+  color: #ff9f1a;
+  font-weight: 900;
+  border: 1px solid rgba(255, 145, 0, 0.45);
+  background: rgba(255, 145, 0, 0.06);
+}
+
+.ctetModuleCard.tone-gold .ctetModuleIcon { color: #fbbf24; }
+.ctetModuleCard.tone-blue .ctetModuleIcon { color: #93c5fd; }
+.ctetModuleCard.tone-violet .ctetModuleIcon { color: #a78bfa; }
+.ctetModuleCard.tone-cyan .ctetModuleIcon { color: #67e8f9; }
+.ctetModuleCard.tone-purple .ctetModuleIcon { color: #c084fc; }
+.ctetModuleCard.tone-amber .ctetModuleIcon { color: #f59e0b; }
+
+.ctetMomentumPanel {
+  border: 1px solid rgba(255, 145, 0, 0.45);
+  border-radius: 26px;
+  padding: 32px;
+  background:
+    radial-gradient(circle at 100% 6%, rgba(255, 145, 0, 0.24), transparent 31%),
+    linear-gradient(145deg, rgba(30, 20, 12, 0.88), rgba(3, 10, 22, 0.94));
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+}
+
+.ctetMomentumHeader {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.ctetMomentumHeader > span {
+  color: #ffb020;
+  font-size: 1.6rem;
+  font-weight: 1000;
+}
+
+.ctetMomentumHeader h3 {
+  margin: 0 0 10px;
+  font-size: 1.35rem;
+}
+
+.ctetMomentumHeader p {
+  margin: 0;
+  color: #d1d5db;
+  line-height: 1.48;
+}
+
+.ctetMomentumStack {
+  display: grid;
+  gap: 18px;
+}
+
+.ctetMomentumCard {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 16px;
+  padding: 20px;
+}
+
+.ctetMomentumIcon {
+  width: 58px;
+  height: 58px;
+  border-radius: 999px;
+  color: #ffb020;
+  border: 2px solid rgba(255, 145, 0, 0.42);
+}
+
+.ctetMomentumCard.tone-target .ctetMomentumIcon {
+  color: #a78bfa;
+  border-color: rgba(167, 139, 250, 0.55);
+}
+
+.ctetMomentumCard strong,
+.ctetMomentumCard small,
+.ctetMomentumCard em {
+  display: block;
+}
+
+.ctetMomentumCard strong {
+  margin-bottom: 8px;
+  font-size: 1.05rem;
+}
+
+.ctetMomentumCard small {
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+
+.ctetMomentumCard em {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  color: #ff9f1a;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.ctetMentorTeaserStrip {
+  margin-top: 36px;
+  display: grid;
+  grid-template-columns: minmax(320px, 1.1fr) minmax(260px, 0.85fr) minmax(240px, 0.55fr);
+  gap: 34px;
+  align-items: center;
+  padding: 26px 34px;
+  border: 1px solid rgba(255, 145, 0, 0.48);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 4% 15%, rgba(255, 145, 0, 0.28), transparent 22%),
+    radial-gradient(circle at 98% 16%, rgba(255, 145, 0, 0.18), transparent 24%),
+    linear-gradient(135deg, rgba(35, 21, 8, 0.82), rgba(3, 10, 22, 0.96));
+}
+
+.ctetMentorTeaserLeft {
+  display: flex;
+  gap: 26px;
+  align-items: center;
+}
+
+.ctetMentorAura {
+  flex: 0 0 auto;
+  width: 118px;
+  height: 118px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 5px solid rgba(255, 176, 32, 0.92);
+  background:
+    radial-gradient(circle at 35% 20%, rgba(255, 255, 255, 0.22), transparent 28%),
+    linear-gradient(135deg, #1f2937, #78350f);
+  box-shadow:
+    0 0 0 9px rgba(255, 145, 0, 0.12),
+    0 0 42px rgba(255, 145, 0, 0.42);
+}
+
+.ctetMentorAura span {
+  color: #fff7ed;
+  font-size: 2rem;
+  font-weight: 950;
+  letter-spacing: -0.08em;
+}
+
+.ctetMentorTeaserStrip h3 {
+  margin: 12px 0 10px;
+  color: #f8fafc;
+  font-size: 1.35rem;
+  letter-spacing: -0.035em;
+}
+
+.ctetMentorTeaserStrip p {
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.52;
+}
+
+.ctetMentorTeaserCenter {
+  padding-left: 34px;
+  border-left: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.ctetMentorTeaserCenter strong {
+  display: block;
+  margin-bottom: 10px;
+  color: #ff9f1a;
+}
+
+.ctetMentorTeaserAction {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+}
+
+.ctetMentorTeaserAction button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 58px;
+  padding: 0 26px;
+  border: 0;
+  border-radius: 12px;
+  color: #fff7ed;
+  font-weight: 950;
+  font-size: 1rem;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ff6a00, #ff9f1a);
+  box-shadow: 0 18px 42px rgba(255, 106, 0, 0.38);
+}
+
+.ctetMentorTeaserAction small {
+  color: #cbd5e1;
+}
+
+@media (max-width: 1180px) {
+  .ctetCommandTopGrid,
+  .ctetCommandBodyGrid,
+  .ctetMentorTeaserStrip {
+    grid-template-columns: 1fr;
+  }
+
+  .ctetJourneyRail {
+    grid-template-columns: repeat(3, minmax(130px, 1fr));
+  }
+
+  .ctetJourneyLine {
+    display: none;
+  }
+
+  .ctetMomentumPanel {
+    padding: 26px;
+  }
+
+  .ctetMentorTeaserCenter {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 860px) {
+  .ctetModuleGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .ctetJourneyRail {
+    grid-template-columns: repeat(2, minmax(130px, 1fr));
+    padding: 22px;
+  }
+
+  .ctetModuleCard {
+    grid-template-columns: 58px 1fr;
+    padding: 20px;
+  }
+
+  .ctetModuleIcon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+  }
+
+  .ctetMentorTeaserLeft {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .ctetCommandScreen {
+    padding: 24px 14px 34px;
+  }
+
+  .ctetCommandStory h2 {
+    font-size: 2.35rem;
+  }
+
+  .ctetJourneyRail {
+    grid-template-columns: 1fr;
+  }
+
+  .ctetJourneyStep {
+    display: grid;
+    grid-template-columns: 66px 1fr;
+    gap: 12px;
+    text-align: left;
+    align-items: center;
+  }
+
+  .ctetJourneyNode {
+    width: 58px;
+    height: 58px;
+    margin: 0;
+  }
+
+  .ctetJourneyStep small {
+    max-width: none;
+    margin: 0;
+  }
+
+  .ctetMomentumCard {
+    grid-template-columns: 54px 1fr;
+    padding: 18px;
+  }
+
+  .ctetMomentumIcon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .ctetMentorTeaserStrip {
+    padding: 22px;
+  }
+
+  .ctetMentorTeaserLeft {
+    flex-direction: column;
+  }
+
+  .ctetMentorAura {
+    width: 92px;
+    height: 92px;
+  }
+}
