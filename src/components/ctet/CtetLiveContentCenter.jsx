@@ -26,64 +26,23 @@ const openSafeCtetTarget = (navigate, value, fallback = "/ctet-tet/courses") => 
   navigate(target);
 };
 
-const fallbackUpdates = [
-  {
-    id: "notes-featured",
-    type: "notes",
-    title: "CDP Quick Revision Notes – Learning Theories",
-    description: "Concise revision notes with exam-focused points, diagrams and PYQ links.",
-    updated: "Updated today, 10:30 AM",
-    route: "/ctet-tet/notes",
-    cta: "Open",
-    featured: true,
-  },
-  {
-    id: "mock-test",
-    type: "mock",
-    title: "Pedagogy Practice Test – 10",
-    description: "New mock test with detailed solutions and performance insights.",
-    updated: "Updated today, 09:15 AM",
-    route: "/ctet-tet/mock-tests",
-    cta: "View",
-  },
-  {
-    id: "current-affairs",
-    type: "current",
-    title: "Daily Current Affairs – 17 May 2025",
-    description: "Important education and national updates with exam relevance.",
-    updated: "Updated today, 08:00 AM",
-    route: "/ctet-tet/current-affairs",
-    cta: "Open",
-  },
-  {
-    id: "videos",
-    type: "videos",
-    title: "Inclusive Classroom Strategies – Replay",
-    description: "Recorded session with practical examples and teaching approaches.",
-    updated: "Updated yesterday, 07:30 PM",
-    route: "/ctet-tet/videos",
-    cta: "Watch",
-  },
-  {
-    id: "roadmap",
-    type: "roadmap",
-    title: "AspirePath – CTET Paper 1 Roadmap",
-    description: "New milestone added: Environmental Studies Deep Dive.",
-    updated: "Updated yesterday, 05:45 PM",
-    route: "/ctet-tet/roadmaps",
-    cta: "Open",
-  },
-];
+  const fallbackUpdates = [
+    {
+      id: "no-updates-yet",
+      type: "live",
+      title: "Live updates will appear here",
+      description: "Fresh CTET/TET classes, mock schedules, notes, and announcements will appear here after publishing Experience events.",
+      updated: "No event scheduled yet",
+      route: "/ctet-tet/courses",
+      cta: "Explore Learning Hub",
+      featured: true,
+      empty: true,
+    },
+  ];
 
-const fallbackWeek = [
-  ["today", "Sat", "17 May", "07:00 PM – 08:00 PM", "CDP Pedagogy Deep Dive (Live Class)", "PYQs, Concepts & Exam Strategies", "live", "Join Live", "/ctet-tet/videos"],
-  ["", "Sun", "18 May", "10:00 AM – 11:30 AM", "CTET Paper 1 Mock Test – 05", "Full-Length Mock with Solutions", "mock", "Start Test", "/ctet-tet/mock-tests"],
-  ["", "Mon", "19 May", "06:30 PM – 07:30 PM", "AspirePath Task: EVS – Biodiversity", "Complete concept map & practice set", "roadmap", "View Task", "/ctet-tet/roadmaps"],
-  ["", "Tue", "20 May", "07:00 PM – 08:00 PM", "Hindi Pedagogy Revision Session", "Teaching Methods & Practice", "live", "Join Live", "/ctet-tet/videos"],
-  ["", "Wed", "21 May", "09:00 AM – 09:30 AM", "Weekly Current Affairs Drop", "Education & Teaching Updates", "current", "View PDF", "/ctet-tet/current-affairs"],
-  ["", "Fri", "23 May", "06:00 PM – 07:00 PM", "Maths Pedagogy – Problem Solving", "Concepts, Tricks & Practice", "videos", "Watch", "/ctet-tet/videos"],
-  ["", "Sun", "25 May", "07:00 PM – 08:00 PM", "Weekly Revision & Doubt Clearing", "Quick Revision + Q&A", "live", "Join Live", "/ctet-tet/videos"],
-];
+  const fallbackWeek = [
+    ["", "—", "Soon", "Schedule pending", "This week’s plan will appear here", "Upcoming live classes, mock tests, and learning events will appear after publishing Experience events.", "live", "Explore Hub", "/ctet-tet/courses"],
+  ];
 
 const typeMeta = {
   notes: { label: "Notes", icon: "▤", tone: "notes", route: "/ctet-tet/notes" },
