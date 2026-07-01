@@ -56,8 +56,8 @@ export const getExperienceEventStatus = (event = {}, nowValue = new Date()) => {
     return EXPERIENCE_EVENT_STATUS.COMPLETED;
   }
 
-  if (manualStatus === EXPERIENCE_EVENT_STATUS.LIVE) {
-    return EXPERIENCE_EVENT_STATUS.LIVE;
+  if (endAt && now > endAt) {
+    return EXPERIENCE_EVENT_STATUS.EXPIRED;
   }
 
   if (startAt && now < startAt) {
@@ -68,12 +68,12 @@ export const getExperienceEventStatus = (event = {}, nowValue = new Date()) => {
     return EXPERIENCE_EVENT_STATUS.LIVE;
   }
 
-  if (startAt && !endAt && now >= startAt) {
+  if (manualStatus === EXPERIENCE_EVENT_STATUS.LIVE) {
     return EXPERIENCE_EVENT_STATUS.LIVE;
   }
 
-  if (endAt && now > endAt) {
-    return EXPERIENCE_EVENT_STATUS.EXPIRED;
+  if (startAt && !endAt && now >= startAt) {
+    return EXPERIENCE_EVENT_STATUS.LIVE;
   }
 
   return manualStatus || EXPERIENCE_EVENT_STATUS.PUBLISHED;
@@ -86,7 +86,6 @@ export const isPublicExperienceEvent = (event = {}, nowValue = new Date()) => {
     EXPERIENCE_EVENT_STATUS.SCHEDULED,
     EXPERIENCE_EVENT_STATUS.PUBLISHED,
     EXPERIENCE_EVENT_STATUS.LIVE,
-    EXPERIENCE_EVENT_STATUS.COMPLETED,
   ].includes(status);
 };
 
