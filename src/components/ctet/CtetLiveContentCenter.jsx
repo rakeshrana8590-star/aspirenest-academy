@@ -1,5 +1,31 @@
 import React, { useMemo, useState } from "react";
 
+const resolveSafeCtetTarget = (value, fallback = "/ctet-tet/courses") => {
+  const raw = String(value || "").trim();
+  if (!raw) return fallback;
+
+  if (raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("mailto:") || raw.startsWith("tel:")) {
+    return raw;
+  }
+
+  if (raw.startsWith("/")) {
+    return raw;
+  }
+
+  return fallback;
+};
+
+const openSafeCtetTarget = (navigate, value, fallback = "/ctet-tet/courses") => {
+  const target = resolveSafeCtetTarget(value, fallback);
+
+  if (target.startsWith("http://") || target.startsWith("https://") || target.startsWith("mailto:") || target.startsWith("tel:")) {
+    window.open(target, "_blank", "noopener,noreferrer");
+    return;
+  }
+
+  navigate(target);
+};
+
 const fallbackUpdates = [
   {
     id: "notes-featured",

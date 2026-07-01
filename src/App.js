@@ -475,7 +475,56 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
 
   const requireAdmin = () => Boolean(user && isAdmin(user));
 
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const accountMenuRef = React.useRef(null);
+
+  const accountDisplayName =
+    user?.displayName ||
+    user?.email?.split("@")?.[0] ||
+    (user ? "AspireNest User" : "Guest");
+
+  const accountEmail = user?.email || "";
+
+  const openAccountTarget = (targetPath) => {
+    setAccountMenuOpen(false);
+    navigate(targetPath);
+  };
+
+  const logoutFromAccountMenu = async () => {
+    setAccountMenuOpen(false);
+    await handleLogout();
+  };
+
   React.useEffect(() => {
+    if (!accountMenuOpen) return;
+
+    const handleAccountMenuOutside = (event) => {
+      if (!accountMenuRef.current) return;
+      if (!accountMenuRef.current.contains(event.target)) {
+        setAccountMenuOpen(false);
+      }
+    };
+
+    const handleAccountMenuEscape = (event) => {
+      if (event.key === "Escape") {
+        setAccountMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleAccountMenuOutside);
+    document.addEventListener("touchstart", handleAccountMenuOutside);
+    document.addEventListener("keydown", handleAccountMenuEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleAccountMenuOutside);
+      document.removeEventListener("touchstart", handleAccountMenuOutside);
+      document.removeEventListener("keydown", handleAccountMenuEscape);
+    };
+  }, [accountMenuOpen]);
+
+  React.useEffect(() => {
+    if (authLoading) return;
+
     const studentProtectedRoutes = new Set([
       "/student-dashboard",
       "/profile/setup",
@@ -483,23 +532,27 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
       "/my-courses",
       "/my-notes",
       "/my-tests",
+      "/my-videos",
       "/payment",
       "/payment-history",
+      "/leaderboard",
       "/ai-classroom",
+      "/ctet-tet/redeem",
     ]);
 
     const isStudentProtectedRoute = studentProtectedRoutes.has(location.pathname);
     const isAdminRoute = location.pathname.startsWith("/admin");
 
     if (!user && (isStudentProtectedRoute || isAdminRoute)) {
-      navigate("/login", { replace: true });
+      const returnToPath = `${location.pathname}${location.search || ""}`;
+      navigate(`/login?returnTo=${encodeURIComponent(returnToPath)}`, { replace: true });
       return;
     }
 
     if (user && isAdminRoute && !isAdmin(user)) {
       navigate("/", { replace: true });
     }
-  }, [location.pathname, navigate, user]);
+  }, [authLoading, location.pathname, location.search, navigate, user]);
 
   const hasPlanAccess = (requiredPlan = "FREE", options = {}) => {
     const normalizedRequiredPlan = String(requiredPlan || "FREE").trim().toUpperCase();
@@ -3851,16 +3904,54 @@ return (
           Login
         </button>
       ) : (
-        <button
-          className="cleanHeaderSwitch"
-          onClick={handleLogout}
-          title="Click to logout"
-        >
-          <span className="switchDot"></span>
-          <span>
-            {isAdmin(user) ? "Admin ON" : "Student ON"}
-          </span>
-        </button>
+          <div className="accountMenuWrap cleanAccountWrap" ref={accountMenuRef}>
+            <button
+              className="cleanHeaderSwitch"
+              onClick={() => setAccountMenuOpen((open) => !open)}
+              title="Open account menu"
+            >
+              <span className="switchDot"></span>
+              <span>
+                {isAdmin(user) ? "Admin ON" : "Student ON"}
+              </span>
+            </button>
+
+            {accountMenuOpen ? (
+              <div className="premiumAccountDropdown">
+                <div className="accountDropdownProfile">
+                  <b>{isAdmin(user) ? "AN" : "ST"}</b>
+                  <div>
+                    <strong>{accountDisplayName}</strong>
+                    <small>{accountEmail}</small>
+                  </div>
+                </div>
+
+                <button type="button" onClick={() => openAccountTarget("/my-profile")}>
+                  <span>👤</span>
+                  <div>
+                    <strong>Profile</strong>
+                    <small>View account details</small>
+                  </div>
+                </button>
+
+                <button type="button" onClick={() => openAccountTarget(isAdmin(user) ? "/admin" : "/student-dashboard")}>
+                  <span>{isAdmin(user) ? "⚙️" : "📊"}</span>
+                  <div>
+                    <strong>{isAdmin(user) ? "Admin Dashboard" : "Student Dashboard"}</strong>
+                    <small>{isAdmin(user) ? "Manage academy" : "Track learning"}</small>
+                  </div>
+                </button>
+
+                <button type="button" className="danger" onClick={logoutFromAccountMenu}>
+                  <span>🚪</span>
+                  <div>
+                    <strong>Logout</strong>
+                    <small>Sign out safely</small>
+                  </div>
+                </button>
+              </div>
+            ) : null}
+          </div>
       )}
     </nav>
   </header>
@@ -4054,18 +4145,62 @@ return (
                     Search anything...
                     <kbd>⌘ K</kbd>
                   </button>
-                        <button
-                    type="button"
-                    className="ctetLockedAccount"
-                    onClick={() => navigate(user ? (isAdmin(user) ? "/admin" : "/student-dashboard") : "/login")}
-                  >
-                    <i />
-                    <span>
-                      <strong>{user ? (isAdmin(user) ? "Admin" : "Student") : "Login"}</strong>
-                      <small>{user ? (isAdmin(user) ? "Premium Access" : "Learning Access") : "Start Learning"}</small>
-                    </span>
-                    <b>{user ? (isAdmin(user) ? "AN" : "ST") : "IN"}</b>
-                  </button>
+                    <div className="accountMenuWrap" ref={accountMenuRef}>
+                      <button
+                        type="button"
+                        className="ctetLockedAccount"
+                        onClick={() => {
+                          if (!user) {
+                            navigate("/login");
+                            return;
+                          }
+                          setAccountMenuOpen((open) => !open);
+                        }}
+                      >
+                        <i />
+                        <span>
+                          <strong>{user ? (isAdmin(user) ? "Admin" : "Student") : "Login"}</strong>
+                          <small>{user ? (isAdmin(user) ? "Premium Access" : "Learning Access") : "Start Learning"}</small>
+                        </span>
+                        <b>{user ? (isAdmin(user) ? "AN" : "ST") : "IN"}</b>
+                      </button>
+
+                      {user && accountMenuOpen ? (
+                        <div className="premiumAccountDropdown">
+                          <div className="accountDropdownProfile">
+                            <b>{isAdmin(user) ? "AN" : "ST"}</b>
+                            <div>
+                              <strong>{accountDisplayName}</strong>
+                              <small>{accountEmail}</small>
+                            </div>
+                          </div>
+
+                          <button type="button" onClick={() => openAccountTarget("/my-profile")}>
+                            <span>👤</span>
+                            <div>
+                              <strong>Profile</strong>
+                              <small>View account details</small>
+                            </div>
+                          </button>
+
+                          <button type="button" onClick={() => openAccountTarget(isAdmin(user) ? "/admin" : "/student-dashboard")}>
+                            <span>{isAdmin(user) ? "⚙️" : "📊"}</span>
+                            <div>
+                              <strong>{isAdmin(user) ? "Admin Dashboard" : "Student Dashboard"}</strong>
+                              <small>{isAdmin(user) ? "Manage academy" : "Track learning"}</small>
+                            </div>
+                          </button>
+
+                          <button type="button" className="danger" onClick={logoutFromAccountMenu}>
+                            <span>🚪</span>
+                            <div>
+                              <strong>Logout</strong>
+                              <small>Sign out safely</small>
+                            </div>
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
                 </div>
               </div>
     </div>
@@ -4309,6 +4444,7 @@ isAdmin={isAdmin}
       Psychology, Pedagogy, Teacher Training, and Digital Learning.
     </p>
 
+
     <div className="ctetS3FreshCredentialGrid">
       {[
         ["🏫", "Current Role", "I/C Principal & Assistant Professor"],
@@ -4346,16 +4482,38 @@ isAdmin={isAdmin}
         </div>
       </div>
 
-      <blockquote className="ctetS3FreshQuoteBox">
-        <span>“</span>
-        <p>
-          Concept clarity, practical pedagogy, bilingual explanation, and
-          exam-focused preparation are at the heart of our teaching.
-        </p>
-        <cite>– Dr. Varsha D. Maru</cite>
-      </blockquote>
+        <aside className="ctetS3FreshCtaPanel" aria-label="Mentor quick actions">
+          <button
+            type="button"
+            className="ctetS3FreshCtaCard"
+            onClick={() => setShowProfile(true)}
+          >
+            <span>👤</span>
+            <div>
+              <strong>View Full Profile</strong>
+              <small>Academic portfolio</small>
+            </div>
+            <b>›</b>
+          </button>
+
+          <button
+            type="button"
+            className="ctetS3FreshCtaCard"
+            onClick={() => setShowMentorProfile(true)}
+          >
+            <span>💬</span>
+            <div>
+              <strong>Contact Mentor</strong>
+              <small>Email for guidance</small>
+            </div>
+            <b>›</b>
+          </button>
+        </aside>
+
     </div>
   </div>
+
+
 
   <div className="ctetS3FreshImpactStrip">
     {[
@@ -4375,7 +4533,137 @@ isAdmin={isAdmin}
 </section>
 
 
-  <CtetLiveContentCenter
+  
+    
+{showMentorProfile && (
+  <div className="mentorProfileOverlay">
+    <div className="mentorProfileModal">
+      <button
+        className="closeMentorProfile"
+        onClick={() => setShowMentorProfile(false)}
+      >
+        ×
+      </button>
+
+      <h2>Connect with your mentor</h2>
+
+      <h3>Dr. Varsha Dalpat Maru</h3>
+
+      <p>
+        <strong>
+          Founder & Academic Mentor
+        </strong>{" "}
+        — AspireNest Academy
+      </p>
+
+      <p>
+        “Guiding future educators with
+        knowledge, confidence, and the right
+        mentorship to transform aspirations
+        into success.”
+      </p>
+
+      <p>
+        <strong>📍 Location:</strong>
+        {" "}Mumbai, Maharashtra, India
+      </p>
+
+      <p>
+        <strong>📧 Email:</strong>
+        {" "}dr.varshamaru@gmail.com
+      </p>
+
+      <p>
+        <strong>📞 Phone:</strong>
+        {" "}+91 97736 92578
+      </p>
+
+      <p>
+        <strong>🔗 LinkedIn:</strong>
+        <br />
+        linkedin.com/in/dr-varsha-maru-4a71b614b
+      </p>
+
+      <p>
+        <strong>
+          🌐 Professional Portfolio:
+        </strong>
+        <br />
+        bold.pro/my/drvarshadalpatmaru
+      </p>
+    </div>
+  </div>
+)}
+
+{showProfile && (
+  <div
+  className="mentorProfileOverlay"
+    onClick={() => setShowProfile(false)}
+  >
+    <div
+     className="mentorProfileModal profileModal"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button
+       className="closeMentorProfile"
+        onClick={() => setShowProfile(false)}
+      >
+        ✕
+      </button>
+
+      <h2>Professional Academic Profile</h2>
+
+      <h3>Dr. Varsha Dalpat Maru</h3>
+
+      <p className="profileTag">
+        Founder & Academic Mentor — AspireNest Academy
+      </p>
+
+      <p>
+        “Where Aspirations Turn Into Selections”
+      </p>
+
+      <div className="profileContent">
+
+        <h4>Professional Profile</h4>
+
+        <p>
+          Dr. Varsha Dalpat Maru is an accomplished educator,
+          academic leader, researcher, and mentor with
+          extensive experience in teacher education,
+          psychology, educational research, and academic leadership.
+        </p>
+
+        <p>
+          Currently serving as I/C Principal and Assistant
+          Professor at Humera Khan College of Education, Mumbai.
+        </p>
+
+        <h4>Academic Qualifications</h4>
+
+        <ul>
+          <li>Ph.D. in Education</li>
+          <li>UGC-NET Qualified – Education & Psychology</li>
+          <li>CTET Paper-II Qualified</li>
+          <li>TAIT Qualified</li>
+          <li>M.Ed. – Education</li>
+          <li>M.A. Psychology</li>
+          <li>Google Certified Educator</li>
+        </ul>
+
+        <h4>Research Areas</h4>
+
+        <p>
+          Cyberbullying, Mental Health, Educational Psychology,
+          Digital Education & Teacher Training.
+        </p>
+
+      </div>
+    </div>
+  </div>
+)}
+
+    <CtetLiveContentCenter
     events={ctetExperienceEvents}
     upcomingEvents={ctetUpcomingExperienceEvents}
     loading={ctetExperienceLoading}
@@ -5095,6 +5383,11 @@ isAdmin={isAdmin}
       />
     ) : null
   }
+/>
+
+<Route
+  path="/admin/content/courses"
+  element={requireAdmin() ? <Navigate to="/admin/content" replace /> : <Navigate to="/login" replace />}
 />
 
 <Route
@@ -8451,7 +8744,7 @@ ${paymentProof}
 
 <div
   className="learningHubCard"
-  onClick={() => navigate("/learning-paths")}
+  onClick={() => navigate("/ctet-tet/roadmaps")}
 >
   <div className="learningHubIcon">🛣️</div>
 
@@ -8780,7 +9073,7 @@ Premium
     <div className="buttons">
   <button
     className="btnLink"
-    onClick={() => navigate("/learning")}
+    onClick={() => navigate("/ctet-tet/courses")}
   >
     Start Learning
   </button>
