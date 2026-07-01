@@ -22,6 +22,7 @@ import {
   getExperienceEventTypeLabel,
   normalizeExperienceEvent,
 } from "../experienceEventUtils";
+import "./adminExperienceEvents.css";
 
 const DEFAULT_FORM = {
   title: "",
@@ -40,9 +41,39 @@ const DEFAULT_FORM = {
   featured: false,
 };
 
-const toDateTimeLocalValue = (value = "") => {
+const STATUS_FILTERS = ["ALL", ...Object.values(EXPERIENCE_EVENT_STATUS)];
+const TYPE_FILTERS = ["ALL", ...Object.values(EXPERIENCE_EVENT_TYPES)];
+
+const toDateTimeLocalValue = (value = "") => String(value || "").trim();
+
+const getDateInputValue = (value) => {
   if (!value) return "";
-  return String(value).trim();
+  if (typeof value === "string") return value.slice(0, 16);
+
+  const date =
+    typeof value?.toDate === "function" ? value.toDate() : new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "";
+
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return localDate.toISOString().slice(0, 16);
+};
+
+const formatDateTime = (value) => {
+  if (!value) return "Not scheduled";
+
+  const date =
+    typeof value?.toDate === "function" ? value.toDate() : new Date(value);
+
+  if (Number.isNaN(date.getTime())) return String(value);
+
+  return date.toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 };
 
 export default function AdminExperienceEventsRoute() {
@@ -55,10 +86,48 @@ export default function AdminExperienceEventsRoute() {
   const [editingEventId, setEditingEventId] = useState("");
   const [routeError, setRouteError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [typeFilter, setTypeFilter] = useState("ALL");
 
   const normalizedEvents = useMemo(
     () => events.map((event) => normalizeExperienceEvent(event.raw || event)),
     [events]
+  );
+
+  const filteredEvents = useMemo(() => {
+    const query = searchText.trim().toLowerCase();
+
+    return normalizedEvents.filter((event) => {
+      const statusMatch = statusFilter === "ALL" || event.status === statusFilter;
+      const typeMatch = typeFilter === "ALL" || event.type === typeFilter;
+      const haystack = [
+        event.title,
+        event.description,
+        event.subject,
+        event.chapter,
+        event.mentorName,
+        event.planType,
+        event.typeLabel,
+        event.status,
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return statusMatch && typeMatch && (!query || haystack.includes(query));
+    });
+  }, [normalizedEvents, searchText, statusFilter, typeFilter]);
+
+  const stats = useMemo(
+    () => ({
+      total: normalizedEvents.length,
+      live: normalizedEvents.filter((event) => event.status === EXPERIENCE_EVENT_STATUS.LIVE).length,
+      upcoming: normalizedEvents.filter((event) =>
+        [EXPERIENCE_EVENT_STATUS.SCHEDULED, EXPERIENCE_EVENT_STATUS.PUBLISHED].includes(event.status)
+      ).length,
+      featured: normalizedEvents.filter((event) => event.featured).length,
+    }),
+    [normalizedEvents]
   );
 
   const loadEvents = async () => {
@@ -91,21 +160,6 @@ export default function AdminExperienceEventsRoute() {
     setEditingEventId("");
     setSuccessMessage("");
     setRouteError("");
-  };
-
-  const getDateInputValue = (value) => {
-    if (!value) return "";
-    if (typeof value === "string") return value.slice(0, 16);
-
-    const date =
-      typeof value?.toDate === "function"
-        ? value.toDate()
-        : new Date(value);
-
-    if (Number.isNaN(date.getTime())) return "";
-
-    const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-    return localDate.toISOString().slice(0, 16);
   };
 
   const startEdit = (eventRecord = {}) => {
@@ -177,7 +231,7 @@ export default function AdminExperienceEventsRoute() {
     setSuccessMessage("");
 
     try {
-      await createExperienceEvent({
+      const payload = {
         ...form,
         title,
         description: form.description.trim(),
@@ -191,24 +245,32 @@ export default function AdminExperienceEventsRoute() {
         ctaUrl: form.ctaUrl.trim(),
         priority: Number(form.priority || 0),
         featured: Boolean(form.featured),
-      });
+      };
 
-      setSuccessMessage("Experience event created.");
+      if (editingEventId) {
+        await updateExperienceEvent(editingEventId, payload);
+        setSuccessMessage("Experience event updated.");
+      } else {
+        await createExperienceEvent(payload);
+        setSuccessMessage("Experience event created.");
+      }
+
       setForm(DEFAULT_FORM);
+      setEditingEventId("");
       await loadEvents();
     } catch (error) {
-      setRouteError(error?.message || "Experience event create failed.");
+      setRouteError(error?.message || "Experience event save failed.");
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <section className="coursePages">
+    <section className="coursePages adminExperiencePage">
       <AdminSectionHeader
         eyebrow="EXPERIENCE STUDIO"
         title="Experience Events"
-        description="Create public event records for live classes, mock tests, marathons, workshops, doubt sessions, and announcements without touching the existing video classroom system."
+        description="Create, feature, publish, and control CTET/TET live classes, mock schedules, workshops, marathons, and announcements from one manager."
         rightSlot={
           <AdminButton variant="secondary" size="sm" onClick={() => navigate("/admin/content")}>
             Back to Content Studio
@@ -221,180 +283,165 @@ export default function AdminExperienceEventsRoute() {
       ) : null}
 
       {successMessage ? (
-        <div className="adminSuccessBox">
+        <div className="adminExperienceSuccess">
           <strong>{successMessage}</strong>
         </div>
       ) : null}
 
-      <form className="adminFilterBar" onSubmit={handleSubmit}>
-        <label>
-          <span>Title</span>
-          <input
-            value={form.title}
-            onChange={(event) => updateField("title", event.target.value)}
-            placeholder="Example: CTET Mega Mock Sunday"
-          />
-        </label>
+      <div className="adminExperienceStats">
+        <article><span>Total Events</span><strong>{stats.total}</strong><small>All records</small></article>
+        <article><span>Live Now</span><strong>{stats.live}</strong><small>Shown first</small></article>
+        <article><span>Upcoming</span><strong>{stats.upcoming}</strong><small>Schedule ribbon</small></article>
+        <article><span>Featured</span><strong>{stats.featured}</strong><small>Priority spotlight</small></article>
+      </div>
 
-        <label>
-          <span>Type</span>
-          <select
-            value={form.type}
-            onChange={(event) => updateField("type", event.target.value)}
-          >
-            {Object.values(EXPERIENCE_EVENT_TYPES).map((type) => (
-              <option value={type} key={type}>
-                {getExperienceEventTypeLabel(type)}
-              </option>
-            ))}
-          </select>
-        </label>
+      <div className="adminExperienceWorkspace">
+        <form className="adminExperienceFormCard" onSubmit={handleSubmit}>
+          <div className="adminExperienceCardHead">
+            <span>{editingEventId ? "EDIT EVENT" : "CREATE EVENT"}</span>
+            <h2>{editingEventId ? "Update event record" : "Launch event control"}</h2>
+            <p>Use published/live status to power the public CTET/TET experience screen.</p>
+          </div>
 
-        <label>
-          <span>Status</span>
-          <select
-            value={form.status}
-            onChange={(event) => updateField("status", event.target.value)}
-          >
-            {Object.values(EXPERIENCE_EVENT_STATUS).map((status) => (
-              <option value={status} key={status}>
-                {status}
-              </option>
-            ))}
-          </select>
-        </label>
+          <div className="adminExperienceFormGrid">
+            <label className="isWide">
+              <span>Title</span>
+              <input value={form.title} onChange={(event) => updateField("title", event.target.value)} placeholder="Example: CTET Mega Mock Sunday" />
+            </label>
 
-        <label>
-          <span>Plan</span>
-          <select
-            value={form.planType}
-            onChange={(event) => updateField("planType", event.target.value)}
-          >
-            <option value="FREE">FREE</option>
-            <option value="BASIC">BASIC</option>
-            <option value="PREMIUM">PREMIUM</option>
-            <option value="MENTORSHIP">MENTORSHIP</option>
-          </select>
-        </label>
+            <label>
+              <span>Type</span>
+              <select value={form.type} onChange={(event) => updateField("type", event.target.value)}>
+                {Object.values(EXPERIENCE_EVENT_TYPES).map((type) => (
+                  <option value={type} key={type}>{getExperienceEventTypeLabel(type)}</option>
+                ))}
+              </select>
+            </label>
 
-        <label>
-          <span>Subject</span>
-          <input
-            value={form.subject}
-            onChange={(event) => updateField("subject", event.target.value)}
-            placeholder="CDP / Maths / EVS"
-          />
-        </label>
+            <label>
+              <span>Status</span>
+              <select value={form.status} onChange={(event) => updateField("status", event.target.value)}>
+                {Object.values(EXPERIENCE_EVENT_STATUS).map((status) => (
+                  <option value={status} key={status}>{status}</option>
+                ))}
+              </select>
+            </label>
 
-        <label>
-          <span>Chapter</span>
-          <input
-            value={form.chapter}
-            onChange={(event) => updateField("chapter", event.target.value)}
-            placeholder="Optional chapter"
-          />
-        </label>
+            <label>
+              <span>Plan</span>
+              <select value={form.planType} onChange={(event) => updateField("planType", event.target.value)}>
+                <option value="FREE">FREE</option>
+                <option value="BASIC">BASIC</option>
+                <option value="PREMIUM">PREMIUM</option>
+                <option value="MENTORSHIP">MENTORSHIP</option>
+              </select>
+            </label>
 
-        <label>
-          <span>Mentor</span>
-          <input
-            value={form.mentorName}
-            onChange={(event) => updateField("mentorName", event.target.value)}
-            placeholder="Dr. Varsha D. Maru"
-          />
-        </label>
+            <label>
+              <span>Priority</span>
+              <input type="number" value={form.priority} onChange={(event) => updateField("priority", event.target.value)} />
+            </label>
 
-        <label>
-          <span>Start</span>
-          <input
-            type="datetime-local"
-            value={form.startAt}
-            onChange={(event) => updateField("startAt", event.target.value)}
-          />
-        </label>
+            <label>
+              <span>Subject</span>
+              <input value={form.subject} onChange={(event) => updateField("subject", event.target.value)} placeholder="CDP / Maths / EVS" />
+            </label>
 
-        <label>
-          <span>End</span>
-          <input
-            type="datetime-local"
-            value={form.endAt}
-            onChange={(event) => updateField("endAt", event.target.value)}
-          />
-        </label>
+            <label>
+              <span>Chapter</span>
+              <input value={form.chapter} onChange={(event) => updateField("chapter", event.target.value)} placeholder="Optional chapter" />
+            </label>
 
-        <label>
-          <span>CTA Label</span>
-          <input
-            value={form.ctaLabel}
-            onChange={(event) => updateField("ctaLabel", event.target.value)}
-            placeholder="Join Live / Start Mock"
-          />
-        </label>
+            <label>
+              <span>Mentor</span>
+              <input value={form.mentorName} onChange={(event) => updateField("mentorName", event.target.value)} placeholder="Dr. Varsha D. Maru" />
+            </label>
 
-        <label>
-          <span>CTA URL</span>
-          <input
-            value={form.ctaUrl}
-            onChange={(event) => updateField("ctaUrl", event.target.value)}
-            placeholder="/ctet-tet/videos or full link"
-          />
-        </label>
+            <label>
+              <span>Featured</span>
+              <select value={form.featured ? "yes" : "no"} onChange={(event) => updateField("featured", event.target.value === "yes")}>
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+              </select>
+            </label>
 
-        <label>
-          <span>Priority</span>
-          <input
-            type="number"
-            value={form.priority}
-            onChange={(event) => updateField("priority", event.target.value)}
-          />
-        </label>
+            <label>
+              <span>Start</span>
+              <input type="datetime-local" value={form.startAt} onChange={(event) => updateField("startAt", event.target.value)} />
+            </label>
 
-        <label>
-          <span>Featured</span>
-          <select
-            value={form.featured ? "yes" : "no"}
-            onChange={(event) => updateField("featured", event.target.value === "yes")}
-          >
-            <option value="no">No</option>
-            <option value="yes">Yes</option>
-          </select>
-        </label>
+            <label>
+              <span>End</span>
+              <input type="datetime-local" value={form.endAt} onChange={(event) => updateField("endAt", event.target.value)} />
+            </label>
 
-        <label>
-          <span>Description</span>
-          <textarea
-            value={form.description}
-            onChange={(event) => updateField("description", event.target.value)}
-            placeholder="Short public description"
-            rows={3}
-          />
-        </label>
+            <label>
+              <span>CTA Label</span>
+              <input value={form.ctaLabel} onChange={(event) => updateField("ctaLabel", event.target.value)} placeholder="Join Live / Start Mock" />
+            </label>
 
-        <div className="adminFilterActions">
-          <AdminButton variant="primary" type="submit" loading={saving}>
-            Create Event
-          </AdminButton>
-          <AdminButton variant="secondary" onClick={resetForm}>
-            Reset
-          </AdminButton>
-          <AdminButton variant="secondary" loading={loading} onClick={loadEvents}>
-            Refresh
-          </AdminButton>
-        </div>
-      </form>
+            <label>
+              <span>CTA URL</span>
+              <input value={form.ctaUrl} onChange={(event) => updateField("ctaUrl", event.target.value)} placeholder="/ctet-tet/videos or full link" />
+            </label>
+
+            <label className="isWide">
+              <span>Description</span>
+              <textarea value={form.description} onChange={(event) => updateField("description", event.target.value)} placeholder="Short public description" rows={4} />
+            </label>
+          </div>
+
+          <div className="adminExperienceActions">
+            <AdminButton variant="primary" type="submit" loading={saving}>
+              {editingEventId ? "Update Event" : "Create Event"}
+            </AdminButton>
+            <AdminButton variant="secondary" type="button" onClick={resetForm}>
+              {editingEventId ? "Cancel Edit" : "Reset"}
+            </AdminButton>
+            <AdminButton variant="secondary" type="button" loading={loading} onClick={loadEvents}>
+              Refresh
+            </AdminButton>
+          </div>
+        </form>
+
+        <aside className="adminExperienceGuideCard">
+          <span>PUBLIC DISPLAY RULE</span>
+          <h3>What appears on `/ctet-tet`?</h3>
+          <ul>
+            <li><strong>Live</strong> events appear first.</li>
+            <li><strong>Featured</strong> events become spotlight cards.</li>
+            <li><strong>Published/Scheduled</strong> events power upcoming rows.</li>
+            <li><strong>Archived</strong> events stay hidden from public experience.</li>
+          </ul>
+        </aside>
+      </div>
 
       <AdminSectionHeader
         eyebrow="EVENT RECORDS"
         title="Latest Experience Events"
-        description="These records will later power the CTET/TET live ribbon, countdown, AspireNest TV, weekly schedule, and What’s New sections."
-        rightSlot={<AdminStatusPill status="info" label={loading ? "Loading" : String(normalizedEvents.length)} />}
+        description="Filter, edit, archive, and review events before they power the student landing experience."
+        rightSlot={<AdminStatusPill status="info" label={loading ? "Loading" : String(filteredEvents.length)} />}
       />
 
-      {normalizedEvents.length ? (
-        <div className="adminReviewGrid">
-          {normalizedEvents.map((event) => (
-            <article className="adminReviewCard" key={event.id || event.title}>
-              <div className="adminReviewCardTop">
+      <div className="adminExperienceFilterPanel">
+        <input value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder="Search title, subject, mentor, plan..." />
+        <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+          {STATUS_FILTERS.map((status) => <option key={status} value={status}>{status}</option>)}
+        </select>
+        <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
+          {TYPE_FILTERS.map((type) => (
+            <option key={type} value={type}>
+              {type === "ALL" ? "ALL TYPES" : getExperienceEventTypeLabel(type)}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {filteredEvents.length ? (
+        <div className="adminExperienceEventGrid">
+          {filteredEvents.map((event) => (
+            <article className="adminExperienceEventCard" key={event.id || event.title}>
+              <div className="adminExperienceEventTop">
                 <AdminStatusPill status={event.status} label={event.status} />
                 {event.featured ? <AdminStatusPill status="approved" label="Featured" /> : null}
               </div>
@@ -402,11 +449,24 @@ export default function AdminExperienceEventsRoute() {
               <h3>{event.title || "Untitled event"}</h3>
               <p>{event.description || "No description added."}</p>
 
-              <div className="adminReviewMetaGrid">
+              <div className="adminExperienceMetaGrid">
                 <div><span>Type</span><strong>{event.typeLabel}</strong></div>
                 <div><span>Plan</span><strong>{event.planType || "FREE"}</strong></div>
                 <div><span>Subject</span><strong>{event.subject || "-"}</strong></div>
                 <div><span>Priority</span><strong>{event.priority || 0}</strong></div>
+                <div><span>Start</span><strong>{formatDateTime(event.startAt)}</strong></div>
+                <div><span>CTA</span><strong>{event.cta?.label || event.ctaLabel || "-"}</strong></div>
+              </div>
+
+              <div className="adminExperienceCardActions">
+                <AdminButton variant="secondary" size="sm" type="button" onClick={() => startEdit(event)}>
+                  Edit
+                </AdminButton>
+                {event.status !== EXPERIENCE_EVENT_STATUS.ARCHIVED ? (
+                  <AdminButton variant="secondary" size="sm" type="button" onClick={() => handleArchive(event)}>
+                    Archive
+                  </AdminButton>
+                ) : null}
               </div>
             </article>
           ))}
