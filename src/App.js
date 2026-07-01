@@ -4390,9 +4390,16 @@ return (
             className="ctetPrimaryCta"
             disabled={!ctetFeaturedExperienceEvent?.cta?.url}
             onClick={() => {
-              const targetUrl = ctetFeaturedExperienceEvent?.cta?.url;
-              if (targetUrl) navigate(targetUrl);
-            }}
+                const targetUrl = String(ctetFeaturedExperienceEvent?.cta?.url || "").trim();
+                if (!targetUrl) return;
+
+                if (/^https?:\/\//i.test(targetUrl)) {
+                  window.open(targetUrl, "_blank", "noopener,noreferrer");
+                  return;
+                }
+
+                navigate(targetUrl);
+              }}
           >
             {ctetFeaturedExperienceEvent?.status === "live" ? "Join Live Class" : ctetFeaturedExperienceEvent ? "View Details" : "Schedule Soon"}
             <strong>›</strong>
