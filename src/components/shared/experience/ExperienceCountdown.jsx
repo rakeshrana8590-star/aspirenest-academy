@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 
 function getRemaining(targetAt) {
   const target = targetAt ? new Date(targetAt).getTime() : 0;
-  const diff = Math.max(0, target - Date.now());
+  const diff = Number.isFinite(target) ? Math.max(0, target - Date.now()) : 0;
 
   return {
     total: diff,
