@@ -13,8 +13,10 @@ import {
   EXPERIENCE_EVENT_TYPES,
 } from "../experienceConstants";
 import {
+  archiveExperienceEvent,
   createExperienceEvent,
   listExperienceEvents,
+  updateExperienceEvent,
 } from "../experienceEventService";
 import {
   getExperienceEventTypeLabel,
@@ -50,6 +52,7 @@ export default function AdminExperienceEventsRoute() {
   const [form, setForm] = useState(DEFAULT_FORM);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editingEventId, setEditingEventId] = useState("");
   const [routeError, setRouteError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -85,8 +88,79 @@ export default function AdminExperienceEventsRoute() {
 
   const resetForm = () => {
     setForm(DEFAULT_FORM);
+    setEditingEventId("");
     setSuccessMessage("");
     setRouteError("");
+  };
+
+  const getDateInputValue = (value) => {
+    if (!value) return "";
+    if (typeof value === "string") return value.slice(0, 16);
+
+    const date =
+      typeof value?.toDate === "function"
+        ? value.toDate()
+        : new Date(value);
+
+    if (Number.isNaN(date.getTime())) return "";
+
+    const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    return localDate.toISOString().slice(0, 16);
+  };
+
+  const startEdit = (eventRecord = {}) => {
+    const raw = eventRecord.raw || eventRecord;
+    const id = eventRecord.id || raw.id || "";
+
+    setEditingEventId(id);
+    setSuccessMessage("");
+    setRouteError("");
+
+    setForm({
+      title: raw.title || eventRecord.title || "",
+      description: raw.description || eventRecord.description || "",
+      type: raw.type || eventRecord.type || EXPERIENCE_EVENT_TYPES.LIVE_CLASS,
+      status: raw.status || eventRecord.status || EXPERIENCE_EVENT_STATUS.SCHEDULED,
+      subject: raw.subject || eventRecord.subject || "",
+      chapter: raw.chapter || eventRecord.chapter || "",
+      mentorName: raw.mentorName || eventRecord.mentorName || "",
+      planType: raw.planType || eventRecord.planType || "FREE",
+      startAt: getDateInputValue(raw.startAt || eventRecord.startAt),
+      endAt: getDateInputValue(raw.endAt || eventRecord.endAt),
+      ctaLabel: raw.ctaLabel || eventRecord.cta?.label || "",
+      ctaUrl: raw.ctaUrl || eventRecord.cta?.url || "",
+      priority: Number(raw.priority || eventRecord.priority || 0),
+      featured: Boolean(raw.featured || eventRecord.featured),
+    });
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleArchive = async (eventRecord = {}) => {
+    const id = eventRecord.id || eventRecord.raw?.id || "";
+
+    if (!id) {
+      setRouteError("Event id missing.");
+      return;
+    }
+
+    const ok = window.confirm("Archive this experience event?");
+    if (!ok) return;
+
+    setSaving(true);
+    setRouteError("");
+    setSuccessMessage("");
+
+    try {
+      await archiveExperienceEvent(id);
+      setSuccessMessage("Experience event archived.");
+      if (editingEventId === id) resetForm();
+      await loadEvents();
+    } catch (error) {
+      setRouteError(error?.message || "Experience event archive failed.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSubmit = async (event) => {

@@ -206,6 +206,63 @@ export default function CtetLiveContentCenter({
 
   const featured = visibleUpdates[0];
 
+  const tvItems = useMemo(() => {
+    const eventItems = (events || []).slice(0, 3).map((event) => {
+      const meta = getMeta(event.type);
+      return {
+        id: `tv-event-${event.id || event.title}`,
+        type: event.type,
+        eyebrow: event.status === "live" ? "LIVE NOW" : event.featured ? "FEATURED" : meta.label,
+        title: event.title || "AspireNest learning event",
+        description: event.description || event.subject || "Live academy update for CTET/TET learners.",
+        cta: event.cta?.label || "View Details",
+        route: normalizeRoute(event.cta?.url || event.url || event.link, meta.route),
+      };
+    });
+
+    const updateItems = visibleUpdates.slice(0, 2).map((item) => ({
+      id: `tv-update-${item.id}`,
+      type: item.type,
+      eyebrow: "WHAT'S NEW",
+      title: item.title,
+      description: item.description,
+      cta: item.cta,
+      route: item.route,
+    }));
+
+    const weekSpotlight = weekItems[0]
+      ? [
+          {
+            id: `tv-week-${weekItems[0].id}`,
+            type: weekItems[0].type,
+            eyebrow: weekItems[0].today || "THIS WEEK",
+            title: weekItems[0].title,
+            description: weekItems[0].subtitle,
+            cta: weekItems[0].cta,
+            route: weekItems[0].route,
+          },
+        ]
+      : [];
+
+    const merged = [...eventItems, ...updateItems, ...weekSpotlight].filter(Boolean);
+
+    if (merged.length) return merged.slice(0, 5);
+
+    return [
+      {
+        id: "tv-empty-state",
+        type: "ANNOUNCEMENT",
+        eyebrow: loading ? "SYNCING" : "ASPIRENEST TV",
+        title: loading ? "Preparing academy spotlight" : "AspireNest TV will appear here soon",
+        description: loading
+          ? "Fetching latest events and updates."
+          : "Featured classes, mock tests, mentor updates, and platform highlights will be shown here.",
+        cta: "Open Learning Hub",
+        route: "/ctet-tet/courses",
+      },
+    ];
+  }, [events, loading, visibleUpdates, weekItems]);
+
   return (
     <section className="ctetS4LiveContentCenter" id="live-content-center">
       <div className="ctetS4BgGrid" />
@@ -229,6 +286,36 @@ export default function CtetLiveContentCenter({
             </div>
           </div>
         </div>
+
+          <div className="ctetS4TvStrip" aria-label="AspireNest TV">
+            <div className="ctetS4TvIntro">
+              <span>▶ AspireNest TV</span>
+              <h3>Live academy spotlight</h3>
+              <p>Featured classes, mock tests, mentor updates, and fresh learning signals in one premium strip.</p>
+            </div>
+
+            <div className="ctetS4TvRail">
+              {tvItems.map((item, tvIndex) => {
+                const meta = getMeta(item.type);
+                return (
+                  <button
+                    type="button"
+                    className={tvIndex === 0 ? "ctetS4TvCard isFeatured" : "ctetS4TvCard"}
+                    key={item.id}
+                    onClick={() => openTarget(navigate, item.route)}
+                  >
+                    <b className={"ctetS4TypePill is-" + meta.tone}>{item.eyebrow}</b>
+                    <span className={"ctetS4IconBox is-" + meta.tone}>{meta.icon}</span>
+                    <div>
+                      <h4>{item.title}</h4>
+                      <p>{item.description}</p>
+                    </div>
+                    <strong>{item.cta} ›</strong>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
         <div className="ctetS4Grid">
           <article className="ctetS4Panel ctetS4WhatsNewPanel">

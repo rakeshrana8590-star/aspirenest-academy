@@ -7737,3 +7737,808 @@ html:has(.ctetS2Screen) {
     min-height: calc(100vh - 58px) !important;
   }
 }
+
+
+/* CTET Screen 4 AspireNest TV missing inclusion v1 */
+.ctetS4TvStrip {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 16px;
+  margin: 0 0 16px;
+  padding: 16px;
+  border: 1px solid rgba(250, 204, 21, 0.22);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(250, 204, 21, 0.16), transparent 34%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.92));
+  box-shadow: 0 26px 80px rgba(0, 0, 0, 0.26);
+  overflow: hidden;
+}
+
+.ctetS4TvIntro {
+  padding: 6px 4px;
+}
+
+.ctetS4TvIntro span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #facc15;
+  font-weight: 900;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.ctetS4TvIntro h3 {
+  margin: 10px 0 8px;
+  color: #fff7ed;
+  font-size: clamp(1.45rem, 2vw, 2.05rem);
+  line-height: 1;
+}
+
+.ctetS4TvIntro p {
+  margin: 0;
+  color: rgba(255, 247, 237, 0.72);
+  line-height: 1.55;
+  font-size: 0.92rem;
+}
+
+.ctetS4TvRail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(230px, 1fr);
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.ctetS4TvCard {
+  min-height: 190px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 24px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.075);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  text-align: left;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+}
+
+.ctetS4TvCard:hover {
+  transform: translateY(-3px);
+  border-color: rgba(250, 204, 21, 0.42);
+  background: rgba(255, 255, 255, 0.11);
+}
+
+.ctetS4TvCard.isFeatured {
+  background:
+    radial-gradient(circle at top right, rgba(250, 204, 21, 0.2), transparent 40%),
+    rgba(255, 255, 255, 0.1);
+}
+
+.ctetS4TvCard div {
+  min-height: 74px;
+}
+
+.ctetS4TvCard h4 {
+  margin: 0 0 6px;
+  color: #fff7ed;
+  font-size: 1rem;
+  line-height: 1.18;
+}
+
+.ctetS4TvCard p {
+  margin: 0;
+  color: rgba(255, 247, 237, 0.68);
+  font-size: 0.82rem;
+  line-height: 1.42;
+}
+
+.ctetS4TvCard strong {
+  margin-top: auto;
+  color: #facc15;
+  font-size: 0.84rem;
+}
+
+.adminReviewActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+@media (max-width: 900px) {
+  .ctetS4TvStrip {
+    grid-template-columns: 1fr;
+  }
+
+  .ctetS4TvRail {
+    grid-auto-columns: minmax(220px, 82%);
+  }
+}
+
+
+/* CTET Screen 4 AspireNest TV compact visual correction v2 */
+.ctetS4LiveContentCenter .ctetS4TvStrip {
+  display: grid !important;
+  grid-template-columns: 240px minmax(0, 1fr) !important;
+  gap: 14px !important;
+  margin: 0 0 14px !important;
+  padding: 14px 16px !important;
+  min-height: auto !important;
+  border-radius: 26px !important;
+  overflow: hidden !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvIntro {
+  padding: 4px 2px !important;
+  align-self: center !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvIntro h3 {
+  margin: 8px 0 6px !important;
+  font-size: 1.52rem !important;
+  line-height: 1.02 !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvIntro p {
+  font-size: 0.86rem !important;
+  line-height: 1.45 !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvRail {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  grid-auto-flow: unset !important;
+  grid-auto-columns: unset !important;
+  gap: 12px !important;
+  overflow: visible !important;
+  padding: 0 !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvCard {
+  min-width: 0 !important;
+  min-height: 142px !important;
+  height: 142px !important;
+  border-radius: 22px !important;
+  padding: 12px !important;
+  gap: 8px !important;
+  overflow: hidden !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvCard .ctetS4TypePill {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  max-width: 100% !important;
+  width: fit-content !important;
+  margin: 0 !important;
+  padding: 5px 9px !important;
+  border-radius: 999px !important;
+  font-size: 0.64rem !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvCard .ctetS4IconBox {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  border-radius: 12px !important;
+  font-size: 1rem !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvCard div {
+  min-height: 0 !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvCard h4 {
+  margin: 0 0 5px !important;
+  font-size: 0.92rem !important;
+  line-height: 1.15 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvCard p {
+  font-size: 0.76rem !important;
+  line-height: 1.35 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvCard strong {
+  margin-top: auto !important;
+  font-size: 0.78rem !important;
+}
+
+@media (max-width: 1100px) {
+  .ctetS4LiveContentCenter .ctetS4TvStrip {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ctetS4LiveContentCenter .ctetS4TvRail {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ctetS4LiveContentCenter .ctetS4TvCard {
+    height: auto !important;
+    min-height: 132px !important;
+  }
+}
+
+
+/* CTET Screen 4 AspireNest TV readable cards v3 */
+.ctetS4LiveContentCenter .ctetS4TvCard {
+  position: relative !important;
+  height: 158px !important;
+  min-height: 158px !important;
+  padding: 13px 14px 12px !important;
+  display: grid !important;
+  grid-template-rows: auto 1fr auto !important;
+  align-content: stretch !important;
+  gap: 8px !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvCard .ctetS4IconBox {
+  position: absolute !important;
+  top: 38px !important;
+  left: 14px !important;
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  border-radius: 10px !important;
+  font-size: 0.9rem !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvCard > div {
+  padding-left: 42px !important;
+  min-height: 0 !important;
+  align-self: center !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvCard h4 {
+  font-size: 0.9rem !important;
+  line-height: 1.12 !important;
+  margin: 0 0 4px !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvCard p {
+  font-size: 0.74rem !important;
+  line-height: 1.28 !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvCard strong {
+  display: block !important;
+  margin: 0 !important;
+  padding-left: 42px !important;
+  color: #facc15 !important;
+  font-size: 0.8rem !important;
+  line-height: 1.1 !important;
+  white-space: nowrap !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvIntro h3 {
+  font-size: 1.42rem !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvIntro p {
+  font-size: 0.82rem !important;
+}
+
+@media (max-width: 1100px) {
+  .ctetS4LiveContentCenter .ctetS4TvCard {
+    height: auto !important;
+    min-height: 150px !important;
+  }
+}
+
+
+/* CTET Screen 4 TV and WhatsNew balance correction v4 */
+.ctetS4LiveContentCenter {
+  padding-top: 14px !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4Hero {
+  margin-bottom: 10px !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvStrip {
+  grid-template-columns: 250px minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  gap: 14px !important;
+  padding: 14px !important;
+  margin: 0 0 14px !important;
+  border-radius: 24px !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvIntro {
+  min-width: 0 !important;
+  padding: 6px 6px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvIntro h3 {
+  font-size: 1.34rem !important;
+  line-height: 1.05 !important;
+  margin: 8px 0 7px !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvIntro p {
+  max-width: 220px !important;
+  font-size: 0.8rem !important;
+  line-height: 1.4 !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvRail {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  min-width: 0 !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvCard,
+.ctetS4LiveContentCenter .ctetS4TvCard.isFeatured {
+  position: relative !important;
+  height: 142px !important;
+  min-height: 142px !important;
+  padding: 11px 13px !important;
+  border-radius: 20px !important;
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) !important;
+  grid-template-rows: auto 1fr auto !important;
+  column-gap: 11px !important;
+  row-gap: 5px !important;
+  background: rgba(15, 23, 42, 0.9) !important;
+  overflow: hidden !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvCard .ctetS4TypePill {
+  grid-column: 1 / -1 !important;
+  position: static !important;
+  transform: none !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 5px 9px !important;
+  font-size: 0.62rem !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvCard .ctetS4IconBox {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  position: static !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  border-radius: 11px !important;
+  font-size: 0.88rem !important;
+  align-self: start !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvCard > div {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  padding-left: 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  align-self: start !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvCard h4 {
+  margin: 0 0 4px !important;
+  font-size: 0.86rem !important;
+  line-height: 1.12 !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvCard p {
+  font-size: 0.72rem !important;
+  line-height: 1.25 !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TvCard strong {
+  grid-column: 2 !important;
+  grid-row: 3 !important;
+  padding-left: 0 !important;
+  margin: 0 !important;
+  align-self: end !important;
+  font-size: 0.76rem !important;
+  line-height: 1 !important;
+}
+
+/* What’s New compact balance */
+.ctetS4LiveContentCenter .ctetS4Grid {
+  gap: 14px !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4Panel {
+  border-radius: 22px !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4PanelHead {
+  margin-bottom: 10px !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4Tabs {
+  gap: 8px !important;
+  margin-bottom: 8px !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4Tabs button {
+  min-height: 34px !important;
+  padding: 8px 12px !important;
+  font-size: 0.74rem !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4FeaturedUpdate {
+  min-height: 70px !important;
+  padding: 11px 12px !important;
+  border-radius: 16px !important;
+  grid-template-columns: 42px minmax(0, 1fr) auto 24px !important;
+  gap: 10px !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4FeaturedUpdate i {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 12px !important;
+  font-size: 1rem !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4FeaturedUpdate h4,
+.ctetS4LiveContentCenter .ctetS4UpdateRow h4 {
+  font-size: 0.82rem !important;
+  line-height: 1.12 !important;
+  margin-bottom: 3px !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 1 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4FeaturedUpdate p,
+.ctetS4LiveContentCenter .ctetS4UpdateRow p {
+  font-size: 0.7rem !important;
+  line-height: 1.25 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 1 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4UpdateList {
+  gap: 7px !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4UpdateRow {
+  min-height: 52px !important;
+  padding: 8px 10px !important;
+  border-radius: 14px !important;
+  grid-template-columns: 36px minmax(0, 1fr) auto auto !important;
+  gap: 9px !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4UpdateRow .ctetS4IconBox {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  border-radius: 11px !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4TypePill {
+  font-size: 0.56rem !important;
+  padding: 4px 7px !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4UpdateRow small {
+  font-size: 0.66rem !important;
+  white-space: nowrap !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4UpdateRow strong,
+.ctetS4LiveContentCenter .ctetS4FeaturedUpdate strong {
+  white-space: nowrap !important;
+}
+
+@media (max-width: 1100px) {
+  .ctetS4LiveContentCenter .ctetS4TvStrip {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ctetS4LiveContentCenter .ctetS4TvIntro p {
+    max-width: none !important;
+  }
+
+  .ctetS4LiveContentCenter .ctetS4TvRail {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ctetS4LiveContentCenter .ctetS4TvCard {
+    height: auto !important;
+    min-height: 128px !important;
+  }
+}
+
+
+/* CTET Screen 4 This Week match WhatsNew balance v5 */
+.ctetS4LiveContentCenter .ctetS4WeekPanel {
+  min-width: 0 !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4WeekList {
+  gap: 7px !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4WeekRow {
+  min-height: 52px !important;
+  height: 52px !important;
+  padding: 7px 10px !important;
+  border-radius: 14px !important;
+  display: grid !important;
+  grid-template-columns: 70px 1px minmax(0, 1fr) 108px 108px !important;
+  gap: 10px !important;
+  align-items: center !important;
+  overflow: hidden !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4WeekRow.isToday {
+  min-height: 56px !important;
+  height: 56px !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4DateBlock {
+  width: 64px !important;
+  min-width: 64px !important;
+  height: 42px !important;
+  padding: 4px 6px !important;
+  border-radius: 12px !important;
+  display: grid !important;
+  place-items: center !important;
+  align-content: center !important;
+  gap: 0 !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4DateBlock small {
+  font-size: 0.52rem !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4DateBlock strong {
+  font-size: 1rem !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4DateBlock span {
+  font-size: 0.62rem !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4WeekRow > i {
+  height: 34px !important;
+  min-height: 34px !important;
+  margin: 0 !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4WeekInfo {
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4WeekInfo small {
+  display: block !important;
+  font-size: 0.64rem !important;
+  line-height: 1 !important;
+  margin: 0 0 4px !important;
+  color: rgba(255, 247, 237, 0.55) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4WeekInfo h4 {
+  margin: 0 0 2px !important;
+  font-size: 0.82rem !important;
+  line-height: 1.12 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4WeekInfo p {
+  margin: 0 !important;
+  font-size: 0.68rem !important;
+  line-height: 1.15 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4WeekRow .ctetS4TypePill {
+  justify-self: stretch !important;
+  text-align: center !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: 108px !important;
+  padding: 6px 8px !important;
+  border-radius: 9px !important;
+  font-size: 0.62rem !important;
+  line-height: 1.05 !important;
+  white-space: normal !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4WeekRow > strong {
+  justify-self: stretch !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  height: 34px !important;
+  border-radius: 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.72rem !important;
+  white-space: nowrap !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4FooterNote {
+  margin-top: 8px !important;
+  padding: 6px 8px !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4FooterNote p,
+.ctetS4LiveContentCenter .ctetS4FooterNote small {
+  font-size: 0.64rem !important;
+}
+
+@media (max-width: 1200px) {
+  .ctetS4LiveContentCenter .ctetS4WeekRow {
+    grid-template-columns: 64px 1px minmax(0, 1fr) 92px 92px !important;
+    gap: 8px !important;
+  }
+
+  .ctetS4LiveContentCenter .ctetS4WeekRow .ctetS4TypePill {
+    max-width: 92px !important;
+    font-size: 0.56rem !important;
+  }
+
+  .ctetS4LiveContentCenter .ctetS4WeekRow > strong {
+    font-size: 0.66rem !important;
+  }
+}
+
+
+/* CTET Screen 4 exact featured and week bottom fix v7 */
+
+/* 1) Featured Update ribbon overlap fix */
+.ctetS4LiveContentCenter .ctetS4FeaturedUpdate {
+  position: relative !important;
+  min-height: 76px !important;
+  padding-top: 22px !important;
+  overflow: visible !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4FeaturedRibbon {
+  position: absolute !important;
+  top: -1px !important;
+  left: 28px !important;
+  z-index: 5 !important;
+  height: 22px !important;
+  padding: 5px 14px !important;
+  border-radius: 0 0 12px 12px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4FeaturedUpdate h4 {
+  margin-top: 0 !important;
+}
+
+/* 2) This Week footer note ke niche extra gap remove */
+.ctetS4LiveContentCenter .ctetS4WeekPanel {
+  padding-bottom: 10px !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4WeekList {
+  margin-bottom: 0 !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4FooterNote {
+  margin-top: 6px !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4FooterNote p,
+.ctetS4LiveContentCenter .ctetS4FooterNote small {
+  margin-bottom: 0 !important;
+}
+
+
+/* CTET Screen 4 equal panel bottom and leak fix v8 */
+
+/* Make What’s New and This Week outer cards end at same bottom level */
+.ctetS4LiveContentCenter .ctetS4Grid {
+  align-items: stretch !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4WhatsNewPanel,
+.ctetS4LiveContentCenter .ctetS4WeekPanel {
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* Let right panel stretch to left panel height without shrinking its rows */
+.ctetS4LiveContentCenter .ctetS4WeekPanel {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4WeekList {
+  flex: 0 0 auto !important;
+  margin-bottom: 0 !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4FooterNote {
+  margin-top: 8px !important;
+  margin-bottom: 0 !important;
+}
+
+/* Remove left grey leak / background strip caused by overflowing decorative elements */
+.ctetS4LiveContentCenter .ctetS4Panel::before,
+.ctetS4LiveContentCenter .ctetS4Panel::after,
+.ctetS4LiveContentCenter .ctetS4WhatsNewPanel::before,
+.ctetS4LiveContentCenter .ctetS4WhatsNewPanel::after,
+.ctetS4LiveContentCenter .ctetS4WeekPanel::before,
+.ctetS4LiveContentCenter .ctetS4WeekPanel::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Keep Featured ribbon inside featured card, no title overlap, no outside bleed */
+.ctetS4LiveContentCenter .ctetS4FeaturedUpdate {
+  position: relative !important;
+  overflow: hidden !important;
+  padding-top: 24px !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4FeaturedRibbon {
+  position: absolute !important;
+  top: 0 !important;
+  left: 26px !important;
+  z-index: 4 !important;
+  height: 22px !important;
+  padding: 5px 14px !important;
+  border-radius: 0 0 12px 12px !important;
+  font-size: 0.6rem !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.ctetS4LiveContentCenter .ctetS4FeaturedUpdate h4 {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
