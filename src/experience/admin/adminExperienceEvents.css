@@ -275,3 +275,388 @@
     order: -1;
   }
 }
+
+
+/* === Experience Studio premium admin polish v1 === */
+.coursePages.adminExperiencePage {
+  width: min(1480px, calc(100% - 72px)) !important;
+  max-width: none !important;
+  margin: 0 auto !important;
+  padding: 42px 0 76px !important;
+  position: relative !important;
+}
+
+.coursePages.adminExperiencePage::before {
+  content: "";
+  position: fixed;
+  inset: 92px 0 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 14% 10%, rgba(249, 115, 22, 0.12), transparent 30%),
+    radial-gradient(circle at 84% 12%, rgba(59, 130, 246, 0.11), transparent 30%),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 46%, #eef2ff 100%);
+}
+
+.adminExperiencePage .adminExperienceStats {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+  margin: 24px 0 26px !important;
+}
+
+.adminExperiencePage .adminExperienceStats article {
+  position: relative !important;
+  overflow: hidden !important;
+  min-height: 126px !important;
+  border-radius: 28px !important;
+  padding: 22px !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,250,252,0.88)) !important;
+  box-shadow:
+    0 24px 70px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255,255,255,0.9) !important;
+}
+
+.adminExperiencePage .adminExperienceStats article::after {
+  content: "";
+  position: absolute;
+  inset: auto -28px -42px auto;
+  width: 112px;
+  height: 112px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(249,115,22,0.18), transparent 68%);
+}
+
+.adminExperiencePage .adminExperienceStats strong {
+  font-size: 2.28rem !important;
+  letter-spacing: -0.05em !important;
+}
+
+.adminExperiencePage .adminExperienceWorkspace {
+  grid-template-columns: minmax(0, 1fr) 360px !important;
+  gap: 20px !important;
+  align-items: stretch !important;
+  margin: 28px 0 42px !important;
+}
+
+.adminExperiencePage .adminExperienceFormCard {
+  display: grid !important;
+  grid-template-columns: 360px minmax(0, 1fr) !important;
+  column-gap: 28px !important;
+  row-gap: 22px !important;
+  align-items: start !important;
+  min-height: 0 !important;
+  border-radius: 34px !important;
+  padding: 30px !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.98), rgba(248,250,252,0.92)) !important;
+  box-shadow:
+    0 30px 90px rgba(15, 23, 42, 0.10),
+    inset 0 1px 0 rgba(255,255,255,0.96) !important;
+}
+
+.adminExperiencePage .adminExperienceCardHead {
+  position: sticky !important;
+  top: 112px !important;
+  align-self: start !important;
+  padding: 8px 0 0 !important;
+}
+
+.adminExperiencePage .adminExperienceCardHead h2 {
+  font-size: clamp(2.55rem, 4.2vw, 4.25rem) !important;
+  line-height: 0.92 !important;
+  letter-spacing: -0.08em !important;
+  margin: 12px 0 18px !important;
+}
+
+.adminExperiencePage .adminExperienceCardHead p {
+  max-width: 300px !important;
+  font-size: 1rem !important;
+}
+
+.adminExperiencePage .adminExperienceFormGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 15px 16px !important;
+  margin-top: 0 !important;
+}
+
+.adminExperiencePage .adminExperienceFormGrid input,
+.adminExperiencePage .adminExperienceFormGrid select,
+.adminExperiencePage .adminExperienceFormGrid textarea,
+.adminExperiencePage .adminExperienceFilterPanel input,
+.adminExperiencePage .adminExperienceFilterPanel select {
+  min-height: 54px !important;
+  border-radius: 18px !important;
+  background: rgba(248,250,252,0.95) !important;
+  border-color: rgba(148,163,184,0.34) !important;
+}
+
+.adminExperiencePage .adminExperienceFormGrid textarea {
+  min-height: 116px !important;
+}
+
+.adminExperiencePage .adminExperienceActions {
+  grid-column: 1 / -1 !important;
+  margin-top: 2px !important;
+  padding-top: 18px !important;
+  border-top: 1px solid rgba(148,163,184,0.18) !important;
+}
+
+.adminExperiencePage .adminExperienceGuideCard {
+  min-height: 100% !important;
+  border-radius: 34px !important;
+  padding: 30px !important;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(251,191,36,0.18), transparent 34%),
+    linear-gradient(145deg, #020617 0%, #0f172a 58%, #111827 100%) !important;
+  box-shadow:
+    0 34px 90px rgba(15, 23, 42, 0.24),
+    inset 0 1px 0 rgba(255,255,255,0.10) !important;
+}
+
+.adminExperiencePage .adminExperienceGuideCard h3 {
+  font-size: 1.55rem !important;
+  letter-spacing: -0.035em !important;
+}
+
+.adminExperiencePage .adminExperienceGuideCard li {
+  border-radius: 18px !important;
+  background: rgba(255,255,255,0.075) !important;
+  backdrop-filter: blur(14px) !important;
+}
+
+.adminExperiencePage .adminExperienceFilterPanel {
+  border-radius: 28px !important;
+  padding: 16px !important;
+  background: rgba(255,255,255,0.92) !important;
+  box-shadow: 0 24px 70px rgba(15,23,42,0.08) !important;
+}
+
+.adminExperiencePage .adminExperienceEventGrid {
+  gap: 20px !important;
+}
+
+.adminExperiencePage .adminExperienceEventCard {
+  border-radius: 30px !important;
+  padding: 24px !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.98), rgba(248,250,252,0.90)) !important;
+  box-shadow: 0 26px 80px rgba(15,23,42,0.09) !important;
+}
+
+.adminExperiencePage .adminExperienceMetaGrid div {
+  border-radius: 18px !important;
+  background: rgba(248,250,252,0.92) !important;
+}
+
+.adminExperiencePage .adminEmptyState,
+.adminExperiencePage [class*="EmptyState"] {
+  border-radius: 34px !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(249,115,22,0.08), transparent 34%),
+    rgba(255,255,255,0.86) !important;
+  box-shadow: 0 26px 80px rgba(15,23,42,0.07) !important;
+}
+
+@media (max-width: 1180px) {
+  .coursePages.adminExperiencePage {
+    width: min(100% - 36px, 980px) !important;
+  }
+
+  .adminExperiencePage .adminExperienceStats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .adminExperiencePage .adminExperienceWorkspace,
+  .adminExperiencePage .adminExperienceFormCard {
+    grid-template-columns: 1fr !important;
+  }
+
+  .adminExperiencePage .adminExperienceCardHead {
+    position: static !important;
+  }
+
+  .adminExperiencePage .adminExperienceCardHead p {
+    max-width: 720px !important;
+  }
+
+  .adminExperiencePage .adminExperienceFilterPanel {
+    grid-template-columns: 1fr !important;
+  }
+
+  .adminExperiencePage .adminExperienceEventGrid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 680px) {
+  .coursePages.adminExperiencePage {
+    width: min(100% - 24px, 100%) !important;
+    padding: 26px 0 54px !important;
+  }
+
+  .adminExperiencePage .adminExperienceStats,
+  .adminExperiencePage .adminExperienceFormGrid,
+  .adminExperiencePage .adminExperienceMetaGrid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .adminExperiencePage .adminExperienceFormCard,
+  .adminExperiencePage .adminExperienceGuideCard {
+    border-radius: 26px !important;
+    padding: 20px !important;
+  }
+
+  .adminExperiencePage .adminExperienceCardHead h2 {
+    font-size: 2.35rem !important;
+  }
+}
+
+
+/* === Experience Studio clean wide one-screen form v3 === */
+.adminExperiencePage .adminExperienceStats {
+  gap: 14px !important;
+  margin: 16px 0 18px !important;
+}
+
+.adminExperiencePage .adminExperienceStats article {
+  min-height: 92px !important;
+  padding: 16px 18px !important;
+  border-radius: 20px !important;
+}
+
+.adminExperiencePage .adminExperienceStats strong {
+  margin-top: 5px !important;
+  font-size: 1.72rem !important;
+}
+
+.adminExperiencePage .adminExperienceWorkspace {
+  grid-template-columns: minmax(0, 1fr) 330px !important;
+  gap: 18px !important;
+  margin: 18px 0 30px !important;
+  align-items: start !important;
+}
+
+.adminExperiencePage .adminExperienceFormCard {
+  display: grid !important;
+  grid-template-columns: 250px minmax(0, 1fr) !important;
+  gap: 20px !important;
+  padding: 22px 24px !important;
+  border-radius: 28px !important;
+  min-height: 0 !important;
+}
+
+.adminExperiencePage .adminExperienceCardHead {
+  position: static !important;
+  align-self: start !important;
+  padding: 6px 0 0 !important;
+}
+
+.adminExperiencePage .adminExperienceCardHead h2 {
+  margin: 8px 0 12px !important;
+  font-size: 2.45rem !important;
+  line-height: 0.98 !important;
+  letter-spacing: -0.055em !important;
+}
+
+.adminExperiencePage .adminExperienceCardHead p {
+  margin: 0 !important;
+  max-width: 230px !important;
+  font-size: 0.92rem !important;
+  line-height: 1.45 !important;
+}
+
+.adminExperiencePage .adminExperienceFormGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 12px 14px !important;
+  margin-top: 0 !important;
+}
+
+.adminExperiencePage .adminExperienceFormGrid label {
+  gap: 5px !important;
+}
+
+.adminExperiencePage .adminExperienceFormGrid label span {
+  font-size: 0.75rem !important;
+}
+
+.adminExperiencePage .adminExperienceFormGrid label.isWide,
+.adminExperiencePage .adminExperienceFormGrid label:first-child,
+.adminExperiencePage .adminExperienceFormGrid label:last-child {
+  grid-column: 1 / -1 !important;
+}
+
+.adminExperiencePage .adminExperienceFormGrid input,
+.adminExperiencePage .adminExperienceFormGrid select,
+.adminExperiencePage .adminExperienceFormGrid textarea {
+  min-height: 48px !important;
+  padding: 11px 13px !important;
+  border-radius: 15px !important;
+  font-size: 0.92rem !important;
+}
+
+.adminExperiencePage .adminExperienceFormGrid textarea {
+  min-height: 76px !important;
+  max-height: 86px !important;
+}
+
+.adminExperiencePage .adminExperienceActions {
+  grid-column: 1 / -1 !important;
+  margin-top: 0 !important;
+  padding-top: 13px !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.18) !important;
+  gap: 12px !important;
+}
+
+.adminExperiencePage .adminExperienceGuideCard {
+  padding: 22px !important;
+  border-radius: 28px !important;
+  min-height: auto !important;
+}
+
+.adminExperiencePage .adminExperienceGuideCard h3 {
+  margin: 6px 0 10px !important;
+  font-size: 1.22rem !important;
+  line-height: 1.08 !important;
+}
+
+.adminExperiencePage .adminExperienceGuideCard ul {
+  margin-top: 12px !important;
+  gap: 10px !important;
+}
+
+.adminExperiencePage .adminExperienceGuideCard li {
+  padding: 11px 12px !important;
+  border-radius: 15px !important;
+  font-size: 0.86rem !important;
+  line-height: 1.38 !important;
+}
+
+@media (max-width: 1180px) {
+  .adminExperiencePage .adminExperienceWorkspace,
+  .adminExperiencePage .adminExperienceFormCard {
+    grid-template-columns: 1fr !important;
+  }
+
+  .adminExperiencePage .adminExperienceCardHead p {
+    max-width: 720px !important;
+  }
+
+  .adminExperiencePage .adminExperienceFormGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 680px) {
+  .adminExperiencePage .adminExperienceStats,
+  .adminExperiencePage .adminExperienceFormGrid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .adminExperiencePage .adminExperienceFormGrid label.isWide,
+  .adminExperiencePage .adminExperienceFormGrid label:first-child,
+  .adminExperiencePage .adminExperienceFormGrid label:last-child {
+    grid-column: 1 !important;
+  }
+}

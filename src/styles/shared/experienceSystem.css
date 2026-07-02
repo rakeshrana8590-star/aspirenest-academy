@@ -9001,3 +9001,421 @@ html:has(.ctetS2Screen) {
   transform: translateY(-1px) !important;
   border-color: rgba(250, 204, 21, 0.48) !important;
 }
+
+
+/* === CTET hero live ribbon viewport fit v1 === */
+.ctetLiveHeartbeat {
+  margin-top: 14px !important;
+  padding: 22px 28px !important;
+  border-radius: 26px !important;
+  min-height: auto !important;
+}
+
+.ctetLiveHeartbeat h3,
+.ctetLiveHeartbeatTitle,
+.ctetLiveHeartbeatTitle h3 {
+  font-size: clamp(1.3rem, 2vw, 2rem) !important;
+  line-height: 1.05 !important;
+  margin-bottom: 6px !important;
+}
+
+.ctetLiveHeartbeat p {
+  font-size: 0.9rem !important;
+  line-height: 1.35 !important;
+  margin-bottom: 0 !important;
+}
+
+.ctetLiveCountdown {
+  max-width: 230px !important;
+}
+
+.ctetLiveCountdown .experienceCountdown {
+  padding: 14px !important;
+  border-radius: 22px !important;
+}
+
+.ctetLiveCountdown .experienceCountdownLabel {
+  margin-bottom: 10px !important;
+  font-size: 0.72rem !important;
+}
+
+.ctetLiveCountdown .experienceCountdownGrid {
+  gap: 6px !important;
+}
+
+.ctetLiveCountdown .experienceCountdownGrid div {
+  padding: 10px 7px !important;
+  border-radius: 14px !important;
+}
+
+.ctetLiveCountdown .experienceCountdownGrid strong {
+  font-size: 1.28rem !important;
+}
+
+.ctetLiveCountdown .experienceCountdownGrid span {
+  margin-top: 4px !important;
+  font-size: 0.58rem !important;
+}
+
+.ctetLiveHeartbeatActions,
+.ctetLiveActions {
+  gap: 10px !important;
+}
+
+.ctetLiveHeartbeatActions button,
+.ctetLiveActions button {
+  min-height: 44px !important;
+  padding: 11px 18px !important;
+  border-radius: 15px !important;
+}
+
+@media (max-height: 850px) and (min-width: 900px) {
+  .ctetLiveHeartbeat {
+    margin-top: 10px !important;
+    padding: 18px 24px !important;
+  }
+
+  .ctetLiveCountdown .experienceCountdown {
+    padding: 12px !important;
+  }
+
+  .ctetLiveCountdown .experienceCountdownGrid strong {
+    font-size: 1.12rem !important;
+  }
+}
+
+
+/* === CTET live event ribbon unbreakable premium v2 === */
+.ctetLiveHeartbeat {
+  display: grid !important;
+  grid-template-columns: minmax(280px, 1.45fr) minmax(210px, 0.82fr) minmax(120px, 0.45fr) 196px 220px !important;
+  gap: 18px !important;
+  align-items: center !important;
+  margin-top: 14px !important;
+  padding: 18px 26px !important;
+  border-radius: 26px !important;
+  overflow: hidden !important;
+  min-width: 0 !important;
+}
+
+.ctetLiveHeartbeat,
+.ctetLiveHeartbeat * {
+  min-width: 0 !important;
+}
+
+.ctetLiveHeartbeat h3,
+.ctetLiveHeartbeatTitle h3,
+.ctetLiveHeartbeat h4,
+.ctetLiveHeartbeat strong {
+  overflow-wrap: anywhere !important;
+}
+
+.ctetLiveHeartbeat h3,
+.ctetLiveHeartbeatTitle h3 {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  margin: 8px 0 6px !important;
+  font-size: clamp(1.22rem, 1.55vw, 1.72rem) !important;
+  line-height: 1.08 !important;
+  letter-spacing: -0.035em !important;
+}
+
+.ctetLiveHeartbeat p {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  font-size: 0.88rem !important;
+  line-height: 1.35 !important;
+}
+
+.ctetLiveHeartbeat [class*="Mentor"],
+.ctetLiveHeartbeat [class*="mentor"] {
+  min-width: 0 !important;
+}
+
+.ctetLiveHeartbeat [class*="Mentor"] h3,
+.ctetLiveHeartbeat [class*="Mentor"] h4,
+.ctetLiveHeartbeat [class*="Mentor"] strong,
+.ctetLiveHeartbeat [class*="mentor"] h3,
+.ctetLiveHeartbeat [class*="mentor"] h4,
+.ctetLiveHeartbeat [class*="mentor"] strong {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  font-size: clamp(1rem, 1.18vw, 1.28rem) !important;
+  line-height: 1.08 !important;
+  letter-spacing: -0.025em !important;
+  margin: 0 0 4px !important;
+  max-width: 100% !important;
+}
+
+.ctetLiveHeartbeat [class*="Mentor"] p,
+.ctetLiveHeartbeat [class*="Mentor"] span,
+.ctetLiveHeartbeat [class*="mentor"] p,
+.ctetLiveHeartbeat [class*="mentor"] span {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 1 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  font-size: 0.78rem !important;
+  line-height: 1.25 !important;
+}
+
+.ctetLiveCountdown {
+  width: 196px !important;
+  max-width: 196px !important;
+}
+
+.ctetLiveCountdown .experienceCountdown {
+  padding: 12px !important;
+  border-radius: 22px !important;
+}
+
+.ctetLiveCountdown .experienceCountdownLabel {
+  margin-bottom: 9px !important;
+  font-size: 0.7rem !important;
+  white-space: nowrap !important;
+}
+
+.ctetLiveCountdown .experienceCountdownGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+}
+
+.ctetLiveCountdown .experienceCountdownGrid div {
+  padding: 9px 5px !important;
+  border-radius: 14px !important;
+}
+
+.ctetLiveCountdown .experienceCountdownGrid strong {
+  font-size: 1.08rem !important;
+  line-height: 1 !important;
+}
+
+.ctetLiveCountdown .experienceCountdownGrid span {
+  margin-top: 4px !important;
+  font-size: 0.54rem !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.ctetLiveHeartbeatActions,
+.ctetLiveActions {
+  width: 220px !important;
+  max-width: 220px !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 10px !important;
+}
+
+.ctetLiveHeartbeatActions button,
+.ctetLiveActions button {
+  width: 100% !important;
+  min-height: 44px !important;
+  padding: 10px 14px !important;
+  border-radius: 15px !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 1280px) {
+  .ctetLiveHeartbeat {
+    grid-template-columns: minmax(260px, 1fr) minmax(180px, 0.75fr) 180px 190px !important;
+  }
+
+  .ctetLiveHeartbeat > *:nth-child(3) {
+    display: none !important;
+  }
+
+  .ctetLiveCountdown {
+    width: 180px !important;
+    max-width: 180px !important;
+  }
+
+  .ctetLiveHeartbeatActions,
+  .ctetLiveActions {
+    width: 190px !important;
+    max-width: 190px !important;
+  }
+}
+
+@media (max-width: 980px) {
+  .ctetLiveHeartbeat {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+    padding: 18px !important;
+  }
+
+  .ctetLiveCountdown,
+  .ctetLiveHeartbeatActions,
+  .ctetLiveActions {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
+
+
+/* === CTET Screen 4 seamless background fix v1 === */
+.ctetS4LiveContentCenter {
+  background:
+    radial-gradient(circle at 10% 8%, rgba(245, 158, 11, 0.16), transparent 28%),
+    radial-gradient(circle at 90% 10%, rgba(56, 189, 248, 0.10), transparent 30%),
+    radial-gradient(circle at 50% 88%, rgba(15, 118, 110, 0.10), transparent 34%),
+    linear-gradient(135deg, #020711 0%, #06111f 42%, #051224 68%, #020711 100%) !important;
+  overflow: hidden !important;
+}
+
+.ctetS4LiveContentCenter::before {
+  inset: 0 !important;
+  background:
+    radial-gradient(circle, rgba(251, 191, 36, 0.10) 1px, transparent 1px),
+    linear-gradient(120deg, rgba(251, 146, 60, 0.045), transparent 48%),
+    linear-gradient(250deg, rgba(59, 130, 246, 0.045), transparent 46%) !important;
+  background-size: 34px 34px, auto, auto !important;
+  opacity: 0.35 !important;
+}
+
+.ctetS4LiveContentCenter::after {
+  inset: 0 !important;
+  height: auto !important;
+  background:
+    linear-gradient(180deg, rgba(2, 6, 23, 0.20), transparent 20%, transparent 72%, rgba(2, 6, 23, 0.50)),
+    radial-gradient(circle at 50% 50%, transparent 0%, rgba(2, 6, 23, 0.22) 100%) !important;
+  pointer-events: none !important;
+}
+
+.ctetS4BgGrid {
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px) !important;
+  background-size: 72px 72px !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+  opacity: 0.20 !important;
+}
+
+.ctetS4Shell {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+
+/* === CTET Screen 4 one canvas background final v2 === */
+.ctetS4LiveContentCenter {
+  background: #06111f !important;
+  background-image: none !important;
+  overflow: hidden !important;
+}
+
+.ctetS4LiveContentCenter::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: -2 !important;
+  background:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px),
+    radial-gradient(circle at 18% 14%, rgba(245,158,11,0.08), transparent 32%),
+    radial-gradient(circle at 82% 18%, rgba(59,130,246,0.07), transparent 34%) !important;
+  background-size: 72px 72px, 72px 72px, auto, auto !important;
+  opacity: 1 !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+
+.ctetS4LiveContentCenter::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: -1 !important;
+  height: auto !important;
+  background:
+    linear-gradient(180deg, rgba(2,6,23,0.08), transparent 22%, transparent 78%, rgba(2,6,23,0.24)) !important;
+  pointer-events: none !important;
+}
+
+.ctetS4BgGrid {
+  display: none !important;
+}
+
+.ctetS4Shell {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+
+/* === CTET full page single canvas background final v1 === */
+.ctetExperiencePage {
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(245, 158, 11, 0.11), transparent 28%),
+    radial-gradient(circle at 88% 12%, rgba(37, 99, 235, 0.10), transparent 32%),
+    radial-gradient(circle at 48% 56%, rgba(15, 118, 110, 0.055), transparent 36%),
+    linear-gradient(135deg, #050712 0%, #06111f 42%, #071827 72%, #050712 100%) !important;
+}
+
+.ctetExperiencePage::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: -2 !important;
+  pointer-events: none !important;
+  background:
+    linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px) !important;
+  background-size: 72px 72px !important;
+  opacity: 0.42 !important;
+}
+
+.ctetExperiencePage::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
+  background:
+    linear-gradient(180deg, rgba(2,6,23,0.10), transparent 16%, transparent 82%, rgba(2,6,23,0.28)) !important;
+}
+
+.ctetTopEntryExperience,
+.ctetS3FreshMentorAuthority,
+.ctetS4LiveContentCenter,
+.ctetS5LockedScreen {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+.ctetTopEntryExperience::before,
+.ctetTopEntryExperience::after,
+.ctetS3FreshMentorAuthority::before,
+.ctetS3FreshMentorAuthority::after,
+.ctetS4LiveContentCenter::before,
+.ctetS4LiveContentCenter::after,
+.ctetS5LockedScreen::before,
+.ctetS5LockedScreen::after {
+  display: none !important;
+  content: none !important;
+}
+
+.ctetS4BgGrid {
+  display: none !important;
+}
+
+.ctetS5LockedScreen {
+  border-top: 1px solid rgba(251, 191, 36, 0.16) !important;
+}
+
+.ctetS4LiveContentCenter,
+.ctetS5LockedScreen {
+  position: relative !important;
+  z-index: 1 !important;
+}
