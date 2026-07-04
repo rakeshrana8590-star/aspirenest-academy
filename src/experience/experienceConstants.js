@@ -1,5 +1,9 @@
 export const EXPERIENCE_COLLECTIONS = Object.freeze({
   EVENTS: "experienceEvents",
+  HIGHLIGHTS: "experienceHighlights",
+  MISSIONS: "experienceMissions",
+  ACTIVITY: "experienceActivity",
+  SETTINGS: "experienceSettings",
 });
 
 export const EXPERIENCE_EVENT_TYPES = Object.freeze({
@@ -8,7 +12,11 @@ export const EXPERIENCE_EVENT_TYPES = Object.freeze({
   MARATHON: "MARATHON",
   DOUBT_SESSION: "DOUBT_SESSION",
   ANNOUNCEMENT: "ANNOUNCEMENT",
+  WEBINAR: "WEBINAR",
   WORKSHOP: "WORKSHOP",
+  REVISION: "REVISION",
+  RANK_CHALLENGE: "RANK_CHALLENGE",
+  SPECIAL_SESSION: "SPECIAL_SESSION",
 });
 
 export const EXPERIENCE_EVENT_STATUS = Object.freeze({
@@ -29,6 +37,7 @@ export const EXPERIENCE_CTA_TYPES = Object.freeze({
   OPEN_VIDEO: "OPEN_VIDEO",
   READ_NOTES: "READ_NOTES",
   START_MISSION: "START_MISSION",
+  OPEN_ROADMAP: "OPEN_ROADMAP",
   UPGRADE_PLAN: "UPGRADE_PLAN",
 });
 
@@ -38,5 +47,9 @@ export const EXPERIENCE_EVENT_TYPE_LABELS = Object.freeze({
   [EXPERIENCE_EVENT_TYPES.MARATHON]: "Marathon",
   [EXPERIENCE_EVENT_TYPES.DOUBT_SESSION]: "Doubt Session",
   [EXPERIENCE_EVENT_TYPES.ANNOUNCEMENT]: "Announcement",
+  [EXPERIENCE_EVENT_TYPES.WEBINAR]: "Webinar",
   [EXPERIENCE_EVENT_TYPES.WORKSHOP]: "Workshop",
+  [EXPERIENCE_EVENT_TYPES.REVISION]: "Revision",
+  [EXPERIENCE_EVENT_TYPES.RANK_CHALLENGE]: "Rank Challenge",
+  [EXPERIENCE_EVENT_TYPES.SPECIAL_SESSION]: "Special Session",
 });

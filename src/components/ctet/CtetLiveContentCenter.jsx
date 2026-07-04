@@ -1,69 +1,51 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
-const resolveSafeCtetTarget = (value, fallback = "/ctet-tet/courses") => {
-  const raw = String(value || "").trim();
-  if (!raw) return fallback;
-
-  if (raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("mailto:") || raw.startsWith("tel:")) {
-    return raw;
-  }
-
-  if (raw.startsWith("/")) {
-    return raw;
-  }
-
-  return fallback;
-};
-
-const openSafeCtetTarget = (navigate, value, fallback = "/ctet-tet/courses") => {
-  const target = resolveSafeCtetTarget(value, fallback);
-
-  if (target.startsWith("http://") || target.startsWith("https://") || target.startsWith("mailto:") || target.startsWith("tel:")) {
-    window.open(target, "_blank", "noopener,noreferrer");
-    return;
-  }
-
-  navigate(target);
-};
-
-  const fallbackUpdates = [
-    {
-      id: "no-updates-yet",
-      type: "live",
-      title: "Live updates will appear here",
-      description: "Fresh CTET/TET classes, mock schedules, notes, and announcements will appear here after publishing Experience events.",
-      updated: "No event scheduled yet",
-      route: "/ctet-tet/courses",
-      cta: "Explore Learning Hub",
-      featured: true,
-      empty: true,
-    },
-  ];
-
-  const fallbackWeek = [
-    ["", "—", "Soon", "Schedule pending", "This week’s plan will appear here", "Upcoming live classes, mock tests, and learning events will appear after publishing Experience events.", "live", "Explore Hub", "/ctet-tet/courses"],
-  ];
+const fallbackUpdates = [
+  {
+    id: "no-updates-yet",
+    type: "live",
+    title: "No launch update published yet",
+    description: "Fresh published events, notes, videos, mock tests, current affairs PDFs, and roadmap items will appear here.",
+    updated: "Waiting for first publish",
+    route: "/ctet-tet/courses",
+    cta: "Explore Learning Hub",
+    source: "Experience",
+    plan: "FREE",
+    featured: true,
+    empty: true,
+  },
+];
 
 const typeMeta = {
-  notes: { label: "Notes", icon: "▤", tone: "notes", route: "/ctet-tet/notes" },
-  mock: { label: "Mock Test", icon: "☑", tone: "mock", route: "/ctet-tet/mock-tests" },
-  mocktest: { label: "Mock Test", icon: "☑", tone: "mock", route: "/ctet-tet/mock-tests" },
-  videos: { label: "Videos", icon: "▶", tone: "videos", route: "/ctet-tet/videos" },
-  video: { label: "Videos", icon: "▶", tone: "videos", route: "/ctet-tet/videos" },
-  live: { label: "Live Class", icon: "●", tone: "live", route: "/ctet-tet/videos" },
-  current: { label: "Current Affairs", icon: "◎", tone: "current", route: "/ctet-tet/current-affairs" },
-  currentaffairs: { label: "Current Affairs", icon: "◎", tone: "current", route: "/ctet-tet/current-affairs" },
-  roadmap: { label: "Roadmap", icon: "⌁", tone: "roadmap", route: "/ctet-tet/roadmaps" },
-  roadmaps: { label: "Roadmaps", icon: "⌁", tone: "roadmap", route: "/ctet-tet/roadmaps" },
+  announcement: { label: "Announcement", icon: "!", tone: "live", route: "/ctet-tet" },
+  current: { label: "Current Affairs", icon: "CA", tone: "current", route: "/ctet-tet/current-affairs" },
+  currentaffairs: { label: "Current Affairs", icon: "CA", tone: "current", route: "/ctet-tet/current-affairs" },
+  doubt: { label: "Doubt Session", icon: "?", tone: "live", route: "/ctet-tet/videos" },
+  doubtsession: { label: "Doubt Session", icon: "?", tone: "live", route: "/ctet-tet/videos" },
+  live: { label: "Live Class", icon: "LIVE", tone: "live", route: "/ctet-tet/videos" },
+  liveclass: { label: "Live Class", icon: "LIVE", tone: "live", route: "/ctet-tet/videos" },
+  marathon: { label: "Marathon", icon: "MR", tone: "live", route: "/ctet-tet/videos" },
+  mock: { label: "Mock Test", icon: "MT", tone: "mock", route: "/ctet-tet/mock-tests" },
+  mocktest: { label: "Mock Test", icon: "MT", tone: "mock", route: "/ctet-tet/mock-tests" },
+  notes: { label: "Notes", icon: "NT", tone: "notes", route: "/ctet-tet/notes" },
+  rankchallenge: { label: "Rank Challenge", icon: "RK", tone: "mock", route: "/ctet-tet/mock-tests" },
+  revision: { label: "Revision", icon: "RV", tone: "notes", route: "/ctet-tet/notes" },
+  roadmap: { label: "Roadmap", icon: "RD", tone: "roadmap", route: "/ctet-tet/roadmaps" },
+  roadmaps: { label: "Roadmap", icon: "RD", tone: "roadmap", route: "/ctet-tet/roadmaps" },
+  specialsession: { label: "Special Session", icon: "SS", tone: "live", route: "/ctet-tet/videos" },
+  video: { label: "Videos", icon: "VD", tone: "videos", route: "/ctet-tet/videos" },
+  videos: { label: "Videos", icon: "VD", tone: "videos", route: "/ctet-tet/videos" },
+  webinar: { label: "Webinar", icon: "WB", tone: "live", route: "/ctet-tet/videos" },
+  workshop: { label: "Workshop", icon: "WS", tone: "live", route: "/ctet-tet/videos" },
 };
 
 const filters = [
-  ["all", "All", "●"],
-  ["notes", "Notes", "▤"],
-  ["mock", "Mock Tests", "☑"],
-  ["videos", "Videos", "▶"],
-  ["current", "Current Affairs", "◎"],
-  ["roadmap", "Roadmaps", "⌁"],
+  ["all", "All", "*"],
+  ["notes", "Notes", "NT"],
+  ["mock", "Mock Tests", "MT"],
+  ["videos", "Videos", "VD"],
+  ["current", "Current Affairs", "CA"],
+  ["roadmap", "Roadmaps", "RD"],
 ];
 
 function cleanType(value = "") {
@@ -74,7 +56,9 @@ function cleanType(value = "") {
 
 function toDate(value) {
   if (!value) return null;
+  if (value instanceof Date) return value;
   if (typeof value.toDate === "function") return value.toDate();
+
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
@@ -84,12 +68,25 @@ function getMeta(type = "") {
   return typeMeta[key] || typeMeta[type] || typeMeta.live;
 }
 
-function formatDateParts(value, index = 0) {
-  const date = toDate(value);
-  if (!date) {
-    const fallback = fallbackWeek[index % fallbackWeek.length];
-    return { day: fallback[1], date: fallback[2], time: fallback[3] };
+function normalizeRoute(url, fallback) {
+  const target = String(url || "").trim();
+  if (!target) return fallback;
+  if (/^(https?:|mailto:|tel:)/i.test(target)) return target;
+  return target.startsWith("/") ? target : fallback;
+}
+
+function openTarget(navigate, target) {
+  if (!target) return;
+  if (/^(https?:|mailto:|tel:)/i.test(target)) {
+    window.open(target, "_blank", "noopener,noreferrer");
+    return;
   }
+  navigate(target);
+}
+
+function formatDateParts(value) {
+  const date = toDate(value);
+  if (!date) return { day: "--", date: "Soon", time: "Schedule pending" };
 
   return {
     day: date.toLocaleDateString("en-IN", { weekday: "short" }),
@@ -98,104 +95,216 @@ function formatDateParts(value, index = 0) {
   };
 }
 
-function normalizeRoute(url, fallback) {
-  if (!url) return fallback;
-  return url;
+function formatUpdated(value) {
+  const date = toDate(value);
+  if (!date) return "New";
+  return `Updated ${date.toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}`;
 }
 
-function openTarget(navigate, target) {
-  if (!target) return;
-  if (/^https?:\/\//i.test(target)) {
-    window.open(target, "_blank", "noopener,noreferrer");
-    return;
+function getWeekStart(nowValue = new Date()) {
+  const date = new Date(nowValue);
+  const day = date.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  date.setHours(0, 0, 0, 0);
+  date.setDate(date.getDate() + diff);
+  return date;
+}
+
+function sameDay(left, right) {
+  if (!left || !right) return false;
+  return (
+    left.getFullYear() === right.getFullYear() &&
+    left.getMonth() === right.getMonth() &&
+    left.getDate() === right.getDate()
+  );
+}
+
+function getItemDate(item = {}) {
+  return (
+    toDate(item.updatedAt) ||
+    toDate(item.createdAt) ||
+    toDate(item.date) ||
+    toDate(item.startAt) ||
+    toDate(item.scheduleAt)
+  );
+}
+
+function getContentMeta(item = {}) {
+  const section = cleanType(item.section);
+  const contentType = cleanType(item.contentType);
+  const sourceType = cleanType(item.sourceType);
+
+  if (section.includes("current")) return getMeta("current");
+  if (section.includes("mock")) return getMeta("mock");
+  if (section.includes("roadmap")) return getMeta("roadmap");
+  if (section.includes("video") || contentType.includes("video") || sourceType.includes("youtube")) {
+    return getMeta("videos");
   }
-  navigate(target);
+  return getMeta("notes");
+}
+
+function eventToUpdate(event = {}, index = 0) {
+  const eventType = event.type || event.module || event.section || event.typeLabel || "live";
+  const meta = getMeta(eventType);
+  const date = formatDateParts(event.updatedAt || event.createdAt || event.startAt);
+
+  return {
+    id: event.id || `event-${index}`,
+    type: meta.tone,
+    title: event.title || "AspireNest learning event",
+    description:
+      event.description ||
+      event.subtitle ||
+      event.subject ||
+      "Fresh learning update synced from AspireNest Experience events.",
+    updated: event.status === "live" ? "Live now" : `Updated ${date.date}`,
+    route: normalizeRoute(event.cta?.url || event.url || event.link, meta.route),
+    cta: event.cta?.label || (event.status === "live" ? "Join" : "Open"),
+    source: meta.label,
+    plan: event.planType || "FREE",
+    featured: index === 0 || Boolean(event.featured),
+    sortAt: getItemDate(event)?.getTime() || 0,
+  };
+}
+
+function contentToUpdate(item = {}, index = 0) {
+  const meta = getContentMeta(item);
+  const route = item.fileUrl || item.videoUrl || item.url || item.link || meta.route;
+
+  return {
+    id: item.id || `content-${index}`,
+    type: meta.tone,
+    title: item.title || item.name || "AspireNest content update",
+    description:
+      item.description ||
+      item.chapter ||
+      item.subject ||
+      item.month ||
+      "New learning resource published in AspireNest.",
+    updated: formatUpdated(item.updatedAt || item.createdAt || item.date),
+    route: normalizeRoute(route, meta.route),
+    cta: meta.tone === "videos" ? "Watch" : meta.tone === "mock" ? "Start" : "Open",
+    source: meta.label,
+    plan: item.planType || item.type || "FREE",
+    sortAt: getItemDate(item)?.getTime() || 0,
+  };
+}
+
+function currentAffairToUpdate(item = {}, index = 0) {
+  const meta = getMeta("current");
+
+  return {
+    id: item.id || `current-${index}`,
+    type: meta.tone,
+    title: item.title || item.month || "Current Affairs update",
+    description: item.description || item.month || "Latest current affairs PDF is ready for revision.",
+    updated: formatUpdated(item.updatedAt || item.createdAt || item.date),
+    route: normalizeRoute(item.pdf || item.fileUrl || item.url, meta.route),
+    cta: "Read",
+    source: meta.label,
+    plan: item.planType || item.type || "FREE",
+    sortAt: getItemDate(item)?.getTime() || 0,
+  };
+}
+
+function dedupeItems(items = []) {
+  const seen = new Set();
+
+  return items.filter((item) => {
+    const key = [item.id, item.route, item.title].filter(Boolean).join("|").toLowerCase();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 export default function CtetLiveContentCenter({
   events = [],
   upcomingEvents = [],
+  contentItems = [],
+  currentAffairs = [],
   loading = false,
   navigate,
 }) {
   const [activeFilter, setActiveFilter] = useState("all");
+  const [activeTvIndex, setActiveTvIndex] = useState(0);
+  const [tvPaused, setTvPaused] = useState(false);
+  const [touchStartX, setTouchStartX] = useState(null);
 
-  const eventUpdates = useMemo(() => {
-    const source = Array.isArray(events) ? events : [];
-    const mapped = source.slice(0, 8).map((event, index) => {
-      const eventType = event.type || event.module || event.section || event.typeLabel || "live";
-      const meta = getMeta(eventType);
-      const date = formatDateParts(event.updatedAt || event.createdAt || event.startAt, index);
+  const allUpdates = useMemo(() => {
+    const eventItems = (Array.isArray(events) ? events : []).map(eventToUpdate);
+    const moduleItems = (Array.isArray(contentItems) ? contentItems : [])
+      .filter((item) => ["published", "live"].includes(String(item.status || "published").toLowerCase()))
+      .map(contentToUpdate);
+    const currentItems = (Array.isArray(currentAffairs) ? currentAffairs : []).map(currentAffairToUpdate);
 
-      return {
-        id: event.id || `event-${index}`,
-        type: meta.tone,
-        title: event.title || "AspireNest learning update",
-        description:
-          event.description ||
-          event.subtitle ||
-          "Fresh learning update synced from AspireNest live experience events.",
-        updated: event.status === "live" ? "Live now" : `Updated ${date.date}`,
-        route: normalizeRoute(event.cta?.url || event.url || event.link, meta.route),
-        cta: event.status === "live" ? "Join" : "Open",
-        featured: index === 0,
-      };
-    });
+    const merged = dedupeItems([...eventItems, ...moduleItems, ...currentItems])
+      .sort((a, b) => Number(b.featured || false) - Number(a.featured || false) || b.sortAt - a.sortAt);
 
-    return mapped.length ? mapped : fallbackUpdates;
-  }, [events]);
+    return merged.length ? merged.slice(0, 12) : fallbackUpdates;
+  }, [contentItems, currentAffairs, events]);
 
   const visibleUpdates = useMemo(() => {
-    if (activeFilter === "all") return eventUpdates;
-    return eventUpdates.filter((item) => item.type === activeFilter);
-  }, [activeFilter, eventUpdates]);
+    if (activeFilter === "all") return allUpdates;
+    return allUpdates.filter((item) => item.type === activeFilter);
+  }, [activeFilter, allUpdates]);
 
   const weekItems = useMemo(() => {
+    const now = new Date();
+    const weekStart = getWeekStart(now);
     const source = Array.isArray(upcomingEvents) && upcomingEvents.length ? upcomingEvents : events;
-    const mapped = (Array.isArray(source) ? source : []).slice(0, 7).map((event, index) => {
-      const eventType = event.type || event.module || event.section || event.typeLabel || "live";
-      const meta = getMeta(eventType);
-      const date = formatDateParts(event.startAt || event.scheduleAt || event.createdAt, index);
+    const weekEvents = (Array.isArray(source) ? source : [])
+      .map((event) => ({ ...event, startDate: toDate(event.startAt || event.scheduleAt || event.createdAt) }))
+      .filter((event) => event.startDate);
+
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(weekStart);
+      date.setDate(weekStart.getDate() + index);
+      const dayEvents = weekEvents.filter((event) => sameDay(event.startDate, date));
+      const firstEvent = dayEvents[0];
+      const meta = getMeta(firstEvent?.type || "live");
+      const dateParts = formatDateParts(firstEvent?.startAt || date);
+
+      if (!firstEvent) {
+        return {
+          id: `week-empty-${index}`,
+          today: sameDay(date, now) ? "TODAY" : "",
+          day: date.toLocaleDateString("en-IN", { weekday: "short" }),
+          date: date.toLocaleDateString("en-IN", { day: "2-digit", month: "short" }),
+          time: "Open slot",
+          title: "No event planned yet",
+          subtitle: "Follow the roadmap while the next live class, mock test, or workshop is being scheduled.",
+          type: "roadmap",
+          label: "Open Slot",
+          cta: "Open Roadmap",
+          route: "/ctet-tet/roadmaps",
+          empty: true,
+        };
+      }
 
       return {
-        id: event.id || `week-${index}`,
-        today: index === 0 ? "TODAY" : "",
-        day: date.day,
-        date: date.date,
-        time: date.time,
-        title: event.title || "AspireNest weekly learning event",
-        subtitle: event.description || event.subject || "Auto-synced learning schedule",
+        id: firstEvent.id || `week-${index}`,
+        today: sameDay(date, now) ? "TODAY" : "",
+        day: dateParts.day,
+        date: dateParts.date,
+        time: dateParts.time,
+        title: dayEvents.length > 1 ? `${dayEvents.length} events scheduled` : firstEvent.title || "AspireNest weekly learning event",
+        subtitle: firstEvent.description || firstEvent.subject || "Auto-synced learning schedule",
         type: meta.tone,
-        label: meta.label,
-        cta: event.status === "live" ? "Join Live" : meta.tone === "mock" ? "Start Test" : meta.tone === "videos" ? "Watch" : "View",
-        route: normalizeRoute(event.cta?.url || event.url || event.link, meta.route),
+        label: dayEvents.length > 1 ? "Multiple" : meta.label,
+        cta: firstEvent.status === "live" ? "Join Live" : meta.tone === "mock" ? "Start Test" : meta.tone === "videos" ? "Watch" : "View",
+        route: normalizeRoute(firstEvent.cta?.url || firstEvent.url || firstEvent.link, meta.route),
       };
     });
-
-    if (mapped.length) return mapped;
-
-    return fallbackWeek.map((item, index) => ({
-      id: `fallback-week-${index}`,
-      today: item[0] ? "TODAY" : "",
-      day: item[1],
-      date: item[2],
-      time: item[3],
-      title: item[4],
-      subtitle: item[5],
-      type: item[6],
-      label: getMeta(item[6]).label,
-      cta: item[7],
-      route: item[8],
-    }));
   }, [events, upcomingEvents]);
 
-  const featured = visibleUpdates[0];
+  const featured = visibleUpdates[0] || allUpdates[0];
 
   const tvItems = useMemo(() => {
-    const eventItems = (events || []).slice(0, 3).map((event) => {
+    const eventItems = (events || []).slice(0, 4).map((event, index) => {
       const meta = getMeta(event.type);
       return {
-        id: `tv-event-${event.id || event.title}`,
+        id: `tv-event-${event.id || event.title || index}`,
         type: event.type,
         eyebrow: event.status === "live" ? "LIVE NOW" : event.featured ? "FEATURED" : meta.label,
         title: event.title || "AspireNest learning event",
@@ -205,48 +314,62 @@ export default function CtetLiveContentCenter({
       };
     });
 
-    const updateItems = visibleUpdates.slice(0, 2).map((item) => ({
+    const updateItems = allUpdates.slice(0, 5).map((item) => ({
       id: `tv-update-${item.id}`,
       type: item.type,
-      eyebrow: "WHAT'S NEW",
+      eyebrow: item.empty ? "NEEDS PUBLISH" : item.source || "WHAT'S NEW",
       title: item.title,
       description: item.description,
       cta: item.cta,
       route: item.route,
     }));
 
-    const weekSpotlight = weekItems[0]
+    const weekSpotlight = weekItems.find((item) => !item.empty) || weekItems.find((item) => item.today);
+    const weekItemsForTv = weekSpotlight
       ? [
           {
-            id: `tv-week-${weekItems[0].id}`,
-            type: weekItems[0].type,
-            eyebrow: weekItems[0].today || "THIS WEEK",
-            title: weekItems[0].title,
-            description: weekItems[0].subtitle,
-            cta: weekItems[0].cta,
-            route: weekItems[0].route,
+            id: `tv-week-${weekSpotlight.id}`,
+            type: weekSpotlight.type,
+            eyebrow: weekSpotlight.today || "THIS WEEK",
+            title: weekSpotlight.title,
+            description: weekSpotlight.subtitle,
+            cta: weekSpotlight.cta,
+            route: weekSpotlight.route,
           },
         ]
       : [];
 
-    const merged = [...eventItems, ...updateItems, ...weekSpotlight].filter(Boolean);
+    return dedupeItems([...eventItems, ...updateItems, ...weekItemsForTv]).slice(0, 6);
+  }, [allUpdates, events, weekItems]);
 
-    if (merged.length) return merged.slice(0, 5);
+  useEffect(() => {
+    setActiveTvIndex((current) => (tvItems[current] ? current : 0));
+  }, [tvItems]);
 
-    return [
-      {
-        id: "tv-empty-state",
-        type: "ANNOUNCEMENT",
-        eyebrow: loading ? "SYNCING" : "ASPIRENEST TV",
-        title: loading ? "Preparing academy spotlight" : "AspireNest TV will appear here soon",
-        description: loading
-          ? "Fetching latest events and updates."
-          : "Featured classes, mock tests, mentor updates, and platform highlights will be shown here.",
-        cta: "Open Learning Hub",
-        route: "/ctet-tet/courses",
-      },
-    ];
-  }, [events, loading, visibleUpdates, weekItems]);
+  useEffect(() => {
+    if (tvPaused || tvItems.length < 2) return undefined;
+
+    const timer = window.setInterval(() => {
+      setActiveTvIndex((current) => (current + 1) % tvItems.length);
+    }, 5500);
+
+    return () => window.clearInterval(timer);
+  }, [tvItems.length, tvPaused]);
+
+  const moveTv = (direction) => {
+    if (tvItems.length < 2) return;
+    setActiveTvIndex((current) => (current + direction + tvItems.length) % tvItems.length);
+  };
+
+  const handleTouchEnd = (event) => {
+    if (touchStartX == null) return;
+    const delta = event.changedTouches[0]?.clientX - touchStartX;
+    setTouchStartX(null);
+    setTvPaused(false);
+
+    if (Math.abs(delta) < 42) return;
+    moveTv(delta > 0 ? -1 : 1);
+  };
 
   return (
     <section className="ctetS4LiveContentCenter" id="live-content-center">
@@ -254,9 +377,9 @@ export default function CtetLiveContentCenter({
       <div className="ctetS4Shell">
         <div className="ctetS4Hero">
           <div>
-            <span className="ctetS4Eyebrow">⌁ Live Content Center</span>
+            <span className="ctetS4Eyebrow">Live Content Center</span>
             <h2>
-              What’s New & <span>This Week</span>
+              What's New & <span>This Week</span>
             </h2>
             <p>
               Your premium update hub for the latest real CTET/TET content and your weekly learning schedule.
@@ -264,51 +387,75 @@ export default function CtetLiveContentCenter({
           </div>
 
           <div className="ctetS4SyncCard">
-            <span>↻</span>
+            <span>SYNC</span>
             <div>
               <strong>{loading ? "Syncing Updates" : "Live Sync Active"}</strong>
-              <small>Synced from Notes, Mock Tests, Videos, Current Affairs, and AspirePath</small>
+              <small>Synced from Notes, Mock Tests, Videos, Current Affairs, Roadmaps, and Experience events</small>
             </div>
           </div>
         </div>
 
-          <div className="ctetS4TvStrip" aria-label="AspireNest TV">
-            <div className="ctetS4TvIntro">
-              <span>▶ AspireNest TV</span>
-              <h3>Live academy spotlight</h3>
-              <p>Featured classes, mock tests, mentor updates, and fresh learning signals in one premium strip.</p>
-            </div>
-
-            <div className="ctetS4TvRail">
-              {tvItems.map((item, tvIndex) => {
-                const meta = getMeta(item.type);
-                return (
-                  <button
-                    type="button"
-                    className={tvIndex === 0 ? "ctetS4TvCard isFeatured" : "ctetS4TvCard"}
-                    key={item.id}
-                    onClick={() => openTarget(navigate, item.route)}
-                  >
-                    <b className={"ctetS4TypePill is-" + meta.tone}>{item.eyebrow}</b>
-                    <span className={"ctetS4IconBox is-" + meta.tone}>{meta.icon}</span>
-                    <div>
-                      <h4>{item.title}</h4>
-                      <p>{item.description}</p>
-                    </div>
-                    <strong>{item.cta} ›</strong>
-                  </button>
-                );
-              })}
-            </div>
+        <div className="ctetS4TvStrip" aria-label="AspireNest TV">
+          <div className="ctetS4TvIntro">
+            <span>AspireNest TV</span>
+            <h3>Live academy spotlight</h3>
+            <p>Featured classes, mock tests, mentor updates, and fresh learning signals in one premium strip.</p>
+            {tvItems.length > 1 ? (
+              <div className="ctetS4TvControls" aria-label="AspireNest TV controls">
+                <button type="button" onClick={() => moveTv(-1)} aria-label="Previous AspireNest TV item">
+                  Prev
+                </button>
+                <strong>{activeTvIndex + 1} / {tvItems.length}</strong>
+                <button type="button" onClick={() => moveTv(1)} aria-label="Next AspireNest TV item">
+                  Next
+                </button>
+              </div>
+            ) : null}
           </div>
+
+          <div
+            className="ctetS4TvRail"
+            onMouseEnter={() => setTvPaused(true)}
+            onMouseLeave={() => setTvPaused(false)}
+            onFocus={() => setTvPaused(true)}
+            onBlur={() => setTvPaused(false)}
+            onTouchStart={(event) => {
+              setTvPaused(true);
+              setTouchStartX(event.touches[0]?.clientX ?? null);
+            }}
+            onTouchEnd={handleTouchEnd}
+          >
+            {tvItems.map((item, tvIndex) => {
+              const meta = getMeta(item.type);
+              const isActive = tvIndex === activeTvIndex;
+              return (
+                <button
+                  type="button"
+                  className={`ctetS4TvCard ${isActive ? "isFeatured isActive" : ""}`.trim()}
+                  key={item.id}
+                  onClick={() => openTarget(navigate, item.route)}
+                  aria-current={isActive ? "true" : undefined}
+                >
+                  <b className={"ctetS4TypePill is-" + meta.tone}>{item.eyebrow}</b>
+                  <span className={"ctetS4IconBox is-" + meta.tone}>{meta.icon}</span>
+                  <div>
+                    <h4>{item.title}</h4>
+                    <p>{item.description}</p>
+                  </div>
+                  <strong>{item.cta} ›</strong>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         <div className="ctetS4Grid">
           <article className="ctetS4Panel ctetS4WhatsNewPanel">
             <div className="ctetS4PanelHead">
               <div className="ctetS4PanelTitle">
-                <span>🔔</span>
+                <span>NEW</span>
                 <div>
-                  <h3>What’s New</h3>
+                  <h3>What's New</h3>
                   <p>Latest updates across all modules</p>
                 </div>
               </div>
@@ -337,15 +484,17 @@ export default function CtetLiveContentCenter({
                 className="ctetS4FeaturedUpdate"
                 onClick={() => openTarget(navigate, featured.route)}
               >
-                <span className="ctetS4FeaturedRibbon">Featured Update</span>
+                <span className="ctetS4FeaturedRibbon">{featured.empty ? "Publish Needed" : "Featured Update"}</span>
                 <i>{getMeta(featured.type).icon}</i>
                 <div>
+                  <b className={`ctetS4TypePill is-${getMeta(featured.type).tone}`}>{featured.source || getMeta(featured.type).label}</b>
+                  {featured.plan ? <b className="ctetS4PlanPill">{featured.plan}</b> : null}
                   <h4>{featured.title}</h4>
                   <p>{featured.description}</p>
-                  <small>◷ {featured.updated}</small>
+                  <small>{featured.updated}</small>
                 </div>
                 <strong>{featured.cta} ↗</strong>
-                <em>☆</em>
+                <em>NEW</em>
               </button>
             )}
 
@@ -361,7 +510,8 @@ export default function CtetLiveContentCenter({
                   >
                     <span className={`ctetS4IconBox is-${meta.tone}`}>{meta.icon}</span>
                     <div>
-                      <b className={`ctetS4TypePill is-${meta.tone}`}>{meta.label}</b>
+                      <b className={`ctetS4TypePill is-${meta.tone}`}>{item.source || meta.label}</b>
+                      {item.plan ? <b className="ctetS4PlanPill">{item.plan}</b> : null}
                       <h4>{item.title}</h4>
                       <p>{item.description}</p>
                     </div>
@@ -370,20 +520,27 @@ export default function CtetLiveContentCenter({
                   </button>
                 );
               })}
+
+              {visibleUpdates.length <= 1 ? (
+                <div className="ctetS4EmptyMini">
+                  <strong>No more updates in this filter</strong>
+                  <span>Publish content in the matching module to fill this list.</span>
+                </div>
+              ) : null}
             </div>
           </article>
 
           <article className="ctetS4Panel ctetS4WeekPanel">
             <div className="ctetS4PanelHead">
               <div className="ctetS4PanelTitle">
-                <span>▣</span>
+                <span>WEEK</span>
                 <div>
                   <h3>This Week</h3>
-                  <p>Your auto-synced weekly plan</p>
+                  <p>Current Mon-Sun learning plan</p>
                 </div>
               </div>
               <button type="button" onClick={() => navigate("/ctet-tet/roadmaps")}>
-                ▣ Weekly Calendar
+                Weekly Calendar
               </button>
             </div>
 
@@ -394,7 +551,7 @@ export default function CtetLiveContentCenter({
                   <button
                     type="button"
                     key={item.id}
-                    className={item.today ? "ctetS4WeekRow isToday" : "ctetS4WeekRow"}
+                    className={`${item.today ? "ctetS4WeekRow isToday" : "ctetS4WeekRow"} ${item.empty ? "isEmpty" : ""}`.trim()}
                     onClick={() => openTarget(navigate, item.route)}
                   >
                     <div className="ctetS4DateBlock">
@@ -408,7 +565,7 @@ export default function CtetLiveContentCenter({
                       <h4>{item.title}</h4>
                       <p>{item.subtitle}</p>
                     </div>
-                    <b className={`ctetS4TypePill is-${meta.tone}`}>{meta.label}</b>
+                    <b className={`ctetS4TypePill is-${meta.tone}`}>{item.label}</b>
                     <strong>{item.cta} ›</strong>
                   </button>
                 );
@@ -416,15 +573,15 @@ export default function CtetLiveContentCenter({
             </div>
 
             <div className="ctetS4FooterNote">
-              <span>✣</span>
-              <p>Auto-synced weekly plan from your learning activity.</p>
-              <small>No-event premium state supported.</small>
+              <span>OK</span>
+              <p>Completed, cancelled, expired, and archived events stay out of the public week plan.</p>
+              <small>No-event days remain useful and clean.</small>
             </div>
           </article>
         </div>
 
         <div className="ctetS4BottomTrust">
-          <strong>🛡 Always Updated. Always Relevant.</strong>
+          <strong>Always Updated. Always Relevant.</strong>
           <span>We bring you the latest so you can stay ahead.</span>
         </div>
       </div>

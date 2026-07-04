@@ -34,6 +34,29 @@ export const getExperienceDate = (value) => {
 export const getExperienceEventTypeLabel = (type = "") =>
   EXPERIENCE_EVENT_TYPE_LABELS[normalizeExperienceType(type)] || "Experience";
 
+export const buildExperienceEventKey = (event = {}) =>
+  [event.type, event.title, event.startAt]
+    .map((part) => normalizeExperienceText(part).toLowerCase())
+    .join("|");
+
+const CTA_FALLBACK_TARGETS = Object.freeze({
+  [EXPERIENCE_CTA_TYPES.JOIN_LIVE]: "/ctet-tet/videos",
+  [EXPERIENCE_CTA_TYPES.START_MOCK]: "/ctet-tet/mock-tests",
+  [EXPERIENCE_CTA_TYPES.VIEW_DETAILS]: "/ctet-tet",
+  [EXPERIENCE_CTA_TYPES.OPEN_VIDEO]: "/ctet-tet/videos",
+  [EXPERIENCE_CTA_TYPES.READ_NOTES]: "/ctet-tet/notes",
+  [EXPERIENCE_CTA_TYPES.START_MISSION]: "/ctet-tet/roadmaps",
+  [EXPERIENCE_CTA_TYPES.OPEN_ROADMAP]: "/ctet-tet/roadmaps",
+  [EXPERIENCE_CTA_TYPES.UPGRADE_PLAN]: "/ctet-tet/pricing",
+});
+
+const getExperienceCtaFallbackUrl = (ctaType, type) => {
+  if (CTA_FALLBACK_TARGETS[ctaType]) return CTA_FALLBACK_TARGETS[ctaType];
+  if (type === EXPERIENCE_EVENT_TYPES.LIVE_CLASS) return "/ctet-tet/videos";
+  if (type === EXPERIENCE_EVENT_TYPES.MOCK_TEST) return "/ctet-tet/mock-tests";
+  return "/ctet-tet";
+};
+
 export const getExperienceEventStatus = (event = {}, nowValue = new Date()) => {
   const manualStatus = normalizeExperienceStatus(event.status);
   const now = getExperienceDate(nowValue) || new Date();
@@ -93,11 +116,13 @@ export const getExperienceEventCta = (event = {}) => {
   const type = normalizeExperienceType(event.type);
   const status = getExperienceEventStatus(event);
 
-  if (event.ctaType || event.ctaLabel || event.ctaUrl) {
+  if (event.ctaType || event.ctaLabel || event.ctaUrl || event.ctaLink) {
+    const ctaType = event.ctaType || EXPERIENCE_CTA_TYPES.VIEW_DETAILS;
+
     return {
-      type: event.ctaType || EXPERIENCE_CTA_TYPES.VIEW_DETAILS,
+      type: ctaType,
       label: event.ctaLabel || "View Details",
-      url: event.ctaUrl || "",
+      url: event.ctaUrl || event.ctaLink || getExperienceCtaFallbackUrl(ctaType, type),
     };
   }
 
@@ -105,7 +130,7 @@ export const getExperienceEventCta = (event = {}) => {
     return {
       type: EXPERIENCE_CTA_TYPES.JOIN_LIVE,
       label: status === EXPERIENCE_EVENT_STATUS.LIVE ? "Join Live" : "View Schedule",
-      url: event.joinUrl || event.liveUrl || event.ctaUrl || "",
+      url: event.joinUrl || event.liveUrl || event.ctaUrl || event.ctaLink || "/ctet-tet/videos",
     };
   }
 
@@ -113,14 +138,14 @@ export const getExperienceEventCta = (event = {}) => {
     return {
       type: EXPERIENCE_CTA_TYPES.START_MOCK,
       label: "Open Mock Test",
-      url: event.mockTestUrl || event.ctaUrl || "",
+      url: event.mockTestUrl || event.ctaUrl || event.ctaLink || "/ctet-tet/mock-tests",
     };
   }
 
   return {
     type: EXPERIENCE_CTA_TYPES.VIEW_DETAILS,
     label: "View Details",
-    url: event.ctaUrl || "",
+    url: event.ctaUrl || event.ctaLink || getExperienceCtaFallbackUrl(EXPERIENCE_CTA_TYPES.VIEW_DETAILS, type),
   };
 };
 
@@ -139,11 +164,15 @@ export const normalizeExperienceEvent = (event = {}) => {
     chapter: normalizeExperienceText(event.chapter),
     mentorName: normalizeExperienceText(event.mentorName),
     planType: normalizeExperienceText(event.planType || "FREE"),
+    thumbnail: normalizeExperienceText(event.thumbnail || event.thumbnailUrl),
     startAt: event.startAt || null,
     endAt: event.endAt || null,
     priority: Number(event.priority || 0),
     featured: Boolean(event.featured),
     cta: getExperienceEventCta(event),
+    ctaType: normalizeExperienceText(event.ctaType),
+    ctaLabel: normalizeExperienceText(event.ctaLabel),
+    ctaUrl: normalizeExperienceText(event.ctaUrl || event.ctaLink),
     sourceType: normalizeExperienceText(event.sourceType),
     sourceId: normalizeExperienceText(event.sourceId),
     raw: event,

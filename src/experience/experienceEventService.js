@@ -1,12 +1,65 @@
-import { addDoc, collection, doc, getDocs, limit, query, serverTimestamp, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDocs, limit, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 
 import { db } from "../firebase";
 import { EXPERIENCE_COLLECTIONS } from "./experienceConstants";
 import {
+  buildExperienceEventKey,
   isPublicExperienceEvent,
   normalizeExperienceEvent,
   sortExperienceEvents,
 } from "./experienceEventUtils";
+
+const buildExperiencePayload = (data = {}, includeCreateFields = false) => {
+  const title = String(data.title || "").trim();
+  const type = data.type || "";
+  const startAt = data.startAt || "";
+
+  const payload = {
+    title,
+    description: String(data.description || "").trim(),
+    type,
+    status: data.status || "",
+    subject: String(data.subject || "").trim(),
+    chapter: String(data.chapter || "").trim(),
+    mentorName: String(data.mentorName || "").trim(),
+    planType: String(data.planType || "FREE").trim(),
+    startAt,
+    endAt: data.endAt || "",
+    thumbnail: String(data.thumbnail || data.thumbnailUrl || "").trim(),
+    ctaType: data.ctaType || "",
+    ctaLabel: String(data.ctaLabel || "").trim(),
+    ctaUrl: String(data.ctaUrl || data.ctaLink || "").trim(),
+    priority: Number(data.priority || 0),
+    featured: Boolean(data.featured),
+    sourceType: data.sourceType || "manual",
+    sourceId: data.sourceId || "",
+    experienceKey: buildExperienceEventKey({ title, type, startAt }),
+    updatedAt: serverTimestamp(),
+  };
+
+  if (includeCreateFields) {
+    payload.createdAt = serverTimestamp();
+  }
+
+  return payload;
+};
+
+const assertUniqueExperienceEvent = async (payload, currentId = "") => {
+  if (!payload.experienceKey) return;
+
+  const duplicateQuery = query(
+    collection(db, EXPERIENCE_COLLECTIONS.EVENTS),
+    where("experienceKey", "==", payload.experienceKey),
+    limit(2)
+  );
+
+  const snapshot = await getDocs(duplicateQuery);
+  const duplicate = snapshot.docs.find((docSnap) => docSnap.id !== currentId);
+
+  if (duplicate) {
+    throw new Error("Duplicate experience event already exists for this title, type, and start time.");
+  }
+};
 
 export const createExperienceEvent = async (data = {}) => {
   const title = String(data.title || "").trim();
@@ -15,27 +68,9 @@ export const createExperienceEvent = async (data = {}) => {
     throw new Error("Experience event title is required.");
   }
 
-  const payload = {
-    title,
-    description: String(data.description || "").trim(),
-    type: data.type || "",
-    status: data.status || "",
-    subject: String(data.subject || "").trim(),
-    chapter: String(data.chapter || "").trim(),
-    mentorName: String(data.mentorName || "").trim(),
-    planType: String(data.planType || "FREE").trim(),
-    startAt: data.startAt || "",
-    endAt: data.endAt || "",
-    ctaType: data.ctaType || "",
-    ctaLabel: String(data.ctaLabel || "").trim(),
-    ctaUrl: String(data.ctaUrl || "").trim(),
-    priority: Number(data.priority || 0),
-    featured: Boolean(data.featured),
-    sourceType: data.sourceType || "manual",
-    sourceId: data.sourceId || "",
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  };
+  const payload = buildExperiencePayload(data, true);
+
+  await assertUniqueExperienceEvent(payload);
 
   const docRef = await addDoc(collection(db, EXPERIENCE_COLLECTIONS.EVENTS), payload);
 
@@ -57,26 +92,9 @@ export const updateExperienceEvent = async (eventId, data = {}) => {
     throw new Error("Experience event title is required.");
   }
 
-  const payload = {
-    title,
-    description: String(data.description || "").trim(),
-    type: data.type || "",
-    status: data.status || "",
-    subject: String(data.subject || "").trim(),
-    chapter: String(data.chapter || "").trim(),
-    mentorName: String(data.mentorName || "").trim(),
-    planType: String(data.planType || "FREE").trim(),
-    startAt: data.startAt || "",
-    endAt: data.endAt || "",
-    ctaType: data.ctaType || "",
-    ctaLabel: String(data.ctaLabel || "").trim(),
-    ctaUrl: String(data.ctaUrl || "").trim(),
-    priority: Number(data.priority || 0),
-    featured: Boolean(data.featured),
-    sourceType: data.sourceType || "manual",
-    sourceId: data.sourceId || "",
-    updatedAt: serverTimestamp(),
-  };
+  const payload = buildExperiencePayload(data);
+
+  await assertUniqueExperienceEvent(payload, id);
 
   await updateDoc(doc(db, EXPERIENCE_COLLECTIONS.EVENTS, id), payload);
 

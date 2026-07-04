@@ -9,6 +9,7 @@ import {
   AdminStatusPill,
 } from "../../components/shared/admin";
 import {
+  EXPERIENCE_CTA_TYPES,
   EXPERIENCE_EVENT_STATUS,
   EXPERIENCE_EVENT_TYPES,
 } from "../experienceConstants";
@@ -35,6 +36,8 @@ const DEFAULT_FORM = {
   planType: "FREE",
   startAt: "",
   endAt: "",
+  thumbnail: "",
+  ctaType: EXPERIENCE_CTA_TYPES.VIEW_DETAILS,
   ctaLabel: "",
   ctaUrl: "",
   priority: 0,
@@ -181,6 +184,8 @@ export default function AdminExperienceEventsRoute() {
       planType: raw.planType || eventRecord.planType || "FREE",
       startAt: getDateInputValue(raw.startAt || eventRecord.startAt),
       endAt: getDateInputValue(raw.endAt || eventRecord.endAt),
+      thumbnail: raw.thumbnail || raw.thumbnailUrl || eventRecord.thumbnail || "",
+      ctaType: raw.ctaType || eventRecord.cta?.type || EXPERIENCE_CTA_TYPES.VIEW_DETAILS,
       ctaLabel: raw.ctaLabel || eventRecord.cta?.label || "",
       ctaUrl: raw.ctaUrl || eventRecord.cta?.url || "",
       priority: Number(raw.priority || eventRecord.priority || 0),
@@ -241,6 +246,8 @@ export default function AdminExperienceEventsRoute() {
         planType: form.planType.trim() || "FREE",
         startAt: toDateTimeLocalValue(form.startAt),
         endAt: toDateTimeLocalValue(form.endAt),
+        thumbnail: form.thumbnail.trim(),
+        ctaType: form.ctaType,
         ctaLabel: form.ctaLabel.trim(),
         ctaUrl: form.ctaUrl.trim(),
         priority: Number(form.priority || 0),
@@ -376,6 +383,20 @@ export default function AdminExperienceEventsRoute() {
             </label>
 
             <label>
+              <span>Thumbnail URL</span>
+              <input value={form.thumbnail} onChange={(event) => updateField("thumbnail", event.target.value)} placeholder="Optional image URL" />
+            </label>
+
+            <label>
+              <span>CTA Type</span>
+              <select value={form.ctaType} onChange={(event) => updateField("ctaType", event.target.value)}>
+                {Object.values(EXPERIENCE_CTA_TYPES).map((type) => (
+                  <option value={type} key={type}>{type}</option>
+                ))}
+              </select>
+            </label>
+
+            <label>
               <span>CTA Label</span>
               <input value={form.ctaLabel} onChange={(event) => updateField("ctaLabel", event.target.value)} placeholder="Join Live / Start Mock" />
             </label>
@@ -456,6 +477,8 @@ export default function AdminExperienceEventsRoute() {
                 <div><span>Priority</span><strong>{event.priority || 0}</strong></div>
                 <div><span>Start</span><strong>{formatDateTime(event.startAt)}</strong></div>
                 <div><span>CTA</span><strong>{event.cta?.label || event.ctaLabel || "-"}</strong></div>
+                <div><span>CTA Type</span><strong>{event.cta?.type || event.ctaType || "-"}</strong></div>
+                <div><span>Media</span><strong>{event.thumbnail ? "Thumbnail ready" : "-"}</strong></div>
               </div>
 
               <div className="adminExperienceCardActions">

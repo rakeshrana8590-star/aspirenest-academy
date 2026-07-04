@@ -2308,10 +2308,18 @@ if (expiryDate && expiryDate < new Date()) {
 
   React.useEffect(() => {
     loadContentItemsFromFirestore();
-    loadQuestionBankFromFirestore();
     loadNotesSubjectsFromFirestore();
     loadNotesChaptersFromFirestore();
   }, []);
+
+  React.useEffect(() => {
+    if (user && isAdmin(user)) {
+      loadQuestionBankFromFirestore();
+      return;
+    }
+
+    setQuestionBankItems([]);
+  }, [user]);
 
   const loadPaymentHistory = async (currentUser = user) => {
     if (!currentUser) return;
@@ -4413,10 +4421,8 @@ return (
           <button
             type="button"
             className="ctetPrimaryCta"
-            disabled={!ctetFeaturedExperienceEvent?.cta?.url}
             onClick={() => {
-                const targetUrl = String(ctetFeaturedExperienceEvent?.cta?.url || "").trim();
-                if (!targetUrl) return;
+                const targetUrl = String(ctetFeaturedExperienceEvent?.cta?.url || "/ctet-tet/videos").trim();
 
                 if (/^https?:\/\//i.test(targetUrl)) {
                   window.open(targetUrl, "_blank", "noopener,noreferrer");
@@ -4426,7 +4432,7 @@ return (
                 navigate(targetUrl);
               }}
           >
-            {ctetFeaturedExperienceEvent?.status === "live" ? "Join Live Class" : ctetFeaturedExperienceEvent ? "View Details" : "Schedule Soon"}
+            {ctetFeaturedExperienceEvent?.status === "live" ? "Join Live Class" : ctetFeaturedExperienceEvent ? "View Details" : "View Classes"}
             <strong>›</strong>
           </button>
 
@@ -4698,6 +4704,8 @@ isAdmin={isAdmin}
     <CtetLiveContentCenter
     events={ctetExperienceEvents}
     upcomingEvents={ctetUpcomingExperienceEvents}
+    contentItems={universalContent}
+    currentAffairs={currentAffairsList}
     loading={ctetExperienceLoading}
     navigate={navigate}
   />
