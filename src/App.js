@@ -229,7 +229,7 @@ export default function App() {
       "aspireExamAttemptMode",
       isExamAttemptPage
     );
-  
+
     return () => {
       document.body.classList.remove("aspireExamAttemptMode");
     };
@@ -239,11 +239,11 @@ export default function App() {
   const updateNotesScrollState = (rowId) => {
     const row = document.getElementById(rowId);
     if (!row) return;
-  
+
     const atStart = row.scrollLeft <= 5;
     const atEnd =
       row.scrollLeft + row.clientWidth >= row.scrollWidth - 5;
-  
+
     setNotesScrollState((prev) => ({
       ...prev,
       [rowId]: {
@@ -253,16 +253,16 @@ export default function App() {
       },
     }));
   };
-  
+
   const scrollShelf = (rowId, direction) => {
     const row = document.getElementById(rowId);
     if (!row) return;
-  
+
     row.scrollBy({
       left: direction === "right" ? 520 : -520,
       behavior: "smooth",
     });
-  
+
     setTimeout(() => updateNotesScrollState(rowId), 350);
   };
 
@@ -271,7 +271,7 @@ export default function App() {
       window.history.scrollRestoration = "manual";
     }
   }, []);
-  
+
   React.useLayoutEffect(() => {
     window.scrollTo(0, 0);
     document.documentElement.scrollTop = 0;
@@ -283,6 +283,7 @@ export default function App() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [selectedNotesSubject, setSelectedNotesSubject] = useState(null);
   const [activeSection, setActiveSection] = useState(null);
+  const [ctetMobileScreen, setCtetMobileScreen] = useState("home");
   const [currentQuestion, setCurrentQuestion] = useState(0);
 const [selectedAnswer, setSelectedAnswer] = useState("");
 const [score, setScore] = useState(0);
@@ -370,43 +371,43 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
     (item) =>
       item.section === CONTENT_SECTIONS.NOTES
   );
-  
+
   const universalCurrentAffairs =
     universalContent.filter(
       (item) =>
         item.section ===
         CONTENT_SECTIONS.CURRENT_AFFAIRS
     );
-  
 
 
 
-  
+
+
     const activeMockPlan =
     decodeURIComponent(location.pathname.split("/")[4] || "FREE").toUpperCase();
-  
+
   const activeMockSubjectId =
     decodeURIComponent(location.pathname.split("/")[5] || "");
-  
+
   const activeMockChapterId =
     decodeURIComponent(location.pathname.split("/")[6] || "");
-  
-  
-  
- 
-  
- 
 
-    
-   
-    
-   
+
+
+
+
+
+
+
+
+
+
   const [paletteFilter, setPaletteFilter] = useState("all");
   const [submitConfirmTestId, setSubmitConfirmTestId] =
   useState(null);
   const [examFontScale, setExamFontScale] = useState(1);
-    
-   
+
+
     const {
       mockAttemptState,
       setMockAttemptState,
@@ -609,53 +610,53 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
     if (!test) {
       return "EXPIRED";
     }
-  
+
     const scheduleType = test.scheduleType || "alwaysAvailable";
-  
+
     if (scheduleType === "alwaysAvailable") {
       return "AVAILABLE";
     }
-  
+
     const now = new Date();
-  
+
     const startDateTime =
       test.examStartDate && test.examStartTime
         ? new Date(`${test.examStartDate}T${test.examStartTime}`)
         : test.examStartDate
         ? new Date(`${test.examStartDate}T00:00`)
         : null;
-  
+
     const endDateTime =
       test.examEndDate && test.examEndTime
         ? new Date(`${test.examEndDate}T${test.examEndTime}`)
         : test.examEndDate
         ? new Date(`${test.examEndDate}T23:59`)
         : null;
-  
+
     if (startDateTime && now < startDateTime) {
       return "UPCOMING";
     }
-  
+
     if (endDateTime && now > endDateTime) {
       return "EXPIRED";
     }
-  
+
     return "AVAILABLE";
   };
-  
+
   const getMockTestAccessStatus = (test) => {
     if (!test) {
       return "NOT_FOUND";
     }
-  
+
     if (test.status !== "published") {
       return "UNPUBLISHED";
     }
-  
+
     if (!user) {
       return "LOGIN_REQUIRED";
     }
-  
+
     if (
       test.planType &&
       !hasPlanAccess(test.planType, {
@@ -666,24 +667,24 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
     ) {
       return "PLAN_LOCKED";
     }
-  
+
     if (membershipExpiry && new Date(membershipExpiry) < new Date()) {
       return "EXPIRED_MEMBERSHIP";
     }
-  
+
     const scheduleStatus = getMockTestScheduleStatus(test);
-  
+
     if (scheduleStatus === "UPCOMING") {
       return "UPCOMING";
     }
-  
+
     if (scheduleStatus === "EXPIRED") {
       return "EXPIRED";
     }
-  
+
     return "AVAILABLE";
   };
-  
+
   const getMockTestRules = (test) => ({
     navigationMode: test?.navigationMode || "free",
     shuffleQuestions: test?.shuffleQuestions || "no",
@@ -691,19 +692,19 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
     allowPause: test?.allowPause || "yes",
     calculatorAllowed: test?.calculatorAllowed || "no",
   });
-  
+
   const shuffleMockArray = (items = []) => {
     const clonedItems = [...items];
-  
+
     for (let index = clonedItems.length - 1; index > 0; index -= 1) {
       const randomIndex = Math.floor(Math.random() * (index + 1));
-  
+
       [clonedItems[index], clonedItems[randomIndex]] = [
         clonedItems[randomIndex],
         clonedItems[index],
       ];
     }
-  
+
     return clonedItems;
   };
 
@@ -903,11 +904,11 @@ useEffect(() => {
   const reusedQuestionRaw = localStorage.getItem(
     "reusedQuestionForMockTest"
   );
-  
+
   if (reusedQuestionRaw) {
     try {
       const reusedQuestion = JSON.parse(reusedQuestionRaw);
-  
+
       setMockTestQuestionsForm((prev) => [
         ...prev,
         {
@@ -932,7 +933,7 @@ useEffect(() => {
           saveToQuestionBank: "no",
         },
       ]);
-  
+
       localStorage.removeItem("reusedQuestionForMockTest");
     } catch {
       localStorage.removeItem("reusedQuestionForMockTest");
@@ -947,7 +948,7 @@ useEffect(() => {
       item.section === "mockTest"
   );
 
-  
+
 
   if (!editTest) return;
 
@@ -974,22 +975,22 @@ const handleSaveMockTest = async () => {
       alert("Please enter test title");
       return;
     }
-    
+
     if (!mockTestForm.subject.trim()) {
       alert("Please select subject");
       return;
     }
-    
+
     if (!mockTestForm.chapter.trim()) {
       alert("Please enter chapter");
       return;
     }
-    
+
     if (mockTestQuestionsForm.length === 0) {
       alert("Please add at least one question");
       return;
     }
-    
+
     if (
       Number(mockTestForm.totalQuestions) !==
       mockTestQuestionsForm.length
@@ -999,13 +1000,13 @@ const handleSaveMockTest = async () => {
       );
       return;
     }
-    
+
     for (const [index, question] of mockTestQuestionsForm.entries()) {
       if (!question.question?.trim()) {
         alert(`Question ${index + 1} is empty`);
         return;
       }
-    
+
       if (
         !question.option1?.trim() ||
         !question.option2?.trim() ||
@@ -1017,7 +1018,7 @@ const handleSaveMockTest = async () => {
         );
         return;
       }
-    
+
       if (!question.answer) {
         alert(
           `Please select correct answer for Question ${index + 1}`
@@ -1025,7 +1026,7 @@ const handleSaveMockTest = async () => {
         return;
       }
     }
-    
+
     if (
       mockTestForm.scheduleType === "dateTime" &&
       (
@@ -1038,7 +1039,7 @@ const handleSaveMockTest = async () => {
       );
       return;
     }
-    
+
     if (
       mockTestForm.recurringMode === "weekly" &&
       !mockTestForm.weeklyTestDay
@@ -1048,7 +1049,7 @@ const handleSaveMockTest = async () => {
       );
       return;
     }
-    
+
     if (
       mockTestForm.recurringMode === "monthly" &&
       !mockTestForm.monthlyTestDate
@@ -1061,23 +1062,23 @@ const handleSaveMockTest = async () => {
     const confirmSave = window.confirm(
       `
     Title: ${mockTestForm.title}
-    
+
     Subject: ${mockTestForm.subject}
-    
+
     Chapter: ${mockTestForm.chapter}
-    
+
     Questions: ${mockTestQuestionsForm.length}
-    
+
     Duration: ${mockTestForm.duration} min
-    
+
     Plan: ${mockTestForm.planType}
-    
+
     Type: ${mockTestForm.testType}
-    
+
     Do you want to save this paper?
     `
     );
-    
+
     if (!confirmSave) {
       return;
     }
@@ -1095,10 +1096,10 @@ const handleSaveMockTest = async () => {
     const finalPassingMarks = Number(
       mockTestForm.passingMarks || 0
     );
-    
+
     const finalExamDifficulty =
       mockTestForm.examDifficulty || "Mixed";
-    
+
     const finalExamLanguage =
       mockTestForm.examLanguage || "English";
     if (!finalTitle) {
@@ -1246,9 +1247,9 @@ const handleSaveMockTest = async () => {
       finalPassingMarks >= 0
         ? finalPassingMarks
         : 0,
-    
+
     examDifficulty: finalExamDifficulty,
-    
+
     examLanguage: finalExamLanguage,
 
     attemptLimit: mockTestForm.attemptLimit || "unlimited",
@@ -1339,29 +1340,29 @@ examInstructions:
             .toLowerCase()
             .replace(/\s+/g, "-")
             .slice(0, 180);
-    
+
         const questionBankPayload = {
           ...question,
-    
+
           questionBankKey,
-    
+
           sourceExamTitle: finalTitle,
           sourceExamType: finalExamType,
           sourceTestType: finalTestType,
           sourceSubject: finalSubject,
           sourceChapter: finalChapter,
-    
+
           section: "questionBank",
-    
+
           updatedAt: new Date(),
         };
-    
+
         if (editingQuestionBankId) {
           await updateDoc(
             doc(db, "questionBank", editingQuestionBankId),
             questionBankPayload
           );
-    
+
           setEditingQuestionBankId(null);
         } else {
           const existingQuestions = await getDocs(
@@ -1370,7 +1371,7 @@ examInstructions:
               where("questionBankKey", "==", questionBankKey)
             )
           );
-    
+
           if (existingQuestions.empty) {
             await addDoc(collection(db, "questionBank"), {
               ...questionBankPayload,
@@ -1379,7 +1380,7 @@ examInstructions:
           }
         }
       }
-    
+
       await loadQuestionBankFromFirestore();
     }
 
@@ -1478,7 +1479,7 @@ const handleImportMockTestXlsx = async (event) => {
       event.target.value = "";
       return;
     }
-    
+
     const { testInfoRows, questionRows } = workbookRows;
 
     const parsedImport = buildMockTestImportPayloadFromRows({
@@ -1548,7 +1549,7 @@ const handleImportMockTestXlsxFromUrl = async () => {
       alert(workbookRows.message);
       return;
     }
-    
+
     const { testInfoRows, questionRows } = workbookRows;
 
     const parsedImport = buildMockTestImportPayloadFromRows({
@@ -1654,12 +1655,12 @@ const [paymentHistory, setPaymentHistory] = useState([]);
       alert("Please login first");
       return;
     }
-  
+
     try {
       setPaymentLoading(true);
-  
+
       const orderId = generateOrderId();
-  
+
       const upiLink = `upi://pay?pa=aspirenestplatform@oksbi&pn=AspireNest Academy&am=${amount}&tn=${orderId}`;
       const paymentData = {
         orderId,
@@ -1676,14 +1677,14 @@ const [paymentHistory, setPaymentHistory] = useState([]);
         matchStatus: "waiting",
         createdAt: new Date().toISOString(),
       };
-  
+
       console.log("Payment Request Created:", paymentData);
       const paymentDocRef = await addDoc(collection(db, "payments"), paymentData);
       setActivePayment({
         id: paymentDocRef.id,
         ...paymentData,
       });
-  
+
       alert(
         `Payment Request Created!\nOrder ID: ${orderId}`
       );
@@ -1697,7 +1698,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       const verifiedUser = await getVerifiedAuthSession(auth, currentUser);
-    
+
         setUser(verifiedUser);
 
         if (verifiedUser && !isAdmin(verifiedUser)) {
@@ -1710,17 +1711,17 @@ const [paymentHistory, setPaymentHistory] = useState([]);
             );
           });
         }
-        
+
         if (!verifiedUser) {
         setIsPremiumUser(false);
         setAuthLoading(false);
         return;
       }
-    
+
       // Fast first load
       checkPremiumAccess(verifiedUser);
       loadUserMockResults(verifiedUser.email);
-    
+
       // Main content delay se load hoga
       setTimeout(() => {
         loadMockQuestions();
@@ -1731,7 +1732,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
         loadNotesSubjectsFromFirestore();
         loadNotesChaptersFromFirestore();
       }, 300);
-    
+
       // Admin heavy data sirf admin ke liye
       if (isAdmin(verifiedUser)) {
         setTimeout(() => {
@@ -1741,10 +1742,10 @@ const [paymentHistory, setPaymentHistory] = useState([]);
           loadPaymentRequests();
         }, 600);
       }
-    
+
       setAuthLoading(false);
     });
-    
+
     return () => unsubscribe();
   }, []);
 
@@ -1754,18 +1755,18 @@ const [paymentHistory, setPaymentHistory] = useState([]);
       "/": null,
       "/learning": "learning-hub",
     };
-  
+
     const sectionName = routeToSection[location.pathname];
-  
+
     if (sectionName === undefined) return;
-  
-  
-  
+
+
+
     setActiveSection(sectionName);
-  
+
     setTimeout(() => {
       const section = document.getElementById(sectionName);
-  
+
       if (section) {
         section.scrollIntoView({
           behavior: "smooth",
@@ -1779,14 +1780,14 @@ const [paymentHistory, setPaymentHistory] = useState([]);
     const cleanEmail = email.trim().toLowerCase();
     const cleanFullName =
       studentProfile.fullName?.trim() || cleanEmail.split("@")[0];
-  
+
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         cleanEmail,
         password
       );
-  
+
       const baseStudentProfile = {
         uid: userCredential.user.uid,
         fullName: cleanFullName,
@@ -1812,23 +1813,23 @@ const [paymentHistory, setPaymentHistory] = useState([]);
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-  
+
       await setDoc(
         doc(db, "students", userCredential.user.uid),
         baseStudentProfile
       );
-  
+
       await setDoc(doc(db, "users", userCredential.user.uid), {
         ...baseStudentProfile,
         displayName: cleanFullName,
         paymentStatus: "FREE",
         premiumStatus: "FREE",
       });
-  
+
       await sendEmailVerification(userCredential.user);
-  
+
       await signOut(auth);
-  
+
       alert(
         "Account created ✅ Verification email sent. Please verify your Gmail before login."
       );
@@ -1840,22 +1841,22 @@ const [paymentHistory, setPaymentHistory] = useState([]);
   const handleLogin = async (loginPayload = {}) => {
     const loginEmail = (loginPayload.email ?? email).trim();
     const loginPassword = loginPayload.password ?? password;
-  
+
     if (!loginEmail || !loginPassword) {
       alert("Please enter email and password.");
       return;
     }
-  
+
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
         loginEmail,
         loginPassword
       );
-  
+
       // Launch-safe login: Firebase-authenticated users can enter.
       // Email verification can be completed later; paid access stays Firestore-gated.
-  
+
       setEmail(loginEmail);
       setPassword(loginPassword);
 
@@ -1871,11 +1872,11 @@ const [paymentHistory, setPaymentHistory] = useState([]);
       alert(
         "StackBlitz preview me Google login block hota hai. App new tab me open ho rahi hai."
       );
-  
+
       window.open(window.location.href, "_blank");
       return;
     }
-  
+
     try {
       await signInWithPopup(auth, provider);
       navigate(redirectPath || "/ctet-tet", { replace: true });
@@ -1902,7 +1903,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
       alert("Please enter your email first");
       return;
     }
-  
+
     try {
       await sendPasswordResetEmail(auth, email);
       alert("Password reset email sent 📩");
@@ -1912,12 +1913,12 @@ const [paymentHistory, setPaymentHistory] = useState([]);
   };
 
   const handleContactSubmit = async () => {
-   
+
     if (!fullName || !mobile || !contactEmail) {
       alert("Please fill all contact details");
       return;
     }
-  
+
     try {
       await addDoc(collection(db, "enquiries"), {
         fullName: fullName,
@@ -1925,9 +1926,9 @@ const [paymentHistory, setPaymentHistory] = useState([]);
         email: contactEmail,
         createdAt: new Date()
       });
-  
+
       alert("Enquiry submitted successfully ✅");
-  
+
       setFullName("");
       setMobile("");
       setContactEmail("");
@@ -2009,12 +2010,12 @@ const [paymentHistory, setPaymentHistory] = useState([]);
       alert("Please login first to access premium content.");
       return;
     }
-  
+
     if (!isPremiumUser) {
       alert("This section is only for premium members. Please upgrade.");
       return;
     }
-  
+
     alert("Premium access verified ✅");
   };
   const loadRazorpayScript = () => {
@@ -2052,18 +2053,18 @@ const usersData = usersSnap.docs.map((doc) => ({
   ...doc.data(),
 }));
       const enquiriesSnap = await getDocs(collection(db, "enquiries"));
-  
+
       setStudents(
         studentsSnap.docs.map((doc) => {
           const student = {
             id: doc.id,
             ...doc.data(),
           };
-      
+
           const userRecord = usersData.find(
             (u) => u.email === student.email
           );
-      
+
           return {
             ...student,
             isPremium: userRecord?.isPremium || false,
@@ -2071,14 +2072,14 @@ const usersData = usersSnap.docs.map((doc) => ({
           };
         })
       );
-  
+
       setEnquiries(
         enquiriesSnap.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }))
       );
-  
+
       alert("Admin data loaded ✅");
     } catch (error) {
       alert(error.message);
@@ -2086,16 +2087,16 @@ const usersData = usersSnap.docs.map((doc) => ({
   };
   const checkPremiumAccess = async (currentUser) => {
     if (!currentUser) return;
-  
+
     if (currentUser.email === adminEmail) {
       setIsPremiumUser(true);
       return;
     }
-  
+
     try {
       const userRef = doc(db, "users", currentUser.uid);
       const userSnap = await getDoc(userRef);
-  
+
       if (!userSnap.exists()) {
         await setDoc(userRef, {
           email: currentUser.email,
@@ -2105,11 +2106,11 @@ const usersData = usersSnap.docs.map((doc) => ({
           purchaseDate: null,
           createdAt: new Date(),
         });
-  
+
         setIsPremiumUser(false);
         return;
       }
-  
+
       setIsPremiumUser(userSnap.data().isPremium === true);
       const expiryDate = userSnap.data().expiryDate?.toDate
   ? userSnap.data().expiryDate.toDate()
@@ -2134,7 +2135,7 @@ if (expiryDate && expiryDate < new Date()) {
   setUserPlanType(
     userSnap.data().subscriptionType || "PREMIUM"
   );
-  
+
   setMembershipExpiry(expiryDate);
 }
     } catch (error) {
@@ -2148,9 +2149,9 @@ if (expiryDate && expiryDate < new Date()) {
         collection(db, "mockResults"),
         where("email", "==", email)
       );
-  
+
       const querySnapshot = await getDocs(q);
-  
+
       setMockResults(
         querySnapshot.docs.map((doc) => ({
           id: doc.id,
@@ -2166,16 +2167,16 @@ if (expiryDate && expiryDate < new Date()) {
       const querySnapshot = await getDocs(
         collection(db, "mockResults")
       );
-  
+
       const results = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-  
+
       const sortedResults = results
         .sort((a, b) => b.percentage - a.percentage)
         .slice(0, 5);
-  
+
       setLeaderboard(sortedResults);
     } catch (error) {
       alert(error.message);
@@ -2187,12 +2188,12 @@ if (expiryDate && expiryDate < new Date()) {
       const snapshot = await getDocs(
         collection(db, "mockLeaderboard")
       );
-  
+
       const data = snapshot.docs.map((docItem) => ({
         id: docItem.id,
         ...docItem.data(),
       }));
-  
+
       setMockLeaderboardEntries(data);
     } catch (error) {
       console.error("Mock leaderboard load error:", error);
@@ -2207,46 +2208,46 @@ if (expiryDate && expiryDate < new Date()) {
         collection(db, "mockQuestions"),
         where("subject", "==", subject)
       );
-  
+
       const querySnapshot = await getDocs(q);
-  
+
       const questions = querySnapshot.docs.map((doc) => ({
         id: doc.id,
-  
+
         question: doc.data().question,
-  
+
         options: [
           doc.data().option1,
           doc.data().option2,
           doc.data().option3,
           doc.data().option4,
         ],
-  
+
         answer: doc.data().answer,
-  
+
         subject: doc.data().subject,
-  
+
         level: doc.data().level,
-  
+
         language: doc.data().language,
-  
+
         accessPlan:
           doc.data().accessPlan || "FREE",
       }));
-  
+
       const filteredQuestions =
         questions.filter((question) => {
           if (question.accessPlan === "FREE") {
             return true;
           }
-  
+
           return hasPlanAccess(
             question.accessPlan
           );
         });
-  
+
       setMockQuestions(filteredQuestions);
-  
+
       setCurrentQuestion(0);
       setSelectedAnswer("");
       setScore(0);
@@ -2260,12 +2261,12 @@ if (expiryDate && expiryDate < new Date()) {
   const loadFirebaseNotes = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, "notes"));
-  
+
       const notes = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-  
+
       setFirebaseNotes(notes);
     } catch (error) {
       alert(error.message);
@@ -2276,12 +2277,12 @@ if (expiryDate && expiryDate < new Date()) {
       const querySnapshot = await getDocs(
         collection(db, "currentAffairs")
       );
-  
+
       const data = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-  
+
       setCurrentAffairsList(data);
     } catch (error) {
       alert(error.message);
@@ -2292,12 +2293,12 @@ if (expiryDate && expiryDate < new Date()) {
       const querySnapshot = await getDocs(
         collection(db, "announcements")
       );
-  
+
       const data = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-  
+
       setAnnouncements(data);
     } catch (error) {
       alert(error.message);
@@ -2314,10 +2315,10 @@ if (expiryDate && expiryDate < new Date()) {
 
   const loadPaymentHistory = async (currentUser = user) => {
     if (!currentUser) return;
-  
+
     try {
       let querySnapshot;
-  
+
       if (currentUser.email === adminEmail) {
         querySnapshot = await getDocs(collection(db, "payments"));
       } else {
@@ -2325,15 +2326,15 @@ if (expiryDate && expiryDate < new Date()) {
           collection(db, "payments"),
           where("userId", "==", currentUser.uid)
         );
-  
+
         querySnapshot = await getDocs(q);
       }
-  
+
       const data = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-  
+
       setPaymentHistory(data);
     } catch (error) {
       alert(error.message);
@@ -2341,17 +2342,17 @@ if (expiryDate && expiryDate < new Date()) {
   };
   const loadPaymentRequests = async () => {
     if (!user || !isAdmin(user)) return;
-  
+
     try {
       const querySnapshot = await getDocs(
         collection(db, "payments")
       );
-  
+
       const data = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-  
+
       setPaymentRequests(data);
     } catch (error) {
       alert(error.message);
@@ -2369,40 +2370,40 @@ if (expiryDate && expiryDate < new Date()) {
       alert("Please fill all question details");
       return;
     }
-  
+
     try {
       await addDoc(collection(db, "mockQuestions"), {
         question: adminQuestion,
-  
+
         option1: adminOption1,
         option2: adminOption2,
         option3: adminOption3,
         option4: adminOption4,
-  
+
         answer: adminAnswer,
-  
+
         subject: adminSubject,
-  
+
         level: adminLevel,
-  
+
         accessPlan: adminAccessPlan,
-  
+
         language: "English",
-  
+
         createdAt: new Date(),
       });
-  
+
       alert("Question added successfully ✅");
-  
+
       setAdminQuestion("");
       setAdminOption1("");
       setAdminOption2("");
       setAdminOption3("");
       setAdminOption4("");
       setAdminAnswer("");
-  
+
       setAdminAccessPlan("FREE");
-  
+
       loadMockQuestions(adminSubject);
     } catch (error) {
       alert(error.message);
@@ -2426,18 +2427,18 @@ if (expiryDate && expiryDate < new Date()) {
       console.log(error);
     }
     setMockQuestions(updatedQuestions);
-  
+
     alert("Question deleted successfully ✅");
   };
   const handleEditNote = (note) => {
     setEditingNoteId(note.id);
-  
+
     setAdminNoteTitle(note.title || "");
     setAdminNoteCategory(note.category || "");
     setAdminNotePages(note.pages || "");
     setAdminNoteType(note.type || "FREE");
     setAdminNotePdf(note.pdf || "");
-  
+
     window.scrollTo({
       top: 0,
       behavior: "smooth",
@@ -2447,14 +2448,14 @@ if (expiryDate && expiryDate < new Date()) {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this note?"
     );
-  
+
     if (!confirmDelete) return;
-  
+
     try {
       await deleteDoc(doc(db, "notes", noteId));
-  
+
       alert("Note deleted successfully ✅");
-  
+
       loadFirebaseNotes();
     } catch (error) {
       alert(error.message);
@@ -2462,21 +2463,21 @@ if (expiryDate && expiryDate < new Date()) {
   };
   const handleUploadPdf = async (file) => {
     if (!file) return "";
-  
+
     try {
       setUploadingPdf(true);
-  
+
       const storageRef = ref(
         storage,
         `notes/${Date.now()}-${file.name}`
       );
-  
+
       await uploadBytes(storageRef, file);
-  
+
       const downloadURL = await getDownloadURL(storageRef);
-  
+
       setUploadingPdf(false);
-  
+
       return downloadURL;
     } catch (error) {
       setUploadingPdf(false);
@@ -2486,21 +2487,21 @@ if (expiryDate && expiryDate < new Date()) {
   };
   const handleUploadCurrentPdf = async (file) => {
     if (!file) return "";
-  
+
     try {
       setUploadingCurrentPdf(true);
-  
+
       const storageRef = ref(
         storage,
         `current-affairs/${Date.now()}-${file.name}`
       );
-  
+
       await uploadBytes(storageRef, file);
-  
+
       const downloadURL = await getDownloadURL(storageRef);
-  
+
       setUploadingCurrentPdf(false);
-  
+
       return downloadURL;
     } catch (error) {
       setUploadingCurrentPdf(false);
@@ -2513,7 +2514,7 @@ if (expiryDate && expiryDate < new Date()) {
       alert("Please fill title, category and pages");
       return;
     }
-  
+
     try {
       if (!adminNotePdf) {
         alert("Please upload PDF first");
@@ -2528,7 +2529,7 @@ if (expiryDate && expiryDate < new Date()) {
           pdf: adminNotePdf,
           updatedAt: new Date(),
         });
-      
+
         alert("Note updated successfully ✅");
       } else {
         await addDoc(collection(db, "notes"), {
@@ -2539,12 +2540,12 @@ if (expiryDate && expiryDate < new Date()) {
           pdf: adminNotePdf,
           createdAt: new Date(),
         });
-      
+
         alert("Note saved successfully ✅");
       }
-  
-     
-  
+
+
+
       setAdminNoteTitle("");
       setAdminNoteCategory("");
       setAdminNotePages("");
@@ -2558,13 +2559,13 @@ if (expiryDate && expiryDate < new Date()) {
   };
   const handleEditCurrentAffairs = (item) => {
     setEditingCurrentId(item.id);
-  
+
     setCurrentTitle(item.title || "");
     setCurrentMonth(item.month || "");
     setCurrentPages(item.pages || "");
     setCurrentType(item.type || "FREE");
     setCurrentPdf(item.pdf || "");
-  
+
     window.scrollTo({
       top: 0,
       behavior: "smooth",
@@ -2574,14 +2575,14 @@ if (expiryDate && expiryDate < new Date()) {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this current affairs PDF?"
     );
-  
+
     if (!confirmDelete) return;
-  
+
     try {
       await deleteDoc(doc(db, "currentAffairs", itemId));
-  
+
       alert("Current affairs deleted successfully ✅");
-  
+
       loadCurrentAffairs();
     } catch (error) {
       alert(error.message);
@@ -2592,13 +2593,13 @@ if (expiryDate && expiryDate < new Date()) {
       alert("Please fill title, month and pages");
       return;
     }
-  
+
     try {
       if (!currentPdf) {
         alert("Please upload current affairs PDF first");
         return;
       }
-  
+
       if (editingCurrentId) {
         await updateDoc(doc(db, "currentAffairs", editingCurrentId), {
           title: currentTitle,
@@ -2608,7 +2609,7 @@ if (expiryDate && expiryDate < new Date()) {
           pdf: currentPdf,
           updatedAt: new Date(),
         });
-      
+
         alert("Current affairs updated successfully ✅");
       } else {
         await addDoc(collection(db, "currentAffairs"), {
@@ -2619,19 +2620,19 @@ if (expiryDate && expiryDate < new Date()) {
           pdf: currentPdf,
           createdAt: new Date(),
         });
-      
+
         alert("Current affairs saved successfully ✅");
       }
-  
-      
-  
+
+
+
       setCurrentTitle("");
       setCurrentMonth("");
       setCurrentPages("");
       setCurrentPdf("");
       setCurrentType("FREE");
       setEditingCurrentId(null);
-  
+
       loadCurrentAffairs();
     } catch (error) {
       alert(error.message);
@@ -2642,7 +2643,7 @@ if (expiryDate && expiryDate < new Date()) {
       alert("Please fill announcement title and message");
       return;
     }
-  
+
     const newAnnouncement = {
       id: Date.now(),
       title: announcementTitle,
@@ -2655,18 +2656,18 @@ if (expiryDate && expiryDate < new Date()) {
       createdAt: new Date(),
     });
     setAnnouncements([newAnnouncement, ...announcements]);
-  
+
     setAnnouncementTitle("");
     setAnnouncementMessage("");
-  
+
     alert("Announcement published successfully ✅");
   };
 
   const getSubjectDisplayName = (subjectValue) => {
     if (!subjectValue) return "";
-  
+
     const value = subjectValue.toString().trim().toLowerCase();
-  
+
     const subjectMatch = notesSubjectsList.find((subject) => {
       return (
         subject.id?.toString().trim().toLowerCase() === value ||
@@ -2675,7 +2676,7 @@ if (expiryDate && expiryDate < new Date()) {
         subject.code?.toString().trim().toLowerCase() === value
       );
     });
-  
+
     return subjectMatch?.name || subjectValue;
   };
 
@@ -2684,17 +2685,17 @@ if (expiryDate && expiryDate < new Date()) {
       alert("Please enter subject name.");
       return;
     }
-  
+
     const normalizedSubjectName =
     notesSubjectName.trim().toLowerCase();
-  
+
   const duplicateSubject = notesSubjectsList.some(
     (subject) =>
       subject.name?.trim().toLowerCase() ===
         normalizedSubjectName &&
       subject.id !== editingNotesSubjectId
   );
-  
+
   if (duplicateSubject) {
     alert("This subject already exists.");
     return;
@@ -2713,14 +2714,14 @@ if (expiryDate && expiryDate < new Date()) {
       status: notesSubjectStatus,
       updatedAt: new Date().toISOString(),
     };
-  
+
     try {
       if (editingNotesSubjectId) {
         await updateDoc(
           doc(db, "notesSubjects", editingNotesSubjectId),
           subjectPayload
         );
-  
+
         alert("Subject updated successfully.");
       } else {
         await addDoc(
@@ -2730,17 +2731,17 @@ if (expiryDate && expiryDate < new Date()) {
             createdAt: new Date().toISOString(),
           }
         );
-  
+
         alert("Subject saved to Firestore successfully.");
       }
-  
+
       setNotesSubjectName("");
       setNotesSubjectCode("");
       setNotesSubjectSlug("");
       setNotesSubjectOrder("");
       setNotesSubjectStatus("Active");
       setEditingNotesSubjectId(null);
-  
+
     } catch (error) {
       console.error("Subject save/update error:", error);
       alert("Subject save/update failed.");
@@ -2758,7 +2759,7 @@ if (expiryDate && expiryDate < new Date()) {
       alert("Please enter chapter name.");
       return;
     }
-  
+
     const chapterPayload = {
       subjectId: notesChapterSubjectId,
 subjectName:
@@ -2777,14 +2778,14 @@ subjectName:
       status: notesChapterStatus,
       updatedAt: new Date().toISOString(),
     };
-  
+
     try {
       if (editingNotesChapterId) {
         await updateDoc(
           doc(db, "notesChapters", editingNotesChapterId),
           chapterPayload
         );
-  
+
         alert("Chapter updated successfully.");
       } else {
         await addDoc(
@@ -2794,10 +2795,10 @@ subjectName:
             createdAt: new Date().toISOString(),
           }
         );
-  
+
         alert("Chapter saved to Firestore successfully.");
       }
-  
+
       setNotesChapterSubjectId("");
       setNotesChapterName("");
       setNotesChapterCode("");
@@ -2815,17 +2816,17 @@ subjectName:
   const handlePublishNotesContent = async () => {
     const normalizedNotesSubject =
       notesCmsSubject.trim();
-  
+
     if (!notesCmsTitle.trim()) {
       alert("Please enter note title.");
       return;
     }
-  
+
     if (!normalizedNotesSubject) {
       alert("Please select or enter subject.");
       return;
     }
-  
+
     const normalizeText = (value = "") =>
     value
       .toString()
@@ -2833,14 +2834,14 @@ subjectName:
       .toLowerCase()
       .replace(/-/g, " ")
       .replace(/\s+/g, " ");
-  
+
   const existingSubject = notesSubjectsList.find(
     (subject) =>
       normalizeText(subject.name) === normalizeText(normalizedNotesSubject) ||
       normalizeText(subject.slug) === normalizeText(normalizedNotesSubject) ||
       normalizeText(subject.code) === normalizeText(normalizedNotesSubject)
   );
-  
+
     if (normalizedNotesSubject && !existingSubject) {
       await addDoc(collection(db, "notesSubjects"), {
         name: normalizedNotesSubject,
@@ -2853,10 +2854,10 @@ subjectName:
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
-  
+
       await loadNotesSubjectsFromFirestore();
     }
-  
+
     const existingChapter = notesChaptersList.find(
       (chapter) =>
         chapter.subjectName?.trim().toLowerCase() ===
@@ -2864,7 +2865,7 @@ subjectName:
         chapter.name?.trim().toLowerCase() ===
           notesCmsChapter.trim().toLowerCase()
     );
-  
+
     if (
       normalizedNotesSubject &&
       notesCmsChapter.trim() &&
@@ -2884,10 +2885,10 @@ subjectName:
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
-  
+
       await loadNotesChaptersFromFirestore();
     }
-  
+
     const notesPayload = {
       title: notesCmsTitle,
       description: notesCmsDescription,
@@ -2903,7 +2904,7 @@ subjectName:
       section: "notes",
       updatedAt: new Date().toISOString(),
     };
-  
+
     try {
       if (editingNotesCmsId) {
         await updateDoc(
@@ -2924,7 +2925,7 @@ subjectName:
               }
             );
           }
-  
+
         alert("Notes updated successfully.");
       } else {
         const notesRef = await addDoc(collection(db, "contentItems"), {
@@ -2945,10 +2946,10 @@ subjectName:
               }
             );
           }
-  
+
         alert("Notes saved to Firestore successfully.");
       }
-  
+
       setNotesCmsTitle("");
       setNotesCmsDescription("");
       setNotesCmsPlanType("FREE");
@@ -2960,7 +2961,7 @@ subjectName:
       setNotesCmsThumbnailUrl("");
       setNotesCmsStatus("Draft");
       setEditingNotesCmsId(null);
-  
+
       await loadContentItemsFromFirestore();
     } catch (error) {
       console.error("Notes save/update error:", error);
@@ -3061,11 +3062,11 @@ subjectName:
       await deleteDoc(
         doc(db, "contentItems", itemId)
       );
-  
+
       setUniversalContent((prevContent) =>
         prevContent.filter((item) => item.id !== itemId)
       );
-  
+
       alert("Content deleted from Firestore.");
     } catch (error) {
       console.error("Delete error:", error);
@@ -3078,14 +3079,14 @@ subjectName:
       const snapshot = await getDocs(
         collection(db, "contentItems")
       );
-  
+
       const loadedItems = snapshot.docs.map((docItem) => ({
         id: docItem.id,
         ...docItem.data(),
       }));
-  
+
       setUniversalContent(loadedItems);
-  
+
       console.log(
         "Loaded contentItems from Firestore:",
         loadedItems
@@ -3103,12 +3104,12 @@ subjectName:
       const bankSnapshot = await getDocs(
         collection(db, "questionBank")
       );
-  
+
       const bankData = bankSnapshot.docs.map((bankDoc) => ({
         id: bankDoc.id,
         ...bankDoc.data(),
       }));
-  
+
       setQuestionBankItems(bankData);
     } catch (error) {
       console.error("Question bank load error:", error);
@@ -3120,16 +3121,16 @@ subjectName:
       const snapshot = await getDocs(
         collection(db, "notesSubjects")
       );
-  
+
       const loadedSubjects = snapshot.docs.map(
         (docItem) => ({
           id: docItem.id,
           ...docItem.data(),
         })
       );
-  
+
       setNotesSubjectsList(loadedSubjects);
-  
+
       console.log(
         "Loaded notesSubjects:",
         loadedSubjects
@@ -3147,16 +3148,16 @@ subjectName:
       const snapshot = await getDocs(
         collection(db, "notesChapters")
       );
-  
+
       const loadedChapters = snapshot.docs.map(
         (docItem) => ({
           id: docItem.id,
           ...docItem.data(),
         })
       );
-  
+
       setNotesChaptersList(loadedChapters);
-  
+
       console.log(
         "Loaded notesChapters:",
         loadedChapters
@@ -3178,53 +3179,53 @@ subjectName:
         course: cmsCourse,
         chapter: cmsChapter,
         month: cmsMonth,
-  
+
         planType: cmsPlanType,
         contentType: cmsContentType,
         sourceType: cmsSourceType,
-  
+
         fileUrl: cmsFileUrl,
         videoUrl: cmsVideoUrl,
         thumbnailUrl: cmsThumbnailUrl,
-  
+
         mentorName: cmsMentorName,
         duration: cmsDuration,
-  
+
         status: cmsStatus,
       };
-  
+
       if (editingCmsId) {
         await updateContentItem(
           editingCmsId,
           payload
         );
-  
+
         alert("Universal content updated ✅");
       } else {
         await addContentItem(payload);
-  
+
         alert("Universal content published ✅");
       }
-  
+
       setCmsTitle("");
       setCmsSubject("");
       setCmsCourse("");
       setCmsChapter("");
-  
+
       setCmsFileUrl("");
       setCmsVideoUrl("");
       setCmsThumbnailUrl("");
-  
+
       setCmsMentorName("");
       setCmsMonth("");
       setCmsDuration("");
-  
+
       setEditingCmsId(null);
-  
+
       loadContentItemsFromFirestore();
     } catch (error) {
       console.error(error);
-  
+
       alert(error.message);
     }
   };
@@ -3234,27 +3235,27 @@ subjectName:
       alert("Please enter current affair title.");
       return;
     }
-  
+
     if (!cmsMonth.trim()) {
       alert("Please select month.");
       return;
     }
-  
+
     if (!cmsDuration.trim()) {
       alert("Please enter year.");
       return;
     }
-  
+
     if (!cmsChapter.trim()) {
       alert("Please select week/type.");
       return;
     }
-  
+
     if (!cmsFileUrl.trim()) {
       alert("Please enter PDF URL.");
       return;
     }
-  
+
     const payload = {
       title: cmsTitle.trim(),
       section: CONTENT_SECTIONS.CURRENT_AFFAIRS,
@@ -3272,7 +3273,7 @@ subjectName:
       duration: cmsDuration,
       status: cmsStatus,
     };
-  
+
     try {
       if (editingCmsId) {
         await updateContentItem(editingCmsId, payload);
@@ -3281,9 +3282,9 @@ subjectName:
         await addContentItem(payload);
         alert("Current Affair saved successfully ✅");
       }
-  
+
       alert("Current Affair saved successfully ✅");
-  
+
       setCmsTitle("");
       setCmsMonth("");
       setCmsDuration("");
@@ -3291,21 +3292,21 @@ subjectName:
       setCmsPlanType(PLAN_TYPES.FREE);
       setCmsFileUrl("");
       setCmsStatus(CONTENT_STATUS.PUBLISHED);
-  
+
       await loadContentItemsFromFirestore();
     } catch (error) {
       console.error(error);
       alert("Current Affair save failed.");
     }
   };
-  
+
   const handleDeleteAnnouncement = (announcementId) => {
     const updatedAnnouncements = announcements.filter(
       (item) => item.id !== announcementId
     );
-  
+
     setAnnouncements(updatedAnnouncements);
-  
+
     alert("Announcement deleted successfully ✅");
   };
   const approvePaymentRequest = async function(payment) {
@@ -3406,16 +3407,16 @@ subjectName:
         collection(db, "users"),
         where("email", "==", studentEmail)
       );
-  
+
       const querySnapshot = await getDocs(q);
-  
+
       if (querySnapshot.empty) {
         alert("User record not found in premium database.");
         return;
       }
-  
+
       const userDoc = querySnapshot.docs[0];
-  
+
       await setDoc(
         doc(db, "users", userDoc.id),
         {
@@ -3425,20 +3426,20 @@ subjectName:
         },
         { merge: true }
       );
-  
+
       alert(
         `${studentEmail} marked as ${
           makePremium ? "Premium" : "Free"
         } user ✅`
       );
-      
+
       await loadAdminData();
     } catch (error) {
       alert(error.message);
     }
   };
   const courses = [
-    
+
     {
       id: "ctet-paper-2",
       title: "CTET Paper II",
@@ -3468,11 +3469,11 @@ subjectName:
   ];
   const notesLibraryData = {
     FREE: [],
-  
+
     BASIC: [],
-  
+
     PREMIUM: [],
-  
+
     MENTORSHIP: [],
   };
 
@@ -3494,7 +3495,7 @@ subjectName:
         description: "CMS uploaded notes",
         cover: "📄",
       }));
-  
+
     const mergedSubjects = [
       ...notesLibraryData[planName],
       ...cmsSubjects,
@@ -3503,7 +3504,7 @@ subjectName:
         index ===
         self.findIndex((s) => s.id === subject.id)
     );
-  
+
     return {
       ...library,
       [planName]: mergedSubjects,
@@ -3513,17 +3514,17 @@ subjectName:
   const notesSubjectRouteMatch = location.pathname.match(
     /^\/ctet-tet\/notes\/plan\/([^/]+)\/([^/]+)$/
   );
-  
+
   const activeNotesPlan =
     notesSubjectRouteMatch?.[1]?.toUpperCase() || null;
-  
+
   const activeNotesSubjectId =
     notesSubjectRouteMatch?.[2] || null;
-  
+
     const videoSubjectRouteMatch = location.pathname.match(
       /^\/admin\/content\/videos\/subjects\/([^/]+)$/
     );
-    
+
     const activeVideoSubjectName =
       videoSubjectRouteMatch?.[1]
         ? decodeURIComponent(videoSubjectRouteMatch[1])
@@ -3536,7 +3537,7 @@ subjectName:
         )
       : null;
 
-  
+
   const sampleMockQuestions = [
     {
       question: "Piaget kis development theory ke liye famous hain?",
@@ -3569,11 +3570,11 @@ subjectName:
       answer: "All learners ko equal opportunity dena",
     },
   ];
-  
 
-  
+
+
   const restartMockTest = () => {
-    
+
     setCurrentQuestion(0);
     setSelectedAnswer("");
     setScore(0);
@@ -3616,7 +3617,7 @@ const averageAccuracy =
       { day: "Sat", score: 82 },
       { day: "Sun", score: 90 },
     ];
-    
+
     const subjectPerformanceData = [
       { name: "CDP", value: 80 },
       { name: "Maths", value: 65 },
@@ -3682,14 +3683,14 @@ const smartRecommendation =
       { day: "Sat", score: 82 },
       { day: "Sun", score: 90 },
     ];
-    
+
     const subjectChartData = [
       { name: "CDP", value: 80 },
       { name: "Maths", value: 65 },
       { name: "EVS", value: 72 },
       { name: "Language", value: 88 },
     ];
-    
+
     const chartColors = [
       "#f97316",
       "#3b82f6",
@@ -3704,12 +3705,12 @@ const smartRecommendation =
             const date = result.createdAt.toDate
               ? result.createdAt.toDate()
               : new Date(result.createdAt);
-    
+
             return date.toDateString();
           })
       ),
     ];
-    
+
     const dailyStreak = uniqueTestDates.length;
     const recentScores = mockResults
   .slice(-5)
@@ -3791,12 +3792,12 @@ const studyTimeMessage =
           value: 100 - averageAccuracy,
         },
       ];
-      
-     
 
 
 
-  
+
+
+
 
 
   if (authLoading) {
@@ -3827,11 +3828,11 @@ const studyTimeMessage =
               loading="eager"
               decoding="async"
             />
-    
+
             <div className="premium-loader-ring"></div>
-    
+
             <h2>Loading AspireNest Academy</h2>
-    
+
             <p>Preparing your smart learning experience...</p>
           </div>
         }
@@ -3842,7 +3843,7 @@ const studyTimeMessage =
               <AspireNestLogo />
             </div>
           </header>
-    
+
           <div
             style={{
               height: "calc(100vh - 90px)",
@@ -4115,13 +4116,13 @@ return (
 >
 
 </div>
-  
+
     <div className="ctetExperienceStickyHeader">
       <div className="ctetLockedNav">
                 <button type="button" className="ctetLockedBrand" onClick={() => navigate("/ctet-tet")}>
                   <AspireNestLogo />
                 </button>
-      
+
                 <nav className="ctetLockedLinks" aria-label="CTET TET navigation">
                   {[
                     ["Learning Hub", "/ctet-tet"],
@@ -4138,7 +4139,7 @@ return (
                     </button>
                   ))}
                 </nav>
-      
+
                 <div className="ctetLockedTools">
                   <button type="button" className="ctetLockedSearch" onClick={() => navigate("/ctet-tet/courses")}>
                     <span>⌕</span>
@@ -4205,11 +4206,35 @@ return (
               </div>
     </div>
 
-    <div className="ctetExperiencePage">
+    <nav className="ctetMobileSectionDock" aria-label="CTET screen shortcuts">
+      {[
+        ["home", "Home"],
+        ["journey", "Journey"],
+        ["mentor", "Mentor"],
+        ["live", "Live"],
+        ["help", "Help"],
+      ].map(([screen, label]) => (
+        <button
+          type="button"
+          key={screen}
+          data-ctet-screen-button={screen}
+          aria-pressed={ctetMobileScreen === screen ? "true" : "false"}
+          onClick={() => {
+            setCtetMobileScreen(screen);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        >
+          <span className="ctetMobileDockMark" aria-hidden="true" />
+          <strong>{label}</strong>
+        </button>
+      ))}
+    </nav>
+
+    <div className="ctetExperiencePage" data-ctet-mobile-screen={ctetMobileScreen}>
   <section className="ctetTopEntryExperience" aria-label="AspireNest CTET TET top entry experience">
     <div className="ctetTopEntryShell">
-      
-        
+
+
 <div className="ctetHeroCommandGrid">
         <div className="ctetHeroStory">
           <div className="ctetTrustBadge">
@@ -4540,8 +4565,8 @@ isAdmin={isAdmin}
 </section>
 
 
-  
-    
+
+
 {showMentorProfile && (
   <div className="mentorProfileOverlay">
     <div className="mentorProfileModal">
@@ -5798,7 +5823,7 @@ isAdmin={isAdmin}
 
         <div className="contentStudioForm">
           <div className="contentStudioGrid">
-         
+
 
 <input
   type="text"
@@ -5963,7 +5988,7 @@ This action cannot be undone.`
       </section>
     ) : null
   }
-/>  
+/>
 
 <Route
   path="/admin/content/notes/chapters"
@@ -6118,9 +6143,9 @@ This action cannot be undone.`
                   if (
                     window.confirm(
                       `Delete "${chapter.name}" permanently?
-                    
+
                     All PDFs linked to this chapter may become inaccessible.
-                    
+
                     This action cannot be undone.`
                     )
                   ) {
@@ -8247,7 +8272,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
     <ExamReviewRoute
       universalContent={universalContent}
       getMockTestAccessStatus={getMockTestAccessStatus}
-      
+
       mockAttemptState={mockAttemptState}
     />
   }
@@ -8556,7 +8581,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
       fontSize: "14px",
     }}
   >
-    ⏳ Approval Pending  
+    ⏳ Approval Pending
     <br />
     Your payment proof step has started. Please wait for verification.
   </div>
@@ -9103,7 +9128,7 @@ Premium
     <span><strong>75%</strong> Completed</span>
   </div>
 </section>
-    
+
 
 
 
@@ -9300,7 +9325,7 @@ isPremiumUser={isPremiumUser}
 </section>
 
 
-     
+
 <section id="student-profile">
       <StudentDashboard
   user={user}
