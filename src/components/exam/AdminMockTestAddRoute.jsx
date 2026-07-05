@@ -515,19 +515,50 @@ export default function AdminMockTestAddRoute({
 
           <AdminMockField label="Attempt Limit">
             <select
-              value={mockTestForm.attemptLimit || "unlimited"}
-              onChange={(e) => updateMockForm({ attemptLimit: e.target.value })}
+              value={
+                ["unlimited", "1", "2", "3"].includes(String(mockTestForm.attemptLimit || "unlimited"))
+                  ? mockTestForm.attemptLimit || "unlimited"
+                  : "custom"
+              }
+              onChange={(e) =>
+                updateMockForm({
+                  attemptLimit:
+                    e.target.value === "custom" ? "5" : e.target.value,
+                })
+              }
             >
               <option value="unlimited">Unlimited</option>
               <option value="1">1 Attempt</option>
               <option value="2">2 Attempts</option>
               <option value="3">3 Attempts</option>
+              <option value="custom">Custom</option>
             </select>
+
+            {!["unlimited", "1", "2", "3"].includes(String(mockTestForm.attemptLimit || "unlimited")) && (
+              <input
+                type="number"
+                min="1"
+                step="1"
+                value={mockTestForm.attemptLimit || "5"}
+                onChange={(e) =>
+                  updateMockForm({
+                    attemptLimit: e.target.value || "1",
+                  })
+                }
+                placeholder="Enter custom attempt limit"
+              />
+            )}
           </AdminMockField>
 
           <AdminMockField label="Result Publish Mode">
             <select
-              value={mockTestForm.resultPublishMode || "instant"}
+              value={
+                ["instant", "afterSubmission", "manual"].includes(
+                  mockTestForm.resultPublishMode || "instant"
+                )
+                  ? mockTestForm.resultPublishMode || "instant"
+                  : "instant"
+              }
               onChange={(e) =>
                 updateMockForm({ resultPublishMode: e.target.value })
               }

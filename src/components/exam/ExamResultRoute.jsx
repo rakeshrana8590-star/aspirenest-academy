@@ -53,21 +53,65 @@ const getPerformanceTone = (percentage) => {
   return "revision";
 };
 
+const parseAttemptLimit = (value) => {
+  const normalized = String(value || "unlimited").trim().toLowerCase();
+
+  if (!normalized || normalized === "unlimited" || normalized === "0") {
+    return { isUnlimited: true, max: null };
+  }
+
+  const max = Number.parseInt(normalized, 10);
+
+  if (Number.isFinite(max) && max > 0) {
+    return { isUnlimited: false, max };
+  }
+
+  return { isUnlimited: true, max: null };
+};
+
+const countSubmittedMockAttempts = (mockResults = [], testId = "", email = "") =>
+  (Array.isArray(mockResults) ? mockResults : []).filter((result) => {
+    const sameTest =
+      result?.testId === testId ||
+      result?.mockTestId === testId ||
+      result?.testID === testId ||
+      result?.contentId === testId;
+
+    const sameStudent =
+      !email ||
+      result?.email === email ||
+      result?.studentEmail === email ||
+      result?.userEmail === email;
+
+    return sameTest && sameStudent;
+  }).length;
+
+const hasSavedMockAttempt = (mockResults = [], attemptSaveKey = "") =>
+  Boolean(attemptSaveKey) &&
+  (Array.isArray(mockResults) ? mockResults : []).some(
+    (result) =>
+      result?.attemptKey === attemptSaveKey ||
+      result?.attemptId === attemptSaveKey
+  );
+
 const AutoSaveMockResult = ({
   testId,
   userEmail,
+  attemptSaveKey,
   saveToLeaderboard,
 }) => {
   React.useEffect(() => {
     if (!testId || !userEmail) return;
 
-    const autoSaveKey = `mockResultAutoSaved_${testId}_${userEmail}`;
+    const autoSaveKey = `mockResultAutoSaved_${
+      attemptSaveKey || `${testId}_${userEmail}`
+    }`;
 
     if (sessionStorage.getItem(autoSaveKey)) return;
 
     sessionStorage.setItem(autoSaveKey, "yes");
     saveToLeaderboard(false);
-  }, [testId, userEmail, saveToLeaderboard]);
+  }, [testId, userEmail, attemptSaveKey, saveToLeaderboard]);
 
   return null;
 };
@@ -82,6 +126,8 @@ export default function ExamResultRoute({
   loadUserMockResults,
   loadLeaderboard,
   loadMockLeaderboardEntries,
+  setMockAttemptState,
+  mockResults = [],
 }) {
   const navigate = useNavigate();
   const { testId } = useParams();
@@ -143,6 +189,54 @@ export default function ExamResultRoute({
     : {};
 
   const hasSubmittedAttempt = activeAttemptState?.isSubmitted === true;
+  const attemptStartedAt =
+    activeAttemptState?.startedAt ||
+    activeAttemptState?.submittedAt ||
+    Date.now();
+  const attemptSubmittedAt =
+    activeAttemptState?.submittedAt || attemptStartedAt;
+  const attemptSaveKey = `${test.id}_${user?.email || "anonymous"}_${attemptStartedAt}`;
+
+  const attemptLimitInfo = parseAttemptLimit(test.attemptLimit);
+  const savedSubmittedCount = countSubmittedMockAttempts(
+    mockResults,
+    test.id,
+    user?.email
+  );
+  const hasSavedCurrentAttempt = hasSavedMockAttempt(
+    mockResults,
+    attemptSaveKey
+  );
+  const submittedAttemptCount =
+    savedSubmittedCount +
+    (hasSubmittedAttempt && !hasSavedCurrentAttempt ? 1 : 0);
+  const canAttemptAgain =
+    attemptLimitInfo.isUnlimited ||
+    submittedAttemptCount < attemptLimitInfo.max;
+
+  const handleAttemptAgain = () => {
+    if (!canAttemptAgain) return;
+
+    localStorage.removeItem(getAttemptStorageKey(test.id));
+
+    try {
+      localStorage.removeItem(`mockAttemptAnswers_${test.id}`);
+      sessionStorage.removeItem(`mockResultAutoSaved_${test.id}_${user?.email || ""}`);
+      sessionStorage.removeItem(`mockResultAutoSaved_${attemptSaveKey}`);
+    } catch {
+      // Ignore storage cleanup failures.
+    }
+
+    if (typeof setMockAttemptState === "function") {
+      setMockAttemptState((prev) => {
+        const next = { ...(prev || {}) };
+        delete next[test.id];
+        return next;
+      });
+    }
+
+    navigate(`/ctet-tet/mock-tests/attempt/${test.id}`);
+  };
 
   if (accessStatus === "UNPUBLISHED") {
     return renderStateCard({
@@ -344,7 +438,7 @@ export default function ExamResultRoute({
         return false;
       }
 
-      const attemptKey = `${test.id}_${user.email}`;
+      const attemptKey = attemptSaveKey;
 
       const existingResult = await getDocs(
         query(
@@ -380,6 +474,11 @@ export default function ExamResultRoute({
           skippedCount,
           totalQuestions,
           durationSeconds,
+
+          attemptId: attemptSaveKey,
+          attemptStartedAt,
+          attemptSubmittedAt,
+          attemptNumber: savedSubmittedCount + 1,
 
           startedAt: activeAttemptState.startedAt || null,
           endedAt: activeAttemptState.submittedAt || null,
@@ -428,6 +527,11 @@ export default function ExamResultRoute({
 
             rankScore: percentage,
             rankTieBreakerScore: score,
+
+            attemptId: attemptSaveKey,
+            attemptStartedAt,
+            attemptSubmittedAt,
+            attemptNumber: savedSubmittedCount + 1,
 
             startedAt: activeAttemptState.startedAt || null,
             endedAt: activeAttemptState.submittedAt || null,
@@ -494,6 +598,7 @@ export default function ExamResultRoute({
         <AutoSaveMockResult
           testId={test.id}
           userEmail={user?.email || ""}
+          attemptSaveKey={attemptSaveKey}
           saveToLeaderboard={saveToLeaderboard}
         />
 
@@ -563,6 +668,21 @@ export default function ExamResultRoute({
               >
                 Review Answers
               </button>
+
+              {canAttemptAgain ? (
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={handleAttemptAgain}
+                >
+                  Attempt Again
+                </button>
+              ) : (
+                <button type="button" className="secondary" disabled>
+                  Attempt limit reached
+                </button>
+              )}
+
 
               <button
                 type="button"

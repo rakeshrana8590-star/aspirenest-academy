@@ -156,8 +156,11 @@ const validateImportedQuestions = (importedQuestions = []) =>
   
       attemptLimit:
         testInfo["Attempt Limit"]?.toString().trim() || "unlimited",
-      resultPublishMode:
-        testInfo["Result Publish Mode"]?.toString().trim() || "instant",
+      resultPublishMode: ["instant", "afterSubmission", "manual"].includes(
+        testInfo["Result Publish Mode"]?.toString().trim()
+      )
+        ? testInfo["Result Publish Mode"].toString().trim()
+        : "instant",
   
       shuffleQuestions:
         testInfo["Shuffle Questions"]?.toString().trim() || "no",

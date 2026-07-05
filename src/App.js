@@ -1253,7 +1253,11 @@ const handleSaveMockTest = async () => {
     examLanguage: finalExamLanguage,
 
     attemptLimit: mockTestForm.attemptLimit || "unlimited",
-    resultPublishMode: mockTestForm.resultPublishMode || "instant",
+    resultPublishMode: ["instant", "afterSubmission", "manual"].includes(
+      mockTestForm.resultPublishMode
+    )
+      ? mockTestForm.resultPublishMode
+      : "instant",
     shuffleQuestions: mockTestForm.shuffleQuestions || "no",
     shuffleOptions: mockTestForm.shuffleOptions || "no",
     navigationMode: mockTestForm.navigationMode || "free",
@@ -1333,72 +1337,87 @@ examInstructions:
       updatedAt: new Date(),
     };
 
-    if (bankQuestions.length > 0) {
-      for (const question of bankQuestions) {
-        const questionBankKey =
-          `${finalExamType}-${finalSubject}-${finalChapter}-${question.question}`
-            .toLowerCase()
-            .replace(/\s+/g, "-")
-            .slice(0, 180);
+    const activeEditingMockTestId = editingMockTestId;
+    const savedAt = new Date();
 
-        const questionBankPayload = {
-          ...question,
-
-          questionBankKey,
-
-          sourceExamTitle: finalTitle,
-          sourceExamType: finalExamType,
-          sourceTestType: finalTestType,
-          sourceSubject: finalSubject,
-          sourceChapter: finalChapter,
-
-          section: "questionBank",
-
-          updatedAt: new Date(),
-        };
-
-        if (editingQuestionBankId) {
-          await updateDoc(
-            doc(db, "questionBank", editingQuestionBankId),
-            questionBankPayload
-          );
-
-          setEditingQuestionBankId(null);
-        } else {
-          const existingQuestions = await getDocs(
-            query(
-              collection(db, "questionBank"),
-              where("questionBankKey", "==", questionBankKey)
-            )
-          );
-
-          if (existingQuestions.empty) {
-            await addDoc(collection(db, "questionBank"), {
-              ...questionBankPayload,
-              createdAt: new Date(),
-            });
-          }
-        }
-      }
-
-      await loadQuestionBankFromFirestore();
-    }
-
-    if (editingMockTestId) {
-      await updateDoc(doc(db, "contentItems", editingMockTestId), {
+    if (activeEditingMockTestId) {
+      await updateDoc(doc(db, "contentItems", activeEditingMockTestId), {
         ...mockPayload,
-        editedAt: new Date(),
+        updatedAt: savedAt,
+        editedAt: savedAt,
       });
-
-      alert("Examination Test updated successfully ✅");
     } else {
       await addDoc(collection(db, "contentItems"), {
         ...mockPayload,
-        createdAt: new Date(),
+        createdAt: savedAt,
+        updatedAt: savedAt,
       });
-
-      alert("Examination Test saved successfully ✅");
     }
+
+    if (typeof loadContentItemsFromFirestore === "function") {
+      await loadContentItemsFromFirestore();
+    }
+
+    try {
+      if (bankQuestions.length > 0) {
+        for (const question of bankQuestions) {
+          const questionBankKey =
+            `${finalExamType}-${finalSubject}-${finalChapter}-${question.question}`
+              .toLowerCase()
+              .replace(/\s+/g, "-")
+              .slice(0, 180);
+
+          const questionBankPayload = {
+            ...question,
+
+            questionBankKey,
+
+            sourceExamTitle: finalTitle,
+            sourceExamType: finalExamType,
+            sourceTestType: finalTestType,
+            sourceSubject: finalSubject,
+            sourceChapter: finalChapter,
+
+            section: "questionBank",
+
+            updatedAt: new Date(),
+          };
+
+          if (editingQuestionBankId) {
+            await updateDoc(
+              doc(db, "questionBank", editingQuestionBankId),
+              questionBankPayload
+            );
+
+            setEditingQuestionBankId(null);
+          } else {
+            const existingQuestions = await getDocs(
+              query(
+                collection(db, "questionBank"),
+                where("questionBankKey", "==", questionBankKey)
+              )
+            );
+
+            if (existingQuestions.empty) {
+              await addDoc(collection(db, "questionBank"), {
+                ...questionBankPayload,
+                createdAt: new Date(),
+              });
+            }
+          }
+        }
+
+        await loadQuestionBankFromFirestore();
+      }
+    } catch (questionBankError) {
+      console.warn("Question bank sync skipped after mock save:", questionBankError);
+    }
+
+    alert(
+      activeEditingMockTestId
+        ? "Examination Test updated successfully ✅"
+        : "Examination Test saved successfully ✅"
+    );
 
     setMockTestForm(createDefaultMockTestForm());
 
@@ -8333,6 +8352,8 @@ handleSaveUniversalContent={handleSaveUniversalContent}
       getMockTestScheduleStatus={getMockTestScheduleStatus}
       getMockTestRules={getMockTestRules}
       setMockAttemptState={setMockAttemptState}
+      mockResults={mockResults}
+      user={user}
     />
   }
 />
@@ -8377,6 +8398,8 @@ handleSaveUniversalContent={handleSaveUniversalContent}
       loadUserMockResults={loadUserMockResults}
       loadLeaderboard={loadLeaderboard}
       loadMockLeaderboardEntries={loadMockLeaderboardEntries}
+      setMockAttemptState={setMockAttemptState}
+      mockResults={mockResults}
     />
   }
 />

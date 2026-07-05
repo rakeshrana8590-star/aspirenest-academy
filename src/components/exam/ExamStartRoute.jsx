@@ -28,12 +28,55 @@ const isRuleEnabled = (value) => {
 const getDisplayValue = (value, fallback = "Not set") =>
   value || value === 0 ? value : fallback;
 
+const parseAttemptLimit = (value) => {
+  const normalized = String(value || "unlimited").trim().toLowerCase();
+
+  if (!normalized || normalized === "unlimited" || normalized === "0") {
+    return { isUnlimited: true, max: null };
+  }
+
+  const max = Number.parseInt(normalized, 10);
+
+  if (Number.isFinite(max) && max > 0) {
+    return { isUnlimited: false, max };
+  }
+
+  return { isUnlimited: true, max: null };
+};
+
+const countSubmittedMockAttempts = (mockResults = [], testId = "", email = "") =>
+  (Array.isArray(mockResults) ? mockResults : []).filter((result) => {
+    const sameTest =
+      result?.testId === testId ||
+      result?.mockTestId === testId ||
+      result?.testID === testId ||
+      result?.contentId === testId;
+
+    const sameStudent =
+      !email ||
+      result?.email === email ||
+      result?.studentEmail === email ||
+      result?.userEmail === email;
+
+    return sameTest && sameStudent;
+  }).length;
+
+const hasSavedMockAttempt = (mockResults = [], attemptSaveKey = "") =>
+  Boolean(attemptSaveKey) &&
+  (Array.isArray(mockResults) ? mockResults : []).some(
+    (result) =>
+      result?.attemptKey === attemptSaveKey ||
+      result?.attemptId === attemptSaveKey
+  );
+
 export default function ExamStartRoute({
   universalContent,
   getMockTestAccessStatus,
   getMockTestScheduleStatus,
   getMockTestRules,
   setMockAttemptState,
+  mockResults = [],
+  user,
 }) {
   const navigate = useNavigate();
   const { testId } = useParams();
@@ -155,6 +198,29 @@ export default function ExamStartRoute({
   const passingMarks = Number(test.passingMarks || 0);
   const scheduleStatus = getMockTestScheduleStatus(test);
 
+  const attemptLimitInfo = parseAttemptLimit(test.attemptLimit);
+  const activeAttemptSaveKey =
+    savedStartAttempt?.startedAt || savedStartAttempt?.submittedAt
+      ? `${test.id}_${user?.email || "anonymous"}_${
+          savedStartAttempt.startedAt || savedStartAttempt.submittedAt
+        }`
+      : "";
+  const savedSubmittedCount = countSubmittedMockAttempts(
+    mockResults,
+    test.id,
+    user?.email
+  );
+  const hasSavedCurrentAttempt = hasSavedMockAttempt(
+    mockResults,
+    activeAttemptSaveKey
+  );
+  const submittedAttemptCount =
+    savedSubmittedCount +
+    (hasSubmittedAttempt && !hasSavedCurrentAttempt ? 1 : 0);
+  const isAttemptLimitReached =
+    !attemptLimitInfo.isUnlimited &&
+    submittedAttemptCount >= attemptLimitInfo.max;
+
   const startPageRules = getMockTestRules(test);
   const isPauseAllowed = isRuleEnabled(startPageRules.allowPause);
 
@@ -164,30 +230,46 @@ export default function ExamStartRoute({
   const isCalculatorAllowed = isRuleEnabled(startPageRules.calculatorAllowed);
   const isAutoSubmitOnViolation = isRuleEnabled(test.autoSubmitOnViolation);
 
+  const clearCurrentAttemptState = () => {
+    localStorage.removeItem(getAttemptStorageKey(test.id));
+    localStorage.removeItem(`mockAttemptAnswers_${test.id}`);
+
+    if (typeof setMockAttemptState === "function") {
+      setMockAttemptState((prev) => {
+        const next = { ...(prev || {}) };
+        delete next[test.id];
+        return next;
+      });
+    }
+  };
+
   const handleStartTest = () => {
     if (hasSubmittedAttempt) {
-      navigate(`/ctet-tet/mock-tests/result/${test.id}`);
+      if (isAttemptLimitReached) {
+        navigate(`/ctet-tet/mock-tests/result/${test.id}`);
+        return;
+      }
+
+      clearCurrentAttemptState();
+      navigate(`/ctet-tet/mock-tests/attempt/${test.id}`);
       return;
     }
 
     if (hasStartedAttempt && !isPauseAllowed) {
-      localStorage.removeItem(getAttemptStorageKey(test.id));
-
-      setMockAttemptState((prev) => {
-        const next = { ...prev };
-        delete next[test.id];
-        return next;
-      });
+      clearCurrentAttemptState();
     }
 
     navigate(`/ctet-tet/mock-tests/attempt/${test.id}`);
   };
 
-  const primaryActionLabel = hasSubmittedAttempt
-    ? "View Result"
-    : hasStartedAttempt && isPauseAllowed
-    ? "Resume Test"
-    : "Begin Test";
+  const primaryActionLabel =
+    hasSubmittedAttempt && isAttemptLimitReached
+      ? "View Result"
+      : hasSubmittedAttempt
+      ? "Attempt Again"
+      : hasStartedAttempt && isPauseAllowed
+      ? "Resume Test"
+      : "Begin Test";
 
   return (
     <section className="examStartPage">
