@@ -13025,3 +13025,43 @@ html:has(.ctetS2Screen) {
   background: rgba(148, 163, 184, 0.12) !important;
   color: #cbd5e1 !important;
 }
+
+/* === CTET mobile dock desktop guard === */
+html body #root .appShell > nav.ctetMobileSectionDock.ctetMobileSectionDock {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+.ctetExperienceStickyHeader + .ctetMobileSectionDock + .ctetExperiencePage {
+  margin-top: 62px !important;
+}
+
+.ctetExperienceStickyHeader + .ctetMobileSectionDock + .ctetExperiencePage > .ctetTopEntryExperience {
+  margin-top: 0 !important;
+  min-height: calc(100vh - 62px) !important;
+}
+
+@media (max-width: 1380px) {
+  .ctetExperienceStickyHeader + .ctetMobileSectionDock + .ctetExperiencePage {
+    margin-top: 58px !important;
+  }
+
+  .ctetExperienceStickyHeader + .ctetMobileSectionDock + .ctetExperiencePage > .ctetTopEntryExperience {
+    min-height: calc(100vh - 58px) !important;
+  }
+}
+
+@media (max-width: 720px) {
+  html body #root .appShell > nav.ctetMobileSectionDock.ctetMobileSectionDock {
+    display: grid !important;
+    pointer-events: auto !important;
+  }
+
+  .ctetExperienceStickyHeader + .ctetMobileSectionDock + .ctetExperiencePage {
+    margin-top: 70px !important;
+  }
+
+  .ctetExperienceStickyHeader + .ctetMobileSectionDock + .ctetExperiencePage > .ctetTopEntryExperience {
+    min-height: calc(100dvh - 70px) !important;
+  }
+}
