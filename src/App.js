@@ -3643,6 +3643,70 @@ const latestScore =
     ? mockResults[mockResults.length - 1].percentage
     : 0;
 
+const getCtetMomentumTime = (value) => {
+  if (!value) return 0;
+  if (typeof value === "number") return value;
+  if (value instanceof Date) return value.getTime();
+  if (typeof value === "string") {
+    const parsed = Date.parse(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+  if (typeof value.toDate === "function") return value.toDate().getTime();
+  if (typeof value.seconds === "number") return value.seconds * 1000;
+  return 0;
+};
+
+const latestMockResult = [...(mockResults || [])]
+  .sort(
+    (first, second) =>
+      Math.max(
+        getCtetMomentumTime(second.completedAt),
+        getCtetMomentumTime(second.submittedAt),
+        getCtetMomentumTime(second.createdAt),
+        getCtetMomentumTime(second.updatedAt)
+      ) -
+      Math.max(
+        getCtetMomentumTime(first.completedAt),
+        getCtetMomentumTime(first.submittedAt),
+        getCtetMomentumTime(first.createdAt),
+        getCtetMomentumTime(first.updatedAt)
+      )
+  )[0] || null;
+
+const latestMockScore = Number.isFinite(Number(latestMockResult?.percentage))
+  ? Math.round(Number(latestMockResult.percentage))
+  : 0;
+
+const ctetContinueLearningCard = !user
+  ? {
+      eyebrow: "Learning Momentum",
+      icon: "🚀",
+      title: "Start your CTET/TET journey",
+      text: "Login to unlock your personal resume card, mock history, and daily progress.",
+      percent: 0,
+      route: "/login",
+      action: "Login ▶",
+    }
+  : latestMockResult
+  ? {
+      eyebrow: "Continue Learning",
+      icon: "🧾",
+      title: latestMockResult.testTitle || latestMockResult.title || "Continue from latest mock",
+      text: `${totalMockAttempts} mock attempt${totalMockAttempts === 1 ? "" : "s"} • Avg accuracy ${averageAccuracy}%`,
+      percent: Math.max(0, Math.min(100, latestMockScore)),
+      route: "/ctet-tet/mock-tests/history",
+      action: "Review ▶",
+    }
+  : {
+      eyebrow: "Learning Momentum",
+      icon: "🧾",
+      title: "Start your first mock test",
+      text: "Begin with a practice test so AspireNest can build your progress path.",
+      percent: 0,
+      route: "/ctet-tet/mock-tests",
+      action: "Start ▶",
+    };
+
 const analyticsMessage =
   averageAccuracy >= 80
     ? "Excellent progress. Keep maintaining consistency."
@@ -4311,25 +4375,25 @@ return (
               <h2>Hero Command Deck</h2>
               <p>Personalized guidance to keep you on track every day.</p>
             </div>
-            <span className="ctetStreakChip">🔥 7 Day Streak</span>
+            <span className="ctetStreakChip">{ctetContinueLearningCard.eyebrow}</span>
           </div>
 
           <button
             type="button"
             className="ctetNextStepCard"
-            onClick={() => navigate(user ? "/ctet-tet/courses" : "/login")}
+            onClick={() => navigate(ctetContinueLearningCard.route)}
           >
-            <span className="ctetNextIcon">📖</span>
+            <span className="ctetNextIcon">{ctetContinueLearningCard.icon}</span>
             <div>
-              <small>Next Up</small>
-              <h3>Child Development & Pedagogy</h3>
-              <p>Topic 1 of 8 • In Progress</p>
+              <small>Continue Learning</small>
+              <h3>{ctetContinueLearningCard.title}</h3>
+              <p>{ctetContinueLearningCard.text}</p>
               <div className="ctetProgressBar">
-                <span style={{ width: "35%" }} />
+                <span style={{ width: `${ctetContinueLearningCard.percent}%` }} />
               </div>
             </div>
-            <strong>35%</strong>
-            <em>Resume ▶</em>
+            <strong>{ctetContinueLearningCard.percent > 0 ? `${ctetContinueLearningCard.percent}%` : "Start"}</strong>
+            <em>{ctetContinueLearningCard.action}</em>
           </button>
 
           <div className="ctetQuickActionLabel">Quick Actions</div>
