@@ -3707,6 +3707,49 @@ const ctetContinueLearningCard = !user
       action: "Start ▶",
     };
 
+const ctetLearningMomentumCards = [
+  {
+    id: "resume",
+    eyebrow: ctetContinueLearningCard.eyebrow,
+    icon: ctetContinueLearningCard.icon,
+    title: ctetContinueLearningCard.title,
+    text: ctetContinueLearningCard.text,
+    meta:
+      ctetContinueLearningCard.percent > 0
+        ? `${ctetContinueLearningCard.percent}% latest score`
+        : user
+        ? "First activity pending"
+        : "Login required",
+    route: ctetContinueLearningCard.route,
+    action: ctetContinueLearningCard.action.replace("▶", "").trim(),
+    tone: "gold",
+  },
+  {
+    id: "roadmap",
+    eyebrow: "AspirePath",
+    icon: "🧭",
+    title: "Open your guided roadmap",
+    text: "Follow day-wise CTET/TET preparation with tasks, resources, and revision flow.",
+    meta: "Roadmap • Daily plan",
+    route: user ? "/my-aspirepath" : "/ctet-tet/roadmaps",
+    action: user ? "Open my path" : "View roadmaps",
+    tone: "violet",
+  },
+  {
+    id: "progress",
+    eyebrow: "Progress",
+    icon: "📊",
+    title: user ? "Check your learning progress" : "Track progress after login",
+    text: user
+      ? `Mocks: ${totalMockAttempts} • Best score ${highestScore}%`
+      : "Login to see mock accuracy, attempts, dashboard and progress history.",
+    meta: user ? `Latest score ${latestScore || 0}%` : "Private dashboard",
+    route: user ? "/student-dashboard" : "/login",
+    action: user ? "Open progress" : "Login",
+    tone: "blue",
+  },
+];
+
 const analyticsMessage =
   averageAccuracy >= 80
     ? "Excellent progress. Keep maintaining consistency."
@@ -4514,6 +4557,7 @@ setActiveSection={setActiveSection}
 setActiveAdminTab={setActiveAdminTab}
 user={user}
 isAdmin={isAdmin}
+learningMomentumCards={ctetLearningMomentumCards}
 />
 
 
