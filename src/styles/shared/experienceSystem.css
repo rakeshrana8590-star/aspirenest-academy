@@ -13330,3 +13330,29 @@ html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMission 
 html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMission + .ctetS2MomentumList {
   display: none !important;
 }
+
+/* === CTET Screen 2 real streak line v1 === */
+.ctetS2StreakLine {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 10px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.18);
+}
+
+.ctetS2StreakLine span {
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.ctetS2StreakLine em {
+  color: #fef3c7;
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 900;
+  text-align: right;
+}

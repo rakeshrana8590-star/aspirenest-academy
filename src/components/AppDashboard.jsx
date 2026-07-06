@@ -18,7 +18,7 @@ import {
   Video,
 } from "lucide-react";
 
-export default function AppDashboard({ user, isAdmin, learningMomentumCards = [], todayMission = null }) {
+export default function AppDashboard({ user, isAdmin, learningMomentumCards = [], todayMission = null, streakActivityDates = [] }) {
   const navigate = useNavigate();
   const isAdminUser = typeof isAdmin === "function" ? isAdmin(user) : false;
 
@@ -40,8 +40,8 @@ export default function AppDashboard({ user, isAdmin, learningMomentumCards = []
     { Icon: GraduationCap, title: "Courses", route: "/ctet-tet/courses", status: "Structured prep", cta: "Explore courses", tone: "amber" },
   ];
 
-  const getLocalMissionDateKey = () => {
-    const now = new Date();
+  const getLocalMissionDateKey = (value = new Date()) => {
+    const now = value instanceof Date ? value : new Date(value);
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, "0");
     const day = String(now.getDate()).padStart(2, "0");
@@ -59,6 +59,13 @@ export default function AppDashboard({ user, isAdmin, learningMomentumCards = []
     [missionDateKey, user?.email]
   );
 
+  const missionHistoryStorageKey = React.useMemo(
+    () => `ctetMissionActivityDates_${user?.email || "guest"}`,
+    [user?.email]
+  );
+
+  const [missionActivityDates, setMissionActivityDates] = React.useState([]);
+
   const [missionDoneIds, setMissionDoneIds] = React.useState([]);
 
   React.useEffect(() => {
@@ -75,6 +82,20 @@ export default function AppDashboard({ user, isAdmin, learningMomentumCards = []
     }
   }, [missionStorageKey]);
 
+  React.useEffect(() => {
+    try {
+      const savedHistory = JSON.parse(
+        localStorage.getItem(missionHistoryStorageKey) || "[]"
+      );
+
+      setMissionActivityDates(
+        Array.isArray(savedHistory) ? savedHistory.filter(Boolean) : []
+      );
+    } catch {
+      setMissionActivityDates([]);
+    }
+  }, [missionHistoryStorageKey]);
+
   const missionTaskIds = missionTasks.map((task) => task.id);
   const completedMissionTaskIds = missionDoneIds.filter((id) =>
     missionTaskIds.includes(id)
@@ -85,6 +106,42 @@ export default function AppDashboard({ user, isAdmin, learningMomentumCards = []
     100,
     Math.round((missionDone / missionTotal) * 100)
   );
+
+  const combinedStreakActivityDates = Array.from(
+    new Set([
+      ...(Array.isArray(streakActivityDates) ? streakActivityDates : []),
+      ...missionActivityDates,
+      ...(missionDone > 0 ? [missionDateKey] : []),
+    ].filter(Boolean))
+  );
+
+  const calculateActiveStreak = (dateKeys = []) => {
+    const activitySet = new Set(dateKeys);
+    const todayKey = getLocalMissionDateKey();
+
+    if (!activitySet.has(todayKey)) return 0;
+
+    let streakCount = 0;
+    const cursor = new Date();
+
+    while (activitySet.has(getLocalMissionDateKey(cursor))) {
+      streakCount += 1;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+
+    return streakCount;
+  };
+
+  const activeStreak = calculateActiveStreak(combinedStreakActivityDates);
+
+  const streakMilestone =
+    activeStreak >= 7
+      ? "7-day milestone active"
+      : activeStreak >= 3
+      ? "3-day milestone active"
+      : activeStreak > 0
+      ? "Return tomorrow to grow it"
+      : "Start your streak today";
 
   const handleMissionTask = (task) => {
     if (!user) {
@@ -98,7 +155,18 @@ export default function AppDashboard({ user, isAdmin, learningMomentumCards = []
 
     setMissionDoneIds(nextDoneIds);
 
+    const nextActivityDates = Array.from(
+      new Set([...missionActivityDates, missionDateKey])
+    );
+
+    setMissionActivityDates(nextActivityDates);
+
     try {
+      localStorage.setItem(
+        missionHistoryStorageKey,
+        JSON.stringify(nextActivityDates)
+      );
+
       localStorage.setItem(
         missionStorageKey,
         JSON.stringify({
@@ -218,6 +286,13 @@ export default function AppDashboard({ user, isAdmin, learningMomentumCards = []
                     <i style={{ width: `${missionProgress}%` }} />
                   </span>
                   <em>{missionProgress}%</em>
+                </div>
+
+                <div className="ctetS2StreakLine">
+                  <span>
+                    🔥 {activeStreak > 0 ? `${activeStreak}-day streak` : "No active streak"}
+                  </span>
+                  <em>{streakMilestone}</em>
                 </div>
 
                 <div className="ctetS2TodayMissionTasks">

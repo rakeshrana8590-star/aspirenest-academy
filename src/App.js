@@ -3675,6 +3675,35 @@ const getCtetMomentumTime = (value) => {
   return 0;
 };
 
+const getCtetLocalDateKey = (value) => {
+  const time = getCtetMomentumTime(value);
+  if (!time) return "";
+
+  const date = new Date(time);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+const ctetMockActivityDateKeys = [
+  ...new Set(
+    (mockResults || [])
+      .map((result) =>
+        getCtetLocalDateKey(
+          result.completedAt ||
+            result.submittedAt ||
+            result.createdAt ||
+            result.updatedAt
+        )
+      )
+      .filter(Boolean)
+  ),
+];
+
 const latestMockResult = [...(mockResults || [])]
   .sort(
     (first, second) =>
@@ -4616,6 +4645,7 @@ user={user}
 isAdmin={isAdmin}
 learningMomentumCards={ctetLearningMomentumCards}
 todayMission={ctetTodayMission}
+streakActivityDates={ctetMockActivityDateKeys}
 />
 
 
