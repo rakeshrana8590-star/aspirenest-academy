@@ -3726,6 +3726,44 @@ const ctetContinueLearningCard = !user
       action: "Start ▶",
     };
 
+const ctetTodayMission = {
+  id: "todayMission",
+  eyebrow: "Today’s Mission",
+  icon: "🎯",
+  title: user ? "Complete today’s 3-step mission" : "Login for today’s mission",
+  text: user
+    ? "Read, practice, and check your path. Small daily actions build selection momentum."
+    : "Login to start your daily CTET/TET mission and track progress.",
+  action: user ? "Start mission" : "Login",
+  route: user ? "/ctet-tet/notes" : "/login",
+  tasks: [
+    {
+      id: "notes",
+      icon: "📄",
+      title: "Read quick notes",
+      text: "Open revision notes for one topic.",
+      route: "/ctet-tet/notes",
+      cta: "Open notes",
+    },
+    {
+      id: "mock",
+      icon: "🧪",
+      title: "Practice mock test",
+      text: "Attempt or review one mock test.",
+      route: "/ctet-tet/mock-tests",
+      cta: "Practice",
+    },
+    {
+      id: "roadmap",
+      icon: "🧭",
+      title: "Check AspirePath",
+      text: "Review today’s roadmap task.",
+      route: user ? "/my-aspirepath" : "/ctet-tet/roadmaps",
+      cta: user ? "Open path" : "View roadmaps",
+    },
+  ],
+};
+
 const ctetLearningMomentumCards = [
   {
     id: "resume",
@@ -4577,6 +4615,7 @@ setActiveAdminTab={setActiveAdminTab}
 user={user}
 isAdmin={isAdmin}
 learningMomentumCards={ctetLearningMomentumCards}
+todayMission={ctetTodayMission}
 />
 
 

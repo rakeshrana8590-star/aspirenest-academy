@@ -18,7 +18,7 @@ import {
   Video,
 } from "lucide-react";
 
-export default function AppDashboard({ user, isAdmin, learningMomentumCards = [] }) {
+export default function AppDashboard({ user, isAdmin, learningMomentumCards = [], todayMission = null }) {
   const navigate = useNavigate();
   const isAdminUser = typeof isAdmin === "function" ? isAdmin(user) : false;
 
@@ -39,6 +39,80 @@ export default function AppDashboard({ user, isAdmin, learningMomentumCards = []
     { Icon: Route, title: "AspirePath", route: "/ctet-tet/roadmaps", status: "Guided path", cta: "Open roadmap", tone: "purple" },
     { Icon: GraduationCap, title: "Courses", route: "/ctet-tet/courses", status: "Structured prep", cta: "Explore courses", tone: "amber" },
   ];
+
+  const getLocalMissionDateKey = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
+  const missionTasks = Array.isArray(todayMission?.tasks)
+    ? todayMission.tasks
+    : [];
+
+  const missionDateKey = React.useMemo(() => getLocalMissionDateKey(), []);
+  const missionStorageKey = React.useMemo(
+    () => `ctetTodayMission_${user?.email || "guest"}_${missionDateKey}`,
+    [missionDateKey, user?.email]
+  );
+
+  const [missionDoneIds, setMissionDoneIds] = React.useState([]);
+
+  React.useEffect(() => {
+    try {
+      const savedMission = JSON.parse(
+        localStorage.getItem(missionStorageKey) || "{}"
+      );
+
+      setMissionDoneIds(
+        Array.isArray(savedMission.doneIds) ? savedMission.doneIds : []
+      );
+    } catch {
+      setMissionDoneIds([]);
+    }
+  }, [missionStorageKey]);
+
+  const missionTaskIds = missionTasks.map((task) => task.id);
+  const completedMissionTaskIds = missionDoneIds.filter((id) =>
+    missionTaskIds.includes(id)
+  );
+  const missionTotal = missionTasks.length || 3;
+  const missionDone = completedMissionTaskIds.length;
+  const missionProgress = Math.min(
+    100,
+    Math.round((missionDone / missionTotal) * 100)
+  );
+
+  const handleMissionTask = (task) => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    const nextDoneIds = Array.from(
+      new Set([...completedMissionTaskIds, task.id])
+    );
+
+    setMissionDoneIds(nextDoneIds);
+
+    try {
+      localStorage.setItem(
+        missionStorageKey,
+        JSON.stringify({
+          date: missionDateKey,
+          doneIds: nextDoneIds,
+          updatedAt: Date.now(),
+        })
+      );
+    } catch {
+      // Ignore local progress storage failures.
+    }
+
+    navigate(task.route);
+  };
 
   const momentum = learningMomentumCards.length > 0
     ? learningMomentumCards.map((card) => ({
@@ -127,8 +201,51 @@ export default function AppDashboard({ user, isAdmin, learningMomentumCards = []
               </div>
             </div>
 
+            {todayMission ? (
+              <div className="ctetS2TodayMission">
+                <div className="ctetS2TodayMissionTop">
+                  <span>{todayMission.icon || "🎯"}</span>
+                  <div>
+                    <b>{todayMission.eyebrow || "Today’s Mission"}</b>
+                    <h4>{todayMission.title}</h4>
+                    <p>{todayMission.text}</p>
+                  </div>
+                </div>
+
+                <div className="ctetS2TodayMissionProgress">
+                  <strong>{missionDone}/{missionTotal} progress</strong>
+                  <span>
+                    <i style={{ width: `${missionProgress}%` }} />
+                  </span>
+                  <em>{missionProgress}%</em>
+                </div>
+
+                <div className="ctetS2TodayMissionTasks">
+                  {missionTasks.map((task) => {
+                    const isDone = completedMissionTaskIds.includes(task.id);
+
+                    return (
+                      <button
+                        type="button"
+                        className={isDone ? "isDone" : ""}
+                        key={task.id}
+                        onClick={() => handleMissionTask(task)}
+                      >
+                        <b>{task.icon || "•"}</b>
+                        <span>
+                          <strong>{task.title}</strong>
+                          <small>{isDone ? "Started today" : task.text}</small>
+                        </span>
+                        <em>{isDone ? "Done" : task.cta}</em>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
+
             <div className="ctetS2MomentumList">
-              {momentum.map((card) => {
+              {momentum.slice(0, todayMission ? 1 : momentum.length).map((card) => {
                 const Icon = card.Icon;
                 return (
                   <button
@@ -192,33 +309,7 @@ export default function AppDashboard({ user, isAdmin, learningMomentumCards = []
           </div>
         </div>
 
-        <div className="ctetS2Mentor">
-          <div className="ctetS2MentorLeft">
-            <div className="ctetS2MentorPhoto">VM</div>
-            <div>
-              <span className="ctetS2MentorBadge">
-                <Sparkles size={14} />
-                Mentor Authority
-              </span>
-              <h3>Learn from a mentor who’s walked the path.</h3>
-              <p>Get expert guidance, clarity and confidence at every step.</p>
-            </div>
-          </div>
 
-          <div className="ctetS2MentorMid">
-            <h3>Dr. Varsha D. Maru</h3>
-            <strong>Ph.D. Educator &amp; CTET/TET Mentor</strong>
-            <p>Guiding thousands of aspirants toward selection with the right strategy and support.</p>
-          </div>
-
-          <div className="ctetS2MentorAction">
-            <button type="button" onClick={() => navigate("/ctet-tet/courses")}>
-              Meet your mentor
-              <ArrowRight size={18} />
-            </button>
-            <small>Next up: Mentor Deep Dive</small>
-          </div>
-        </div>
       </div>
     </section>
   );
