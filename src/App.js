@@ -4124,71 +4124,89 @@ return (
           }
         >
 {!isExamAttemptPage && !ctetExperienceEnabled && (
-  <header className="cleanHeader">
-    <div className="cleanBrand">
-      <AspireNestLogo />
-    </div>
+  <div className="ctetExperienceStickyHeader ctetGlobalPremiumHeader">
+    <div className="ctetLockedNav">
+      <button type="button" className="ctetLockedBrand" onClick={() => navigate("/ctet-tet")}>
+        <AspireNestLogo />
+      </button>
 
-    <nav className="cleanNav">
-      {!user ? (
-        <button
-          className="cleanHeaderBtn"
-          onClick={() => navigate("/login")}
-        >
-          Login
-        </button>
-      ) : (
-          <div className="accountMenuWrap cleanAccountWrap" ref={accountMenuRef}>
-            <button
-              className="cleanHeaderSwitch"
-              onClick={() => setAccountMenuOpen((open) => !open)}
-              title="Open account menu"
-            >
-              <span className="switchDot"></span>
-              <span>
-                {isAdmin(user) ? "Admin ON" : "Student ON"}
-              </span>
-            </button>
+      <nav className="ctetLockedLinks" aria-label="AspireNest navigation">
+        {[
+          ["Learning Hub", "/ctet-tet"],
+          ["Mock Tests", "/ctet-tet/mock-tests"],
+          ["Notes", "/ctet-tet/notes"],
+          ["Videos", "/ctet-tet/videos"],
+          ["Current Affairs", "/ctet-tet/current-affairs"],
+          ["Roadmaps", "/ctet-tet/roadmaps"],
+          ["Pricing", "/ctet-tet/pricing"],
+        ].map(([label, url]) => (
+          <button type="button" key={label} onClick={() => navigate(url)}>
+            {label}
+            {label === "Pricing" ? <em>Premium</em> : null}
+          </button>
+        ))}
+      </nav>
 
-            {accountMenuOpen ? (
-              <div className="premiumAccountDropdown">
-                <div className="accountDropdownProfile">
-                  <b>{isAdmin(user) ? "AN" : "ST"}</b>
-                  <div>
-                    <strong>{accountDisplayName}</strong>
-                    <small>{accountEmail}</small>
-                  </div>
+      <div className="ctetLockedTools">
+        <div className="accountMenuWrap" ref={accountMenuRef}>
+          <button
+            type="button"
+            className="ctetLockedAccount"
+            onClick={() => {
+              if (!user) {
+                navigate("/login");
+                return;
+              }
+              setAccountMenuOpen((open) => !open);
+            }}
+          >
+            <i />
+            <span>
+              <strong>{user ? (isAdmin(user) ? "Admin" : "Student") : "Login"}</strong>
+              <small>{user ? (isAdmin(user) ? "Premium Access" : "Learning Access") : "Start Learning"}</small>
+            </span>
+            <b>{user ? (isAdmin(user) ? "AN" : "ST") : "IN"}</b>
+          </button>
+
+          {user && accountMenuOpen ? (
+            <div className="premiumAccountDropdown">
+              <div className="accountDropdownProfile">
+                <b>{isAdmin(user) ? "AN" : "ST"}</b>
+                <div>
+                  <strong>{accountDisplayName}</strong>
+                  <small>{accountEmail}</small>
                 </div>
-
-                <button type="button" onClick={() => openAccountTarget("/my-profile")}>
-                  <span>👤</span>
-                  <div>
-                    <strong>Profile</strong>
-                    <small>View account details</small>
-                  </div>
-                </button>
-
-                <button type="button" onClick={() => openAccountTarget(isAdmin(user) ? "/admin" : "/student-dashboard")}>
-                  <span>{isAdmin(user) ? "⚙️" : "📊"}</span>
-                  <div>
-                    <strong>{isAdmin(user) ? "Admin Dashboard" : "Student Dashboard"}</strong>
-                    <small>{isAdmin(user) ? "Manage academy" : "Track learning"}</small>
-                  </div>
-                </button>
-
-                <button type="button" className="danger" onClick={logoutFromAccountMenu}>
-                  <span>🚪</span>
-                  <div>
-                    <strong>Logout</strong>
-                    <small>Sign out safely</small>
-                  </div>
-                </button>
               </div>
-            ) : null}
-          </div>
-      )}
-    </nav>
-  </header>
+
+              <button type="button" onClick={() => openAccountTarget("/my-profile")}>
+                <span>👤</span>
+                <div>
+                  <strong>Profile</strong>
+                  <small>View account details</small>
+                </div>
+              </button>
+
+              <button type="button" onClick={() => openAccountTarget(isAdmin(user) ? "/admin" : "/student-dashboard")}>
+                <span>{isAdmin(user) ? "⚙️" : "📊"}</span>
+                <div>
+                  <strong>{isAdmin(user) ? "Admin Dashboard" : "Student Dashboard"}</strong>
+                  <small>{isAdmin(user) ? "Manage academy" : "Track learning"}</small>
+                </div>
+              </button>
+
+              <button type="button" className="danger" onClick={logoutFromAccountMenu}>
+                <span>🚪</span>
+                <div>
+                  <strong>Logout</strong>
+                  <small>Sign out safely</small>
+                </div>
+              </button>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  </div>
 )}
 <main className="appShell">
 <Routes key={location.key || location.pathname}>
@@ -4374,11 +4392,6 @@ return (
                 </nav>
 
                 <div className="ctetLockedTools">
-                  <button type="button" className="ctetLockedSearch" onClick={() => navigate("/ctet-tet/courses")}>
-                    <span>⌕</span>
-                    Search anything...
-                    <kbd>⌘ K</kbd>
-                  </button>
                     <div className="accountMenuWrap" ref={accountMenuRef}>
                       <button
                         type="button"
@@ -9271,7 +9284,7 @@ Premium
           </div>
         </div>
       )}
-<header className="cleanHeader">
+{false && (<header className="cleanHeader">
   <div className="cleanBrand">
     <img
       src="/logo-header.png"
@@ -9315,7 +9328,7 @@ Premium
       </button>
     )}
   </nav>
-</header>
+</header>)}
       {false && (
   <div className="stickySectionNav"></div>
 )}

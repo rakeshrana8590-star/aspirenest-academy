@@ -14005,3 +14005,35 @@ html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2BadgeStripIte
 html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2BadgeStripItems span.isLocked {
   border-style: dashed !important;
 }
+
+/* === Global premium header without search v1 === */
+html body #root > .appShell,
+html body #root .appShell {
+  background: #020617;
+}
+
+html body #root .ctetGlobalPremiumHeader + .appShell {
+  padding-top: 74px;
+}
+
+html body #root .ctetGlobalPremiumHeader .ctetLockedTools {
+  min-width: auto;
+}
+
+html body #root .ctetGlobalPremiumHeader .ctetLockedAccount {
+  min-width: 170px;
+}
+
+html body #root .ctetExperienceStickyHeader .ctetLockedSearch {
+  display: none !important;
+}
+
+@media (max-width: 920px) {
+  html body #root .ctetGlobalPremiumHeader + .appShell {
+    padding-top: 68px;
+  }
+
+  html body #root .ctetGlobalPremiumHeader .ctetLockedAccount {
+    min-width: 132px;
+  }
+}
