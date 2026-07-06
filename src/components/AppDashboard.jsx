@@ -184,6 +184,76 @@ export default function AppDashboard({ user, isAdmin, learningMomentumCards = []
   const levelProgress = Math.round((xpInCurrentLevel / xpPerLevel) * 100);
   const xpToNextLevel = xpPerLevel - xpInCurrentLevel;
 
+  const mockXpEventCount = uniqueXpEvents.filter((event) => event.type === "mock").length;
+
+  const badgeRules = [
+    {
+      id: "mission-starter",
+      icon: "🎯",
+      title: "Mission Starter",
+      rule: missionDone >= 1,
+      hint: "Start one daily mission task",
+    },
+    {
+      id: "daily-finisher",
+      icon: "✅",
+      title: "Daily Finisher",
+      rule: missionDone >= missionTotal && missionTotal > 0,
+      hint: "Complete today’s 3-step mission",
+    },
+    {
+      id: "streak-spark",
+      icon: "🔥",
+      title: "Streak Spark",
+      rule: activeStreak >= 1,
+      hint: "Build a real daily streak",
+    },
+    {
+      id: "three-day-rhythm",
+      icon: "⚡",
+      title: "3-Day Rhythm",
+      rule: activeStreak >= 3,
+      hint: "Stay active for 3 days",
+    },
+    {
+      id: "level-builder",
+      icon: "⭐",
+      title: "Level Builder",
+      rule: currentLevel >= 2,
+      hint: "Reach Level 2",
+    },
+    {
+      id: "level-climber",
+      icon: "🏔️",
+      title: "Level Climber",
+      rule: currentLevel >= 5,
+      hint: "Reach Level 5",
+    },
+    {
+      id: "mock-starter",
+      icon: "📝",
+      title: "Mock Starter",
+      rule: mockXpEventCount >= 1,
+      hint: "Attempt one mock test",
+    },
+    {
+      id: "practice-engine",
+      icon: "🚀",
+      title: "Practice Engine",
+      rule: mockXpEventCount >= 3,
+      hint: "Attempt three mock tests",
+    },
+  ];
+
+  const badgeWall = Array.from(
+    new globalThis.Map(badgeRules.map((badge) => [badge.id, badge])).values()
+  ).map((badge) => ({
+    ...badge,
+    unlocked: Boolean(badge.rule),
+  }));
+
+  const unlockedBadgeCount = badgeWall.filter((badge) => badge.unlocked).length;
+
   const handleMissionTask = (task) => {
     if (!user) {
       navigate("/login");
@@ -396,6 +466,25 @@ export default function AppDashboard({ user, isAdmin, learningMomentumCards = []
           </aside>
 
           <div className="ctetS2Modules">
+            <div className="ctetS2BadgeStrip" aria-label="Badge wall">
+              <div>
+                <strong>Badge Wall</strong>
+                <em>{unlockedBadgeCount}/{badgeWall.length} unlocked</em>
+              </div>
+
+              <div className="ctetS2BadgeStripItems">
+                {badgeWall.map((badge) => (
+                  <span
+                    className={badge.unlocked ? "isUnlocked" : "isLocked"}
+                    key={badge.id}
+                    title={badge.unlocked ? badge.title : badge.hint}
+                  >
+                    <b>{badge.icon}</b>
+                    {badge.title}
+                  </span>
+                ))}
+              </div>
+            </div>
             <div className="ctetS2ModuleTitle">
               <BookOpen size={16} />
               Module Command Grid
