@@ -13356,3 +13356,362 @@ html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMission 
   font-weight: 900;
   text-align: right;
 }
+
+/* === CTET Screen 2 XP Level Engine v1 === */
+.ctetS2StreakLine {
+  flex-wrap: wrap;
+}
+
+.ctetS2StreakLine small {
+  flex-basis: 100%;
+  color: #fde68a;
+  font-size: 0.69rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.ctetS2XpMiniBar {
+  display: grid;
+  gap: 5px;
+}
+
+.ctetS2XpMiniBar span {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.11);
+}
+
+.ctetS2XpMiniBar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #38bdf8, #facc15);
+  transition: width 0.25s ease;
+}
+
+.ctetS2XpMiniBar em {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.66rem;
+  font-style: normal;
+  font-weight: 800;
+  text-align: right;
+}
+
+/* === CTET Screen 2 XP layout compact guard v2 === */
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMission {
+  gap: 8px;
+  padding: 12px;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2StreakLine {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 5px 8px;
+  padding: 8px 10px;
+  border-radius: 14px;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2StreakLine span {
+  font-size: 0.74rem;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2StreakLine em {
+  font-size: 0.64rem;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2StreakLine small {
+  grid-column: 1 / -1;
+  font-size: 0.66rem;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2XpMiniBar {
+  gap: 3px;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2XpMiniBar span {
+  height: 5px;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2XpMiniBar em {
+  font-size: 0.62rem;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTasks {
+  gap: 6px;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTasks button {
+  min-height: 46px;
+  padding: 7px 9px;
+  border-radius: 14px;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTasks strong {
+  font-size: 0.75rem;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTasks small {
+  font-size: 0.62rem;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTasks em {
+  font-size: 0.62rem;
+}
+
+/* === CTET Screen 2 XP mission launch fit final guard === */
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2Momentum {
+  overflow: hidden !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2MomentumHead {
+  margin-bottom: 10px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2MomentumHead h3 {
+  font-size: 1.12rem !important;
+  line-height: 1.05 !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2MomentumHead p {
+  font-size: 0.76rem !important;
+  line-height: 1.28 !important;
+  margin-top: 4px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMission {
+  gap: 7px !important;
+  padding: 11px !important;
+  margin: 8px 0 0 !important;
+  border-radius: 18px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTop {
+  gap: 9px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTop > span {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  border-radius: 12px !important;
+  font-size: 16px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTop b {
+  font-size: 0.62rem !important;
+  margin-bottom: 2px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTop h4 {
+  font-size: 0.9rem !important;
+  line-height: 1.08 !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTop p {
+  font-size: 0.68rem !important;
+  line-height: 1.18 !important;
+  margin-top: 3px !important;
+  -webkit-line-clamp: 1 !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionProgress {
+  gap: 7px !important;
+  font-size: 0.66rem !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionProgress span {
+  height: 6px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2StreakLine {
+  padding: 7px 9px !important;
+  border-radius: 13px !important;
+  gap: 3px 7px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2StreakLine span {
+  font-size: 0.68rem !important;
+  line-height: 1.1 !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2StreakLine em {
+  font-size: 0.58rem !important;
+  line-height: 1.1 !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2StreakLine small {
+  font-size: 0.61rem !important;
+  line-height: 1.1 !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2XpMiniBar {
+  gap: 2px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2XpMiniBar span {
+  height: 4px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2XpMiniBar em {
+  font-size: 0.58rem !important;
+  line-height: 1.1 !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTasks {
+  gap: 5px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTasks button {
+  min-height: 39px !important;
+  padding: 6px 8px !important;
+  border-radius: 13px !important;
+  grid-template-columns: 20px 1fr auto !important;
+  gap: 7px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTasks button > b {
+  font-size: 14px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTasks strong {
+  font-size: 0.68rem !important;
+  line-height: 1.05 !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTasks small {
+  display: none !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTasks em {
+  font-size: 0.58rem !important;
+  line-height: 1 !important;
+}
+
+/* === CTET Screen 2 XP mission spacious premium correction === */
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2Momentum {
+  min-height: 520px !important;
+  overflow: visible !important;
+  align-self: stretch !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMission {
+  gap: 12px !important;
+  padding: 16px !important;
+  margin: 14px 0 0 !important;
+  border-radius: 22px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTop {
+  gap: 12px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTop > span {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  border-radius: 14px !important;
+  font-size: 19px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTop b {
+  font-size: 0.68rem !important;
+  margin-bottom: 4px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTop h4 {
+  font-size: 1.02rem !important;
+  line-height: 1.14 !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTop p {
+  display: block !important;
+  overflow: visible !important;
+  -webkit-line-clamp: unset !important;
+  -webkit-box-orient: unset !important;
+  font-size: 0.76rem !important;
+  line-height: 1.35 !important;
+  margin-top: 6px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionProgress {
+  gap: 9px !important;
+  font-size: 0.74rem !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionProgress span {
+  height: 8px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2StreakLine {
+  display: grid !important;
+  grid-template-columns: 1fr auto !important;
+  gap: 6px 10px !important;
+  padding: 10px 12px !important;
+  border-radius: 16px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2StreakLine span {
+  font-size: 0.78rem !important;
+  line-height: 1.2 !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2StreakLine em {
+  font-size: 0.66rem !important;
+  line-height: 1.2 !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2StreakLine small {
+  grid-column: 1 / -1 !important;
+  font-size: 0.7rem !important;
+  line-height: 1.2 !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2XpMiniBar {
+  gap: 5px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2XpMiniBar span {
+  height: 7px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2XpMiniBar em {
+  font-size: 0.66rem !important;
+  line-height: 1.2 !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTasks {
+  gap: 9px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTasks button {
+  min-height: 58px !important;
+  padding: 10px 12px !important;
+  border-radius: 17px !important;
+  grid-template-columns: 24px 1fr auto !important;
+  gap: 10px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTasks button > b {
+  font-size: 17px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTasks strong {
+  font-size: 0.82rem !important;
+  line-height: 1.15 !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTasks small {
+  display: block !important;
+  overflow: visible !important;
+  -webkit-line-clamp: unset !important;
+  -webkit-box-orient: unset !important;
+  font-size: 0.69rem !important;
+  line-height: 1.18 !important;
+  margin-top: 3px !important;
+}
+
+html body #root .appShell .ctetExperiencePage .ctetS2Screen .ctetS2TodayMissionTasks em {
+  font-size: 0.68rem !important;
+  line-height: 1.1 !important;
+}

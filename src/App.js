@@ -3704,6 +3704,38 @@ const ctetMockActivityDateKeys = [
   ),
 ];
 
+const ctetMockXpEvents = (mockResults || [])
+  .map((result) => {
+    const activityDateKey = getCtetLocalDateKey(
+      result.completedAt ||
+        result.submittedAt ||
+        result.createdAt ||
+        result.updatedAt
+    );
+
+    const eventId =
+      result.id ||
+      result.attemptSaveKey ||
+      [
+        "mock",
+        result.testId || result.testTitle || result.title || "test",
+        activityDateKey,
+        result.score ?? "",
+        result.percentage ?? "",
+      ].join("_");
+
+    return activityDateKey
+      ? {
+          id: eventId,
+          type: "mock",
+          dateKey: activityDateKey,
+          xp: 40,
+          label: "Mock attempt",
+        }
+      : null;
+  })
+  .filter(Boolean);
+
 const latestMockResult = [...(mockResults || [])]
   .sort(
     (first, second) =>
@@ -4646,6 +4678,7 @@ isAdmin={isAdmin}
 learningMomentumCards={ctetLearningMomentumCards}
 todayMission={ctetTodayMission}
 streakActivityDates={ctetMockActivityDateKeys}
+xpActivityEvents={ctetMockXpEvents}
 />
 
 

@@ -18,7 +18,7 @@ import {
   Video,
 } from "lucide-react";
 
-export default function AppDashboard({ user, isAdmin, learningMomentumCards = [], todayMission = null, streakActivityDates = [] }) {
+export default function AppDashboard({ user, isAdmin, learningMomentumCards = [], todayMission = null, streakActivityDates = [], xpActivityEvents = [] }) {
   const navigate = useNavigate();
   const isAdminUser = typeof isAdmin === "function" ? isAdmin(user) : false;
 
@@ -142,6 +142,47 @@ export default function AppDashboard({ user, isAdmin, learningMomentumCards = []
       : activeStreak > 0
       ? "Return tomorrow to grow it"
       : "Start your streak today";
+
+  const missionXpEvents = completedMissionTaskIds.map((taskId) => {
+    const task = missionTasks.find((item) => item.id === taskId);
+
+    const xpMap = {
+      notes: 10,
+      mock: 15,
+      roadmap: 10,
+      video: 10,
+    };
+
+    return {
+      id: `mission_${missionDateKey}_${taskId}`,
+      type: taskId,
+      dateKey: missionDateKey,
+      xp: xpMap[taskId] || 10,
+      label: task?.title || "Mission task",
+    };
+  });
+
+  const uniqueXpEvents = Array.from(
+    new globalThis.Map(
+      [
+        ...(Array.isArray(xpActivityEvents) ? xpActivityEvents : []),
+        ...missionXpEvents,
+      ]
+        .filter((event) => event?.id)
+        .map((event) => [String(event.id), event])
+    ).values()
+  );
+
+  const totalXp = uniqueXpEvents.reduce(
+    (sum, event) => sum + Math.max(0, Number(event.xp || 0)),
+    0
+  );
+
+  const xpPerLevel = 100;
+  const currentLevel = Math.floor(totalXp / xpPerLevel) + 1;
+  const xpInCurrentLevel = totalXp % xpPerLevel;
+  const levelProgress = Math.round((xpInCurrentLevel / xpPerLevel) * 100);
+  const xpToNextLevel = xpPerLevel - xpInCurrentLevel;
 
   const handleMissionTask = (task) => {
     if (!user) {
@@ -293,6 +334,14 @@ export default function AppDashboard({ user, isAdmin, learningMomentumCards = []
                     🔥 {activeStreak > 0 ? `${activeStreak}-day streak` : "No active streak"}
                   </span>
                   <em>{streakMilestone}</em>
+                  <small>Level {currentLevel} • {totalXp} XP</small>
+                </div>
+
+                <div className="ctetS2XpMiniBar" aria-label="Level progress">
+                  <span>
+                    <i style={{ width: `${levelProgress}%` }} />
+                  </span>
+                  <em>{xpInCurrentLevel}/{xpPerLevel} XP • {xpToNextLevel} to next level</em>
                 </div>
 
                 <div className="ctetS2TodayMissionTasks">
