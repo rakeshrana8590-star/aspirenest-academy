@@ -54,6 +54,7 @@ import AuthRoute from "./components/public/AuthRoute";
 
 import AppDashboard from "./components/AppDashboard.jsx";
 import CtetLiveContentCenter from "./components/ctet/CtetLiveContentCenter.jsx";
+import CtetMentorPresenceBand from "./components/ctet/CtetMentorPresenceBand.jsx";
 import CtetSuccessWallScreen from "./components/ctet/CtetSuccessWallScreen.jsx";
 import CtetSupportFooterScreen from "./components/ctet/CtetSupportFooterScreen.jsx";
 import {
@@ -4944,6 +4945,11 @@ xpActivityEvents={ctetMockXpEvents}
     </div>
   </div>
 )}
+
+    <CtetMentorPresenceBand
+      events={ctetExperienceEvents}
+      navigate={navigate}
+    />
 
     <CtetLiveContentCenter
     events={ctetExperienceEvents}

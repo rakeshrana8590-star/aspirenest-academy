@@ -15153,3 +15153,454 @@ html body #root .ctetExperienceStickyHeader .ctetLockedSearch {
 .ctetS5SuccessHero p {
   max-width: 840px !important;
 }
+
+
+/* === Pack 3 Phase 22 Mentor Presence Band: Screen 3 continuation === */
+.ctetS3MentorPresenceBand {
+  position: relative;
+  padding: 0 clamp(18px, 4vw, 42px) clamp(18px, 3vw, 28px);
+  margin-top: -2px;
+  background: #020716;
+  color: #fff7e5;
+}
+
+.ctetS3MentorPresenceBandShell {
+  width: min(1480px, 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  border: 1px solid rgba(255, 183, 77, 0.24);
+  border-radius: 26px;
+  padding: 18px 20px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 183, 77, 0.16), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(124, 92, 255, 0.14), transparent 34%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.94), rgba(36, 19, 9, 0.88));
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.26);
+}
+
+.ctetS3MentorPresenceBandCopy {
+  display: grid;
+  gap: 6px;
+}
+
+.ctetS3MentorPresenceBandCopy span {
+  width: max-content;
+  border-radius: 999px;
+  padding: 7px 12px;
+  background: rgba(255, 183, 77, 0.14);
+  color: #ffd28a;
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.13em;
+}
+
+.ctetS3MentorPresenceBandCopy h2 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.35rem, 2.2vw, 2.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.ctetS3MentorPresenceBandCopy p {
+  margin: 0;
+  max-width: 860px;
+  color: rgba(255, 246, 224, 0.72);
+  font-size: 0.96rem;
+  line-height: 1.5;
+}
+
+.ctetS3MentorPresenceBandCopy small {
+  color: rgba(255, 211, 138, 0.88);
+  font-weight: 850;
+}
+
+.ctetS3MentorPresenceBandActions {
+  display: grid;
+  gap: 10px;
+  min-width: 190px;
+}
+
+.ctetS3MentorPresenceBandActions button {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #ffb347, #ff8f00);
+  color: #201104;
+  font-weight: 950;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ctetS3MentorPresenceBandActions button.isGhost {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff7e5;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+}
+
+@media (max-width: 900px) {
+  .ctetS3MentorPresenceBandShell {
+    grid-template-columns: 1fr;
+  }
+
+  .ctetS3MentorPresenceBandActions {
+    min-width: 0;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] > .ctetS3MentorPresenceBand {
+    display: none !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] > .ctetS3MentorPresenceBand {
+    display: block !important;
+    padding: 0 14px 96px !important;
+    background: #020716 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetS3MentorPresenceBandShell {
+    border-radius: 22px;
+    padding: 15px;
+    grid-template-columns: 1fr;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetS3MentorPresenceBandActions {
+    grid-template-columns: 1fr;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetS3MentorPresenceBandActions button {
+    width: 100%;
+  }
+}
+
+
+/* === Pack 3 Phase 22B Mentor Presence Band premium polish === */
+.ctetS3MentorPresenceBand.ctetS3MentorPresenceBand {
+  padding-top: 18px !important;
+  padding-bottom: 24px !important;
+}
+
+.ctetS3MentorPresenceBand .ctetS3MentorPresenceBandShell {
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  gap: 18px !important;
+  min-height: 168px !important;
+  padding: 22px 24px !important;
+  border-radius: 30px !important;
+  border: 1px solid rgba(255, 183, 77, 0.34) !important;
+  background:
+    radial-gradient(circle at 8% 12%, rgba(255, 183, 77, 0.22), transparent 26%),
+    radial-gradient(circle at 86% 18%, rgba(255, 122, 24, 0.20), transparent 32%),
+    linear-gradient(135deg, rgba(12, 18, 31, 0.98), rgba(44, 24, 11, 0.95)) !important;
+  box-shadow:
+    0 26px 70px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.ctetS3MentorPresenceBandMark {
+  width: 86px !important;
+  height: 86px !important;
+  border-radius: 26px !important;
+  display: grid !important;
+  place-items: center !important;
+  align-content: center !important;
+  border: 1px solid rgba(255, 183, 77, 0.42) !important;
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255, 214, 128, 0.42), transparent 32%),
+    linear-gradient(135deg, rgba(255, 151, 40, 0.34), rgba(15, 23, 42, 0.78)) !important;
+  box-shadow: 0 20px 42px rgba(255, 122, 24, 0.14) !important;
+}
+
+.ctetS3MentorPresenceBandMark strong {
+  color: #fff7df !important;
+  font-size: 1.55rem !important;
+  line-height: 1 !important;
+}
+
+.ctetS3MentorPresenceBandMark span {
+  color: #ffd28a !important;
+  font-size: 0.68rem !important;
+  font-weight: 900 !important;
+}
+
+.ctetS3MentorPresenceBandCopy span {
+  background: rgba(255, 183, 77, 0.18) !important;
+  color: #ffd28a !important;
+}
+
+.ctetS3MentorPresenceBandCopy h2 {
+  color: #fff7e8 !important;
+  opacity: 1 !important;
+  text-shadow: 0 16px 36px rgba(0, 0, 0, 0.42) !important;
+  font-size: clamp(1.65rem, 2.8vw, 3.15rem) !important;
+  letter-spacing: -0.045em !important;
+}
+
+.ctetS3MentorPresenceBandCopy p {
+  color: rgba(255, 247, 229, 0.78) !important;
+  font-size: 1rem !important;
+}
+
+.ctetS3MentorPresenceBandCopy small {
+  color: #ffd28a !important;
+}
+
+.ctetS3MentorPresenceBandActions {
+  min-width: 210px !important;
+}
+
+.ctetS3MentorPresenceBandActions button {
+  min-height: 48px !important;
+  border-radius: 16px !important;
+  box-shadow: 0 18px 34px rgba(255, 143, 0, 0.18) !important;
+}
+
+.ctetS3MentorPresenceBandActions button.isGhost {
+  box-shadow: none !important;
+}
+
+@media (max-width: 900px) {
+  .ctetS3MentorPresenceBand .ctetS3MentorPresenceBandShell {
+    grid-template-columns: auto minmax(0, 1fr) !important;
+  }
+
+  .ctetS3MentorPresenceBandActions {
+    grid-column: 1 / -1 !important;
+    grid-template-columns: 1fr 1fr !important;
+    min-width: 0 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetS3MentorPresenceBand .ctetS3MentorPresenceBandShell {
+    grid-template-columns: 1fr !important;
+    min-height: 0 !important;
+    padding: 16px !important;
+    border-radius: 24px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetS3MentorPresenceBandMark {
+    width: 70px !important;
+    height: 70px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetS3MentorPresenceBandCopy h2 {
+    font-size: 1.75rem !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetS3MentorPresenceBandActions {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+/* === Pack 3 Phase 22E STABLE mobile mentor portrait fill === */
+@media (max-width: 720px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen=mentor] .ctetS3FreshPhotoPanel.ctetS3FreshPhotoPanel {
+    position: absolute !important;
+    top: 28px !important;
+    left: 12px !important;
+    width: 112px !important;
+    height: 152px !important;
+    min-width: 112px !important;
+    min-height: 152px !important;
+    max-width: 112px !important;
+    max-height: 152px !important;
+    padding: 0 !important;
+    border-radius: 22px !important;
+    overflow: hidden !important;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(3, 7, 18, 0.98)) !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen=mentor] .ctetS3FreshPhotoGlow {
+    display: none !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen=mentor] .ctetS3FreshPhoto.ctetS3FreshPhoto {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: cover !important;
+    object-position: center top !important;
+    display: block !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen=mentor] .ctetS3FreshTopLine,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen=mentor] .ctetS3FreshContentPanel > h2,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen=mentor] .ctetS3FreshRoleLine,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen=mentor] .ctetS3FreshBio {
+    margin-left: 124px !important;
+  }
+}
+
+
+/* === Pack 3 Screen 5 FINAL one-screen proof wall balance === */
+.ctetS5SuccessWallScreen.ctetS5SuccessWallScreen {
+  min-height: calc(100vh - 86px) !important;
+  padding: clamp(24px, 3.2vw, 38px) clamp(18px, 4vw, 48px) clamp(28px, 3.6vw, 44px) !important;
+  border-top: 1px solid rgba(255, 183, 77, 0.16) !important;
+  background:
+    radial-gradient(circle at 8% 12%, rgba(255, 183, 77, 0.10), transparent 28%),
+    radial-gradient(circle at 88% 18%, rgba(34, 197, 94, 0.08), transparent 32%),
+    linear-gradient(180deg, #020716 0%, #050b18 48%, #020716 100%) !important;
+  color: #fff7e5 !important;
+}
+
+.ctetS5SuccessWallScreen.ctetS5SuccessWallScreen::before {
+  display: none !important;
+  content: none !important;
+}
+
+.ctetS5SuccessWallScreen .ctetS5SuccessShell {
+  width: min(1480px, 100%) !important;
+  min-height: auto !important;
+  display: grid !important;
+  gap: 14px !important;
+}
+
+.ctetS5SuccessWallScreen .ctetS5SuccessHero {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 0.28fr) !important;
+  gap: 16px !important;
+  align-items: stretch !important;
+  padding: 22px 24px !important;
+  border: 1px solid rgba(255, 183, 77, 0.20) !important;
+  border-radius: 30px !important;
+  background:
+    radial-gradient(circle at top left, rgba(255, 183, 77, 0.12), transparent 30%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(35, 22, 12, 0.72)) !important;
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.24) !important;
+}
+
+.ctetS5SuccessWallScreen .ctetS5SuccessEyebrow,
+.ctetS5SuccessWallScreen .ctetS5SuccessPanelHead span {
+  background: rgba(255, 183, 77, 0.13) !important;
+  color: #ffd28a !important;
+  border: 1px solid rgba(255, 183, 77, 0.14) !important;
+}
+
+.ctetS5SuccessWallScreen .ctetS5SuccessHero h2 {
+  margin: 12px 0 8px !important;
+  font-size: clamp(2.25rem, 4vw, 4.05rem) !important;
+  line-height: 0.96 !important;
+  color: #fff7e8 !important;
+  text-shadow: 0 18px 45px rgba(0, 0, 0, 0.32) !important;
+}
+
+.ctetS5SuccessWallScreen .ctetS5SuccessHero h2 span {
+  color: #ffb347 !important;
+}
+
+.ctetS5SuccessWallScreen .ctetS5SuccessHero p {
+  max-width: 780px !important;
+  font-size: clamp(0.92rem, 1.08vw, 1.06rem) !important;
+  line-height: 1.48 !important;
+  color: rgba(255, 246, 224, 0.70) !important;
+}
+
+.ctetS5SuccessWallScreen .ctetS5SuccessScoreCard {
+  min-height: 176px !important;
+  padding: 20px !important;
+  border-radius: 24px !important;
+  background:
+    radial-gradient(circle at top right, rgba(255, 211, 106, 0.12), transparent 34%),
+    rgba(255, 255, 255, 0.055) !important;
+}
+
+.ctetS5SuccessWallScreen .ctetS5SuccessScoreCard strong {
+  font-size: clamp(2.2rem, 3.2vw, 3.6rem) !important;
+}
+
+.ctetS5SuccessWallScreen .ctetS5SuccessGrid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.05fr) minmax(230px, 0.43fr) minmax(230px, 0.43fr) !important;
+  gap: 14px !important;
+  align-items: stretch !important;
+}
+
+.ctetS5SuccessWallScreen .ctetS5SuccessPanel {
+  min-height: 210px !important;
+  padding: 16px !important;
+  border-radius: 24px !important;
+  background:
+    radial-gradient(circle at top right, rgba(124, 92, 255, 0.10), transparent 32%),
+    rgba(15, 23, 42, 0.66) !important;
+}
+
+.ctetS5SuccessWallScreen .ctetS5SuccessPanel.isFeatured {
+  background:
+    radial-gradient(circle at top right, rgba(124, 92, 255, 0.16), transparent 32%),
+    rgba(15, 23, 42, 0.72) !important;
+}
+
+.ctetS5SuccessWallScreen .ctetS5SuccessProofRow {
+  padding: 12px !important;
+  border-radius: 16px !important;
+  background: rgba(8, 13, 24, 0.76) !important;
+}
+
+.ctetS5SuccessWallScreen .ctetS5SuccessPanel p {
+  font-size: 0.95rem !important;
+  line-height: 1.48 !important;
+}
+
+@media (max-width: 1100px) {
+  .ctetS5SuccessWallScreen .ctetS5SuccessHero,
+  .ctetS5SuccessWallScreen .ctetS5SuccessGrid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 768px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="success"] > .ctetS5SuccessWallScreen.ctetS5SuccessWallScreen {
+    min-height: calc(100vh - 96px) !important;
+    padding: 16px 12px 96px !important;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(255, 183, 77, 0.10), transparent 30%),
+      linear-gradient(180deg, #020716 0%, #050b18 50%, #020716 100%) !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="success"] .ctetS5SuccessHero {
+    padding: 15px !important;
+    border-radius: 24px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="success"] .ctetS5SuccessHero h2 {
+    font-size: clamp(2rem, 10vw, 2.8rem) !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="success"] .ctetS5SuccessPanel {
+    min-height: auto !important;
+  }
+}
+
+/* === Pack 3 Screen 5 seamless background correction === */
+.ctetS5SuccessWallScreen.ctetS5SuccessWallScreen {
+  background: #020716 !important;
+  border-top: none !important;
+}
+
+.ctetS5SuccessWallScreen.ctetS5SuccessWallScreen::before {
+  display: none !important;
+  content: none !important;
+}
+
+.ctetS5SuccessWallScreen .ctetS5SuccessHero {
+  background:
+    radial-gradient(circle at top left, rgba(255, 183, 77, 0.10), transparent 30%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(35, 22, 12, 0.74)) !important;
+}
+
+@media (max-width: 768px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="success"] > .ctetS5SuccessWallScreen.ctetS5SuccessWallScreen {
+    background: #020716 !important;
+    border-top: none !important;
+  }
+}
