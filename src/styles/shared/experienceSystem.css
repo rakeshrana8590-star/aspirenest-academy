@@ -14373,3 +14373,251 @@ html body #root .ctetExperienceStickyHeader .ctetLockedSearch {
     white-space: normal !important;
   }
 }
+
+
+/* === Pack 3 Phase 19A Leaderboard Snapshot: Screen 4 only === */
+.ctetS4LeaderboardSnapshot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(220px, 0.7fr) minmax(0, 1.3fr) auto;
+  gap: 14px;
+  align-items: stretch;
+  margin: 18px 0;
+  padding: 16px;
+  border: 1px solid rgba(124, 92, 255, 0.24);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at top right, rgba(124, 92, 255, 0.18), transparent 34%),
+    linear-gradient(135deg, rgba(10, 15, 28, 0.96), rgba(23, 18, 47, 0.9));
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.22);
+}
+
+.ctetS4LeaderboardIntro {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+}
+
+.ctetS4LeaderboardIntro span {
+  width: max-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(124, 92, 255, 0.16);
+  color: #d9ccff;
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+}
+
+.ctetS4LeaderboardIntro h3 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.15rem, 1.8vw, 1.55rem);
+}
+
+.ctetS4LeaderboardIntro p {
+  margin: 0;
+  color: rgba(235, 232, 255, 0.68);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.ctetS4LeaderboardCards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ctetS4LeaderboardCard,
+.ctetS4LeaderboardEmpty {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.065);
+  color: #fff;
+}
+
+.ctetS4LeaderboardCard {
+  min-height: 112px;
+  padding: 12px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 8px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ctetS4LeaderboardCard.isTop {
+  border-color: rgba(255, 209, 102, 0.36);
+  background: linear-gradient(145deg, rgba(255, 209, 102, 0.16), rgba(255, 255, 255, 0.06));
+}
+
+.ctetS4LeaderboardCard.isOwn {
+  outline: 2px solid rgba(34, 197, 94, 0.42);
+}
+
+.ctetS4LeaderboardCard > b {
+  width: max-content;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(124, 92, 255, 0.18);
+  color: #d9ccff;
+  font-size: 0.78rem;
+}
+
+.ctetS4LeaderboardCard strong {
+  display: block;
+  color: #fff;
+  font-size: 0.96rem;
+  line-height: 1.15;
+}
+
+.ctetS4LeaderboardCard span {
+  display: block;
+  margin-top: 3px;
+  color: rgba(235, 232, 255, 0.62);
+  font-size: 0.78rem;
+  line-height: 1.25;
+}
+
+.ctetS4LeaderboardCard em {
+  color: #ffd36a;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.ctetS4LeaderboardEmpty {
+  grid-column: 1 / -1;
+  padding: 14px;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+}
+
+.ctetS4LeaderboardEmpty b {
+  color: #d9ccff;
+}
+
+.ctetS4LeaderboardEmpty span {
+  color: rgba(235, 232, 255, 0.66);
+}
+
+.ctetS4LeaderboardAction {
+  min-width: 190px;
+  display: grid;
+  align-content: center;
+  justify-items: end;
+  gap: 10px;
+}
+
+.ctetS4LeaderboardAction p {
+  margin: 0;
+  color: rgba(235, 232, 255, 0.7);
+  font-size: 0.82rem;
+  text-align: right;
+}
+
+.ctetS4LeaderboardAction strong {
+  color: #ffd36a;
+}
+
+.ctetS4LeaderboardAction button {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #7c5cff, #4f46e5);
+  color: #fff;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+@media (max-width: 980px) {
+  .ctetS4LeaderboardSnapshot {
+    grid-template-columns: 1fr;
+  }
+
+  .ctetS4LeaderboardAction {
+    justify-items: start;
+  }
+
+  .ctetS4LeaderboardAction p {
+    text-align: left;
+  }
+}
+
+@media (max-width: 640px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="live"] .ctetS4LeaderboardSnapshot {
+    padding: 12px;
+    border-radius: 20px;
+    gap: 12px;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="live"] .ctetS4LeaderboardCards {
+    grid-template-columns: 1fr;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="live"] .ctetS4LeaderboardCard {
+    min-height: auto;
+  }
+}
+
+/* === Pack 3 Phase 19B Leaderboard Snapshot polish: Screen 4 only === */
+.ctetS4LeaderboardCards:has(.ctetS4LeaderboardCard:first-child:last-child) {
+  grid-template-columns: 1fr !important;
+}
+
+.ctetS4LeaderboardCard.ctetS4LeaderboardCard {
+  border-radius: 18px !important;
+  transform: none !important;
+  aspect-ratio: auto !important;
+}
+
+.ctetS4LeaderboardCard:first-child:last-child {
+  min-height: 118px !important;
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  grid-template-rows: none !important;
+  align-items: center !important;
+  gap: 14px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 15px 18px !important;
+  border-radius: 22px !important;
+}
+
+.ctetS4LeaderboardCard:first-child:last-child > b {
+  width: 44px !important;
+  height: 44px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 16px !important;
+  padding: 0 !important;
+  font-size: 0.95rem !important;
+}
+
+.ctetS4LeaderboardCard:first-child:last-child strong {
+  font-size: 1.08rem !important;
+}
+
+.ctetS4LeaderboardCard:first-child:last-child span {
+  font-size: 0.84rem !important;
+}
+
+.ctetS4LeaderboardCard:first-child:last-child em {
+  justify-self: end !important;
+  padding: 9px 12px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 211, 106, 0.12) !important;
+}
+
+@media (max-width: 640px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="live"] .ctetS4LeaderboardCard:first-child:last-child {
+    grid-template-columns: auto minmax(0, 1fr) !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="live"] .ctetS4LeaderboardCard:first-child:last-child em {
+    grid-column: 2 !important;
+    justify-self: start !important;
+  }
+}

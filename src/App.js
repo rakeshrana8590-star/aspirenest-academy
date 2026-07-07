@@ -4949,6 +4949,8 @@ xpActivityEvents={ctetMockXpEvents}
     contentItems={universalContent}
     currentAffairs={currentAffairsList}
     loading={ctetExperienceLoading}
+    mockLeaderboardEntries={mockLeaderboardEntries}
+    user={user}
     navigate={navigate}
   />
 

@@ -234,6 +234,40 @@ function currentAffairToUpdate(item = {}, index = 0) {
   };
 }
 
+function getLeaderboardScore(entry = {}) {
+  return Number(entry.percentage || entry.accuracy || entry.rankScore || 0);
+}
+
+function maskLeaderboardName(entry = {}) {
+  const raw = String(entry.studentName || entry.studentEmail || entry.email || "Student").trim();
+  const email = String(entry.studentEmail || entry.email || "").trim();
+
+  if (raw.includes("@")) {
+    const [name = "student"] = raw.split("@");
+    return `${name.slice(0, 2)}***`;
+  }
+
+  if (email && raw === email) {
+    const [name = "student"] = email.split("@");
+    return `${name.slice(0, 2)}***`;
+  }
+
+  const parts = raw.split(/\s+/).filter(Boolean);
+  if (!parts.length) return "Student";
+  if (parts.length === 1) return parts[0].length > 8 ? `${parts[0].slice(0, 6)}…` : parts[0];
+
+  return `${parts[0]} ${parts[1][0] || ""}.`.trim();
+}
+
+function isOwnLeaderboardEntry(entry = {}, user = null) {
+  const email = String(user?.email || "").toLowerCase();
+  if (!email) return false;
+
+  return [entry.studentEmail, entry.email]
+    .map((value) => String(value || "").toLowerCase())
+    .includes(email);
+}
+
 function dedupeItems(items = []) {
   const seen = new Set();
 
@@ -251,6 +285,8 @@ export default function CtetLiveContentCenter({
   contentItems = [],
   currentAffairs = [],
   loading = false,
+  mockLeaderboardEntries = [],
+  user = null,
   navigate,
 }) {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -275,6 +311,30 @@ export default function CtetLiveContentCenter({
     if (activeFilter === "all") return allUpdates;
     return allUpdates.filter((item) => item.type === activeFilter);
   }, [activeFilter, allUpdates]);
+
+  const leaderboardSnapshot = useMemo(() => {
+    const source = Array.isArray(mockLeaderboardEntries) ? mockLeaderboardEntries : [];
+    const ranked = [...source]
+      .filter((entry) => getLeaderboardScore(entry) > 0)
+      .sort(
+        (a, b) =>
+          getLeaderboardScore(b) - getLeaderboardScore(a) ||
+          Number(b.score || 0) - Number(a.score || 0)
+      )
+      .map((entry, index) => ({
+        ...entry,
+        rank: index + 1,
+        displayName: maskLeaderboardName(entry),
+        scoreLabel: `${getLeaderboardScore(entry)}%`,
+        isOwn: isOwnLeaderboardEntry(entry, user),
+      }));
+
+    return {
+      top: ranked.slice(0, 3),
+      own: ranked.find((entry) => entry.isOwn) || null,
+      total: ranked.length,
+    };
+  }, [mockLeaderboardEntries, user]);
 
   const challengeItems = useMemo(() => {
     const source = Array.isArray(events) ? events : [];
@@ -551,6 +611,50 @@ export default function CtetLiveContentCenter({
                 </button>
               </div>
             )}
+          </div>
+        </div>
+
+        <div className="ctetS4LeaderboardSnapshot" aria-label="AspireNest leaderboard snapshot">
+          <div className="ctetS4LeaderboardIntro">
+            <span>LEADERBOARD SNAPSHOT</span>
+            <h3>Top Rankers This Week</h3>
+            <p>Privacy-safe rank snapshot from leaderboard-enabled mock test attempts.</p>
+          </div>
+
+          <div className="ctetS4LeaderboardCards">
+            {leaderboardSnapshot.top.length ? (
+              leaderboardSnapshot.top.map((entry) => (
+                <button
+                  type="button"
+                  className={`ctetS4LeaderboardCard ${entry.rank === 1 ? "isTop" : ""} ${entry.isOwn ? "isOwn" : ""}`.trim()}
+                  key={entry.id || entry.leaderboardKey || entry.rank}
+                  onClick={() => navigate("/leaderboard")}
+                >
+                  <b>#{entry.rank}</b>
+                  <div>
+                    <strong>{entry.displayName}</strong>
+                    <span>{entry.testTitle || entry.subject || "Mock Test"}</span>
+                  </div>
+                  <em>{entry.scoreLabel}</em>
+                </button>
+              ))
+            ) : (
+              <div className="ctetS4LeaderboardEmpty">
+                <b>No public ranks yet</b>
+                <span>Ranks will appear after students submit leaderboard-enabled mock tests.</span>
+              </div>
+            )}
+          </div>
+
+          <div className="ctetS4LeaderboardAction">
+            {leaderboardSnapshot.own ? (
+              <p>Your rank: <strong>#{leaderboardSnapshot.own.rank}</strong> • {leaderboardSnapshot.own.scoreLabel}</p>
+            ) : (
+              <p>{leaderboardSnapshot.total} ranked entries • full emails hidden</p>
+            )}
+            <button type="button" onClick={() => navigate("/leaderboard")}>
+              View Full Leaderboard ›
+            </button>
           </div>
         </div>
 
