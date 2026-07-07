@@ -259,6 +259,28 @@ function maskLeaderboardName(entry = {}) {
   return `${parts[0]} ${parts[1][0] || ""}.`.trim();
 }
 
+function formatActivityTime(value) {
+  const date = toDate(value);
+  if (!date) return "Recently";
+
+  return date.toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function getActivityTimestamp(value) {
+  return toDate(value)?.getTime() || 0;
+}
+
+function isRecentActivityTime(value, windowDays = 45) {
+  const time = getActivityTimestamp(value);
+  if (!time) return false;
+  return Date.now() - time <= windowDays * 24 * 60 * 60 * 1000 || time > Date.now();
+}
+
 function isOwnLeaderboardEntry(entry = {}, user = null) {
   const email = String(user?.email || "").toLowerCase();
   if (!email) return false;
@@ -335,6 +357,96 @@ export default function CtetLiveContentCenter({
       total: ranked.length,
     };
   }, [mockLeaderboardEntries, user]);
+
+  const recentActivityItems = useMemo(() => {
+    const activity = [];
+
+    (Array.isArray(mockLeaderboardEntries) ? mockLeaderboardEntries : []).forEach((entry, index) => {
+      const activityAt =
+        entry.attemptSubmittedAt ||
+        entry.createdAt ||
+        entry.updatedAt ||
+        entry.endedAt;
+
+      if (!isRecentActivityTime(activityAt)) return;
+
+      activity.push({
+        id: `rank-${entry.id || entry.leaderboardKey || index}`,
+        tone: "rank",
+        badge: "RANK",
+        actor: maskLeaderboardName(entry),
+        title: `${maskLeaderboardName(entry)} joined the ranking board`,
+        description: `${entry.testTitle || entry.subject || "Mock Test"} • ${getLeaderboardScore(entry)}%`,
+        time: formatActivityTime(activityAt),
+        sortAt: getActivityTimestamp(activityAt),
+        route: "/leaderboard",
+      });
+    });
+
+    (Array.isArray(events) ? events : []).forEach((event, index) => {
+      const activityAt =
+        event.updatedAt ||
+        event.createdAt ||
+        event.startAt ||
+        event.scheduleAt;
+
+      if (!isRecentActivityTime(activityAt)) return;
+
+      const meta = getMeta(event.type || event.typeLabel);
+      activity.push({
+        id: `event-${event.id || index}`,
+        tone: meta.tone,
+        badge: meta.label,
+        actor: "AspireNest Team",
+        title: event.status === "live" ? "Live event is active" : "New academy event published",
+        description: event.title || event.subject || "AspireNest event update",
+        time: formatActivityTime(activityAt),
+        sortAt: getActivityTimestamp(activityAt),
+        route: normalizeRoute(event.cta?.url || event.url || event.link, meta.route),
+      });
+    });
+
+    (Array.isArray(contentItems) ? contentItems : [])
+      .filter((item) => ["published", "live"].includes(String(item.status || "published").toLowerCase()))
+      .forEach((item, index) => {
+        const activityAt = item.updatedAt || item.createdAt || item.date;
+        if (!isRecentActivityTime(activityAt)) return;
+
+        const meta = getContentMeta(item);
+        activity.push({
+          id: `content-${item.id || index}`,
+          tone: meta.tone,
+          badge: meta.label,
+          actor: "AspireNest Team",
+          title: `${meta.label} published`,
+          description: item.title || item.subject || item.chapter || "New learning resource",
+          time: formatActivityTime(activityAt),
+          sortAt: getActivityTimestamp(activityAt),
+          route: normalizeRoute(item.fileUrl || item.videoUrl || item.url || item.link, meta.route),
+        });
+      });
+
+    (Array.isArray(currentAffairs) ? currentAffairs : []).forEach((item, index) => {
+      const activityAt = item.updatedAt || item.createdAt || item.date;
+      if (!isRecentActivityTime(activityAt)) return;
+
+      activity.push({
+        id: `current-${item.id || index}`,
+        tone: "current",
+        badge: "Current Affairs",
+        actor: "AspireNest Team",
+        title: "Current Affairs updated",
+        description: item.title || item.month || "Latest current affairs material",
+        time: formatActivityTime(activityAt),
+        sortAt: getActivityTimestamp(activityAt),
+        route: normalizeRoute(item.pdf || item.fileUrl || item.url, "/ctet-tet/current-affairs"),
+      });
+    });
+
+    return dedupeItems(activity)
+      .sort((a, b) => b.sortAt - a.sortAt)
+      .slice(0, 6);
+  }, [contentItems, currentAffairs, events, mockLeaderboardEntries]);
 
   const challengeItems = useMemo(() => {
     const source = Array.isArray(events) ? events : [];
@@ -503,12 +615,12 @@ export default function CtetLiveContentCenter({
       <div className="ctetS4Shell">
         <div className="ctetS4Hero">
           <div>
-            <span className="ctetS4Eyebrow">Live Content Center</span>
+            <span className="ctetS4Eyebrow">Live Community Center</span>
             <h2>
-              What's New & <span>This Week</span>
+              Community Pulse & <span>This Week</span>
             </h2>
             <p>
-              Your premium update hub for the latest real CTET/TET content and your weekly learning schedule.
+              Rank challenges, leaderboard movement, real academy activity, fresh updates, and weekly learning schedule in one premium screen.
             </p>
           </div>
 
@@ -575,6 +687,7 @@ export default function CtetLiveContentCenter({
           </div>
         </div>
 
+        <div className="ctetS4CommunityPulseGrid" aria-label="AspireNest community pulse">
         <div className="ctetS4ChallengeSpotlight" aria-label="AspireNest challenge spotlight">
           <div className="ctetS4ChallengeIntro">
             <span>COMMUNITY CHALLENGE</span>
@@ -656,6 +769,41 @@ export default function CtetLiveContentCenter({
               View Full Leaderboard ›
             </button>
           </div>
+        </div>
+
+        <div className="ctetS4ActivityFeed" aria-label="Recent AspireNest activity feed">
+          <div className="ctetS4ActivityIntro">
+            <span>LIVE ACTIVITY</span>
+            <h3>Recent Academy Activity</h3>
+            <p>Real recent actions from mock attempts, published content, current affairs, and admin-created events.</p>
+          </div>
+
+          <div className="ctetS4ActivityList">
+            {recentActivityItems.length ? (
+              recentActivityItems.map((item) => (
+                <button
+                  type="button"
+                  className={`ctetS4ActivityRow is-${item.tone}`}
+                  key={item.id}
+                  onClick={() => openTarget(navigate, item.route)}
+                >
+                  <b>{item.badge}</b>
+                  <div>
+                    <strong>{item.title}</strong>
+                    <span>{item.description}</span>
+                  </div>
+                  <small>{item.time}</small>
+                </button>
+              ))
+            ) : (
+              <div className="ctetS4ActivityEmpty">
+                <b>No recent public activity yet</b>
+                <span>Fresh activity will appear after real mock attempts, event publishes, or new content updates.</span>
+              </div>
+            )}
+          </div>
+        </div>
+
         </div>
 
         <div className="ctetS4Grid">
