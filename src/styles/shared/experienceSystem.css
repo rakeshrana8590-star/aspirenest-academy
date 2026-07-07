@@ -14037,3 +14037,339 @@ html body #root .ctetExperienceStickyHeader .ctetLockedSearch {
     min-width: 132px;
   }
 }
+
+
+/* === Pack 3 Phase 18B Challenge Spotlight: Screen 4 only === */
+.ctetS4ChallengeSpotlight {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(220px, 0.72fr) minmax(0, 1.28fr);
+  gap: 18px;
+  margin: 18px 0;
+  padding: 18px;
+  border: 1px solid rgba(255, 183, 77, 0.22);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 183, 77, 0.16), transparent 34%),
+    linear-gradient(135deg, rgba(18, 12, 7, 0.96), rgba(47, 28, 9, 0.92));
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.26);
+}
+
+.ctetS4ChallengeIntro {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.ctetS4ChallengeIntro span {
+  width: max-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 183, 77, 0.14);
+  color: #ffd28a;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.ctetS4ChallengeIntro h3 {
+  margin: 0;
+  color: #fff8e8;
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  line-height: 1.05;
+}
+
+.ctetS4ChallengeIntro p {
+  margin: 0;
+  color: rgba(255, 246, 224, 0.72);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.ctetS4ChallengeRail {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ctetS4ChallengeCard,
+.ctetS4ChallengeEmpty {
+  min-height: 178px;
+  border: 1px solid rgba(255, 214, 143, 0.16);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff7e5;
+  text-align: left;
+}
+
+.ctetS4ChallengeCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px;
+  cursor: pointer;
+}
+
+.ctetS4ChallengeCard.isFeatured {
+  background:
+    linear-gradient(145deg, rgba(255, 177, 66, 0.18), rgba(255, 255, 255, 0.07));
+  border-color: rgba(255, 202, 112, 0.34);
+}
+
+.ctetS4ChallengeCard > b {
+  width: max-content;
+  max-width: 100%;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(255, 159, 26, 0.18);
+  color: #ffd28a;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.ctetS4ChallengeCard span {
+  color: #ffbf64;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ctetS4ChallengeCard h4,
+.ctetS4ChallengeEmpty h4 {
+  margin: 5px 0 4px;
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.ctetS4ChallengeCard p,
+.ctetS4ChallengeEmpty p {
+  margin: 0;
+  color: rgba(255, 245, 225, 0.7);
+  font-size: 0.84rem;
+  line-height: 1.42;
+}
+
+.ctetS4ChallengeCard small {
+  display: block;
+  margin-top: 8px;
+  color: rgba(255, 230, 184, 0.72);
+  font-weight: 800;
+}
+
+.ctetS4ChallengeCard strong {
+  color: #ffd28a;
+  font-size: 0.9rem;
+}
+
+.ctetS4ChallengeEmpty {
+  grid-column: 1 / -1;
+  padding: 18px;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+}
+
+.ctetS4ChallengeEmpty b {
+  color: #ffd28a;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ctetS4ChallengeEmpty button {
+  width: max-content;
+  border: none;
+  border-radius: 999px;
+  padding: 9px 13px;
+  background: linear-gradient(135deg, #ffb347, #ff8f00);
+  color: #1c1207;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+@media (max-width: 980px) {
+  .ctetS4ChallengeSpotlight {
+    grid-template-columns: 1fr;
+  }
+
+  .ctetS4ChallengeRail {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="live"] .ctetS4ChallengeSpotlight {
+    margin: 12px 0;
+    padding: 12px;
+    border-radius: 20px;
+    gap: 12px;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="live"] .ctetS4ChallengeIntro h3 {
+    font-size: 1.2rem;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="live"] .ctetS4ChallengeIntro p,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="live"] .ctetS4ChallengeCard p,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="live"] .ctetS4ChallengeEmpty p {
+    font-size: 0.8rem;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="live"] .ctetS4ChallengeCard,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="live"] .ctetS4ChallengeEmpty {
+    min-height: auto;
+    padding: 12px;
+    border-radius: 18px;
+  }
+}
+
+
+/* === Pack 3 Phase 18C Challenge card polish: Screen 4 only === */
+.ctetS4ChallengeCard.ctetS4ChallengeCard {
+  width: 100%;
+  max-width: none;
+  aspect-ratio: auto;
+  border-radius: 22px !important;
+  transform: none;
+}
+
+.ctetS4ChallengeCard.isSingle {
+  min-height: 172px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+}
+
+.ctetS4ChallengeCard.isSingle > b {
+  align-self: start;
+  white-space: nowrap;
+}
+
+.ctetS4ChallengeCard.isSingle > div {
+  min-width: 0;
+}
+
+.ctetS4ChallengeCard.isSingle h4 {
+  font-size: 1.18rem;
+  margin-top: 8px;
+}
+
+.ctetS4ChallengeCard.isSingle p {
+  max-width: 560px;
+  font-size: 0.92rem;
+}
+
+.ctetS4ChallengeCard.isSingle > strong {
+  align-self: center;
+  justify-self: end;
+  min-width: max-content;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffb347, #ff8f00);
+  color: #201104;
+  font-weight: 950;
+  box-shadow: 0 14px 30px rgba(255, 143, 0, 0.2);
+}
+
+@media (max-width: 760px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="live"] .ctetS4ChallengeCard.isSingle {
+    display: flex;
+    align-items: stretch;
+    min-height: auto;
+    gap: 10px;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="live"] .ctetS4ChallengeCard.isSingle > b {
+    align-self: flex-start;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="live"] .ctetS4ChallengeCard.isSingle > strong {
+    align-self: flex-start;
+    justify-self: start;
+    width: max-content;
+    max-width: 100%;
+    padding: 9px 12px;
+  }
+}
+
+/* === Pack 3 Phase 18D hotfix: real challenge card full-width in Screen 4 only === */
+.ctetS4ChallengeRail:has(.ctetS4ChallengeCard.isSingle) {
+  grid-template-columns: 1fr !important;
+}
+
+.ctetS4ChallengeCard.isSingle.isSingle {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 168px !important;
+  border-radius: 24px !important;
+  display: grid !important;
+  grid-template-columns: minmax(130px, 0.28fr) minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 18px !important;
+  overflow: hidden !important;
+}
+
+.ctetS4ChallengeCard.isSingle > b {
+  align-self: center !important;
+  justify-self: start !important;
+  white-space: normal !important;
+  text-align: left !important;
+}
+
+.ctetS4ChallengeCard.isSingle > div {
+  min-width: 0 !important;
+}
+
+.ctetS4ChallengeCard.isSingle span,
+.ctetS4ChallengeCard.isSingle h4,
+.ctetS4ChallengeCard.isSingle p,
+.ctetS4ChallengeCard.isSingle small {
+  word-break: normal !important;
+  overflow-wrap: anywhere !important;
+}
+
+.ctetS4ChallengeCard.isSingle h4 {
+  max-width: 100% !important;
+  font-size: clamp(1.08rem, 1.5vw, 1.35rem) !important;
+  line-height: 1.16 !important;
+}
+
+.ctetS4ChallengeCard.isSingle p {
+  max-width: 720px !important;
+  font-size: 0.94rem !important;
+  line-height: 1.45 !important;
+}
+
+.ctetS4ChallengeCard.isSingle > strong {
+  position: static !important;
+  justify-self: end !important;
+  white-space: nowrap !important;
+  transform: none !important;
+}
+
+@media (max-width: 760px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="live"] .ctetS4ChallengeRail:has(.ctetS4ChallengeCard.isSingle) {
+    grid-template-columns: 1fr !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="live"] .ctetS4ChallengeCard.isSingle.isSingle {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    min-height: auto !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="live"] .ctetS4ChallengeCard.isSingle > strong {
+    align-self: flex-start !important;
+    white-space: normal !important;
+  }
+}

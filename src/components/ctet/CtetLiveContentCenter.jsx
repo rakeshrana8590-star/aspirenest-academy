@@ -68,6 +68,21 @@ function getMeta(type = "") {
   return typeMeta[key] || typeMeta[type] || typeMeta.live;
 }
 
+function cleanCtaLabel(value = "", fallback = "Open") {
+  const raw = String(value || "").trim();
+  const normalized = raw.toUpperCase().replace(/\s+/g, "_");
+
+  if (normalized === "JOIN_CHALLENGE") return "Join Challenge";
+  if (normalized === "START_MOCK") return "Start";
+  if (normalized === "JOIN_LIVE") return "Join Live";
+  if (normalized === "VIEW_DETAILS") return "View Details";
+  if (normalized === "OPEN_VIDEO") return "Watch";
+  if (normalized === "READ_NOTES") return "Read";
+  if (normalized === "OPEN_ROADMAP") return "Open Roadmap";
+
+  return raw || fallback;
+}
+
 function normalizeRoute(url, fallback) {
   const target = String(url || "").trim();
   if (!target) return fallback;
@@ -143,6 +158,18 @@ function getContentMeta(item = {}) {
   return getMeta("notes");
 }
 
+function isChallengeEvent(event = {}) {
+  const key = cleanType(event.type || event.typeLabel || event.module || event.section);
+  return key === "rankchallenge" || key === "challenge" || key.includes("challenge");
+}
+
+function getChallengeStatusLabel(event = {}) {
+  const status = cleanType(event.status);
+  if (status === "live") return "Live Challenge";
+  if (status === "scheduled" || status === "published") return "Open Challenge";
+  return "Challenge";
+}
+
 function eventToUpdate(event = {}, index = 0) {
   const eventType = event.type || event.module || event.section || event.typeLabel || "live";
   const meta = getMeta(eventType);
@@ -159,7 +186,7 @@ function eventToUpdate(event = {}, index = 0) {
       "Fresh learning update synced from AspireNest Experience events.",
     updated: event.status === "live" ? "Live now" : `Updated ${date.date}`,
     route: normalizeRoute(event.cta?.url || event.url || event.link, meta.route),
-    cta: event.cta?.label || (event.status === "live" ? "Join" : "Open"),
+    cta: cleanCtaLabel(event.cta?.label || event.ctaLabel, event.status === "live" ? "Join" : "Open"),
     source: meta.label,
     plan: event.planType || "FREE",
     featured: index === 0 || Boolean(event.featured),
@@ -249,6 +276,34 @@ export default function CtetLiveContentCenter({
     return allUpdates.filter((item) => item.type === activeFilter);
   }, [activeFilter, allUpdates]);
 
+  const challengeItems = useMemo(() => {
+    const source = Array.isArray(events) ? events : [];
+    return source
+      .filter(isChallengeEvent)
+      .slice(0, 3)
+      .map((event, index) => {
+        const dateParts = formatDateParts(event.startAt || event.scheduleAt || event.createdAt);
+        const challengeCtaLabel = cleanCtaLabel(event.cta?.label || event.ctaLabel, "Join Challenge");
+
+        return {
+          id: event.id || `challenge-${index}`,
+          eyebrow: getChallengeStatusLabel(event),
+          title: event.title || "AspireNest Rank Challenge",
+          description:
+            event.description ||
+            event.subject ||
+            "Join the active CTET/TET challenge and test your preparation with the community.",
+          subject: event.subject || "CTET/TET",
+          plan: event.planType || "FREE",
+          time: dateParts.time,
+          date: dateParts.date,
+          cta: challengeCtaLabel,
+          route: normalizeRoute(event.cta?.url || event.challengeUrl || event.mockTestUrl || event.url || event.link, "/ctet-tet/mock-tests"),
+          featured: index === 0 || Boolean(event.featured),
+        };
+      });
+  }, [events]);
+
   const weekItems = useMemo(() => {
     const now = new Date();
     const weekStart = getWeekStart(now);
@@ -309,7 +364,7 @@ export default function CtetLiveContentCenter({
         eyebrow: event.status === "live" ? "LIVE NOW" : event.featured ? "FEATURED" : meta.label,
         title: event.title || "AspireNest learning event",
         description: event.description || event.subject || "Live academy update for CTET/TET learners.",
-        cta: event.cta?.label || "View Details",
+        cta: cleanCtaLabel(event.cta?.label || event.ctaLabel, "View Details"),
         route: normalizeRoute(event.cta?.url || event.url || event.link, meta.route),
       };
     });
@@ -339,7 +394,18 @@ export default function CtetLiveContentCenter({
         ]
       : [];
 
-    return dedupeItems([...eventItems, ...updateItems, ...weekItemsForTv]).slice(0, 6);
+    const mergedTvItems = [...eventItems, ...updateItems, ...weekItemsForTv];
+    const seenTvItems = new Set();
+
+    return mergedTvItems
+      .filter((item) => {
+        const key = [item.title, item.route].filter(Boolean).join("|").toLowerCase();
+        if (!key) return true;
+        if (seenTvItems.has(key)) return false;
+        seenTvItems.add(key);
+        return true;
+      })
+      .slice(0, 6);
   }, [allUpdates, events, weekItems]);
 
   useEffect(() => {
@@ -446,6 +512,45 @@ export default function CtetLiveContentCenter({
                 </button>
               );
             })}
+          </div>
+        </div>
+
+        <div className="ctetS4ChallengeSpotlight" aria-label="AspireNest challenge spotlight">
+          <div className="ctetS4ChallengeIntro">
+            <span>COMMUNITY CHALLENGE</span>
+            <h3>Rank Challenge Arena</h3>
+            <p>Weekly CTET/TET challenges, mock battles, and rank-focused practice will appear here from real Experience Studio events.</p>
+          </div>
+
+          <div className="ctetS4ChallengeRail">
+            {challengeItems.length ? (
+              challengeItems.map((item) => (
+                <button
+                  type="button"
+                  className={`ctetS4ChallengeCard ${item.featured ? "isFeatured" : ""} ${challengeItems.length === 1 ? "isSingle" : ""}`.trim()}
+                  key={item.id}
+                  onClick={() => openTarget(navigate, item.route)}
+                >
+                  <b>{item.eyebrow}</b>
+                  <div>
+                    <span>{item.subject}</span>
+                    <h4>{item.title}</h4>
+                    <p>{item.description}</p>
+                    <small>{item.date} • {item.time} • {item.plan}</small>
+                  </div>
+                  <strong>{item.cta} ›</strong>
+                </button>
+              ))
+            ) : (
+              <div className="ctetS4ChallengeEmpty">
+                <b>Challenge schedule soon</b>
+                <h4>No active rank challenge published yet</h4>
+                <p>Create a Rank Challenge from Admin → Experience Studio. It will appear here without touching code.</p>
+                <button type="button" onClick={() => navigate("/ctet-tet/mock-tests")}>
+                  Practice Mock Tests ›
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

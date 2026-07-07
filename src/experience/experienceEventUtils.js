@@ -42,6 +42,7 @@ export const buildExperienceEventKey = (event = {}) =>
 const CTA_FALLBACK_TARGETS = Object.freeze({
   [EXPERIENCE_CTA_TYPES.JOIN_LIVE]: "/ctet-tet/videos",
   [EXPERIENCE_CTA_TYPES.START_MOCK]: "/ctet-tet/mock-tests",
+  [EXPERIENCE_CTA_TYPES.JOIN_CHALLENGE]: "/ctet-tet/mock-tests",
   [EXPERIENCE_CTA_TYPES.VIEW_DETAILS]: "/ctet-tet",
   [EXPERIENCE_CTA_TYPES.OPEN_VIDEO]: "/ctet-tet/videos",
   [EXPERIENCE_CTA_TYPES.READ_NOTES]: "/ctet-tet/notes",
@@ -139,6 +140,19 @@ export const getExperienceEventCta = (event = {}) => {
       type: EXPERIENCE_CTA_TYPES.START_MOCK,
       label: "Open Mock Test",
       url: event.mockTestUrl || event.ctaUrl || event.ctaLink || "/ctet-tet/mock-tests",
+    };
+  }
+
+  if (type === EXPERIENCE_EVENT_TYPES.RANK_CHALLENGE) {
+    return {
+      type: EXPERIENCE_CTA_TYPES.JOIN_CHALLENGE,
+      label: event.ctaLabel || "Join Challenge",
+      url:
+        event.challengeUrl ||
+        event.ctaUrl ||
+        event.ctaLink ||
+        event.mockTestUrl ||
+        "/ctet-tet/mock-tests",
     };
   }
 
