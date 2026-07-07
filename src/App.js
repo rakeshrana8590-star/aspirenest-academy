@@ -54,6 +54,7 @@ import AuthRoute from "./components/public/AuthRoute";
 
 import AppDashboard from "./components/AppDashboard.jsx";
 import CtetLiveContentCenter from "./components/ctet/CtetLiveContentCenter.jsx";
+import CtetSuccessWallScreen from "./components/ctet/CtetSuccessWallScreen.jsx";
 import CtetSupportFooterScreen from "./components/ctet/CtetSupportFooterScreen.jsx";
 import {
   StudentRoadmapHub, StudentRoadmapDetail, StudentRoadmapDay, MyAspirePath, } from "./components/roadmaps/StudentRoadmaps.jsx";
@@ -4458,6 +4459,7 @@ return (
         ["journey", "Journey"],
         ["mentor", "Mentor"],
         ["live", "Live"],
+        ["success", "Success"],
         ["help", "Help"],
       ].map(([screen, label]) => (
         <button
@@ -4951,6 +4953,11 @@ xpActivityEvents={ctetMockXpEvents}
     loading={ctetExperienceLoading}
     mockLeaderboardEntries={mockLeaderboardEntries}
     user={user}
+    navigate={navigate}
+  />
+
+  <CtetSuccessWallScreen
+    mockLeaderboardEntries={mockLeaderboardEntries}
     navigate={navigate}
   />
 
