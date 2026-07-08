@@ -16039,96 +16039,58 @@ html body #root .ctetExperienceStickyHeader .ctetLockedSearch {
 }
 
 
-/* === CTET/TET no hover flash guard v3 === */
-/* User rule: no hover flash, shimmer, shine, white/grey patch, sweep, glare anywhere on CTET/TET page. */
+/* === CTET/TET no hover flash guard v4 safe === */
+/* Preserve lift/background. Remove only hover spotlight/flash overlays. */
 
-/* Kill card/panel internal overlay pseudo layers */
-.ctetExperiencePage [class*="ctet"][class*="Card"]::before,
-.ctetExperiencePage [class*="ctet"][class*="Card"]::after,
-.ctetExperiencePage [class*="ctet"][class*="card"]::before,
-.ctetExperiencePage [class*="ctet"][class*="card"]::after,
-.ctetExperiencePage [class*="ctet"][class*="Panel"]::before,
-.ctetExperiencePage [class*="ctet"][class*="Panel"]::after,
-.ctetExperiencePage [class*="ctet"][class*="Tile"]::before,
-.ctetExperiencePage [class*="ctet"][class*="Tile"]::after,
-.ctetExperiencePage [class*="ctet"][class*="Item"]::before,
-.ctetExperiencePage [class*="ctet"][class*="Item"]::after,
-.ctetExperiencePage [class*="ctet"][class*="Row"]::before,
-.ctetExperiencePage [class*="ctet"][class*="Row"]::after,
-.ctetExperiencePage [class*="ctet"][class*="Module"]::before,
-.ctetExperiencePage [class*="ctet"][class*="Module"]::after,
-.ctetExperiencePage [class*="ctet"][class*="Action"]::before,
-.ctetExperiencePage [class*="ctet"][class*="Action"]::after,
-.ctetExperiencePage [class*="ctet"][class*="Button"]::before,
-.ctetExperiencePage [class*="ctet"][class*="Button"]::after {
+/* Do NOT target buttons here. Buttons keep real gradient/background. */
+.ctetExperiencePage [class*="ctet"][class*="Card"]:hover::before,
+.ctetExperiencePage [class*="ctet"][class*="Card"]:hover::after,
+.ctetExperiencePage [class*="ctet"][class*="card"]:hover::before,
+.ctetExperiencePage [class*="ctet"][class*="card"]:hover::after,
+.ctetExperiencePage [class*="ctet"][class*="Panel"]:hover::before,
+.ctetExperiencePage [class*="ctet"][class*="Panel"]:hover::after,
+.ctetExperiencePage [class*="ctet"][class*="Tile"]:hover::before,
+.ctetExperiencePage [class*="ctet"][class*="Tile"]:hover::after,
+.ctetExperiencePage [class*="ctet"][class*="Item"]:hover::before,
+.ctetExperiencePage [class*="ctet"][class*="Item"]:hover::after,
+.ctetExperiencePage [class*="ctet"][class*="Row"]:hover::before,
+.ctetExperiencePage [class*="ctet"][class*="Row"]:hover::after,
+.ctetExperiencePage [class*="ctet"][class*="Module"]:hover::before,
+.ctetExperiencePage [class*="ctet"][class*="Module"]:hover::after {
   content: none !important;
   display: none !important;
   opacity: 0 !important;
   visibility: hidden !important;
   animation: none !important;
-  transition: none !important;
-  background: none !important;
   background-image: none !important;
-  box-shadow: none !important;
   filter: none !important;
 }
 
-/* Kill hover/focus generated bright patches inside cards */
+/* Kill only bright flash images on hover, not real backgrounds. */
 .ctetExperiencePage [class*="ctet"][class*="Card"]:hover,
 .ctetExperiencePage [class*="ctet"][class*="card"]:hover,
 .ctetExperiencePage [class*="ctet"][class*="Panel"]:hover,
 .ctetExperiencePage [class*="ctet"][class*="Tile"]:hover,
 .ctetExperiencePage [class*="ctet"][class*="Item"]:hover,
 .ctetExperiencePage [class*="ctet"][class*="Row"]:hover,
-.ctetExperiencePage [class*="ctet"][class*="Module"]:hover,
-.ctetExperiencePage [class*="ctet"][class*="Action"]:hover,
-.ctetExperiencePage [class*="ctet"][class*="Button"]:hover,
-.ctetExperiencePage [class*="ctet"][class*="Card"]:focus-within,
-.ctetExperiencePage [class*="ctet"][class*="card"]:focus-within,
-.ctetExperiencePage [class*="ctet"][class*="Panel"]:focus-within,
-.ctetExperiencePage [class*="ctet"][class*="Tile"]:focus-within,
-.ctetExperiencePage [class*="ctet"][class*="Item"]:focus-within,
-.ctetExperiencePage [class*="ctet"][class*="Row"]:focus-within,
-.ctetExperiencePage [class*="ctet"][class*="Module"]:focus-within,
-.ctetExperiencePage [class*="ctet"][class*="Action"]:focus-within,
-.ctetExperiencePage [class*="ctet"][class*="Button"]:focus-within {
-  background-image: none !important;
+.ctetExperiencePage [class*="ctet"][class*="Module"]:hover {
   filter: none !important;
   text-shadow: none !important;
 }
 
-/* Kill descendant hover overlays too */
-.ctetExperiencePage [class*="ctet"]:hover *::before,
-.ctetExperiencePage [class*="ctet"]:hover *::after {
+/* Keep lift and shadow. Remove only shimmer/sweep style animation layers. */
+.ctetExperiencePage [class*="ctet"]:hover::before,
+.ctetExperiencePage [class*="ctet"]:hover::after {
   animation: none !important;
-  transition: none !important;
-  background-image: none !important;
-  filter: none !important;
 }
 
-/* Hero command deck: strict calm hover only */
-.ctetExperiencePage .ctetHeroCommandDeck [class*="ctet"]:hover,
-.ctetExperiencePage .ctetHeroCommandDeck button:hover,
-.ctetExperiencePage .ctetHeroCommandDeck a:hover {
-  background-image: none !important;
-  filter: none !important;
-  text-shadow: none !important;
+/* Top ticker movement should continue. */
+.ctetExperiencePage .ctetTopEventTickerTrack {
+  animation: ctetTopEventTickerMoveCompact 28s linear infinite !important;
 }
 
-/* Screen 4 / Screen 5 cards: strict no spotlight patch */
-.ctetExperiencePage .ctetS4LiveContentCenter [class*="ctet"]:hover,
-.ctetExperiencePage .ctetS5LockedScreen [class*="ctet"]:hover,
-.ctetExperiencePage #contact.ctetS5LockedScreen [class*="ctet"]:hover {
-  background-image: none !important;
-  filter: none !important;
-  text-shadow: none !important;
-}
-
-/* Buttons can lift/change border, but no flash layer */
-.ctetExperiencePage button:hover,
-.ctetExperiencePage a:hover {
-  filter: none !important;
-  text-shadow: none !important;
+.ctetExperiencePage .ctetTopEventTicker:hover .ctetTopEventTickerTrack {
+  animation-play-state: paused !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
