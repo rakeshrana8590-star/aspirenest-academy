@@ -608,45 +608,86 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
     });
   };
 
-  const getMockTestScheduleStatus = (test) => {
-    if (!test) {
-      return "EXPIRED";
+const parseMockScheduleMs = (value) => {
+  if (!value) return null;
+
+  if (typeof value?.toDate === "function") {
+    const time = value.toDate().getTime();
+    return Number.isFinite(time) ? time : null;
+  }
+
+  if (value instanceof Date) {
+    const time = value.getTime();
+    return Number.isFinite(time) ? time : null;
+  }
+
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+
+    const direct = new Date(trimmed).getTime();
+    if (Number.isFinite(direct)) return direct;
+
+    const dmy = trimmed.match(/^(\d{1,2})-(\d{1,2})-(\d{4})(?:[ T](\d{1,2}):(\d{2}))?/);
+    if (dmy) {
+      const [, dd, mm, yyyy, hh = "0", min = "0"] = dmy;
+      const parsed = new Date(
+        Number(yyyy),
+        Number(mm) - 1,
+        Number(dd),
+        Number(hh),
+        Number(min)
+      ).getTime();
+
+      return Number.isFinite(parsed) ? parsed : null;
     }
+  }
 
-    const scheduleType = test.scheduleType || "alwaysAvailable";
+  return null;
+};
 
-    if (scheduleType === "alwaysAvailable") {
-      return "AVAILABLE";
-    }
+const getMockScheduleStartMs = (test = {}) =>
+  parseMockScheduleMs(
+    test.startTime ||
+      test.startDate ||
+      test.startAt ||
+      test.startsAt ||
+      test.scheduledStart ||
+      test.scheduledStartAt ||
+      test.scheduleStart ||
+      test.availableFrom ||
+      test.publishAt
+  );
 
-    const now = new Date();
+const getMockScheduleEndMs = (test = {}) =>
+  parseMockScheduleMs(
+    test.endTime ||
+      test.endDate ||
+      test.endAt ||
+      test.endsAt ||
+      test.scheduledEnd ||
+      test.scheduledEndAt ||
+      test.scheduleEnd ||
+      test.availableUntil ||
+      test.expireAt
+  );
 
-    const startDateTime =
-      test.examStartDate && test.examStartTime
-        ? new Date(`${test.examStartDate}T${test.examStartTime}`)
-        : test.examStartDate
-        ? new Date(`${test.examStartDate}T00:00`)
-        : null;
+const getMockTestScheduleStatus = (test) => {
+  const now = Date.now();
+  const startMs = getMockScheduleStartMs(test);
+  const endMs = getMockScheduleEndMs(test);
 
-    const endDateTime =
-      test.examEndDate && test.examEndTime
-        ? new Date(`${test.examEndDate}T${test.examEndTime}`)
-        : test.examEndDate
-        ? new Date(`${test.examEndDate}T23:59`)
-        : null;
+  if (startMs && now < startMs) return "UPCOMING";
+  if (endMs && now > endMs) return "EXPIRED";
 
-    if (startDateTime && now < startDateTime) {
-      return "UPCOMING";
-    }
+  return "AVAILABLE";
+};
 
-    if (endDateTime && now > endDateTime) {
-      return "EXPIRED";
-    }
-
-    return "AVAILABLE";
-  };
-
-  const getMockTestAccessStatus = (test) => {
+const getMockTestAccessStatus = (test) => {
     if (!test) {
       return "NOT_FOUND";
     }
