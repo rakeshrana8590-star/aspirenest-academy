@@ -198,29 +198,6 @@ export default function ExamStartRoute({
   const passingMarks = Number(test.passingMarks || 0);
   const scheduleStatus = getMockTestScheduleStatus(test);
 
-  /* === Direct scheduled mock start gate === */
-  if (scheduleStatus === "UPCOMING") {
-    return renderStateCard({
-      label: "Upcoming",
-      title: "This mock test is scheduled.",
-      message:
-        "This mock test will become visible and startable at the scheduled start time.",
-      actionLabel: "Back to Mock Tests",
-      onAction: () => navigate("/ctet-tet/mock-tests"),
-    });
-  }
-
-  if (scheduleStatus === "EXPIRED") {
-    return renderStateCard({
-      label: "Expired",
-      title: "This mock test window has ended.",
-      message:
-        "This mock test is no longer available because the scheduled window has closed.",
-      actionLabel: "Back to Mock Tests",
-      onAction: () => navigate("/ctet-tet/mock-tests"),
-    });
-  }
-
   const attemptLimitInfo = parseAttemptLimit(test.attemptLimit);
   const activeAttemptSaveKey =
     savedStartAttempt?.startedAt || savedStartAttempt?.submittedAt

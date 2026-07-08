@@ -22,76 +22,12 @@ const PLAN_ICONS = {
 const normalizeText = (value = "") =>
   value.toString().trim().toLowerCase();
 
-const getMockScheduleMs = (value) => {
-  if (!value) return null;
-
-  if (typeof value?.toDate === "function") {
-    const time = value.toDate().getTime();
-    return Number.isFinite(time) ? time : null;
-  }
-
-  if (value instanceof Date) {
-    const time = value.getTime();
-    return Number.isFinite(time) ? time : null;
-  }
-
-  if (typeof value === "number") {
-    return Number.isFinite(value) ? value : null;
-  }
-
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    if (!trimmed) return null;
-
-    const parsed = new Date(trimmed).getTime();
-    return Number.isFinite(parsed) ? parsed : null;
-  }
-
-  return null;
-};
-
-const getMockScheduleStartMs = (test = {}) =>
-  getMockScheduleMs(
-    test.startTime ||
-      test.startDate ||
-      test.startAt ||
-      test.startsAt ||
-      test.scheduledStart ||
-      test.scheduledStartAt ||
-      test.scheduleStart ||
-      test.availableFrom ||
-      test.publishAt
-  );
-
-const getMockScheduleEndMs = (test = {}) =>
-  getMockScheduleMs(
-    test.endTime ||
-      test.endDate ||
-      test.endAt ||
-      test.endsAt ||
-      test.scheduledEnd ||
-      test.scheduledEndAt ||
-      test.scheduleEnd ||
-      test.availableUntil ||
-      test.expireAt
-  );
-
-const isMockVisibleForStudents = (test = {}) => {
-  if (test.section !== "mockTest") return false;
-  if (test.status !== "published" && test.status !== "live") return false;
-
-  const now = Date.now();
-  const startMs = getMockScheduleStartMs(test);
-  const endMs = getMockScheduleEndMs(test);
-
-  if (startMs && now < startMs) return false;
-  if (endMs && now > endMs) return false;
-
-  return true;
-};
-
 const getPublishedMockTests = (universalContent = []) =>
-  universalContent.filter(isMockVisibleForStudents);
+  universalContent.filter(
+    (test) =>
+      test.section === "mockTest" &&
+      test.status === "published"
+  );
 
 const getPlanMockTests = (universalContent = [], planName = "FREE") =>
   getPublishedMockTests(universalContent).filter(
