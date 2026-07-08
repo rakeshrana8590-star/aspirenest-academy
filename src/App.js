@@ -4505,17 +4505,67 @@ return (
 
     <div className="ctetExperiencePage" data-ctet-mobile-screen={ctetMobileScreen}>
   <section className="ctetTopEntryExperience" aria-label="AspireNest CTET TET top entry experience">
+      {/* === CTET Screen 1 top event ticker compact gap-fit v1 === */}
+      {ctetFeaturedExperienceEvent ? (
+        <div className="ctetTopEventTicker" aria-label="Live event update ticker">
+          <div className="ctetTopEventTickerTrack">
+            {(() => {
+              const tickerItems = [
+                ctetFeaturedExperienceEvent.status
+                  ? "STATUS " + String(ctetFeaturedExperienceEvent.status).toUpperCase()
+                  : null,
+                ctetFeaturedExperienceEvent.title
+                  ? "EVENT " + ctetFeaturedExperienceEvent.title
+                  : null,
+                ctetFeaturedExperienceEvent.typeLabel
+                  ? "TYPE " + ctetFeaturedExperienceEvent.typeLabel
+                  : null,
+                ctetFeaturedExperienceEvent.planType
+                  ? "PLAN " + ctetFeaturedExperienceEvent.planType
+                  : null,
+                ctetFeaturedExperienceEvent.subject
+                  ? "SUBJECT " + ctetFeaturedExperienceEvent.subject
+                  : null,
+                ctetFeaturedExperienceEvent.chapter
+                  ? "CHAPTER " + ctetFeaturedExperienceEvent.chapter
+                  : null,
+                ctetFeaturedExperienceStartAt
+                  ? "START " + new Date(ctetFeaturedExperienceStartAt).toLocaleString("en-IN", {
+                      day: "2-digit",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : null,
+                ctetFeaturedExperienceEvent.cta?.label
+                  ? "ACTION " + ctetFeaturedExperienceEvent.cta.label
+                  : null,
+              ].filter(Boolean);
+
+              return (
+                <>
+                  <div className="ctetTopEventTickerGroup">
+                    {tickerItems.map((item, index) => (
+                      <span key={"top-event-a-" + index}>{item}</span>
+                    ))}
+                  </div>
+                  <div className="ctetTopEventTickerGroup" aria-hidden="true">
+                    {tickerItems.map((item, index) => (
+                      <span key={"top-event-b-" + index}>{item}</span>
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        </div>
+      ) : null}
+
     <div className="ctetTopEntryShell">
 
 
 <div className="ctetHeroCommandGrid">
         <div className="ctetHeroStory">
-          <div className="ctetTrustBadge">
-            <span>🏆</span>
-            <strong>India’s Most Trusted CTET/TET Preparation Platform</strong>
-            <span>🛡️</span>
-          </div>
-
           <h1>
             Crack CTET/TETs
             <span> with Smart Learning</span>

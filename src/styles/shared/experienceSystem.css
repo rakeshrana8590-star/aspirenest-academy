@@ -15912,3 +15912,230 @@ html body #root .ctetExperienceStickyHeader .ctetLockedSearch {
     border-radius: 15px !important;
   }
 }
+
+
+/* === CTET Screen 1 top event ticker compact gap-fit v1 === */
+.ctetTopEntryExperience {
+  position: relative !important;
+}
+
+.ctetTopEntryShell {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+.ctetTopEventTicker {
+  position: absolute !important;
+  top: 8px !important;
+  left: 50% !important;
+  width: min(1540px, calc(100% - 76px)) !important;
+  height: 28px !important;
+  transform: translateX(-50%) !important;
+  z-index: 5 !important;
+  overflow: hidden !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(251, 146, 60, 0.2) !important;
+  background:
+    linear-gradient(90deg, rgba(2, 6, 23, 0.94), rgba(88, 28, 12, 0.68), rgba(2, 6, 23, 0.94)) !important;
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035) !important;
+}
+
+.ctetTopEventTicker::before,
+.ctetTopEventTicker::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 58px !important;
+  z-index: 3 !important;
+  pointer-events: none !important;
+}
+
+.ctetTopEventTicker::before {
+  left: 0 !important;
+  background: linear-gradient(90deg, rgba(2, 6, 23, 1), rgba(2, 6, 23, 0)) !important;
+}
+
+.ctetTopEventTicker::after {
+  right: 0 !important;
+  background: linear-gradient(270deg, rgba(2, 6, 23, 1), rgba(2, 6, 23, 0)) !important;
+}
+
+.ctetTopEventTickerTrack {
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  width: max-content !important;
+  min-width: max-content !important;
+  white-space: nowrap !important;
+  animation: ctetTopEventTickerMoveCompact 28s linear infinite !important;
+  will-change: transform !important;
+}
+
+.ctetTopEventTicker:hover .ctetTopEventTickerTrack {
+  animation-play-state: paused !important;
+}
+
+.ctetTopEventTickerGroup {
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 18px !important;
+  flex: 0 0 auto !important;
+  padding-right: 18px !important;
+}
+
+.ctetTopEventTickerGroup span {
+  display: inline-flex !important;
+  align-items: center !important;
+  white-space: nowrap !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 0.68rem !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.02em !important;
+}
+
+.ctetTopEventTickerGroup span::after {
+  content: "•" !important;
+  color: rgba(251, 146, 60, 0.9) !important;
+  margin-left: 14px !important;
+}
+
+@keyframes ctetTopEventTickerMoveCompact {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@media (max-width: 980px) {
+  .ctetTopEventTicker {
+    width: calc(100% - 28px) !important;
+    height: 26px !important;
+    top: 6px !important;
+  }
+
+  .ctetTopEventTickerGroup span {
+    font-size: 0.62rem !important;
+  }
+}
+
+@media (max-width: 720px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="home"] .ctetTopEventTicker {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctetTopEventTickerTrack {
+    animation: none !important;
+  }
+}
+
+
+/* === CTET/TET no hover flash guard v3 === */
+/* User rule: no hover flash, shimmer, shine, white/grey patch, sweep, glare anywhere on CTET/TET page. */
+
+/* Kill card/panel internal overlay pseudo layers */
+.ctetExperiencePage [class*="ctet"][class*="Card"]::before,
+.ctetExperiencePage [class*="ctet"][class*="Card"]::after,
+.ctetExperiencePage [class*="ctet"][class*="card"]::before,
+.ctetExperiencePage [class*="ctet"][class*="card"]::after,
+.ctetExperiencePage [class*="ctet"][class*="Panel"]::before,
+.ctetExperiencePage [class*="ctet"][class*="Panel"]::after,
+.ctetExperiencePage [class*="ctet"][class*="Tile"]::before,
+.ctetExperiencePage [class*="ctet"][class*="Tile"]::after,
+.ctetExperiencePage [class*="ctet"][class*="Item"]::before,
+.ctetExperiencePage [class*="ctet"][class*="Item"]::after,
+.ctetExperiencePage [class*="ctet"][class*="Row"]::before,
+.ctetExperiencePage [class*="ctet"][class*="Row"]::after,
+.ctetExperiencePage [class*="ctet"][class*="Module"]::before,
+.ctetExperiencePage [class*="ctet"][class*="Module"]::after,
+.ctetExperiencePage [class*="ctet"][class*="Action"]::before,
+.ctetExperiencePage [class*="ctet"][class*="Action"]::after,
+.ctetExperiencePage [class*="ctet"][class*="Button"]::before,
+.ctetExperiencePage [class*="ctet"][class*="Button"]::after {
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  animation: none !important;
+  transition: none !important;
+  background: none !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* Kill hover/focus generated bright patches inside cards */
+.ctetExperiencePage [class*="ctet"][class*="Card"]:hover,
+.ctetExperiencePage [class*="ctet"][class*="card"]:hover,
+.ctetExperiencePage [class*="ctet"][class*="Panel"]:hover,
+.ctetExperiencePage [class*="ctet"][class*="Tile"]:hover,
+.ctetExperiencePage [class*="ctet"][class*="Item"]:hover,
+.ctetExperiencePage [class*="ctet"][class*="Row"]:hover,
+.ctetExperiencePage [class*="ctet"][class*="Module"]:hover,
+.ctetExperiencePage [class*="ctet"][class*="Action"]:hover,
+.ctetExperiencePage [class*="ctet"][class*="Button"]:hover,
+.ctetExperiencePage [class*="ctet"][class*="Card"]:focus-within,
+.ctetExperiencePage [class*="ctet"][class*="card"]:focus-within,
+.ctetExperiencePage [class*="ctet"][class*="Panel"]:focus-within,
+.ctetExperiencePage [class*="ctet"][class*="Tile"]:focus-within,
+.ctetExperiencePage [class*="ctet"][class*="Item"]:focus-within,
+.ctetExperiencePage [class*="ctet"][class*="Row"]:focus-within,
+.ctetExperiencePage [class*="ctet"][class*="Module"]:focus-within,
+.ctetExperiencePage [class*="ctet"][class*="Action"]:focus-within,
+.ctetExperiencePage [class*="ctet"][class*="Button"]:focus-within {
+  background-image: none !important;
+  filter: none !important;
+  text-shadow: none !important;
+}
+
+/* Kill descendant hover overlays too */
+.ctetExperiencePage [class*="ctet"]:hover *::before,
+.ctetExperiencePage [class*="ctet"]:hover *::after {
+  animation: none !important;
+  transition: none !important;
+  background-image: none !important;
+  filter: none !important;
+}
+
+/* Hero command deck: strict calm hover only */
+.ctetExperiencePage .ctetHeroCommandDeck [class*="ctet"]:hover,
+.ctetExperiencePage .ctetHeroCommandDeck button:hover,
+.ctetExperiencePage .ctetHeroCommandDeck a:hover {
+  background-image: none !important;
+  filter: none !important;
+  text-shadow: none !important;
+}
+
+/* Screen 4 / Screen 5 cards: strict no spotlight patch */
+.ctetExperiencePage .ctetS4LiveContentCenter [class*="ctet"]:hover,
+.ctetExperiencePage .ctetS5LockedScreen [class*="ctet"]:hover,
+.ctetExperiencePage #contact.ctetS5LockedScreen [class*="ctet"]:hover {
+  background-image: none !important;
+  filter: none !important;
+  text-shadow: none !important;
+}
+
+/* Buttons can lift/change border, but no flash layer */
+.ctetExperiencePage button:hover,
+.ctetExperiencePage a:hover {
+  filter: none !important;
+  text-shadow: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctetExperiencePage *,
+  .ctetExperiencePage *::before,
+  .ctetExperiencePage *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
