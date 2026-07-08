@@ -1038,3 +1038,239 @@
     width: 100%;
   }
 }
+
+
+/* === Exam start desktop single screen header-safe v2 === */
+@media (min-width: 1000px) {
+  .examStartPage {
+    height: calc(100dvh - 68px) !important;
+    min-height: calc(100dvh - 68px) !important;
+    max-height: calc(100dvh - 68px) !important;
+    padding: 10px clamp(18px, 4vw, 54px) 14px !important;
+    overflow: hidden !important;
+    background:
+      radial-gradient(circle at 12% 0%, rgba(249, 115, 22, 0.18), transparent 28%),
+      radial-gradient(circle at 88% 7%, rgba(59, 130, 246, 0.14), transparent 30%),
+      linear-gradient(180deg, #070a12 0 245px, #f7f9fc 245px, #ffffff 100%) !important;
+  }
+
+  .examStartShell {
+    width: min(1280px, 100%) !important;
+    height: 100% !important;
+    display: grid !important;
+    grid-template-rows: 34px 214px minmax(0, 1fr) !important;
+    gap: 10px !important;
+    overflow: hidden !important;
+  }
+
+  .examStartTopBar {
+    height: 34px !important;
+    min-height: 34px !important;
+    margin: 0 !important;
+  }
+
+  .examStartBackBtn,
+  .examStartTopNote {
+    min-height: 32px !important;
+    height: 32px !important;
+    padding: 0 14px !important;
+    font-size: 0.7rem !important;
+  }
+
+  .examStartLaunch,
+  .examStartHero {
+    height: 214px !important;
+    min-height: 214px !important;
+    max-height: 214px !important;
+    margin: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 320px) !important;
+    gap: 14px !important;
+    overflow: hidden !important;
+  }
+
+  .examStartHeroContent,
+  .examStartActionPanel {
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: 214px !important;
+    overflow: hidden !important;
+    border-radius: 26px !important;
+  }
+
+  .examStartHeroContent {
+    padding: 18px 22px !important;
+  }
+
+  .examStartActionPanel {
+    padding: 16px 18px !important;
+    justify-content: center !important;
+  }
+
+  .examStartBadge,
+  .examStartActionLabel,
+  .examStartSchedulePill {
+    padding: 7px 11px !important;
+    font-size: 0.62rem !important;
+  }
+
+  .examStartHeroContent h1,
+  .examStartHero h1 {
+    margin: 9px 0 5px !important;
+    font-size: clamp(1.9rem, 2.55vw, 2.65rem) !important;
+    line-height: 0.96 !important;
+    letter-spacing: -0.06em !important;
+  }
+
+  .examStartHeroContent p,
+  .examStartHero p {
+    font-size: 0.78rem !important;
+    line-height: 1.22 !important;
+  }
+
+  .examStartQuickGrid,
+  .examStartHeroChips {
+    margin-top: 12px !important;
+    gap: 8px !important;
+  }
+
+  .examStartQuickGrid div,
+  .examStartHeroChips span {
+    padding: 9px 11px !important;
+    border-radius: 15px !important;
+  }
+
+  .examStartQuickGrid span {
+    font-size: 0.62rem !important;
+  }
+
+  .examStartQuickGrid strong {
+    margin-top: 5px !important;
+    font-size: 0.82rem !important;
+  }
+
+  .examStartActionPanel strong {
+    margin-top: 9px !important;
+    font-size: 1.28rem !important;
+    line-height: 1 !important;
+  }
+
+  .examStartActionPanel p {
+    margin: 7px 0 10px !important;
+    font-size: 0.76rem !important;
+    line-height: 1.3 !important;
+  }
+
+  .examStartActionChecks {
+    gap: 8px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .examStartActionChecks div {
+    padding: 9px 10px !important;
+    border-radius: 14px !important;
+  }
+
+  .examStartActionChecks span {
+    font-size: 0.6rem !important;
+  }
+
+  .examStartActionChecks strong {
+    margin-top: 5px !important;
+    font-size: 0.78rem !important;
+  }
+
+  .examStartActionPanel button,
+  .examStartSecondaryAction,
+  .examStartStateCard button {
+    min-height: 42px !important;
+    border-radius: 15px !important;
+    font-size: 0.86rem !important;
+  }
+
+  .examStartGrid {
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .examStartCard {
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    padding: 13px !important;
+    border-radius: 22px !important;
+  }
+
+  .examStartCardHead {
+    gap: 10px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .examStartCardIcon {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 14px !important;
+    font-size: 1rem !important;
+  }
+
+  .examStartCard h3 {
+    font-size: 1rem !important;
+    line-height: 1.05 !important;
+  }
+
+  .examStartCardHead p {
+    font-size: 0.66rem !important;
+    line-height: 1.1 !important;
+  }
+
+  .examStartMetricGrid {
+    gap: 8px !important;
+  }
+
+  .examStartMetricGrid div,
+  .examStartRuleList div,
+  .examStartInfoList p {
+    padding: 9px 10px !important;
+    border-radius: 14px !important;
+  }
+
+  .examStartMetricGrid span,
+  .examStartInfoList span,
+  .examStartRuleList span {
+    font-size: 0.62rem !important;
+  }
+
+  .examStartMetricGrid strong,
+  .examStartInfoList strong,
+  .examStartRuleList strong {
+    font-size: 0.82rem !important;
+  }
+
+  .examStartRuleList,
+  .examStartInfoList {
+    gap: 8px !important;
+  }
+
+  .examStartInstructionCard ul {
+    gap: 8px !important;
+  }
+
+  .examStartInstructionCard li {
+    font-size: 0.78rem !important;
+    line-height: 1.26 !important;
+  }
+
+  .examStartCustomInstruction,
+  .examStartStatusBox {
+    padding: 12px !important;
+    border-radius: 16px !important;
+  }
+
+  .examStartStatusBox strong {
+    font-size: 1.18rem !important;
+  }
+}
