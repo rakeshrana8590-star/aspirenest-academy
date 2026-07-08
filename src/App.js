@@ -608,32 +608,56 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
     });
   };
 
+  const parseMockScheduleDateTime = (
+    dateValue = "",
+    timeValue = "",
+    fallbackTime = "00:00"
+  ) => {
+    const dateText = String(dateValue || "").trim();
+    const timeText = String(timeValue || "").trim();
+
+    if (!dateText) {
+      return null;
+    }
+
+    const dateTimeText = dateText.includes("T")
+      ? dateText
+      : `${dateText}T${timeText || fallbackTime}`;
+
+    const parsed = new Date(dateTimeText);
+
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  };
+
   const getMockTestScheduleStatus = (test) => {
     if (!test) {
       return "EXPIRED";
     }
 
-    const scheduleType = test.scheduleType || "alwaysAvailable";
+    const hasScheduleWindow = Boolean(
+      test.examStartDate ||
+        test.examStartTime ||
+        test.examEndDate ||
+        test.examEndTime
+    );
 
-    if (scheduleType === "alwaysAvailable") {
+    if (!hasScheduleWindow) {
       return "AVAILABLE";
     }
 
     const now = new Date();
 
-    const startDateTime =
-      test.examStartDate && test.examStartTime
-        ? new Date(`${test.examStartDate}T${test.examStartTime}`)
-        : test.examStartDate
-        ? new Date(`${test.examStartDate}T00:00`)
-        : null;
+    const startDateTime = parseMockScheduleDateTime(
+      test.examStartDate,
+      test.examStartTime,
+      "00:00"
+    );
 
-    const endDateTime =
-      test.examEndDate && test.examEndTime
-        ? new Date(`${test.examEndDate}T${test.examEndTime}`)
-        : test.examEndDate
-        ? new Date(`${test.examEndDate}T23:59`)
-        : null;
+    const endDateTime = parseMockScheduleDateTime(
+      test.examEndDate,
+      test.examEndTime,
+      "23:59"
+    );
 
     if (startDateTime && now < startDateTime) {
       return "UPCOMING";

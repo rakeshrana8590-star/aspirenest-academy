@@ -27,9 +27,38 @@ function clean(value = "") {
 function routeOf(value = "", fallback = "/ctet-tet/roadmaps") {
   const route = clean(value);
   if (!route) return fallback;
-  if (route.startsWith("http")) return route;
+
+  try {
+    const parsed = new URL(route, window.location.origin);
+    const isInternalHost =
+      parsed.hostname === window.location.hostname ||
+      parsed.hostname === "localhost" ||
+      parsed.hostname === "aspirenest-academy.vercel.app" ||
+      parsed.hostname === "aspirenestacademy.in" ||
+      parsed.hostname === "www.aspirenestacademy.in";
+
+    if (isInternalHost) {
+      return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+    }
+  } catch {
+    // fallback below
+  }
+
   if (route.startsWith("/")) return route;
+  if (/^https?:\/\//i.test(route)) return route;
+
   return fallback;
+}
+
+function openRoute(route, navigate) {
+  const target = routeOf(route);
+
+  if (/^https?:\/\//i.test(target)) {
+    window.open(target, "_blank", "noopener,noreferrer");
+    return;
+  }
+
+  navigate?.(target);
 }
 
 function isMentorEvent(event = {}) {
@@ -108,7 +137,7 @@ export default function CtetMentorPresenceBand({
         </div>
 
         <div className="ctetS3MentorPresenceBandActions">
-          <button type="button" onClick={() => navigate?.(primaryRoute)}>
+          <button type="button" onClick={() => openRoute(primaryRoute, navigate)}>
             {primaryLabel} ›
           </button>
           <button type="button" className="isGhost" onClick={() => navigate?.("/ctet-tet/videos")}>

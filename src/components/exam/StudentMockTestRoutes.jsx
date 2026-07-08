@@ -22,11 +22,70 @@ const PLAN_ICONS = {
 const normalizeText = (value = "") =>
   value.toString().trim().toLowerCase();
 
+const parseMockStudentScheduleDateTime = (
+  dateValue = "",
+  timeValue = "",
+  fallbackTime = "00:00"
+) => {
+  const dateText = String(dateValue || "").trim();
+  const timeText = String(timeValue || "").trim();
+
+  if (!dateText) {
+    return null;
+  }
+
+  const dateTimeText = dateText.includes("T")
+    ? dateText
+    : `${dateText}T${timeText || fallbackTime}`;
+
+  const parsed = new Date(dateTimeText);
+
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const getMockStudentScheduleStatus = (test = {}) => {
+  const hasScheduleWindow = Boolean(
+    test.examStartDate ||
+      test.examStartTime ||
+      test.examEndDate ||
+      test.examEndTime
+  );
+
+  if (!hasScheduleWindow) {
+    return "AVAILABLE";
+  }
+
+  const now = new Date();
+
+  const startDateTime = parseMockStudentScheduleDateTime(
+    test.examStartDate,
+    test.examStartTime,
+    "00:00"
+  );
+
+  const endDateTime = parseMockStudentScheduleDateTime(
+    test.examEndDate,
+    test.examEndTime,
+    "23:59"
+  );
+
+  if (startDateTime && now < startDateTime) {
+    return "UPCOMING";
+  }
+
+  if (endDateTime && now > endDateTime) {
+    return "EXPIRED";
+  }
+
+  return "AVAILABLE";
+};
+
 const getPublishedMockTests = (universalContent = []) =>
   universalContent.filter(
     (test) =>
       test.section === "mockTest" &&
-      test.status === "published"
+      test.status === "published" &&
+      getMockStudentScheduleStatus(test) === "AVAILABLE"
   );
 
 const getPlanMockTests = (universalContent = [], planName = "FREE") =>

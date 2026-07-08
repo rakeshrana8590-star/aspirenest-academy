@@ -152,9 +152,14 @@ export const resolveFeaturedExperienceEvent = (events = []) => {
     events.map((event) => normalizeExperienceEvent(event.raw || event))
   );
 
+  const selectable = normalized.filter((event) =>
+    ["scheduled", "published", "live"].includes(event.status)
+  );
+
   return (
-    normalized.find((event) => event.status === "live") ||
-    normalized.find((event) => event.featured) ||
+    selectable.find((event) => event.featured) ||
+    selectable.find((event) => event.status === "live") ||
+    selectable.find((event) => ["scheduled", "published"].includes(event.status)) ||
     normalized[0] ||
     null
   );

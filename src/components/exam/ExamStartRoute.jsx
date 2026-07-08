@@ -28,6 +28,30 @@ const isRuleEnabled = (value) => {
 const getDisplayValue = (value, fallback = "Not set") =>
   value || value === 0 ? value : fallback;
 
+const formatScheduledMockDateTime = (dateValue = "", timeValue = "") => {
+  const dateText = String(dateValue || "").trim();
+  const timeText = String(timeValue || "").trim();
+
+  if (!dateText) return "scheduled time";
+
+  const dateTimeText = dateText.includes("T")
+    ? dateText
+    : `${dateText}T${timeText || "00:00"}`;
+
+  const parsed = new Date(dateTimeText);
+
+  if (Number.isNaN(parsed.getTime())) return "scheduled time";
+
+  return parsed.toLocaleString("en-IN", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
 const parseAttemptLimit = (value) => {
   const normalized = String(value || "unlimited").trim().toLowerCase();
 
@@ -168,10 +192,15 @@ export default function ExamStartRoute({
   }
 
   if (accessStatus === "UPCOMING" && !hasSubmittedAttempt) {
+    const startsAt = formatScheduledMockDateTime(
+      test.examStartDate,
+      test.examStartTime
+    );
+
     return renderStateCard({
       label: "Upcoming",
-      title: "Test not started yet",
-      message: "This mock test is scheduled for a future date or time.",
+      title: test.title || "Scheduled mock test",
+      message: `This mock test is scheduled for ${startsAt}. It will unlock automatically at the start time.`,
       actionLabel: "Back to Mock Tests",
       onAction: () => navigate("/ctet-tet/mock-tests"),
     });
