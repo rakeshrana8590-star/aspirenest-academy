@@ -68,6 +68,21 @@ function getMeta(type = "") {
   return typeMeta[key] || typeMeta[type] || typeMeta.live;
 }
 
+function cleanCtaLabel(value = "", fallback = "Open") {
+  const raw = String(value || "").trim();
+  const normalized = raw.toUpperCase().replace(/\s+/g, "_");
+
+  if (normalized === "JOIN_CHALLENGE") return "Join Challenge";
+  if (normalized === "START_MOCK") return "Start";
+  if (normalized === "JOIN_LIVE") return "Join Live";
+  if (normalized === "VIEW_DETAILS") return "View Details";
+  if (normalized === "OPEN_VIDEO") return "Watch";
+  if (normalized === "READ_NOTES") return "Read";
+  if (normalized === "OPEN_ROADMAP") return "Open Roadmap";
+
+  return raw || fallback;
+}
+
 function normalizeRoute(url, fallback) {
   const target = String(url || "").trim();
   if (!target) return fallback;
@@ -143,6 +158,18 @@ function getContentMeta(item = {}) {
   return getMeta("notes");
 }
 
+function isChallengeEvent(event = {}) {
+  const key = cleanType(event.type || event.typeLabel || event.module || event.section);
+  return key === "rankchallenge" || key === "challenge" || key.includes("challenge");
+}
+
+function getChallengeStatusLabel(event = {}) {
+  const status = cleanType(event.status);
+  if (status === "live") return "Live Challenge";
+  if (status === "scheduled" || status === "published") return "Open Challenge";
+  return "Challenge";
+}
+
 function eventToUpdate(event = {}, index = 0) {
   const eventType = event.type || event.module || event.section || event.typeLabel || "live";
   const meta = getMeta(eventType);
@@ -159,7 +186,7 @@ function eventToUpdate(event = {}, index = 0) {
       "Fresh learning update synced from AspireNest Experience events.",
     updated: event.status === "live" ? "Live now" : `Updated ${date.date}`,
     route: normalizeRoute(event.cta?.url || event.url || event.link, meta.route),
-    cta: event.cta?.label || (event.status === "live" ? "Join" : "Open"),
+    cta: cleanCtaLabel(event.cta?.label || event.ctaLabel, event.status === "live" ? "Join" : "Open"),
     source: meta.label,
     plan: event.planType || "FREE",
     featured: index === 0 || Boolean(event.featured),
@@ -207,6 +234,62 @@ function currentAffairToUpdate(item = {}, index = 0) {
   };
 }
 
+function getLeaderboardScore(entry = {}) {
+  return Number(entry.percentage || entry.accuracy || entry.rankScore || 0);
+}
+
+function maskLeaderboardName(entry = {}) {
+  const raw = String(entry.studentName || entry.studentEmail || entry.email || "Student").trim();
+  const email = String(entry.studentEmail || entry.email || "").trim();
+
+  if (raw.includes("@")) {
+    const [name = "student"] = raw.split("@");
+    return `${name.slice(0, 2)}***`;
+  }
+
+  if (email && raw === email) {
+    const [name = "student"] = email.split("@");
+    return `${name.slice(0, 2)}***`;
+  }
+
+  const parts = raw.split(/\s+/).filter(Boolean);
+  if (!parts.length) return "Student";
+  if (parts.length === 1) return parts[0].length > 8 ? `${parts[0].slice(0, 6)}…` : parts[0];
+
+  return `${parts[0]} ${parts[1][0] || ""}.`.trim();
+}
+
+function formatActivityTime(value) {
+  const date = toDate(value);
+  if (!date) return "Recently";
+
+  return date.toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function getActivityTimestamp(value) {
+  return toDate(value)?.getTime() || 0;
+}
+
+function isRecentActivityTime(value, windowDays = 45) {
+  const time = getActivityTimestamp(value);
+  if (!time) return false;
+  return Date.now() - time <= windowDays * 24 * 60 * 60 * 1000 || time > Date.now();
+}
+
+function isOwnLeaderboardEntry(entry = {}, user = null) {
+  const email = String(user?.email || "").toLowerCase();
+  if (!email) return false;
+
+  return [entry.studentEmail, entry.email]
+    .map((value) => String(value || "").toLowerCase())
+    .includes(email);
+}
+
 function dedupeItems(items = []) {
   const seen = new Set();
 
@@ -224,6 +307,8 @@ export default function CtetLiveContentCenter({
   contentItems = [],
   currentAffairs = [],
   loading = false,
+  mockLeaderboardEntries = [],
+  user = null,
   navigate,
 }) {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -248,6 +333,148 @@ export default function CtetLiveContentCenter({
     if (activeFilter === "all") return allUpdates;
     return allUpdates.filter((item) => item.type === activeFilter);
   }, [activeFilter, allUpdates]);
+
+  const leaderboardSnapshot = useMemo(() => {
+    const source = Array.isArray(mockLeaderboardEntries) ? mockLeaderboardEntries : [];
+    const ranked = [...source]
+      .filter((entry) => getLeaderboardScore(entry) > 0)
+      .sort(
+        (a, b) =>
+          getLeaderboardScore(b) - getLeaderboardScore(a) ||
+          Number(b.score || 0) - Number(a.score || 0)
+      )
+      .map((entry, index) => ({
+        ...entry,
+        rank: index + 1,
+        displayName: maskLeaderboardName(entry),
+        scoreLabel: `${getLeaderboardScore(entry)}%`,
+        isOwn: isOwnLeaderboardEntry(entry, user),
+      }));
+
+    return {
+      top: ranked.slice(0, 3),
+      own: ranked.find((entry) => entry.isOwn) || null,
+      total: ranked.length,
+    };
+  }, [mockLeaderboardEntries, user]);
+
+  const recentActivityItems = useMemo(() => {
+    const activity = [];
+
+    (Array.isArray(mockLeaderboardEntries) ? mockLeaderboardEntries : []).forEach((entry, index) => {
+      const activityAt =
+        entry.attemptSubmittedAt ||
+        entry.createdAt ||
+        entry.updatedAt ||
+        entry.endedAt;
+
+      if (!isRecentActivityTime(activityAt)) return;
+
+      activity.push({
+        id: `rank-${entry.id || entry.leaderboardKey || index}`,
+        tone: "rank",
+        badge: "RANK",
+        actor: maskLeaderboardName(entry),
+        title: `${maskLeaderboardName(entry)} joined the ranking board`,
+        description: `${entry.testTitle || entry.subject || "Mock Test"} • ${getLeaderboardScore(entry)}%`,
+        time: formatActivityTime(activityAt),
+        sortAt: getActivityTimestamp(activityAt),
+        route: "/leaderboard",
+      });
+    });
+
+    (Array.isArray(events) ? events : []).forEach((event, index) => {
+      const activityAt =
+        event.updatedAt ||
+        event.createdAt ||
+        event.startAt ||
+        event.scheduleAt;
+
+      if (!isRecentActivityTime(activityAt)) return;
+
+      const meta = getMeta(event.type || event.typeLabel);
+      activity.push({
+        id: `event-${event.id || index}`,
+        tone: meta.tone,
+        badge: meta.label,
+        actor: "AspireNest Team",
+        title: event.status === "live" ? "Live event is active" : "New academy event published",
+        description: event.title || event.subject || "AspireNest event update",
+        time: formatActivityTime(activityAt),
+        sortAt: getActivityTimestamp(activityAt),
+        route: normalizeRoute(event.cta?.url || event.url || event.link, meta.route),
+      });
+    });
+
+    (Array.isArray(contentItems) ? contentItems : [])
+      .filter((item) => ["published", "live"].includes(String(item.status || "published").toLowerCase()))
+      .forEach((item, index) => {
+        const activityAt = item.updatedAt || item.createdAt || item.date;
+        if (!isRecentActivityTime(activityAt)) return;
+
+        const meta = getContentMeta(item);
+        activity.push({
+          id: `content-${item.id || index}`,
+          tone: meta.tone,
+          badge: meta.label,
+          actor: "AspireNest Team",
+          title: `${meta.label} published`,
+          description: item.title || item.subject || item.chapter || "New learning resource",
+          time: formatActivityTime(activityAt),
+          sortAt: getActivityTimestamp(activityAt),
+          route: normalizeRoute(item.fileUrl || item.videoUrl || item.url || item.link, meta.route),
+        });
+      });
+
+    (Array.isArray(currentAffairs) ? currentAffairs : []).forEach((item, index) => {
+      const activityAt = item.updatedAt || item.createdAt || item.date;
+      if (!isRecentActivityTime(activityAt)) return;
+
+      activity.push({
+        id: `current-${item.id || index}`,
+        tone: "current",
+        badge: "Current Affairs",
+        actor: "AspireNest Team",
+        title: "Current Affairs updated",
+        description: item.title || item.month || "Latest current affairs material",
+        time: formatActivityTime(activityAt),
+        sortAt: getActivityTimestamp(activityAt),
+        route: normalizeRoute(item.pdf || item.fileUrl || item.url, "/ctet-tet/current-affairs"),
+      });
+    });
+
+    return dedupeItems(activity)
+      .sort((a, b) => b.sortAt - a.sortAt)
+      .slice(0, 6);
+  }, [contentItems, currentAffairs, events, mockLeaderboardEntries]);
+
+  const challengeItems = useMemo(() => {
+    const source = Array.isArray(events) ? events : [];
+    return source
+      .filter(isChallengeEvent)
+      .slice(0, 3)
+      .map((event, index) => {
+        const dateParts = formatDateParts(event.startAt || event.scheduleAt || event.createdAt);
+        const challengeCtaLabel = cleanCtaLabel(event.cta?.label || event.ctaLabel, "Join Challenge");
+
+        return {
+          id: event.id || `challenge-${index}`,
+          eyebrow: getChallengeStatusLabel(event),
+          title: event.title || "AspireNest Rank Challenge",
+          description:
+            event.description ||
+            event.subject ||
+            "Join the active CTET/TET challenge and test your preparation with the community.",
+          subject: event.subject || "CTET/TET",
+          plan: event.planType || "FREE",
+          time: dateParts.time,
+          date: dateParts.date,
+          cta: challengeCtaLabel,
+          route: normalizeRoute(event.cta?.url || event.challengeUrl || event.mockTestUrl || event.url || event.link, "/ctet-tet/mock-tests"),
+          featured: index === 0 || Boolean(event.featured),
+        };
+      });
+  }, [events]);
 
   const weekItems = useMemo(() => {
     const now = new Date();
@@ -309,7 +536,7 @@ export default function CtetLiveContentCenter({
         eyebrow: event.status === "live" ? "LIVE NOW" : event.featured ? "FEATURED" : meta.label,
         title: event.title || "AspireNest learning event",
         description: event.description || event.subject || "Live academy update for CTET/TET learners.",
-        cta: event.cta?.label || "View Details",
+        cta: cleanCtaLabel(event.cta?.label || event.ctaLabel, "View Details"),
         route: normalizeRoute(event.cta?.url || event.url || event.link, meta.route),
       };
     });
@@ -339,7 +566,18 @@ export default function CtetLiveContentCenter({
         ]
       : [];
 
-    return dedupeItems([...eventItems, ...updateItems, ...weekItemsForTv]).slice(0, 6);
+    const mergedTvItems = [...eventItems, ...updateItems, ...weekItemsForTv];
+    const seenTvItems = new Set();
+
+    return mergedTvItems
+      .filter((item) => {
+        const key = [item.title, item.route].filter(Boolean).join("|").toLowerCase();
+        if (!key) return true;
+        if (seenTvItems.has(key)) return false;
+        seenTvItems.add(key);
+        return true;
+      })
+      .slice(0, 6);
   }, [allUpdates, events, weekItems]);
 
   useEffect(() => {
@@ -377,12 +615,12 @@ export default function CtetLiveContentCenter({
       <div className="ctetS4Shell">
         <div className="ctetS4Hero">
           <div>
-            <span className="ctetS4Eyebrow">Live Content Center</span>
+            <span className="ctetS4Eyebrow">Live Community Center</span>
             <h2>
-              What's New & <span>This Week</span>
+              Community Pulse & <span>This Week</span>
             </h2>
             <p>
-              Your premium update hub for the latest real CTET/TET content and your weekly learning schedule.
+              Rank challenges, leaderboard movement, real academy activity, fresh updates, and weekly learning schedule in one premium screen.
             </p>
           </div>
 
@@ -447,6 +685,125 @@ export default function CtetLiveContentCenter({
               );
             })}
           </div>
+        </div>
+
+        <div className="ctetS4CommunityPulseGrid" aria-label="AspireNest community pulse">
+        <div className="ctetS4ChallengeSpotlight" aria-label="AspireNest challenge spotlight">
+          <div className="ctetS4ChallengeIntro">
+            <span>COMMUNITY CHALLENGE</span>
+            <h3>Rank Challenge Arena</h3>
+            <p>Weekly CTET/TET challenges, mock battles, and rank-focused practice will appear here from real Experience Studio events.</p>
+          </div>
+
+          <div className="ctetS4ChallengeRail">
+            {challengeItems.length ? (
+              challengeItems.map((item) => (
+                <button
+                  type="button"
+                  className={`ctetS4ChallengeCard ${item.featured ? "isFeatured" : ""} ${challengeItems.length === 1 ? "isSingle" : ""}`.trim()}
+                  key={item.id}
+                  onClick={() => openTarget(navigate, item.route)}
+                >
+                  <b>{item.eyebrow}</b>
+                  <div>
+                    <span>{item.subject}</span>
+                    <h4>{item.title}</h4>
+                    <p>{item.description}</p>
+                    <small>{item.date} • {item.time} • {item.plan}</small>
+                  </div>
+                  <strong>{item.cta} ›</strong>
+                </button>
+              ))
+            ) : (
+              <div className="ctetS4ChallengeEmpty">
+                <b>Challenge schedule soon</b>
+                <h4>No active rank challenge published yet</h4>
+                <p>Create a Rank Challenge from Admin → Experience Studio. It will appear here without touching code.</p>
+                <button type="button" onClick={() => navigate("/ctet-tet/mock-tests")}>
+                  Practice Mock Tests ›
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="ctetS4LeaderboardSnapshot" aria-label="AspireNest leaderboard snapshot">
+          <div className="ctetS4LeaderboardIntro">
+            <span>LEADERBOARD SNAPSHOT</span>
+            <h3>Top Rankers This Week</h3>
+            <p>Privacy-safe rank snapshot from leaderboard-enabled mock test attempts.</p>
+          </div>
+
+          <div className="ctetS4LeaderboardCards">
+            {leaderboardSnapshot.top.length ? (
+              leaderboardSnapshot.top.map((entry) => (
+                <button
+                  type="button"
+                  className={`ctetS4LeaderboardCard ${entry.rank === 1 ? "isTop" : ""} ${entry.isOwn ? "isOwn" : ""}`.trim()}
+                  key={entry.id || entry.leaderboardKey || entry.rank}
+                  onClick={() => navigate("/leaderboard")}
+                >
+                  <b>#{entry.rank}</b>
+                  <div>
+                    <strong>{entry.displayName}</strong>
+                    <span>{entry.testTitle || entry.subject || "Mock Test"}</span>
+                  </div>
+                  <em>{entry.scoreLabel}</em>
+                </button>
+              ))
+            ) : (
+              <div className="ctetS4LeaderboardEmpty">
+                <b>No public ranks yet</b>
+                <span>Ranks will appear after students submit leaderboard-enabled mock tests.</span>
+              </div>
+            )}
+          </div>
+
+          <div className="ctetS4LeaderboardAction">
+            {leaderboardSnapshot.own ? (
+              <p>Your rank: <strong>#{leaderboardSnapshot.own.rank}</strong> • {leaderboardSnapshot.own.scoreLabel}</p>
+            ) : (
+              <p>{leaderboardSnapshot.total} ranked entries • full emails hidden</p>
+            )}
+            <button type="button" onClick={() => navigate("/leaderboard")}>
+              View Full Leaderboard ›
+            </button>
+          </div>
+        </div>
+
+        <div className="ctetS4ActivityFeed" aria-label="Recent AspireNest activity feed">
+          <div className="ctetS4ActivityIntro">
+            <span>LIVE ACTIVITY</span>
+            <h3>Recent Academy Activity</h3>
+            <p>Real recent actions from mock attempts, published content, current affairs, and admin-created events.</p>
+          </div>
+
+          <div className="ctetS4ActivityList">
+            {recentActivityItems.length ? (
+              recentActivityItems.map((item) => (
+                <button
+                  type="button"
+                  className={`ctetS4ActivityRow is-${item.tone}`}
+                  key={item.id}
+                  onClick={() => openTarget(navigate, item.route)}
+                >
+                  <b>{item.badge}</b>
+                  <div>
+                    <strong>{item.title}</strong>
+                    <span>{item.description}</span>
+                  </div>
+                  <small>{item.time}</small>
+                </button>
+              ))
+            ) : (
+              <div className="ctetS4ActivityEmpty">
+                <b>No recent public activity yet</b>
+                <span>Fresh activity will appear after real mock attempts, event publishes, or new content updates.</span>
+              </div>
+            )}
+          </div>
+        </div>
+
         </div>
 
         <div className="ctetS4Grid">
