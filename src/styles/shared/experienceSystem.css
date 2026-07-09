@@ -17051,3 +17051,107 @@ html body #root .appShell > .pricingMasterPage.coursePages,
     margin-top: 0 !important;
   }
 }
+
+
+/* === CTET mobile account dropdown compact v5 === */
+/* Mobile CTET: compact account dropdown anchored to Admin/Login pill. */
+@media (max-width: 720px) {
+  html body #root .appShell .ctetExperienceStickyHeader {
+    z-index: 10000 !important;
+    overflow: visible !important;
+    pointer-events: auto !important;
+  }
+
+  html body #root .appShell .ctetExperienceStickyHeader .ctetLockedNav,
+  html body #root .appShell .ctetExperienceStickyHeader .ctetLockedTools,
+  html body #root .appShell .ctetExperienceStickyHeader .accountMenuWrap {
+    overflow: visible !important;
+    pointer-events: auto !important;
+  }
+
+  html body #root .appShell .ctetExperienceStickyHeader .accountMenuWrap {
+    position: relative !important;
+    z-index: 10010 !important;
+  }
+
+  html body #root .appShell .ctetExperienceStickyHeader .ctetLockedAccount {
+    position: relative !important;
+    z-index: 10011 !important;
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+  }
+
+  html body #root .appShell .ctetExperienceStickyHeader .premiumAccountDropdown {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    right: 0 !important;
+    left: auto !important;
+    width: 232px !important;
+    max-width: calc(100vw - 24px) !important;
+    min-width: 0 !important;
+    padding: 6px !important;
+    border-radius: 17px !important;
+    z-index: 10020 !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    pointer-events: auto !important;
+  }
+
+  html body #root .appShell .ctetExperienceStickyHeader .premiumAccountDropdown .accountDropdownProfile {
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+    gap: 8px !important;
+    padding: 7px !important;
+    margin-bottom: 5px !important;
+    border-radius: 14px !important;
+  }
+
+  html body #root .appShell .ctetExperienceStickyHeader .premiumAccountDropdown .accountDropdownProfile > b {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 0.66rem !important;
+  }
+
+  html body #root .appShell .ctetExperienceStickyHeader .premiumAccountDropdown button {
+    grid-template-columns: 28px minmax(0, 1fr) !important;
+    gap: 8px !important;
+    padding: 7px !important;
+    border-radius: 13px !important;
+  }
+
+  html body #root .appShell .ctetExperienceStickyHeader .premiumAccountDropdown button > span {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 10px !important;
+    font-size: 0.78rem !important;
+  }
+
+  html body #root .appShell .ctetExperienceStickyHeader .premiumAccountDropdown strong {
+    max-width: 150px !important;
+    font-size: 0.78rem !important;
+    line-height: 1.06 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  html body #root .appShell .ctetExperienceStickyHeader .premiumAccountDropdown small {
+    max-width: 150px !important;
+    font-size: 0.62rem !important;
+    line-height: 1.05 !important;
+    margin-top: 2px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  html body #root .appShell .ctetExperienceStickyHeader .premiumAccountDropdown *,
+  html body #root .appShell .ctetExperienceStickyHeader .premiumAccountDropdown button {
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+  }
+
+  html body #root .appShell .ctetTopEventTicker,
+  html body #root .appShell .ctetTopEventTicker * {
+    pointer-events: none !important;
+  }
+}
