@@ -16974,3 +16974,80 @@ html body #root .appShell > .pricingMasterPage.coursePages,
     max-height: 72px !important;
   }
 }
+
+
+/* === CTET mobile screen ownership foundation v1 === */
+/* Foundation gate: every direct CTET mobile screen child must be owned by exactly one dock screen. */
+@media (max-width: 720px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] > .ctetTopEntryExperience,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] > .ctetS2Screen,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] > .ctetS3FreshMentorAuthority,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] > .ctetS3MentorPresenceBand,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] > .ctetBookLaunchRibbon,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] > .ctetS4LiveContentCenter,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] > .ctetS5SuccessWallScreen,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] > .ctetS5LockedScreen {
+    display: none !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="home"] > .ctetTopEntryExperience {
+    display: block !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="journey"] > .ctetS2Screen {
+    display: block !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] > .ctetS3FreshMentorAuthority {
+    display: flex !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] > .ctetS3MentorPresenceBand {
+    display: block !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] > .ctetBookLaunchRibbon {
+    display: grid !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="live"] > .ctetS4LiveContentCenter {
+    display: block !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="success"] > .ctetS5SuccessWallScreen {
+    display: block !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] > .ctetS5LockedScreen {
+    display: block !important;
+  }
+}
+
+
+/* === CTET Screen 1 fullscreen gap real fix v1 === */
+/* Screen 1 only: keep one-screen ownership, but stop event card sticking to viewport bottom on tall/fullscreen displays. */
+@media (min-width: 721px) {
+  html body #root .appShell .ctetExperiencePage > .ctetTopEntryExperience {
+    min-height: calc(100vh - 62px) !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage > .ctetTopEntryExperience .ctetTopEntryShell {
+    min-height: calc(100vh - 62px) !important;
+  }
+}
+
+@media (min-width: 721px) and (min-height: 760px) {
+  html body #root .appShell .ctetExperiencePage > .ctetTopEntryExperience .ctetTopEntryShell {
+    grid-template-rows: auto auto !important;
+    align-content: start !important;
+    row-gap: clamp(22px, 3vh, 42px) !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage > .ctetTopEntryExperience .ctetHeroCommandGrid {
+    margin-bottom: 0 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage > .ctetTopEntryExperience .ctetLiveHeartbeat {
+    margin-top: 0 !important;
+  }
+}
