@@ -16101,3 +16101,558 @@ html body #root .ctetExperienceStickyHeader .ctetLockedSearch {
     transition: none !important;
   }
 }
+
+
+/* === CTET Screen 3 book launch premium panel v3 === */
+.ctetBookLaunchRibbon {
+  width: min(1680px, calc(100% - 72px)) !important;
+  margin: 36px auto 34px !important;
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: 170px minmax(0, 1fr) 270px !important;
+  align-items: center !important;
+  gap: 34px !important;
+  min-height: 246px !important;
+  padding: 28px 34px !important;
+  overflow: hidden !important;
+  border-radius: 34px !important;
+  border: 1px solid rgba(134, 239, 172, 0.34) !important;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(134, 239, 172, 0.13), transparent 32%),
+    radial-gradient(circle at 86% 32%, rgba(16, 185, 129, 0.12), transparent 34%),
+    linear-gradient(135deg, rgba(5, 18, 21, 0.98), rgba(8, 36, 32, 0.98) 52%, rgba(11, 58, 46, 0.94)) !important;
+  box-shadow:
+    0 26px 76px rgba(0, 0, 0, 0.34),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025) !important;
+  isolation: isolate !important;
+}
+
+.ctetBookLaunchRibbon::before,
+.ctetBookLaunchRibbon::after {
+  display: none !important;
+  content: none !important;
+}
+
+.ctetBookLaunchCover {
+  width: 154px !important;
+  height: 214px !important;
+  border-radius: 22px !important;
+  padding: 7px !important;
+  background: rgba(3, 12, 15, 0.9) !important;
+  border: 1px solid rgba(167, 243, 208, 0.42) !important;
+  box-shadow:
+    0 26px 44px rgba(0, 0, 0, 0.42),
+    0 0 0 7px rgba(16, 185, 129, 0.055) !important;
+  overflow: hidden !important;
+}
+
+.ctetBookLaunchCover img {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  object-fit: cover !important;
+  border-radius: 15px !important;
+}
+
+.ctetBookLaunchContent {
+  min-width: 0 !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+.ctetBookLaunchMetaRow {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  margin-bottom: 13px !important;
+}
+
+.ctetBookLaunchEyebrow,
+.ctetBookLaunchBatchTag {
+  display: inline-flex !important;
+  align-items: center !important;
+  width: fit-content !important;
+  min-height: 30px !important;
+  padding: 8px 15px !important;
+  border-radius: 999px !important;
+  text-transform: uppercase !important;
+  font-size: 0.69rem !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.14em !important;
+  line-height: 1 !important;
+}
+
+.ctetBookLaunchEyebrow {
+  color: #dcfce7 !important;
+  background: rgba(6, 95, 70, 0.64) !important;
+  border: 1px solid rgba(134, 239, 172, 0.34) !important;
+}
+
+.ctetBookLaunchBatchTag {
+  color: rgba(220, 252, 231, 0.9) !important;
+  background: rgba(15, 23, 42, 0.5) !important;
+  border: 1px solid rgba(167, 243, 208, 0.18) !important;
+}
+
+.ctetBookLaunchContent h3 {
+  margin: 0 !important;
+  max-width: 900px !important;
+  color: #f0fdf4 !important;
+  font-size: clamp(2.05rem, 3.22vw, 3.42rem) !important;
+  line-height: 0.98 !important;
+  font-weight: 1000 !important;
+  letter-spacing: -0.055em !important;
+  text-wrap: balance !important;
+}
+
+.ctetBookLaunchContent p {
+  max-width: 980px !important;
+  margin: 14px 0 12px !important;
+  color: rgba(220, 252, 231, 0.82) !important;
+  font-size: clamp(0.92rem, 1.04vw, 1.06rem) !important;
+  line-height: 1.52 !important;
+  font-weight: 730 !important;
+}
+
+.ctetBookLaunchByline {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 16px !important;
+}
+
+.ctetBookLaunchByline span {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 28px !important;
+  padding: 7px 12px !important;
+  border-radius: 999px !important;
+  color: rgba(236, 253, 245, 0.92) !important;
+  background: rgba(2, 6, 23, 0.34) !important;
+  border: 1px solid rgba(134, 239, 172, 0.16) !important;
+  font-size: 0.74rem !important;
+  font-weight: 900 !important;
+}
+
+.ctetBookLaunchTicker {
+  width: min(900px, 100%) !important;
+  height: 30px !important;
+  overflow: hidden !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(110, 231, 183, 0.18) !important;
+  background: rgba(2, 10, 14, 0.5) !important;
+}
+
+.ctetBookLaunchTickerTrack {
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  width: max-content !important;
+  min-width: max-content !important;
+  gap: 22px !important;
+  white-space: nowrap !important;
+  animation: ctetBookLaunchTickerMove 38s linear infinite !important;
+  will-change: transform !important;
+}
+
+.ctetBookLaunchTickerTrack span {
+  display: inline-flex !important;
+  align-items: center !important;
+  color: rgba(236, 253, 245, 0.88) !important;
+  font-size: 0.64rem !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+.ctetBookLaunchTickerTrack span::after {
+  content: "•" !important;
+  color: rgba(110, 231, 183, 0.92) !important;
+  margin-left: 18px !important;
+}
+
+.ctetBookLaunchAction {
+  position: relative !important;
+  z-index: 2 !important;
+  display: grid !important;
+  grid-template-columns: 96px 1fr !important;
+  align-items: center !important;
+  gap: 16px !important;
+  justify-self: end !important;
+}
+
+.ctetBookLaunchAction img {
+  width: 96px !important;
+  height: 96px !important;
+  display: block !important;
+  border-radius: 20px !important;
+  padding: 9px !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(110, 231, 183, 0.3) !important;
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.28) !important;
+}
+
+.ctetBookLaunchAction a {
+  min-height: 82px !important;
+  width: 150px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  padding: 15px 16px !important;
+  border-radius: 22px !important;
+  color: #ecfdf5 !important;
+  text-decoration: none !important;
+  font-size: 0.94rem !important;
+  line-height: 1.12 !important;
+  font-weight: 950 !important;
+  background: linear-gradient(135deg, rgba(8, 25, 28, 0.92), rgba(10, 65, 52, 0.84)) !important;
+  border: 1px solid rgba(134, 239, 172, 0.36) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25) !important;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+.ctetBookLaunchAction a span {
+  display: grid !important;
+  gap: 2px !important;
+}
+
+.ctetBookLaunchAction a strong {
+  display: block !important;
+  color: #bbf7d0 !important;
+}
+
+.ctetBookLaunchAction a::before,
+.ctetBookLaunchAction a::after {
+  display: none !important;
+  content: none !important;
+}
+
+.ctetBookLaunchAction a:hover {
+  transform: translateY(-2px) !important;
+  border-color: rgba(167, 243, 208, 0.68) !important;
+  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.32) !important;
+}
+
+.ctetBookLaunchAction a b {
+  font-size: 1.42rem !important;
+  line-height: 1 !important;
+  color: #86efac !important;
+}
+
+@keyframes ctetBookLaunchTickerMove {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@media (max-width: 1180px) {
+  .ctetBookLaunchRibbon {
+    grid-template-columns: 142px minmax(0, 1fr) !important;
+  }
+
+  .ctetBookLaunchCover {
+    width: 132px !important;
+    height: 184px !important;
+  }
+
+  .ctetBookLaunchAction {
+    grid-column: 1 / -1 !important;
+    grid-template-columns: 76px minmax(0, 240px) !important;
+    justify-content: end !important;
+  }
+
+  .ctetBookLaunchAction img {
+    width: 76px !important;
+    height: 76px !important;
+  }
+
+  .ctetBookLaunchAction a {
+    width: auto !important;
+  }
+}
+
+@media (max-width: 720px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchRibbon {
+    width: calc(100% - 26px) !important;
+    margin: 20px auto 18px !important;
+    grid-template-columns: 82px minmax(0, 1fr) !important;
+    gap: 14px !important;
+    padding: 18px !important;
+    border-radius: 24px !important;
+    min-height: 0 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchCover {
+    width: 82px !important;
+    height: 116px !important;
+    border-radius: 15px !important;
+    padding: 5px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchMetaRow {
+    gap: 7px !important;
+    margin-bottom: 8px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchEyebrow,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchBatchTag {
+    min-height: 24px !important;
+    padding: 6px 9px !important;
+    font-size: 0.54rem !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchContent h3 {
+    font-size: 1.35rem !important;
+    line-height: 1.02 !important;
+    letter-spacing: -0.04em !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchContent p {
+    margin: 8px 0 8px !important;
+    font-size: 0.75rem !important;
+    line-height: 1.42 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchByline {
+    display: none !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchTicker {
+    display: none !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchAction {
+    grid-column: 1 / -1 !important;
+    grid-template-columns: 64px 1fr !important;
+    justify-content: stretch !important;
+    gap: 12px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchAction img {
+    width: 64px !important;
+    height: 64px !important;
+    border-radius: 14px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchAction a {
+    width: auto !important;
+    min-height: 58px !important;
+    border-radius: 16px !important;
+    padding: 12px 14px !important;
+    font-size: 0.84rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctetBookLaunchTickerTrack {
+    animation: none !important;
+  }
+
+  .ctetBookLaunchAction a {
+    transition: none !important;
+  }
+}
+
+
+/* === CTET Screen 3 book launch hover lift v1 === */
+.ctetBookLaunchRibbon {
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+.ctetBookLaunchRibbon:hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(167, 243, 208, 0.58) !important;
+  box-shadow:
+    0 32px 86px rgba(0, 0, 0, 0.42),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025) !important;
+}
+
+.ctetBookLaunchRibbon:hover::before,
+.ctetBookLaunchRibbon:hover::after,
+.ctetBookLaunchRibbon:hover *::before,
+.ctetBookLaunchRibbon:hover *::after {
+  animation: none !important;
+}
+
+.ctetBookLaunchCover {
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease !important;
+}
+
+.ctetBookLaunchRibbon:hover .ctetBookLaunchCover {
+  transform: translateY(-3px) !important;
+  border-color: rgba(167, 243, 208, 0.56) !important;
+  box-shadow:
+    0 30px 52px rgba(0, 0, 0, 0.46),
+    0 0 0 7px rgba(16, 185, 129, 0.055) !important;
+}
+
+@media (max-width: 720px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchRibbon:hover,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchRibbon:hover .ctetBookLaunchCover {
+    transform: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctetBookLaunchRibbon,
+  .ctetBookLaunchCover {
+    transition: none !important;
+  }
+
+  .ctetBookLaunchRibbon:hover,
+  .ctetBookLaunchRibbon:hover .ctetBookLaunchCover {
+    transform: none !important;
+  }
+}
+
+
+/* === CTET book promo mobile screen lock v1 === */
+/* Book promo belongs only to Screen 3 Mentor on mobile. It must not leak into Home/Journey/Live/Success/Help. */
+@media (max-width: 720px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] > .ctetBookLaunchRibbon {
+    display: none !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] > .ctetBookLaunchRibbon {
+    display: grid !important;
+  }
+}
+
+
+/* === CTET book promo mobile compact fit v1 === */
+/* Screen 3 Mentor mobile only: hide scrollbar, prevent dock cut, keep promo compact. */
+@media (max-width: 720px) {
+  html:has(.ctetExperiencePage[data-ctet-mobile-screen]) ,
+  body:has(.ctetExperiencePage[data-ctet-mobile-screen]) {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  html:has(.ctetExperiencePage[data-ctet-mobile-screen])::-webkit-scrollbar,
+  body:has(.ctetExperiencePage[data-ctet-mobile-screen])::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] {
+    overflow-y: auto !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    padding-bottom: 112px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"]::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] > .ctetBookLaunchRibbon {
+    width: calc(100% - 22px) !important;
+    margin: 14px auto 108px !important;
+    grid-template-columns: 76px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    min-height: 0 !important;
+    padding: 14px !important;
+    border-radius: 22px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchCover {
+    width: 76px !important;
+    height: 108px !important;
+    padding: 5px !important;
+    border-radius: 14px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchContent {
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchMetaRow {
+    gap: 6px !important;
+    margin-bottom: 7px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchEyebrow {
+    min-height: 22px !important;
+    padding: 5px 8px !important;
+    font-size: 0.5rem !important;
+    letter-spacing: 0.08em !important;
+    white-space: nowrap !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchBatchTag {
+    display: none !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchContent h3 {
+    max-width: 100% !important;
+    font-size: 1.14rem !important;
+    line-height: 1.04 !important;
+    letter-spacing: -0.035em !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchContent p {
+    margin: 7px 0 0 !important;
+    font-size: 0.68rem !important;
+    line-height: 1.34 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 5 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchByline,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchTicker {
+    display: none !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchAction {
+    grid-column: 1 / -1 !important;
+    grid-template-columns: 58px minmax(0, 1fr) !important;
+    gap: 10px !important;
+    justify-content: stretch !important;
+    margin-top: 2px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchAction img {
+    width: 58px !important;
+    height: 58px !important;
+    padding: 6px !important;
+    border-radius: 14px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchAction a {
+    width: auto !important;
+    min-height: 52px !important;
+    padding: 10px 12px !important;
+    border-radius: 15px !important;
+    font-size: 0.78rem !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchRibbon:hover,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] .ctetBookLaunchRibbon:hover .ctetBookLaunchCover {
+    transform: none !important;
+  }
+}

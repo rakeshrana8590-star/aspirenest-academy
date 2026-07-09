@@ -184,6 +184,7 @@ import "./styles/video/videoClassBuilder.css";
 import "./styles/video/studentVideoHub.css";
 import "./styles/video/studentVideoShelves.css";
 import "./styles/video/videoLiveStates.css";
+import "./styles/shared/mobileNoScrollbar.css";
 
 import {
   CONTENT_SECTIONS,
@@ -5024,6 +5025,109 @@ xpActivityEvents={ctetMockXpEvents}
       events={ctetExperienceEvents}
       navigate={navigate}
     />
+
+    {/* === CTET Screen 3 book launch promo ribbon v1 === */}
+    {(() => {
+      const bookPromo = {
+        enabled: true,
+        title: "Child Development & Pedagogy",
+        subtitle: "CTET & TETs Important Key Notes",
+        description:
+          "A focused CTET & TET revision handbook with important key notes, concept clarity, and exam-ready preparation support aligned with NCF-SE 2023 and NEP 2020.",
+        author: "Dr. Varsha D. Maru",
+        url: "https://amzn.in/d/0hWc6cLH",
+        coverSrc: "/ctet-books/child-development-pedagogy-kindle-cover.png",
+        qrSrc: "/ctet-books/child-development-pedagogy-amazon-qr.png",
+      };
+
+      if (!bookPromo.enabled || !bookPromo.url) {
+        return null;
+      }
+
+      const tickerItems = [
+        "NEW KINDLE LAUNCH",
+        bookPromo.title,
+        bookPromo.subtitle,
+        "By " + bookPromo.author,
+        "Last-minute revision support",
+        "Scan QR or open Amazon Kindle",
+      ];
+
+      return (
+        <section className="ctetBookLaunchRibbon" aria-label="Dr. Varsha Kindle book launch update">
+          <div className="ctetBookLaunchCover" aria-hidden="true">
+            <img
+              src={bookPromo.coverSrc}
+              alt={bookPromo.title + " Kindle book cover"}
+            />
+          </div>
+
+          <div className="ctetBookLaunchContent">
+            <div className="ctetBookLaunchMetaRow">
+              <span className="ctetBookLaunchEyebrow">New Kindle Release</span>
+              <span className="ctetBookLaunchBatchTag">CTET/TET Revision Companion</span>
+            </div>
+
+            <h3>{bookPromo.title}</h3>
+
+            <p>
+              The Ultimate Last-Moment Revision Handbook for CTET & TET aspirants —
+              focused key notes, concept clarity, and exam-ready preparation support
+              aligned with NCF-SE 2023 and NEP 2020.
+            </p>
+
+            <div className="ctetBookLaunchByline">
+              <span>By Dr. Varsha D. Maru</span>
+              <span>Available on Amazon Kindle</span>
+            </div>
+
+            <div className="ctetBookLaunchTicker" aria-label="Kindle book highlights">
+              <div className="ctetBookLaunchTickerTrack">
+                {[
+                  "New Kindle Release",
+                  "Child Development & Pedagogy",
+                  "CTET & TET Key Notes",
+                  "Last-Moment Revision Support",
+                  "NCF-SE 2023",
+                  "NEP 2020",
+                  "By Dr. Varsha D. Maru",
+                  "Available on Amazon Kindle",
+                ]
+                  .concat([
+                    "New Kindle Release",
+                    "Child Development & Pedagogy",
+                    "CTET & TET Key Notes",
+                    "Last-Moment Revision Support",
+                    "NCF-SE 2023",
+                    "NEP 2020",
+                    "By Dr. Varsha D. Maru",
+                    "Available on Amazon Kindle",
+                  ])
+                  .map((item, index) => (
+                    <span key={"book-launch-ticker-" + index}>{item}</span>
+                  ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="ctetBookLaunchAction">
+            <img src={bookPromo.qrSrc} alt="Amazon Kindle book QR code" />
+            <a
+              href={bookPromo.url}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Open Child Development and Pedagogy book on Amazon Kindle"
+            >
+              <span>
+                View on
+                <strong>Amazon Kindle</strong>
+              </span>
+              <b>›</b>
+            </a>
+          </div>
+        </section>
+      );
+    })()}
 
     <CtetLiveContentCenter
     events={ctetExperienceEvents}
