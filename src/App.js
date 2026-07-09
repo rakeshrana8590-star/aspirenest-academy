@@ -57,6 +57,7 @@ import CtetLiveContentCenter from "./components/ctet/CtetLiveContentCenter.jsx";
 import CtetMentorPresenceBand from "./components/ctet/CtetMentorPresenceBand.jsx";
 import CtetSuccessWallScreen from "./components/ctet/CtetSuccessWallScreen.jsx";
 import CtetSupportFooterScreen from "./components/ctet/CtetSupportFooterScreen.jsx";
+import CtetPricingMentorGuidance from "./components/ctet/CtetPricingMentorGuidance.jsx";
 import {
   StudentRoadmapHub, StudentRoadmapDetail, StudentRoadmapDay, MyAspirePath, } from "./components/roadmaps/StudentRoadmaps.jsx";
 
@@ -8784,6 +8785,8 @@ handleSaveUniversalContent={handleSaveUniversalContent}
           notes, tests, dashboard, AI classroom, and mentor guidance.
         </p>
       </div>
+
+      <CtetPricingMentorGuidance />
 
       <div className="pricingActionGrid">
         <div

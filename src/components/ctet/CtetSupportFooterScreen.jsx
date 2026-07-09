@@ -1,21 +1,66 @@
 import React, { useState } from "react";
 
+const OFFICIAL_EMAIL = "aspirenestacademy@gmail.com";
+const OFFICIAL_WHATSAPP_NUMBER = "917304256002";
+const OFFICIAL_WHATSAPP_DISPLAY = "+91 73042 56002";
+const EMAIL_SUPPORT_SUBJECT = "AspireNest Academy Support & Access Guidance";
+const EMAIL_SUPPORT_BODY = [
+  "Dear AspireNest Academy Team,",
+  "",
+  "I need guidance regarding CTET/TET preparation and access options.",
+  "",
+  "My details are:",
+  "",
+  "Name:",
+  "Registered Email:",
+  "Mobile Number:",
+  "Support Required: Plan / Payment / Mock Test / Notes / Videos / Roadmap / Individual Access",
+  "Message:",
+  "",
+  "Please guide me with the most suitable plan or access option.",
+  "",
+  "Thank you.",
+].join("\n");
+
+function buildWhatsAppUrl(message) {
+  return `https://wa.me/${OFFICIAL_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+}
+
+function buildEmailUrl(subject = "AspireNest Academy Support", body = "") {
+  const params = new URLSearchParams({
+    view: "cm",
+    fs: "1",
+    to: OFFICIAL_EMAIL,
+    su: subject,
+    body,
+  });
+
+  return `https://mail.google.com/mail/?${params.toString()}`;
+}
+
+function openUrl(url) {
+  if (!url) return;
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+
 const supportRows = [
   {
     icon: "✉",
     tone: "mail",
     title: "Email Support",
-    text: "support@aspirenestacademy.com",
+    text: OFFICIAL_EMAIL,
     action: "Write to us",
-    url: "mailto:support@aspirenestacademy.com",
+    url: buildEmailUrl(EMAIL_SUPPORT_SUBJECT, EMAIL_SUPPORT_BODY),
   },
   {
     icon: "☘",
     tone: "whatsapp",
     title: "WhatsApp Support",
-    text: "+91 98765 43210",
+    text: OFFICIAL_WHATSAPP_DISPLAY,
     action: "Chat Now",
-    url: "https://wa.me/919876543210",
+    url: buildWhatsAppUrl(
+      "Hello AspireNest Academy,\nI need support for CTET/TET preparation, plan, payment, or access.\nPlease guide me."
+    ),
   },
   {
     icon: "⌖",
@@ -36,10 +81,26 @@ const supportRows = [
 ];
 
 const faqItems = [
-  "How do I access premium classes?",
-  "Are mock tests included in premium?",
-  "Can I use AspireNest on mobile?",
-  "How do I contact support?",
+  {
+    question: "How do I access premium classes?",
+    answer:
+      "First talk to the mentor on WhatsApp. After payment/access confirmation, AspireNest admin will activate your plan, module, or individual access.",
+  },
+  {
+    question: "Are mock tests included in premium?",
+    answer:
+      "Yes, premium access can include mock tests. Individual mock test access can also be given manually if required.",
+  },
+  {
+    question: "Can I use AspireNest on mobile?",
+    answer:
+      "Yes. AspireNest is built for mobile, tablet, laptop, and desktop. Use the same login account on your device.",
+  },
+  {
+    question: "How do I contact support?",
+    answer:
+      "Use the WhatsApp support button or fill the support form. Your details will open directly in WhatsApp for quick guidance.",
+  },
 ];
 
 const footerColumns = [
@@ -77,11 +138,6 @@ const footerColumns = [
   },
 ];
 
-function openUrl(url) {
-  if (!url) return;
-  window.open(url, "_blank", "noopener,noreferrer");
-}
-
 export default function CtetSupportFooterScreen({
   fullName,
   setFullName,
@@ -93,6 +149,39 @@ export default function CtetSupportFooterScreen({
   navigate,
 }) {
   const [message, setMessage] = useState("");
+  const [activeFaq, setActiveFaq] = useState(-1);
+
+  function handleSubmitEnquiry() {
+    const whatsappMessage = [
+      "Hello Dr. Varsha Ma’am / AspireNest Academy,",
+      "",
+      "I need guidance/support for CTET/TET preparation.",
+      "",
+      `Name: ${fullName || "Not entered"}`,
+      `Mobile: ${mobile || "Not entered"}`,
+      `Email: ${contactEmail || "Not entered"}`,
+      `Support Needed: Plan / Payment / Access / Mock Test / Notes / Videos / Roadmap`,
+      `Message: ${message || "Please guide me for the best plan/access."}`,
+      "",
+      "Please guide me on WhatsApp.",
+    ].join("\n");
+
+    openUrl(buildWhatsAppUrl(whatsappMessage));
+
+    if (typeof onSubmit === "function") {
+      onSubmit();
+    }
+  }
+
+  function handleContactSupport() {
+    const whatsappMessage = [
+      "Hello AspireNest Academy,",
+      "I still have questions about CTET/TET preparation, plan, payment, or access.",
+      "Please guide me.",
+    ].join("\n");
+
+    openUrl(buildWhatsAppUrl(whatsappMessage));
+  }
 
   return (
     <section className="ctetS5LockedScreen" id="contact">
@@ -103,7 +192,7 @@ export default function CtetSupportFooterScreen({
               <span>☊</span>
               <div>
                 <h3>Support & Enquiry</h3>
-                <p>We’re here to help you on your preparation journey.</p>
+                <p>Plan, payment, access, notes, mock tests, videos, or roadmap — ask before you choose.</p>
               </div>
             </div>
 
@@ -145,20 +234,20 @@ export default function CtetSupportFooterScreen({
               </label>
 
               <label className="ctetS5LockedMessage">
-                <b>Message</b>
+                <b>Your Requirement</b>
                 <div>
                   <i>▱</i>
                   <textarea
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Type your message here..."
+                    placeholder="Example: I need only mock test access / full plan / notes / video class / roadmap guidance..."
                   />
                 </div>
               </label>
             </div>
 
-            <button className="ctetS5LockedSubmit" type="button" onClick={onSubmit}>
-              Submit Enquiry <span>✈</span>
+            <button className="ctetS5LockedSubmit" type="button" onClick={handleSubmitEnquiry}>
+              Send on WhatsApp <span>✈</span>
             </button>
           </article>
 
@@ -168,8 +257,8 @@ export default function CtetSupportFooterScreen({
               <div>
                 <h3>AspireNest Support</h3>
                 <p>
-                  Have questions about our courses, notes, mock tests, roadmaps,
-                  payments or access? Our team is ready to help.
+                  Before choosing any plan or access, talk to your mentor once.
+                  We help you choose the right access.
                 </p>
               </div>
             </div>
@@ -203,20 +292,34 @@ export default function CtetSupportFooterScreen({
             </div>
 
             <div className="ctetS5LockedFaqList">
-              {faqItems.map((faq) => (
-                <button type="button" key={faq}>
-                  {faq}
-                  <span>⌄</span>
-                </button>
-              ))}
+              {faqItems.map((faq, index) => {
+                const isOpen = activeFaq === index;
+
+                return (
+                  <div className="ctetS5LockedFaqItem" key={faq.question}>
+                    <button
+                      type="button"
+                      aria-expanded={isOpen}
+                      onClick={() => setActiveFaq(isOpen ? -1 : index)}
+                    >
+                      {faq.question}
+                      <span>{isOpen ? "⌃" : "⌄"}</span>
+                    </button>
+
+                    {isOpen ? (
+                      <p className="ctetS5LockedFaqAnswer">{faq.answer}</p>
+                    ) : null}
+                  </div>
+                );
+              })}
             </div>
 
             <div className="ctetS5LockedQuestionBox">
               <div>
                 <strong>Still have questions?</strong>
-                <p>Our support experts are happy to help.</p>
+                <p>Ask on WhatsApp before choosing a plan or access.</p>
               </div>
-              <button type="button" onClick={() => openUrl("mailto:support@aspirenestacademy.com")}>
+              <button type="button" onClick={handleContactSupport}>
                 ☊ Contact Support
               </button>
             </div>

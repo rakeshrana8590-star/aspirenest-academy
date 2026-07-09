@@ -16656,3 +16656,321 @@ html body #root .ctetExperienceStickyHeader .ctetLockedSearch {
     transform: none !important;
   }
 }
+
+
+/* === CTET Screen 6 support FAQ accordion v1 === */
+.ctetS5LockedFaqItem {
+  display: grid !important;
+  gap: 8px !important;
+}
+
+.ctetS5LockedFaqAnswer {
+  margin: -4px 0 6px !important;
+  padding: 0 18px 12px !important;
+  color: rgba(203, 213, 225, 0.72) !important;
+  font-size: 0.86rem !important;
+  line-height: 1.55 !important;
+}
+
+.ctetS5LockedFaqList button[aria-expanded="true"] {
+  border-color: rgba(245, 158, 11, 0.42) !important;
+  background: rgba(245, 158, 11, 0.08) !important;
+}
+
+@media (max-width: 720px) {
+  .ctetS5LockedFaqAnswer {
+    padding: 0 12px 10px !important;
+    font-size: 12px !important;
+    line-height: 1.42 !important;
+  }
+}\n\n\n
+
+/* === CTET pricing mentor guidance restored premium v5 === */
+html:has(.pricingMasterPage),
+body:has(.pricingMasterPage),
+#root:has(.pricingMasterPage),
+.appShell:has(.pricingMasterPage) {
+  background: #ffffff !important;
+  overflow-x: hidden !important;
+}
+
+html body #root .appShell > .pricingMasterPage.coursePages,
+.pricingMasterPage.coursePages {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  min-width: 100vw !important;
+  margin: 0 calc(50% - 50vw) !important;
+  padding: 42px 0 56px !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 237, 213, 0.78), transparent 28%),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 54%, #ffffff 100%) !important;
+  color: #0f172a !important;
+}
+
+.pricingMasterPage.coursePages::before,
+.pricingMasterPage.coursePages::after {
+  display: none !important;
+  content: none !important;
+}
+
+.pricingMasterPage .sectionHeader {
+  width: min(1120px, calc(100% - 34px)) !important;
+  margin: 0 auto 20px !important;
+  padding: 0 !important;
+  text-align: center !important;
+}
+
+.pricingMasterPage .sectionHeader h2 {
+  margin: 0 !important;
+  color: #0f172a !important;
+  font-size: clamp(2.1rem, 4vw, 3.25rem) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.055em !important;
+}
+
+.pricingMasterPage .sectionHeader p {
+  max-width: 680px !important;
+  margin: 12px auto 0 !important;
+  color: #64748b !important;
+  opacity: 1 !important;
+  font-size: 0.98rem !important;
+  line-height: 1.55 !important;
+}
+
+.ctetPricingMentorGuide {
+  width: min(1120px, calc(100% - 34px)) !important;
+  margin: 0 auto 26px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 0.92fr) minmax(420px, 1.08fr) !important;
+  gap: 18px !important;
+  padding: 20px !important;
+  border-radius: 30px !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 237, 213, 0.96), transparent 34%),
+    linear-gradient(135deg, #ffffff, #f8fafc) !important;
+  border: 1px solid rgba(226, 232, 240, 0.98) !important;
+  box-shadow:
+    0 24px 60px rgba(15, 23, 42, 0.09),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.86) !important;
+}
+
+.ctetPricingMentorGuideText {
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  gap: 11px !important;
+  padding: 10px 12px !important;
+}
+
+.ctetPricingMentorGuideText > span {
+  width: fit-content !important;
+  padding: 8px 13px !important;
+  border-radius: 999px !important;
+  color: #c2410c !important;
+  background: #fff7ed !important;
+  border: 1px solid rgba(251, 146, 60, 0.24) !important;
+  font-size: 0.72rem !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+}
+
+.ctetPricingMentorGuideText h3 {
+  margin: 0 !important;
+  color: #0f172a !important;
+  font-size: clamp(2rem, 3.6vw, 3.25rem) !important;
+  line-height: 1 !important;
+  letter-spacing: -0.055em !important;
+}
+
+.ctetPricingMentorGuideText p {
+  margin: 0 !important;
+  max-width: 560px !important;
+  color: #64748b !important;
+  font-size: 0.98rem !important;
+  line-height: 1.52 !important;
+  font-weight: 760 !important;
+}
+
+.ctetPricingMentorGuideChips {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+.ctetPricingMentorGuideChips b {
+  padding: 7px 10px !important;
+  border-radius: 999px !important;
+  color: #334155 !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.045) !important;
+  font-size: 0.74rem !important;
+}
+
+.ctetPricingMentorGuideForm {
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 11px !important;
+  padding: 16px !important;
+  border-radius: 24px !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(226, 232, 240, 0.98) !important;
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.06) !important;
+}
+
+.ctetPricingMentorGuideForm label {
+  display: grid !important;
+  gap: 7px !important;
+  min-width: 0 !important;
+}
+
+.ctetPricingMentorGuideForm b {
+  color: #334155 !important;
+  font-size: 0.78rem !important;
+  font-weight: 950 !important;
+}
+
+.ctetPricingMentorGuideForm input,
+.ctetPricingMentorGuideForm select,
+.ctetPricingMentorGuideForm textarea {
+  width: 100% !important;
+  min-height: 44px !important;
+  border: 1px solid rgba(203, 213, 225, 0.96) !important;
+  border-radius: 14px !important;
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  padding: 10px 13px !important;
+  outline: none !important;
+  font-size: 0.9rem !important;
+  font-weight: 820 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+}
+
+.ctetPricingMentorGuideForm input::placeholder,
+.ctetPricingMentorGuideForm textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+.ctetPricingMentorGuideForm input:focus,
+.ctetPricingMentorGuideForm select:focus,
+.ctetPricingMentorGuideForm textarea:focus {
+  border-color: rgba(249, 115, 22, 0.46) !important;
+  box-shadow: 0 0 0 4px rgba(251, 146, 60, 0.12) !important;
+}
+
+.ctetPricingMentorGuideForm textarea {
+  min-height: 82px !important;
+  height: 82px !important;
+  max-height: 82px !important;
+  resize: none !important;
+  overflow: hidden !important;
+  line-height: 1.4 !important;
+}
+
+.ctetPricingMentorGuideWide,
+.ctetPricingMentorGuideCta {
+  grid-column: 1 / -1 !important;
+}
+
+.ctetPricingMentorGuideCta {
+  min-height: 52px !important;
+  border-radius: 16px !important;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+  font-size: 0.94rem !important;
+  font-weight: 950 !important;
+  background: linear-gradient(135deg, #16a34a, #22c55e) !important;
+  box-shadow: 0 16px 32px rgba(22, 163, 74, 0.22) !important;
+  transition: transform 180ms ease, box-shadow 180ms ease !important;
+}
+
+.ctetPricingMentorGuideCta:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 20px 38px rgba(22, 163, 74, 0.3) !important;
+}
+
+@media (max-width: 980px) {
+  .ctetPricingMentorGuide {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 720px) {
+  html body #root .appShell > .pricingMasterPage.coursePages,
+  .pricingMasterPage.coursePages {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 18px 0 88px !important;
+    background: #ffffff !important;
+  }
+
+  .pricingMasterPage .sectionHeader {
+    width: calc(100% - 22px) !important;
+    margin-bottom: 14px !important;
+  }
+
+  .pricingMasterPage .sectionHeader h2 {
+    font-size: 1.95rem !important;
+  }
+
+  .pricingMasterPage .sectionHeader p {
+    font-size: 0.84rem !important;
+    line-height: 1.42 !important;
+  }
+
+  .ctetPricingMentorGuide {
+    width: calc(100% - 22px) !important;
+    margin: 0 auto 18px !important;
+    padding: 12px !important;
+    border-radius: 23px !important;
+    gap: 10px !important;
+  }
+
+  .ctetPricingMentorGuideText {
+    padding: 4px !important;
+    gap: 8px !important;
+  }
+
+  .ctetPricingMentorGuideText h3 {
+    font-size: 1.65rem !important;
+    letter-spacing: -0.04em !important;
+  }
+
+  .ctetPricingMentorGuideText p {
+    font-size: 0.82rem !important;
+    line-height: 1.38 !important;
+  }
+
+  .ctetPricingMentorGuideForm {
+    grid-template-columns: 1fr !important;
+    padding: 11px !important;
+    border-radius: 19px !important;
+    gap: 9px !important;
+  }
+
+  .ctetPricingMentorGuideForm input,
+  .ctetPricingMentorGuideForm select,
+  .ctetPricingMentorGuideForm textarea,
+  .ctetPricingMentorGuideCta {
+    min-height: 42px !important;
+    font-size: 0.86rem !important;
+  }
+
+  .ctetPricingMentorGuideForm textarea {
+    height: 72px !important;
+    max-height: 72px !important;
+  }
+}
