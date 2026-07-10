@@ -1,5 +1,9 @@
 import React, { useMemo } from "react";
 
+import {
+  getExperienceEventPresentation,
+} from "../../experience/experienceEventPresentation";
+
 function toDate(value) {
   if (!value) return null;
   if (value instanceof Date) return value;
@@ -11,7 +15,7 @@ function toDate(value) {
 
 function formatDate(value) {
   const date = toDate(value);
-  if (!date) return "Latest mentor guidance";
+  if (!date) return "Schedule pending";
 
   return date.toLocaleDateString("en-IN", {
     day: "2-digit",
@@ -41,7 +45,7 @@ function routeOf(value = "", fallback = "/ctet-tet/roadmaps") {
       return `${parsed.pathname}${parsed.search}${parsed.hash}`;
     }
   } catch {
-    // fallback below
+    // Use the safe fallback below.
   }
 
   if (route.startsWith("/")) return route;
@@ -50,8 +54,8 @@ function routeOf(value = "", fallback = "/ctet-tet/roadmaps") {
   return fallback;
 }
 
-function openRoute(route, navigate) {
-  const target = routeOf(route);
+function openRoute(route, navigate, fallback) {
+  const target = routeOf(route, fallback);
 
   if (/^https?:\/\//i.test(target)) {
     window.open(target, "_blank", "noopener,noreferrer");
@@ -61,70 +65,117 @@ function openRoute(route, navigate) {
   navigate?.(target);
 }
 
-function isMentorEvent(event = {}) {
-  const text = [
-    event.type,
-    event.typeLabel,
-    event.title,
-    event.description,
-    event.mentorName,
-    event.ctaLabel,
-  ]
-    .map((value) => clean(value).toLowerCase())
-    .join(" ");
-
-  return (
-    text.includes("mentor") ||
-    text.includes("varsha") ||
-    text.includes("guidance") ||
-    text.includes("roadmap")
+function hasMentorPresenceOwnership(event = {}) {
+  return Boolean(
+    event.mentorPresence ?? event.raw?.mentorPresence
   );
+}
+
+function getStatusRank(status = "") {
+  const ranks = {
+    live: 0,
+    scheduled: 1,
+    published: 2,
+  };
+
+  return ranks[clean(status).toLowerCase()] ?? 3;
+}
+
+function getSortTime(item = {}) {
+  const presentation = item.presentation || {};
+  const startAt =
+    presentation.timing?.startAt ||
+    item.event?.startAt ||
+    item.event?.scheduleAt;
+
+  return toDate(startAt)?.getTime() ?? null;
+}
+
+function sortMentorItems(left, right) {
+  const leftRank = getStatusRank(left.presentation.status);
+  const rightRank = getStatusRank(right.presentation.status);
+
+  if (leftRank !== rightRank) {
+    return leftRank - rightRank;
+  }
+
+  const leftTime = getSortTime(left);
+  const rightTime = getSortTime(right);
+
+  if (leftRank <= 1) {
+    return (
+      (leftTime ?? Number.MAX_SAFE_INTEGER) -
+      (rightTime ?? Number.MAX_SAFE_INTEGER)
+    );
+  }
+
+  return (rightTime ?? 0) - (leftTime ?? 0);
 }
 
 export default function CtetMentorPresenceBand({
   events = [],
   navigate,
 }) {
-  const mentorEvent = useMemo(() => {
-    return [...(Array.isArray(events) ? events : [])]
-      .filter(isMentorEvent)
-      .sort((a, b) => {
-        const bTime = toDate(b.updatedAt || b.createdAt || b.startAt || b.scheduleAt)?.getTime() || 0;
-        const aTime = toDate(a.updatedAt || a.createdAt || a.startAt || a.scheduleAt)?.getTime() || 0;
-        return bTime - aTime;
-      })[0] || null;
+  const mentorItem = useMemo(() => {
+    return (Array.isArray(events) ? events : [])
+      .filter(hasMentorPresenceOwnership)
+      .map((event) => ({
+        event,
+        presentation:
+          getExperienceEventPresentation(event),
+      }))
+      .sort(sortMentorItems)[0] || null;
   }, [events]);
 
-  const title = mentorEvent?.title || "This Week’s Mentor Focus";
+  const mentorEvent =
+    mentorItem?.presentation?.event ||
+    mentorItem?.event ||
+    null;
+
+  const presentation = mentorItem?.presentation || null;
+
+  const title =
+    mentorEvent?.title ||
+    "This Week's Mentor Focus";
+
   const description =
     mentorEvent?.description ||
     "Complete one roadmap task, revise your weakest chapter, and attempt one focused mock before the next class.";
 
-  const primaryLabel =
-    mentorEvent?.cta?.label ||
-    mentorEvent?.ctaLabel ||
-    "Start Mentor Plan";
+  const primaryCta = presentation?.primaryCta || {
+    label: "Start Mentor Plan",
+    route: "/ctet-tet/roadmaps",
+  };
 
-  const primaryRoute = routeOf(
-    mentorEvent?.cta?.url ||
-      mentorEvent?.ctaUrl ||
-      mentorEvent?.ctaLink ||
-      mentorEvent?.url ||
-      mentorEvent?.link,
-    "/ctet-tet/roadmaps"
-  );
+  const secondaryCta = presentation?.secondaryCta || {
+    label: "Watch Classes",
+    route: "/ctet-tet/videos",
+  };
 
-  const dateLabel = formatDate(
-    mentorEvent?.updatedAt ||
-      mentorEvent?.createdAt ||
-      mentorEvent?.startAt ||
-      mentorEvent?.scheduleAt
-  );
+  const scheduleAt =
+    presentation?.timing?.scheduleAt ||
+    presentation?.timing?.startAt ||
+    mentorEvent?.startAt ||
+    mentorEvent?.scheduleAt;
+
+  const scheduleLabel = mentorEvent
+    ? presentation?.timing?.scheduleLabel || "Starts"
+    : "Latest mentor guidance";
+
+  const mentorName =
+    clean(mentorEvent?.mentorName) ||
+    "Dr. Varsha D. Maru";
 
   return (
-    <section className="ctetS3MentorPresenceBand" aria-label="Latest mentor presence message">
+    <section
+      className="ctetS3MentorPresenceBand"
+      aria-label="Latest mentor presence message"
+    >
       <div className="ctetS3MentorPresenceBandShell">
-        <div className="ctetS3MentorPresenceBandMark" aria-hidden="true">
+        <div
+          className="ctetS3MentorPresenceBandMark"
+          aria-hidden="true"
+        >
           <strong>VM</strong>
           <span>Mentor</span>
         </div>
@@ -133,15 +184,40 @@ export default function CtetMentorPresenceBand({
           <span>MENTOR PRESENCE</span>
           <h2>{title}</h2>
           <p>{description}</p>
-          <small>Dr. Varsha D. Maru • {dateLabel}</small>
+          <small>
+            {mentorName} {"\u2022"}{" "}
+            {mentorEvent
+              ? `${scheduleLabel} ${formatDate(scheduleAt)}`
+              : scheduleLabel}
+          </small>
         </div>
 
         <div className="ctetS3MentorPresenceBandActions">
-          <button type="button" onClick={() => openRoute(primaryRoute, navigate)}>
-            {primaryLabel} ›
+          <button
+            type="button"
+            onClick={() =>
+              openRoute(
+                primaryCta.route,
+                navigate,
+                "/ctet-tet/roadmaps"
+              )
+            }
+          >
+            {primaryCta.label} {"\u203A"}
           </button>
-          <button type="button" className="isGhost" onClick={() => navigate?.("/ctet-tet/videos")}>
-            Watch Classes ›
+
+          <button
+            type="button"
+            className="isGhost"
+            onClick={() =>
+              openRoute(
+                secondaryCta.route,
+                navigate,
+                "/ctet-tet/videos"
+              )
+            }
+          >
+            {secondaryCta.label} {"\u203A"}
           </button>
         </div>
       </div>

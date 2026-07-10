@@ -1,3 +1,4 @@
+import { getExperienceEventPresentation } from "./experienceEventPresentation";
 import {
   buildExperienceEventKey,
   getExperienceDate,
@@ -175,6 +176,7 @@ const buildEventNotification = (event = {}, nowMs) => {
 
   const isLive = status === "live";
   const isFeatured = Boolean(event.featured);
+  const presentation = getExperienceEventPresentation(event);
 
   return {
     key: linkedKey || `experience-event:${cleanText(event.id || fallbackId)}`,
@@ -188,7 +190,7 @@ const buildEventNotification = (event = {}, nowMs) => {
     badge: isLive ? "Live now" : isFeatured ? "Featured" : "Upcoming",
     tone: isLive ? "live" : isFeatured ? "featured" : "event",
     icon: isLive ? "LIVE" : cleanText(event.typeLabel).slice(0, 1) || "E",
-    route: cleanText(event.cta?.url || event.ctaUrl || "/ctet-tet"),
+      route: presentation.primaryCta.route || "/ctet-tet",
     timeAt: startAt,
     sortAt: startAt ? startAt.getTime() : nowMs,
     priority: isLive ? 4 : isFeatured ? 3 : 1,

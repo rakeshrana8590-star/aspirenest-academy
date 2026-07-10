@@ -12996,24 +12996,118 @@ html:has(.ctetS2Screen) {
   text-transform: uppercase;
 }
 
-.ctetS4EmptyMini {
+.ctetS4EmptyMini,
+.ctetS4WhatsNewEmpty {
   display: grid;
-  gap: 4px;
-  padding: 14px;
+  gap: 8px;
+  padding: 22px;
   border: 1px dashed rgba(148, 163, 184, 0.32);
   border-radius: 18px;
   background: rgba(15, 23, 42, 0.46);
   color: rgba(226, 232, 240, 0.78);
 }
 
-.ctetS4EmptyMini strong {
+.ctetS4EmptyMini strong,
+.ctetS4WhatsNewEmpty strong {
   color: #fff7ed;
-  font-size: 0.9rem;
+  font-size: 0.96rem;
 }
 
-.ctetS4EmptyMini span {
-  font-size: 0.78rem;
+.ctetS4EmptyMini span,
+.ctetS4WhatsNewEmpty p {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.ctetS4WhatsNewResults {
+  min-width: 0;
+}
+
+.ctetS4WhatsNewSingleNote {
+  display: grid;
+  gap: 4px;
+  margin-top: 10px;
+  padding: 14px 16px;
+  border: 1px dashed rgba(148, 163, 184, 0.24);
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.3);
+}
+
+.ctetS4WhatsNewSingleNote strong {
+  color: #fff7ed;
+  font-size: 0.84rem;
+}
+
+.ctetS4WhatsNewSingleNote span {
+  color: rgba(203, 213, 225, 0.7);
+  font-size: 0.76rem;
   line-height: 1.4;
+}
+
+.ctetS4WhatsNewPanel.isEmpty {
+  display: grid;
+  grid-template-rows: auto auto minmax(240px, 1fr);
+}
+
+.ctetS4WhatsNewPanel.isEmpty .ctetS4WhatsNewResults {
+  display: grid;
+  min-height: 0;
+}
+
+.ctetS4WhatsNewEmpty {
+  min-height: clamp(220px, 28vw, 360px);
+  height: 100%;
+  place-content: center;
+  justify-items: center;
+  text-align: center;
+}
+
+.ctetS4WhatsNewEmpty > span {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border: 1px solid rgba(245, 158, 11, 0.44);
+  border-radius: 16px;
+  background: rgba(120, 53, 15, 0.22);
+  color: #fbbf24;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.ctetS4WhatsNewEmpty p {
+  max-width: 460px;
+  color: rgba(203, 213, 225, 0.76);
+}
+
+.ctetS4WhatsNewEmpty button {
+  min-height: 42px;
+  margin-top: 6px;
+  padding: 0 18px;
+  border: 1px solid rgba(245, 158, 11, 0.46);
+  border-radius: 14px;
+  background: rgba(120, 53, 15, 0.28);
+  color: #fde68a;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.ctetS4WhatsNewEmpty button:hover,
+.ctetS4WhatsNewEmpty button:focus-visible,
+.ctetS4WhatsNewEmpty button:active {
+  border-color: rgba(251, 191, 36, 0.72);
+  background: rgba(120, 53, 15, 0.4);
+  color: #fff7ed;
+  box-shadow: none;
+  transform: none;
+}
+
+.ctetS4WhatsNewEmpty button:focus-visible {
+  outline: 2px solid rgba(251, 191, 36, 0.66);
+  outline-offset: 2px;
 }
 
 .ctetS4WeekRow.isEmpty {
@@ -17701,4 +17795,346 @@ button.ctetHeaderNotificationBell::after {
 html body #root .ctetExperienceStickyHeader
 button.ctetHeaderNotificationBell {
   overflow: visible !important;
+}
+
+/* C3.1 What's New readability final override */
+.ctetS4LiveContentCenter
+  .ctetS4WhatsNewPanel:not(.isEmpty) {
+  align-self: start !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.ctetS4LiveContentCenter
+  .ctetS4WhatsNewPanel:not(.isEmpty)
+  .ctetS4WhatsNewResults {
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+
+.ctetS4LiveContentCenter
+  .ctetS4WhatsNewResults
+  .ctetS4FeaturedUpdate {
+  display: grid !important;
+  grid-template-columns:
+    42px minmax(0, 1fr) minmax(118px, max-content) 72px !important;
+  gap: 10px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 92px !important;
+  align-items: center !important;
+  overflow: hidden !important;
+}
+
+.ctetS4LiveContentCenter
+  .ctetS4WhatsNewResults
+  .ctetS4UpdateRow {
+  display: grid !important;
+  grid-template-columns:
+    36px minmax(0, 1fr) max-content max-content !important;
+  gap: 10px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 64px !important;
+  align-items: center !important;
+  overflow: hidden !important;
+}
+
+.ctetS4LiveContentCenter
+  .ctetS4WhatsNewResults
+  .ctetS4FeaturedUpdate
+  > div,
+.ctetS4LiveContentCenter
+  .ctetS4WhatsNewResults
+  .ctetS4UpdateRow
+  > div {
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+
+.ctetS4LiveContentCenter
+  .ctetS4WhatsNewResults
+  .ctetS4FeaturedUpdate
+  h4,
+.ctetS4LiveContentCenter
+  .ctetS4WhatsNewResults
+  .ctetS4UpdateRow
+  h4,
+.ctetS4LiveContentCenter
+  .ctetS4WhatsNewResults
+  .ctetS4FeaturedUpdate
+  p,
+.ctetS4LiveContentCenter
+  .ctetS4WhatsNewResults
+  .ctetS4UpdateRow
+  p {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+  -webkit-line-clamp: unset !important;
+  -webkit-box-orient: initial !important;
+}
+
+.ctetS4LiveContentCenter
+  .ctetS4WhatsNewResults
+  .ctetS4FeaturedUpdate
+  h4,
+.ctetS4LiveContentCenter
+  .ctetS4WhatsNewResults
+  .ctetS4UpdateRow
+  h4 {
+  line-height: 1.24 !important;
+}
+
+.ctetS4LiveContentCenter
+  .ctetS4WhatsNewResults
+  .ctetS4FeaturedUpdate
+  p,
+.ctetS4LiveContentCenter
+  .ctetS4WhatsNewResults
+  .ctetS4UpdateRow
+  p {
+  margin: 5px 0 6px !important;
+  line-height: 1.35 !important;
+}
+
+.ctetS4LiveContentCenter
+  .ctetS4WhatsNewResults
+  .ctetS4FeaturedUpdate
+  > strong,
+.ctetS4LiveContentCenter
+  .ctetS4WhatsNewResults
+  .ctetS4UpdateRow
+  > strong {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 180px !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  text-align: center !important;
+  justify-self: end !important;
+  box-shadow: none !important;
+}
+
+.ctetS4LiveContentCenter
+  .ctetS4WhatsNewResults
+  .ctetS4FeaturedUpdate
+  > em {
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  width: auto !important;
+  min-width: 58px !important;
+  max-width: 72px !important;
+  min-height: 32px !important;
+  padding: 6px 8px !important;
+  border: 1px solid rgba(250, 204, 21, 0.42) !important;
+  border-radius: 999px !important;
+  background: rgba(120, 53, 15, 0.32) !important;
+  color: #fde047 !important;
+  font-size: 0.66rem !important;
+  font-style: normal !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.04em !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  justify-self: end !important;
+  box-shadow: none !important;
+}
+
+.ctetS4LiveContentCenter
+  .ctetS4WhatsNewSingleNote {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px 18px !important;
+  min-height: 54px !important;
+  height: auto !important;
+  margin-top: 10px !important;
+  padding: 12px 16px !important;
+}
+
+.ctetS4LiveContentCenter
+  .ctetS4WhatsNewSingleNote
+  span {
+  text-align: right !important;
+}
+
+@media (max-width: 760px) {
+  html body #root
+    .appShell
+    .ctetExperiencePage[data-ctet-mobile-screen="live"]
+    > .ctetS4LiveContentCenter
+    .ctetS4WhatsNewResults
+    .ctetS4FeaturedUpdate,
+  html body #root
+    .appShell
+    .ctetExperiencePage[data-ctet-mobile-screen="live"]
+    > .ctetS4LiveContentCenter
+    .ctetS4WhatsNewResults
+    .ctetS4UpdateRow {
+    grid-template-columns:
+      42px minmax(0, 1fr) !important;
+    overflow: visible !important;
+  }
+
+  html body #root
+    .appShell
+    .ctetExperiencePage[data-ctet-mobile-screen="live"]
+    > .ctetS4LiveContentCenter
+    .ctetS4WhatsNewResults
+    .ctetS4FeaturedUpdate
+    > strong,
+  html body #root
+    .appShell
+    .ctetExperiencePage[data-ctet-mobile-screen="live"]
+    > .ctetS4LiveContentCenter
+    .ctetS4WhatsNewResults
+    .ctetS4FeaturedUpdate
+    > em,
+  html body #root
+    .appShell
+    .ctetExperiencePage[data-ctet-mobile-screen="live"]
+    > .ctetS4LiveContentCenter
+    .ctetS4WhatsNewResults
+    .ctetS4UpdateRow
+    > small,
+  html body #root
+    .appShell
+    .ctetExperiencePage[data-ctet-mobile-screen="live"]
+    > .ctetS4LiveContentCenter
+    .ctetS4WhatsNewResults
+    .ctetS4UpdateRow
+    > strong {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    justify-self: stretch !important;
+  }
+
+  html body #root
+    .appShell
+    .ctetExperiencePage[data-ctet-mobile-screen="live"]
+    > .ctetS4LiveContentCenter
+    .ctetS4WhatsNewResults
+    .ctetS4FeaturedUpdate
+    > em {
+    width: auto !important;
+    min-width: 0 !important;
+    justify-self: start !important;
+  }
+
+  .ctetS4LiveContentCenter
+    .ctetS4WhatsNewSingleNote {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  .ctetS4LiveContentCenter
+    .ctetS4WhatsNewSingleNote
+    span {
+    text-align: left !important;
+  }
+}
+
+/* === CTET Phase 24 notification viewport-fit final v1 === */
+/* Keep the portal inside the viewport and give the hidden-scroll list a clean bottom edge. */
+.ctetHeaderNotificationPanel {
+  overflow: hidden !important;
+}
+
+.ctetNotificationList {
+  max-height: min(540px, calc(100dvh - 190px)) !important;
+  padding-bottom: 12px !important;
+  scroll-padding-block: 8px 16px;
+}
+
+.ctetNotificationRow:last-child {
+  border-bottom: 0 !important;
+}
+
+@media (max-width: 720px) {
+  .ctetNotificationList {
+    max-height: min(420px, calc(100dvh - 202px)) !important;
+    padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
+  }
+}
+
+/* === CTET Phase 24 notification scroll cue final v2 === */
+.ctetHeaderNotificationPanel {
+  position: fixed !important;
+}
+
+.ctetHeaderNotificationPanel.hasScrollableList
+  .ctetNotificationList {
+  padding-bottom: 48px !important;
+}
+
+.ctetNotificationScrollCue {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 5;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border: 0;
+  border-top: 1px solid rgba(233, 185, 79, 0.18);
+  background: #0d1626;
+  color: #e9b94f;
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.ctetNotificationScrollCue b {
+  font-size: 0.86rem;
+  line-height: 1;
+}
+
+.ctetNotificationScrollCue:hover,
+.ctetNotificationScrollCue:focus-visible,
+.ctetNotificationScrollCue:active {
+  background: #0d1626;
+  color: #f1c661;
+  box-shadow: none;
+  filter: none;
+  transform: none;
+}
+
+.ctetNotificationScrollCue:focus-visible {
+  outline: 1px solid rgba(233, 185, 79, 0.58);
+  outline-offset: -2px;
+}
+
+@media (max-width: 720px) {
+  .ctetHeaderNotificationPanel.hasScrollableList
+    .ctetNotificationList {
+    padding-bottom:
+      max(46px, env(safe-area-inset-bottom)) !important;
+  }
+
+  .ctetNotificationScrollCue {
+    min-height: 34px;
+    font-size: 0.63rem;
+  }
 }

@@ -8,6 +8,11 @@ import {
   normalizeExperienceEvent,
   sortExperienceEvents,
 } from "./experienceEventUtils";
+import {
+  getExperienceEventContractIssues,
+  selectExperienceSpotlightEvent,
+} from "./experienceEventPresentation";
+
 
 const buildExperiencePayload = (data = {}, includeCreateFields = false) => {
   const title = String(data.title || "").trim();
@@ -22,6 +27,7 @@ const buildExperiencePayload = (data = {}, includeCreateFields = false) => {
     subject: String(data.subject || "").trim(),
     chapter: String(data.chapter || "").trim(),
     mentorName: String(data.mentorName || "").trim(),
+      mentorPresence: Boolean(data.mentorPresence),
     planType: String(data.planType || "FREE").trim(),
     startAt,
     endAt: data.endAt || "",
@@ -43,6 +49,19 @@ const buildExperiencePayload = (data = {}, includeCreateFields = false) => {
 
   return payload;
 };
+
+const assertExperienceEventContract = (event = {}) => {
+  const errors = getExperienceEventContractIssues(event).filter(
+    (issue) => issue.level === "error"
+  );
+
+  if (!errors.length) return;
+
+  throw new Error(
+    errors.map((issue) => issue.message).join(" ")
+  );
+};
+
 
 const assertUniqueExperienceEvent = async (payload, currentId = "") => {
   if (!payload.experienceKey) return;
@@ -70,6 +89,8 @@ export const createExperienceEvent = async (data = {}) => {
 
   const payload = buildExperiencePayload(data, true);
 
+  assertExperienceEventContract(payload);
+
   await assertUniqueExperienceEvent(payload);
 
   const docRef = await addDoc(collection(db, EXPERIENCE_COLLECTIONS.EVENTS), payload);
@@ -93,6 +114,8 @@ export const updateExperienceEvent = async (eventId, data = {}) => {
   }
 
   const payload = buildExperiencePayload(data);
+
+  assertExperienceEventContract(payload);
 
   await assertUniqueExperienceEvent(payload, id);
 
@@ -147,20 +170,6 @@ export const listPublishedExperienceEvents = async ({ maxCount = 30 } = {}) => {
   ).slice(0, maxCount);
 };
 
-export const resolveFeaturedExperienceEvent = (events = []) => {
-  const normalized = sortExperienceEvents(
-    events.map((event) => normalizeExperienceEvent(event.raw || event))
-  );
-
-  const selectable = normalized.filter((event) =>
-    ["scheduled", "published", "live"].includes(event.status)
-  );
-
-  return (
-    selectable.find((event) => event.featured) ||
-    selectable.find((event) => event.status === "live") ||
-    selectable.find((event) => ["scheduled", "published"].includes(event.status)) ||
-    normalized[0] ||
-    null
-  );
-};
+export const resolveFeaturedExperienceEvent = (
+  events = []
+) => selectExperienceSpotlightEvent(events);

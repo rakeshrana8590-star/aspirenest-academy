@@ -177,6 +177,9 @@ export const normalizeExperienceEvent = (event = {}) => {
     subject: normalizeExperienceText(event.subject),
     chapter: normalizeExperienceText(event.chapter),
     mentorName: normalizeExperienceText(event.mentorName),
+    mentorPresence: Boolean(
+      event.mentorPresence ?? event.raw?.mentorPresence
+    ),
     planType: normalizeExperienceText(event.planType || "FREE"),
     thumbnail: normalizeExperienceText(event.thumbnail || event.thumbnailUrl),
     startAt: event.startAt || null,

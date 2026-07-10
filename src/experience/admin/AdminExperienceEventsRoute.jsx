@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -24,6 +24,9 @@ import {
   normalizeExperienceEvent,
 } from "../experienceEventUtils";
 import {
+  getExperienceEventContractIssues,
+} from "../experienceEventPresentation";
+import {
   EXPERIENCE_NOTIFICATION_SOURCE_TYPES,
   getExperienceSourceItemId,
   getExperienceSourceItemTitle,
@@ -39,6 +42,7 @@ const DEFAULT_FORM = {
   subject: "",
   chapter: "",
   mentorName: "",
+  mentorPresence: false,
   planType: "FREE",
   startAt: "",
   endAt: "",
@@ -119,6 +123,7 @@ export default function AdminExperienceEventsRoute({
   const [saving, setSaving] = useState(false);
   const [editingEventId, setEditingEventId] = useState("");
   const [routeError, setRouteError] = useState("");
+  const routeErrorRef = useRef(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -230,6 +235,20 @@ export default function AdminExperienceEventsRoute({
     loadEvents();
   }, []);
 
+  useEffect(() => {
+    if (!routeError) return undefined;
+
+    const frame = window.requestAnimationFrame(() => {
+      routeErrorRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+      routeErrorRef.current?.focus();
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [routeError]);
+
   const updateField = (field, value) => {
     setForm((current) => ({
       ...current,
@@ -260,6 +279,9 @@ export default function AdminExperienceEventsRoute({
       subject: raw.subject || eventRecord.subject || "",
       chapter: raw.chapter || eventRecord.chapter || "",
       mentorName: raw.mentorName || eventRecord.mentorName || "",
+      mentorPresence: Boolean(
+        raw.mentorPresence ?? eventRecord.mentorPresence
+      ),
       planType: raw.planType || eventRecord.planType || "FREE",
       startAt: getDateInputValue(raw.startAt || eventRecord.startAt),
       endAt: getDateInputValue(raw.endAt || eventRecord.endAt),
@@ -332,6 +354,7 @@ export default function AdminExperienceEventsRoute({
         subject: form.subject.trim(),
         chapter: form.chapter.trim(),
         mentorName: form.mentorName.trim(),
+        mentorPresence: Boolean(form.mentorPresence),
         planType: form.planType.trim() || "FREE",
         startAt: toDateTimeLocalValue(form.startAt),
         endAt: toDateTimeLocalValue(form.endAt),
@@ -344,6 +367,23 @@ export default function AdminExperienceEventsRoute({
         priority: Number(form.priority || 0),
         featured: Boolean(form.featured),
       };
+
+
+        const contractIssues =
+          getExperienceEventContractIssues(payload);
+        const contractErrors = contractIssues.filter(
+          (issue) => issue.level === "error"
+        );
+
+        if (contractErrors.length) {
+          setRouteError(
+            contractErrors
+              .map((issue) => issue.message)
+              .join(" ")
+          );
+          setSaving(false);
+          return;
+        }
 
       if (editingEventId) {
         await updateExperienceEvent(editingEventId, payload);
@@ -377,7 +417,17 @@ export default function AdminExperienceEventsRoute({
       />
 
       {routeError ? (
-        <AdminErrorBox title="Experience Studio Error" message={routeError} />
+        <div
+          ref={routeErrorRef}
+          className="adminExperienceErrorAnchor"
+          tabIndex={-1}
+          aria-live="assertive"
+        >
+          <AdminErrorBox
+            title="Experience Studio Error"
+            message={routeError}
+          />
+        </div>
       ) : null}
 
       {successMessage ? (
@@ -454,6 +504,24 @@ export default function AdminExperienceEventsRoute({
               <span>Mentor</span>
               <input value={form.mentorName} onChange={(event) => updateField("mentorName", event.target.value)} placeholder="Dr. Varsha D. Maru" />
             </label>
+
+              <label>
+                <span>Show in Mentor Presence</span>
+                <select
+                  value={form.mentorPresence ? "yes" : "no"}
+                  onChange={(event) =>
+                    updateField(
+                      "mentorPresence",
+                      event.target.value === "yes"
+                    )
+                  }
+                >
+                  <option value="no">No</option>
+                  <option value="yes">
+                    Yes - Screen 3 Mentor Presence
+                  </option>
+                </select>
+              </label>
 
             <label>
               <span>Featured</span>
@@ -601,6 +669,12 @@ export default function AdminExperienceEventsRoute({
               <div className="adminExperienceEventTop">
                 <AdminStatusPill status={event.status} label={event.status} />
                 {event.featured ? <AdminStatusPill status="approved" label="Featured" /> : null}
+                  {event.mentorPresence ? (
+                    <AdminStatusPill
+                      status="approved"
+                      label="Mentor Presence"
+                    />
+                  ) : null}
               </div>
 
               <h3>{event.title || "Untitled event"}</h3>

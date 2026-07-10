@@ -29,6 +29,7 @@ export default function CtetHeaderNotificationCenter({
 }) {
   const triggerRef = useRef(null);
   const panelRef = useRef(null);
+    const listRef = useRef(null);
   const storageKey = getNotificationStorageKey(user);
 
   const notifications = useMemo(
@@ -47,6 +48,10 @@ export default function CtetHeaderNotificationCenter({
 
   const [isOpen, setIsOpen] = useState(false);
   const [panelStyle, setPanelStyle] = useState(null);
+    const [listScrollState, setListScrollState] = useState({
+      hasOverflow: false,
+      atEnd: true,
+    });
   const [readKeys, setReadKeys] = useState(() =>
     loadReadNotificationKeys(storageKey)
   );
@@ -187,6 +192,54 @@ export default function CtetHeaderNotificationCenter({
     ]);
   };
 
+    const updateListScrollState = useCallback(() => {
+      const list = listRef.current;
+      if (!list) return;
+
+      const hasOverflow =
+        list.scrollHeight > list.clientHeight + 1;
+      const atEnd =
+        !hasOverflow ||
+        list.scrollTop + list.clientHeight >=
+          list.scrollHeight - 2;
+
+      setListScrollState((current) => {
+        if (
+          current.hasOverflow === hasOverflow &&
+          current.atEnd === atEnd
+        ) {
+          return current;
+        }
+
+        return { hasOverflow, atEnd };
+      });
+    }, []);
+
+    useLayoutEffect(() => {
+      if (!isOpen || !panelStyle) return undefined;
+
+      const frame = window.requestAnimationFrame(
+        updateListScrollState
+      );
+
+      return () => window.cancelAnimationFrame(frame);
+    }, [
+      isOpen,
+      panelStyle,
+      notifications.length,
+      updateListScrollState,
+    ]);
+
+    const scrollNotificationList = () => {
+      const list = listRef.current;
+      if (!list) return;
+
+      list.scrollBy({
+        top: Math.max(160, list.clientHeight * 0.72),
+        behavior: "smooth",
+      });
+    };
+
   const openNotification = (notification) => {
     markRead(notification.key);
     setIsOpen(false);
@@ -213,7 +266,12 @@ export default function CtetHeaderNotificationCenter({
           <div
             id="ctet-header-notification-panel"
             ref={panelRef}
-            className="ctetHeaderNotificationPanel"
+              className={
+                "ctetHeaderNotificationPanel" +
+                (listScrollState.hasOverflow
+                  ? " hasScrollableList"
+                  : "")
+              }
             role="dialog"
             aria-modal="false"
             aria-label="AspireNest notifications"
@@ -239,7 +297,12 @@ export default function CtetHeaderNotificationCenter({
               </button>
             </div>
 
-            <div className="ctetNotificationList" aria-live="polite">
+              <div
+                ref={listRef}
+                className="ctetNotificationList"
+                aria-live="polite"
+                onScroll={updateListScrollState}
+              >
               {notifications.length > 0 ? (
                 notifications.map((notification) => {
                   const isUnread = !readKeySet.has(notification.key);
@@ -284,6 +347,19 @@ export default function CtetHeaderNotificationCenter({
                 </div>
               )}
             </div>
+
+              {listScrollState.hasOverflow &&
+              !listScrollState.atEnd ? (
+                <button
+                  type="button"
+                  className="ctetNotificationScrollCue"
+                  onClick={scrollNotificationList}
+                  aria-label="Scroll to more notifications"
+                >
+                  <span>More updates</span>
+                  <b aria-hidden="true">{"\u2193"}</b>
+                </button>
+              ) : null}
           </div>,
           document.body
         )

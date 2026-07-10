@@ -150,6 +150,9 @@ import { useExamSecurity } from "./components/exam/useExamSecurity.js";
 import { useMockTestActionMenu } from "./components/exam/useMockTestActionMenu.js";
 import useExperienceEvents from "./experience/useExperienceEvents.js";
 import {
+  getExperienceEventPresentation,
+} from "./experience/experienceEventPresentation.js";
+import {
   downloadMockTestXlsxTemplate, downloadMockTestCsvTemplate, } from "./components/exam/mockTestTemplateDownloads.js";
 import {
   convertGoogleDriveUrlToDownloadUrl, importMockTestJsonAsDraft, buildMockTestImportPayloadFromRows, readMockTestWorkbookRowsFromArrayBuffer, } from "./components/exam/mockTestImportUtils.js";
@@ -245,10 +248,63 @@ export default function App() {
     };
   }, []);
 
-  const ctetFeaturedExperienceStartAt =
-    typeof ctetFeaturedExperienceEvent?.startAt?.toDate === "function"
-      ? ctetFeaturedExperienceEvent.startAt.toDate()
-      : ctetFeaturedExperienceEvent?.startAt || null;
+  const ctetFeaturedEventPresentation =
+    ctetFeaturedExperienceEvent
+      ? getExperienceEventPresentation(
+          ctetFeaturedExperienceEvent
+        )
+      : null;
+
+  const ctetFeaturedExperienceScheduleAt =
+    ctetFeaturedEventPresentation?.timing
+      ?.scheduleAt || null;
+
+  const ctetFeaturedExperienceCountdownAt =
+    ctetFeaturedEventPresentation?.timing
+      ?.countdownAt || null;
+
+  const ctetFeaturedExperienceScheduleLabel =
+    ctetFeaturedEventPresentation?.timing
+      ?.scheduleLabel || "Schedule";
+
+  const ctetFeaturedExperienceDateLabel =
+    ctetFeaturedExperienceScheduleAt
+      ? ctetFeaturedExperienceScheduleAt
+          .toLocaleDateString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })
+      : "Schedule soon";
+
+  const ctetFeaturedExperienceTimeLabel =
+    ctetFeaturedExperienceScheduleAt
+      ? ctetFeaturedExperienceScheduleAt
+          .toLocaleTimeString("en-IN", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+      : "Time to be announced";
+
+  const openCtetExperienceTarget = (
+    targetUrl,
+    fallbackUrl = "/ctet-tet"
+  ) => {
+    const safeTarget = String(
+      targetUrl || fallbackUrl
+    ).trim();
+
+    if (/^https?:\/\//i.test(safeTarget)) {
+      window.open(
+        safeTarget,
+        "_blank",
+        "noopener,noreferrer"
+      );
+      return;
+    }
+
+    navigate(safeTarget || fallbackUrl);
+  };
 
   React.useEffect(() => {
     document.body.classList.toggle(
@@ -4421,8 +4477,10 @@ return (
                 ctetFeaturedExperienceEvent.chapter
                   ? "CHAPTER " + ctetFeaturedExperienceEvent.chapter
                   : null,
-                ctetFeaturedExperienceStartAt
-                  ? "START " + new Date(ctetFeaturedExperienceStartAt).toLocaleString("en-IN", {
+                ctetFeaturedExperienceScheduleAt
+                  ? ctetFeaturedExperienceScheduleLabel.toUpperCase() +
+                    " " +
+                    ctetFeaturedExperienceScheduleAt.toLocaleString("en-IN", {
                       day: "2-digit",
                       month: "short",
                       hour: "2-digit",
@@ -4574,48 +4632,100 @@ return (
       <div className="ctetLiveHeartbeat">
         <div className="ctetLiveInfo">
           <div className="ctetLiveBadgeRow">
-            <span className={ctetFeaturedExperienceEvent?.status === "live" ? "ctetLiveBadge isLive" : "ctetLiveBadge"}>
-              {ctetFeaturedExperienceEvent?.status === "live" ? "● LIVE CLASS" : ctetFeaturedExperienceEvent ? "UPCOMING" : ctetExperienceLoading ? "LOADING" : "SCHEDULE SOON"}
+            <span
+              className={
+                ctetFeaturedEventPresentation?.status === "live"
+                  ? "ctetLiveBadge isLive"
+                  : "ctetLiveBadge"
+              }
+            >
+              {ctetFeaturedEventPresentation
+                ? `${
+                    ctetFeaturedEventPresentation.status === "live"
+                      ? "● "
+                      : ""
+                  }${ctetFeaturedEventPresentation.statusLabel.toUpperCase()}`
+                : ctetExperienceLoading
+                  ? "LOADING"
+                  : "SCHEDULE SOON"}
             </span>
-            <strong>Today’s Featured Class</strong>
+            <strong>
+              {ctetFeaturedEventPresentation?.headlineLabel ||
+                (ctetExperienceLoading
+                  ? "Syncing latest academy event"
+                  : "Next academy event")}
+            </strong>
           </div>
 
           <h2>
-            {ctetFeaturedExperienceEvent?.title || (ctetExperienceLoading ? "Checking latest AspireNest event" : "Live class schedule will appear here soon")}
+            {ctetFeaturedExperienceEvent?.title ||
+              (ctetExperienceLoading
+                ? "Checking latest AspireNest event"
+                : "New class, mock test, or challenge will appear here")}
           </h2>
 
           <p>
-            {ctetFeaturedExperienceEvent?.description || (ctetExperienceLoading ? "Fetching live class, mock test, and event updates." : "Upcoming live class, mock test, or workshop details will be shown from real event data.")}
+            {ctetFeaturedExperienceEvent?.description ||
+              (ctetExperienceLoading
+                ? "Fetching real class, mock test, challenge, and workshop updates."
+                : "Upcoming academy event details will appear here when published by the admin team.")}
           </p>
         </div>
 
         <div className="ctetLiveMentor">
           <div className="ctetMentorAvatar">VM</div>
           <div>
-            <h3>Dr. Varsha D. Maru</h3>
+            <h3>
+              {ctetFeaturedEventPresentation?.mentorName ||
+                "Dr. Varsha D. Maru"}
+            </h3>
             <p>Ph.D. Educator & CTET/TET Mentor</p>
-            <small>{ctetFeaturedExperienceEvent?.subject || "Expert guidance"}</small>
+            <small>
+              {ctetFeaturedExperienceEvent?.subject ||
+                ctetFeaturedEventPresentation?.typeLabel ||
+                "Expert guidance"}
+            </small>
           </div>
         </div>
 
         <div className="ctetLiveSchedule">
           <div>
             <span>📅</span>
-            <strong>{ctetFeaturedExperienceEvent?.typeLabel || "Live Learning"}</strong>
+            <strong>
+              {ctetFeaturedExperienceScheduleLabel}{" "}
+              {ctetFeaturedExperienceDateLabel}
+            </strong>
           </div>
           <div>
             <span>⏱️</span>
-            <strong>{ctetFeaturedExperienceEvent?.planType || "CTET/TET"}</strong>
+            <strong>
+              {ctetFeaturedExperienceTimeLabel}
+            </strong>
           </div>
         </div>
 
         <div className="ctetLiveCountdown">
-          {ctetFeaturedExperienceStartAt ? (
+          {ctetFeaturedExperienceCountdownAt ? (
             <ExperienceCountdown
-              targetAt={ctetFeaturedExperienceStartAt}
-              label="Starts in"
-              completedLabel={ctetFeaturedExperienceEvent?.status === "live" ? "Live now" : "Started"}
+              targetAt={
+                ctetFeaturedExperienceCountdownAt
+              }
+              label={
+                ctetFeaturedEventPresentation?.timing
+                  ?.countdownLabel || "Starts in"
+              }
+              completedLabel={
+                ctetFeaturedEventPresentation?.timing
+                  ?.countdownCompletedLabel ||
+                "Started"
+              }
             />
+          ) : ctetFeaturedEventPresentation?.status ===
+            "live" ? (
+            <div className="ctetCountdownEmpty">
+              <strong>Live now</strong>
+              <span>End time not set</span>
+            </div>
           ) : (
             <div className="ctetCountdownEmpty">
               <strong>Schedule</strong>
@@ -4628,23 +4738,29 @@ return (
           <button
             type="button"
             className="ctetPrimaryCta"
-            onClick={() => {
-                const targetUrl = String(ctetFeaturedExperienceEvent?.cta?.url || "/ctet-tet/videos").trim();
-
-                if (/^https?:\/\//i.test(targetUrl)) {
-                  window.open(targetUrl, "_blank", "noopener,noreferrer");
-                  return;
-                }
-
-                navigate(targetUrl);
-              }}
+            onClick={() =>
+              openCtetExperienceTarget(
+                ctetFeaturedEventPresentation?.primaryCta.route,
+                "/ctet-tet"
+              )
+            }
           >
-            {ctetFeaturedExperienceEvent?.status === "live" ? "Join Live Class" : ctetFeaturedExperienceEvent ? "View Details" : "View Classes"}
+            {ctetFeaturedEventPresentation?.primaryCta.label ||
+              "View Learning Hub"}
             <strong>›</strong>
           </button>
 
-          <button type="button" onClick={() => navigate("/ctet-tet/videos")}>
-            View Classes
+          <button
+            type="button"
+            onClick={() =>
+              openCtetExperienceTarget(
+                ctetFeaturedEventPresentation?.secondaryCta.route,
+                "/ctet-tet"
+              )
+            }
+          >
+            {ctetFeaturedEventPresentation?.secondaryCta.label ||
+              "Learning Hub"}
             <strong>›</strong>
           </button>
         </div>
