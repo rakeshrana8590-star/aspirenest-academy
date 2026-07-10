@@ -17155,3 +17155,550 @@ html body #root .appShell > .pricingMasterPage.coursePages,
     pointer-events: none !important;
   }
 }
+
+/* === CTET Launch Pack 4 Phase 24 notification center v2 portal popover === */
+
+html body #root .ctetExperienceStickyHeader
+.ctetLockedTools {
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+}
+
+html body #root .ctetExperienceStickyHeader
+.ctetHeaderNotificationWrap {
+  position: relative !important;
+  z-index: 10015 !important;
+  display: flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+}
+
+html body #root .ctetExperienceStickyHeader
+button.ctetHeaderNotificationBell {
+  all: unset !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(237, 181, 61, 0.46) !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(
+      145deg,
+      #111b2d 0%,
+      #07101f 100%
+    ) !important;
+  color: #f4c45e !important;
+  box-shadow:
+    0 11px 24px rgba(0, 0, 0, 0.28),
+    inset 0 0 0 1px rgba(237, 181, 61, 0.05),
+    0 0 0 1px rgba(237, 181, 61, 0.04) !important;
+  font-family: inherit !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease !important;
+}
+
+html body #root .ctetExperienceStickyHeader
+button.ctetHeaderNotificationBell:hover,
+html body #root .ctetExperienceStickyHeader
+button.ctetHeaderNotificationBell.isOpen {
+  transform: translateY(-1px) !important;
+  border-color: rgba(249, 199, 91, 0.78) !important;
+  box-shadow:
+    0 15px 32px rgba(0, 0, 0, 0.36),
+    inset 0 0 0 1px rgba(249, 199, 91, 0.12),
+    0 0 0 3px rgba(237, 181, 61, 0.1) !important;
+}
+
+html body #root .ctetExperienceStickyHeader
+button.ctetHeaderNotificationBell:focus-visible {
+  outline: 3px solid rgba(249, 199, 91, 0.3) !important;
+  outline-offset: 3px !important;
+}
+
+html body #root .ctetExperienceStickyHeader
+button.ctetHeaderNotificationBell svg {
+  width: 22px !important;
+  height: 22px !important;
+  display: block !important;
+  overflow: visible !important;
+  color: #f4c45e !important;
+}
+
+html body #root .ctetExperienceStickyHeader
+button.ctetHeaderNotificationBell svg path {
+  stroke: currentColor !important;
+}
+
+html body #root .ctetExperienceStickyHeader
+.ctetHeaderNotificationCount {
+  position: absolute !important;
+  top: -6px !important;
+  right: -6px !important;
+  min-width: 20px !important;
+  height: 20px !important;
+  display: grid !important;
+  place-items: center !important;
+  box-sizing: border-box !important;
+  padding: 0 5px !important;
+  border: 2px solid #07101f !important;
+  border-radius: 999px !important;
+  background: linear-gradient(145deg, #ff7849, #d92f45) !important;
+  color: #ffffff !important;
+  font-size: 0.62rem !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  box-shadow: 0 5px 13px rgba(217, 47, 69, 0.38) !important;
+}
+
+.ctetHeaderNotificationPanel {
+  position: fixed !important;
+  z-index: 2147482000 !important;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(239, 190, 77, 0.28);
+  border-radius: 24px;
+  background:
+    radial-gradient(
+      circle at 88% 0%,
+      rgba(222, 168, 55, 0.16),
+      transparent 34%
+    ),
+    linear-gradient(
+      155deg,
+      #101a2c 0%,
+      #091221 58%,
+      #07101d 100%
+    );
+  color: #f8fafc;
+  box-shadow:
+    0 34px 90px rgba(0, 0, 0, 0.56),
+    0 8px 26px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  transform-origin: top right;
+  animation: ctetNotificationPortalEnter 170ms ease-out;
+}
+
+@keyframes ctetNotificationPortalEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-7px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.ctetNotificationPanelHeader {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 19px 19px 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.075);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.025),
+      transparent
+    );
+}
+
+.ctetNotificationPanelHeader > div {
+  min-width: 0;
+}
+
+.ctetNotificationPanelHeader span {
+  display: block;
+  color: #e9b94f;
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+}
+
+.ctetNotificationPanelHeader h3 {
+  margin: 5px 0 3px;
+  color: #ffffff;
+  font-size: 1.2rem;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+.ctetNotificationPanelHeader p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.ctetNotificationPanelHeader button {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid rgba(233, 185, 79, 0.24);
+  border-radius: 11px;
+  background: rgba(233, 185, 79, 0.08);
+  color: #f1c661;
+  font-size: 0.66rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.ctetNotificationPanelHeader button:hover:not(:disabled) {
+  background: rgba(233, 185, 79, 0.14);
+  border-color: rgba(233, 185, 79, 0.42);
+}
+
+.ctetNotificationPanelHeader button:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+
+.ctetNotificationList {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: min(448px, calc(100dvh - 230px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.ctetNotificationList::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.ctetNotificationRow {
+  position: relative;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 43px minmax(0, 1fr) 14px;
+  align-items: start;
+  gap: 11px;
+  box-sizing: border-box;
+  padding: 13px 16px;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: transparent;
+  color: #ffffff;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.ctetNotificationRow:hover,
+.ctetNotificationRow:focus-visible {
+  background: #101b2d;
+  box-shadow: inset 3px 0 0 rgba(231, 183, 76, 0.48);
+  outline: none;
+}
+
+.ctetNotificationRow.isUnread {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(218, 164, 49, 0.14),
+      rgba(218, 164, 49, 0.025)
+    );
+}
+
+.ctetNotificationRow.isUnread::before {
+  content: "";
+  position: absolute;
+  top: 19px;
+  left: 5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: #f4bd4c;
+  box-shadow: 0 0 0 3px rgba(244, 189, 76, 0.11);
+}
+
+.ctetNotificationRowIcon {
+  width: 43px;
+  height: 43px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  background: #172337;
+  color: #dce6f5;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.ctetNotificationRowIcon.is-live {
+  border-color: rgba(255, 121, 121, 0.2);
+  background: linear-gradient(145deg, #d53b49, #8f1825);
+  color: #ffffff;
+  font-size: 0.53rem;
+  box-shadow: 0 8px 20px rgba(193, 41, 56, 0.2);
+}
+
+.ctetNotificationRowIcon.is-featured,
+.ctetNotificationRowIcon.is-announcement {
+  border-color: rgba(244, 196, 94, 0.22);
+  background: linear-gradient(145deg, #f0ce75, #b98018);
+  color: #2d1d04;
+}
+
+.ctetNotificationRowIcon.is-event {
+  background: linear-gradient(145deg, #263955, #17253b);
+  color: #dbeafe;
+}
+
+.ctetNotificationRowIcon.is-note,
+.ctetNotificationRowIcon.is-video,
+.ctetNotificationRowIcon.is-roadmap {
+  border-color: rgba(96, 165, 250, 0.18);
+  background: linear-gradient(145deg, #203657, #14243c);
+  color: #bfdbfe;
+}
+
+.ctetNotificationRowIcon.is-mock,
+.ctetNotificationRowIcon.is-result {
+  border-color: rgba(74, 222, 128, 0.18);
+  background: linear-gradient(145deg, #1f493b, #123027);
+  color: #bbf7d0;
+}
+
+.ctetNotificationRowIcon.is-current-affairs {
+  border-color: rgba(196, 181, 253, 0.18);
+  background: linear-gradient(145deg, #3a315d, #251f42);
+  color: #ddd6fe;
+}
+
+.ctetNotificationRowCopy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.ctetNotificationRowMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ctetNotificationRowMeta b {
+  color: #e7b74c;
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.ctetNotificationRowMeta small {
+  color: #718096;
+  font-size: 0.63rem;
+  white-space: nowrap;
+}
+
+.ctetNotificationRowCopy > strong {
+  overflow: hidden;
+  color: #f8fafc;
+  font-size: 0.82rem;
+  font-weight: 850;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ctetNotificationRowCopy > span:last-child {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #9aa8bc;
+  font-size: 0.69rem;
+  line-height: 1.42;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.ctetNotificationRow > em {
+  align-self: center;
+  color: #d6a83e;
+  font-size: 1.18rem;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.ctetNotificationEmpty {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 36px 24px;
+  text-align: center;
+}
+
+.ctetNotificationEmpty > span {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(74, 222, 128, 0.15);
+  border-radius: 15px;
+  background: rgba(34, 197, 94, 0.1);
+  color: #79d99d;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.ctetNotificationEmpty strong {
+  color: #f8fafc;
+  font-size: 0.88rem;
+}
+
+.ctetNotificationEmpty p {
+  max-width: 270px;
+  margin: 0;
+  color: #8290a4;
+  font-size: 0.71rem;
+  line-height: 1.48;
+}
+
+@media (max-width: 720px) {
+  html body #root .ctetExperienceStickyHeader
+  .ctetLockedTools {
+    max-width: 164px !important;
+    gap: 6px !important;
+  }
+
+  html body #root .ctetExperienceStickyHeader
+  button.ctetHeaderNotificationBell {
+    width: 39px !important;
+    height: 39px !important;
+    min-width: 39px !important;
+    border-radius: 13px !important;
+  }
+
+  html body #root .ctetExperienceStickyHeader
+  button.ctetHeaderNotificationBell svg {
+    width: 19px !important;
+    height: 19px !important;
+  }
+
+  html body #root .ctetExperienceStickyHeader
+  .ctetHeaderNotificationCount {
+    top: -5px !important;
+    right: -5px !important;
+    min-width: 18px !important;
+    height: 18px !important;
+    font-size: 0.56rem !important;
+  }
+
+  .ctetHeaderNotificationPanel {
+    border-radius: 20px;
+  }
+
+  .ctetNotificationPanelHeader {
+    gap: 10px;
+    padding: 15px 14px 12px;
+  }
+
+  .ctetNotificationPanelHeader h3 {
+    font-size: 1.05rem;
+  }
+
+  .ctetNotificationPanelHeader button {
+    min-height: 32px;
+    padding: 6px 8px;
+    font-size: 0.61rem;
+  }
+
+  .ctetNotificationList {
+    max-height: calc(100dvh - 224px);
+  }
+
+  .ctetNotificationRow {
+    grid-template-columns: 39px minmax(0, 1fr) 12px;
+    gap: 9px;
+    padding: 11px 12px;
+  }
+
+  .ctetNotificationRowIcon {
+    width: 39px;
+    height: 39px;
+    border-radius: 13px;
+  }
+
+  .ctetNotificationRowCopy > strong {
+    font-size: 0.77rem;
+  }
+
+  .ctetNotificationRowCopy > span:last-child {
+    font-size: 0.66rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctetHeaderNotificationPanel {
+    animation: none;
+  }
+
+  .ctetHeaderNotificationBell,
+  .ctetNotificationRow {
+    transition: none !important;
+  }
+}
+
+/* === CTET Phase 24 notification minimal no-flash guard v4 === */
+/* Only remove wrapper flash/pseudo overlays. Bell and badge visuals remain untouched. */
+
+html body #root .ctetExperienceStickyHeader
+.ctetLockedTools:hover,
+html body #root .ctetExperienceStickyHeader
+.ctetLockedTools:focus-within,
+html body #root .ctetExperienceStickyHeader
+.ctetHeaderNotificationWrap:hover,
+html body #root .ctetExperienceStickyHeader
+.ctetHeaderNotificationWrap:focus-within {
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+html body #root .ctetExperienceStickyHeader
+.ctetLockedTools::before,
+html body #root .ctetExperienceStickyHeader
+.ctetLockedTools::after,
+html body #root .ctetExperienceStickyHeader
+.ctetHeaderNotificationWrap::before,
+html body #root .ctetExperienceStickyHeader
+.ctetHeaderNotificationWrap::after,
+html body #root .ctetExperienceStickyHeader
+button.ctetHeaderNotificationBell::before,
+html body #root .ctetExperienceStickyHeader
+button.ctetHeaderNotificationBell::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+html body #root .ctetExperienceStickyHeader
+button.ctetHeaderNotificationBell {
+  overflow: visible !important;
+}

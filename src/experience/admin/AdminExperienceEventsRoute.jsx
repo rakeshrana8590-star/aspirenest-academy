@@ -23,6 +23,12 @@ import {
   getExperienceEventTypeLabel,
   normalizeExperienceEvent,
 } from "../experienceEventUtils";
+import {
+  EXPERIENCE_NOTIFICATION_SOURCE_TYPES,
+  getExperienceSourceItemId,
+  getExperienceSourceItemTitle,
+  getExperienceSourceItemType,
+} from "../experienceNotificationSourceUtils";
 import "./adminExperienceEvents.css";
 
 const DEFAULT_FORM = {
@@ -40,12 +46,33 @@ const DEFAULT_FORM = {
   ctaType: EXPERIENCE_CTA_TYPES.VIEW_DETAILS,
   ctaLabel: "",
   ctaUrl: "",
+  sourceType: "",
+  sourceId: "",
   priority: 0,
   featured: false,
 };
 
 const STATUS_FILTERS = ["ALL", ...Object.values(EXPERIENCE_EVENT_STATUS)];
 const TYPE_FILTERS = ["ALL", ...Object.values(EXPERIENCE_EVENT_TYPES)];
+
+const SOURCE_TYPE_OPTIONS = [
+  { value: "", label: "No linked source" },
+  { value: EXPERIENCE_NOTIFICATION_SOURCE_TYPES.MOCK_TEST, label: "Mock Test" },
+  { value: EXPERIENCE_NOTIFICATION_SOURCE_TYPES.VIDEO, label: "Video / Live Class" },
+  { value: EXPERIENCE_NOTIFICATION_SOURCE_TYPES.NOTES, label: "Notes / PDF" },
+  { value: EXPERIENCE_NOTIFICATION_SOURCE_TYPES.CURRENT_AFFAIRS, label: "Current Affairs" },
+  { value: EXPERIENCE_NOTIFICATION_SOURCE_TYPES.ROADMAP, label: "Roadmap / Mission" },
+];
+
+const getSourceOptionLabel = (item = {}) =>
+  [
+    getExperienceSourceItemTitle(item),
+    item.subject || item.course || item.examType,
+    item.chapter || item.month,
+  ]
+    .map((value) => String(value || "").trim())
+    .filter(Boolean)
+    .join(" • ");
 
 const toDateTimeLocalValue = (value = "") => String(value || "").trim();
 
@@ -79,7 +106,11 @@ const formatDateTime = (value) => {
   });
 };
 
-export default function AdminExperienceEventsRoute() {
+export default function AdminExperienceEventsRoute({
+  universalContent = [],
+  currentAffairs = [],
+  roadmaps = [],
+}) {
   const navigate = useNavigate();
 
   const [events, setEvents] = useState([]);
@@ -92,6 +123,52 @@ export default function AdminExperienceEventsRoute() {
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [typeFilter, setTypeFilter] = useState("ALL");
+
+  const sourceOptions = useMemo(() => {
+    const selectedType = String(form.sourceType || "").trim();
+    if (!selectedType) return [];
+
+    const contentOptions = (Array.isArray(universalContent) ? universalContent : []).map((item) => ({
+      item,
+      sourceType: getExperienceSourceItemType(item),
+    }));
+
+    const currentAffairOptions = (
+      Array.isArray(currentAffairs) ? currentAffairs : []
+    ).map((item) => ({
+      item,
+      sourceType: getExperienceSourceItemType(
+        item,
+        EXPERIENCE_NOTIFICATION_SOURCE_TYPES.CURRENT_AFFAIRS
+      ),
+    }));
+
+    const roadmapOptions = (Array.isArray(roadmaps) ? roadmaps : []).map((item) => ({
+      item,
+      sourceType: EXPERIENCE_NOTIFICATION_SOURCE_TYPES.ROADMAP,
+    }));
+
+    const seenIds = new Set();
+
+    return [...contentOptions, ...currentAffairOptions, ...roadmapOptions]
+      .filter(({ item, sourceType }) => {
+        const itemId = getExperienceSourceItemId(item);
+        const itemTitle = getExperienceSourceItemTitle(item);
+
+        if (!itemId || !itemTitle || sourceType !== selectedType) return false;
+
+        const uniqueKey = `${sourceType}:${itemId}`;
+        if (seenIds.has(uniqueKey)) return false;
+        seenIds.add(uniqueKey);
+        return true;
+      })
+      .map(({ item }) => item)
+      .sort((first, second) =>
+        getExperienceSourceItemTitle(first).localeCompare(
+          getExperienceSourceItemTitle(second)
+        )
+      );
+  }, [currentAffairs, form.sourceType, roadmaps, universalContent]);
 
   const normalizedEvents = useMemo(
     () => events.map((event) => normalizeExperienceEvent(event.raw || event)),
@@ -113,6 +190,8 @@ export default function AdminExperienceEventsRoute() {
         event.planType,
         event.typeLabel,
         event.status,
+        event.sourceType,
+        event.sourceId,
       ]
         .join(" ")
         .toLowerCase();
@@ -188,6 +267,11 @@ export default function AdminExperienceEventsRoute() {
       ctaType: raw.ctaType || eventRecord.cta?.type || EXPERIENCE_CTA_TYPES.VIEW_DETAILS,
       ctaLabel: raw.ctaLabel || eventRecord.cta?.label || "",
       ctaUrl: raw.ctaUrl || eventRecord.cta?.url || "",
+      sourceType:
+        (raw.sourceType || eventRecord.sourceType) === "manual"
+          ? ""
+          : raw.sourceType || eventRecord.sourceType || "",
+      sourceId: raw.sourceId || eventRecord.sourceId || "",
       priority: Number(raw.priority || eventRecord.priority || 0),
       featured: Boolean(raw.featured || eventRecord.featured),
     });
@@ -231,6 +315,11 @@ export default function AdminExperienceEventsRoute() {
       return;
     }
 
+    if (form.sourceType && !form.sourceId) {
+      setRouteError("Select the exact published linked source item.");
+      return;
+    }
+
     setSaving(true);
     setRouteError("");
     setSuccessMessage("");
@@ -250,6 +339,8 @@ export default function AdminExperienceEventsRoute() {
         ctaType: form.ctaType,
         ctaLabel: form.ctaLabel.trim(),
         ctaUrl: form.ctaUrl.trim(),
+        sourceType: form.sourceType.trim() || "manual",
+        sourceId: form.sourceType ? form.sourceId.trim() : "",
         priority: Number(form.priority || 0),
         featured: Boolean(form.featured),
       };
@@ -406,6 +497,51 @@ export default function AdminExperienceEventsRoute() {
               <input value={form.ctaUrl} onChange={(event) => updateField("ctaUrl", event.target.value)} placeholder="/ctet-tet/videos or full link" />
             </label>
 
+            <label>
+              <span>Linked Source Type</span>
+              <select
+                value={form.sourceType}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    sourceType: event.target.value,
+                    sourceId: "",
+                  }))
+                }
+              >
+                {SOURCE_TYPE_OPTIONS.map((option) => (
+                  <option key={option.value || "manual"} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              <span>Linked Source Item</span>
+              <select
+                value={form.sourceId}
+                disabled={!form.sourceType}
+                onChange={(event) => updateField("sourceId", event.target.value)}
+              >
+                <option value="">
+                  {form.sourceType
+                    ? sourceOptions.length
+                      ? "Select exact published item"
+                      : "No published items available"
+                    : "Select source type first"}
+                </option>
+                {sourceOptions.map((item) => (
+                  <option
+                    key={getExperienceSourceItemId(item)}
+                    value={getExperienceSourceItemId(item)}
+                  >
+                    {getSourceOptionLabel(item)}
+                  </option>
+                ))}
+              </select>
+            </label>
+
             <label className="isWide">
               <span>Description</span>
               <textarea value={form.description} onChange={(event) => updateField("description", event.target.value)} placeholder="Short public description" rows={4} />
@@ -478,6 +614,7 @@ export default function AdminExperienceEventsRoute() {
                 <div><span>Start</span><strong>{formatDateTime(event.startAt)}</strong></div>
                 <div><span>CTA</span><strong>{event.cta?.label || event.ctaLabel || "-"}</strong></div>
                 <div><span>CTA Type</span><strong>{event.cta?.type || event.ctaType || "-"}</strong></div>
+                <div><span>Linked Source</span><strong>{event.sourceId ? `${event.sourceType} • ${event.sourceId}` : "Manual event"}</strong></div>
                 <div><span>Media</span><strong>{event.thumbnail ? "Thumbnail ready" : "-"}</strong></div>
               </div>
 

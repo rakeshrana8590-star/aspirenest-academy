@@ -58,11 +58,13 @@ import CtetMentorPresenceBand from "./components/ctet/CtetMentorPresenceBand.jsx
 import CtetSuccessWallScreen from "./components/ctet/CtetSuccessWallScreen.jsx";
 import CtetSupportFooterScreen from "./components/ctet/CtetSupportFooterScreen.jsx";
 import CtetPricingMentorGuidance from "./components/ctet/CtetPricingMentorGuidance.jsx";
+import CtetPremiumHeader from "./components/ctet/CtetPremiumHeader.jsx";
 import {
   StudentRoadmapHub, StudentRoadmapDetail, StudentRoadmapDay, MyAspirePath, } from "./components/roadmaps/StudentRoadmaps.jsx";
 
 import {
   RoadmapStudioHome, RoadmapImportRoute, RoadmapEditRoute, RoadmapManageRoute, RoadmapScheduleRoute, RoadmapProgressRoute, RoadmapResourcesRoute, } from "./components/roadmaps/RoadmapStudio.jsx";
+import { loadPublishedStudyRoadmaps } from "./services/roadmapService";
 
 import VideoManagerHome from "./components/video/VideoManagerHome.jsx";
 import VideoClassFormRoute from "./components/video/VideoClassFormRoute.jsx";
@@ -209,24 +211,44 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const ctetExperienceEnabled = location.pathname === "/ctet-tet";
+  const isExamAttemptPage = location.pathname.includes(
+    "/ctet-tet/mock-tests/attempt/"
+  );
+
   const {
     events: ctetExperienceEvents,
     upcomingEvents: ctetUpcomingExperienceEvents,
     featuredEvent: ctetFeaturedExperienceEvent,
     loading: ctetExperienceLoading,
   } = useExperienceEvents({
-    enabled: ctetExperienceEnabled,
+    enabled: !isExamAttemptPage,
     maxCount: 10,
   });
+
+  const [ctetNotificationRoadmaps, setCtetNotificationRoadmaps] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+
+    loadPublishedStudyRoadmaps()
+      .then((items) => {
+        if (active) {
+          setCtetNotificationRoadmaps(Array.isArray(items) ? items : []);
+        }
+      })
+      .catch((error) => {
+        console.error("Notification roadmaps load failed:", error);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const ctetFeaturedExperienceStartAt =
     typeof ctetFeaturedExperienceEvent?.startAt?.toDate === "function"
       ? ctetFeaturedExperienceEvent.startAt.toDate()
       : ctetFeaturedExperienceEvent?.startAt || null;
-
-  const isExamAttemptPage = location.pathname.includes(
-    "/ctet-tet/mock-tests/attempt/"
-  );
 
   React.useEffect(() => {
     document.body.classList.toggle(
@@ -2699,18 +2721,28 @@ if (expiryDate && expiryDate < new Date()) {
       return;
     }
 
+    const createdAt = new Date();
+
+    const announcementRef = await addDoc(
+      collection(db, "announcements"),
+      {
+        title: announcementTitle,
+        message: announcementMessage,
+        createdAt,
+      }
+    );
+
     const newAnnouncement = {
-      id: Date.now(),
+      id: announcementRef.id,
       title: announcementTitle,
       message: announcementMessage,
-      createdAt: new Date(),
+      createdAt,
     };
-    await addDoc(collection(db, "announcements"), {
-      title: announcementTitle,
-      message: announcementMessage,
-      createdAt: new Date(),
-    });
-    setAnnouncements([newAnnouncement, ...announcements]);
+
+    setAnnouncements((currentAnnouncements) => [
+      newAnnouncement,
+      ...currentAnnouncements,
+    ]);
 
     setAnnouncementTitle("");
     setAnnouncementMessage("");
@@ -4131,6 +4163,28 @@ const studyTimeMessage =
     );
 }
 
+  const renderCtetPremiumHeader = (className = "") => (
+    <CtetPremiumHeader
+      className={className}
+      user={user}
+      isAdminUser={Boolean(user && isAdmin(user))}
+      announcements={announcements}
+      events={ctetExperienceEvents}
+      contentItems={universalContent}
+      currentAffairs={currentAffairsList}
+      roadmaps={ctetNotificationRoadmaps}
+      mockResults={mockResults}
+      navigate={navigate}
+      accountMenuRef={accountMenuRef}
+      accountMenuOpen={accountMenuOpen}
+      setAccountMenuOpen={setAccountMenuOpen}
+      accountDisplayName={accountDisplayName}
+      accountEmail={accountEmail}
+      openAccountTarget={openAccountTarget}
+      logoutFromAccountMenu={logoutFromAccountMenu}
+    />
+  );
+
 return (
         <React.Suspense
           fallback={
@@ -4151,91 +4205,9 @@ return (
             </div>
           }
         >
-{!isExamAttemptPage && !ctetExperienceEnabled && (
-  <div className="ctetExperienceStickyHeader ctetGlobalPremiumHeader">
-    <div className="ctetLockedNav">
-      <button type="button" className="ctetLockedBrand" onClick={() => navigate("/ctet-tet")}>
-        <AspireNestLogo />
-      </button>
-
-      <nav className="ctetLockedLinks" aria-label="AspireNest navigation">
-        {[
-          ["Learning Hub", "/ctet-tet"],
-          ["Mock Tests", "/ctet-tet/mock-tests"],
-          ["Notes", "/ctet-tet/notes"],
-          ["Videos", "/ctet-tet/videos"],
-          ["Current Affairs", "/ctet-tet/current-affairs"],
-          ["Roadmaps", "/ctet-tet/roadmaps"],
-          ["Pricing", "/ctet-tet/pricing"],
-        ].map(([label, url]) => (
-          <button type="button" key={label} onClick={() => navigate(url)}>
-            {label}
-            {label === "Pricing" ? <em>Premium</em> : null}
-          </button>
-        ))}
-      </nav>
-
-      <div className="ctetLockedTools">
-        <div className="accountMenuWrap" ref={accountMenuRef}>
-          <button
-            type="button"
-            className="ctetLockedAccount"
-            onClick={() => {
-              if (!user) {
-                navigate("/login");
-                return;
-              }
-              setAccountMenuOpen((open) => !open);
-            }}
-          >
-            <i />
-            <span>
-              <strong>{user ? (isAdmin(user) ? "Admin" : "Student") : "Login"}</strong>
-              <small>{user ? (isAdmin(user) ? "Premium Access" : "Learning Access") : "Start Learning"}</small>
-            </span>
-            <b>{user ? (isAdmin(user) ? "AN" : "ST") : "IN"}</b>
-          </button>
-
-          {user && accountMenuOpen ? (
-            <div className="premiumAccountDropdown">
-              <div className="accountDropdownProfile">
-                <b>{isAdmin(user) ? "AN" : "ST"}</b>
-                <div>
-                  <strong>{accountDisplayName}</strong>
-                  <small>{accountEmail}</small>
-                </div>
-              </div>
-
-              <button type="button" onClick={() => openAccountTarget("/my-profile")}>
-                <span>👤</span>
-                <div>
-                  <strong>Profile</strong>
-                  <small>View account details</small>
-                </div>
-              </button>
-
-              <button type="button" onClick={() => openAccountTarget(isAdmin(user) ? "/admin" : "/student-dashboard")}>
-                <span>{isAdmin(user) ? "⚙️" : "📊"}</span>
-                <div>
-                  <strong>{isAdmin(user) ? "Admin Dashboard" : "Student Dashboard"}</strong>
-                  <small>{isAdmin(user) ? "Manage academy" : "Track learning"}</small>
-                </div>
-              </button>
-
-              <button type="button" className="danger" onClick={logoutFromAccountMenu}>
-                <span>🚪</span>
-                <div>
-                  <strong>Logout</strong>
-                  <small>Sign out safely</small>
-                </div>
-              </button>
-            </div>
-          ) : null}
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+        {!isExamAttemptPage &&
+          !ctetExperienceEnabled &&
+          renderCtetPremiumHeader("ctetGlobalPremiumHeader")}
 <main className="appShell">
 <Routes key={location.key || location.pathname}>
 
@@ -4396,89 +4368,7 @@ return (
 
 </div>
 
-    <div className="ctetExperienceStickyHeader">
-      <div className="ctetLockedNav">
-                <button type="button" className="ctetLockedBrand" onClick={() => navigate("/ctet-tet")}>
-                  <AspireNestLogo />
-                </button>
-
-                <nav className="ctetLockedLinks" aria-label="CTET TET navigation">
-                  {[
-                    ["Learning Hub", "/ctet-tet"],
-                    ["Mock Tests", "/ctet-tet/mock-tests"],
-                    ["Notes", "/ctet-tet/notes"],
-                    ["Videos", "/ctet-tet/videos"],
-                    ["Current Affairs", "/ctet-tet/current-affairs"],
-                    ["Roadmaps", "/ctet-tet/roadmaps"],
-                    ["Pricing", "/ctet-tet/pricing"],
-                  ].map(([label, url]) => (
-                    <button type="button" key={label} onClick={() => navigate(url)}>
-                      {label}
-                      {label === "Pricing" ? <em>Premium</em> : null}
-                    </button>
-                  ))}
-                </nav>
-
-                <div className="ctetLockedTools">
-                    <div className="accountMenuWrap" ref={accountMenuRef}>
-                      <button
-                        type="button"
-                        className="ctetLockedAccount"
-                        onClick={() => {
-                          if (!user) {
-                            navigate("/login");
-                            return;
-                          }
-                          setAccountMenuOpen((open) => !open);
-                        }}
-                      >
-                        <i />
-                        <span>
-                          <strong>{user ? (isAdmin(user) ? "Admin" : "Student") : "Login"}</strong>
-                          <small>{user ? (isAdmin(user) ? "Premium Access" : "Learning Access") : "Start Learning"}</small>
-                        </span>
-                        <b>{user ? (isAdmin(user) ? "AN" : "ST") : "IN"}</b>
-                      </button>
-
-                      {user && accountMenuOpen ? (
-                        <div className="premiumAccountDropdown">
-                          <div className="accountDropdownProfile">
-                            <b>{isAdmin(user) ? "AN" : "ST"}</b>
-                            <div>
-                              <strong>{accountDisplayName}</strong>
-                              <small>{accountEmail}</small>
-                            </div>
-                          </div>
-
-                          <button type="button" onClick={() => openAccountTarget("/my-profile")}>
-                            <span>👤</span>
-                            <div>
-                              <strong>Profile</strong>
-                              <small>View account details</small>
-                            </div>
-                          </button>
-
-                          <button type="button" onClick={() => openAccountTarget(isAdmin(user) ? "/admin" : "/student-dashboard")}>
-                            <span>{isAdmin(user) ? "⚙️" : "📊"}</span>
-                            <div>
-                              <strong>{isAdmin(user) ? "Admin Dashboard" : "Student Dashboard"}</strong>
-                              <small>{isAdmin(user) ? "Manage academy" : "Track learning"}</small>
-                            </div>
-                          </button>
-
-                          <button type="button" className="danger" onClick={logoutFromAccountMenu}>
-                            <span>🚪</span>
-                            <div>
-                              <strong>Logout</strong>
-                              <small>Sign out safely</small>
-                            </div>
-                          </button>
-                        </div>
-                      ) : null}
-                    </div>
-                </div>
-              </div>
-    </div>
+    {renderCtetPremiumHeader()}
 
     <nav className="ctetMobileSectionDock" aria-label="CTET screen shortcuts">
       {[
@@ -5845,7 +5735,15 @@ xpActivityEvents={ctetMockXpEvents}
 
 <Route
   path="/admin/content/experience"
-  element={requireAdmin() ? <AdminExperienceEventsRoute /> : null}
+  element={
+    requireAdmin() ? (
+      <AdminExperienceEventsRoute
+        universalContent={universalContent}
+        currentAffairs={currentAffairsList}
+        roadmaps={ctetNotificationRoadmaps}
+      />
+    ) : null
+  }
 />
 
 <Route
