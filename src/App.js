@@ -824,6 +824,8 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
   const [students, setStudents] = useState([]);
 const [enquiries, setEnquiries] = useState([]);
 const [mockResults, setMockResults] = useState([]);
+const [mockResultsLoaded, setMockResultsLoaded] = useState(false);
+const [mockResultsLoadError, setMockResultsLoadError] = useState("");
 const [adminMockResults, setAdminMockResults] = useState([]);
 const [paymentRequests, setPaymentRequests] = useState([]);
 const [activePayment, setActivePayment] = useState(null);
@@ -2270,6 +2272,15 @@ if (expiryDate && expiryDate < new Date()) {
     }
   };
   const loadUserMockResults = async (email) => {
+    setMockResultsLoaded(false);
+    setMockResultsLoadError("");
+
+    if (!email) {
+      setMockResults([]);
+      setMockResultsLoaded(true);
+      return [];
+    }
+
     try {
       const q = query(
         collection(db, "mockResults"),
@@ -2277,15 +2288,22 @@ if (expiryDate && expiryDate < new Date()) {
       );
 
       const querySnapshot = await getDocs(q);
+      const results = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-      setMockResults(
-        querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-      );
+      setMockResults(results);
+      setMockResultsLoaded(true);
+      return results;
     } catch (error) {
-      alert(error.message);
+      console.error("User mock result load error:", error);
+      setMockResultsLoadError(
+        error?.message ||
+          "Your submitted result could not be restored right now."
+      );
+      setMockResultsLoaded(true);
+      return [];
     }
   };
   const loadAllMockResults = async () => {
@@ -8743,6 +8761,8 @@ handleSaveUniversalContent={handleSaveUniversalContent}
       loadMockLeaderboardEntries={loadMockLeaderboardEntries}
       setMockAttemptState={setMockAttemptState}
       mockResults={mockResults}
+      mockResultsLoaded={mockResultsLoaded}
+      mockResultsLoadError={mockResultsLoadError}
     />
   }
 />

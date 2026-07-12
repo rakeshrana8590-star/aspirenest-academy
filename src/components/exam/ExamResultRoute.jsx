@@ -43,6 +43,40 @@ const formatDuration = (seconds = 0) => {
   return `${minutes}m ${remainingSeconds}s`;
 };
 
+const toResultNumber = (value, fallback = 0) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+};
+
+const getResultTimestamp = (value) => {
+  if (!value) return 0;
+
+  if (typeof value?.toMillis === "function") {
+    return value.toMillis();
+  }
+
+  if (typeof value?.toDate === "function") {
+    const date = value.toDate();
+    return Number.isNaN(date?.getTime?.()) ? 0 : date.getTime();
+  }
+
+  if (typeof value?.seconds === "number") {
+    return value.seconds * 1000;
+  }
+
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? 0 : value.getTime();
+  }
+
+  const numeric = Number(value);
+  if (Number.isFinite(numeric) && numeric > 0) {
+    return numeric < 10_000_000_000 ? numeric * 1000 : numeric;
+  }
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+};
+
 const getPerformanceLabel = (percentage) => {
   if (percentage >= 80) return "Excellent";
   if (percentage >= 50) return "Good Attempt";
@@ -186,19 +220,144 @@ export default function ExamResultRoute({
   loadMockLeaderboardEntries,
   setMockAttemptState,
   mockResults = [],
+  mockResultsLoaded = false,
+  mockResultsLoadError = "",
 }) {
   const navigate = useNavigate();
   const { testId } = useParams();
 
   const activeResultAttemptId = decodeURIComponent(testId || "");
 
-  const test = universalContent.find(
+  const test = (Array.isArray(universalContent)
+    ? universalContent
+    : []
+  ).find(
     (item) =>
       item.section === "mockTest" &&
       item.id === activeResultAttemptId
   );
 
   const accessStatus = getMockTestAccessStatus(test);
+
+  /* === P0 mock-test catalog loading gate v2 === */
+  const hasLoadedMockTestCatalog = React.useMemo(
+    () =>
+      (Array.isArray(universalContent)
+        ? universalContent
+        : []
+      ).some((item) => item?.section === "mockTest"),
+    [universalContent]
+  );
+
+  const [
+    mockTestCatalogWaitExpired,
+    setMockTestCatalogWaitExpired,
+  ] = React.useState(false);
+
+  React.useEffect(() => {
+    setMockTestCatalogWaitExpired(false);
+
+    if (test || hasLoadedMockTestCatalog) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      setMockTestCatalogWaitExpired(true);
+    }, 8000);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    activeResultAttemptId,
+    hasLoadedMockTestCatalog,
+    test,
+  ]);
+
+  const isMockTestCatalogPending =
+    !test &&
+    !hasLoadedMockTestCatalog &&
+    !mockTestCatalogWaitExpired;
+
+  /* === P0 saved mock-result recovery v3 === */
+  const [resultRecoveryRetry, setResultRecoveryRetry] =
+    React.useState(0);
+  const loadUserMockResultsRef = React.useRef(
+    loadUserMockResults
+  );
+
+  React.useEffect(() => {
+    loadUserMockResultsRef.current = loadUserMockResults;
+  }, [loadUserMockResults]);
+
+  const savedResultForTest = React.useMemo(() => {
+    const expectedTestId = String(test?.id || "");
+    const expectedEmail = String(user?.email || "")
+      .trim()
+      .toLowerCase();
+
+    if (!expectedTestId || !expectedEmail) return null;
+
+    return [...(Array.isArray(mockResults) ? mockResults : [])]
+      .filter((item) => {
+        const itemTestId = String(
+          item?.testId ||
+            item?.mockTestId ||
+            item?.testID ||
+            item?.contentId ||
+            ""
+        );
+
+        const itemEmail = String(
+          item?.email ||
+            item?.studentEmail ||
+            item?.userEmail ||
+            ""
+        )
+          .trim()
+          .toLowerCase();
+
+        return (
+          itemTestId === expectedTestId &&
+          itemEmail === expectedEmail
+        );
+      })
+      .sort(
+        (first, second) =>
+          getResultTimestamp(
+            second?.attemptSubmittedAt ||
+              second?.endedAt ||
+              second?.updatedAt ||
+              second?.createdAt
+          ) -
+          getResultTimestamp(
+            first?.attemptSubmittedAt ||
+              first?.endedAt ||
+              first?.updatedAt ||
+              first?.createdAt
+          )
+      )[0] || null;
+  }, [mockResults, test?.id, user?.email]);
+
+  React.useEffect(() => {
+    const email = user?.email;
+    const activeTestId = test?.id;
+    const loader = loadUserMockResultsRef.current;
+
+    if (!email || !activeTestId || typeof loader !== "function") {
+      return undefined;
+    }
+
+    let isActive = true;
+
+    Promise.resolve(loader(email)).catch((error) => {
+      if (isActive) {
+        console.error("Result recovery request failed:", error);
+      }
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, [resultRecoveryRetry, test?.id, user?.email]);
 
   const renderStateCard = ({
     label,
@@ -214,13 +373,26 @@ export default function ExamResultRoute({
           <h1>{title}</h1>
           <p>{message}</p>
 
-          <button type="button" onClick={onAction}>
-            {actionLabel}
-          </button>
+          {actionLabel && typeof onAction === "function" ? (
+            <button type="button" onClick={onAction}>
+              {actionLabel}
+            </button>
+          ) : null}
         </div>
       </div>
     </section>
   );
+
+  if (isMockTestCatalogPending) {
+    return renderStateCard({
+      label: "Preparing",
+      title: "Preparing your result",
+      message:
+        "Mock-test details and your submitted result are being securely restored. Please wait a moment.",
+      actionLabel: "",
+      onAction: undefined,
+    });
+  }
 
   if (accessStatus === "NOT_FOUND") {
     return renderStateCard({
@@ -247,13 +419,31 @@ export default function ExamResultRoute({
     : {};
 
   const hasSubmittedAttempt = activeAttemptState?.isSubmitted === true;
+
+  const useRecoveredSummary =
+    !hasSubmittedAttempt && Boolean(savedResultForTest);
+  const hasViewableResult =
+    hasSubmittedAttempt || useRecoveredSummary;
   const attemptStartedAt =
     activeAttemptState?.startedAt ||
     activeAttemptState?.submittedAt ||
+    savedResultForTest?.attemptStartedAt ||
+    savedResultForTest?.startedAt ||
+    savedResultForTest?.createdAt ||
     Date.now();
   const attemptSubmittedAt =
-    activeAttemptState?.submittedAt || attemptStartedAt;
-  const attemptSaveKey = `${test.id}_${user?.email || "anonymous"}_${attemptStartedAt}`;
+    activeAttemptState?.submittedAt ||
+    savedResultForTest?.attemptSubmittedAt ||
+    savedResultForTest?.endedAt ||
+    savedResultForTest?.updatedAt ||
+    savedResultForTest?.createdAt ||
+    attemptStartedAt;
+  const attemptSaveKey =
+    savedResultForTest?.attemptKey ||
+    savedResultForTest?.attemptId ||
+    `${test.id}_${user?.email || "anonymous"}_${getResultTimestamp(
+      attemptStartedAt
+    ) || Date.now()}`;
 
   const attemptLimitInfo = parseAttemptLimit(test.attemptLimit);
   const savedSubmittedCount = countSubmittedMockAttempts(
@@ -329,7 +519,39 @@ export default function ExamResultRoute({
     });
   }
 
-  if (accessStatus === "UPCOMING" && !hasSubmittedAttempt) {
+  if (
+    !hasSubmittedAttempt &&
+    user?.email &&
+    !mockResultsLoaded
+  ) {
+    return renderStateCard({
+      label: "Preparing",
+      title: "Preparing your result",
+      message:
+        "Your submitted attempt is being securely restored. Please wait a moment.",
+      actionLabel: "",
+      onAction: undefined,
+    });
+  }
+
+  if (
+    !hasSubmittedAttempt &&
+    user?.email &&
+    mockResultsLoaded &&
+    mockResultsLoadError &&
+    !savedResultForTest
+  ) {
+    return renderStateCard({
+      label: "Recovery Needed",
+      title: "Result could not be loaded",
+      message: mockResultsLoadError,
+      actionLabel: "Retry Result",
+      onAction: () =>
+        setResultRecoveryRetry((current) => current + 1),
+    });
+  }
+
+  if (accessStatus === "UPCOMING" && !hasViewableResult) {
     return renderStateCard({
       label: "Upcoming",
       title: "Test upcoming",
@@ -339,7 +561,7 @@ export default function ExamResultRoute({
     });
   }
 
-  if (accessStatus === "EXPIRED" && !hasSubmittedAttempt) {
+  if (accessStatus === "EXPIRED" && !hasViewableResult) {
     return renderStateCard({
       label: "Locked",
       title: "Result locked",
@@ -350,11 +572,11 @@ export default function ExamResultRoute({
     });
   }
 
-  if (!hasSubmittedAttempt) {
+  if (!hasViewableResult) {
     return renderStateCard({
       label: "Locked",
       title: "Result locked",
-      message: "Please submit the mock test before viewing result.",
+      message: "No submitted attempt was found for this test and account.",
       actionLabel: "Continue Test",
       onAction: () =>
         navigate(`/ctet-tet/mock-tests/attempt/${test.id}`),
@@ -364,6 +586,8 @@ export default function ExamResultRoute({
   const newStoredAnswers = storedAttemptState?.answers || {};
   const liveAttemptAnswers = liveAttemptState?.answers || {};
   const activeAttemptAnswers = activeAttemptState?.answers || {};
+  const recoveredAttemptAnswers =
+    savedResultForTest?.answers || {};
 
   const oldStoredAnswers = safeParseJson(
     localStorage.getItem(`mockAttemptAnswers_${test.id}`)
@@ -375,7 +599,11 @@ export default function ExamResultRoute({
     ? liveAttemptAnswers
     : hasObjectData(newStoredAnswers)
     ? newStoredAnswers
+    : hasObjectData(recoveredAttemptAnswers)
+    ? recoveredAttemptAnswers
     : oldStoredAnswers;
+
+  const hasReviewData = hasObjectData(attemptAnswers);
 
   const fallbackQuestionOrder = questions.map((_, index) => index);
 
@@ -389,6 +617,11 @@ export default function ExamResultRoute({
         questions.length
       )
     ? storedAttemptState.questionOrder
+    : isValidQuestionOrder(
+        savedResultForTest?.questionOrder,
+        questions.length
+      )
+    ? savedResultForTest.questionOrder
     : fallbackQuestionOrder;
 
   const resultQuestions = questionOrder
@@ -398,9 +631,9 @@ export default function ExamResultRoute({
     }))
     .filter((item) => Boolean(item.question));
 
-  const totalQuestions = resultQuestions.length;
+  const calculatedQuestionCount = resultQuestions.length;
 
-  const correctCount = resultQuestions.filter(
+  const calculatedCorrectCount = resultQuestions.filter(
     ({ actualQuestionIndex, question }) =>
       isExamAnswerCorrect(
         attemptAnswers[actualQuestionIndex],
@@ -409,15 +642,21 @@ export default function ExamResultRoute({
       )
   ).length;
 
-  const skippedCount = resultQuestions.filter(
-    ({ actualQuestionIndex }) => !attemptAnswers[actualQuestionIndex]
+  const calculatedSkippedCount = resultQuestions.filter(
+    ({ actualQuestionIndex }) =>
+      !attemptAnswers[actualQuestionIndex]
   ).length;
 
-  const wrongCount = totalQuestions - correctCount - skippedCount;
+  const calculatedWrongCount =
+    calculatedQuestionCount -
+    calculatedCorrectCount -
+    calculatedSkippedCount;
 
-  const accuracy =
-    totalQuestions > 0
-      ? Math.round((correctCount / totalQuestions) * 100)
+  const calculatedAccuracy =
+    calculatedQuestionCount > 0
+      ? Math.round(
+          (calculatedCorrectCount / calculatedQuestionCount) * 100
+        )
       : 0;
 
   const calculatedTotalMarks = resultQuestions.reduce(
@@ -431,19 +670,24 @@ export default function ExamResultRoute({
     0
   );
 
-  const totalMarks =
+  const calculatedResultTotalMarks =
     Number(test.totalMarks) ||
     calculatedTotalMarks ||
-    totalQuestions * Number(test.marksPerQuestion || 1);
+    calculatedQuestionCount *
+      Number(test.marksPerQuestion || 1);
 
-  const score = resultQuestions.reduce(
+  const calculatedScore = resultQuestions.reduce(
     (sum, { actualQuestionIndex, question }) => {
       const selected = attemptAnswers[actualQuestionIndex];
 
       if (!selected) return sum;
 
       if (
-        isExamAnswerCorrect(selected, question.answer, question)
+        isExamAnswerCorrect(
+          selected,
+          question.answer,
+          question
+        )
       ) {
         return (
           sum +
@@ -467,12 +711,78 @@ export default function ExamResultRoute({
     0
   );
 
-  const percentage =
-    totalMarks > 0
-      ? Math.round((score / totalMarks) * 100)
+  const calculatedPercentage =
+    calculatedResultTotalMarks > 0
+      ? Math.round(
+          (calculatedScore / calculatedResultTotalMarks) * 100
+        )
       : 0;
 
-  const safePercentage = Math.max(0, Math.min(100, percentage));
+  const totalQuestions = useRecoveredSummary
+    ? toResultNumber(
+        savedResultForTest?.totalQuestions,
+        calculatedQuestionCount
+      )
+    : calculatedQuestionCount;
+
+  const correctCount = useRecoveredSummary
+    ? toResultNumber(
+        savedResultForTest?.correctCount ??
+          savedResultForTest?.correct,
+        calculatedCorrectCount
+      )
+    : calculatedCorrectCount;
+
+  const wrongCount = useRecoveredSummary
+    ? toResultNumber(
+        savedResultForTest?.wrongCount ??
+          savedResultForTest?.wrong,
+        calculatedWrongCount
+      )
+    : calculatedWrongCount;
+
+  const skippedCount = useRecoveredSummary
+    ? toResultNumber(
+        savedResultForTest?.skippedCount ??
+          savedResultForTest?.skipped,
+        calculatedSkippedCount
+      )
+    : calculatedSkippedCount;
+
+  const totalMarks = useRecoveredSummary
+    ? toResultNumber(
+        savedResultForTest?.totalMarks,
+        calculatedResultTotalMarks
+      )
+    : calculatedResultTotalMarks;
+
+  const score = useRecoveredSummary
+    ? toResultNumber(
+        savedResultForTest?.score,
+        calculatedScore
+      )
+    : calculatedScore;
+
+  const percentage = useRecoveredSummary
+    ? toResultNumber(
+        savedResultForTest?.percentage ??
+          savedResultForTest?.accuracy,
+        calculatedPercentage
+      )
+    : calculatedPercentage;
+
+  const accuracy = useRecoveredSummary
+    ? toResultNumber(
+        savedResultForTest?.accuracy ??
+          savedResultForTest?.percentage,
+        calculatedAccuracy
+      )
+    : calculatedAccuracy;
+
+  const safePercentage = Math.max(
+    0,
+    Math.min(100, percentage)
+  );
 
   const leaderboardEnabled =
     test.leaderboardMode && test.leaderboardMode !== "disabled";
@@ -480,13 +790,28 @@ export default function ExamResultRoute({
   const isAdminUser = Boolean(isAdmin?.(user));
   const canShowLeaderboardButton = leaderboardEnabled || isAdminUser;
 
-  const startedAt = Number(activeAttemptState.startedAt || Date.now());
-  const endedAt = Number(activeAttemptState.submittedAt || Date.now());
-
-  const durationSeconds = Math.max(
-    0,
-    Math.round((endedAt - startedAt) / 1000)
+  const startedAt = getResultTimestamp(
+    activeAttemptState.startedAt ||
+      savedResultForTest?.attemptStartedAt ||
+      savedResultForTest?.startedAt
   );
+
+  const endedAt = getResultTimestamp(
+    activeAttemptState.submittedAt ||
+      savedResultForTest?.attemptSubmittedAt ||
+      savedResultForTest?.endedAt
+  );
+
+  const durationSeconds = useRecoveredSummary
+    ? toResultNumber(savedResultForTest?.durationSeconds, 0)
+    : Math.max(
+        0,
+        Math.round(
+          ((endedAt || Date.now()) -
+            (startedAt || Date.now())) /
+            1000
+        )
+      );
 
   const performanceLabel = getPerformanceLabel(percentage);
   const performanceTone = getPerformanceTone(percentage);
@@ -538,6 +863,8 @@ export default function ExamResultRoute({
           skippedCount,
           totalQuestions,
           durationSeconds,
+          answers: attemptAnswers,
+          questionOrder,
 
           attemptId: attemptSaveKey,
           attemptStartedAt,
@@ -722,12 +1049,14 @@ export default function ExamResultRoute({
   return (
     <section className="examResultPage">
       <div className="examResultShell">
-        <AutoSaveMockResult
-          testId={test.id}
-          userEmail={user?.email || ""}
-          attemptSaveKey={attemptSaveKey}
-          saveToLeaderboard={saveToLeaderboard}
-        />
+        {hasSubmittedAttempt ? (
+          <AutoSaveMockResult
+            testId={test.id}
+            userEmail={user?.email || ""}
+            attemptSaveKey={attemptSaveKey}
+            saveToLeaderboard={saveToLeaderboard}
+          />
+        ) : null}
 
         <div className="examResultHero">
           <div className="examResultHeroContent">
@@ -787,14 +1116,26 @@ export default function ExamResultRoute({
             </p>
 
             <div className="examResultActionStack">
-              <button
-                type="button"
-                onClick={() =>
-                  navigate(`/ctet-tet/mock-tests/review/${test.id}`)
-                }
-              >
-                Review Answers
-              </button>
+              {hasReviewData ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate(
+                      `/ctet-tet/mock-tests/review/${test.id}`
+                    )
+                  }
+                >
+                  Review Answers
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="secondary"
+                  disabled
+                >
+                  Answer Review Unavailable
+                </button>
+              )}
 
               {canAttemptAgain ? (
                 <button
@@ -870,7 +1211,9 @@ export default function ExamResultRoute({
             <div className="examResultStatusBox">
               <strong>{performanceLabel}</strong>
               <span>
-                Score saved automatically when this result page opens.
+                {useRecoveredSummary
+                  ? "Restored securely from your saved submission."
+                  : "Score saved automatically when this result page opens."}
               </span>
             </div>
 
@@ -888,7 +1231,7 @@ export default function ExamResultRoute({
               </p>
             </div>
 
-            {canShowLeaderboardButton && (
+            {hasSubmittedAttempt && canShowLeaderboardButton && (
               <button
                 type="button"
                 className="examResultSyncButton"
