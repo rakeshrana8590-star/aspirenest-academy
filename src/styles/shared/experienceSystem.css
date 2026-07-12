@@ -18138,3 +18138,466 @@ button.ctetHeaderNotificationBell {
     font-size: 0.63rem;
   }
 }
+
+/* === CTET Screen 4 premium test-wise leaderboard v4 === */
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardSnapshot {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(220px, 0.58fr) minmax(0, 1.62fr);
+  grid-template-areas:
+    "intro cards"
+    "action action";
+  align-items: stretch;
+  gap: 18px 22px;
+  min-width: 0;
+  overflow: hidden;
+  padding: 20px;
+  border: 1px solid rgba(124, 92, 255, 0.34);
+  border-radius: 26px;
+  background:
+    radial-gradient(
+      circle at 92% 8%,
+      rgba(105, 76, 255, 0.19),
+      transparent 34%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(9, 13, 29, 0.99),
+      rgba(14, 14, 35, 0.99)
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 22px 48px rgba(0, 0, 0, 0.2);
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardIntro {
+  grid-area: intro;
+  align-self: center;
+  min-width: 0;
+  max-width: 330px;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardIntroTop {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardIntroTop > span,
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardIntroTop > small {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 11px;
+  border-radius: 999px;
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardIntroTop > span {
+  border: 1px solid rgba(151, 123, 255, 0.24);
+  background: rgba(108, 76, 225, 0.2);
+  color: #d8ccff;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardIntroTop > small {
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(225, 232, 244, 0.66);
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardIntro h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(1.42rem, 2vw, 2rem);
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardIntro p {
+  max-width: 31ch;
+  margin: 12px 0 0;
+  color: rgba(214, 221, 235, 0.58);
+  font-size: 0.83rem;
+  line-height: 1.55;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardCards {
+  grid-area: cards;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas: "silver gold bronze";
+  align-items: end;
+  gap: 14px;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardCard {
+  position: relative;
+  min-width: 0;
+  min-height: 176px;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  align-content: stretch;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 23px !important;
+  background:
+    linear-gradient(
+      155deg,
+      rgba(22, 29, 49, 0.99),
+      rgba(12, 18, 32, 0.99)
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 14px 26px rgba(0, 0, 0, 0.18);
+  color: #ffffff;
+  text-align: left;
+  filter: none !important;
+  transform: none !important;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardCard::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  pointer-events: none;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardCard.isRank1 {
+  grid-area: gold;
+  min-height: 206px;
+  border-color: rgba(255, 210, 91, 0.52);
+  background:
+    radial-gradient(
+      circle at 18% 0%,
+      rgba(255, 210, 91, 0.18),
+      transparent 42%
+    ),
+    linear-gradient(
+      155deg,
+      rgba(34, 32, 43, 0.99),
+      rgba(14, 18, 31, 0.99)
+    );
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardCard.isRank1::before {
+  background: linear-gradient(90deg, #f4bd36, #ffe29a);
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardCard.isRank2 {
+  grid-area: silver;
+  border-color: rgba(194, 207, 226, 0.38);
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardCard.isRank2::before {
+  background: linear-gradient(90deg, #9eb0c8, #e0e8f3);
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardCard.isRank3 {
+  grid-area: bronze;
+  border-color: rgba(230, 145, 83, 0.42);
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardCard.isRank3::before {
+  background: linear-gradient(90deg, #c96f35, #efa56c);
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardRankRow {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardRankRow > b,
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardTier,
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardYou {
+  min-height: 28px;
+  display: inline-grid;
+  place-items: center;
+  width: max-content;
+  padding: 6px 9px;
+  border-radius: 999px;
+  line-height: 1;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardRankRow > b {
+  min-width: 38px;
+  background: rgba(124, 92, 255, 0.16);
+  color: #e4ddff;
+  font-size: 0.85rem;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardTier {
+  border: 1px solid rgba(255, 255, 255, 0.085);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(234, 239, 248, 0.69);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardYou {
+  justify-self: end;
+  border: 1px solid rgba(38, 199, 109, 0.3);
+  background: rgba(38, 199, 109, 0.11);
+  color: #98e9b4;
+  font-size: 0.57rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardCard.isRank1
+  .ctetS4LeaderboardRankRow > b {
+  background: rgba(255, 210, 91, 0.15);
+  color: #ffe29a;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardCard.isRank2
+  .ctetS4LeaderboardRankRow > b {
+  background: rgba(194, 207, 226, 0.13);
+  color: #e2eaf5;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardCard.isRank3
+  .ctetS4LeaderboardRankRow > b {
+  background: rgba(230, 145, 83, 0.14);
+  color: #f0ae7a;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardIdentity {
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: 7px;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardIdentity > strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 1.06rem;
+  line-height: 1.12;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardIdentity > span {
+  color: rgba(216, 224, 237, 0.58);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardScore {
+  min-width: 0;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 13px;
+  border: 1px solid rgba(255, 211, 106, 0.13);
+  border-radius: 16px;
+  background: rgba(5, 9, 20, 0.42);
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardScore > small {
+  color: rgba(218, 226, 239, 0.58);
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardScore > strong {
+  color: #ffd45f;
+  font-size: 1.45rem;
+  font-weight: 950;
+  line-height: 0.9;
+  letter-spacing: -0.035em;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardAction {
+  grid-area: action;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 18px;
+  background: rgba(7, 12, 25, 0.58);
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardOwnPosition {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 9px;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardOwnPosition > span {
+  color: rgba(218, 226, 239, 0.55);
+  font-size: 0.66rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardOwnPosition > strong {
+  color: #ffd45f;
+  font-size: 1.2rem;
+  font-weight: 950;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardOwnPosition > small {
+  overflow: hidden;
+  color: rgba(231, 236, 245, 0.72);
+  font-size: 0.74rem;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardAction > button {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 10px 15px;
+  border: 1px solid rgba(151, 123, 255, 0.28);
+  border-radius: 14px;
+  background: rgba(105, 76, 225, 0.17);
+  color: #f4f0ff;
+  font-size: 0.74rem;
+  font-weight: 900;
+  filter: none !important;
+  transform: none !important;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardAction > button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardAction > button:hover,
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardAction > button:focus-visible,
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardAction > button:active,
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardCard:hover,
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardCard:focus-visible,
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardCard:active {
+  filter: none !important;
+  transform: none !important;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardAction > button:hover,
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardAction > button:focus-visible {
+  border-color: rgba(177, 154, 255, 0.46);
+  background: rgba(105, 76, 225, 0.23);
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardEmpty {
+  grid-column: 1 / -1;
+  min-height: 176px;
+  display: grid;
+  place-content: center;
+  gap: 7px;
+  padding: 20px;
+  border: 1px dashed rgba(151, 123, 255, 0.25);
+  border-radius: 22px;
+  background: rgba(12, 18, 34, 0.62);
+  text-align: center;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardEmpty > b {
+  color: #ffffff;
+}
+
+.ctetS4CommunityPulseGrid .ctetS4LeaderboardEmpty > span {
+  max-width: 46ch;
+  color: rgba(218, 226, 239, 0.58);
+  font-size: 0.77rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 1080px) {
+  .ctetS4CommunityPulseGrid .ctetS4LeaderboardSnapshot {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "intro"
+      "cards"
+      "action";
+  }
+
+  .ctetS4CommunityPulseGrid .ctetS4LeaderboardIntro {
+    max-width: 680px;
+  }
+
+  .ctetS4CommunityPulseGrid .ctetS4LeaderboardIntro p {
+    max-width: 62ch;
+  }
+}
+
+@media (max-width: 720px) {
+  html body #root .appShell
+    .ctetExperiencePage[data-ctet-mobile-screen="live"]
+    .ctetS4LeaderboardSnapshot {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "intro"
+      "cards"
+      "action";
+    gap: 14px;
+    padding: 14px;
+    border-radius: 22px;
+  }
+
+  html body #root .appShell
+    .ctetExperiencePage[data-ctet-mobile-screen="live"]
+    .ctetS4LeaderboardCards {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "gold"
+      "silver"
+      "bronze";
+    gap: 10px;
+  }
+
+  html body #root .appShell
+    .ctetExperiencePage[data-ctet-mobile-screen="live"]
+    .ctetS4LeaderboardCard,
+  html body #root .appShell
+    .ctetExperiencePage[data-ctet-mobile-screen="live"]
+    .ctetS4LeaderboardCard.isRank1 {
+    min-height: 0;
+  }
+
+  html body #root .appShell
+    .ctetExperiencePage[data-ctet-mobile-screen="live"]
+    .ctetS4LeaderboardAction {
+    grid-template-columns: 1fr;
+  }
+
+  html body #root .appShell
+    .ctetExperiencePage[data-ctet-mobile-screen="live"]
+    .ctetS4LeaderboardOwnPosition {
+    grid-template-columns: auto auto minmax(0, 1fr);
+  }
+
+  html body #root .appShell
+    .ctetExperiencePage[data-ctet-mobile-screen="live"]
+    .ctetS4LeaderboardAction > button {
+    width: 100%;
+  }
+}

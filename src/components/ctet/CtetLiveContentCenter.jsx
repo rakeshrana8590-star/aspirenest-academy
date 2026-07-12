@@ -1,5 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
+  extractMockTestIdFromRoute,
+  getMockLeaderboardModeLabel,
+  getPublicMockTestTitle,
+  rankMockLeaderboardEntries,
+} from "../exam/mockLeaderboardUtils.js";
+import {
   getExperienceEventPresentation,
 } from "../../experience/experienceEventPresentation";
 import {
@@ -502,29 +508,143 @@ export default function CtetLiveContentCenter({
     );
   }, [activeFilter, allUpdates]);
 
+  const activeChallengeLeaderboard = useMemo(() => {
+    const mockTests = (Array.isArray(contentItems) ? contentItems : []).filter(
+      (item) => item.section === "mockTest"
+    );
+
+    const contexts = (Array.isArray(events) ? events : [])
+      .filter(isChallengeEvent)
+      .map((event) => {
+        const presentation = getExperienceEventPresentation(event);
+        const linkedSource = presentation.linkedSource || {};
+        const linkedSourceType = String(
+          linkedSource.sourceType || event.sourceType || ""
+        )
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z]/g, "");
+
+        const linkedSourceId = String(
+          linkedSource.sourceId || event.sourceId || ""
+        ).trim();
+
+        const linkedTestId =
+          linkedSourceType === "mocktest"
+            ? linkedSourceId
+            : String(event.testId || event.mockTestId || "").trim();
+
+        const route =
+          presentation.primaryCta?.route ||
+          presentation.primaryCta?.url ||
+          event.ctaUrl ||
+          event.ctaLink ||
+          "";
+
+        const testId =
+          linkedTestId || extractMockTestIdFromRoute(route);
+
+        const test =
+          mockTests.find(
+            (item) =>
+              String(item.id || item.contentId || "").trim() === testId
+          ) || null;
+
+        const storedEntry = (
+          Array.isArray(mockLeaderboardEntries)
+            ? mockLeaderboardEntries
+            : []
+        ).find(
+          (entry) =>
+            String(
+              entry.testId ||
+                entry.mockTestId ||
+                entry.contentId ||
+                ""
+            ).trim() === testId
+        );
+
+        return {
+          event,
+          presentation,
+          test,
+          testId,
+          route,
+          featured: Boolean(event.featured),
+          title: getPublicMockTestTitle(
+            test?.title ||
+              storedEntry?.testTitle ||
+              event.title ||
+              "AspireNest Rank Challenge"
+          ),
+          leaderboardMode:
+            test?.leaderboardMode ||
+            storedEntry?.leaderboardMode ||
+            "",
+        };
+      });
+
+    return (
+      contexts.find((context) => context.featured && context.testId) ||
+      contexts.find((context) => context.testId) ||
+      contexts[0] ||
+      null
+    );
+  }, [contentItems, events, mockLeaderboardEntries]);
+
   const leaderboardSnapshot = useMemo(() => {
-    const source = Array.isArray(mockLeaderboardEntries) ? mockLeaderboardEntries : [];
-    const ranked = [...source]
-      .filter((entry) => getLeaderboardScore(entry) > 0)
-      .sort(
-        (a, b) =>
-          getLeaderboardScore(b) - getLeaderboardScore(a) ||
-          Number(b.score || 0) - Number(a.score || 0)
-      )
-      .map((entry, index) => ({
-        ...entry,
-        rank: index + 1,
-        displayName: maskLeaderboardName(entry),
-        scoreLabel: `${getLeaderboardScore(entry)}%`,
-        isOwn: isOwnLeaderboardEntry(entry, user),
-      }));
+    const context = activeChallengeLeaderboard;
+
+    if (!context?.testId) {
+      return {
+        top: [],
+        own: null,
+        total: 0,
+        testId: "",
+        testTitle: "Leaderboard unavailable",
+        modeLabel: "LEADERBOARD SNAPSHOT",
+        route: "",
+        hasLinkedTest: false,
+      };
+    }
+
+    const resolved = rankMockLeaderboardEntries(
+      mockLeaderboardEntries,
+      {
+        testId: context.testId,
+        preferredMode: context.leaderboardMode,
+        user,
+      }
+    );
+
+    const ranked = resolved.ranked.map((entry) => ({
+      ...entry,
+      displayName: maskLeaderboardName(entry),
+      scoreLabel: `${getLeaderboardScore(entry)}%`,
+      scoreFraction: `${Number(entry.score || 0)}/${Number(
+        entry.totalMarks || 0
+      )}`,
+    }));
 
     return {
       top: ranked.slice(0, 3),
       own: ranked.find((entry) => entry.isOwn) || null,
       total: ranked.length,
+      testId: context.testId,
+      testTitle: context.title,
+      modeLabel: getMockLeaderboardModeLabel(
+        context.leaderboardMode
+      ),
+      route: `/leaderboard?testId=${encodeURIComponent(
+        context.testId
+      )}`,
+      hasLinkedTest: true,
     };
-  }, [mockLeaderboardEntries, user]);
+  }, [
+    activeChallengeLeaderboard,
+    mockLeaderboardEntries,
+    user,
+  ]);
 
   const recentActivityItems = useMemo(() => {
     const activity = [];
@@ -544,10 +664,14 @@ export default function CtetLiveContentCenter({
         badge: "RANK",
         actor: maskLeaderboardName(entry),
         title: `${maskLeaderboardName(entry)} joined the ranking board`,
-        description: `${entry.testTitle || entry.subject || "Mock Test"} • ${getLeaderboardScore(entry)}%`,
+        description: `${getPublicMockTestTitle(
+          entry.testTitle || entry.subject || "Mock Test"
+        )} • ${getLeaderboardScore(entry)}%`,
         time: formatActivityTime(activityAt),
         sortAt: getActivityTimestamp(activityAt),
-        route: "/leaderboard",
+        route: entry.testId
+          ? `/leaderboard?testId=${encodeURIComponent(entry.testId)}`
+          : "/leaderboard",
       });
     });
 
@@ -959,9 +1083,22 @@ export default function CtetLiveContentCenter({
 
         <div className="ctetS4LeaderboardSnapshot" aria-label="AspireNest leaderboard snapshot">
           <div className="ctetS4LeaderboardIntro">
-            <span>LEADERBOARD SNAPSHOT</span>
-            <h3>Top Rankers This Week</h3>
-            <p>Privacy-safe rank snapshot from leaderboard-enabled mock test attempts.</p>
+            <div className="ctetS4LeaderboardIntroTop">
+              <span>{leaderboardSnapshot.modeLabel}</span>
+              <small>
+                {leaderboardSnapshot.total
+                  ? `${leaderboardSnapshot.total} ranked`
+                  : "Awaiting ranks"}
+              </small>
+            </div>
+
+            <h3>{leaderboardSnapshot.testTitle}</h3>
+
+            <p>
+              {leaderboardSnapshot.hasLinkedTest
+                ? "Compete in this challenge and climb the test rankings."
+                : "Link this Rank Challenge to an exact leaderboard-enabled mock test."}
+            </p>
           </div>
 
           <div className="ctetS4LeaderboardCards">
@@ -969,34 +1106,84 @@ export default function CtetLiveContentCenter({
               leaderboardSnapshot.top.map((entry) => (
                 <button
                   type="button"
-                  className={`ctetS4LeaderboardCard ${entry.rank === 1 ? "isTop" : ""} ${entry.isOwn ? "isOwn" : ""}`.trim()}
+                  className={`ctetS4LeaderboardCard isRank${entry.rank} ${entry.rank === 1 ? "isTop" : ""} ${entry.isOwn ? "isOwn" : ""}`.trim()}
                   key={entry.id || entry.leaderboardKey || entry.rank}
-                  onClick={() => navigate("/leaderboard")}
+                  onClick={() => navigate(leaderboardSnapshot.route)}
                 >
-                  <b>#{entry.rank}</b>
-                  <div>
-                    <strong>{entry.displayName}</strong>
-                    <span>{entry.testTitle || entry.subject || "Mock Test"}</span>
+                  <div className="ctetS4LeaderboardRankRow">
+                    <b>#{entry.rank}</b>
+                    <span className="ctetS4LeaderboardTier">
+                      {entry.rank === 1
+                        ? "GOLD"
+                        : entry.rank === 2
+                        ? "SILVER"
+                        : "BRONZE"}
+                    </span>
+                    {entry.isOwn ? (
+                      <span className="ctetS4LeaderboardYou">YOU</span>
+                    ) : null}
                   </div>
-                  <em>{entry.scoreLabel}</em>
+
+                  <div className="ctetS4LeaderboardIdentity">
+                    <strong>{entry.displayName}</strong>
+                    <span>
+                      {Number(entry.correctCount || entry.correct || 0)} correct
+                    </span>
+                  </div>
+
+                  <div className="ctetS4LeaderboardScore">
+                    <small>{entry.scoreFraction}</small>
+                    <strong>{entry.scoreLabel}</strong>
+                  </div>
                 </button>
               ))
             ) : (
               <div className="ctetS4LeaderboardEmpty">
-                <b>No public ranks yet</b>
-                <span>Ranks will appear after students submit leaderboard-enabled mock tests.</span>
+                <b>
+                  {leaderboardSnapshot.hasLinkedTest
+                    ? "No ranks for this test yet"
+                    : "Linked mock test required"}
+                </b>
+                <span>
+                  {leaderboardSnapshot.hasLinkedTest
+                    ? "Ranks will appear after students submit this challenge test."
+                    : "Open Experience Studio and choose the exact Mock Test as the linked source."}
+                </span>
               </div>
             )}
           </div>
 
           <div className="ctetS4LeaderboardAction">
-            {leaderboardSnapshot.own ? (
-              <p>Your rank: <strong>#{leaderboardSnapshot.own.rank}</strong> • {leaderboardSnapshot.own.scoreLabel}</p>
-            ) : (
-              <p>{leaderboardSnapshot.total} ranked entries • full emails hidden</p>
-            )}
-            <button type="button" onClick={() => navigate("/leaderboard")}>
-              View Full Leaderboard ›
+            <div className="ctetS4LeaderboardOwnPosition">
+              {leaderboardSnapshot.own ? (
+                <>
+                  <span>Your position</span>
+                  <strong>#{leaderboardSnapshot.own.rank}</strong>
+                  <small>
+                    {leaderboardSnapshot.own.scoreFraction}
+                    {" • "}
+                    {leaderboardSnapshot.own.scoreLabel}
+                  </small>
+                </>
+              ) : (
+                <>
+                  <span>Challenge status</span>
+                  <strong>{leaderboardSnapshot.total}</strong>
+                  <small>ranked students</small>
+                </>
+              )}
+            </div>
+
+            <button
+              type="button"
+              disabled={!leaderboardSnapshot.route}
+              onClick={() =>
+                leaderboardSnapshot.route &&
+                navigate(leaderboardSnapshot.route)
+              }
+            >
+              Open Full Leaderboard
+              <span aria-hidden="true">›</span>
             </button>
           </div>
         </div>

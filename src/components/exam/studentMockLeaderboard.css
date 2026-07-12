@@ -1,0 +1,682 @@
+/* === Phase 24 premium full mock leaderboard v1 === */
+.mockLeaderboardPage {
+  min-height: 100vh;
+  overflow-x: hidden;
+  background:
+    radial-gradient(
+      circle at 10% 4%,
+      rgba(248, 153, 48, 0.1),
+      transparent 25%
+    ),
+    radial-gradient(
+      circle at 90% 8%,
+      rgba(88, 92, 255, 0.12),
+      transparent 28%
+    ),
+    #07101f;
+}
+
+.mockLeaderboardBoard {
+  width: min(1380px, calc(100% - 36px));
+  margin: 24px auto 56px;
+  padding: 24px;
+  border: 1px solid rgba(120, 137, 168, 0.18);
+  border-radius: 30px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(10, 19, 36, 0.98),
+      rgba(8, 14, 28, 0.99)
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 26px 60px rgba(0, 0, 0, 0.24);
+}
+
+.mockLeaderboardBoardHead {
+  position: relative;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(310px, 0.58fr);
+  align-items: end;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.mockLeaderboardBoardTitle {
+  min-width: 0;
+}
+
+.mockLeaderboardBoardTitle > span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 7px 11px;
+  border: 1px solid rgba(242, 161, 65, 0.22);
+  border-radius: 999px;
+  background: rgba(242, 161, 65, 0.1);
+  color: #ffc46e;
+  font-size: 0.64rem;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+}
+
+.mockLeaderboardBoardTitle h2 {
+  max-width: 24ch;
+  margin: 14px 0 0;
+  color: #ffffff;
+  font-size: clamp(1.7rem, 3.2vw, 3rem);
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+}
+
+.mockLeaderboardBoardTitle p {
+  max-width: 64ch;
+  margin: 12px 0 0;
+  color: rgba(214, 223, 238, 0.58);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.mockLeaderboardTestSwitcher {
+  position: relative;
+  min-width: 0;
+}
+
+.mockLeaderboardTestSwitcher > span {
+  display: block;
+  margin-bottom: 8px;
+  color: rgba(219, 227, 240, 0.58);
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.mockLeaderboardTestButton {
+  width: 100%;
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(127, 104, 255, 0.28);
+  border-radius: 16px;
+  background: rgba(17, 25, 44, 0.96);
+  color: #ffffff;
+  text-align: left;
+  filter: none !important;
+  transform: none !important;
+}
+
+.mockLeaderboardTestButton > strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.82rem;
+  line-height: 1.28;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mockLeaderboardTestButton > b {
+  color: #b9abff;
+  font-size: 1rem;
+}
+
+.mockLeaderboardTestButton:hover,
+.mockLeaderboardTestButton:focus-visible,
+.mockLeaderboardTestButton:active {
+  border-color: rgba(151, 130, 255, 0.48);
+  background: rgba(20, 29, 50, 0.98);
+  filter: none !important;
+  transform: none !important;
+}
+
+.mockLeaderboardTestMenu {
+  position: absolute;
+  inset: calc(100% + 8px) 0 auto;
+  z-index: 80;
+  max-height: 310px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 7px;
+  border: 1px solid rgba(127, 104, 255, 0.27);
+  border-radius: 17px;
+  background: rgba(8, 14, 28, 0.995);
+  box-shadow: 0 24px 52px rgba(0, 0, 0, 0.42);
+  scrollbar-width: none;
+}
+
+.mockLeaderboardTestMenu::-webkit-scrollbar {
+  display: none;
+}
+
+.mockLeaderboardTestMenu > button {
+  width: 100%;
+  min-height: 46px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 11px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  color: rgba(235, 240, 249, 0.78);
+  text-align: left;
+  filter: none !important;
+  transform: none !important;
+}
+
+.mockLeaderboardTestMenu > button + button {
+  margin-top: 4px;
+}
+
+.mockLeaderboardTestMenu > button > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.77rem;
+  line-height: 1.35;
+}
+
+.mockLeaderboardTestMenu > button > b {
+  color: #b9abff;
+  font-size: 0.56rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mockLeaderboardTestMenu > button:hover,
+.mockLeaderboardTestMenu > button:focus-visible,
+.mockLeaderboardTestMenu > button.isSelected {
+  border-color: rgba(127, 104, 255, 0.22);
+  background: rgba(103, 79, 220, 0.14);
+  color: #ffffff;
+  filter: none !important;
+  transform: none !important;
+}
+
+.mockLeaderboardPodium {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas: "silver gold bronze";
+  align-items: end;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.mockLeaderboardPodiumCard {
+  position: relative;
+  min-width: 0;
+  min-height: 254px;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 18px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 25px;
+  background:
+    linear-gradient(
+      155deg,
+      rgba(20, 29, 49, 0.99),
+      rgba(11, 18, 32, 0.99)
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 18px 38px rgba(0, 0, 0, 0.2);
+}
+
+.mockLeaderboardPodiumCard::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+}
+
+.mockLeaderboardPodiumCard.isRank1 {
+  grid-area: gold;
+  min-height: 292px;
+  border-color: rgba(255, 207, 83, 0.5);
+  background:
+    radial-gradient(
+      circle at 18% 0%,
+      rgba(255, 207, 83, 0.2),
+      transparent 42%
+    ),
+    linear-gradient(
+      155deg,
+      rgba(36, 33, 43, 0.99),
+      rgba(13, 18, 31, 0.99)
+    );
+}
+
+.mockLeaderboardPodiumCard.isRank1::before {
+  background: linear-gradient(90deg, #f3b82d, #ffe39c);
+}
+
+.mockLeaderboardPodiumCard.isRank2 {
+  grid-area: silver;
+  border-color: rgba(194, 207, 226, 0.38);
+}
+
+.mockLeaderboardPodiumCard.isRank2::before {
+  background: linear-gradient(90deg, #9daec5, #e0e8f2);
+}
+
+.mockLeaderboardPodiumCard.isRank3 {
+  grid-area: bronze;
+  border-color: rgba(226, 143, 80, 0.42);
+}
+
+.mockLeaderboardPodiumCard.isRank3::before {
+  background: linear-gradient(90deg, #c36c32, #efa56d);
+}
+
+.mockLeaderboardPodiumTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.mockLeaderboardPodiumTop > span,
+.mockLeaderboardPodiumTop > b {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 9px;
+  border-radius: 999px;
+  font-size: 0.58rem;
+  font-weight: 950;
+  letter-spacing: 0.09em;
+}
+
+.mockLeaderboardPodiumTop > span {
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.045);
+  color: rgba(237, 241, 249, 0.73);
+}
+
+.mockLeaderboardPodiumTop > b {
+  border: 1px solid rgba(38, 199, 109, 0.3);
+  background: rgba(38, 199, 109, 0.11);
+  color: #98e9b4;
+}
+
+.mockLeaderboardPodiumRank {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.mockLeaderboardPodiumRank > small {
+  color: rgba(218, 226, 239, 0.5);
+  font-size: 0.59rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.mockLeaderboardPodiumRank > strong {
+  color: #ffffff;
+  font-size: 2.25rem;
+  font-weight: 950;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+}
+
+.mockLeaderboardPodiumCard.isRank1
+  .mockLeaderboardPodiumRank > strong {
+  color: #ffd45f;
+  font-size: 2.8rem;
+}
+
+.mockLeaderboardPodiumIdentity {
+  min-width: 0;
+  align-self: center;
+  display: grid;
+  gap: 8px;
+}
+
+.mockLeaderboardPodiumIdentity > strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 1.2rem;
+  line-height: 1.12;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mockLeaderboardPodiumIdentity > span {
+  color: rgba(215, 224, 238, 0.58);
+  font-size: 0.75rem;
+  font-weight: 750;
+}
+
+.mockLeaderboardPodiumScore {
+  min-width: 0;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(255, 210, 91, 0.14);
+  border-radius: 17px;
+  background: rgba(5, 9, 20, 0.43);
+}
+
+.mockLeaderboardPodiumScore > strong {
+  color: #ffd45f;
+  font-size: 1.85rem;
+  font-weight: 950;
+  line-height: 0.9;
+  letter-spacing: -0.045em;
+}
+
+.mockLeaderboardPodiumScore > span {
+  color: rgba(218, 226, 239, 0.6);
+  font-size: 0.73rem;
+  font-weight: 800;
+}
+
+.mockLeaderboardOwnStrip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px solid rgba(52, 211, 122, 0.23);
+  border-radius: 19px;
+  background: rgba(35, 142, 84, 0.09);
+}
+
+.mockLeaderboardOwnStrip > div {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  padding: 8px 10px;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.mockLeaderboardOwnStrip > div:last-child {
+  border-right: 0;
+}
+
+.mockLeaderboardOwnStrip span {
+  color: rgba(216, 225, 238, 0.55);
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mockLeaderboardOwnStrip strong {
+  color: #b5f0ca;
+  font-size: 1rem;
+  font-weight: 950;
+}
+
+.mockLeaderboardRankList {
+  margin-top: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 20px;
+  background: rgba(10, 17, 32, 0.72);
+}
+
+.mockLeaderboardRankListHead,
+.mockLeaderboardRankRow {
+  display: grid;
+  grid-template-columns:
+    78px minmax(180px, 1.4fr) minmax(100px, 0.8fr)
+    minmax(90px, 0.7fr) minmax(80px, 0.65fr) minmax(110px, 0.8fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.mockLeaderboardRankListHead {
+  min-height: 44px;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.075);
+  background: rgba(255, 255, 255, 0.025);
+  color: rgba(214, 223, 237, 0.48);
+  font-size: 0.59rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mockLeaderboardRankRow {
+  min-height: 68px;
+  padding: 12px 16px;
+  color: rgba(235, 240, 249, 0.78);
+}
+
+.mockLeaderboardRankRow + .mockLeaderboardRankRow {
+  border-top: 1px solid rgba(255, 255, 255, 0.055);
+}
+
+.mockLeaderboardRankRow.isOwn {
+  background: rgba(36, 151, 88, 0.08);
+}
+
+.mockLeaderboardRankRow > b {
+  color: #ffd45f;
+  font-size: 0.93rem;
+}
+
+.mockLeaderboardRankRow > div {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mockLeaderboardRankRow > div > strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mockLeaderboardRankRow > div > small {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 7px;
+  border: 1px solid rgba(38, 199, 109, 0.28);
+  border-radius: 999px;
+  background: rgba(38, 199, 109, 0.1);
+  color: #98e9b4;
+  font-size: 0.53rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+}
+
+.mockLeaderboardRankRow > span {
+  color: rgba(223, 230, 241, 0.67);
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+
+.mockLeaderboardRankListEmpty {
+  padding: 22px;
+  color: rgba(215, 224, 237, 0.55);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.mockLeaderboardBoardActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.mockLeaderboardBoardActions > button {
+  min-height: 44px;
+  padding: 10px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.045);
+  color: rgba(238, 242, 249, 0.82);
+  font-size: 0.74rem;
+  font-weight: 900;
+  filter: none !important;
+  transform: none !important;
+}
+
+.mockLeaderboardBoardActions > button.isPrimary {
+  border-color: rgba(242, 161, 65, 0.26);
+  background: rgba(242, 161, 65, 0.12);
+  color: #ffd08b;
+}
+
+.mockLeaderboardBoardActions > button:hover,
+.mockLeaderboardBoardActions > button:focus-visible,
+.mockLeaderboardBoardActions > button:active {
+  border-color: rgba(151, 130, 255, 0.4);
+  background: rgba(103, 79, 220, 0.15);
+  filter: none !important;
+  transform: none !important;
+}
+
+@media (max-width: 980px) {
+  .mockLeaderboardBoardHead {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .mockLeaderboardPodiumCard,
+  .mockLeaderboardPodiumCard.isRank1 {
+    min-height: 246px;
+  }
+
+  .mockLeaderboardRankListHead,
+  .mockLeaderboardRankRow {
+    grid-template-columns:
+      64px minmax(150px, 1.2fr) minmax(90px, 0.8fr)
+      minmax(80px, 0.7fr) minmax(70px, 0.6fr);
+  }
+
+  .mockLeaderboardRankListHead > :last-child,
+  .mockLeaderboardRankRow > :last-child {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .mockLeaderboardBoard {
+    width: calc(100% - 20px);
+    margin: 14px auto 92px;
+    padding: 14px;
+    border-radius: 22px;
+  }
+
+  .mockLeaderboardBoardTitle h2 {
+    font-size: 1.65rem;
+  }
+
+  .mockLeaderboardTestButton > strong {
+    white-space: normal;
+  }
+
+  .mockLeaderboardPodium {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "gold"
+      "silver"
+      "bronze";
+    gap: 10px;
+  }
+
+  .mockLeaderboardPodiumCard,
+  .mockLeaderboardPodiumCard.isRank1 {
+    min-height: 0;
+  }
+
+  .mockLeaderboardOwnStrip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mockLeaderboardOwnStrip > div:nth-child(2) {
+    border-right: 0;
+  }
+
+  .mockLeaderboardRankList {
+    border: 0;
+    background: transparent;
+  }
+
+  .mockLeaderboardRankListHead {
+    display: none;
+  }
+
+  .mockLeaderboardRankRow {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 8px 10px;
+    min-height: 0;
+    margin-top: 8px;
+    padding: 13px;
+    border: 1px solid rgba(255, 255, 255, 0.075);
+    border-radius: 15px;
+    background: rgba(10, 17, 32, 0.78);
+  }
+
+  .mockLeaderboardRankRow + .mockLeaderboardRankRow {
+    border-top: 1px solid rgba(255, 255, 255, 0.075);
+  }
+
+  .mockLeaderboardRankRow > b {
+    grid-row: 1 / span 2;
+  }
+
+  .mockLeaderboardRankRow > div {
+    grid-column: 2;
+  }
+
+  .mockLeaderboardRankRow > span:nth-of-type(1) {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .mockLeaderboardRankRow > span:nth-of-type(2) {
+    grid-column: 3;
+    grid-row: 2;
+    justify-self: end;
+    color: #ffd45f;
+  }
+
+  .mockLeaderboardRankRow > span:nth-of-type(3),
+  .mockLeaderboardRankRow > span:nth-of-type(4) {
+    display: none;
+  }
+
+  .mockLeaderboardBoardActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .mockLeaderboardBoardActions > button {
+    width: 100%;
+  }
+}
+
+/* === Phase 24 leaderboard title visibility guard === */
+.mockLeaderboardPage .mockLeaderboardBoardTitle h2 {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+  background: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+}

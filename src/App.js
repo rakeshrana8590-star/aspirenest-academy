@@ -8795,7 +8795,9 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   path="/leaderboard"
   element={
     <StudentMockLeaderboardRoute
-      mockResults={mockResults}
+      mockLeaderboardEntries={mockLeaderboardEntries}
+      universalContent={universalContent}
+      user={user}
     />
   }
 />

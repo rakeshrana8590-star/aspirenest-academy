@@ -1,7 +1,15 @@
-import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import StudentMockTestCard from "./StudentMockTestCard.jsx";
+import "./studentMockLeaderboard.css";
+import {
+  getMockLeaderboardModeLabel,
+  getMockLeaderboardScore,
+  getPublicMockTestTitle,
+  maskMockLeaderboardName,
+  rankMockLeaderboardEntries,
+} from "./mockLeaderboardUtils.js";
 
 const MOCK_PLAN_ORDER = ["FREE", "BASIC", "PREMIUM", "MENTORSHIP"];
 
@@ -921,159 +929,397 @@ export function StudentMockTestHistoryRoute({
   }
   
   export function StudentMockLeaderboardRoute({
-    mockResults = [],
+    mockLeaderboardEntries = [],
+    universalContent = [],
+    user = null,
   }) {
     const navigate = useNavigate();
-  
-    const rankedResults = [...mockResults]
-      .sort(
-        (a, b) =>
-          Number(b.percentage || b.accuracy || 0) -
-            Number(a.percentage || a.accuracy || 0) ||
-          Number(b.score || 0) - Number(a.score || 0)
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [testMenuOpen, setTestMenuOpen] = useState(false);
+    const testMenuRef = useRef(null);
+
+    useEffect(() => {
+      const handlePointerDown = (event) => {
+        if (
+          testMenuRef.current &&
+          !testMenuRef.current.contains(event.target)
+        ) {
+          setTestMenuOpen(false);
+        }
+      };
+
+      const handleKeyDown = (event) => {
+        if (event.key === "Escape") {
+          setTestMenuOpen(false);
+        }
+      };
+
+      document.addEventListener("mousedown", handlePointerDown);
+      document.addEventListener("keydown", handleKeyDown);
+
+      return () => {
+        document.removeEventListener("mousedown", handlePointerDown);
+        document.removeEventListener("keydown", handleKeyDown);
+      };
+    }, []);
+
+    const testOptionsMap = new Map();
+
+    (Array.isArray(universalContent) ? universalContent : [])
+      .filter(
+        (test) =>
+          test.section === "mockTest" &&
+          test.leaderboardMode &&
+          test.leaderboardMode !== "disabled" &&
+          test.id
       )
-      .slice(0, 20);
-  
-    const topScore =
-      rankedResults.length > 0
-        ? Number(
-            rankedResults[0].percentage ||
-              rankedResults[0].accuracy ||
-              0
-          )
-        : 0;
-  
-    const totalStudents = new Set(
-      rankedResults.map(
-        (result) =>
-          result.studentEmail ||
-          result.email ||
-          result.studentName ||
-          result.id
-      )
-    ).size;
-  
+      .forEach((test) => {
+        testOptionsMap.set(String(test.id), {
+          id: String(test.id),
+          title: getPublicMockTestTitle(test.title),
+          rawTitle: test.title || "Mock Test",
+          leaderboardMode: test.leaderboardMode || "",
+        });
+      });
+
+    (Array.isArray(mockLeaderboardEntries)
+      ? mockLeaderboardEntries
+      : []
+    ).forEach((entry) => {
+      const id = String(
+        entry.testId || entry.mockTestId || entry.contentId || ""
+      ).trim();
+
+      if (!id || testOptionsMap.has(id)) return;
+
+      testOptionsMap.set(id, {
+        id,
+        title: getPublicMockTestTitle(
+          entry.testTitle || entry.subject || "Mock Test"
+        ),
+        rawTitle:
+          entry.testTitle || entry.subject || "Mock Test",
+        leaderboardMode: entry.leaderboardMode || "",
+      });
+    });
+
+    const testOptions = [...testOptionsMap.values()].sort((a, b) =>
+      a.title.localeCompare(b.title)
+    );
+
+    const requestedTestId = String(
+      searchParams.get("testId") || ""
+    ).trim();
+
+    const selectedTest =
+      testOptions.find((test) => test.id === requestedTestId) ||
+      testOptions[0] ||
+      null;
+
+    const resolvedLeaderboard = rankMockLeaderboardEntries(
+      mockLeaderboardEntries,
+      {
+        testId: selectedTest?.id || "",
+        preferredMode: selectedTest?.leaderboardMode || "",
+        user,
+      }
+    );
+
+    const formatDuration = (value) => {
+      const totalSeconds = Math.max(0, Number(value || 0));
+      if (!totalSeconds) return "Time unavailable";
+
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = Math.round(totalSeconds % 60);
+
+      return minutes
+        ? `${minutes}m ${seconds}s`
+        : `${seconds}s`;
+    };
+
+    const decorateResult = (result) => ({
+      ...result,
+      displayName: maskMockLeaderboardName(result, user),
+      scoreValue: getMockLeaderboardScore(result),
+      scoreFraction: `${Number(result.score || 0)}/${Number(
+        result.totalMarks || 0
+      )}`,
+      correctValue: Number(
+        result.correctCount ?? result.correct ?? 0
+      ),
+      wrongValue: Number(
+        result.wrongCount ?? result.wrong ?? 0
+      ),
+      skippedValue: Number(
+        result.skippedCount ?? result.skipped ?? 0
+      ),
+      durationLabel: formatDuration(result.durationSeconds),
+    });
+
+    const rankedResults = resolvedLeaderboard.ranked.map(
+      decorateResult
+    );
+
+    const topThree = rankedResults.slice(0, 3);
+    const remainingResults = rankedResults.slice(3, 20);
+    const ownResult =
+      rankedResults.find((result) => result.isOwn) || null;
+    const topScore = topThree[0]?.scoreValue || 0;
+    const totalStudents = resolvedLeaderboard.total;
+    const modeLabel = getMockLeaderboardModeLabel(
+      selectedTest?.leaderboardMode || ""
+    );
+    const selectedTitle =
+      selectedTest?.title || "Test-wise Leaderboard";
+
+    const selectTest = (testId) => {
+      setSearchParams(testId ? { testId } : {});
+      setTestMenuOpen(false);
+    };
+
     return (
-      <section className="mockStudentPage">
+      <section className="mockStudentPage mockLeaderboardPage">
         <MockStudentHero
-          badge="LEADERBOARD"
-          title="Top Student Rankings"
-          text="See top performers from submitted mock tests and compare score, accuracy, and rank."
+          badge={modeLabel}
+          title={selectedTitle}
+          text={
+            selectedTest
+              ? "Live ranking for this selected mock test, with every student compared inside the same test."
+              : "Choose a leaderboard-enabled mock test to view its rankings."
+          }
           backLabel="Back to Mock Tests"
           onBack={() => navigate("/ctet-tet/mock-tests")}
           stats={[
             {
-              label: "Ranked Entries",
-              value: rankedResults.length,
-            },
-            {
-              label: "Students",
+              label: "Ranked Students",
               value: totalStudents,
             },
             {
               label: "Top Score",
               value: `${topScore}%`,
             },
+            {
+              label: "Your Rank",
+              value: ownResult ? `#${ownResult.rank}` : "—",
+            },
           ]}
         />
-  
-        <div className="mockStudentShelf">
-          <div className="mockStudentShelfHeader">
-            <span>Performance Rankings</span>
-            <h2>Leaderboard</h2>
-          </div>
-  
-          {rankedResults.length === 0 ? (
-            <MockEmptyState
-              title="No rankings yet"
-              text="Leaderboard will appear after students submit mock tests."
-            />
-          ) : (
-            <div className="mockStudentTestGrid">
-              {rankedResults.map((result, index) => (
-                <article
-                  className="mockTestPremiumCard isCompleted"
-                  key={result.id || index}
+
+        <div className="mockLeaderboardBoard">
+          <div className="mockLeaderboardBoardHead">
+            <div className="mockLeaderboardBoardTitle">
+              <span>CHALLENGE LEADERBOARD</span>
+              <h2>{selectedTitle}</h2>
+              <p>
+                Gold, Silver, and Bronze positions are calculated only
+                from this selected test.
+              </p>
+            </div>
+
+            <div
+              className={`mockLeaderboardTestSwitcher ${
+                testMenuOpen ? "isOpen" : ""
+              }`.trim()}
+              ref={testMenuRef}
+            >
+              <span>Select Test</span>
+
+              <button
+                type="button"
+                className="mockLeaderboardTestButton"
+                aria-haspopup="listbox"
+                aria-expanded={testMenuOpen}
+                disabled={!testOptions.length}
+                onClick={() =>
+                  setTestMenuOpen((current) => !current)
+                }
+              >
+                <strong>
+                  {selectedTest?.rawTitle ||
+                    selectedTest?.title ||
+                    "No leaderboard tests"}
+                </strong>
+                <b aria-hidden="true">⌄</b>
+              </button>
+
+              {testMenuOpen ? (
+                <div
+                  className="mockLeaderboardTestMenu"
+                  role="listbox"
+                  aria-label="Select leaderboard test"
                 >
-                  <div className="mockTestPremiumTop">
-                    <div className="mockTestPremiumIcon">
-                      {index === 0
-                        ? "🥇"
-                        : index === 1
-                        ? "🥈"
-                        : index === 2
-                        ? "🥉"
-                        : "🏆"}
-                    </div>
-  
-                    <div className="mockTestPremiumBadges">
-                      <span>Rank #{index + 1}</span>
-                      <span>
-                        {result.percentage || result.accuracy || 0}%
-                      </span>
-                    </div>
-                  </div>
-  
-                  <h3>
-                    {result.studentName ||
-                      result.studentEmail ||
-                      result.email ||
-                      "Student"}
-                  </h3>
-  
-                  <p className="mockTestPremiumMeta">
-                    {result.testTitle || "Mock Test"}
-                  </p>
-  
-                  <div className="mockTestPremiumStats">
-                    <div>
-                      <span>Score</span>
-                      <strong>
-                        {result.score || 0}/{result.totalMarks || 0}
-                      </strong>
-                    </div>
-  
-                    <div>
-                      <span>Accuracy</span>
-                      <strong>
-                        {result.accuracy || result.percentage || 0}%
-                      </strong>
-                    </div>
-  
-                    <div>
-                      <span>Correct</span>
-                      <strong>
-                        {result.correctCount || result.correct || 0}
-                      </strong>
-                    </div>
-  
-                    <div>
-                      <span>Wrong / Skipped</span>
-                      <strong>
-                        {result.wrongCount || result.wrong || 0} /{" "}
-                        {result.skippedCount || result.skipped || 0}
-                      </strong>
-                    </div>
-                  </div>
-  
-                  <div className="mockTestPremiumFooter">
-                    <div>
-                      <span>Rank</span>
-                      <strong>#{index + 1}</strong>
-                    </div>
-  
+                  {testOptions.map((test) => (
                     <button
                       type="button"
-                      className="mockTestPremiumButton"
-                      onClick={() => navigate("/ctet-tet/mock-tests")}
+                      role="option"
+                      aria-selected={selectedTest?.id === test.id}
+                      className={
+                        selectedTest?.id === test.id
+                          ? "isSelected"
+                          : ""
+                      }
+                      key={test.id}
+                      onClick={() => selectTest(test.id)}
                     >
-                      Practice More
+                      <span>{test.rawTitle || test.title}</span>
+                      {selectedTest?.id === test.id ? (
+                        <b>Selected</b>
+                      ) : null}
                     </button>
-                  </div>
-                </article>
-              ))}
+                  ))}
+                </div>
+              ) : null}
             </div>
+          </div>
+
+          {rankedResults.length === 0 ? (
+            <MockEmptyState
+              title={
+                selectedTest
+                  ? "No rankings for this test yet"
+                  : "No leaderboard-enabled tests yet"
+              }
+              text={
+                selectedTest
+                  ? "Rankings will appear after students submit this selected mock test."
+                  : "Publish a mock test with leaderboard mode enabled."
+              }
+            />
+          ) : (
+            <>
+              <div
+                className="mockLeaderboardPodium"
+                aria-label="Top three leaderboard positions"
+              >
+                {topThree.map((result) => (
+                  <article
+                    className={`mockLeaderboardPodiumCard isRank${result.rank} ${
+                      result.isOwn ? "isOwn" : ""
+                    }`.trim()}
+                    key={
+                      result.id ||
+                      result.leaderboardKey ||
+                      `${selectedTest?.id}-${result.rank}`
+                    }
+                  >
+                    <div className="mockLeaderboardPodiumTop">
+                      <span>
+                        {result.rank === 1
+                          ? "GOLD"
+                          : result.rank === 2
+                          ? "SILVER"
+                          : "BRONZE"}
+                      </span>
+                      {result.isOwn ? <b>YOU</b> : null}
+                    </div>
+
+                    <div className="mockLeaderboardPodiumRank">
+                      <small>RANK</small>
+                      <strong>#{result.rank}</strong>
+                    </div>
+
+                    <div className="mockLeaderboardPodiumIdentity">
+                      <strong>{result.displayName}</strong>
+                      <span>
+                        {result.correctValue} correct
+                        {" • "}
+                        {result.durationLabel}
+                      </span>
+                    </div>
+
+                    <div className="mockLeaderboardPodiumScore">
+                      <strong>{result.scoreValue}%</strong>
+                      <span>{result.scoreFraction} marks</span>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              {ownResult && ownResult.rank > 3 ? (
+                <div className="mockLeaderboardOwnStrip">
+                  <div>
+                    <span>Your current position</span>
+                    <strong>#{ownResult.rank}</strong>
+                  </div>
+
+                  <div>
+                    <span>Score</span>
+                    <strong>{ownResult.scoreFraction}</strong>
+                  </div>
+
+                  <div>
+                    <span>Percentage</span>
+                    <strong>{ownResult.scoreValue}%</strong>
+                  </div>
+
+                  <div>
+                    <span>Correct</span>
+                    <strong>{ownResult.correctValue}</strong>
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="mockLeaderboardRankList">
+                <div className="mockLeaderboardRankListHead">
+                  <span>Rank</span>
+                  <span>Student</span>
+                  <span>Score</span>
+                  <span>Accuracy</span>
+                  <span>Correct</span>
+                  <span>Time</span>
+                </div>
+
+                {remainingResults.length ? (
+                  remainingResults.map((result) => (
+                    <article
+                      className={`mockLeaderboardRankRow ${
+                        result.isOwn ? "isOwn" : ""
+                      }`.trim()}
+                      key={
+                        result.id ||
+                        result.leaderboardKey ||
+                        `${selectedTest?.id}-${result.rank}`
+                      }
+                    >
+                      <b>#{result.rank}</b>
+
+                      <div>
+                        <strong>{result.displayName}</strong>
+                        {result.isOwn ? <small>YOU</small> : null}
+                      </div>
+
+                      <span>{result.scoreFraction}</span>
+                      <span>{result.scoreValue}%</span>
+                      <span>{result.correctValue}</span>
+                      <span>{result.durationLabel}</span>
+                    </article>
+                  ))
+                ) : (
+                  <div className="mockLeaderboardRankListEmpty">
+                    More ranks will appear as additional students
+                    complete this test.
+                  </div>
+                )}
+              </div>
+            </>
           )}
+
+          <div className="mockLeaderboardBoardActions">
+            <button
+              type="button"
+              onClick={() => navigate("/ctet-tet")}
+            >
+              Back to Community
+            </button>
+
+            <button
+              type="button"
+              className="isPrimary"
+              onClick={() => navigate("/ctet-tet/mock-tests")}
+            >
+              Practice Mock Tests
+            </button>
+          </div>
         </div>
       </section>
     );
