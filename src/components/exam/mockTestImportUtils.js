@@ -2,6 +2,7 @@ import * as XLSX from "xlsx";
 import { addDoc, collection } from "firebase/firestore";
 
 import { db } from "../../firebase";
+import { normalizeExamQuestion } from "./examAnswerUtils.js";
 
 export const convertGoogleDriveUrlToDownloadUrl = (url = "") => {
   const fileIdMatch =
@@ -23,8 +24,13 @@ export const importMockTestJsonAsDraft = async ({
     return false;
   }
 
+  const normalizedQuestions = importedTest.questions.map((question) =>
+    normalizeExamQuestion(question)
+  );
+
   const importPayload = {
     ...importedTest,
+    questions: normalizedQuestions,
     title: `${importedTest.title} - Imported`,
     section: "mockTest",
     contentType: "MOCK",
@@ -71,7 +77,8 @@ const buildImportedQuestionsFromRows = ({
   questionRows = [],
   testInfo = {},
 }) =>
-  questionRows.map((row, index) => ({
+  questionRows.map((row, index) =>
+    normalizeExamQuestion({
     questionNumber: Number(row["Question Number"] || index + 1),
     question: row["Question"]?.toString().trim() || "",
     option1: row["Option A"]?.toString().trim() || "",
@@ -101,7 +108,8 @@ const buildImportedQuestionsFromRows = ({
       row["Question Status"]?.toString().trim() || "published",
     saveToQuestionBank:
       row["Save To Question Bank"]?.toString().trim() || "yes",
-  }));
+    })
+  );
 
 const validateImportedQuestions = (importedQuestions = []) =>
   importedQuestions.findIndex(

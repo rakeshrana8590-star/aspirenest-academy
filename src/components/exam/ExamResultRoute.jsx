@@ -5,11 +5,13 @@ import {
   collection,
   getDocs,
   query,
+  updateDoc,
   where,
 } from "firebase/firestore";
 
 import { db } from "../../firebase";
 import { getAttemptStorageKey } from "./examAttemptStorage.js";
+import { isExamAnswerCorrect } from "./examAnswerUtils.js";
 
 const safeParseJson = (value, fallback = {}) => {
   try {
@@ -94,24 +96,80 @@ const hasSavedMockAttempt = (mockResults = [], attemptSaveKey = "") =>
       result?.attemptId === attemptSaveKey
   );
 
+const isBetterLeaderboardResult = (
+  currentEntry = {},
+  nextPercentage = 0,
+  nextScore = 0
+) => {
+  const currentPercentage = Number(
+    currentEntry.rankScore ?? currentEntry.percentage ?? 0
+  );
+  const currentScore = Number(
+    currentEntry.rankTieBreakerScore ?? currentEntry.score ?? 0
+  );
+  const safeNextPercentage = Number(nextPercentage || 0);
+  const safeNextScore = Number(nextScore || 0);
+
+  return (
+    safeNextPercentage > currentPercentage ||
+    (safeNextPercentage === currentPercentage &&
+      safeNextScore > currentScore)
+  );
+};
+
 const AutoSaveMockResult = ({
   testId,
   userEmail,
   attemptSaveKey,
   saveToLeaderboard,
 }) => {
+  const saveResultRef = React.useRef(saveToLeaderboard);
+
   React.useEffect(() => {
-    if (!testId || !userEmail) return;
+    saveResultRef.current = saveToLeaderboard;
+  }, [saveToLeaderboard]);
 
-    const autoSaveKey = `mockResultAutoSaved_${
-      attemptSaveKey || `${testId}_${userEmail}`
-    }`;
+  React.useEffect(() => {
+    if (!testId || !userEmail) return undefined;
 
-    if (sessionStorage.getItem(autoSaveKey)) return;
+    const syncIdentity =
+      attemptSaveKey || `${testId}_${userEmail}`;
+    const successKey = `mockResultAutoSavedV2_${syncIdentity}`;
+    const inFlightKey = `${successKey}_inFlight`;
 
-    sessionStorage.setItem(autoSaveKey, "yes");
-    saveToLeaderboard(false);
-  }, [testId, userEmail, attemptSaveKey, saveToLeaderboard]);
+    if (
+      sessionStorage.getItem(successKey) ||
+      sessionStorage.getItem(inFlightKey)
+    ) {
+      return undefined;
+    }
+
+    sessionStorage.setItem(inFlightKey, "yes");
+
+    let isActive = true;
+
+    const syncResult = async () => {
+      try {
+        const didSave = await saveResultRef.current(false);
+
+        if (didSave) {
+          sessionStorage.setItem(successKey, "yes");
+        } else if (isActive) {
+          console.warn(
+            "Mock result auto-sync did not complete. It will retry when the result is reopened."
+          );
+        }
+      } finally {
+        sessionStorage.removeItem(inFlightKey);
+      }
+    };
+
+    syncResult();
+
+    return () => {
+      isActive = false;
+    };
+  }, [testId, userEmail, attemptSaveKey]);
 
   return null;
 };
@@ -344,8 +402,11 @@ export default function ExamResultRoute({
 
   const correctCount = resultQuestions.filter(
     ({ actualQuestionIndex, question }) =>
-      attemptAnswers[actualQuestionIndex] &&
-      attemptAnswers[actualQuestionIndex] === question.answer
+      isExamAnswerCorrect(
+        attemptAnswers[actualQuestionIndex],
+        question.answer,
+        question
+      )
   ).length;
 
   const skippedCount = resultQuestions.filter(
@@ -381,7 +442,9 @@ export default function ExamResultRoute({
 
       if (!selected) return sum;
 
-      if (selected === question.answer) {
+      if (
+        isExamAnswerCorrect(selected, question.answer, question)
+      ) {
         return (
           sum +
           Number(
@@ -443,7 +506,8 @@ export default function ExamResultRoute({
       const existingResult = await getDocs(
         query(
           collection(db, "mockResults"),
-          where("attemptKey", "==", attemptKey)
+          where("attemptKey", "==", attemptKey),
+          where("email", "==", user.email)
         )
       );
 
@@ -485,6 +549,24 @@ export default function ExamResultRoute({
 
           createdAt: new Date(),
         });
+      } else {
+        await Promise.all(
+          existingResult.docs.map((resultDocument) =>
+            updateDoc(resultDocument.ref, {
+              testTitle: test.title || "",
+              score,
+              totalMarks,
+              percentage,
+              accuracy,
+              correctCount,
+              wrongCount,
+              skippedCount,
+              totalQuestions,
+              durationSeconds,
+              updatedAt: new Date(),
+            })
+          )
+        );
       }
 
       if (leaderboardEnabled) {
@@ -538,6 +620,51 @@ export default function ExamResultRoute({
 
             createdAt: new Date(),
           });
+        } else {
+          const leaderboardDocumentsToUpdate =
+            existingLeaderboard.docs.filter((leaderboardDocument) => {
+              const leaderboardData =
+                leaderboardDocument.data() || {};
+
+              const isSameAttempt =
+                Boolean(attemptSaveKey) &&
+                leaderboardData.attemptId === attemptSaveKey;
+
+              return (
+                isSameAttempt ||
+                isBetterLeaderboardResult(
+                  leaderboardData,
+                  percentage,
+                  score
+                )
+              );
+            });
+
+          await Promise.all(
+            leaderboardDocumentsToUpdate.map((leaderboardDocument) =>
+              updateDoc(leaderboardDocument.ref, {
+                testTitle: test.title || "",
+                score,
+                totalMarks,
+                percentage,
+                accuracy,
+                correctCount,
+                wrongCount,
+                skippedCount,
+                totalQuestions,
+                durationSeconds,
+                rankScore: percentage,
+                rankTieBreakerScore: score,
+                attemptId: attemptSaveKey,
+                attemptStartedAt,
+                attemptSubmittedAt,
+                attemptNumber: savedSubmittedCount + 1,
+                startedAt: activeAttemptState.startedAt || null,
+                endedAt: activeAttemptState.submittedAt || null,
+                updatedAt: new Date(),
+              })
+            )
+          );
         }
       }
 

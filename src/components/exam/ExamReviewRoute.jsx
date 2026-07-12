@@ -2,6 +2,10 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { getAttemptStorageKey } from "./examAttemptStorage.js";
+import {
+  isExamAnswerCorrect,
+  normalizeExamAnswerKey,
+} from "./examAnswerUtils.js";
 
 const safeParseJson = (value, fallback = {}) => {
   try {
@@ -212,8 +216,11 @@ export default function ExamReviewRoute({
 
   const correctCount = reviewQuestions.filter(
     ({ actualQuestionIndex, question }) =>
-      attemptAnswers[actualQuestionIndex] &&
-      attemptAnswers[actualQuestionIndex] === question.answer
+      isExamAnswerCorrect(
+        attemptAnswers[actualQuestionIndex],
+        question.answer,
+        question
+      )
   ).length;
 
   const skippedCount = reviewQuestions.filter(
@@ -223,7 +230,12 @@ export default function ExamReviewRoute({
   const wrongCount =
     reviewQuestions.length - correctCount - skippedCount;
 
-  const getOptionLabel = (answerKey = "") => {
+  const getOptionLabel = (answerKey = "", question = {}) => {
+    const normalizedKey = normalizeExamAnswerKey(
+      answerKey,
+      question
+    );
+
     const optionMap = {
       option1: "A",
       option2: "B",
@@ -231,13 +243,22 @@ export default function ExamReviewRoute({
       option4: "D",
     };
 
-    return optionMap[answerKey] || answerKey || "—";
+    return optionMap[normalizedKey] || normalizedKey || "—";
   };
 
   const getOptionText = (question, answerKey) => {
     if (!answerKey) return "Not Attempted";
 
-    return question?.[answerKey] || answerKey || "Not Attempted";
+    const normalizedKey = normalizeExamAnswerKey(
+      answerKey,
+      question
+    );
+
+    return (
+      question?.[normalizedKey] ||
+      answerKey ||
+      "Not Attempted"
+    );
   };
 
   return (
@@ -288,7 +309,7 @@ export default function ExamReviewRoute({
               const userAnswer = attemptAnswers[actualQuestionIndex];
 
               const isCorrect =
-                userAnswer && userAnswer === question.answer;
+                isExamAnswerCorrect(userAnswer, question.answer, question);
 
               const isSkipped = !userAnswer;
 
@@ -317,7 +338,7 @@ export default function ExamReviewRoute({
               const userAnswer = attemptAnswers[actualQuestionIndex];
 
               const isCorrect =
-                userAnswer && userAnswer === question.answer;
+                isExamAnswerCorrect(userAnswer, question.answer, question);
 
               const isSkipped = !userAnswer;
 
@@ -354,14 +375,14 @@ export default function ExamReviewRoute({
                         <strong>
                           {isSkipped
                             ? "—"
-                            : getOptionLabel(userAnswer)}
+                            : getOptionLabel(userAnswer, question)}
                         </strong>
                       </span>
 
                       <span>
                         Correct:{" "}
                         <strong>
-                          {getOptionLabel(question.answer)}
+                          {getOptionLabel(question.answer, question)}
                         </strong>
                       </span>
                     </div>
@@ -382,14 +403,21 @@ export default function ExamReviewRoute({
                         <div
                           key={optionKey}
                           className={`reviewOptionItem ${
-                            question.answer === optionKey
+                            isExamAnswerCorrect(
+                              optionKey,
+                              question.answer,
+                              question
+                            )
                               ? "correctOption"
-                              : userAnswer === optionKey
+                              : normalizeExamAnswerKey(
+                                  userAnswer,
+                                  question
+                                ) === optionKey
                               ? "selectedOption"
                               : ""
                           }`}
                         >
-                          <strong>{getOptionLabel(optionKey)}.</strong>{" "}
+                          <strong>{getOptionLabel(optionKey, question)}.</strong>{" "}
                           {question[optionKey]}
                         </div>
                       ))}

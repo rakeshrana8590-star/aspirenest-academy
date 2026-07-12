@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const toNumber = (value, fallback = 0) => {
   const numberValue = Number(value);
@@ -65,13 +65,25 @@ const formatSubmittedAt = (value) => {
 export default function AdminMockTestResultsRoute({
   universalContent = [],
   mockResults = [],
+  loadAllMockResults,
   loadLeaderboard,
-  loadUserMockResults,
-  user,
   navigate,
 }) {
   const [searchText, setSearchText] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("all");
+  const hasLoadedAllResultsRef = useRef(false);
+
+  useEffect(() => {
+    if (
+      hasLoadedAllResultsRef.current ||
+      typeof loadAllMockResults !== "function"
+    ) {
+      return;
+    }
+
+    hasLoadedAllResultsRef.current = true;
+    loadAllMockResults();
+  }, [loadAllMockResults]);
 
   const mockTests = useMemo(
     () => universalContent.filter((item) => item.section === "mockTest"),
@@ -226,11 +238,10 @@ export default function AdminMockTestResultsRoute({
   }, [attemptResults]);
 
   const handleRefreshResults = async () => {
-    await loadLeaderboard?.();
-
-    if (user?.email) {
-      await loadUserMockResults?.(user.email);
-    }
+    await Promise.all([
+      loadAllMockResults?.(),
+      loadLeaderboard?.(),
+    ]);
   };
 
   return (

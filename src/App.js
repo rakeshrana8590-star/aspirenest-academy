@@ -824,6 +824,7 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
   const [students, setStudents] = useState([]);
 const [enquiries, setEnquiries] = useState([]);
 const [mockResults, setMockResults] = useState([]);
+const [adminMockResults, setAdminMockResults] = useState([]);
 const [paymentRequests, setPaymentRequests] = useState([]);
 const [activePayment, setActivePayment] = useState(null);
 const [paymentProof, setPaymentProof] = useState("");
@@ -2287,6 +2288,26 @@ if (expiryDate && expiryDate < new Date()) {
       alert(error.message);
     }
   };
+  const loadAllMockResults = async () => {
+    try {
+      const querySnapshot = await getDocs(
+        collection(db, "mockResults")
+      );
+
+      setAdminMockResults(
+        querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+      );
+
+      return true;
+    } catch (error) {
+      alert(error.message);
+      return false;
+    }
+  };
+
   const loadLeaderboard = async () => {
     try {
       const querySnapshot = await getDocs(
@@ -7709,10 +7730,9 @@ This action cannot be undone.`
     requireAdmin() ? (
       <AdminMockTestResultsRoute
         universalContent={universalContent}
-        mockResults={mockResults}
+        mockResults={adminMockResults}
+        loadAllMockResults={loadAllMockResults}
         loadLeaderboard={loadLeaderboard}
-        loadUserMockResults={loadUserMockResults}
-        user={user}
         navigate={navigate}
       />
     ) : null

@@ -221,7 +221,27 @@ service cloud.firestore {
       allow read: if isAdmin() ||
         (isSignedIn() && request.auth.token.email == resource.data.email);
 
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin() ||
+        (
+          isSignedIn()
+          && resource.data.email == request.auth.token.email
+          && request.resource.data.email == resource.data.email
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "testTitle",
+            "score",
+            "totalMarks",
+            "percentage",
+            "accuracy",
+            "correctCount",
+            "wrongCount",
+            "skippedCount",
+            "totalQuestions",
+            "durationSeconds",
+            "updatedAt"
+          ])
+        );
+
+      allow delete: if isAdmin();
     }
 
     match /mockLeaderboard/{docId} {
@@ -229,11 +249,63 @@ service cloud.firestore {
 
       allow create: if isSignedIn()
         && (
-          request.resource.data.email == request.auth.token.email ||
-          request.resource.data.studentEmail == request.auth.token.email
+          request.resource.data.get("email", "") ==
+            request.auth.token.email ||
+          request.resource.data.get("studentEmail", "") ==
+            request.auth.token.email
         );
 
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin() ||
+        (
+          isSignedIn()
+          && resource.data.studentEmail == request.auth.token.email
+          && request.resource.data.studentEmail ==
+            resource.data.studentEmail
+          && request.resource.data.leaderboardKey ==
+            resource.data.leaderboardKey
+          && request.resource.data.testId == resource.data.testId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "testTitle",
+            "score",
+            "totalMarks",
+            "percentage",
+            "accuracy",
+            "correctCount",
+            "wrongCount",
+            "skippedCount",
+            "totalQuestions",
+            "durationSeconds",
+            "rankScore",
+            "rankTieBreakerScore",
+            "attemptId",
+            "attemptStartedAt",
+            "attemptSubmittedAt",
+            "attemptNumber",
+            "startedAt",
+            "endedAt",
+            "updatedAt"
+          ])
+          && (
+            request.resource.data.get("rankScore", 0) >
+              resource.data.get("rankScore", 0)
+            || (
+              request.resource.data.get("rankScore", 0) ==
+                resource.data.get("rankScore", 0)
+              && request.resource.data.get(
+                "rankTieBreakerScore",
+                0
+              ) >
+                resource.data.get("rankTieBreakerScore", 0)
+            )
+            || (
+              resource.data.get("attemptId", "") != ""
+              && request.resource.data.get("attemptId", "") ==
+                resource.data.get("attemptId", "")
+            )
+          )
+        );
+
+      allow delete: if isAdmin();
     }
 
     match /questionBank/{docId} {
