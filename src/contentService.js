@@ -2,14 +2,9 @@ import { db } from "./firebase";
 
 import {
   collection,
-  addDoc,
   getDocs,
-  doc,
-  updateDoc,
-  deleteDoc,
   query,
   where,
-  orderBy,
 } from "firebase/firestore";
 
 import {
@@ -18,8 +13,14 @@ import {
   validateContentItem,
 } from "./contentSystem";
 
-
-const CONTENT_COLLECTION = "contentItems";
+import {
+  createContentItemWithMirrors,
+  deleteContentItemWithMirrors,
+  PUBLIC_CONTENT_COLLECTION,
+  RAW_CONTENT_COLLECTION,
+  updateContentItemWithMirrors,
+} from "./publicContentCatalogService";
+import { PUBLIC_CONTENT_SCHEMA_VERSION } from "./publicContentCatalogUtils";
 
 export const addContentItem = async (contentData) => {
   const item = createContentItem(contentData);
@@ -29,33 +30,30 @@ export const addContentItem = async (contentData) => {
     throw new Error(validationError);
   }
 
-  const docRef = await addDoc(
-    collection(db, CONTENT_COLLECTION),
-    item
-  );
-
-  return docRef.id;
+  return createContentItemWithMirrors(item);
 };
 
 export const loadPublishedContent = async (section) => {
   const q = query(
-    collection(db, CONTENT_COLLECTION),
+    collection(db, PUBLIC_CONTENT_COLLECTION),
     where("section", "==", section),
-    where("status", "==", CONTENT_STATUS.PUBLISHED)
+    where("status", "==", CONTENT_STATUS.PUBLISHED),
+    where("sourceCollection", "==", RAW_CONTENT_COLLECTION),
+    where(
+      "publicSchemaVersion",
+      "==",
+      PUBLIC_CONTENT_SCHEMA_VERSION
+    )
   );
 
   let snapshot;
 
-try {
-  snapshot = await getDocs(q);
-} catch (error) {
-  console.warn(
-    "Universal CMS collection not ready yet:",
-    error
-  );
-
-  return [];
-}
+  try {
+    snapshot = await getDocs(q);
+  } catch (error) {
+    console.warn("Universal public CMS collection not ready yet:", error);
+    return [];
+  }
 
   return snapshot.docs.map((document) => ({
     id: document.id,
@@ -63,25 +61,18 @@ try {
   }));
 };
 
-export const updateContentItem = async (contentId, updates) => {
-  await updateDoc(doc(db, CONTENT_COLLECTION, contentId), {
-    ...updates,
-    updatedAt: new Date(),
-  });
-};
+export const updateContentItem = async (contentId, updates) =>
+  updateContentItemWithMirrors(contentId, updates);
 
-export const deleteContentItem = async (contentId) => {
-  await deleteDoc(doc(db, CONTENT_COLLECTION, contentId));
-};
+export const deleteContentItem = async (contentId) =>
+  deleteContentItemWithMirrors(contentId);
 
-export const unpublishContentItem = async (contentId) => {
-  await updateContentItem(contentId, {
+export const unpublishContentItem = async (contentId) =>
+  updateContentItem(contentId, {
     status: CONTENT_STATUS.UNPUBLISHED,
   });
-};
 
-export const archiveContentItem = async (contentId) => {
-  await updateContentItem(contentId, {
+export const archiveContentItem = async (contentId) =>
+  updateContentItem(contentId, {
     status: CONTENT_STATUS.ARCHIVED,
   });
-};

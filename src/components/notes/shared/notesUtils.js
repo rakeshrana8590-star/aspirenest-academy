@@ -1,3 +1,5 @@
+import { isCanonicalPublicContentItem } from "../../../publicContentCatalogUtils";
+
 export const NOTES_PLAN_ORDER = [
     "FREE",
     "BASIC",
@@ -82,7 +84,10 @@ export const NOTES_PLAN_ORDER = [
   }
   
   export function hasNotePdf(note = {}) {
-    return Boolean(String(getNotePdfUrl(note) || "").trim());
+    return (
+      Boolean(String(getNotePdfUrl(note) || "").trim()) ||
+      isCanonicalPublicContentItem(note)
+    );
   }
   
   export function getNoteSubject(note = {}) {

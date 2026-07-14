@@ -1,5 +1,9 @@
 import { useNavigate } from "react-router-dom";
 
+import { loadProtectedContentMirror } from "../protectedContentAssetsService";
+import { isCanonicalPublicContentItem } from "../publicContentCatalogUtils";
+import { hasValidCurrentAffairsPdf } from "./currentAffairs/shared/currentAffairsUtils";
+
 export default function CurrentAffairs({
   currentAffairsList,
   fallbackCurrentAffairs,
@@ -32,6 +36,7 @@ export default function CurrentAffairs({
         "";
 
       return {
+        ...item,
         id: item.id,
         title:
           item.title ||
@@ -51,8 +56,7 @@ export default function CurrentAffairs({
     .filter(
       (item) =>
         item.month &&
-        item.pdf &&
-        item.pdf !== "#" &&
+        hasValidCurrentAffairsPdf(item) &&
         item.type !== "COMING_SOON"
     );
 
@@ -117,18 +121,36 @@ export default function CurrentAffairs({
     return hasPlanAccess ? hasPlanAccess(accessType) : false;
   };
 
-  const openPdf = (item) => {
-    if (!item.pdf || item.pdf === "#") {
-      alert("This PDF will be uploaded soon.");
-      return;
-    }
-
+  const openPdf = async (item) => {
     if (!canAccessCurrentAffair(item)) {
       navigate("/ctet-tet/pricing");
       return;
     }
 
-    window.open(item.pdf, "_blank", "noopener,noreferrer");
+    let resolvedItem = item;
+
+    if (isCanonicalPublicContentItem(item)) {
+      try {
+        resolvedItem = await loadProtectedContentMirror({
+          sourceCollection: item.sourceCollection || "contentItems",
+          sourceId: item.sourceId || item.id,
+          publicItem: item,
+        });
+      } catch (error) {
+        console.error("Protected current affairs PDF load failed:", error);
+        alert("This protected PDF is not available right now.");
+        return;
+      }
+    }
+
+    const pdfUrl = getPdfUrl(resolvedItem);
+
+    if (!pdfUrl || pdfUrl === "#") {
+      alert("This PDF will be uploaded soon.");
+      return;
+    }
+
+    window.open(pdfUrl, "_blank", "noopener,noreferrer");
   };
 
   return (

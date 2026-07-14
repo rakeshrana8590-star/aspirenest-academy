@@ -1,12 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
+  createContentItemWithMirrors,
+  deleteContentItemWithMirrors,
+  updateContentItemWithMirrors,
+} from "../../publicContentCatalogService";
 
 import VideoAdminCard from "./VideoAdminCard.jsx";
 import VideoActionMenu from "./VideoActionMenu.jsx";
@@ -442,7 +440,7 @@ export default function VideoLibraryManageRoute({
     const nextStatus =
       currentStatus === "published" ? "unpublished" : "published";
 
-    await updateDoc(doc(db, "contentItems", video.id), {
+    await updateContentItemWithMirrors(video.id, {
       status: nextStatus,
       updatedAt: new Date(),
     });
@@ -461,7 +459,7 @@ export default function VideoLibraryManageRoute({
 
     const { id, createdAt, updatedAt, editedAt, ...safePayload } = video;
 
-    await addDoc(collection(db, "contentItems"), {
+    await createContentItemWithMirrors({
       ...safePayload,
       title: `${video.title || "Class"} Copy`,
       status: "draft",
@@ -481,7 +479,7 @@ export default function VideoLibraryManageRoute({
 
     if (!confirmDelete) return;
 
-    await deleteDoc(doc(db, "contentItems", video.id));
+    await deleteContentItemWithMirrors(video.id);
 
     await reloadContent?.();
   };
@@ -544,7 +542,7 @@ export default function VideoLibraryManageRoute({
 
     await Promise.all(
       selectedVideos.map((video) =>
-        updateDoc(doc(db, "contentItems", video.id), {
+        updateContentItemWithMirrors(video.id, {
           status: nextStatus,
           updatedAt: new Date(),
         })
@@ -567,7 +565,7 @@ export default function VideoLibraryManageRoute({
     if (!confirmDelete) return;
 
     await Promise.all(
-      selectedVideos.map((video) => deleteDoc(doc(db, "contentItems", video.id)))
+      selectedVideos.map((video) => deleteContentItemWithMirrors(video.id))
     );
 
     clearSelection();

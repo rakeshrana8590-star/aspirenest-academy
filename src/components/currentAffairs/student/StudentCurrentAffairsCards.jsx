@@ -3,6 +3,7 @@ import React from "react";
 import {
   canAccessCurrentAffairsPlan,
   getCurrentAffairsPdfUrl,
+  hasValidCurrentAffairsPdf,
 } from "../shared/currentAffairsUtils";
 
 export function StudentCurrentAffairsMonthCard({ month, onOpen }) {
@@ -103,7 +104,7 @@ export function StudentCurrentAffairsPdfCard({
 
         <div>
           <span>Source</span>
-          <strong>{pdfUrl ? "PDF Ready" : "Pending"}</strong>
+          <strong>{hasValidCurrentAffairsPdf(item) ? "PDF Ready" : "Pending"}</strong>
         </div>
       </div>
 

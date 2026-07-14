@@ -8,6 +8,7 @@ import {
   canAccessNotePlan,
   getNoteChapter,
   getNotePdfUrl,
+  hasNotePdf,
   getNotePlan,
   getNoteSubject,
   getNotesPdfCount,
@@ -172,7 +173,7 @@ export function StudentNotePdfCard({
 
         <div>
           <span>Source</span>
-          <strong>{pdfUrl ? "PDF Ready" : "Pending"}</strong>
+          <strong>{hasNotePdf(note) ? "PDF Ready" : "Pending"}</strong>
         </div>
       </div>
 

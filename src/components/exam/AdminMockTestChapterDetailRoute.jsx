@@ -1,6 +1,7 @@
 import React from "react";
-import { doc, updateDoc } from "firebase/firestore";
 import { useParams } from "react-router-dom";
+
+import { updateContentItemWithMirrors } from "../../publicContentCatalogService";
 
 import {
   buildMockTestFormFromTest,
@@ -34,7 +35,7 @@ export default function AdminMockTestChapterDetailRoute({
   const handleTogglePublish = async (test) => {
     const newStatus = test.status === "published" ? "unpublished" : "published";
 
-    await updateDoc(doc(db, "contentItems", test.id), {
+    await updateContentItemWithMirrors(test.id, {
       status: newStatus,
       updatedAt: new Date(),
     });

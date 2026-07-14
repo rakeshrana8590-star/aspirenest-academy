@@ -1,6 +1,9 @@
 import React from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
+import {
+  createContentItemWithMirrors,
+  updateContentItemWithMirrors,
+} from "../../publicContentCatalogService";
 
 import {
   LIVE_CLASS_STATUS,
@@ -122,9 +125,9 @@ export default function VideoClassFormRoute({
       const payload = buildVideoSavePayload(videoForm);
 
       if (editId) {
-        await updateDoc(doc(db, "contentItems", editId), payload);
+        await updateContentItemWithMirrors(editId, payload);
       } else {
-        await addDoc(collection(db, "contentItems"), {
+        await createContentItemWithMirrors({
           ...payload,
           createdAt: new Date(),
         });

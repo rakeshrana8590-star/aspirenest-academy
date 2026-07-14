@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ACCESS_MODULE,
   ACCESS_PLAN_TYPES,
+  ACCESS_SCOPE_TYPES,
   ACCESS_STATUS,
 } from "./accessConstants";
 import {
@@ -10,6 +11,7 @@ import {
   isAccessActive,
   isAccessExpired,
   normalizeAccessPlan,
+  normalizeScopeType,
   resolveBestAccess,
 } from "./accessUtils";
 import {
@@ -26,81 +28,18 @@ const BLOCKED_STATUSES = new Set([
   "failed",
 ]);
 
-const resolveFallbackPlan = (profile = {}, fallbackPlanType = ACCESS_PLAN_TYPES.FREE) => {
-  const directPlan =
-    profile.planType ||
-    profile.subscriptionType ||
-    profile.accessPlan ||
-    profile.currentPlan ||
-    fallbackPlanType;
-
-  const normalizedPlan = normalizeAccessPlan(directPlan);
-
-  if (normalizedPlan !== ACCESS_PLAN_TYPES.FREE) {
-    return normalizedPlan;
-  }
-
-  if (profile.isPremium === true || profile.isPremiumUser === true) {
-    return ACCESS_PLAN_TYPES.PREMIUM;
-  }
-
-  return ACCESS_PLAN_TYPES.FREE;
-};
-
-const resolveFallbackExpiry = (profile = {}, fallbackExpiry = null) =>
-  profile.membershipExpiry ||
-  profile.expiryDate ||
-  profile.accessUntil ||
-  profile.validUntil ||
-  fallbackExpiry ||
-  null;
-
-const resolveAccessExpiry = (accessRecord = null, fallbackExpiry = null) => {
-  if (!accessRecord) return fallbackExpiry || null;
-
-  return (
-    accessRecord.accessUntil ||
-    accessRecord.expiryDate ||
-    accessRecord.validUntil ||
-    fallbackExpiry ||
-    null
-  );
-};
-
 const getAccessStatusValue = (record = null) =>
   String(record?.status || "").trim().toLowerCase();
 
 const isBlockedAccessRecord = (record = null) =>
   BLOCKED_STATUSES.has(getAccessStatusValue(record));
 
-const buildFallbackAccess = ({
-  user = null,
-  profile = {},
-  fallbackPlanType = ACCESS_PLAN_TYPES.FREE,
-  fallbackExpiry = null,
-} = {}) => {
-  const email = String(user?.email || profile?.email || "").trim().toLowerCase();
-  const uid = String(user?.uid || profile?.uid || "").trim();
-  const planType = resolveFallbackPlan(profile, fallbackPlanType);
-  const accessUntil = resolveFallbackExpiry(profile, fallbackExpiry);
-
-  return {
-    id: "fallback-profile-access",
-    email,
-    normalizedEmail: email,
-    uid,
-    planType,
-    status: ACCESS_STATUS.ACTIVE,
-    source: "profile_fallback",
-    accessUntil,
-  };
-};
+const getAccessExpiry = (record = null) =>
+  record?.accessUntil || record?.expiryDate || record?.validUntil || null;
 
 export default function useAccessProfile({
   user = null,
   profile = {},
-  fallbackPlanType = ACCESS_PLAN_TYPES.FREE,
-  fallbackExpiry = null,
   enabled = true,
 } = {}) {
   const [loading, setLoading] = useState(false);
@@ -109,17 +48,6 @@ export default function useAccessProfile({
 
   const uid = String(user?.uid || profile?.uid || "").trim();
   const email = String(user?.email || profile?.email || "").trim().toLowerCase();
-
-  const fallbackAccess = useMemo(
-    () =>
-      buildFallbackAccess({
-        user,
-        profile,
-        fallbackPlanType,
-        fallbackExpiry,
-      }),
-    [user, profile, fallbackPlanType, fallbackExpiry]
-  );
 
   const loadAccessProfile = useCallback(async () => {
     if (!enabled || (!uid && !email)) {
@@ -140,17 +68,26 @@ export default function useAccessProfile({
 
       const seen = new Set();
       const mergedRecords = [...uidRecords, ...emailRecords].filter((record) => {
-        const recordId = record && record.id ? record.id : "";
-        const recordUid = record && record.uid ? record.uid : "";
-        const recordEmail = record && (record.normalizedEmail || record.email) ? record.normalizedEmail || record.email : "";
-        const recordPlan = record && record.planType ? record.planType : "";
-        const key = recordId || [recordUid, recordEmail, recordPlan].join("-");
+        const recordId = record?.id || "";
+        const recordUid = record?.uid || "";
+        const recordEmail = record?.normalizedEmail || record?.email || "";
+        const recordPlan = record?.planType || "";
+        const recordScope = record?.scopeType || "";
+        const recordItem = record?.itemId || "";
+        const key = recordId || [
+          recordUid,
+          recordEmail,
+          recordPlan,
+          recordScope,
+          recordItem,
+        ].join("-");
 
         if (seen.has(key)) return false;
 
         seen.add(key);
         return true;
       });
+
       setAccessRecords(mergedRecords);
     } catch (accessError) {
       setError(accessError);
@@ -164,82 +101,95 @@ export default function useAccessProfile({
     loadAccessProfile();
   }, [loadAccessProfile]);
 
-  const bestFirestoreAccess = useMemo(
+  const bestActiveAccess = useMemo(
     () => resolveBestAccess(accessRecords),
     [accessRecords]
   );
 
-  const bestAccess = bestFirestoreAccess || fallbackAccess;
-  const activePlan = normalizeAccessPlan(bestAccess?.planType || fallbackAccess.planType);
-  const membershipExpiry = resolveAccessExpiry(bestAccess, fallbackAccess.accessUntil);
-  const isBlocked = !bestFirestoreAccess && accessRecords.some(isBlockedAccessRecord);
-  const isExpired = isAccessExpired(membershipExpiry);
-  const hasActiveBestAccess = bestFirestoreAccess
-    ? isAccessActive(bestFirestoreAccess)
-    : true;
+  const bestPlanAccess = useMemo(
+    () => resolveBestAccess(
+      accessRecords.filter(
+        (record) => normalizeScopeType(record?.scopeType) === ACCESS_SCOPE_TYPES.PLAN
+      )
+    ),
+    [accessRecords]
+  );
+
+  const activePlan = normalizeAccessPlan(
+    bestPlanAccess?.planType || ACCESS_PLAN_TYPES.FREE
+  );
+  const membershipExpiry = getAccessExpiry(bestActiveAccess);
+  const isBlocked = !bestActiveAccess && accessRecords.some(isBlockedAccessRecord);
+  const isExpired = !bestActiveAccess && accessRecords.some((record) =>
+    isAccessExpired(getAccessExpiry(record))
+  );
+  const hasActiveAccess = Boolean(
+    bestActiveAccess && isAccessActive(bestActiveAccess)
+  );
 
   const accessStatus = isBlocked
     ? ACCESS_STATUS.BLOCKED
     : isExpired
       ? ACCESS_STATUS.EXPIRED
-      : hasActiveBestAccess
+      : hasActiveAccess
         ? ACCESS_STATUS.ACTIVE
         : ACCESS_STATUS.PENDING;
 
-        const hasAccess = useCallback(
-          (requiredPlan = ACCESS_PLAN_TYPES.FREE, options = {}) =>
-            canAccessContent({
-              requiredPlan,
-              userPlan: activePlan,
-              accessRecord: bestFirestoreAccess,
-              accessRecords,
-              module: options.module || "",
-              itemType: options.itemType || "",
-              itemId: options.itemId || "",
-              emergencyAccess: Boolean(options.emergencyAccess),
-            }),
-          [activePlan, bestFirestoreAccess, accessRecords]
-        );
+  const hasAccess = useCallback(
+    (requiredPlan = ACCESS_PLAN_TYPES.FREE, options = {}) =>
+      canAccessContent({
+        requiredPlan,
+        accessRecord: bestPlanAccess,
+        accessRecords,
+        course: options.course || "",
+        module: options.module || "",
+        itemType: options.itemType || "",
+        itemId: options.itemId || "",
+      }),
+    [bestPlanAccess, accessRecords]
+  );
 
-        const canAccessModule = useCallback(
-          (module = ACCESS_MODULE.NOTES, requiredPlan = ACCESS_PLAN_TYPES.FREE) => {
-            if (!module) return hasAccess(requiredPlan);
-      
-            return canAccessContent({
-              requiredPlan,
-              userPlan: activePlan,
-              accessRecord: bestFirestoreAccess,
-              accessRecords,
-              module,
-            });
-          },
-          [activePlan, bestFirestoreAccess, accessRecords, hasAccess]
-        );
-      
-        const canAccessItem = useCallback(
-          ({
-            module = "",
-            itemType = "",
-            itemId = "",
-            requiredPlan = ACCESS_PLAN_TYPES.FREE,
-          } = {}) =>
-            canAccessContent({
-              requiredPlan,
-              userPlan: activePlan,
-              accessRecord: bestFirestoreAccess,
-              accessRecords,
-              module,
-              itemType,
-              itemId,
-            }),
-          [activePlan, bestFirestoreAccess, accessRecords]
-        );
+  const canAccessModule = useCallback(
+    (module = ACCESS_MODULE.NOTES, requiredPlan = ACCESS_PLAN_TYPES.FREE, options = {}) => {
+      if (!module) return hasAccess(requiredPlan, options);
+
+      return canAccessContent({
+        requiredPlan,
+        accessRecord: bestPlanAccess,
+        accessRecords,
+        course: options.course || "",
+        module,
+      });
+    },
+    [bestPlanAccess, accessRecords, hasAccess]
+  );
+
+  const canAccessItem = useCallback(
+    ({
+      course = "",
+      module = "",
+      itemType = "",
+      itemId = "",
+      requiredPlan = ACCESS_PLAN_TYPES.FREE,
+    } = {}) =>
+      canAccessContent({
+        requiredPlan,
+        accessRecord: bestPlanAccess,
+        accessRecords,
+        course,
+        module,
+        itemType,
+        itemId,
+      }),
+    [bestPlanAccess, accessRecords]
+  );
 
   return {
     loading,
     error,
     accessRecords,
-    bestAccess,
+    bestAccess: bestPlanAccess,
+    bestActiveAccess,
     activePlan,
     accessStatus,
     membershipExpiry,

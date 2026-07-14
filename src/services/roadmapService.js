@@ -959,6 +959,10 @@ export const loadStudyRoadmaps = async ({
       href,
       section: item.section || "",
       contentType: item.contentType || "",
+      sourceCollection: item.sourceCollection || "",
+      sourceId: item.sourceId || item.id || "",
+      publicSchemaVersion: item.publicSchemaVersion || null,
+      hasProtectedAsset: item.hasProtectedAsset === true,
     };
   };
   
@@ -975,7 +979,14 @@ export const loadStudyRoadmaps = async ({
       };
     }
   
-    const snapshot = await getDocs(collection(db, "contentItems"));
+    const snapshot = await getDocs(
+      query(
+        collection(db, "contentItemsPublic"),
+        where("status", "==", "published"),
+        where("sourceCollection", "==", "contentItems"),
+        where("publicSchemaVersion", "==", 1)
+      )
+    );
 
     const contentItems = snapshot.docs
       .map((item) => ({

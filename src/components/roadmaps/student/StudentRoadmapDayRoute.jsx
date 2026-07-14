@@ -1,5 +1,8 @@
 import React from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+
+import { loadProtectedContentMirror } from "../../../protectedContentAssetsService";
+import { isCanonicalPublicContentItem } from "../../../publicContentCatalogUtils";
+import { useNavigate, useParams } from "react-router-dom";
 
 import {
   canAccessRoadmap,
@@ -183,6 +186,53 @@ export default function StudentRoadmapDayRoute({
     });
   };
 
+  const handleOpenRecommendation = async (item = {}) => {
+    if (!canOpenRecommendation(item)) {
+      navigate(user ? "/ctet-tet/pricing" : "/login");
+      return;
+    }
+
+    if (item.type === "note" && isCanonicalPublicContentItem(item)) {
+      try {
+        const protectedNote = await loadProtectedContentMirror({
+          sourceCollection: item.sourceCollection || "contentItems",
+          sourceId: item.sourceId || item.id,
+          publicItem: item,
+        });
+        const noteUrl =
+          protectedNote.pdfUrl ||
+          protectedNote.fileUrl ||
+          protectedNote.sourceUrl ||
+          protectedNote.downloadUrl ||
+          "";
+
+        if (!noteUrl) {
+          alert("This protected note is not available right now.");
+          return;
+        }
+
+        window.open(noteUrl, "_blank", "noopener,noreferrer");
+        return;
+      } catch (error) {
+        console.error("Roadmap protected note load failed:", error);
+        alert("This protected note is not available right now.");
+        return;
+      }
+    }
+
+    if (item.href?.startsWith("/")) {
+      navigate(item.href);
+      return;
+    }
+
+    if (item.href) {
+      window.open(item.href, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    alert("This recommendation is not available right now.");
+  };
+
   const handleToggleTask = async (task) => {
     if (!user?.uid) {
       navigate("/login");
@@ -347,33 +397,19 @@ export default function StudentRoadmapDayRoute({
                     </div>
 
                     <div className="aspirePathHeroActions">
-                      {canOpenRecommendation(item) && item.href ? (
-                        item.href.startsWith("/") ? (
-                          <Link
-                            className="aspirePathPrimaryBtn"
-                            to={item.href}
-                          >
-                            Open Recommendation
-                          </Link>
-                        ) : (
-                          <a
-                            className="aspirePathPrimaryBtn"
-                            href={item.href}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Open Recommendation
-                          </a>
-                        )
-                      ) : (
-                        <button
-                          className="aspirePathSecondaryBtn"
-                          type="button"
-                          onClick={() => navigate(user ? "/ctet-tet/pricing" : "/login")}
-                        >
-                          Unlock Recommendation
-                        </button>
-                      )}
+                      <button
+                        className={
+                          canOpenRecommendation(item)
+                            ? "aspirePathPrimaryBtn"
+                            : "aspirePathSecondaryBtn"
+                        }
+                        type="button"
+                        onClick={() => handleOpenRecommendation(item)}
+                      >
+                        {canOpenRecommendation(item)
+                          ? "Open Recommendation"
+                          : "Unlock Recommendation"}
+                      </button>
                     </div>
                   </article>
                 ))}

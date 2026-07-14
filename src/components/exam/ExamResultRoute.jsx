@@ -12,6 +12,7 @@ import {
 import { db } from "../../firebase";
 import { getAttemptStorageKey } from "./examAttemptStorage.js";
 import { isExamAnswerCorrect } from "./examAnswerUtils.js";
+import { savePublicMockLeaderboardMirror } from "./mockLeaderboardPublicService.js";
 
 const safeParseJson = (value, fallback = {}) => {
   try {
@@ -105,7 +106,40 @@ const parseAttemptLimit = (value) => {
   return { isUnlimited: true, max: null };
 };
 
-const countSubmittedMockAttempts = (mockResults = [], testId = "", email = "") =>
+/* === P0 mock UID ownership v1 === */
+const normalizeMockIdentity = (value) =>
+  String(value || "").trim().toLowerCase();
+
+const isSameMockOwner = (record = {}, user = {}) => {
+  const expectedUid = String(user?.uid || "").trim();
+  const recordUid = String(
+    record?.uid ||
+      record?.studentUid ||
+      record?.ownerUid ||
+      record?.userId ||
+      ""
+  ).trim();
+
+  if (expectedUid && recordUid) {
+    return recordUid === expectedUid;
+  }
+
+  const expectedEmail = normalizeMockIdentity(user?.email);
+  const recordEmail = normalizeMockIdentity(
+    record?.email ||
+      record?.studentEmail ||
+      record?.userEmail ||
+      record?.ownerEmail
+  );
+
+  return Boolean(expectedEmail && recordEmail === expectedEmail);
+};
+
+const countSubmittedMockAttempts = (
+  mockResults = [],
+  testId = "",
+  user = {}
+) =>
   (Array.isArray(mockResults) ? mockResults : []).filter((result) => {
     const sameTest =
       result?.testId === testId ||
@@ -113,13 +147,7 @@ const countSubmittedMockAttempts = (mockResults = [], testId = "", email = "") =
       result?.testID === testId ||
       result?.contentId === testId;
 
-    const sameStudent =
-      !email ||
-      result?.email === email ||
-      result?.studentEmail === email ||
-      result?.userEmail === email;
-
-    return sameTest && sameStudent;
+    return sameTest && isSameMockOwner(result, user);
   }).length;
 
 const hasSavedMockAttempt = (mockResults = [], attemptSaveKey = "") =>
@@ -208,6 +236,122 @@ const AutoSaveMockResult = ({
   return null;
 };
 
+import { useSubmittedMockTestAnswers } from "./mockSubmissionReceiptService.js";
+
+/* === P0 legacy historical summary-only policy v2 === */
+const findLatestSavedResultForRoute = (
+  mockResults = [],
+  routeTestId = "",
+  user = {}
+) => {
+  const expectedTestId = String(routeTestId || "").trim();
+  const expectedUid = String(user?.uid || "").trim();
+  const expectedEmail = String(user?.email || "")
+    .trim()
+    .toLowerCase();
+
+  if (
+    !expectedTestId ||
+    (!expectedUid && !expectedEmail)
+  ) {
+    return null;
+  }
+
+  return [...(Array.isArray(mockResults) ? mockResults : [])]
+    .filter((item) => {
+      const itemTestId = String(
+        item?.testId ||
+          item?.mockTestId ||
+          item?.testID ||
+          item?.contentId ||
+          ""
+      ).trim();
+
+      if (itemTestId !== expectedTestId) {
+        return false;
+      }
+
+      const itemUid = String(
+        item?.uid ||
+          item?.studentUid ||
+          item?.ownerUid ||
+          item?.userId ||
+          ""
+      ).trim();
+
+      if (expectedUid && itemUid) {
+        return itemUid === expectedUid;
+      }
+
+      const itemEmail = String(
+        item?.email ||
+          item?.studentEmail ||
+          item?.userEmail ||
+          item?.ownerEmail ||
+          ""
+      )
+        .trim()
+        .toLowerCase();
+
+      return Boolean(
+        expectedEmail &&
+          itemEmail === expectedEmail
+      );
+    })
+    .sort(
+      (first, second) =>
+        getResultTimestamp(
+          second?.attemptSubmittedAt ||
+            second?.endedAt ||
+            second?.updatedAt ||
+            second?.createdAt
+        ) -
+        getResultTimestamp(
+          first?.attemptSubmittedAt ||
+            first?.endedAt ||
+            first?.updatedAt ||
+            first?.createdAt
+        )
+    )[0] || null;
+};
+
+const buildHistoricalSummaryTest = (
+  routeTestId = "",
+  savedResult = {}
+) => ({
+  id: String(routeTestId || "").trim(),
+  section: "mockTest",
+  status: "historical-summary-only",
+  title:
+    savedResult?.testTitle ||
+    savedResult?.title ||
+    "Historical Mock Test",
+  subject:
+    savedResult?.subject ||
+    "Subject",
+  chapter:
+    savedResult?.chapter ||
+    "Complete Test",
+  planType:
+    savedResult?.planType ||
+    savedResult?.accessPlan ||
+    "FREE",
+  examType:
+    savedResult?.examType ||
+    "CTET/TET",
+  testType:
+    savedResult?.testType ||
+    "Mock Test",
+  totalQuestions:
+    Number(savedResult?.totalQuestions || 0),
+  totalMarks:
+    Number(savedResult?.totalMarks || 0),
+  attemptLimit: "1",
+  leaderboardMode: "disabled",
+  resultPublishMode: "instant",
+  questions: [],
+});
+
 export default function ExamResultRoute({
   universalContent,
   getMockTestAccessStatus,
@@ -228,7 +372,7 @@ export default function ExamResultRoute({
 
   const activeResultAttemptId = decodeURIComponent(testId || "");
 
-  const test = (Array.isArray(universalContent)
+  const sourceTest = (Array.isArray(universalContent)
     ? universalContent
     : []
   ).find(
@@ -237,7 +381,48 @@ export default function ExamResultRoute({
       item.id === activeResultAttemptId
   );
 
-  const accessStatus = getMockTestAccessStatus(test);
+  const legacySavedResultForRoute = React.useMemo(
+    () =>
+      findLatestSavedResultForRoute(
+        mockResults,
+        activeResultAttemptId,
+        user
+      ),
+    [
+      mockResults,
+      activeResultAttemptId,
+      user?.uid,
+      user?.email,
+    ]
+  );
+
+  const isHistoricalSummaryOnly =
+    !sourceTest &&
+    Boolean(legacySavedResultForRoute);
+
+  const isHistoricalRecoveryPending =
+    !sourceTest &&
+    !legacySavedResultForRoute &&
+    Boolean(user?.email) &&
+    !mockResultsLoaded;
+
+  const test =
+    sourceTest ||
+    (
+      isHistoricalSummaryOnly ||
+      isHistoricalRecoveryPending
+        ? buildHistoricalSummaryTest(
+            activeResultAttemptId,
+            legacySavedResultForRoute || {}
+          )
+        : null
+    );
+
+  const accessStatus = isHistoricalSummaryOnly
+    ? "HISTORICAL_SUMMARY_ONLY"
+    : isHistoricalRecoveryPending
+    ? "HISTORICAL_RECOVERY_PENDING"
+    : getMockTestAccessStatus(test);
 
   /* === P0 mock-test catalog loading gate v2 === */
   const hasLoadedMockTestCatalog = React.useMemo(
@@ -290,11 +475,14 @@ export default function ExamResultRoute({
 
   const savedResultForTest = React.useMemo(() => {
     const expectedTestId = String(test?.id || "");
+    const expectedUid = String(user?.uid || "").trim();
     const expectedEmail = String(user?.email || "")
       .trim()
       .toLowerCase();
 
-    if (!expectedTestId || !expectedEmail) return null;
+    if (!expectedTestId || (!expectedUid && !expectedEmail)) {
+      return null;
+    }
 
     return [...(Array.isArray(mockResults) ? mockResults : [])]
       .filter((item) => {
@@ -306,19 +494,33 @@ export default function ExamResultRoute({
             ""
         );
 
+        const itemUid = String(
+          item?.uid ||
+            item?.studentUid ||
+            item?.ownerUid ||
+            item?.userId ||
+            ""
+        ).trim();
+
         const itemEmail = String(
           item?.email ||
             item?.studentEmail ||
             item?.userEmail ||
+            item?.ownerEmail ||
             ""
         )
           .trim()
           .toLowerCase();
 
-        return (
-          itemTestId === expectedTestId &&
-          itemEmail === expectedEmail
-        );
+        const sameOwner =
+          expectedUid && itemUid
+            ? itemUid === expectedUid
+            : Boolean(
+                expectedEmail &&
+                  itemEmail === expectedEmail
+              );
+
+        return itemTestId === expectedTestId && sameOwner;
       })
       .sort(
         (first, second) =>
@@ -336,6 +538,41 @@ export default function ExamResultRoute({
           )
       )[0] || null;
   }, [mockResults, test?.id, user?.email]);
+
+  const submittedAnswerReleaseEligible = React.useMemo(() => {
+    if (
+      !test?.id ||
+      !user?.uid ||
+      isHistoricalSummaryOnly ||
+      isHistoricalRecoveryPending
+    ) {
+      return false;
+    }
+
+    const liveState = mockAttemptState?.[test.id] || {};
+    const storedState = safeParseJson(
+      localStorage.getItem(getAttemptStorageKey(test.id))
+    );
+
+    return Boolean(
+      liveState?.isSubmitted === true ||
+        storedState?.isSubmitted === true ||
+        savedResultForTest
+    );
+  }, [
+    mockAttemptState,
+    savedResultForTest,
+    test?.id,
+    user?.uid,
+    isHistoricalSummaryOnly,
+    isHistoricalRecoveryPending,
+  ]);
+
+  const submittedAnswerRelease = useSubmittedMockTestAnswers({
+    test,
+    user,
+    enabled: submittedAnswerReleaseEligible,
+  });
 
   React.useEffect(() => {
     const email = user?.email;
@@ -404,7 +641,10 @@ export default function ExamResultRoute({
     });
   }
 
-  const questions = test.questions || [];
+  const questions =
+    submittedAnswerRelease.test?.questions ||
+    test.questions ||
+    [];
 
   const storedAttemptState = safeParseJson(
     localStorage.getItem(getAttemptStorageKey(test.id))
@@ -424,6 +664,27 @@ export default function ExamResultRoute({
     !hasSubmittedAttempt && Boolean(savedResultForTest);
   const hasViewableResult =
     hasSubmittedAttempt || useRecoveredSummary;
+
+  if (hasViewableResult && submittedAnswerRelease.loading) {
+    return renderStateCard({
+      label: "Securing Result",
+      title: "Preparing your result",
+      message:
+        "Your submitted answer key is being loaded securely.",
+      actionLabel: "Back to Mock Tests",
+      onAction: () => navigate("/ctet-tet/mock-tests"),
+    });
+  }
+
+  if (hasViewableResult && submittedAnswerRelease.error) {
+    return renderStateCard({
+      label: "Recovery Needed",
+      title: "Answer key could not be loaded",
+      message: submittedAnswerRelease.error,
+      actionLabel: "Retry Result",
+      onAction: () => window.location.reload(),
+    });
+  }
   const attemptStartedAt =
     activeAttemptState?.startedAt ||
     activeAttemptState?.submittedAt ||
@@ -449,7 +710,7 @@ export default function ExamResultRoute({
   const savedSubmittedCount = countSubmittedMockAttempts(
     mockResults,
     test.id,
-    user?.email
+    user
   );
   const hasSavedCurrentAttempt = hasSavedMockAttempt(
     mockResults,
@@ -506,9 +767,14 @@ export default function ExamResultRoute({
     });
   }
 
+  // Historical result ownership is independent of current paid entitlement.
+  // START / ATTEMPT routes remain access- and schedule-gated.
   if (
-    accessStatus === "PLAN_LOCKED" ||
-    accessStatus === "EXPIRED_MEMBERSHIP"
+    (
+      accessStatus === "PLAN_LOCKED" ||
+      accessStatus === "EXPIRED_MEMBERSHIP"
+    ) &&
+    !hasViewableResult
   ) {
     return renderStateCard({
       label: "Plan Required",
@@ -603,7 +869,9 @@ export default function ExamResultRoute({
     ? recoveredAttemptAnswers
     : oldStoredAnswers;
 
-  const hasReviewData = hasObjectData(attemptAnswers);
+  const hasReviewData =
+    !isHistoricalSummaryOnly &&
+    hasObjectData(attemptAnswers);
 
   const fallbackQuestionOrder = questions.map((_, index) => index);
 
@@ -818,7 +1086,7 @@ export default function ExamResultRoute({
 
   const saveToLeaderboard = async (showAlert = true) => {
     try {
-      if (!user?.email) {
+      if (!user?.uid || !user?.email) {
         if (showAlert) {
           alert("Please login to save result");
         }
@@ -832,7 +1100,7 @@ export default function ExamResultRoute({
         query(
           collection(db, "mockResults"),
           where("attemptKey", "==", attemptKey),
-          where("email", "==", user.email)
+          where("uid", "==", user.uid)
         )
       );
 
@@ -843,6 +1111,7 @@ export default function ExamResultRoute({
           testId: test.id,
           testTitle: test.title || "",
 
+          uid: user.uid,
           email: user.email,
           studentEmail: user.email,
           studentName: fullName || user.email,
@@ -907,13 +1176,15 @@ export default function ExamResultRoute({
         );
 
         if (existingLeaderboard.empty) {
-          await addDoc(collection(db, "mockLeaderboard"), {
+          /* === P0 public leaderboard mirror create v1 === */
+          const newLeaderboardPayload = {
             leaderboardKey,
             leaderboardMode: test.leaderboardMode,
 
             testId: test.id,
             testTitle: test.title || "",
 
+            uid: user.uid,
             studentEmail: user.email,
             studentName: fullName || user.email,
 
@@ -946,7 +1217,15 @@ export default function ExamResultRoute({
             endedAt: activeAttemptState.submittedAt || null,
 
             createdAt: new Date(),
-          });
+          };
+          const newLeaderboardRef = await addDoc(
+            collection(db, "mockLeaderboard"),
+            newLeaderboardPayload
+          );
+          await savePublicMockLeaderboardMirror(
+            newLeaderboardRef.id,
+            newLeaderboardPayload
+          );
         } else {
           const leaderboardDocumentsToUpdate =
             existingLeaderboard.docs.filter((leaderboardDocument) => {
@@ -967,9 +1246,11 @@ export default function ExamResultRoute({
               );
             });
 
+          /* === P0 public leaderboard mirror update v1 === */
           await Promise.all(
-            leaderboardDocumentsToUpdate.map((leaderboardDocument) =>
-              updateDoc(leaderboardDocument.ref, {
+            leaderboardDocumentsToUpdate.map(
+              async (leaderboardDocument) => {
+                const leaderboardUpdatePayload = {
                 testTitle: test.title || "",
                 score,
                 totalMarks,
@@ -989,7 +1270,28 @@ export default function ExamResultRoute({
                 startedAt: activeAttemptState.startedAt || null,
                 endedAt: activeAttemptState.submittedAt || null,
                 updatedAt: new Date(),
-              })
+              };
+
+                await updateDoc(
+                  leaderboardDocument.ref,
+                  leaderboardUpdatePayload
+                );
+
+                await savePublicMockLeaderboardMirror(
+                  leaderboardDocument.id,
+                  {
+                    ...leaderboardDocument.data(),
+                    ...leaderboardUpdatePayload,
+                    leaderboardKey,
+                    leaderboardMode: test.leaderboardMode,
+                    testId: test.id,
+                    testTitle: test.title || "",
+                    studentName:
+                      fullName || "AspireNest Learner",
+                    planType: test.planType || "FREE",
+                  }
+                );
+              }
             )
           );
         }
@@ -1211,7 +1513,9 @@ export default function ExamResultRoute({
             <div className="examResultStatusBox">
               <strong>{performanceLabel}</strong>
               <span>
-                {useRecoveredSummary
+                {isHistoricalSummaryOnly
+                  ? "Your score and attempt history are preserved. Detailed answer review is unavailable because the original question source for this older test no longer exists."
+                  : useRecoveredSummary
                   ? "Restored securely from your saved submission."
                   : "Score saved automatically when this result page opens."}
               </span>

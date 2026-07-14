@@ -767,11 +767,39 @@ export function StudentMockTestHistoryRoute({
   }) {
     const navigate = useNavigate();
   
-    const studentResults = mockResults.filter(
-      (result) =>
-        result.email === user?.email ||
-        result.studentEmail === user?.email
-    );
+    /* === P0 mock UID ownership v1 === */
+    const expectedUid = String(user?.uid || "").trim();
+    const expectedEmail = String(user?.email || "")
+      .trim()
+      .toLowerCase();
+
+    const studentResults = mockResults.filter((result) => {
+      const resultUid = String(
+        result?.uid ||
+          result?.studentUid ||
+          result?.ownerUid ||
+          result?.userId ||
+          ""
+      ).trim();
+
+      if (expectedUid && resultUid) {
+        return resultUid === expectedUid;
+      }
+
+      const resultEmail = String(
+        result?.email ||
+          result?.studentEmail ||
+          result?.userEmail ||
+          result?.ownerEmail ||
+          ""
+      )
+        .trim()
+        .toLowerCase();
+
+      return Boolean(
+        expectedEmail && resultEmail === expectedEmail
+      );
+    });
   
     const totalAttempts = studentResults.length;
   
