@@ -1,9 +1,6 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { loadProtectedContentMirror } from "../../protectedContentAssetsService";
-import { isCanonicalPublicContentItem } from "../../publicContentCatalogUtils";
-
 import SecureVideoPlayer from "./SecureVideoPlayer.jsx";
 import useVideoLibrary from "./useVideoLibrary.js";
 
@@ -95,74 +92,10 @@ export default function StudentClassroomRoute({
 
   const activeVideoId = safeDecodeRouteValue(videoId);
 
-  const publicClassroomItem = React.useMemo(
+  const classroomItem = React.useMemo(
     () => videoLibrary.getVideoById(activeVideoId),
     [videoLibrary, activeVideoId]
   );
-
-  const [classroomItem, setClassroomItem] = React.useState(
-    publicClassroomItem
-  );
-  const [protectedSourceLoading, setProtectedSourceLoading] =
-    React.useState(false);
-  const [protectedSourceError, setProtectedSourceError] = React.useState("");
-  const [protectedSourceReloadKey, setProtectedSourceReloadKey] =
-    React.useState(0);
-
-  React.useEffect(() => {
-    let mounted = true;
-
-    const loadClassroomSource = async () => {
-      setProtectedSourceError("");
-
-      if (!publicClassroomItem) {
-        setClassroomItem(null);
-        setProtectedSourceLoading(false);
-        return;
-      }
-
-      if (isAdmin || !isCanonicalPublicContentItem(publicClassroomItem)) {
-        setClassroomItem(publicClassroomItem);
-        setProtectedSourceLoading(false);
-        return;
-      }
-
-      setProtectedSourceLoading(true);
-      setClassroomItem(publicClassroomItem);
-
-      try {
-        const protectedItem = await loadProtectedContentMirror({
-          sourceCollection:
-            publicClassroomItem.sourceCollection || "contentItems",
-          sourceId:
-            publicClassroomItem.sourceId || publicClassroomItem.id,
-          publicItem: publicClassroomItem,
-        });
-
-        if (mounted) {
-          setClassroomItem(protectedItem);
-        }
-      } catch (error) {
-        console.error("Protected classroom source load failed:", error);
-
-        if (mounted) {
-          setProtectedSourceError(
-            "This protected classroom source is not available right now."
-          );
-        }
-      } finally {
-        if (mounted) {
-          setProtectedSourceLoading(false);
-        }
-      }
-    };
-
-    loadClassroomSource();
-
-    return () => {
-      mounted = false;
-    };
-  }, [publicClassroomItem, isAdmin, protectedSourceReloadKey]);
 
   const requiredPlan = normalizePlanType(classroomItem?.planType || "FREE");
   const classMode = getClassMode(classroomItem || {});
@@ -242,7 +175,7 @@ export default function StudentClassroomRoute({
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  const openNote = async (note = {}) => {
+  const openNote = (note = {}) => {
     const rawNotePlan =
       note.accessPlan || note.planType || note.plan || note.type || "FREE";
 
@@ -272,30 +205,7 @@ export default function StudentClassroomRoute({
       }
     }
 
-    let resolvedNote = note;
-
-    if (isCanonicalPublicContentItem(note)) {
-      try {
-        resolvedNote = await loadProtectedContentMirror({
-          sourceCollection: note.sourceCollection || "contentItems",
-          sourceId: note.sourceId || note.id,
-          publicItem: note,
-        });
-      } catch (error) {
-        console.error("Protected related note load failed:", error);
-        alert("This protected note is not available right now.");
-        return;
-      }
-    }
-
-    const noteUrl = getNoteUrl(resolvedNote);
-
-    if (!noteUrl) {
-      alert("This note PDF is not available right now.");
-      return;
-    }
-
-    openExternalUrl(noteUrl);
+    openExternalUrl(getNoteUrl(note));
   };
   const goBackToChapter = () => {
     if (!classroomItem) {
@@ -309,52 +219,6 @@ export default function StudentClassroomRoute({
       )}/${encodeURIComponent(createVideoSlug(classroomItem.chapter || ""))}`
     );
   };
-
-  if (protectedSourceLoading) {
-    return (
-      <section className="coursePages studentClassroomPage studentClassroomCinemaPage">
-        <div className="studentClassroomShell">
-          <section className="studentClassroomStateCard">
-            <span>Protected Classroom</span>
-            <h1>Loading your classroom source</h1>
-            <p>Your access is verified. The protected lesson source is loading.</p>
-          </section>
-        </div>
-      </section>
-    );
-  }
-
-  if (protectedSourceError) {
-    return (
-      <section className="coursePages studentClassroomPage studentClassroomCinemaPage">
-        <div className="studentClassroomShell">
-          <section className="studentClassroomStateCard">
-            <span>Protected Classroom</span>
-            <h1>Classroom source unavailable</h1>
-            <p>{protectedSourceError}</p>
-            <div className="studentClassroomStateActions">
-              <button
-                type="button"
-                className="studentVideoPrimaryButton"
-                onClick={() =>
-                  setProtectedSourceReloadKey((currentKey) => currentKey + 1)
-                }
-              >
-                Retry
-              </button>
-              <button
-                type="button"
-                className="studentVideoSecondaryButton"
-                onClick={() => navigate("/ctet-tet/videos")}
-              >
-                Back to Classes
-              </button>
-            </div>
-          </section>
-        </div>
-      </section>
-    );
-  }
 
   if (!classroomItem) {
     return (

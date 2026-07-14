@@ -1,9 +1,6 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { loadProtectedContentMirror } from "../../../protectedContentAssetsService";
-import { isCanonicalPublicContentItem } from "../../../publicContentCatalogUtils";
-
 import StudentCurrentAffairsHero from "./StudentCurrentAffairsHero";
 import StudentCurrentAffairsEmptyState from "./StudentCurrentAffairsEmptyState";
 import { StudentCurrentAffairsWeekBlock } from "./StudentCurrentAffairsCards";
@@ -39,8 +36,14 @@ export default function StudentCurrentAffairsMonthRoute({
     monthItems.map((item) => item.planType || "FREE")
   ).size;
 
-  const openCurrentAffairPdf = async (item) => {
+  const openCurrentAffairPdf = (item) => {
+    const pdfUrl = getCurrentAffairsPdfUrl(item);
     const planName = item.planType || "FREE";
+
+    if (!pdfUrl) {
+      alert("PDF URL missing in this current affair item.");
+      return;
+    }
 
     if (
       !isAdmin &&
@@ -55,29 +58,6 @@ export default function StudentCurrentAffairsMonthRoute({
       })
     ) {
       navigate("/ctet-tet/pricing");
-      return;
-    }
-
-    let resolvedItem = item;
-
-    if (isCanonicalPublicContentItem(item)) {
-      try {
-        resolvedItem = await loadProtectedContentMirror({
-          sourceCollection: item.sourceCollection || "contentItems",
-          sourceId: item.sourceId || item.id,
-          publicItem: item,
-        });
-      } catch (error) {
-        console.error("Protected current affairs PDF load failed:", error);
-        alert("This protected PDF is not available right now.");
-        return;
-      }
-    }
-
-    const pdfUrl = getCurrentAffairsPdfUrl(resolvedItem);
-
-    if (!pdfUrl) {
-      alert("PDF URL missing in this current affair item.");
       return;
     }
 

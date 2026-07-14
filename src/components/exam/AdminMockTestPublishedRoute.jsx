@@ -1,5 +1,4 @@
-
-import { updateContentItemWithMirrors } from "../../publicContentCatalogService";
+import { doc, updateDoc } from "firebase/firestore";
 
 import {
   buildMockTestFormFromTest,
@@ -69,7 +68,7 @@ export default function AdminMockTestPublishedRoute({
 
     if (!confirmUnpublish) return;
 
-    await updateContentItemWithMirrors(test.id, {
+    await updateDoc(doc(db, "contentItems", test.id), {
       status: "unpublished",
       updatedAt: new Date(),
     });

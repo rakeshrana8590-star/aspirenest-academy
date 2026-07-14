@@ -1,5 +1,3 @@
-import { isCanonicalPublicContentItem } from "../../../publicContentCatalogUtils";
-
 export const CURRENT_AFFAIRS_PLAN_ORDER = [
     "FREE",
     "BASIC",
@@ -94,9 +92,7 @@ export const CURRENT_AFFAIRS_PLAN_ORDER = [
     const pdfUrl = getCurrentAffairsPdfUrl(item);
     const normalizedUrl = pdfUrl.trim().toLowerCase();
   
-    if (!normalizedUrl) {
-      return isCanonicalPublicContentItem(item);
-    }
+    if (!normalizedUrl) return false;
     if (normalizedUrl === "#") return false;
     if (normalizedUrl === "coming-soon") return false;
     if (normalizedUrl === "coming soon") return false;

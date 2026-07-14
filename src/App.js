@@ -17,21 +17,13 @@ import {
   getVerifiedAuthSession, resendVerificationEmailAndLogout, syncVerifiedStudentAccountStatus, } from "./utils/authAccountService";
 
 import {
-  ACCESS_COURSE, ACCESS_ITEM_TYPES, ACCESS_MODULE, } from "./access/accessConstants";
+  ACCESS_ITEM_TYPES, ACCESS_MODULE, } from "./access/accessConstants";
+import {
+  canAccessContent, } from "./access/accessUtils";
 import useAccessProfile from "./access/useAccessProfile";
 import { grantPaymentAccess } from "./access/accessService";
 import {
-  loadProtectedContentMirror,
-} from "./protectedContentAssetsService";
-import { isCanonicalPublicContentItem } from "./publicContentCatalogUtils";
-import {
-  createContentItemWithMirrors,
-  deleteContentItemWithMirrors,
-  loadPublicContentItems,
-  loadRawContentItems,
-  syncContentItemMirrors,
-  updateContentItemWithMirrors,
-} from "./publicContentCatalogService";
+  getProtectedContentUrl, readProtectedContentAsset, saveProtectedContentAsset, } from "./protectedContentAssetsService";
 import { upsertLearnerLoginSnapshot } from "./profile/learnerProfileService";
 
 import {
@@ -392,7 +384,6 @@ const [mobile, setMobile] = useState("");
 const [contactEmail, setContactEmail] = useState("");
   const [user, setUser] = useState(null);
   const [universalContent, setUniversalContent] = useState([]);
-  const contentCatalogLoadRequestRef = React.useRef(0);
   const [notesCmsTitle, setNotesCmsTitle] = useState("");
 const [notesCmsDescription, setNotesCmsDescription] = useState("");
 const [notesCmsPlanType, setNotesCmsPlanType] = useState("FREE");
@@ -531,29 +522,38 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
   const [userPlanType, setUserPlanType] = useState("FREE");
   const [membershipExpiry, setMembershipExpiry] = useState(null);
+  const EMERGENCY_PREMIUM_EMAILS = new Set([
+    "jamilanri786@gmail.com",
+    "ansarineha340@gmail.com",
+    "1990amala@gmail.com",
+    "qureshihoor1986@gmail.com",
+    "gratitude.pb@gmail.com",
+    "yasmeen.shaikh@hkce.edu.in",
+    "ruhiipatel.18@gmail.com",
+    "dianapithawala@gmail.com",
+  ]);
+
+  const isEmergencyPremiumLearner = (email = "") =>
+    EMERGENCY_PREMIUM_EMAILS.has(String(email || "").trim().toLowerCase());
 
   const accessProfile = useAccessProfile({
     user,
     profile: {
       email: user?.email,
       uid: user?.uid,
+      isPremium: isPremiumUser,
+      subscriptionType: userPlanType,
+      membershipExpiry,
+      expiryDate: membershipExpiry,
     },
+    fallbackPlanType: userPlanType || "FREE",
+    fallbackExpiry: membershipExpiry,
     enabled: Boolean(user),
   });
 
-  const activeAccessPlan = accessProfile?.activePlan || "FREE";
-  const activeAccessExpiry = accessProfile?.membershipExpiry || null;
-
-  React.useEffect(() => {
-    const nextPlan = activeAccessPlan || "FREE";
-    const hasPaidPlan =
-      accessProfile?.accessStatus === "active" &&
-      ["BASIC", "PREMIUM", "MENTORSHIP"].includes(nextPlan);
-
-    setUserPlanType(nextPlan);
-    setIsPremiumUser(hasPaidPlan);
-    setMembershipExpiry(activeAccessExpiry);
-  }, [activeAccessExpiry, activeAccessPlan, accessProfile?.accessStatus]);
+  const activeAccessPlan = accessProfile?.activePlan || userPlanType || "FREE";
+  const activeAccessExpiry =
+    accessProfile?.membershipExpiry || membershipExpiry || null;
   const requireLogin = () => Boolean(user);
 
   const requireAdmin = () => Boolean(user && isAdmin(user));
@@ -644,19 +644,48 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
         ? options
         : {};
 
-    if (isAdmin(user)) return true;
-    if (normalizedRequiredPlan === "FREE") return true;
-    if (!user) return false;
-    if (accessProfile?.loading || accessProfile?.error) return false;
-    if (accessProfile?.isBlocked || accessProfile?.isExpired) return false;
-    if (typeof accessProfile?.hasAccess !== "function") return false;
+    if (isAdmin(user)) {
+      return true;
+    }
 
-    return Boolean(
-      accessProfile.hasAccess(normalizedRequiredPlan, {
-        ...accessOptions,
-        course: accessOptions.course || ACCESS_COURSE.CTET_TET,
-      })
-    );
+    if (isEmergencyPremiumLearner(user?.email)) {
+      return true;
+    }
+
+    if (accessProfile?.isBlocked) {
+      return false;
+    }
+
+    if (normalizedRequiredPlan === "FREE") {
+      return true;
+    }
+
+    if (accessProfile?.isExpired) {
+      return false;
+    }
+
+    if (activeAccessExpiry && new Date(activeAccessExpiry) < new Date()) {
+      return false;
+    }
+
+    if (
+      typeof accessProfile?.hasAccess === "function" &&
+      accessProfile.hasAccess(normalizedRequiredPlan, accessOptions)
+    ) {
+      return true;
+    }
+
+    return canAccessContent({
+      requiredPlan: normalizedRequiredPlan,
+      userPlan: activeAccessPlan || "FREE",
+      accessRecord: accessProfile?.bestAccess || null,
+      accessRecords: accessProfile?.accessRecords || [],
+      module: accessOptions.module || "",
+      itemType: accessOptions.itemType || "",
+      itemId: accessOptions.itemId || "",
+      emergencyAccess: Boolean(accessOptions.emergencyAccess),
+      isAdmin: isAdmin(user),
+    });
   };
 
   const parseMockScheduleDateTime = (
@@ -805,10 +834,6 @@ const [adminPaymentProof, setAdminPaymentProof] = useState("");
 const [paymentLoading, setPaymentLoading] = useState(false);
 const [leaderboard, setLeaderboard] = useState([]);
 const [mockLeaderboardEntries, setMockLeaderboardEntries] = useState([]);
-const [
-  adminMockLeaderboardEntries,
-  setAdminMockLeaderboardEntries,
-] = useState([]);
 const [mockQuestions, setMockQuestions] = useState([]);
 const [selectedSubject, setSelectedSubject] = useState("CDP");
 const [adminQuestion, setAdminQuestion] = useState("");
@@ -1425,13 +1450,13 @@ examInstructions:
     const savedAt = new Date();
 
     if (activeEditingMockTestId) {
-      await updateContentItemWithMirrors(activeEditingMockTestId, {
+      await updateDoc(doc(db, "contentItems", activeEditingMockTestId), {
         ...mockPayload,
         updatedAt: savedAt,
         editedAt: savedAt,
       });
     } else {
-      await createContentItemWithMirrors({
+      await addDoc(collection(db, "contentItems"), {
         ...mockPayload,
         createdAt: savedAt,
         updatedAt: savedAt,
@@ -1606,7 +1631,8 @@ const handleImportMockTestXlsx = async (event) => {
       return;
     }
 
-    await createContentItemWithMirrors(
+    await addDoc(
+      collection(db, "contentItems"),
       parsedImport.importPayload
     );
 
@@ -1672,7 +1698,8 @@ const handleImportMockTestXlsxFromUrl = async () => {
 
     if (!confirmImport) return;
 
-    await createContentItemWithMirrors(
+    await addDoc(
+      collection(db, "contentItems"),
       parsedImport.importPayload
     );
 
@@ -1815,7 +1842,6 @@ const [paymentHistory, setPaymentHistory] = useState([]);
 
         if (!verifiedUser) {
         setIsPremiumUser(false);
-        await loadContentItemsFromFirestore(null);
         setAuthLoading(false);
         return;
       }
@@ -1830,17 +1856,16 @@ const [paymentHistory, setPaymentHistory] = useState([]);
         loadFirebaseNotes();
         loadCurrentAffairs();
         loadAnnouncements();
-        loadContentItemsFromFirestore(verifiedUser);
+        loadContentItemsFromFirestore();
         loadNotesSubjectsFromFirestore();
         loadNotesChaptersFromFirestore();
-        loadMockLeaderboardEntries();
       }, 300);
 
       // Admin heavy data sirf admin ke liye
       if (isAdmin(verifiedUser)) {
         setTimeout(() => {
           loadLeaderboard();
-          loadAdminMockLeaderboardEntries(verifiedUser);
+          loadMockLeaderboardEntries();
           loadPaymentHistory(verifiedUser);
           loadPaymentRequests();
         }, 600);
@@ -2080,27 +2105,26 @@ const [paymentHistory, setPaymentHistory] = useState([]);
       return;
     }
 
-    if (isCanonicalPublicContentItem(note)) {
-      try {
-        const protectedNote = await loadProtectedContentMirror({
-          sourceCollection: note.sourceCollection || "contentItems",
-          sourceId: note.sourceId || note.id,
-          publicItem: note,
-        });
+    if (note.id) {
+        try {
+          const protectedAsset = await readProtectedContentAsset(note.id);
+          const protectedPdfUrl = getProtectedContentUrl(protectedAsset, [
+            "pdfUrl",
+            "fileUrl",
+            "sourceUrl",
+            "downloadUrl",
+            "assetUrl",
+          ]);
 
-        notePdfUrl =
-          protectedNote.pdfUrl ||
-          protectedNote.fileUrl ||
-          protectedNote.sourceUrl ||
-          protectedNote.downloadUrl ||
-          protectedNote.assetUrl ||
-          "";
-      } catch (error) {
-        console.error("Protected notes PDF load failed:", error);
-        alert("This protected PDF is not available right now.");
-        return;
+          if (protectedPdfUrl) {
+            notePdfUrl = protectedPdfUrl;
+          }
+        } catch (error) {
+          console.warn("Protected notes PDF not available, using legacy URL fallback:", error);
+        }
       }
-    }
+
+
 
     if (!notePdfUrl || notePdfUrl === "#") {
       alert("PDF will be uploaded soon.");
@@ -2115,8 +2139,8 @@ const [paymentHistory, setPaymentHistory] = useState([]);
       return;
     }
 
-    if (!hasPlanAccess("PREMIUM")) {
-      alert("This section requires valid AspireNest Access Engine authorization. Please contact your mentor or view plans.");
+    if (!isPremiumUser) {
+      alert("This section is only for premium members. Please upgrade.");
       return;
     }
 
@@ -2189,39 +2213,79 @@ const usersData = usersSnap.docs.map((doc) => ({
       alert(error.message);
     }
   };
-  const checkPremiumAccess = async () => {
-    // Authorization is resolved exclusively by studentAccess/useAccessProfile.
-    // Legacy users/{uid} plan fields are intentionally ignored.
-    setIsPremiumUser(false);
-    setUserPlanType("FREE");
-    setMembershipExpiry(null);
+  const checkPremiumAccess = async (currentUser) => {
+    if (!currentUser) return;
+
+    if (currentUser.email === adminEmail) {
+      setIsPremiumUser(true);
+      return;
+    }
+
+    try {
+      const userRef = doc(db, "users", currentUser.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          email: currentUser.email,
+          isPremium: false,
+          purchasedCourses: [],
+          subscriptionType: "FREE",
+          purchaseDate: null,
+          createdAt: new Date(),
+        });
+
+        setIsPremiumUser(false);
+        return;
+      }
+
+      setIsPremiumUser(userSnap.data().isPremium === true);
+      const expiryDate = userSnap.data().expiryDate?.toDate
+  ? userSnap.data().expiryDate.toDate()
+  : userSnap.data().expiryDate
+  ? new Date(userSnap.data().expiryDate)
+  : null;
+
+if (expiryDate && expiryDate < new Date()) {
+  setIsPremiumUser(false);
+  setUserPlanType("FREE");
+  await setDoc(
+    userRef,
+    {
+      isPremium: false,
+      subscriptionType: "FREE",
+      premiumStatus: "EXPIRED",
+      expiredAt: new Date(),
+    },
+    { merge: true }
+  );
+} else {
+  setUserPlanType(
+    userSnap.data().subscriptionType || "PREMIUM"
+  );
+
+  setMembershipExpiry(expiryDate);
+}
+    } catch (error) {
+      alert(error.message);
+      setIsPremiumUser(false);
+    }
   };
   const loadUserMockResults = async (email) => {
     setMockResultsLoaded(false);
     setMockResultsLoadError("");
 
-    const uid = String(user?.uid || "").trim();
-    const normalizedEmail = String(email || user?.email || "")
-      .trim()
-      .toLowerCase();
-
-    if (!uid && !normalizedEmail) {
+    if (!email) {
       setMockResults([]);
       setMockResultsLoaded(true);
       return [];
     }
 
     try {
-      /* === P0 mock UID ownership v1 === */
-      const q = uid
-        ? query(
-            collection(db, "mockResults"),
-            where("uid", "==", uid)
-          )
-        : query(
-            collection(db, "mockResults"),
-            where("email", "==", normalizedEmail)
-          );
+      const q = query(
+        collection(db, "mockResults"),
+        where("email", "==", email)
+      );
 
       const querySnapshot = await getDocs(q);
       const results = querySnapshot.docs.map((doc) => ({
@@ -2264,22 +2328,9 @@ const usersData = usersSnap.docs.map((doc) => ({
 
   const loadLeaderboard = async () => {
     try {
-      /* === P0 mock UID ownership v1 === */
-      const resultSource = isAdmin(user)
-        ? collection(db, "mockResults")
-        : user?.uid
-        ? query(
-            collection(db, "mockResults"),
-            where("uid", "==", user.uid)
-          )
-        : null;
-
-      if (!resultSource) {
-        setLeaderboard([]);
-        return [];
-      }
-
-      const querySnapshot = await getDocs(resultSource);
+      const querySnapshot = await getDocs(
+        collection(db, "mockResults")
+      );
 
       const results = querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -2299,10 +2350,7 @@ const usersData = usersSnap.docs.map((doc) => ({
   const loadMockLeaderboardEntries = async () => {
     try {
       const snapshot = await getDocs(
-        query(
-          collection(db, "mockLeaderboardPublic"),
-          where("status", "==", "published")
-        )
+        collection(db, "mockLeaderboard")
       );
 
       const data = snapshot.docs.map((docItem) => ({
@@ -2315,36 +2363,6 @@ const usersData = usersSnap.docs.map((doc) => ({
       console.error("Mock leaderboard load error:", error);
     }
   };
-
-  /* === P0 phase6h-b admin raw student public split v1 === */
-  const loadAdminMockLeaderboardEntries = async (
-    currentUser = user
-  ) => {
-    if (!isAdmin(currentUser)) {
-      setAdminMockLeaderboardEntries([]);
-      return;
-    }
-
-    try {
-      const snapshot = await getDocs(
-        collection(db, "mockLeaderboard")
-      );
-
-      const data = snapshot.docs.map((docItem) => ({
-        id: docItem.id,
-        ...docItem.data(),
-      }));
-
-      setAdminMockLeaderboardEntries(data);
-    } catch (error) {
-      console.error(
-        "Admin mock leaderboard load error:",
-        error
-      );
-      setAdminMockLeaderboardEntries([]);
-    }
-  };
-
 
   const loadMockQuestions = async (
     subject = selectedSubject
@@ -3071,17 +3089,45 @@ subjectName:
 
     try {
       if (editingNotesCmsId) {
-        await updateContentItemWithMirrors(
-          editingNotesCmsId,
+        await updateDoc(
+          doc(db, "contentItems", editingNotesCmsId),
           notesPayload
         );
 
+          if (notesCmsPdfUrl.trim()) {
+            await saveProtectedContentAsset(
+              editingNotesCmsId,
+              {
+                id: editingNotesCmsId,
+                ...notesPayload,
+              },
+              {
+                actorEmail: user?.email || "admin",
+                source: "notes_cms",
+              }
+            );
+          }
+
         alert("Notes updated successfully.");
       } else {
-        await createContentItemWithMirrors({
-          ...notesPayload,
-          createdAt: new Date().toISOString(),
-        });
+        const notesRef = await addDoc(collection(db, "contentItems"), {
+            ...notesPayload,
+            createdAt: new Date().toISOString(),
+          });
+
+          if (notesCmsPdfUrl.trim()) {
+            await saveProtectedContentAsset(
+              notesRef.id,
+              {
+                id: notesRef.id,
+                ...notesPayload,
+              },
+              {
+                actorEmail: user?.email || "admin",
+                source: "notes_cms",
+              }
+            );
+          }
 
         alert("Notes saved to Firestore successfully.");
       }
@@ -3115,8 +3161,13 @@ subjectName:
     if (!confirmSync) return;
 
     try {
-      const rawContentItems = await loadRawContentItems();
-      const noteItems = rawContentItems.filter((item) => {
+      const snapshot = await getDocs(collection(db, "contentItems"));
+      const noteItems = snapshot.docs
+        .map((docItem) => ({
+          id: docItem.id,
+          ...docItem.data(),
+        }))
+        .filter((item) => {
           const section = String(
             item.section || item.contentSection || item.type || ""
           ).toLowerCase();
@@ -3151,7 +3202,22 @@ subjectName:
         }
 
         try {
-          await syncContentItemMirrors(item.id);
+          await saveProtectedContentAsset(
+            item.id,
+            {
+              ...item,
+              id: item.id,
+              pdfUrl,
+              fileUrl: item.fileUrl || pdfUrl,
+              section: item.section || "notes",
+              planType: item.planType || "FREE",
+              course: item.course || "CTET_TET",
+            },
+            {
+              actorEmail: user?.email || "admin",
+              source: "notes_protected_backfill",
+            }
+          );
 
           syncedCount += 1;
         } catch (error) {
@@ -3175,7 +3241,9 @@ subjectName:
 
   const handleDeleteLocalContentItem = async (itemId) => {
     try {
-      await deleteContentItemWithMirrors(itemId);
+      await deleteDoc(
+        doc(db, "contentItems", itemId)
+      );
 
       setUniversalContent((prevContent) =>
         prevContent.filter((item) => item.id !== itemId)
@@ -3188,47 +3256,28 @@ subjectName:
     }
   };
 
-  const loadContentItemsFromFirestore = async (
-    sessionUser = user
-  ) => {
-    const requestId =
-      contentCatalogLoadRequestRef.current + 1;
-    contentCatalogLoadRequestRef.current = requestId;
-
+  const loadContentItemsFromFirestore = async () => {
     try {
-      const loadedItems = isAdmin(sessionUser)
-        ? await loadRawContentItems()
-        : await loadPublicContentItems();
+      const snapshot = await getDocs(
+        collection(db, "contentItems")
+      );
 
-      if (
-        requestId !== contentCatalogLoadRequestRef.current
-      ) {
-        return loadedItems;
-      }
+      const loadedItems = snapshot.docs.map((docItem) => ({
+        id: docItem.id,
+        ...docItem.data(),
+      }));
 
       setUniversalContent(loadedItems);
 
       console.log(
-        isAdmin(sessionUser)
-          ? "Loaded admin raw contentItems from Firestore:"
-          : "Loaded student contentItemsPublic from Firestore:",
+        "Loaded contentItems from Firestore:",
         loadedItems
       );
-
-      return loadedItems;
     } catch (error) {
-      if (requestId === contentCatalogLoadRequestRef.current) {
-        setUniversalContent([]);
-      }
-
       console.error(
-        isAdmin(sessionUser)
-          ? "Error loading admin raw contentItems:"
-          : "Error loading student contentItemsPublic:",
+        "Error loading contentItems:",
         error
       );
-
-      return [];
     }
   };
 
@@ -4263,7 +4312,7 @@ return (
   element={
     <StudentRoadmapHub
       user={user}
-      userPlanType={activeAccessPlan}
+      userPlanType={userPlanType}
       hasPlanAccess={hasPlanAccess}
       isAdminUser={isAdmin(user)}
     />
@@ -4275,7 +4324,7 @@ return (
   element={
     <StudentRoadmapDetail
       user={user}
-      userPlanType={activeAccessPlan}
+      userPlanType={userPlanType}
       hasPlanAccess={hasPlanAccess}
       isAdminUser={isAdmin(user)}
     />
@@ -4287,7 +4336,7 @@ return (
   element={
     <StudentRoadmapDay
       user={user}
-      userPlanType={activeAccessPlan}
+      userPlanType={userPlanType}
       hasPlanAccess={hasPlanAccess}
       isAdminUser={isAdmin(user)}
     />
@@ -4299,7 +4348,7 @@ return (
   element={
     <MyAspirePath
       user={user}
-      userPlanType={activeAccessPlan}
+      userPlanType={userPlanType}
       hasPlanAccess={hasPlanAccess}
       isAdminUser={isAdmin(user)}
     />
@@ -5484,7 +5533,7 @@ xpActivityEvents={ctetMockXpEvents}
           <StudentDashboard
             user={user}
             isPremiumUser={isPremiumUser}
-            userPlanType={activeAccessPlan}
+            userPlanType={userPlanType}
             membershipExpiry={membershipExpiry}
             hasPlanAccess={hasPlanAccess}
             isAdmin={isAdmin(user)}
@@ -5524,7 +5573,7 @@ xpActivityEvents={ctetMockXpEvents}
       <StudentLearnerProfileRoute
         user={user}
         activePlan={activeAccessPlan}
-        accessStatus={accessProfile?.accessStatus || "pending"}
+        accessStatus={accessProfile?.accessStatus || "active"}
         membershipExpiry={activeAccessExpiry}
       />
     ) : null
@@ -5538,7 +5587,7 @@ xpActivityEvents={ctetMockXpEvents}
       <StudentLearnerProfileRoute
         user={user}
         activePlan={activeAccessPlan}
-        accessStatus={accessProfile?.accessStatus || "pending"}
+        accessStatus={accessProfile?.accessStatus || "active"}
         membershipExpiry={activeAccessExpiry}
       />
     ) : null
@@ -7714,8 +7763,8 @@ This action cannot be undone.`
   element={
     requireAdmin() ? (
       <AdminMockTestLeaderboardRoute
-        mockLeaderboardEntries={adminMockLeaderboardEntries}
-        loadMockLeaderboardEntries={loadAdminMockLeaderboardEntries}
+        mockLeaderboardEntries={mockLeaderboardEntries}
+        loadMockLeaderboardEntries={loadMockLeaderboardEntries}
         navigate={navigate}
       />
     ) : null
@@ -8535,7 +8584,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   element={
     <StudentVideoPlanRoute
       universalContent={universalContent}
-      userPlanType={activeAccessPlan}
+      userPlanType={userPlanType}
       isAdmin={isAdmin(user)}
     />
   }
@@ -8546,7 +8595,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   element={
     <StudentVideoSubjectRoute
       universalContent={universalContent}
-      userPlanType={activeAccessPlan}
+      userPlanType={userPlanType}
       isAdmin={isAdmin(user)}
     />
   }
@@ -8557,7 +8606,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   element={
     <StudentVideoChapterRoute
       universalContent={universalContent}
-      userPlanType={activeAccessPlan}
+      userPlanType={userPlanType}
       isAdmin={isAdmin(user)}
       hasPlanAccess={hasPlanAccess}
     />
@@ -8570,7 +8619,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
     <StudentClassroomGuardRoute
       universalContent={universalContent}
       user={user}
-      userPlanType={activeAccessPlan}
+      userPlanType={userPlanType}
       isAdmin={isAdmin(user)}
       hasPlanAccess={hasPlanAccess}
     />
@@ -8725,12 +8774,8 @@ handleSaveUniversalContent={handleSaveUniversalContent}
     <ExamReviewRoute
       universalContent={universalContent}
       getMockTestAccessStatus={getMockTestAccessStatus}
+
       mockAttemptState={mockAttemptState}
-      user={user}
-      loadUserMockResults={loadUserMockResults}
-      mockResults={mockResults}
-      mockResultsLoaded={mockResultsLoaded}
-      mockResultsLoadError={mockResultsLoadError}
     />
   }
 />
@@ -9946,7 +9991,7 @@ setAnnouncementMessage={setAnnouncementMessage}
   fallbackCurrentAffairs={[]}
   handleNoteAccess={handleNoteAccess}
   isPremiumUser={isPremiumUser}
-  userPlanType={activeAccessPlan}
+  userPlanType={userPlanType}
   hasPlanAccess={hasPlanAccess}
   setActiveSection={setActiveSection}
 />

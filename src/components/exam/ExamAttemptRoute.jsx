@@ -18,8 +18,6 @@ import {
   saveAttemptState,
 } from "./examAttemptStorage.js";
 
-import { submitMockSubmissionReceipt } from "./mockSubmissionReceiptService.js";
-
 export default function ExamAttemptRoute({
   universalContent,
   getMockTestAccessStatus,
@@ -274,67 +272,35 @@ export default function ExamAttemptRoute({
     !attemptState?.isSubmitted;
 
   React.useEffect(() => {
-    if (!test || !attemptState || !shouldForceSubmit) return undefined;
+    if (!test || !attemptState || !shouldForceSubmit) return;
 
-    let active = true;
-    let redirectTimer = null;
-
-    const finalizeForcedSubmission = async () => {
-      const finalState = {
-        ...attemptState,
-        submittedAt: Date.now(),
-        isSubmitted: true,
-        forceSubmittedReason: "Violation limit exceeded",
-      };
-
-      try {
-        await submitMockSubmissionReceipt({
-          user,
-          test,
-          attemptState: finalState,
-          reason: "violation_limit",
-        });
-
-        if (!active) return;
-
-        saveAttemptState(test.id, finalState);
-
-        setMockAttemptState((prev) => ({
-          ...prev,
-          [test.id]: finalState,
-        }));
-
-        toast.error("Violation limit exceeded. Test auto-submitted.");
-
-        redirectTimer = setTimeout(() => {
-          navigate(`/ctet-tet/mock-tests/result/${test.id}`);
-        }, 300);
-      } catch (error) {
-        if (!active) return;
-
-        console.error("Forced mock receipt save failed:", error);
-        toast.error(
-          "Submission could not be secured. Please check your connection and retry."
-        );
-      }
+    const finalState = {
+      ...attemptState,
+      submittedAt: Date.now(),
+      isSubmitted: true,
+      forceSubmittedReason: "Violation limit exceeded",
     };
 
-    finalizeForcedSubmission();
+    saveAttemptState(test.id, finalState);
 
-    return () => {
-      active = false;
+    setMockAttemptState((prev) => ({
+      ...prev,
+      [test.id]: finalState,
+    }));
 
-      if (redirectTimer) {
-        clearTimeout(redirectTimer);
-      }
-    };
+    toast.error("Violation limit exceeded. Test auto-submitted.");
+
+    const redirectTimer = setTimeout(() => {
+      navigate(`/ctet-tet/mock-tests/result/${test.id}`);
+    }, 300);
+
+    return () => clearTimeout(redirectTimer);
   }, [
     test,
     attemptState,
     shouldForceSubmit,
     setMockAttemptState,
     navigate,
-    user,
   ]);
 
   const resetQuestionTimer = () => {
@@ -382,7 +348,7 @@ export default function ExamAttemptRoute({
     setSubmitConfirmTestId(test.id);
   };
 
-  const confirmFinalSubmit = async () => {
+  const confirmFinalSubmit = () => {
     if (!test || !attemptState) return;
 
     const finalState = {
@@ -391,33 +357,18 @@ export default function ExamAttemptRoute({
       isSubmitted: true,
     };
 
-    try {
-      await submitMockSubmissionReceipt({
-        user,
-        test,
-        attemptState: finalState,
-        reason: "student_submit",
-      });
+    saveAttemptState(test.id, finalState);
 
-      saveAttemptState(test.id, finalState);
+    setMockAttemptState((prev) => ({
+      ...prev,
+      [test.id]: finalState,
+    }));
 
-      setMockAttemptState((prev) => ({
-        ...prev,
-        [test.id]: finalState,
-      }));
+    setSubmitConfirmTestId(null);
 
-      setSubmitConfirmTestId(null);
+    toast.success("Test submitted successfully ✅");
 
-      toast.success("Test submitted successfully ✅");
-
-      navigate(`/ctet-tet/mock-tests/result/${test.id}`);
-    } catch (error) {
-      console.error("Mock submission receipt save failed:", error);
-
-      toast.error(
-        "Submission could not be secured. Please check your connection and retry."
-      );
-    }
+    navigate(`/ctet-tet/mock-tests/result/${test.id}`);
   };
 
   const cancelFinalSubmit = () => {

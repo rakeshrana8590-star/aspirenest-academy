@@ -1,5 +1,5 @@
 import React from "react";
-import { updateContentItemWithMirrors } from "../../publicContentCatalogService";
+import { doc, updateDoc } from "firebase/firestore";
 
 import { deleteMockTest } from "./mockTestAdminActions.js";
 
@@ -295,7 +295,7 @@ export default function AdminMockTestManageRoute({
     }
   
     for (const testId of safeSelectedIds) {
-      await updateContentItemWithMirrors(testId, {
+      await updateDoc(doc(db, "contentItems", testId), {
         status,
         updatedAt: new Date(),
       });

@@ -68,40 +68,7 @@ const parseAttemptLimit = (value) => {
   return { isUnlimited: true, max: null };
 };
 
-/* === P0 mock UID ownership v1 === */
-const normalizeMockIdentity = (value) =>
-  String(value || "").trim().toLowerCase();
-
-const isSameMockOwner = (record = {}, user = {}) => {
-  const expectedUid = String(user?.uid || "").trim();
-  const recordUid = String(
-    record?.uid ||
-      record?.studentUid ||
-      record?.ownerUid ||
-      record?.userId ||
-      ""
-  ).trim();
-
-  if (expectedUid && recordUid) {
-    return recordUid === expectedUid;
-  }
-
-  const expectedEmail = normalizeMockIdentity(user?.email);
-  const recordEmail = normalizeMockIdentity(
-    record?.email ||
-      record?.studentEmail ||
-      record?.userEmail ||
-      record?.ownerEmail
-  );
-
-  return Boolean(expectedEmail && recordEmail === expectedEmail);
-};
-
-const countSubmittedMockAttempts = (
-  mockResults = [],
-  testId = "",
-  user = {}
-) =>
+const countSubmittedMockAttempts = (mockResults = [], testId = "", email = "") =>
   (Array.isArray(mockResults) ? mockResults : []).filter((result) => {
     const sameTest =
       result?.testId === testId ||
@@ -109,7 +76,13 @@ const countSubmittedMockAttempts = (
       result?.testID === testId ||
       result?.contentId === testId;
 
-    return sameTest && isSameMockOwner(result, user);
+    const sameStudent =
+      !email ||
+      result?.email === email ||
+      result?.studentEmail === email ||
+      result?.userEmail === email;
+
+    return sameTest && sameStudent;
   }).length;
 
 const hasSavedMockAttempt = (mockResults = [], attemptSaveKey = "") =>
@@ -264,7 +237,7 @@ export default function ExamStartRoute({
   const savedSubmittedCount = countSubmittedMockAttempts(
     mockResults,
     test.id,
-    user
+    user?.email
   );
   const hasSavedCurrentAttempt = hasSavedMockAttempt(
     mockResults,

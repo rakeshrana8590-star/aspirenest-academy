@@ -10,7 +10,6 @@ import {
   updateDoc,
   writeBatch,
   where,
-  Timestamp,
 } from "firebase/firestore";
 
 import { db } from "../firebase";
@@ -40,124 +39,6 @@ const ADMIN_ROLES = new Set(["admin", "super_admin", "owner"]);
 
 export const normalizeAccessEmail = (email = "") =>
   String(email || "").trim().toLowerCase();
-
-/* === P0 app-wide fixed-window access helpers v2 === */
-const ACCESS_DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-const ACCESS_ACTIVE_STATUS = "active";
-
-const isFirestoreTimestampValue = (value) =>
-  Boolean(
-    value &&
-      typeof value.toDate === "function" &&
-      typeof value.seconds === "number"
-  );
-
-const toFirestoreAccessTimestamp = (
-  value,
-  fieldName,
-  boundary = "exact"
-) => {
-  if (!value) return null;
-  if (isFirestoreTimestampValue(value)) return value;
-
-  let parsedDate = null;
-
-  if (
-    typeof value === "string" &&
-    ACCESS_DATE_ONLY_PATTERN.test(value.trim())
-  ) {
-    const cleanValue = value.trim();
-    const timePart =
-      boundary === "end"
-        ? "T23:59:59.999+05:30"
-        : "T00:00:00.000+05:30";
-
-    parsedDate = new Date(`${cleanValue}${timePart}`);
-  } else {
-    parsedDate =
-      value instanceof Date
-        ? value
-        : new Date(value);
-  }
-
-  if (
-    !(parsedDate instanceof Date) ||
-    Number.isNaN(parsedDate.getTime())
-  ) {
-    throw new Error(`${fieldName} must be a valid date.`);
-  }
-
-  return Timestamp.fromDate(parsedDate);
-};
-
-const normalizeFixedAccessWindow = ({
-  accessFrom,
-  accessUntil,
-  status,
-} = {}) => {
-  const normalizedStatus = String(
-    status || ACCESS_STATUS.ACTIVE
-  )
-    .trim()
-    .toLowerCase();
-
-  const normalizedFrom = toFirestoreAccessTimestamp(
-    accessFrom,
-    "Access from",
-    "start"
-  );
-  const normalizedUntil = toFirestoreAccessTimestamp(
-    accessUntil,
-    "Access until",
-    "end"
-  );
-
-  if (
-    normalizedStatus === ACCESS_ACTIVE_STATUS &&
-    (!normalizedFrom || !normalizedUntil)
-  ) {
-    throw new Error(
-      "Active access requires both accessFrom and accessUntil."
-    );
-  }
-
-  if (
-    normalizedFrom &&
-    normalizedUntil &&
-    normalizedFrom.toMillis() >= normalizedUntil.toMillis()
-  ) {
-    throw new Error(
-      "Access until must be later than access from."
-    );
-  }
-
-  if (
-    normalizedStatus === ACCESS_ACTIVE_STATUS &&
-    normalizedUntil &&
-    normalizedUntil.toMillis() <= Date.now()
-  ) {
-    throw new Error(
-      "Active access cannot end in the past."
-    );
-  }
-
-  const hasFixedWindow = Boolean(
-    normalizedFrom && normalizedUntil
-  );
-
-  return {
-    status: normalizedStatus,
-    accessFrom: normalizedFrom,
-    accessUntil: normalizedUntil,
-    validityMode: hasFixedWindow
-      ? "fixed_window"
-      : "closed",
-    validityPolicy: hasFixedWindow
-      ? "fixed_window"
-      : "closed",
-    authorizationSchemaVersion: 2,
-  };
-};
 
 const toAccessRecord = (docSnap) => {
   if (!docSnap || !docSnap.exists()) return null;
@@ -257,49 +138,31 @@ const buildAccessPayload = (data = {}) => {
     throw new Error("Access record requires email or uid.");
   }
 
-  const normalizedWindow = normalizeFixedAccessWindow({
-    accessFrom: data.accessFrom,
-    accessUntil: data.accessUntil,
-    status: data.status || ACCESS_STATUS.ACTIVE,
-  });
-
   return {
     email: normalizedEmail || null,
     normalizedEmail,
     uid: uid || null,
-    planType: normalizeAccessPlan(
-      data.planType || ACCESS_PLAN_TYPES.FREE
-    ),
+    planType: normalizeAccessPlan(data.planType || ACCESS_PLAN_TYPES.FREE),
     scopeType: data.scopeType || ACCESS_SCOPE_TYPES.PLAN,
-    status: normalizedWindow.status,
+    status: String(data.status || ACCESS_STATUS.ACTIVE).trim().toLowerCase(),
     source: data.source || ACCESS_SOURCE.ADMIN_MANUAL,
     course: data.course || ACCESS_COURSE.CTET_TET,
     module: data.module || null,
     itemType: data.itemType || null,
     itemId: data.itemId || null,
     itemTitle: data.itemTitle || "",
-    itemIds: Array.isArray(data.itemIds)
-      ? data.itemIds
-      : [],
+    itemIds: Array.isArray(data.itemIds) ? data.itemIds : [],
     bundleId: data.bundleId || null,
     productId: data.productId || null,
     accessKeyId: data.accessKeyId || null,
     campaignId: data.campaignId || null,
     campaignName: data.campaignName || "",
     campaignSource: data.campaignSource || "",
-    learnerName: String(
-      data.learnerName || data.name || ""
-    ).trim(),
-    name: String(
-      data.name || data.learnerName || ""
-    ).trim(),
+    learnerName: String(data.learnerName || data.name || "").trim(),
+    name: String(data.name || data.learnerName || "").trim(),
     phone: String(data.phone || "").trim(),
-    accessFrom: normalizedWindow.accessFrom,
-    accessUntil: normalizedWindow.accessUntil,
-    validityMode: normalizedWindow.validityMode,
-    validityPolicy: normalizedWindow.validityPolicy,
-    authorizationSchemaVersion:
-      normalizedWindow.authorizationSchemaVersion,
+    accessFrom: data.accessFrom || null,
+    accessUntil: data.accessUntil || null,
     notes: data.notes || data.adminNote || "",
     adminNote: data.adminNote || data.notes || "",
     updatedAt: serverTimestamp(),
@@ -339,82 +202,42 @@ export const buildStudentEntitlementId = (accessRecord = {}) => {
   return "plan_" + cleanEntitlementSegment(normalizeAccessPlan(accessRecord.planType || ACCESS_PLAN_TYPES.FREE));
 };
 
-export const buildStudentEntitlementPayload = (
-  accessRecord = {},
-  metadata = {}
-) => {
-  const uid = String(
-    accessRecord.uid || metadata.uid || ""
-  ).trim();
+export const buildStudentEntitlementPayload = (accessRecord = {}, metadata = {}) => {
+  const uid = String(accessRecord.uid || metadata.uid || "").trim();
   const normalizedEmail = normalizeAccessEmail(
-    accessRecord.normalizedEmail ||
-      accessRecord.email ||
-      metadata.email
+    accessRecord.normalizedEmail || accessRecord.email || metadata.email
   );
 
   if (!uid) {
-    throw new Error(
-      "Student entitlement requires uid."
-    );
+    throw new Error("Student entitlement requires uid.");
   }
 
-  const normalizedWindow = normalizeFixedAccessWindow({
-    accessFrom: accessRecord.accessFrom,
-    accessUntil: accessRecord.accessUntil,
-    status:
-      accessRecord.status || ACCESS_STATUS.ACTIVE,
-  });
-
-  const entitlementId =
-    buildStudentEntitlementId(accessRecord);
+  const entitlementId = buildStudentEntitlementId(accessRecord);
 
   return {
     id: entitlementId,
     uid,
     email: normalizedEmail || null,
     normalizedEmail,
-    accessId:
-      accessRecord.id || metadata.accessId || null,
-    planType: normalizeAccessPlan(
-      accessRecord.planType ||
-        ACCESS_PLAN_TYPES.FREE
-    ),
-    scopeType:
-      accessRecord.scopeType ||
-      ACCESS_SCOPE_TYPES.PLAN,
+    accessId: accessRecord.id || metadata.accessId || null,
+    planType: normalizeAccessPlan(accessRecord.planType || ACCESS_PLAN_TYPES.FREE),
+    scopeType: accessRecord.scopeType || ACCESS_SCOPE_TYPES.PLAN,
     module: accessRecord.module || null,
     itemType: accessRecord.itemType || null,
     itemId: accessRecord.itemId || null,
-    itemIds: Array.isArray(accessRecord.itemIds)
-      ? accessRecord.itemIds
-      : [],
+    itemIds: Array.isArray(accessRecord.itemIds) ? accessRecord.itemIds : [],
     bundleId: accessRecord.bundleId || null,
-    course:
-      accessRecord.course ||
-      ACCESS_COURSE.CTET_TET,
-    status: normalizedWindow.status,
-    source:
-      accessRecord.source ||
-      ACCESS_SOURCE.ADMIN_MANUAL,
-    accessFrom: normalizedWindow.accessFrom,
-    accessUntil: normalizedWindow.accessUntil,
-    validityMode: normalizedWindow.validityMode,
-    validityPolicy:
-      normalizedWindow.validityPolicy,
-    authorizationSchemaVersion:
-      normalizedWindow.authorizationSchemaVersion,
+    course: accessRecord.course || ACCESS_COURSE.CTET_TET,
+    status: String(accessRecord.status || ACCESS_STATUS.ACTIVE).trim().toLowerCase(),
+    source: accessRecord.source || ACCESS_SOURCE.ADMIN_MANUAL,
+    accessFrom: accessRecord.accessFrom || null,
+    accessUntil: accessRecord.accessUntil || null,
     updatedAt: serverTimestamp(),
   };
 };
 
-export const syncStudentEntitlement = async (
-  accessRecord = {},
-  metadata = {}
-) => {
-  const payload = buildStudentEntitlementPayload(
-    accessRecord,
-    metadata
-  );
+export const syncStudentEntitlement = async (accessRecord = {}, metadata = {}) => {
+  const payload = buildStudentEntitlementPayload(accessRecord, metadata);
   const entitlementRef = doc(
     db,
     ACCESS_COLLECTIONS.STUDENT_ENTITLEMENTS,
@@ -423,75 +246,9 @@ export const syncStudentEntitlement = async (
     payload.id
   );
 
-  await setDoc(
-    entitlementRef,
-    payload,
-    { merge: true }
-  );
+  await setDoc(entitlementRef, payload, { merge: true });
 
   return payload;
-};
-
-/* === P0 entitlement transition cleanup v2 === */
-const syncStudentEntitlementTransition = async (
-  before = {},
-  after = {},
-  metadata = {}
-) => {
-  const nextPayload =
-    buildStudentEntitlementPayload(
-      after,
-      metadata
-    );
-  const batch = writeBatch(db);
-  const nextRef = doc(
-    db,
-    ACCESS_COLLECTIONS.STUDENT_ENTITLEMENTS,
-    nextPayload.uid,
-    "items",
-    nextPayload.id
-  );
-
-  batch.set(
-    nextRef,
-    nextPayload,
-    { merge: true }
-  );
-
-  const beforeUid = String(
-    before.uid || ""
-  ).trim();
-
-  if (beforeUid && beforeUid === nextPayload.uid) {
-    const previousId =
-      buildStudentEntitlementId(before);
-
-    if (
-      previousId &&
-      previousId !== nextPayload.id
-    ) {
-      const previousRef = doc(
-        db,
-        ACCESS_COLLECTIONS.STUDENT_ENTITLEMENTS,
-        beforeUid,
-        "items",
-        previousId
-      );
-
-      batch.set(
-        previousRef,
-        {
-          status: ACCESS_STATUS.BLOCKED,
-          updatedAt: serverTimestamp(),
-        },
-        { merge: true }
-      );
-    }
-  }
-
-  await batch.commit();
-
-  return nextPayload;
 };
 
 const syncStudentEntitlementIfUid = async (accessRecord = {}, metadata = {}) => {
@@ -957,128 +714,42 @@ export const markAccessInviteOpened = async (inviteCode = "", user = {}) => {
   return { ...invite, inviteStatus: "opened", openedByUid: uid, openedByEmail: email };
 };
 
-export const redeemAccessInvite = async (
-  inviteCode = "",
-  user = {}
-) => {
+export const redeemAccessInvite = async (inviteCode = "", user = {}) => {
   const code = String(inviteCode || "").trim();
   const uid = user?.uid || "";
   const email = normalizeAccessEmail(user?.email);
 
-  if (!code) {
-    throw new Error("Invite code is required.");
-  }
+  if (!code) throw new Error("Invite code is required.");
+  if (!uid || !email) throw new Error("Please login with invited email to redeem access.");
 
-  if (!uid || !email) {
-    throw new Error(
-      "Please login with invited email to redeem access."
-    );
-  }
-
-  const inviteRef = doc(
-    db,
-    ACCESS_COLLECTIONS.ACCESS_INVITES,
-    code
-  );
+  const inviteRef = doc(db, ACCESS_COLLECTIONS.ACCESS_INVITES, code);
   const inviteSnap = await getDoc(inviteRef);
   const invite = toInviteRecord(inviteSnap);
 
-  if (!invite) {
-    throw new Error("Invite not found.");
-  }
+  if (!invite) throw new Error("Invite not found.");
 
-  const inviteEmail = normalizeAccessEmail(
-    invite.normalizedEmail || invite.email
-  );
+  const inviteEmail = normalizeAccessEmail(invite.normalizedEmail || invite.email);
+  if (inviteEmail !== email) throw new Error("This invite belongs to another email.");
 
-  if (inviteEmail !== email) {
-    throw new Error(
-      "This invite belongs to another email."
-    );
-  }
+  if (invite.inviteStatus === "used") throw new Error("Invite already used.");
+  if (invite.inviteStatus === "revoked") throw new Error("Invite has been revoked.");
+  if (invite.inviteStatus === "expired") throw new Error("Invite has expired.");
 
-  if (invite.inviteStatus === "used") {
-    throw new Error("Invite already used.");
-  }
+  const expiryDate = invite.expiresAt?.toDate ? invite.expiresAt.toDate() : invite.expiresAt ? new Date(invite.expiresAt) : null;
+  if (expiryDate && expiryDate.getTime() < Date.now()) throw new Error("Invite has expired.");
 
-  if (invite.inviteStatus === "revoked") {
-    throw new Error("Invite has been revoked.");
-  }
+  if (!invite.accessId) throw new Error("Access record missing for this invite.");
 
-  if (invite.inviteStatus === "expired") {
-    throw new Error("Invite has expired.");
-  }
-
-  const expiryDate = invite.expiresAt?.toDate
-    ? invite.expiresAt.toDate()
-    : invite.expiresAt
-      ? new Date(invite.expiresAt)
-      : null;
-
-  if (
-    expiryDate &&
-    expiryDate.getTime() < Date.now()
-  ) {
-    throw new Error("Invite has expired.");
-  }
-
-  if (!invite.accessId) {
-    throw new Error(
-      "Access record missing for this invite."
-    );
-  }
-
-  const accessRef = doc(
-    db,
-    ACCESS_COLLECTIONS.STUDENT_ACCESS,
-    invite.accessId
-  );
+  const accessRef = doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, invite.accessId);
   const accessSnap = await getDoc(accessRef);
 
-  if (!accessSnap.exists()) {
-    throw new Error(
-      "Student access record not found."
-    );
-  }
+  if (!accessSnap.exists()) throw new Error("Student access record not found.");
 
   const accessData = accessSnap.data() || {};
-  const accessEmail = normalizeAccessEmail(
-    accessData.normalizedEmail ||
-      accessData.email
-  );
+  const accessEmail = normalizeAccessEmail(accessData.normalizedEmail || accessData.email);
 
-  if (accessEmail !== email) {
-    throw new Error(
-      "Access record email does not match invite email."
-    );
-  }
-
-  if (
-    accessData.uid &&
-    accessData.uid !== uid
-  ) {
-    throw new Error(
-      "This access is already linked to another account."
-    );
-  }
-
-  const normalizedWindow =
-    normalizeFixedAccessWindow({
-      accessFrom: accessData.accessFrom,
-      accessUntil: accessData.accessUntil,
-      status:
-        accessData.status ||
-        ACCESS_STATUS.ACTIVE,
-    });
-
-  if (
-    normalizedWindow.status !==
-    ACCESS_STATUS.ACTIVE
-  ) {
-    throw new Error(
-      "This access record is not active."
-    );
-  }
+  if (accessEmail !== email) throw new Error("Access record email does not match invite email.");
+  if (accessData.uid && accessData.uid !== uid) throw new Error("This access is already linked to another account.");
 
   const batch = writeBatch(db);
 
@@ -1094,13 +765,6 @@ export const redeemAccessInvite = async (
 
   batch.update(accessRef, {
     uid,
-    accessFrom: normalizedWindow.accessFrom,
-    accessUntil: normalizedWindow.accessUntil,
-    validityMode: normalizedWindow.validityMode,
-    validityPolicy:
-      normalizedWindow.validityPolicy,
-    authorizationSchemaVersion:
-      normalizedWindow.authorizationSchemaVersion,
     inviteId: invite.id || code,
     inviteRedeemedAt: serverTimestamp(),
     inviteRedeemedByUid: uid,
@@ -1110,13 +774,7 @@ export const redeemAccessInvite = async (
     updatedBy: uid,
   });
 
-  const auditRef = doc(
-    collection(
-      db,
-      ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS
-    )
-  );
-
+  const auditRef = doc(collection(db, ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS));
   batch.set(auditRef, {
     action: "redeem_access_invite",
     accessId: invite.accessId,
@@ -1124,11 +782,7 @@ export const redeemAccessInvite = async (
     uid,
     before: null,
     after: { inviteStatus: "used" },
-    metadata: {
-      source: "manual_invite_link",
-      inviteCode: code,
-      inviteId: invite.id || code,
-    },
+    metadata: { source: "manual_invite_link", inviteCode: code, inviteId: invite.id || code },
     createdAt: serverTimestamp(),
     createdBy: uid,
     actorEmail: email,
@@ -1142,13 +796,6 @@ export const redeemAccessInvite = async (
       id: invite.accessId,
       ...accessData,
       uid,
-      accessFrom: normalizedWindow.accessFrom,
-      accessUntil: normalizedWindow.accessUntil,
-      validityMode: normalizedWindow.validityMode,
-      validityPolicy:
-        normalizedWindow.validityPolicy,
-      authorizationSchemaVersion:
-        normalizedWindow.authorizationSchemaVersion,
     },
     {
       accessId: invite.accessId,
@@ -1158,12 +805,7 @@ export const redeemAccessInvite = async (
     }
   );
 
-  return {
-    success: true,
-    inviteId: invite.id || code,
-    accessId: invite.accessId,
-    email,
-  };
+  return { success: true, inviteId: invite.id || code, accessId: invite.accessId, email };
 };
 
 export const queueAccessInviteResend = async (id, actor = {}, metadata = {}) => {
@@ -1207,55 +849,22 @@ export const queueAccessInviteResend = async (id, actor = {}, metadata = {}) => 
   };
 };
 
-export const updateAccessStatus = async (
-  id,
-  status,
-  actor = {},
-  metadata = {}
-) => {
+export const updateAccessStatus = async (id, status, actor = {}, metadata = {}) => {
   const accessId = requireAccessId(id);
   const adminActor = requireAdminActor(actor);
   const before = await readAccessById(accessId);
-  const normalizedWindow =
-    normalizeFixedAccessWindow({
-      accessFrom: before?.accessFrom,
-      accessUntil: before?.accessUntil,
-      status,
-    });
-
   const payload = {
-    status: normalizedWindow.status,
-    accessFrom: normalizedWindow.accessFrom,
-    accessUntil: normalizedWindow.accessUntil,
-    validityMode: normalizedWindow.validityMode,
-    validityPolicy:
-      normalizedWindow.validityPolicy,
-    authorizationSchemaVersion:
-      normalizedWindow.authorizationSchemaVersion,
+    status: String(status || "").trim().toLowerCase(),
     updatedAt: serverTimestamp(),
     updatedBy: adminActor.uid,
   };
 
   if (!payload.status) {
-    throw new Error(
-      "Access status is required."
-    );
+    throw new Error("Access status is required.");
   }
 
-  await updateDoc(
-    doc(
-      db,
-      ACCESS_COLLECTIONS.STUDENT_ACCESS,
-      accessId
-    ),
-    payload
-  );
-
-  const after = {
-    ...(before || {}),
-    ...payload,
-    id: accessId,
-  };
+  await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId), payload);
+  const after = { ...(before || {}), ...payload, id: accessId };
 
   await syncStudentEntitlementIfUid(after, {
     accessId,
@@ -1266,9 +875,7 @@ export const updateAccessStatus = async (
 
   await createAccessAuditLog({
     actor: adminActor,
-    action:
-      metadata.action ||
-      "update_access_status",
+    action: metadata.action || "update_access_status",
     accessId,
     email: before?.email,
     uid: before?.uid,
@@ -1283,56 +890,24 @@ export const updateAccessStatus = async (
   };
 };
 
-export const extendAccess = async (
-  id,
-  accessUntil,
-  actor = {},
-  metadata = {}
-) => {
+export const extendAccess = async (id, accessUntil, actor = {}, metadata = {}) => {
   const accessId = requireAccessId(id);
   const adminActor = requireAdminActor(actor);
   const before = await readAccessById(accessId);
 
   if (!accessUntil) {
-    throw new Error(
-      "Access until date is required."
-    );
+    throw new Error("Access until date is required.");
   }
 
-  const normalizedWindow =
-    normalizeFixedAccessWindow({
-      accessFrom: before?.accessFrom,
-      accessUntil,
-      status: ACCESS_STATUS.ACTIVE,
-    });
-
   const payload = {
-    accessFrom: normalizedWindow.accessFrom,
-    accessUntil: normalizedWindow.accessUntil,
-    validityMode: normalizedWindow.validityMode,
-    validityPolicy:
-      normalizedWindow.validityPolicy,
-    authorizationSchemaVersion:
-      normalizedWindow.authorizationSchemaVersion,
-    status: normalizedWindow.status,
+    accessUntil,
+    status: ACCESS_STATUS.ACTIVE,
     updatedAt: serverTimestamp(),
     updatedBy: adminActor.uid,
   };
 
-  await updateDoc(
-    doc(
-      db,
-      ACCESS_COLLECTIONS.STUDENT_ACCESS,
-      accessId
-    ),
-    payload
-  );
-
-  const after = {
-    ...(before || {}),
-    ...payload,
-    id: accessId,
-  };
+  await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId), payload);
+  const after = { ...(before || {}), ...payload, id: accessId };
 
   await syncStudentEntitlementIfUid(after, {
     accessId,
@@ -1343,8 +918,7 @@ export const extendAccess = async (
 
   await createAccessAuditLog({
     actor: adminActor,
-    action:
-      metadata.action || "extend_access",
+    action: metadata.action || "extend_access",
     accessId,
     email: before?.email,
     uid: before?.uid,
@@ -1395,63 +969,26 @@ export const addAccessNote = async (id, note = "", actor = {}, metadata = {}) =>
   };
 };
 
-export const upgradeAccess = async (
-  id,
-  planType,
-  actor = {},
-  metadata = {}
-) => {
+export const upgradeAccess = async (id, planType, actor = {}, metadata = {}) => {
   const accessId = requireAccessId(id);
   const adminActor = requireAdminActor(actor);
   const before = await readAccessById(accessId);
-  const normalizedWindow =
-    normalizeFixedAccessWindow({
-      accessFrom: before?.accessFrom,
-      accessUntil: before?.accessUntil,
-      status: ACCESS_STATUS.ACTIVE,
-    });
-
   const payload = {
     planType: normalizeAccessPlan(planType),
-    status: normalizedWindow.status,
-    accessFrom: normalizedWindow.accessFrom,
-    accessUntil: normalizedWindow.accessUntil,
-    validityMode: normalizedWindow.validityMode,
-    validityPolicy:
-      normalizedWindow.validityPolicy,
-    authorizationSchemaVersion:
-      normalizedWindow.authorizationSchemaVersion,
+    status: ACCESS_STATUS.ACTIVE,
     updatedAt: serverTimestamp(),
     updatedBy: adminActor.uid,
   };
 
-  await updateDoc(
-    doc(
-      db,
-      ACCESS_COLLECTIONS.STUDENT_ACCESS,
-      accessId
-    ),
-    payload
-  );
+  await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId), payload);
+  const after = { ...(before || {}), ...payload, id: accessId };
 
-  const after = {
-    ...(before || {}),
-    ...payload,
-    id: accessId,
-  };
-
-  if (after.uid) {
-    await syncStudentEntitlementTransition(
-      before || {},
-      after,
-      {
-        accessId,
-        actorUid: adminActor.uid,
-        actorEmail: adminActor.email,
-        source: "upgrade_access",
-      }
-    );
-  }
+  await syncStudentEntitlementIfUid(after, {
+    accessId,
+    actorUid: adminActor.uid,
+    actorEmail: adminActor.email,
+    source: "upgrade_access",
+  });
 
   await createAccessAuditLog({
     actor: adminActor,
@@ -1470,49 +1007,19 @@ export const upgradeAccess = async (
   };
 };
 
-export const revokeAccess = async (
-  id,
-  actor = {},
-  metadata = {}
-) => {
+export const revokeAccess = async (id, actor = {}, metadata = {}) => {
   const accessId = requireAccessId(id);
   const adminActor = requireAdminActor(actor);
   const before = await readAccessById(accessId);
-  const normalizedWindow =
-    normalizeFixedAccessWindow({
-      accessFrom: before?.accessFrom,
-      accessUntil: before?.accessUntil,
-      status: ACCESS_STATUS.BLOCKED,
-    });
-
   const payload = {
     status: ACCESS_STATUS.BLOCKED,
-    accessFrom: normalizedWindow.accessFrom,
-    accessUntil: normalizedWindow.accessUntil,
-    validityMode: normalizedWindow.validityMode,
-    validityPolicy:
-      normalizedWindow.validityPolicy,
-    authorizationSchemaVersion:
-      normalizedWindow.authorizationSchemaVersion,
     revokedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
     updatedBy: adminActor.uid,
   };
 
-  await updateDoc(
-    doc(
-      db,
-      ACCESS_COLLECTIONS.STUDENT_ACCESS,
-      accessId
-    ),
-    payload
-  );
-
-  const after = {
-    ...(before || {}),
-    ...payload,
-    id: accessId,
-  };
+  await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId), payload);
+  const after = { ...(before || {}), ...payload, id: accessId };
 
   await syncStudentEntitlementIfUid(after, {
     accessId,
@@ -2279,217 +1786,86 @@ function pickPaymentAccessRecord(records = []) {
   }) || records[0] || null;
 }
 
-export async function grantPaymentAccess(
-  payment = {},
-  actor = {}
-) {
+export async function grantPaymentAccess(payment = {}, actor = {}) {
   const adminActor = requireAdminActor(actor);
-  const normalizedEmail = normalizeAccessEmail(
-    payment.studentEmail ||
-      payment.email ||
-      payment.userEmail
-  );
-  const uid = String(
-    payment.userId || payment.uid || ""
-  ).trim();
+  const normalizedEmail = normalizeAccessEmail(payment.studentEmail || payment.email || payment.userEmail);
+  const uid = String(payment.userId || payment.uid || "").trim();
 
   if (!normalizedEmail && !uid) {
-    throw new Error(
-      "Payment access requires learner email or user id."
-    );
+    throw new Error("Payment access requires learner email or user id.");
   }
 
-  const paymentPlanType =
-    resolvePaymentPlanType(payment);
-  const validityMonths =
-    resolvePaymentValidityMonths(payment);
-  const requestedAccessFrom =
-    payment.accessFrom ||
-    payment.purchaseDate ||
-    new Date();
+  const paymentPlanType = resolvePaymentPlanType(payment);
+  const validityMonths = resolvePaymentValidityMonths(payment);
+  const accessFrom = payment.accessFrom || payment.purchaseDate || new Date();
   const paymentAccessUntil =
     payment.accessUntil ||
     payment.expiryDate ||
-    addPaymentAccessMonths(
-      requestedAccessFrom,
-      validityMonths
-    );
+    addPaymentAccessMonths(accessFrom, validityMonths);
 
-  const uidMatches = uid
-    ? await getAccessByUid(uid)
-    : [];
-  const emailMatches = normalizedEmail
-    ? await getAccessByEmail(normalizedEmail)
-    : [];
-  const existingAccess =
-    pickPaymentAccessRecord(
-      uniquePaymentAccessRecords(
-        uidMatches.concat(emailMatches)
-      )
-    );
+  const uidMatches = uid ? await getAccessByUid(uid) : [];
+  const emailMatches = normalizedEmail ? await getAccessByEmail(normalizedEmail) : [];
+  const existingAccess = pickPaymentAccessRecord(uniquePaymentAccessRecords(uidMatches.concat(emailMatches)));
 
-  const before = existingAccess
-    ? Object.assign({}, existingAccess)
-    : null;
-  const existingPlanLevel = before
-    ? getPaymentPlanLevel(before.planType)
-    : -1;
-  const paymentPlanLevel =
-    getPaymentPlanLevel(paymentPlanType);
-  const shouldPreserveExistingPlan = Boolean(
-    before &&
-      Math.max(
-        existingPlanLevel,
-        paymentPlanLevel
-      ) === existingPlanLevel &&
-      existingPlanLevel !== paymentPlanLevel
-  );
-  const finalPlanType =
-    shouldPreserveExistingPlan
-      ? normalizeAccessPlan(before.planType)
-      : paymentPlanType;
+  const before = existingAccess ? Object.assign({}, existingAccess) : null;
+  const existingPlanLevel = before ? getPaymentPlanLevel(before.planType) : -1;
+  const paymentPlanLevel = getPaymentPlanLevel(paymentPlanType);
+  const shouldPreserveExistingPlan = Boolean(before && Math.max(existingPlanLevel, paymentPlanLevel) === existingPlanLevel && existingPlanLevel !== paymentPlanLevel);
+  const finalPlanType = shouldPreserveExistingPlan ? normalizeAccessPlan(before.planType) : paymentPlanType;
 
-  const existingFromDate = before
-    ? toPaymentAccessDate(before.accessFrom)
-    : null;
-  const requestedFromDate =
-    toPaymentAccessDate(requestedAccessFrom);
-  const shouldPreserveExistingFrom = Boolean(
-    existingFromDate &&
-      requestedFromDate &&
-      existingFromDate.getTime() <=
-        requestedFromDate.getTime()
-  );
-  const finalAccessFrom =
-    shouldPreserveExistingFrom
-      ? before.accessFrom
-      : requestedAccessFrom;
+  const existingUntilDate = before ? toPaymentAccessDate(before.accessUntil) : null;
+  const paymentUntilDate = toPaymentAccessDate(paymentAccessUntil);
+  const shouldPreserveExistingUntil = Boolean(existingUntilDate && paymentUntilDate && Math.max(existingUntilDate.getTime(), paymentUntilDate.getTime()) === existingUntilDate.getTime() && existingUntilDate.getTime() !== paymentUntilDate.getTime());
+  const finalAccessUntil = shouldPreserveExistingUntil ? before.accessUntil : paymentAccessUntil;
 
-  const existingUntilDate = before
-    ? toPaymentAccessDate(before.accessUntil)
-    : null;
-  const paymentUntilDate =
-    toPaymentAccessDate(paymentAccessUntil);
-  const shouldPreserveExistingUntil = Boolean(
-    existingUntilDate &&
-      paymentUntilDate &&
-      Math.max(
-        existingUntilDate.getTime(),
-        paymentUntilDate.getTime()
-      ) === existingUntilDate.getTime() &&
-      existingUntilDate.getTime() !==
-        paymentUntilDate.getTime()
-  );
-  const finalAccessUntil =
-    shouldPreserveExistingUntil
-      ? before.accessUntil
-      : paymentAccessUntil;
-
-  const payload = Object.assign(
-    {},
-    buildAccessPayload({
-      email: normalizedEmail,
-      uid,
-      name:
-        payment.studentName ||
-        payment.name ||
-        "",
-      learnerName:
-        payment.studentName ||
-        payment.learnerName ||
-        payment.name ||
-        "",
-      phone:
-        payment.studentMobile ||
-        payment.phone ||
-        "",
-      planType: finalPlanType,
-      status: ACCESS_STATUS.ACTIVE,
-      source: ACCESS_SOURCE.PAYMENT,
-      course:
-        payment.course ||
-        ACCESS_COURSE.CTET_TET,
-      scopeType: ACCESS_SCOPE_TYPES.PLAN,
-      accessFrom: finalAccessFrom,
-      accessUntil: finalAccessUntil,
-      notes:
-        payment.notes ||
-        payment.adminNote ||
-        (
-          "Payment approved" +
-          (
-            payment.orderId
-              ? ": " + payment.orderId
-              : ""
-          )
-        ),
-    }),
-    {
-      paymentId:
-        payment.paymentId ||
-        payment.id ||
-        null,
-      paymentRequestId:
-        payment.paymentRequestId ||
-        payment.id ||
-        null,
-      orderId: payment.orderId || "",
-      amount: payment.amount || null,
-      paymentPlanName:
-        payment.planName || "",
-      validityMonths,
-      updatedBy: adminActor.uid,
-    }
-  );
+  const payload = Object.assign({}, buildAccessPayload({
+    email: normalizedEmail,
+    uid,
+    name: payment.studentName || payment.name || "",
+    learnerName: payment.studentName || payment.learnerName || payment.name || "",
+    phone: payment.studentMobile || payment.phone || "",
+    planType: finalPlanType,
+    status: ACCESS_STATUS.ACTIVE,
+    source: ACCESS_SOURCE.PAYMENT,
+    course: payment.course || ACCESS_COURSE.CTET_TET,
+    scopeType: ACCESS_SCOPE_TYPES.PLAN,
+    accessFrom,
+    accessUntil: finalAccessUntil,
+    notes: payment.notes || payment.adminNote || ("Payment approved" + (payment.orderId ? ": " + payment.orderId : "")),
+  }), {
+    paymentId: payment.paymentId || payment.id || null,
+    paymentRequestId: payment.paymentRequestId || payment.id || null,
+    orderId: payment.orderId || "",
+    amount: payment.amount || null,
+    paymentPlanName: payment.planName || "",
+    validityMonths,
+    updatedBy: adminActor.uid,
+  });
 
   const auditMetadata = {
     source: ACCESS_SOURCE.PAYMENT,
     paymentId: payload.paymentId,
-    paymentRequestId:
-      payload.paymentRequestId,
+    paymentRequestId: payload.paymentRequestId,
     orderId: payload.orderId,
     amount: payload.amount,
     requestedPlanType: paymentPlanType,
     finalPlanType,
     validityMonths,
     conflictSafe: Boolean(before),
-    preservedHigherPlan:
-      shouldPreserveExistingPlan,
-    preservedEarlierStart:
-      shouldPreserveExistingFrom,
-    preservedLongerValidity:
-      shouldPreserveExistingUntil,
+    preservedHigherPlan: shouldPreserveExistingPlan,
+    preservedLongerValidity: shouldPreserveExistingUntil,
   };
 
   if (before && before.id) {
-    await updateDoc(
-      doc(
-        db,
-        ACCESS_COLLECTIONS.STUDENT_ACCESS,
-        before.id
-      ),
-      payload
-    );
+    await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, before.id), payload);
+    const updatedAccess = Object.assign({}, before, payload, { id: before.id });
 
-    const updatedAccess = Object.assign(
-      {},
-      before,
-      payload,
-      { id: before.id }
-    );
-
-    if (updatedAccess.uid) {
-      await syncStudentEntitlementTransition(
-        before,
-        updatedAccess,
-        {
-          accessId: before.id,
-          actorUid: adminActor.uid,
-          actorEmail: adminActor.email,
-          source: "payment_access_updated",
-        }
-      );
-    }
+    await syncStudentEntitlementIfUid(updatedAccess, {
+      accessId: before.id,
+      actorUid: adminActor.uid,
+      actorEmail: adminActor.email,
+      source: "payment_access_updated",
+    });
 
     await createAccessAuditLog({
       actor: adminActor,
@@ -2502,48 +1878,27 @@ export async function grantPaymentAccess(
       metadata: auditMetadata,
     });
 
-    return Object.assign(
-      {},
-      before,
-      payload,
-      {
-        id: before.id,
-        accessWriteMode: "updated",
-      }
-    );
+    return Object.assign({}, before, payload, {
+      id: before.id,
+      accessWriteMode: "updated",
+    });
   }
 
-  const createPayload = Object.assign(
-    {},
-    payload,
-    {
-      createdAt: serverTimestamp(),
-      createdBy: adminActor.uid,
-      actorEmail: adminActor.email,
-    }
-  );
+  const createPayload = Object.assign({}, payload, {
+    createdAt: serverTimestamp(),
+    createdBy: adminActor.uid,
+    actorEmail: adminActor.email,
+  });
 
-  const docRef = await addDoc(
-    collection(
-      db,
-      ACCESS_COLLECTIONS.STUDENT_ACCESS
-    ),
-    createPayload
-  );
-  const createdAccess = {
-    id: docRef.id,
-    ...createPayload,
-  };
+  const docRef = await addDoc(collection(db, ACCESS_COLLECTIONS.STUDENT_ACCESS), createPayload);
+  const createdAccess = { id: docRef.id, ...createPayload };
 
-  await syncStudentEntitlementIfUid(
-    createdAccess,
-    {
-      accessId: docRef.id,
-      actorUid: adminActor.uid,
-      actorEmail: adminActor.email,
-      source: "payment_access_created",
-    }
-  );
+  await syncStudentEntitlementIfUid(createdAccess, {
+    accessId: docRef.id,
+    actorUid: adminActor.uid,
+    actorEmail: adminActor.email,
+    source: "payment_access_created",
+  });
 
   await createAccessAuditLog({
     actor: adminActor,
@@ -2556,12 +1911,8 @@ export async function grantPaymentAccess(
     metadata: auditMetadata,
   });
 
-  return Object.assign(
-    {},
-    createPayload,
-    {
-      id: docRef.id,
-      accessWriteMode: "created",
-    }
-  );
+  return Object.assign({}, createPayload, {
+    id: docRef.id,
+    accessWriteMode: "created",
+  });
 }

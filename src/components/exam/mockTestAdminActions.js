@@ -1,10 +1,14 @@
 import * as XLSX from "xlsx";
 
 import {
-  createContentItemWithMirrors,
-  deleteContentItemWithMirrors,
-  updateContentItemWithMirrors,
-} from "../../publicContentCatalogService";
+    addDoc,
+    collection,
+    deleteDoc,
+    doc,
+    updateDoc,
+  } from "firebase/firestore";
+
+import { db } from "../../firebase";
 
 export const duplicateMockTestAsDraft = async ({
   test,
@@ -26,7 +30,7 @@ export const duplicateMockTestAsDraft = async ({
 
   delete clonePayload.id;
 
-  await createContentItemWithMirrors(clonePayload);
+  await addDoc(collection(db, "contentItems"), clonePayload);
 
   if (typeof reloadContent === "function") {
     await reloadContent();
@@ -45,7 +49,7 @@ export const updateMockTestStatus = async ({
       return false;
     }
   
-    await updateContentItemWithMirrors(test.id, {
+    await updateDoc(doc(db, "contentItems", test.id), {
       status,
       ...extraFields,
       updatedAt: new Date(),
@@ -66,7 +70,7 @@ export const updateMockTestStatus = async ({
       return false;
     }
   
-    await updateContentItemWithMirrors(test.id, {
+    await updateDoc(doc(db, "contentItems", test.id), {
       isFeatured: !test.isFeatured,
       updatedAt: new Date(),
     });
@@ -109,7 +113,7 @@ export const updateMockTestStatus = async ({
       return false;
     }
   
-    await deleteContentItemWithMirrors(test.id);
+    await deleteDoc(doc(db, "contentItems", test.id));
   
     if (typeof reloadContent === "function") {
       await reloadContent();

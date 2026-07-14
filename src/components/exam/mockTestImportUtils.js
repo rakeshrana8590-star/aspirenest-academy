@@ -1,5 +1,7 @@
 import * as XLSX from "xlsx";
-import { createContentItemWithMirrors } from "../../publicContentCatalogService";
+import { addDoc, collection } from "firebase/firestore";
+
+import { db } from "../../firebase";
 import { normalizeExamQuestion } from "./examAnswerUtils.js";
 
 export const convertGoogleDriveUrlToDownloadUrl = (url = "") => {
@@ -39,7 +41,7 @@ export const importMockTestJsonAsDraft = async ({
 
   delete importPayload.id;
 
-  await createContentItemWithMirrors(importPayload);
+  await addDoc(collection(db, "contentItems"), importPayload);
 
   if (typeof reloadContent === "function") {
     await reloadContent();
