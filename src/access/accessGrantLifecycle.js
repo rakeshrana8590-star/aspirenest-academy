@@ -472,11 +472,6 @@ export const assertGrantCandidateIdentitySafe = (
   const incomingUid = cleanValue(
     incomingGrant.uid
   );
-
-  if (incomingUid) {
-    return true;
-  }
-
   const candidateUids = Array.from(
     new Set(
       (Array.isArray(records) ? records : [])
@@ -487,7 +482,18 @@ export const assertGrantCandidateIdentitySafe = (
     )
   );
 
-  if (candidateUids.length > 1) {
+  if (
+    incomingUid &&
+    candidateUids.some(
+      (candidateUid) => candidateUid !== incomingUid
+    )
+  ) {
+    throw new Error(
+      "Access identity conflicts with another learner UID."
+    );
+  }
+
+  if (!incomingUid && candidateUids.length > 1) {
     throw new Error(
       "Multiple learner UIDs match this email. Select a UID before writing access."
     );

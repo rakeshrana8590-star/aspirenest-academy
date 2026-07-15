@@ -31,8 +31,16 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    function isUidKeyedUserRequest(userId) {
+      return request.resource.data.uid is string &&
+        request.resource.data.uid == userId &&
+        !userId.matches(".*@.*");
+    }
+
     match /users/{userId} {
-      allow create: if isOwner(userId) || isAdmin();
+      allow create: if
+        (isOwner(userId) || isAdmin()) &&
+        isUidKeyedUserRequest(userId);
 
       allow read: if isOwner(userId) || isAdmin();
 
@@ -41,7 +49,7 @@ service cloud.firestore {
         && request.resource.data.subscriptionType == resource.data.subscriptionType
         && request.resource.data.premiumStatus == resource.data.premiumStatus;
 
-      allow update: if isAdmin() || isInviteStudentAccessUpdate();
+      allow update: if isAdmin();
       allow delete: if isAdmin();
     }
 
@@ -745,6 +753,73 @@ service cloud.firestore {
         request.resource.data.updatedBy == request.auth.uid;
     }
 
+    function isPendingIdentityClaimUpdate(accessDocId) {
+      return isSignedIn() &&
+        (
+          resource.data.normalizedEmail == request.auth.token.email ||
+          resource.data.email == request.auth.token.email
+        ) &&
+        (
+          !resource.data.keys().hasAny(["uid"]) ||
+          resource.data.uid == null ||
+          resource.data.uid == "" ||
+          resource.data.uid == request.auth.uid
+        ) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "uid",
+          "identityClaimedAt",
+          "identityClaimedByUid",
+          "identityClaimedByEmail",
+          "identityClaimSource",
+          "identityClaimAuditId",
+          "identityClaimEntitlementId",
+          "updatedAt",
+          "updatedBy"
+        ]) &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.identityClaimedByUid == request.auth.uid &&
+        request.resource.data.identityClaimedByEmail == request.auth.token.email &&
+        request.resource.data.identityClaimSource == "verified_uid_claim" &&
+        request.resource.data.identityClaimAuditId is string &&
+        request.resource.data.identityClaimAuditId != "" &&
+        existsAfter(
+          /databases/$(database)/documents/accessAuditLogs/$(request.resource.data.identityClaimAuditId)
+        ) &&
+        getAfter(
+          /databases/$(database)/documents/accessAuditLogs/$(request.resource.data.identityClaimAuditId)
+        ).data.accessId == accessDocId &&
+        (
+          request.resource.data.identityClaimEntitlementId == "" ||
+          (
+            request.resource.data.identityClaimEntitlementId is string &&
+            existsAfter(
+              /databases/$(database)/documents/studentEntitlements/$(request.auth.uid)/items/$(request.resource.data.identityClaimEntitlementId)
+            )
+          )
+        ) &&
+        request.resource.data.updatedBy == request.auth.uid;
+    }
+
+    function isIdentityClaimAuditCreate(auditId) {
+      return isSignedIn() &&
+        request.resource.data.action == "claim_pending_access_identity" &&
+        request.resource.data.accessId is string &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.email == request.auth.token.email &&
+        request.resource.data.actorEmail == request.auth.token.email &&
+        request.resource.data.actorRole == "student" &&
+        request.resource.data.metadata.source == "verified_uid_claim" &&
+        existsAfter(
+          /databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)
+        ) &&
+        getAfter(
+          /databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)
+        ).data.uid == request.auth.uid &&
+        getAfter(
+          /databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)
+        ).data.identityClaimAuditId == auditId;
+    }
+
     function isInviteOpenAuditCreate() {
       return isSignedIn() &&
         request.resource.data.action == "open_access_invite" &&
@@ -875,7 +950,10 @@ service cloud.firestore {
         );
 
       allow create: if isAdmin() || isRedeemStudentAccessCreate(docId);
-      allow update: if isAdmin() || isInviteStudentAccessUpdate();
+      allow update: if
+        isAdmin() ||
+        isInviteStudentAccessUpdate() ||
+        isPendingIdentityClaimUpdate(docId);
       allow delete: if isAdmin();
     }
     match /studentEntitlements/{uid}/items/{entitlementId} {
@@ -893,7 +971,12 @@ service cloud.firestore {
 
     match /accessAuditLogs/{docId} {
       allow read: if isAdmin();
-      allow create: if isAdmin() || isRedeemAuditCreate() || isInviteOpenAuditCreate() || isInviteRedeemAuditCreate();
+      allow create: if
+        isAdmin() ||
+        isRedeemAuditCreate() ||
+        isInviteOpenAuditCreate() ||
+        isInviteRedeemAuditCreate() ||
+        isIdentityClaimAuditCreate(docId);
       allow update, delete: if false;
     }
 

@@ -142,6 +142,26 @@ describe("AspireNest idempotent grant lifecycle", () => {
     );
   });
 
+  test("explicit UID write rejects another UID linked to the same identity set", () => {
+    const grant = buildGrant({ uid: "uid-1" });
+
+    expect(() =>
+      assertGrantCandidateIdentitySafe(
+        [
+          {
+            id: "conflict",
+            uid: "uid-2",
+            email: "student@example.com",
+            normalizedEmail: "student@example.com",
+          },
+        ],
+        grant
+      )
+    ).toThrow(
+      "Access identity conflicts with another learner UID."
+    );
+  });
+
   test("different nonblank UID never matches by email", () => {
     const grant = buildGrant();
     const wrongUid = {

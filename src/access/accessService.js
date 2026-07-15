@@ -55,6 +55,18 @@ import {
   validateInviteOpenTransaction,
   validateInviteRedemptionTransaction,
 } from "./accessRedemptionTransaction";
+import {
+  ACCESS_IDENTITY_CLAIM_SOURCE,
+  buildIdentityClaimBatches,
+  buildPendingAccessIdentityClaimPlan,
+} from "./accessIdentityClaim";
+import {
+  ACCESS_BULK_IMPORT_STATUS,
+  ACCESS_BULK_ROW_STATUS,
+  resolveBulkImportStatus,
+  selectResumableBulkAccessRows,
+  summarizeBulkAccessRows,
+} from "./accessBulkLifecycle";
 
 export const ACCESS_COLLECTIONS = Object.freeze({
   STUDENT_ACCESS: "studentAccess",
@@ -64,6 +76,8 @@ export const ACCESS_COLLECTIONS = Object.freeze({
   ACCESS_AUDIT_LOGS: "accessAuditLogs",
   USERS: "users",
   STUDENT_ENTITLEMENTS: "studentEntitlements",
+  ACCESS_BULK_IMPORTS: "accessBulkImports",
+  ACCESS_BULK_IMPORT_ROWS: "accessBulkImportRows",
 });
 
 const ADMIN_ROLES = new Set(["admin", "super_admin", "owner"]);
@@ -406,13 +420,29 @@ export const getAccessByEmail = async (email) => {
 
   if (!normalizedEmail) return [];
 
-  const normalizedMatches = await readAccessQuery("normalizedEmail", normalizedEmail);
+  const [normalizedMatches, legacyEmailMatches] =
+    await Promise.all([
+      readAccessQuery(
+        "normalizedEmail",
+        normalizedEmail
+      ),
+      readAccessQuery("email", normalizedEmail),
+    ]);
+  const recordsById = new Map();
 
-  if (normalizedMatches.length) {
-    return normalizedMatches;
-  }
+  [...normalizedMatches, ...legacyEmailMatches]
+    .filter(Boolean)
+    .forEach((record) => {
+      const recordId = String(
+        record.id || ""
+      ).trim();
 
-  return readAccessQuery("email", normalizedEmail);
+      if (recordId && !recordsById.has(recordId)) {
+        recordsById.set(recordId, record);
+      }
+    });
+
+  return Array.from(recordsById.values());
 };
 
 export const getAccessByUid = async (uid) => {
@@ -421,6 +451,221 @@ export const getAccessByUid = async (uid) => {
   if (!normalizedUid) return [];
 
   return readAccessQuery("uid", normalizedUid);
+};
+
+export const claimPendingAccessIdentity = async ({
+  user = {},
+  maxClaimRecords = 75,
+} = {}) => {
+  const uid = String(user?.uid || "").trim();
+  const email = normalizeAccessEmail(user?.email);
+
+  if (!uid || !email) {
+    throw new Error(
+      "Verified identity claim requires an authenticated uid and email."
+    );
+  }
+
+  const [emailRecords, uidRecords] =
+    await Promise.all([
+      getAccessByEmail(email),
+      getAccessByUid(uid),
+    ]);
+  const recordsById = new Map();
+
+  [...emailRecords, ...uidRecords]
+    .filter(Boolean)
+    .forEach((record) => {
+      const recordId = String(record.id || "").trim();
+
+      if (recordId && !recordsById.has(recordId)) {
+        recordsById.set(recordId, record);
+      }
+    });
+
+  const allRecords = Array.from(
+    recordsById.values()
+  );
+  const plan =
+    buildPendingAccessIdentityClaimPlan(
+      allRecords,
+      {
+        uid,
+        email,
+        maxClaimRecords,
+      }
+    );
+
+  if (plan.noOp) {
+    return {
+      success: true,
+      noOp: true,
+      uid,
+      email,
+      claimedCount: 0,
+      alreadyClaimedCount:
+        plan.alreadyClaimedCount,
+      entitlementCount: 0,
+    };
+  }
+
+  const projectedRecordsById = new Map();
+
+  allRecords.forEach((record) => {
+    const recordId = String(record.id || "").trim();
+
+    if (recordId) {
+      projectedRecordsById.set(recordId, record);
+    }
+  });
+
+  plan.claimOperations.forEach((operation) => {
+    projectedRecordsById.set(
+      operation.accessId,
+      operation.after
+    );
+  });
+
+  const projection =
+    buildEffectiveEntitlementProjection(
+      Array.from(projectedRecordsById.values()),
+      { uid, email }
+    );
+  const entitlementIds = new Set();
+  const desiredEntitlementByAccessId = new Map();
+
+  projection.desiredEntitlements.forEach(
+    ({ id: entitlementId, effectiveRecord }) => {
+      const accessId = String(
+        effectiveRecord?.id ||
+          effectiveRecord?.accessId ||
+          ""
+      ).trim();
+
+      if (accessId) {
+        desiredEntitlementByAccessId.set(
+          accessId,
+          { entitlementId, effectiveRecord }
+        );
+      }
+    }
+  );
+
+  const claimBatches = buildIdentityClaimBatches(
+    plan.claimOperations,
+    {
+      preferredAccessIds: Array.from(
+        desiredEntitlementByAccessId.keys()
+      ),
+    }
+  );
+
+  for (const claimBatch of claimBatches) {
+    const batch = writeBatch(db);
+
+    claimBatch.forEach((operation) => {
+      const accessRef = doc(
+        db,
+        ACCESS_COLLECTIONS.STUDENT_ACCESS,
+        operation.accessId
+      );
+      const auditRef = doc(
+        db,
+        ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS,
+        operation.auditId
+      );
+      const desiredEntitlement =
+        desiredEntitlementByAccessId.get(
+          operation.accessId
+        ) || null;
+      const entitlementId =
+        desiredEntitlement?.entitlementId || "";
+
+      if (desiredEntitlement) {
+        const payload =
+          buildStudentEntitlementPayload(
+            {
+              ...desiredEntitlement.effectiveRecord,
+              status: ACCESS_STATUS.ACTIVE,
+            },
+            {
+              uid,
+              email,
+              accessId: operation.accessId,
+            }
+          );
+        const entitlementRef = doc(
+          db,
+          ACCESS_COLLECTIONS.STUDENT_ENTITLEMENTS,
+          uid,
+          "items",
+          entitlementId
+        );
+
+        batch.set(entitlementRef, payload, {
+          merge: true,
+        });
+        entitlementIds.add(entitlementId);
+      }
+
+      const accessUpdate = {
+        uid,
+        identityClaimedAt: serverTimestamp(),
+        identityClaimedByUid: uid,
+        identityClaimedByEmail: email,
+        identityClaimSource:
+          ACCESS_IDENTITY_CLAIM_SOURCE,
+        identityClaimAuditId: operation.auditId,
+        identityClaimEntitlementId:
+          entitlementId,
+        updatedAt: serverTimestamp(),
+        updatedBy: uid,
+      };
+
+      batch.update(accessRef, accessUpdate);
+      batch.set(auditRef, {
+        action: "claim_pending_access_identity",
+        accessId: operation.accessId,
+        email,
+        uid,
+        before: {
+          uid: operation.before.uid || null,
+        },
+        after: {
+          uid,
+          entitlementId: entitlementId || null,
+          auditId: operation.auditId,
+        },
+        metadata: {
+          source: ACCESS_IDENTITY_CLAIM_SOURCE,
+          atomic: true,
+          entitlementId: entitlementId || null,
+        },
+        createdAt: serverTimestamp(),
+        createdBy: uid,
+        actorEmail: email,
+        actorRole: "student",
+      });
+    });
+
+    await batch.commit();
+  }
+
+  return {
+    success: true,
+    noOp: false,
+    uid,
+    email,
+    claimedCount: plan.claimableCount,
+    alreadyClaimedCount:
+      plan.alreadyClaimedCount,
+    entitlementCount: entitlementIds.size,
+    entitlementIds: Array.from(entitlementIds),
+    claimBatchCount: claimBatches.length,
+    accessIds: plan.claimOperations.map(
+      (operation) => operation.accessId
+    ),
+  };
 };
 
 const getRedeemedAccessByKeyForLearner = async ({
@@ -515,17 +760,18 @@ const writeIdempotentAccessGrant = async ({
   const emailMatches = requestedGrant.normalizedEmail
     ? await getAccessByEmail(requestedGrant.normalizedEmail)
     : [];
+  const identityMatches = uniqueAccessRecords([
+    ...uidMatches,
+    ...emailMatches,
+  ]);
+  assertGrantCandidateIdentitySafe(
+    identityMatches,
+    requestedGrant
+  );
   const candidateMatches = findGrantCandidates(
-    uniqueAccessRecords([
-      ...uidMatches,
-      ...emailMatches,
-    ]),
+    identityMatches,
     requestedGrant,
     { planFamily }
-  );
-  assertGrantCandidateIdentitySafe(
-    candidateMatches,
-    requestedGrant
   );
   const candidate = candidateMatches[0] || null;
   const requestedFamilyKey =
@@ -768,25 +1014,32 @@ export const createUserAccessShell = async (data = {}) => {
   const actor = requireAdminActor(data.actor);
   const normalizedEmail = normalizeAccessEmail(data.email);
   const uid = String(data.uid || "").trim();
-  const name = String(data.name || data.learnerName || "").trim();
+  const name = String(
+    data.name || data.learnerName || ""
+  ).trim();
   const phone = String(data.phone || "").trim();
-  const inviteCode = data.inviteCode || createInviteCode();
-  const inviteLink = data.inviteLink || buildAccessInviteLink(inviteCode);
 
-  if (!normalizedEmail) {
-    throw new Error("User shell email is required.");
+  if (!uid) {
+    throw new Error(
+      "Verified uid is required. Email-keyed user shells are disabled."
+    );
   }
 
-  const userId = uid || normalizedEmail;
+  if (!normalizedEmail) {
+    throw new Error(
+      "Verified user identity email is required."
+    );
+  }
+
   const payload = {
-    uid: uid || null,
+    uid,
     email: normalizedEmail,
     normalizedEmail,
     role: data.role || "student",
-    accessCourse: data.course || ACCESS_COURSE.CTET_TET,
-    accessPlanType: normalizeAccessPlan(data.planType || ACCESS_PLAN_TYPES.FREE),
-    accessStatus: data.status || ACCESS_STATUS.ACTIVE,
-    membershipExpiry: data.accessUntil || null,
+    accessIdentityStatus: "verified_uid",
+    accessIdentitySource:
+      data.identitySource ||
+      "admin_verified_uid_sync",
     updatedAt: serverTimestamp(),
     updatedBy: actor.uid,
     actorEmail: actor.email,
@@ -801,18 +1054,25 @@ export const createUserAccessShell = async (data = {}) => {
     payload.phone = phone;
   }
 
-  await setDoc(doc(db, ACCESS_COLLECTIONS.USERS, userId), payload, { merge: true });
+  await setDoc(
+    doc(db, ACCESS_COLLECTIONS.USERS, uid),
+    payload,
+    { merge: true }
+  );
 
   await createAccessAuditLog({
     actor,
-    action: "create_user_access_shell",
+    action: "sync_verified_user_access_identity",
     email: normalizedEmail,
-    uid: uid || null,
+    uid,
     after: payload,
+    metadata: {
+      emailKeyedShellDisabled: true,
+    },
   });
 
   return {
-    id: userId,
+    id: uid,
     ...payload,
   };
 };
@@ -887,6 +1147,349 @@ export const createAccessInvite = async (data = {}) => {
     ...payload,
   };
 };
+
+const toBulkAccessRowRecord = (docSnap) => {
+  if (!docSnap || !docSnap.exists()) {
+    return null;
+  }
+
+  return {
+    id: docSnap.id,
+    ...docSnap.data(),
+  };
+};
+
+export const createBulkAccessImportPlan = async ({
+  importId = "",
+  rows = [],
+  grantData = {},
+  actor = {},
+  sendInvite = true,
+  metadata = {},
+} = {}) => {
+  const adminActor = requireAdminActor(actor);
+  const normalizedImportId = String(
+    importId || "bulk_access_" + Date.now()
+  ).trim();
+  const safeRows = Array.isArray(rows)
+    ? rows.filter(Boolean)
+    : [];
+
+  if (!normalizedImportId) {
+    throw new Error("Bulk import id is required.");
+  }
+
+  if (!safeRows.length) {
+    throw new Error(
+      "Bulk import requires at least one planned row."
+    );
+  }
+
+  if (safeRows.length > 100) {
+    throw new Error(
+      "Bulk import exceeds the safe row limit."
+    );
+  }
+
+  const importRef = doc(
+    db,
+    ACCESS_COLLECTIONS.ACCESS_BULK_IMPORTS,
+    normalizedImportId
+  );
+  const batch = writeBatch(db);
+  const summary = summarizeBulkAccessRows(safeRows);
+  const importPayload = {
+    importId: normalizedImportId,
+    status: ACCESS_BULK_IMPORT_STATUS.PLANNED,
+    source:
+      grantData.source ||
+      ACCESS_SOURCE.BULK_IMPORT,
+    course:
+      grantData.course ||
+      ACCESS_COURSE.CTET_TET,
+    scopeType:
+      grantData.scopeType ||
+      ACCESS_SCOPE_TYPES.PLAN,
+    planType:
+      grantData.planType ||
+      ACCESS_PLAN_TYPES.FREE,
+    sendInvite: sendInvite === true,
+    summary,
+    metadata,
+    createdAt: serverTimestamp(),
+    createdBy: adminActor.uid,
+    actorEmail: adminActor.email,
+    updatedAt: serverTimestamp(),
+    updatedBy: adminActor.uid,
+  };
+
+  batch.set(importRef, importPayload);
+
+  safeRows.forEach((row) => {
+    const rowId = String(row.rowId || "").trim();
+
+    if (!rowId) {
+      throw new Error(
+        "Every bulk import row requires a deterministic row id."
+      );
+    }
+
+    const rowRef = doc(
+      db,
+      ACCESS_COLLECTIONS.ACCESS_BULK_IMPORT_ROWS,
+      rowId
+    );
+    const email = normalizeAccessEmail(row.email);
+    const rowGrantData = email
+      ? {
+          ...grantData,
+          email,
+          source:
+            grantData.source ||
+            ACCESS_SOURCE.BULK_IMPORT,
+        }
+      : null;
+
+    batch.set(rowRef, {
+      importId: normalizedImportId,
+      rowId,
+      rowNumber: Number(row.rowNumber || 0),
+      original: row.original || "",
+      email: email || null,
+      normalizedEmail: email,
+      status:
+        row.status ||
+        ACCESS_BULK_ROW_STATUS.INVALID,
+      reason: row.reason || "",
+      processable: row.processable === true,
+      existingAccessId:
+        row.existingAccessId || null,
+      grantData: rowGrantData,
+      sendInvite: sendInvite === true,
+      attemptCount: 0,
+      lastError: null,
+      accessId: null,
+      inviteId: null,
+      createdAt: serverTimestamp(),
+      createdBy: adminActor.uid,
+      updatedAt: serverTimestamp(),
+      updatedBy: adminActor.uid,
+    });
+  });
+
+  await batch.commit();
+
+  await createAccessAuditLog({
+    actor: adminActor,
+    action: "bulk_access_import_planned",
+    after: importPayload,
+    metadata: {
+      importId: normalizedImportId,
+      summary,
+      resumable: true,
+    },
+  });
+
+  return {
+    id: normalizedImportId,
+    ...importPayload,
+  };
+};
+
+export const listBulkAccessImportRows = async (
+  importId = "",
+  actor = {}
+) => {
+  requireAdminActor(actor);
+  const normalizedImportId = String(
+    importId || ""
+  ).trim();
+
+  if (!normalizedImportId) {
+    throw new Error("Bulk import id is required.");
+  }
+
+  const rowsQuery = query(
+    collection(
+      db,
+      ACCESS_COLLECTIONS.ACCESS_BULK_IMPORT_ROWS
+    ),
+    where("importId", "==", normalizedImportId)
+  );
+  const snapshot = await getDocs(rowsQuery);
+
+  return snapshot.docs
+    .map(toBulkAccessRowRecord)
+    .filter(Boolean)
+    .sort(
+      (first, second) =>
+        Number(first.rowNumber || 0) -
+        Number(second.rowNumber || 0)
+    );
+};
+
+export const executeBulkAccessImport = async ({
+  importId = "",
+  actor = {},
+} = {}) => {
+  const adminActor = requireAdminActor(actor);
+  const normalizedImportId = String(
+    importId || ""
+  ).trim();
+
+  if (!normalizedImportId) {
+    throw new Error("Bulk import id is required.");
+  }
+
+  const importRef = doc(
+    db,
+    ACCESS_COLLECTIONS.ACCESS_BULK_IMPORTS,
+    normalizedImportId
+  );
+  const importSnapshot = await getDoc(importRef);
+
+  if (!importSnapshot.exists()) {
+    throw new Error("Bulk import ledger not found.");
+  }
+
+  const initialRows = await listBulkAccessImportRows(
+    normalizedImportId,
+    adminActor
+  );
+  const resumableRows =
+    selectResumableBulkAccessRows(initialRows);
+
+  await updateDoc(importRef, {
+    status: ACCESS_BULK_IMPORT_STATUS.RUNNING,
+    lastRunStartedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    updatedBy: adminActor.uid,
+  });
+
+  for (const row of resumableRows) {
+    const rowRef = doc(
+      db,
+      ACCESS_COLLECTIONS.ACCESS_BULK_IMPORT_ROWS,
+      row.id
+    );
+
+    await updateDoc(rowRef, {
+      status: ACCESS_BULK_ROW_STATUS.RUNNING,
+      attemptCount:
+        Number(row.attemptCount || 0) + 1,
+      lastAttemptAt: serverTimestamp(),
+      lastError: null,
+      updatedAt: serverTimestamp(),
+      updatedBy: adminActor.uid,
+    });
+
+    try {
+      if (!row.grantData || !row.email) {
+        throw new Error(
+          "Bulk row grant payload is missing."
+        );
+      }
+
+      const accessRecord = await createManualAccess({
+        ...row.grantData,
+        email: row.email,
+        actor: adminActor,
+      });
+      let inviteRecord = null;
+
+      if (
+        row.sendInvite === true &&
+        accessRecord.accessWriteMode === "created"
+      ) {
+        inviteRecord = await createAccessInvite({
+          ...row.grantData,
+          email: row.email,
+          actor: adminActor,
+          accessId: accessRecord.id,
+          status: ACCESS_STATUS.PENDING,
+          inviteStatus: "pending",
+          sendInvite: true,
+        });
+      }
+
+      await updateDoc(rowRef, {
+        status: ACCESS_BULK_ROW_STATUS.SUCCEEDED,
+        processable: false,
+        accessId: accessRecord.id,
+        accessWriteMode:
+          accessRecord.accessWriteMode ||
+          "created",
+        inviteId: inviteRecord?.id || null,
+        completedAt: serverTimestamp(),
+        lastError: null,
+        updatedAt: serverTimestamp(),
+        updatedBy: adminActor.uid,
+      });
+    } catch (error) {
+      await updateDoc(rowRef, {
+        status: ACCESS_BULK_ROW_STATUS.FAILED,
+        processable: true,
+        lastError:
+          error?.message ||
+          "Bulk row processing failed.",
+        failedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        updatedBy: adminActor.uid,
+      });
+    }
+  }
+
+  const finalRows = await listBulkAccessImportRows(
+    normalizedImportId,
+    adminActor
+  );
+  const finalSummary =
+    summarizeBulkAccessRows(finalRows);
+  const finalStatus =
+    resolveBulkImportStatus(finalRows);
+
+  await updateDoc(importRef, {
+    status: finalStatus,
+    summary: finalSummary,
+    lastRunCompletedAt: serverTimestamp(),
+    completedAt:
+      finalStatus ===
+      ACCESS_BULK_IMPORT_STATUS.COMPLETED
+        ? serverTimestamp()
+        : null,
+    updatedAt: serverTimestamp(),
+    updatedBy: adminActor.uid,
+  });
+
+  await createAccessAuditLog({
+    actor: adminActor,
+    action: "bulk_access_import_run_completed",
+    after: {
+      importId: normalizedImportId,
+      status: finalStatus,
+      summary: finalSummary,
+    },
+    metadata: {
+      importId: normalizedImportId,
+      resumable: true,
+      processedThisRun: resumableRows.length,
+    },
+  });
+
+  return {
+    importId: normalizedImportId,
+    status: finalStatus,
+    summary: finalSummary,
+    rows: finalRows,
+    processedThisRun: resumableRows.length,
+    canResume:
+      finalSummary.counts.failed > 0 ||
+      finalSummary.counts.ready > 0,
+  };
+};
+
+export const resumeBulkAccessImport = async (data = {}) =>
+  executeBulkAccessImport(data);
 
 export const listAccessInvites = async (filters = {}) => {
   requireAdminActor(filters.actor);

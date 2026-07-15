@@ -15,9 +15,13 @@ import {
   resolveBestPlanAccess,
 } from "./accessUtils";
 import {
+  claimPendingAccessIdentity,
   getAccessByEmail,
   getAccessByUid,
 } from "./accessService";
+import {
+  filterAccessRecordsForVerifiedPrincipal,
+} from "./accessIdentityClaim";
 
 const EMPTY_ACCESS_RECORDS = [];
 
@@ -159,36 +163,22 @@ export default function useAccessProfile({
     setError(null);
 
     try {
+      if (uid && email) {
+        await claimPendingAccessIdentity({
+          user: { uid, email },
+        });
+      }
+
       const [uidRecords, emailRecords] = await Promise.all([
         uid ? getAccessByUid(uid) : Promise.resolve([]),
         email ? getAccessByEmail(email) : Promise.resolve([]),
       ]);
 
-      const seen = new Set();
-      const mergedRecords = [...uidRecords, ...emailRecords].filter((record) => {
-        const recordId = record && record.id ? record.id : "";
-        const recordUid = record && record.uid ? record.uid : "";
-        const recordEmail = record && (record.normalizedEmail || record.email)
-          ? record.normalizedEmail || record.email
-          : "";
-        const recordScope = record && record.scopeType ? record.scopeType : "";
-        const recordModule = record && record.module ? record.module : "";
-        const recordItem = record && record.itemId ? record.itemId : "";
-        const recordPlan = record && record.planType ? record.planType : "";
-        const key = recordId || [
-          recordUid,
-          recordEmail,
-          recordScope,
-          recordModule,
-          recordItem,
-          recordPlan,
-        ].join("-");
-
-        if (seen.has(key)) return false;
-
-        seen.add(key);
-        return true;
-      });
+      const mergedRecords =
+        filterAccessRecordsForVerifiedPrincipal(
+          [...uidRecords, ...emailRecords],
+          { uid, email }
+        );
 
       setAccessRecords(mergedRecords);
     } catch (accessError) {

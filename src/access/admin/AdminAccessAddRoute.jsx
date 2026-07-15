@@ -17,7 +17,6 @@ import {
 import {
   createAccessInvite,
   createManualAccess,
-  createUserAccessShell,
   getAccessByEmail,
   normalizeAccessEmail,
 } from "../accessService";
@@ -42,7 +41,6 @@ const initialForm = {
   accessUntil: "",
   status: ACCESS_STATUS.ACTIVE,
   sendInvite: "yes",
-  createUserShell: "yes",
   adminNote: "",
 };
 
@@ -304,16 +302,6 @@ export default function AdminAccessAddRoute() {
 
       if (
         createdNewGrant &&
-        form.createUserShell === "yes"
-      ) {
-        await createUserAccessShell({
-          ...payload,
-          actor,
-        });
-      }
-
-      if (
-        createdNewGrant &&
         form.sendInvite === "yes"
       ) {
         await createAccessInvite({
@@ -329,7 +317,6 @@ export default function AdminAccessAddRoute() {
       const skippedFollowUp =
         !createdNewGrant &&
         (
-          form.createUserShell === "yes" ||
           form.sendInvite === "yes"
         );
 
@@ -344,7 +331,7 @@ export default function AdminAccessAddRoute() {
           ". Audit log created." +
           (
             skippedFollowUp
-              ? " Duplicate user shell/invite creation was skipped; use Invite Manager for an intentional resend."
+              ? " Duplicate invite creation was skipped; use Invite Manager for an intentional resend."
               : ""
           )
       );
@@ -392,7 +379,7 @@ export default function AdminAccessAddRoute() {
     <AdminAccessRouteShell
       badge="ADD ACCESS"
       title="Add Learner Access"
-      description="Create learner access records with plan, course, expiry, optional invite, user shell, admin note, and final confirmation safety."
+      description="Create learner access records with plan, course, expiry, optional invite, admin note, verified-UID claim, and final confirmation safety."
       icon="+"
       primaryAction={{
         label: "Manage Access",
@@ -640,19 +627,6 @@ export default function AdminAccessAddRoute() {
             </select>
           </div>
 
-          <div className="adminAccessField">
-            <label>User Shell</label>
-            <select
-              value={form.createUserShell}
-              onChange={(event) =>
-                updateField("createUserShell", event.target.value)
-              }
-            >
-              <option value="yes">Yes - update users shell</option>
-              <option value="no">No</option>
-            </select>
-          </div>
-
           <div className="adminAccessField adminAccessFull">
             <label>Admin Note</label>
             <textarea
@@ -707,7 +681,7 @@ export default function AdminAccessAddRoute() {
           <AdminReviewPanel
             eyebrow="Confirmation required"
             title="Review final access summary"
-            description="Save will write studentAccess, optional invite, user shell, and audit logs."
+            description="Save will write studentAccess, optional invite, and audit logs. Verified UID claim happens automatically after learner login."
             highlights={[
               ["Learner", normalizedEmail || "Email missing", normalizedEmail ? "success" : "warning"],
               ["Entitlement", compactAccessLabel],
@@ -719,7 +693,6 @@ export default function AdminAccessAddRoute() {
               ["Course", form.course],
               ["Source", form.source],
               ["Invite", form.sendInvite === "yes" ? "Create invite link" : "No invite"],
-              ["User Shell", form.createUserShell === "yes" ? "Sync on" : "Off"],
               ["Status", form.status],
               ["Safety", duplicateStatusText, duplicateStatusText.includes("Duplicate") ? "warning" : "success"],
               ["Admin Note", form.adminNote.trim() || "No admin note", "default", "wide"],
@@ -733,7 +706,7 @@ export default function AdminAccessAddRoute() {
             secondaryActionLabel="Edit"
             onSecondaryAction={() => setShowConfirm(false)}
             secondaryActionDisabled={saving}
-            footerNote="Access save is audit-ready and keeps invite/user shell actions explicit."
+            footerNote="Access save is audit-ready. Email-keyed user shells are disabled; verified UID claim happens after learner login."
           />
         ) : null}
       </div>

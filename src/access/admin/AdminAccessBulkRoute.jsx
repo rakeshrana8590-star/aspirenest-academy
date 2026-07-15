@@ -14,13 +14,14 @@ import {
 } from "../accessConstants";
 
 import {
-  createAccessAuditLog,
-  createAccessInvite,
-  createManualAccess,
-  createUserAccessShell,
+  createBulkAccessImportPlan,
+  executeBulkAccessImport,
   getAccessByEmail,
   normalizeAccessEmail,
 } from "../accessService";
+import {
+  buildBulkAccessDryRun,
+} from "../accessBulkLifecycle";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -42,7 +43,6 @@ const initialForm = {
   accessUntil: "",
   status: ACCESS_STATUS.ACTIVE,
   sendInvite: "yes",
-  createUserShell: "yes",
   adminNote: "",
 };
 
@@ -189,6 +189,7 @@ export default function AdminAccessBulkRoute() {
   const [saving, setSaving] = useState(false);
   const [saveSummary, setSaveSummary] = useState(null);
   const [saveError, setSaveError] = useState("");
+  const [dryRunPlan, setDryRunPlan] = useState(null);
 
   const parsed = useMemo(
     () => parseBulkEmails(form.rawEmails),
@@ -232,11 +233,13 @@ export default function AdminAccessBulkRoute() {
     });
   }, [firestoreDuplicateMap, parsed.validUniqueEmails, bulkAccessTarget]);
 
-  const safeToCreateEmails = useMemo(() => {
-    return parsed.validUniqueEmails.filter(
-      (email) => !firestoreDuplicateEmails.includes(email)
-    );
-  }, [parsed.validUniqueEmails, firestoreDuplicateEmails]);
+  const safeToCreateEmails = useMemo(
+    () =>
+      dryRunPlan?.processableRows?.map(
+        (row) => row.email
+      ) || [],
+    [dryRunPlan]
+  );
 
   const updateField = (field, value) => {
     setForm((current) => ({
@@ -250,6 +253,7 @@ export default function AdminAccessBulkRoute() {
     setDuplicateCheckError("");
     setSaveSummary(null);
     setSaveError("");
+    setDryRunPlan(null);
   };
 
   const loadSampleEmails = () => {
@@ -267,6 +271,7 @@ export default function AdminAccessBulkRoute() {
     setDuplicateCheckError("");
     setSaveSummary(null);
     setSaveError("");
+    setDryRunPlan(null);
   };
 
   const validatePreview = () => {
@@ -390,7 +395,7 @@ export default function AdminAccessBulkRoute() {
       const message = error?.message || "Firestore duplicate check failed.";
       setDuplicateCheckError(message);
       setFirestoreDuplicateMap({});
-      return {};
+      return null;
     } finally {
       setCheckingDuplicates(false);
     }
@@ -399,14 +404,38 @@ export default function AdminAccessBulkRoute() {
   const handlePreview = async () => {
     setSaveSummary(null);
     setSaveError("");
+    setDryRunPlan(null);
 
     if (!validatePreview()) {
       setShowPreview(false);
       return;
     }
 
-    await checkFirestoreDuplicates();
-    setShowPreview(true);
+    const duplicateMap = await checkFirestoreDuplicates();
+
+    if (!duplicateMap) {
+      setShowPreview(false);
+      return;
+    }
+
+    try {
+      const previewId = "bulk_preview_" + Date.now();
+      const plan = buildBulkAccessDryRun({
+        importId: previewId,
+        rawEmails: form.rawEmails,
+        grantData: buildAccessPayload("", previewId),
+        existingRecordsByEmail: duplicateMap,
+        maxRows: 100,
+      });
+
+      setDryRunPlan(plan);
+      setShowPreview(true);
+    } catch (error) {
+      setSaveError(
+        error?.message || "Bulk dry run failed."
+      );
+      setShowPreview(false);
+    }
   };
 
   const handleConfirmBulkSave = async () => {
@@ -417,8 +446,8 @@ export default function AdminAccessBulkRoute() {
       return;
     }
 
-    if (!showPreview) {
-      setSaveError("Preview is required before bulk save.");
+    if (!showPreview || !dryRunPlan) {
+      setSaveError("Dry-run preview is required before bulk save.");
       return;
     }
 
@@ -440,9 +469,9 @@ export default function AdminAccessBulkRoute() {
     }
 
     const confirmMessage =
-      "Confirm bulk save for " +
+      "Confirm resumable bulk save for " +
       safeToCreateEmails.length +
-      " learner(s)? Invalid, pasted duplicate, and existing access records will be skipped.";
+      " learner(s)? Invalid, pasted duplicate, identity-conflict, and existing matching grants will be recorded as skipped ledger rows.";
 
     if (!window.confirm(confirmMessage)) {
       return;
@@ -451,109 +480,71 @@ export default function AdminAccessBulkRoute() {
     setSaving(true);
 
     const batchId = "bulk_access_" + Date.now();
-    const createdEmails = [];
-    const failedEmails = [];
 
     try {
-      await createAccessAuditLog({
+      const executionPlan = buildBulkAccessDryRun({
+        importId: batchId,
+        rawEmails: form.rawEmails,
+        grantData: buildAccessPayload("", batchId),
+        existingRecordsByEmail: firestoreDuplicateMap,
+        maxRows: 100,
+      });
+
+      await createBulkAccessImportPlan({
+        importId: batchId,
+        rows: executionPlan.rows,
+        grantData: buildAccessPayload("", batchId),
         actor,
-        action: "bulk_access_import_started",
+        sendInvite: form.sendInvite === "yes",
         metadata: {
-          batchId,
-          course: form.course,
-          scopeType: form.scopeType,
-          planType: form.planType,
-          module: form.module || null,
-          itemType: form.itemType || null,
-          itemId: form.itemId.trim() || null,
-          itemIds: bundleItemIds,
-          bundleId: form.bundleId.trim() || null,
-          productId: form.productId.trim() || null,
-          accessKeyId: form.accessKeyId.trim() || null,
-          source: form.source,
-          accessFrom: form.accessFrom || null,
-          accessUntil: form.accessUntil || null,
-          status: form.status,
-          sendInvite: form.sendInvite,
-          createUserShell: form.createUserShell,
-          totalInputRows: parsed.totalInputRows,
-          validUnique: parsed.validUniqueEmails.length,
-          invalid: parsed.invalidRows.length,
-          pasteDuplicates: parsed.duplicateRows.length,
-          existingAccess: firestoreDuplicateEmails.length,
-          safeToCreate: safeToCreateEmails.length,
-        },
-        after: {
-          batchId,
-          note: form.adminNote.trim(),
+          adminNote: form.adminNote.trim(),
+          dryRunSummary: executionPlan.summary,
+          verifiedUidClaim: "automatic_after_login",
+          emailKeyedUserShells: "disabled",
         },
       });
 
-      for (const email of safeToCreateEmails) {
-        try {
-          const payload = buildAccessPayload(email, batchId);
-
-          const accessRecord = await createManualAccess({
-            ...payload,
-            actor,
-          });
-
-          if (form.createUserShell === "yes") {
-            await createUserAccessShell({
-              ...payload,
-              actor,
-            });
-          }
-
-          if (form.sendInvite === "yes") {
-            await createAccessInvite({
-              ...payload,
-              actor,
-              accessId: accessRecord.id,
-              status: ACCESS_STATUS.PENDING,
-              inviteStatus: "pending",
-              sendInvite: true,
-            });
-          }
-
-          createdEmails.push(email);
-        } catch (error) {
-          failedEmails.push({
-            email,
-            error: error?.message || "Save failed",
-          });
-        }
-      }
-
-      await createAccessAuditLog({
+      const result = await executeBulkAccessImport({
+        importId: batchId,
         actor,
-        action: "bulk_access_import_completed",
-        metadata: {
-          batchId,
-          createdCount: createdEmails.length,
-          failedCount: failedEmails.length,
-          skippedInvalid: parsed.invalidRows.length,
-          skippedPasteDuplicates: parsed.duplicateRows.length,
-          skippedExistingAccess: firestoreDuplicateEmails.length,
-        },
-        after: {
-          batchId,
-          createdEmails,
-          failedEmails,
-          skippedExistingEmails: firestoreDuplicateEmails,
-        },
       });
+      const succeededRows = result.rows.filter(
+        (row) => row.status === "succeeded"
+      );
+      const failedRows = result.rows.filter(
+        (row) => row.status === "failed"
+      );
+      const existingRows = result.rows.filter(
+        (row) => row.status === "existing_match"
+      );
 
       setSaveSummary({
         batchId,
-        createdEmails,
-        failedEmails,
-        skippedInvalid: parsed.invalidRows.length,
-        skippedPasteDuplicates: parsed.duplicateRows.length,
-        skippedExistingEmails: firestoreDuplicateEmails,
+        status: result.status,
+        canResume: result.canResume,
+        createdEmails: succeededRows
+          .filter((row) => row.accessWriteMode === "created")
+          .map((row) => row.email),
+        updatedEmails: succeededRows
+          .filter((row) => row.accessWriteMode === "updated")
+          .map((row) => row.email),
+        failedEmails: failedRows.map((row) => ({
+          email: row.email,
+          error: row.lastError || "Save failed",
+        })),
+        skippedInvalid:
+          result.summary.counts.invalid,
+        skippedPasteDuplicates:
+          result.summary.counts.duplicate_input,
+        skippedIdentityConflicts:
+          result.summary.counts.identity_conflict,
+        skippedExistingEmails: existingRows.map(
+          (row) => row.email
+        ),
       });
 
       setShowPreview(false);
+      setDryRunPlan(null);
       await checkFirestoreDuplicates();
     } catch (error) {
       setSaveError(error?.message || "Bulk save failed.");
@@ -570,6 +561,7 @@ export default function AdminAccessBulkRoute() {
     setDuplicateCheckError("");
     setSaveSummary(null);
     setSaveError("");
+    setDryRunPlan(null);
   };
 
   const previewStats = [
@@ -593,7 +585,7 @@ export default function AdminAccessBulkRoute() {
     <AdminAccessRouteShell
       badge="BULK IMPORT"
       title="Bulk Gmail Import"
-      description="Paste multiple learner Gmail IDs, assign plan/module/item/bundle entitlement safely, detect invalid entries, paste duplicates, existing matching access, and save only safe learners after confirmation."
+      description="Dry-run multiple learner emails, record every row in a resumable ledger, skip invalid/duplicate/conflicting identities, and execute only safe access grants after confirmation."
       icon="B"
       primaryAction={{
         label: "Add Single Access",
@@ -604,7 +596,7 @@ export default function AdminAccessBulkRoute() {
         route: "/admin/content/access/invites",
       }}
       sectionTitle="Bulk import workspace"
-      sectionDescription="Paste learner Gmail IDs, assign one entitlement scope and validity to all, preview validation and matching Firestore duplicate counts, then confirm bulk save."
+      sectionDescription="Preview validation and identity-safe duplicate outcomes first, then create a resumable per-row ledger before any access grant executes."
       stats={[
         { value: "Paste", label: "Emails" },
         { value: "Clean", label: "Normalize" },
@@ -827,19 +819,6 @@ export default function AdminAccessBulkRoute() {
             </select>
           </div>
 
-          <div className="adminAccessField">
-            <label>User Shell</label>
-            <select
-              value={form.createUserShell}
-              onChange={(event) =>
-                updateField("createUserShell", event.target.value)
-              }
-            >
-              <option value="yes">Yes - sync users shell later</option>
-              <option value="no">No</option>
-            </select>
-          </div>
-
           <div className="adminAccessField adminAccessFull">
             <label>Admin Note</label>
             <textarea
@@ -867,15 +846,23 @@ export default function AdminAccessBulkRoute() {
         {saveSummary ? (
           <div className="adminAccessNotice">
             <strong>Bulk save complete:</strong>{" "}
-            {saveSummary.createdEmails.length} learner(s) created.{" "}
+            {saveSummary.createdEmails.length} created, {" "}
+            {saveSummary.updatedEmails.length} updated, {" "}
             {saveSummary.failedEmails.length} failed. Batch:{" "}
-            {saveSummary.batchId}
+            {saveSummary.batchId} • {saveSummary.status}
             <div className="adminAccessTable">
               <div className="adminAccessRow">
                 <strong>Created</strong>
                 <span>{saveSummary.createdEmails.length}</span>
                 <span className="adminAccessPill">Saved</span>
                 <span>studentAccess</span>
+              </div>
+
+              <div className="adminAccessRow">
+                <strong>Updated</strong>
+                <span>{saveSummary.updatedEmails.length}</span>
+                <span className="adminAccessPill">Idempotent</span>
+                <span>Existing logical grant</span>
               </div>
 
               <div className="adminAccessRow">
@@ -897,6 +884,14 @@ export default function AdminAccessBulkRoute() {
                 <span>{saveSummary.skippedPasteDuplicates}</span>
                 <span className="adminAccessPill">Blocked</span>
                 <span>Single unique save only</span>
+              </div>
+
+
+              <div className="adminAccessRow">
+                <strong>Identity Conflicts</strong>
+                <span>{saveSummary.skippedIdentityConflicts}</span>
+                <span className="adminAccessPill">Fail Closed</span>
+                <span>Different UID linkage</span>
               </div>
             </div>
           </div>
@@ -933,9 +928,7 @@ export default function AdminAccessBulkRoute() {
 
         {showPreview ? (
           <div className="adminAccessNotice">
-            <strong>Final preview:</strong> Bulk save will create only Safe To
-            Create learners. Invalid, paste duplicates, and existing access rows
-            will be skipped.
+            <strong>Dry-run preview:</strong> Only ledger rows marked Ready will execute. Invalid, paste duplicate, identity-conflict, and existing matching grants remain recorded as skipped outcomes.
 
             {duplicateCheckError ? (
               <div className="adminAccessNotice">
@@ -967,8 +960,8 @@ export default function AdminAccessBulkRoute() {
                 }
               >
                 {saving
-                  ? "Saving Bulk Access..."
-                  : "Confirm Bulk Save"}
+                  ? "Running Resumable Import..."
+                  : "Confirm Ledger & Execute"}
               </button>
 
               <button
