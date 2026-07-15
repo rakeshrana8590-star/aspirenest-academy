@@ -489,6 +489,9 @@ service cloud.firestore {
           "redeemedByEmail",
           "redeemedByUid",
           "redeemedAt",
+          "lastRedemptionAccessId",
+          "lastRedemptionEntitlementId",
+          "lastRedemptionAuditId",
           "updatedAt",
           "updatedBy"
         ]) &&
@@ -512,6 +515,21 @@ service cloud.firestore {
         (
           request.resource.data.redeemedByUid == resource.data.redeemedByUid ||
           request.resource.data.redeemedByUid == request.auth.uid
+        ) &&
+        request.resource.data.lastRedemptionAccessId is string &&
+        request.resource.data.lastRedemptionEntitlementId is string &&
+        request.resource.data.lastRedemptionAuditId is string &&
+        existsAfter(
+          /databases/$(database)/documents/studentAccess/$(request.resource.data.lastRedemptionAccessId)
+        ) &&
+        getAfter(
+          /databases/$(database)/documents/studentAccess/$(request.resource.data.lastRedemptionAccessId)
+        ).data.uid == request.auth.uid &&
+        existsAfter(
+          /databases/$(database)/documents/studentEntitlements/$(request.auth.uid)/items/$(request.resource.data.lastRedemptionEntitlementId)
+        ) &&
+        existsAfter(
+          /databases/$(database)/documents/accessAuditLogs/$(request.resource.data.lastRedemptionAuditId)
         ) &&
         request.resource.data.updatedBy == request.auth.uid;
     }
@@ -557,7 +575,7 @@ service cloud.firestore {
           request.resource.data.accessUntil == product.accessUntil;
       }
 
-    function isRedeemStudentAccessCreate() {
+    function isRedeemStudentAccessCreate(accessDocId) {
       return isSignedIn() &&
         request.resource.data.keys().hasOnly([
           "email",
@@ -626,7 +644,16 @@ service cloud.firestore {
           (
             isRedeemDirectKeyAccessMatches(request.resource.data.accessKeyId) ||
             isRedeemProductAccessMatches(request.resource.data.accessKeyId)
-          );
+          ) &&
+          getAfter(
+            /databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)
+          ).data.lastRedemptionAccessId == accessDocId &&
+          getAfter(
+            /databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)
+          ).data.lastRedemptionEntitlementId is string &&
+          getAfter(
+            /databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)
+          ).data.lastRedemptionAuditId is string;
     }
 
     function isInviteOwnRecord() {
@@ -646,12 +673,17 @@ service cloud.firestore {
           "openedAt",
           "openedByUid",
           "openedByEmail",
+          "openAuditId",
           "updatedAt",
           "updatedBy"
         ]) &&
         request.resource.data.inviteStatus == "opened" &&
         request.resource.data.openedByUid == request.auth.uid &&
         request.resource.data.openedByEmail == request.auth.token.email &&
+        request.resource.data.openAuditId is string &&
+        existsAfter(
+          /databases/$(database)/documents/accessAuditLogs/$(request.resource.data.openAuditId)
+        ) &&
         request.resource.data.updatedBy == request.auth.uid;
     }
 
@@ -666,6 +698,8 @@ service cloud.firestore {
           "redeemedByUid",
           "redeemedByEmail",
           "redeemSource",
+          "redeemEntitlementId",
+          "redeemAuditId",
           "updatedAt",
           "updatedBy"
         ]) &&
@@ -673,6 +707,21 @@ service cloud.firestore {
         request.resource.data.redeemedByUid == request.auth.uid &&
         request.resource.data.redeemedByEmail == request.auth.token.email &&
         request.resource.data.redeemSource == "manual_invite_link" &&
+        request.resource.data.redeemEntitlementId is string &&
+        request.resource.data.redeemAuditId is string &&
+        resource.data.accessId is string &&
+        existsAfter(
+          /databases/$(database)/documents/studentAccess/$(resource.data.accessId)
+        ) &&
+        getAfter(
+          /databases/$(database)/documents/studentAccess/$(resource.data.accessId)
+        ).data.uid == request.auth.uid &&
+        existsAfter(
+          /databases/$(database)/documents/studentEntitlements/$(request.auth.uid)/items/$(request.resource.data.redeemEntitlementId)
+        ) &&
+        existsAfter(
+          /databases/$(database)/documents/accessAuditLogs/$(request.resource.data.redeemAuditId)
+        ) &&
         request.resource.data.updatedBy == request.auth.uid;
     }
 
@@ -784,34 +833,34 @@ service cloud.firestore {
         request.resource.data.uid == request.auth.uid &&
         request.resource.data.normalizedEmail == request.auth.token.email &&
         request.resource.data.accessId is string &&
-        exists(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)) &&
+        existsAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)) &&
         (
-          get(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.uid == request.auth.uid ||
-          get(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.normalizedEmail == request.auth.token.email ||
-          get(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.email == request.auth.token.email
+          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.uid == request.auth.uid ||
+          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.normalizedEmail == request.auth.token.email ||
+          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.email == request.auth.token.email
         ) &&
         request.resource.data.planType ==
-          get(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.planType &&
+          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.planType &&
         request.resource.data.scopeType ==
-          get(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.scopeType &&
+          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.scopeType &&
         request.resource.data.module ==
-          get(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.module &&
+          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.module &&
         request.resource.data.itemType ==
-          get(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.itemType &&
+          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.itemType &&
         request.resource.data.itemId ==
-          get(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.itemId &&
+          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.itemId &&
         request.resource.data.itemIds ==
-          get(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.itemIds &&
+          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.itemIds &&
         request.resource.data.bundleId ==
-          get(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.bundleId &&
+          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.bundleId &&
         request.resource.data.course ==
-          get(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.course &&
+          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.course &&
         request.resource.data.status ==
-          get(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.status &&
+          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.status &&
         request.resource.data.source ==
-          get(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.source &&
+          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.source &&
         request.resource.data.accessUntil ==
-          get(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.accessUntil;
+          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.accessUntil;
     }
 
     match /studentAccess/{docId} {
@@ -825,7 +874,7 @@ service cloud.firestore {
           )
         );
 
-      allow create: if isAdmin() || isRedeemStudentAccessCreate();
+      allow create: if isAdmin() || isRedeemStudentAccessCreate(docId);
       allow update: if isAdmin() || isInviteStudentAccessUpdate();
       allow delete: if isAdmin();
     }

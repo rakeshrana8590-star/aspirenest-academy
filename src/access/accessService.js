@@ -44,6 +44,17 @@ import {
   buildEffectiveEntitlementProjection,
   buildStudentEntitlementId,
 } from "./accessEntitlementProjection";
+import {
+  buildAccessKeyRedemptionAccessId,
+  buildAccessKeyRedemptionAuditId,
+  buildInviteOpenAuditId,
+  buildInviteRedemptionAuditId,
+  buildNextAccessKeyUsage,
+  requireAtomicAccessUntil,
+  validateAccessKeyRedemptionTransaction,
+  validateInviteOpenTransaction,
+  validateInviteRedemptionTransaction,
+} from "./accessRedemptionTransaction";
 
 export const ACCESS_COLLECTIONS = Object.freeze({
   STUDENT_ACCESS: "studentAccess",
@@ -1033,151 +1044,305 @@ export const getAccessInviteByCode = async (inviteCode = "") => {
   return toInviteRecord(inviteSnap);
 };
 
-export const markAccessInviteOpened = async (inviteCode = "", user = {}) => {
+export const markAccessInviteOpened = async (
+  inviteCode = "",
+  user = {}
+) => {
   const code = String(inviteCode || "").trim();
-  const uid = user?.uid || "";
+  const uid = String(user?.uid || "").trim();
   const email = normalizeAccessEmail(user?.email);
 
-  if (!code || !uid || !email) return null;
+  if (!code || !uid || !email) {
+    return null;
+  }
 
-  const inviteRef = doc(db, ACCESS_COLLECTIONS.ACCESS_INVITES, code);
-  const inviteSnap = await getDoc(inviteRef);
-  const invite = toInviteRecord(inviteSnap);
-
-  if (!invite) return null;
-
-  const inviteEmail = normalizeAccessEmail(invite.normalizedEmail || invite.email);
-  const openableStatuses = ["pending", "copied", "sent"];
-
-  if (inviteEmail !== email) return invite;
-  if (!openableStatuses.includes(invite.inviteStatus)) return invite;
-
-  const expiryDate = invite.expiresAt?.toDate ? invite.expiresAt.toDate() : invite.expiresAt ? new Date(invite.expiresAt) : null;
-  if (expiryDate && expiryDate.getTime() < Date.now()) return invite;
-
-  await updateDoc(inviteRef, {
-    inviteStatus: "opened",
-    openedAt: serverTimestamp(),
-    openedByUid: uid,
-    openedByEmail: email,
-    updatedAt: serverTimestamp(),
-    updatedBy: uid,
-  });
-
-  await setDoc(doc(collection(db, ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS)), {
-    action: "open_access_invite",
-    accessId: invite.accessId || null,
+  const inviteRef = doc(
+    db,
+    ACCESS_COLLECTIONS.ACCESS_INVITES,
+    code
+  );
+  const auditId = buildInviteOpenAuditId({
+    inviteId: code,
+    uid,
     email,
-    uid,
-    before: { inviteStatus: invite.inviteStatus || null },
-    after: { inviteStatus: "opened" },
-    metadata: {
-      source: "manual_invite_link",
-      inviteCode: code,
-      inviteId: invite.id || code,
-    },
-    createdAt: serverTimestamp(),
-    createdBy: uid,
-    actorEmail: email,
-    actorRole: "student",
   });
-
-  return { ...invite, inviteStatus: "opened", openedByUid: uid, openedByEmail: email };
-};
-
-export const redeemAccessInvite = async (inviteCode = "", user = {}) => {
-  const code = String(inviteCode || "").trim();
-  const uid = user?.uid || "";
-  const email = normalizeAccessEmail(user?.email);
-
-  if (!code) throw new Error("Invite code is required.");
-  if (!uid || !email) throw new Error("Please login with invited email to redeem access.");
-
-  const inviteRef = doc(db, ACCESS_COLLECTIONS.ACCESS_INVITES, code);
-  const inviteSnap = await getDoc(inviteRef);
-  const invite = toInviteRecord(inviteSnap);
-
-  if (!invite) throw new Error("Invite not found.");
-
-  const inviteEmail = normalizeAccessEmail(invite.normalizedEmail || invite.email);
-  if (inviteEmail !== email) throw new Error("This invite belongs to another email.");
-
-  if (invite.inviteStatus === "used") throw new Error("Invite already used.");
-  if (invite.inviteStatus === "revoked") throw new Error("Invite has been revoked.");
-  if (invite.inviteStatus === "expired") throw new Error("Invite has expired.");
-
-  const expiryDate = invite.expiresAt?.toDate ? invite.expiresAt.toDate() : invite.expiresAt ? new Date(invite.expiresAt) : null;
-  if (expiryDate && expiryDate.getTime() < Date.now()) throw new Error("Invite has expired.");
-
-  if (!invite.accessId) throw new Error("Access record missing for this invite.");
-
-  const accessRef = doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, invite.accessId);
-  const accessSnap = await getDoc(accessRef);
-
-  if (!accessSnap.exists()) throw new Error("Student access record not found.");
-
-  const accessData = accessSnap.data() || {};
-  const accessEmail = normalizeAccessEmail(accessData.normalizedEmail || accessData.email);
-
-  if (accessEmail !== email) throw new Error("Access record email does not match invite email.");
-  if (accessData.uid && accessData.uid !== uid) throw new Error("This access is already linked to another account.");
-
-  const batch = writeBatch(db);
-
-  batch.update(inviteRef, {
-    inviteStatus: "used",
-    usedAt: serverTimestamp(),
-    redeemedByUid: uid,
-    redeemedByEmail: email,
-    redeemSource: "manual_invite_link",
-    updatedAt: serverTimestamp(),
-    updatedBy: uid,
-  });
-
-  batch.update(accessRef, {
-    uid,
-    inviteId: invite.id || code,
-    inviteRedeemedAt: serverTimestamp(),
-    inviteRedeemedByUid: uid,
-    inviteRedeemedByEmail: email,
-    lastInviteRedeemedAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-    updatedBy: uid,
-  });
-
-  const auditRef = doc(collection(db, ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS));
-  batch.set(auditRef, {
-    action: "redeem_access_invite",
-    accessId: invite.accessId,
-    email,
-    uid,
-    before: null,
-    after: { inviteStatus: "used" },
-    metadata: { source: "manual_invite_link", inviteCode: code, inviteId: invite.id || code },
-    createdAt: serverTimestamp(),
-    createdBy: uid,
-    actorEmail: email,
-    actorRole: "student",
-  });
-
-  await batch.commit();
-
-  await syncStudentEntitlementIfUid(
-    {
-      id: invite.accessId,
-      ...accessData,
-      uid,
-    },
-    {
-      accessId: invite.accessId,
-      uid,
-      email,
-      source: "redeem_access_invite",
-    }
+  const auditRef = doc(
+    db,
+    ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS,
+    auditId
   );
 
-  return { success: true, inviteId: invite.id || code, accessId: invite.accessId, email };
+  return runTransaction(
+    db,
+    async (transaction) => {
+      const inviteSnapshot =
+        await transaction.get(inviteRef);
+      const invite = toInviteRecord(
+        inviteSnapshot
+      );
+
+      if (!invite) {
+        return null;
+      }
+
+      const validation =
+        validateInviteOpenTransaction({
+          invite,
+          uid,
+          email,
+          now: Date.now(),
+        });
+
+      if (!validation.isValid) {
+        if (
+          validation.errors.includes(
+            "This invite belongs to another email."
+          )
+        ) {
+          return invite;
+        }
+
+        return invite;
+      }
+
+      if (!validation.shouldWrite) {
+        return invite;
+      }
+
+      const inviteUpdate = {
+        inviteStatus: "opened",
+        openedAt: serverTimestamp(),
+        openedByUid: uid,
+        openedByEmail: email,
+        openAuditId: auditId,
+        updatedAt: serverTimestamp(),
+        updatedBy: uid,
+      };
+
+      transaction.update(
+        inviteRef,
+        inviteUpdate
+      );
+
+      transaction.set(auditRef, {
+        action: "open_access_invite",
+        accessId: invite.accessId || null,
+        email,
+        uid,
+        before: {
+          inviteStatus:
+            invite.inviteStatus || null,
+        },
+        after: {
+          inviteStatus: "opened",
+          openAuditId: auditId,
+        },
+        metadata: {
+          source: "manual_invite_link",
+          inviteCode: code,
+          inviteId: invite.id || code,
+          atomic: true,
+        },
+        createdAt: serverTimestamp(),
+        createdBy: uid,
+        actorEmail: email,
+        actorRole: "student",
+      });
+
+      return {
+        ...invite,
+        ...inviteUpdate,
+        id: invite.id || code,
+      };
+    }
+  );
 };
+
+export const redeemAccessInvite = async (
+  inviteCode = "",
+  user = {}
+) => {
+  const code = String(inviteCode || "").trim();
+  const uid = String(user?.uid || "").trim();
+  const email = normalizeAccessEmail(user?.email);
+
+  if (!code) {
+    throw new Error("Invite code is required.");
+  }
+
+  if (!uid || !email) {
+    throw new Error(
+      "Please login with invited email to redeem access."
+    );
+  }
+
+  const inviteRef = doc(
+    db,
+    ACCESS_COLLECTIONS.ACCESS_INVITES,
+    code
+  );
+  const auditId =
+    buildInviteRedemptionAuditId({
+      inviteId: code,
+      uid,
+      email,
+    });
+  const auditRef = doc(
+    db,
+    ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS,
+    auditId
+  );
+
+  return runTransaction(
+    db,
+    async (transaction) => {
+      const inviteSnapshot =
+        await transaction.get(inviteRef);
+      const invite = toInviteRecord(
+        inviteSnapshot
+      );
+
+      if (!invite) {
+        throw new Error("Invite not found.");
+      }
+
+      const accessId = String(
+        invite.accessId || ""
+      ).trim();
+
+      if (!accessId) {
+        throw new Error(
+          "Access record missing for this invite."
+        );
+      }
+
+      const accessRef = doc(
+        db,
+        ACCESS_COLLECTIONS.STUDENT_ACCESS,
+        accessId
+      );
+      const accessSnapshot =
+        await transaction.get(accessRef);
+      const access = toAccessRecord(
+        accessSnapshot
+      );
+      const validation =
+        validateInviteRedemptionTransaction({
+          invite,
+          access,
+          uid,
+          email,
+          now: Date.now(),
+        });
+
+      if (!validation.isValid) {
+        throw new Error(
+          validation.errors.join(" ")
+        );
+      }
+
+      const entitlementRecord = {
+        ...access,
+        id: accessId,
+        uid,
+      };
+      const entitlementPayload =
+        buildStudentEntitlementPayload(
+          entitlementRecord,
+          {
+            accessId,
+            uid,
+            email,
+          }
+        );
+      const entitlementRef = doc(
+        db,
+        ACCESS_COLLECTIONS.STUDENT_ENTITLEMENTS,
+        uid,
+        "items",
+        entitlementPayload.id
+      );
+      const inviteUpdate = {
+        inviteStatus: "used",
+        usedAt: serverTimestamp(),
+        redeemedByUid: uid,
+        redeemedByEmail: email,
+        redeemSource: "manual_invite_link",
+        redeemEntitlementId:
+          entitlementPayload.id,
+        redeemAuditId: auditId,
+        updatedAt: serverTimestamp(),
+        updatedBy: uid,
+      };
+      const accessUpdate = {
+        uid,
+        inviteId: invite.id || code,
+        inviteRedeemedAt: serverTimestamp(),
+        inviteRedeemedByUid: uid,
+        inviteRedeemedByEmail: email,
+        lastInviteRedeemedAt:
+          serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        updatedBy: uid,
+      };
+
+      transaction.update(
+        inviteRef,
+        inviteUpdate
+      );
+      transaction.update(
+        accessRef,
+        accessUpdate
+      );
+      transaction.set(
+        entitlementRef,
+        entitlementPayload,
+        { merge: true }
+      );
+      transaction.set(auditRef, {
+        action: "redeem_access_invite",
+        accessId,
+        email,
+        uid,
+        before: {
+          inviteStatus:
+            invite.inviteStatus || null,
+          accessUid: access.uid || null,
+        },
+        after: {
+          inviteStatus: "used",
+          accessUid: uid,
+          entitlementId:
+            entitlementPayload.id,
+          auditId,
+        },
+        metadata: {
+          source: "manual_invite_link",
+          inviteCode: code,
+          inviteId: invite.id || code,
+          entitlementId:
+            entitlementPayload.id,
+          atomic: true,
+        },
+        createdAt: serverTimestamp(),
+        createdBy: uid,
+        actorEmail: email,
+        actorRole: "student",
+      });
+
+      return {
+        success: true,
+        inviteId: invite.id || code,
+        accessId,
+        entitlementId:
+          entitlementPayload.id,
+        auditId,
+        email,
+      };
+    }
+  );
+};
+
 
 export const queueAccessInviteResend = async (id, actor = {}, metadata = {}) => {
   const inviteId = requireAccessEntityId(id, "Invite id");
@@ -2030,138 +2195,300 @@ export const redeemAccessKeyFoundation = async ({
   name = "",
   phone = "",
 } = {}) => {
-  const validation = await validateAccessKeyForRedeem({
-    code,
-    email,
-    uid,
-  });
+  const normalizedCode =
+    normalizeAccessKeyCode(code);
+  const normalizedEmail =
+    normalizeAccessEmail(email);
+  const normalizedUid = String(
+    uid || ""
+  ).trim();
 
-  if (!validation.isValid) {
-    throw new Error(validation.errors.join(" "));
+  if (!normalizedCode) {
+    throw new Error(
+      "Access key code is required."
+    );
   }
 
-  const keyRecord = validation.keyRecord;
-  const productRecord = assertResolvableAccessProduct(
-    keyRecord.productId ? await readAccessProductById(keyRecord.productId) : null,
-    keyRecord.productId || ""
+  if (!normalizedUid || !normalizedEmail) {
+    throw new Error(
+      "Verified learner uid and email are required."
+    );
+  }
+
+  const keyRef = doc(
+    db,
+    ACCESS_COLLECTIONS.ACCESS_KEYS,
+    normalizedCode
   );
-  const entitlement = resolveAccessKeyEntitlement({ keyRecord, productRecord });
-  const normalizedEmail = validation.normalizedEmail;
-  const normalizedUid = validation.uid;
-  const keyRef = doc(db, ACCESS_COLLECTIONS.ACCESS_KEYS, keyRecord.id);
-
-  const maxUses = Math.max(Number(keyRecord.maxUses || 1), 1);
-  const nextUsedCount = Math.max(Number(keyRecord.usedCount || 0), 0) + 1;
-  const nextKeyStatus =
-    nextUsedCount >= maxUses ? ACCESS_KEY_STATUS.USED : ACCESS_KEY_STATUS.ACTIVE;
-
-  const accessUntil =
-    entitlement.accessUntil || addDaysToDateString(entitlement.validityDays);
-
-  const accessPayload = {
-    ...buildAccessPayload({
-      email: normalizedEmail,
+  const accessId =
+    buildAccessKeyRedemptionAccessId({
+      accessKeyId: normalizedCode,
       uid: normalizedUid,
-      learnerName: learnerName || name || "",
-      name: name || learnerName || "",
-      phone,
-      course: entitlement.course,
-      planType: entitlement.planType,
-      scopeType: entitlement.scopeType,
-      module: entitlement.module,
-      itemType: entitlement.itemType,
-      itemId: entitlement.itemId,
-      itemTitle: entitlement.itemTitle,
-      itemIds: Array.isArray(entitlement.itemIds) ? entitlement.itemIds : [],
-      bundleId: entitlement.bundleId,
-      productId: entitlement.productId,
-      accessKeyId: keyRecord.id,
-      campaignId: entitlement.campaignId,
-      campaignName: entitlement.campaignName,
-      campaignSource: entitlement.campaignSource,
-      source: ACCESS_SOURCE.REDEEM_KEY,
-      status: ACCESS_STATUS.ACTIVE,
-      accessFrom: entitlement.accessFrom || getTodayDateString(),
-      accessUntil,
-      adminNote: "Redeemed access key " + validation.normalizedCode,
-      notes: "Redeemed access key " + validation.normalizedCode,
-    }),
-    createdAt: serverTimestamp(),
-    createdBy: normalizedUid || null,
-    actorEmail: normalizedEmail,
-  };
-
-  const accessRef = await addDoc(
-    collection(db, ACCESS_COLLECTIONS.STUDENT_ACCESS),
-    accessPayload
+      email: normalizedEmail,
+    });
+  const auditId =
+    buildAccessKeyRedemptionAuditId({
+      accessKeyId: normalizedCode,
+      uid: normalizedUid,
+      email: normalizedEmail,
+    });
+  const accessRef = doc(
+    db,
+    ACCESS_COLLECTIONS.STUDENT_ACCESS,
+    accessId
   );
-  const savedAccess = { id: accessRef.id, ...accessPayload };
+  const auditRef = doc(
+    db,
+    ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS,
+    auditId
+  );
 
-  await syncStudentEntitlementIfUid(savedAccess, {
-    accessId: accessRef.id,
-    uid: normalizedUid,
-    email: normalizedEmail,
-    source: "redeem_access_key",
-  });
+  return runTransaction(
+    db,
+    async (transaction) => {
+      const keySnapshot =
+        await transaction.get(keyRef);
+      const keyRecord = toAccessRecord(
+        keySnapshot
+      );
 
-  const keyUpdate = {
-    usedCount: nextUsedCount,
-    status: nextKeyStatus,
-    lastRedeemedByEmail: normalizedEmail || null,
-    lastRedeemedByUid: normalizedUid || null,
-    lastRedeemedAt: serverTimestamp(),
-    redeemedByEmail: keyRecord.redeemedByEmail || normalizedEmail || null,
-    redeemedByUid: keyRecord.redeemedByUid || normalizedUid || null,
-    redeemedAt: keyRecord.redeemedAt || serverTimestamp(),
-    updatedAt: serverTimestamp(),
-    updatedBy: normalizedUid || normalizedEmail || "redeem_key",
-  };
+      if (!keyRecord) {
+        throw new Error(
+          "Access key was not found."
+        );
+      }
 
-  await updateDoc(keyRef, keyUpdate);
+      let productRecord = null;
 
-  await addDoc(collection(db, ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS), {
-    action: "redeem_access_key",
-    accessId: accessRef.id,
-    email: normalizedEmail,
-    uid: normalizedUid || null,
-    before: { accessKey: keyRecord, product: productRecord },
-    after: {
-      access: {
-        id: accessRef.id,
+      if (
+        String(
+          keyRecord.productId || ""
+        ).trim()
+      ) {
+        const productRef = doc(
+          db,
+          ACCESS_COLLECTIONS.ACCESS_PRODUCTS,
+          String(keyRecord.productId).trim()
+        );
+        const productSnapshot =
+          await transaction.get(productRef);
+
+        productRecord =
+          assertResolvableAccessProduct(
+            toAccessRecord(productSnapshot),
+            keyRecord.productId
+          );
+      }
+
+      const accessSnapshot =
+        await transaction.get(accessRef);
+      const existingAccess = toAccessRecord(
+        accessSnapshot
+      );
+      const validation =
+        validateAccessKeyRedemptionTransaction({
+          keyRecord,
+          existingAccess,
+          uid: normalizedUid,
+          email: normalizedEmail,
+          today: new Date(),
+        });
+
+      if (!validation.isValid) {
+        throw new Error(
+          validation.errors.join(" ")
+        );
+      }
+
+      const entitlement =
+        resolveAccessKeyEntitlement({
+          keyRecord,
+          productRecord,
+        });
+      const accessUntil =
+        requireAtomicAccessUntil({
+          accessUntil:
+            entitlement.accessUntil,
+          productId:
+            entitlement.productId,
+        });
+      const keyUsage =
+        buildNextAccessKeyUsage(
+          keyRecord
+        );
+      const accessPayload = {
+        ...buildAccessPayload({
+          email: normalizedEmail,
+          uid: normalizedUid,
+          learnerName:
+            learnerName || name || "",
+          name:
+            name || learnerName || "",
+          phone,
+          course: entitlement.course,
+          planType: entitlement.planType,
+          scopeType:
+            entitlement.scopeType,
+          module: entitlement.module,
+          itemType: entitlement.itemType,
+          itemId: entitlement.itemId,
+          itemTitle:
+            entitlement.itemTitle,
+          itemIds: Array.isArray(
+            entitlement.itemIds
+          )
+            ? entitlement.itemIds
+            : [],
+          bundleId: entitlement.bundleId,
+          productId:
+            entitlement.productId,
+          accessKeyId: keyRecord.id,
+          campaignId:
+            entitlement.campaignId,
+          campaignName:
+            entitlement.campaignName,
+          campaignSource:
+            entitlement.campaignSource,
+          source:
+            ACCESS_SOURCE.REDEEM_KEY,
+          status: ACCESS_STATUS.ACTIVE,
+          accessFrom:
+            entitlement.accessFrom ||
+            getTodayDateString(),
+          accessUntil,
+          adminNote:
+            "Redeemed access key " +
+            normalizedCode,
+          notes:
+            "Redeemed access key " +
+            normalizedCode,
+        }),
+        createdAt: serverTimestamp(),
+        createdBy: normalizedUid,
+        actorEmail: normalizedEmail,
+      };
+      const savedAccess = {
+        id: accessId,
         ...accessPayload,
-      },
-      accessKey: {
-        id: keyRecord.id,
-        ...keyUpdate,
-      },
-    },
-    metadata: {
-      collection: ACCESS_COLLECTIONS.ACCESS_KEYS,
-      accessKeyId: keyRecord.id,
-      productId: entitlement.productId || null,
-      campaignId: entitlement.campaignId || null,
-      campaignName: entitlement.campaignName || "",
-      campaignSource: entitlement.campaignSource || "",
-      scopeType: entitlement.scopeType || ACCESS_SCOPE_TYPES.PLAN,
-      planType: entitlement.planType || ACCESS_PLAN_TYPES.FREE,
-      source: ACCESS_SOURCE.REDEEM_KEY,
-    },
-    createdAt: serverTimestamp(),
-    createdBy: normalizedUid || null,
-    actorEmail: normalizedEmail,
-    actorRole: "student",
-  });
+      };
+      const entitlementPayload =
+        buildStudentEntitlementPayload(
+          savedAccess,
+          {
+            accessId,
+            uid: normalizedUid,
+            email: normalizedEmail,
+          }
+        );
+      const entitlementRef = doc(
+        db,
+        ACCESS_COLLECTIONS.STUDENT_ENTITLEMENTS,
+        normalizedUid,
+        "items",
+        entitlementPayload.id
+      );
+      const keyUpdate = {
+        usedCount:
+          keyUsage.nextUsedCount,
+        status: keyUsage.nextStatus,
+        lastRedeemedByEmail:
+          normalizedEmail,
+        lastRedeemedByUid:
+          normalizedUid,
+        lastRedeemedAt:
+          serverTimestamp(),
+        redeemedByEmail:
+          keyRecord.redeemedByEmail ||
+          normalizedEmail,
+        redeemedByUid:
+          keyRecord.redeemedByUid ||
+          normalizedUid,
+        redeemedAt:
+          keyRecord.redeemedAt ||
+          serverTimestamp(),
+        lastRedemptionAccessId:
+          accessId,
+        lastRedemptionEntitlementId:
+          entitlementPayload.id,
+        lastRedemptionAuditId:
+          auditId,
+        updatedAt: serverTimestamp(),
+        updatedBy: normalizedUid,
+      };
 
-  return {
-    access: {
-      id: accessRef.id,
-      ...accessPayload,
-    },
-    accessKey: {
-      id: keyRecord.id,
-      ...keyUpdate,
-    },
-  };
+      transaction.set(
+        accessRef,
+        accessPayload
+      );
+      transaction.set(
+        entitlementRef,
+        entitlementPayload,
+        { merge: true }
+      );
+      transaction.update(
+        keyRef,
+        keyUpdate
+      );
+      transaction.set(auditRef, {
+        action: "redeem_access_key",
+        accessId,
+        email: normalizedEmail,
+        uid: normalizedUid,
+        before: {
+          accessKey: keyRecord,
+          product: productRecord,
+        },
+        after: {
+          access: savedAccess,
+          accessKey: {
+            id: keyRecord.id,
+            ...keyUpdate,
+          },
+          entitlementId:
+            entitlementPayload.id,
+          auditId,
+        },
+        metadata: {
+          collection:
+            ACCESS_COLLECTIONS.ACCESS_KEYS,
+          accessKeyId: keyRecord.id,
+          productId:
+            entitlement.productId || null,
+          campaignId:
+            entitlement.campaignId || null,
+          campaignName:
+            entitlement.campaignName || "",
+          campaignSource:
+            entitlement.campaignSource || "",
+          scopeType:
+            entitlement.scopeType ||
+            ACCESS_SCOPE_TYPES.PLAN,
+          planType:
+            entitlement.planType ||
+            ACCESS_PLAN_TYPES.FREE,
+          entitlementId:
+            entitlementPayload.id,
+          source:
+            ACCESS_SOURCE.REDEEM_KEY,
+          atomic: true,
+        },
+        createdAt: serverTimestamp(),
+        createdBy: normalizedUid,
+        actorEmail: normalizedEmail,
+        actorRole: "student",
+      });
+
+      return {
+        access: savedAccess,
+        entitlement: entitlementPayload,
+        accessKey: {
+          id: keyRecord.id,
+          ...keyUpdate,
+        },
+        auditId,
+      };
+    }
+  );
 };
 
 const PAYMENT_PLAN_NAME_MAP = Object.freeze({
