@@ -2,12 +2,11 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import useVideoLibrary from "./useVideoLibrary.js";
-import { canAccessVideoPlan } from "./videoUtils.js";
 
 export default function StudentVideoSubjectRoute({
   universalContent = [],
-  userPlanType = "FREE",
   isAdmin = false,
+  hasPlanAccess,
 }) {
   const navigate = useNavigate();
   const { plan = "FREE", subjectId = "" } = useParams();
@@ -43,10 +42,8 @@ export default function StudentVideoSubjectRoute({
 
   const hasAccess =
     isAdmin ||
-    canAccessVideoPlan({
-      requiredPlan: activePlan,
-      userPlanType,
-    });
+    (typeof hasPlanAccess === "function" &&
+      hasPlanAccess(activePlan, { module: "video" }));
 
   if (!hasAccess) {
     return (

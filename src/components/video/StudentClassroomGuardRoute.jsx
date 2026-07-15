@@ -28,7 +28,6 @@ const findClassroomItem = (universalContent = [], activeVideoId = "") => {
 export default function StudentClassroomGuardRoute({
   universalContent = [],
   user = null,
-  userPlanType = "FREE",
   isAdmin = false,
   hasPlanAccess,
 }) {
@@ -46,7 +45,6 @@ export default function StudentClassroomGuardRoute({
     <VideoAccessGuard
       item={classroomItem}
       user={user}
-      userPlanType={userPlanType}
       isAdmin={isAdmin}
       hasPlanAccess={hasPlanAccess}
       isLoading={isLoading}
@@ -54,8 +52,7 @@ export default function StudentClassroomGuardRoute({
       <StudentClassroomRoute
         universalContent={universalContent}
         user={user}
-        userPlanType={userPlanType}
-        isAdmin={isAdmin}
+          isAdmin={isAdmin}
         hasPlanAccess={hasPlanAccess}
       />
     </VideoAccessGuard>

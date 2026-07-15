@@ -18,8 +18,6 @@ import {
 
 import {
   ACCESS_ITEM_TYPES, ACCESS_MODULE, } from "./access/accessConstants";
-import {
-  canAccessContent, } from "./access/accessUtils";
 import useAccessProfile from "./access/useAccessProfile";
 import { grantPaymentAccess } from "./access/accessService";
 import {
@@ -522,20 +520,6 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
   const [userPlanType, setUserPlanType] = useState("FREE");
   const [membershipExpiry, setMembershipExpiry] = useState(null);
-  const EMERGENCY_PREMIUM_EMAILS = new Set([
-    "jamilanri786@gmail.com",
-    "ansarineha340@gmail.com",
-    "1990amala@gmail.com",
-    "qureshihoor1986@gmail.com",
-    "gratitude.pb@gmail.com",
-    "yasmeen.shaikh@hkce.edu.in",
-    "ruhiipatel.18@gmail.com",
-    "dianapithawala@gmail.com",
-  ]);
-
-  const isEmergencyPremiumLearner = (email = "") =>
-    EMERGENCY_PREMIUM_EMAILS.has(String(email || "").trim().toLowerCase());
-
   const accessProfile = useAccessProfile({
     user,
     profile: {
@@ -548,10 +532,11 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
     },
     fallbackPlanType: userPlanType || "FREE",
     fallbackExpiry: membershipExpiry,
+    allowLegacyProfileFallback: false,
     enabled: Boolean(user),
   });
 
-  const activeAccessPlan = accessProfile?.activePlan || userPlanType || "FREE";
+  const activeAccessPlan = accessProfile?.activePlan || "FREE";
   const activeAccessExpiry =
     accessProfile?.membershipExpiry || membershipExpiry || null;
   const requireLogin = () => Boolean(user);
@@ -648,44 +633,31 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
       return true;
     }
 
-    if (isEmergencyPremiumLearner(user?.email)) {
-      return true;
-    }
-
-    if (accessProfile?.isBlocked) {
-      return false;
-    }
-
     if (normalizedRequiredPlan === "FREE") {
       return true;
     }
 
-    if (accessProfile?.isExpired) {
-      return false;
-    }
-
-    if (activeAccessExpiry && new Date(activeAccessExpiry) < new Date()) {
+    if (!user) {
       return false;
     }
 
     if (
-      typeof accessProfile?.hasAccess === "function" &&
-      accessProfile.hasAccess(normalizedRequiredPlan, accessOptions)
+      accessProfile?.loading ||
+      accessProfile?.error ||
+      accessProfile?.isAccessCheckUnavailable ||
+      accessProfile?.isBlocked ||
+      accessProfile?.isExpired
     ) {
-      return true;
+      return false;
     }
 
-    return canAccessContent({
-      requiredPlan: normalizedRequiredPlan,
-      userPlan: activeAccessPlan || "FREE",
-      accessRecord: accessProfile?.bestAccess || null,
-      accessRecords: accessProfile?.accessRecords || [],
-      module: accessOptions.module || "",
-      itemType: accessOptions.itemType || "",
-      itemId: accessOptions.itemId || "",
-      emergencyAccess: Boolean(accessOptions.emergencyAccess),
-      isAdmin: isAdmin(user),
-    });
+    if (typeof accessProfile?.hasAccess !== "function") {
+      return false;
+    }
+
+    return Boolean(
+      accessProfile.hasAccess(normalizedRequiredPlan, accessOptions)
+    );
   };
 
   const parseMockScheduleDateTime = (
@@ -8584,8 +8556,8 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   element={
     <StudentVideoPlanRoute
       universalContent={universalContent}
-      userPlanType={userPlanType}
       isAdmin={isAdmin(user)}
+      hasPlanAccess={hasPlanAccess}
     />
   }
 />
@@ -8595,8 +8567,8 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   element={
     <StudentVideoSubjectRoute
       universalContent={universalContent}
-      userPlanType={userPlanType}
       isAdmin={isAdmin(user)}
+      hasPlanAccess={hasPlanAccess}
     />
   }
 />
@@ -8606,7 +8578,6 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   element={
     <StudentVideoChapterRoute
       universalContent={universalContent}
-      userPlanType={userPlanType}
       isAdmin={isAdmin(user)}
       hasPlanAccess={hasPlanAccess}
     />
@@ -8619,7 +8590,6 @@ handleSaveUniversalContent={handleSaveUniversalContent}
     <StudentClassroomGuardRoute
       universalContent={universalContent}
       user={user}
-      userPlanType={userPlanType}
       isAdmin={isAdmin(user)}
       hasPlanAccess={hasPlanAccess}
     />

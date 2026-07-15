@@ -5,7 +5,6 @@ import SecureVideoPlayer from "./SecureVideoPlayer.jsx";
 import useVideoLibrary from "./useVideoLibrary.js";
 
 import {
-  canAccessVideoPlan,
   createVideoSlug,
   getClassroomSourceUrl,
   getLiveClassStatus,
@@ -82,7 +81,6 @@ const canOpenLiveAction = (item = {}, liveState = "", playbackUrl = "") => {
 export default function StudentClassroomRoute({
   universalContent = [],
   user = null,
-  userPlanType = "FREE",
   isAdmin = false,
   hasPlanAccess,
 }) {
@@ -197,7 +195,7 @@ export default function StudentClassroomRoute({
       const hasAccess =
         typeof hasPlanAccess === "function"
           ? hasPlanAccess(notePlan, noteAccessOptions)
-          : canAccessVideoPlan({ requiredPlan: notePlan, userPlanType });
+          : notePlan === "FREE";
 
       if (!hasAccess) {
         navigate(user ? "/ctet-tet/pricing" : "/login");

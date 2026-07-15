@@ -24,6 +24,7 @@ export const ACCESS_STATUS = Object.freeze({
   PENDING: "pending",
   EXPIRED: "expired",
   BLOCKED: "blocked",
+  ERROR: "error",
 });
 
 export const ACCESS_ACTIVE_STATUS_VALUES = new Set([
@@ -83,6 +84,7 @@ export const ACCESS_KEY_STATUS = Object.freeze({
   USED: "used",
   EXPIRED: "expired",
   BLOCKED: "blocked",
+  ERROR: "error",
 });
 
 export const ACCESS_ADMIN_ROLES = new Set([

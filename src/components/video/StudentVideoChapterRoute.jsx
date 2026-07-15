@@ -5,11 +5,9 @@ import LiveClassCard from "./LiveClassCard.jsx";
 import RecordedLessonCard from "./RecordedLessonCard.jsx";
 import useVideoLibrary from "./useVideoLibrary.js";
 
-import { canAccessVideoPlan } from "./videoUtils.js";
 
 export default function StudentVideoChapterRoute({
   universalContent = [],
-  userPlanType = "FREE",
   isAdmin = false,
   hasPlanAccess,
 }) {
@@ -39,16 +37,12 @@ export default function StudentVideoChapterRoute({
       char.toUpperCase()
     );
 
-    const hasAccess =
+  const hasAccess =
     isAdmin ||
     (typeof hasPlanAccess === "function" &&
       hasPlanAccess(activePlan, {
         module: "video",
-      })) ||
-    canAccessVideoPlan({
-      requiredPlan: activePlan,
-      userPlanType,
-    });
+      }));
 
   const featuredClass =
     chapterItems.liveClasses[0] ||
