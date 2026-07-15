@@ -132,9 +132,16 @@ export const listGrantablePlanProducts = (
         ).toLowerCase() ===
           "active"
     )
-    .map(
-      normalizePlanCatalogEntry
-    )
+    .map((product) => {
+      try {
+        return normalizePlanCatalogEntry(
+          product
+        );
+      } catch (error) {
+        return null;
+      }
+    })
+    .filter(Boolean)
     .sort(
       (first, second) =>
         first.accessRank -
@@ -184,13 +191,20 @@ export const validateDynamicPlanGrantForm = ({
         productId
     ) || null;
 
-  if (
-    !normalizeEmail(
+  const normalizedEmail =
+    normalizeEmail(
       form.email
-    )
-  ) {
+    );
+
+  if (!normalizedEmail) {
     errors.push(
       "Learner email is required."
+    );
+  } else if (
+    !normalizedEmail.includes("@")
+  ) {
+    errors.push(
+      "Enter a valid learner email."
     );
   }
 

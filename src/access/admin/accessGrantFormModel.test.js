@@ -92,6 +92,50 @@ describe("Admin dynamic plan grant form contract", () => {
     ]);
   });
 
+
+  test("ignores malformed active catalog rows instead of crashing the grant screen", () => {
+    expect(
+      listGrantablePlanProducts([
+        ...products,
+        {
+          scopeType: "plan",
+          planCode: "BROKEN",
+          title: "",
+          accessRank: "invalid",
+          status: "active",
+          isActive: true,
+        },
+      ]).map(
+        (product) =>
+          product.planCode
+      )
+    ).toEqual([
+      "CTET_CRASH_45",
+      "PREMIUM",
+    ]);
+  });
+
+  test("rejects an invalid learner email before a grant payload is built", () => {
+    const form = {
+      ...createInitialDynamicPlanGrantForm(),
+      email: "not-an-email",
+      productId:
+        "plan_premium",
+      adminNote: "Approved",
+      accessUntil:
+        "2026-08-30",
+    };
+
+    expect(
+      validateDynamicPlanGrantForm({
+        form,
+        products,
+      })
+    ).toContain(
+      "Enter a valid learner email."
+    );
+  });
+
   test("selecting a product copies stable identity and rank", () => {
     const form =
       applyPlanProductToGrantForm(
