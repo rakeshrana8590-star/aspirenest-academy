@@ -14,6 +14,8 @@ const planGrant = ({
   uid = "uid-1",
   email = "student@example.com",
   planType = "PREMIUM",
+  accessRank = null,
+  productId = null,
   status = "active",
   accessFrom = "2026-01-01T00:00:00.000Z",
   accessUntil = "2027-01-01T00:00:00.000Z",
@@ -26,6 +28,9 @@ const planGrant = ({
   course: "CTET_TET",
   scopeType: "plan",
   planType,
+  planCode: planType,
+  accessRank,
+  productId,
   status,
   accessFrom,
   accessUntil,
@@ -38,6 +43,8 @@ const itemGrant = ({
   uid = "uid-1",
   email = "student@example.com",
   planType = "PREMIUM",
+  accessRank = null,
+  productId = null,
   status = "active",
   module = "notes",
   itemType = "notesPdf",
@@ -53,6 +60,9 @@ const itemGrant = ({
   course: "CTET_TET",
   scopeType: "item",
   planType,
+  planCode: planType,
+  accessRank,
+  productId,
   module,
   itemType,
   itemId,
@@ -476,4 +486,116 @@ describe("AspireNest effective entitlement projection", () => {
     expect(first.id).toBe("a-record");
     expect(second.id).toBe("a-record");
   });
+
+
+  test("dynamic plan entitlement id preserves custom plan code", () => {
+    expect(
+      buildStudentEntitlementId(
+        planGrant({
+          id: "crash",
+          planType: "CTET_CRASH_45",
+          accessRank: 150,
+          productId: "plan_ctet_crash_45",
+        })
+      )
+    ).toBe("plan_CTET_CRASH_45");
+  });
+
+  test("dynamic accessRank selects the effective plan between seed tiers", () => {
+    const projection =
+      buildEffectiveEntitlementProjection(
+        [
+          planGrant({
+            id: "basic",
+            planType: "BASIC",
+            accessRank: 100,
+          }),
+          planGrant({
+            id: "crash",
+            planType: "CTET_CRASH_45",
+            accessRank: 150,
+            productId: "plan_ctet_crash_45",
+          }),
+          planGrant({
+            id: "premium",
+            planType: "PREMIUM",
+            accessRank: 200,
+          }),
+        ],
+        {
+          uid: "uid-1",
+          email: "student@example.com",
+          now: NOW,
+        }
+      );
+
+    expect(projection).toMatchObject({
+      effectivePlanAccessId: "premium",
+      effectivePlanType: "PREMIUM",
+      effectivePlanCode: "PREMIUM",
+      effectivePlanAccessRank: 200,
+    });
+    expect(
+      projection.staleEntitlementIds
+    ).toContain("plan_CTET_CRASH_45");
+  });
+
+  test("custom plan can become effective above PREMIUM by rank", () => {
+    const projection =
+      buildEffectiveEntitlementProjection(
+        [
+          planGrant({
+            id: "premium",
+            planType: "PREMIUM",
+            accessRank: 200,
+          }),
+          planGrant({
+            id: "mega",
+            planType: "CTET_MEGA",
+            accessRank: 250,
+            productId: "plan_ctet_mega",
+          }),
+        ],
+        {
+          uid: "uid-1",
+          email: "student@example.com",
+          now: NOW,
+        }
+      );
+
+    expect(projection).toMatchObject({
+      effectivePlanAccessId: "mega",
+      effectivePlanType: "CTET_MEGA",
+      effectivePlanCode: "CTET_MEGA",
+      effectivePlanAccessRank: 250,
+    });
+    expect(
+      projection.desiredEntitlements[0].id
+    ).toBe("plan_CTET_MEGA");
+    expect(
+      projection.staleEntitlementIds
+    ).toContain("plan_PREMIUM");
+  });
+
+  test("unknown custom plan without rank fails closed below ranked plans", () => {
+    const winner =
+      selectEffectiveEntitlementRecord(
+        [
+          planGrant({
+            id: "unknown",
+            planType: "CTET_UNKNOWN",
+            accessRank: null,
+          }),
+          planGrant({
+            id: "basic",
+            planType: "BASIC",
+            accessRank: 100,
+          }),
+        ],
+        { now: NOW }
+      );
+
+    expect(winner.id).toBe("basic");
+  });
+
 });

@@ -1,8 +1,11 @@
 import {
-  ACCESS_PLAN_LEVELS,
   ACCESS_SCOPE_TYPES,
   ACCESS_STATUS,
 } from "./accessConstants";
+import {
+  comparePlanDescriptors,
+  resolvePlanDescriptor,
+} from "./accessPlanCatalog";
 import {
   buildGrantKey,
   buildGrantPrincipalRef,
@@ -294,9 +297,15 @@ const resolveFinalPlanType = ({
   existingRecord = null,
   incomingGrant = {},
 } = {}) => {
-  const incomingPlan = normalizeGrantPlanType(
-    incomingGrant.planType
-  );
+  const incomingPlan = resolvePlanDescriptor({
+    planCode:
+      incomingGrant.planCode ||
+      incomingGrant.planType,
+    accessRank:
+      incomingGrant.accessRank,
+    productId:
+      incomingGrant.productId,
+  });
 
   if (
     normalizeGrantScopeType(incomingGrant.scopeType) !==
@@ -304,28 +313,74 @@ const resolveFinalPlanType = ({
     !existingRecord
   ) {
     return {
-      planType: incomingPlan,
+      planType: incomingPlan.planCode,
+      planCode: incomingPlan.planCode,
+      accessRank: incomingPlan.accessRank,
+      productId: incomingPlan.productId,
       preservedHigherPlan: false,
     };
   }
 
-  const existingPlan = normalizeGrantPlanType(
-    existingRecord.planType
+  const existingPlan = resolvePlanDescriptor({
+    planCode:
+      existingRecord.planCode ||
+      existingRecord.planType,
+    accessRank:
+      existingRecord.accessRank,
+    productId:
+      existingRecord.productId,
+  });
+  const comparison = comparePlanDescriptors(
+    existingPlan,
+    incomingPlan
   );
-  const existingLevel = ACCESS_PLAN_LEVELS[existingPlan] || 0;
-  const incomingLevel = ACCESS_PLAN_LEVELS[incomingPlan] || 0;
 
-  if (existingLevel > incomingLevel) {
+  if (comparison > 0) {
     return {
-      planType: existingPlan,
+      planType: existingPlan.planCode,
+      planCode: existingPlan.planCode,
+      accessRank: existingPlan.accessRank,
+      productId: existingPlan.productId,
       preservedHigherPlan: true,
     };
   }
 
   return {
-    planType: incomingPlan,
+    planType: incomingPlan.planCode,
+    planCode: incomingPlan.planCode,
+    accessRank:
+      incomingPlan.accessRank ??
+      existingPlan.accessRank,
+    productId:
+      incomingPlan.productId ||
+      existingPlan.productId,
     preservedHigherPlan: false,
   };
+};
+
+const resolveGrantPurchaseTermsSnapshot = ({
+  existingRecord = null,
+  incomingGrant = {},
+  planResolution = {},
+} = {}) => {
+  const existingSnapshot =
+    existingRecord?.purchaseTermsSnapshot ||
+    existingRecord?.termsSnapshot ||
+    null;
+  const incomingSnapshot =
+    incomingGrant?.purchaseTermsSnapshot ||
+    incomingGrant?.termsSnapshot ||
+    null;
+
+  if (planResolution.preservedHigherPlan) {
+    return existingSnapshot;
+  }
+
+  if (incomingSnapshot) {
+    return incomingSnapshot;
+  }
+
+  return existingSnapshot;
 };
 
 export const buildGrantFamilyKey = (grant = {}) => {
@@ -544,6 +599,12 @@ export const buildIdempotentGrantResolution = ({
   const scopeType = normalizeGrantScopeType(
     incomingGrant.scopeType
   );
+  const purchaseTermsSnapshot =
+    resolveGrantPurchaseTermsSnapshot({
+      existingRecord,
+      incomingGrant,
+      planResolution,
+    });
   const course = normalizeGrantCourse(
     incomingGrant.course
   );
@@ -567,6 +628,20 @@ export const buildIdempotentGrantResolution = ({
     course,
     scopeType,
     planType: planResolution.planType,
+    planCode: planResolution.planCode,
+    accessRank: planResolution.accessRank,
+    productId: planResolution.productId,
+    purchaseTermsSnapshot,
+    validityMode:
+      incomingGrant.validityMode ||
+      existingRecord?.validityMode ||
+      null,
+    noExpiry:
+      incomingGrant.noExpiry === true ||
+      existingRecord?.noExpiry === true,
+    untilManualChange:
+      incomingGrant.untilManualChange === true ||
+      existingRecord?.untilManualChange === true,
     grantKey,
   });
 
@@ -579,6 +654,20 @@ export const buildIdempotentGrantResolution = ({
     course,
     scopeType,
     planType: planResolution.planType,
+    planCode: planResolution.planCode,
+    accessRank: planResolution.accessRank,
+    productId: planResolution.productId,
+    purchaseTermsSnapshot,
+    validityMode:
+      incomingGrant.validityMode ||
+      existingRecord?.validityMode ||
+      null,
+    noExpiry:
+      incomingGrant.noExpiry === true ||
+      existingRecord?.noExpiry === true,
+    untilManualChange:
+      incomingGrant.untilManualChange === true ||
+      existingRecord?.untilManualChange === true,
     grantKey,
     grantFamilyKey,
     grantRevision:
@@ -603,6 +692,10 @@ export const buildIdempotentGrantResolution = ({
 export const resolvePlanChange = ({
   record = {},
   requestedPlanType,
+  requestedPlanCode,
+  requestedAccessRank = null,
+  requestedProductId = null,
+  purchaseTermsSnapshot = null,
   allowDowngrade = false,
   reason = "",
 } = {}) => {
@@ -616,17 +709,39 @@ export const resolvePlanChange = ({
     );
   }
 
-  const currentPlanType = normalizeGrantPlanType(
-    record.planType
+  const currentPlan = resolvePlanDescriptor({
+    planCode:
+      record.planCode ||
+      record.planType,
+    accessRank:
+      record.accessRank,
+    productId:
+      record.productId,
+  });
+  const nextPlan = resolvePlanDescriptor({
+    planCode:
+      requestedPlanCode ||
+      requestedPlanType,
+    accessRank:
+      requestedAccessRank,
+    productId:
+      requestedProductId,
+  });
+
+  if (
+    nextPlan.accessRank === null &&
+    nextPlan.planCode !== currentPlan.planCode
+  ) {
+    throw new Error(
+      "Custom plan change requires an explicit access rank."
+    );
+  }
+
+  const comparison = comparePlanDescriptors(
+    nextPlan,
+    currentPlan
   );
-  const nextPlanType = normalizeGrantPlanType(
-    requestedPlanType
-  );
-  const currentLevel =
-    ACCESS_PLAN_LEVELS[currentPlanType] || 0;
-  const nextLevel =
-    ACCESS_PLAN_LEVELS[nextPlanType] || 0;
-  const isDowngrade = nextLevel < currentLevel;
+  const isDowngrade = comparison < 0;
   const cleanReason = cleanValue(reason);
 
   if (isDowngrade && !allowDowngrade) {
@@ -650,20 +765,37 @@ export const resolvePlanChange = ({
     principalRef: identity.principalRef,
     course,
     scopeType: ACCESS_SCOPE_TYPES.PLAN,
-    planType: nextPlanType,
+    planType: nextPlan.planCode,
+    planCode: nextPlan.planCode,
   });
   const grantFamilyKey = buildGrantFamilyKey({
     ...record,
     ...identity,
     course,
     scopeType: ACCESS_SCOPE_TYPES.PLAN,
-    planType: nextPlanType,
+    planType: nextPlan.planCode,
+    planCode: nextPlan.planCode,
+    accessRank: nextPlan.accessRank,
+    productId: nextPlan.productId,
     grantKey,
   });
 
   return {
-    currentPlanType,
-    planType: nextPlanType,
+    currentPlanType: currentPlan.planCode,
+    currentPlanCode: currentPlan.planCode,
+    currentAccessRank: currentPlan.accessRank,
+    planType: nextPlan.planCode,
+    planCode: nextPlan.planCode,
+    accessRank: nextPlan.accessRank,
+    productId:
+      nextPlan.productId ||
+      record.productId ||
+      null,
+    purchaseTermsSnapshot:
+      purchaseTermsSnapshot ||
+      record.purchaseTermsSnapshot ||
+      record.termsSnapshot ||
+      null,
     isDowngrade,
     reason: cleanReason,
     grantKey,

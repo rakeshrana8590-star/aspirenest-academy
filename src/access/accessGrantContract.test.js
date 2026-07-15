@@ -256,7 +256,7 @@ describe("AspireNest grant contract", () => {
   });
 
   test("invalid enums and dates fail closed", () => {
-    expect(() => normalizeGrantPlanType("diamond")).toThrow(
+    expect(() => normalizeGrantPlanType("45 diamond")).toThrow(
       "Plan type is invalid."
     );
     expect(() => normalizeGrantScopeType("everything")).toThrow(
@@ -348,4 +348,98 @@ describe("AspireNest grant contract", () => {
       })
     ).toBe("module:currentAffairs");
   });
+
+
+  test("custom plan grant requires explicit access rank", () => {
+    expect(() =>
+      normalizeAndValidateGrantTarget({
+        scopeType: "plan",
+        planType: "CTET_CRASH_45",
+        status: "active",
+      })
+    ).toThrow(
+      "Custom plan requires an explicit access rank."
+    );
+  });
+
+  test("custom plan grant preserves dynamic identity and product terms", () => {
+    const target = normalizeAndValidateGrantTarget({
+      scopeType: "plan",
+      planCode: "CTET_CRASH_45",
+      accessRank: 150,
+      productId: "plan_ctet_crash_45",
+      status: "active",
+      noExpiry: true,
+      purchaseTermsSnapshot: {
+        productId: "plan_ctet_crash_45",
+        planCode: "CTET_CRASH_45",
+        accessRank: 150,
+        priceINR: 799,
+        priceVersion: 2,
+      },
+    });
+
+    expect(target).toMatchObject({
+      planType: "CTET_CRASH_45",
+      planCode: "CTET_CRASH_45",
+      accessRank: 150,
+      productId: "plan_ctet_crash_45",
+      targetKey: "plan:CTET_CRASH_45",
+      noExpiry: true,
+      accessUntil: null,
+    });
+    expect(
+      target.purchaseTermsSnapshot
+    ).toMatchObject({
+      productId: "plan_ctet_crash_45",
+      planCode: "CTET_CRASH_45",
+      accessRank: 150,
+      priceINR: 799,
+      priceVersion: 2,
+    });
+  });
+
+  test("seed plan rank is inferred without changing legacy input", () => {
+    const target = normalizeAndValidateGrantTarget({
+      scopeType: "plan",
+      planType: "premium",
+      status: "active",
+    });
+
+    expect(target.planType).toBe("PREMIUM");
+    expect(target.planCode).toBe("PREMIUM");
+    expect(target.accessRank).toBe(200);
+  });
+
+  test("purchase terms snapshot cannot belong to another plan", () => {
+    expect(() =>
+      normalizeAndValidateGrantTarget({
+        scopeType: "plan",
+        planType: "PREMIUM",
+        status: "active",
+        purchaseTermsSnapshot: {
+          planCode: "BASIC",
+          accessRank: 100,
+        },
+      })
+    ).toThrow(
+      "Purchase terms snapshot plan does not match the grant."
+    );
+  });
+
+
+
+  test("invalid validity mode fails closed", () => {
+    expect(() =>
+      normalizeAndValidateGrantTarget({
+        scopeType: "plan",
+        planType: "PREMIUM",
+        status: "active",
+        validityMode: "FOREVER_MAGIC",
+      })
+    ).toThrow(
+      "Access validity mode is invalid."
+    );
+  });
+
 });

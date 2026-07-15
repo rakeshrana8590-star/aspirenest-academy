@@ -8,16 +8,12 @@ import {
   ACCESS_SOURCE,
   ACCESS_STATUS,
 } from "./accessConstants";
-
-const PLAN_ALIASES = Object.freeze({
-  FREE: ACCESS_PLAN_TYPES.FREE,
-  BASIC: ACCESS_PLAN_TYPES.BASIC,
-  PREMIUM: ACCESS_PLAN_TYPES.PREMIUM,
-  PRO: ACCESS_PLAN_TYPES.PREMIUM,
-  PAID: ACCESS_PLAN_TYPES.PREMIUM,
-  MENTOR: ACCESS_PLAN_TYPES.MENTORSHIP,
-  MENTORSHIP: ACCESS_PLAN_TYPES.MENTORSHIP,
-});
+import {
+  ACCESS_PLAN_VALIDITY_MODES,
+  isInitialSeedPlan,
+  normalizeAccessRank,
+  normalizePlanCode,
+} from "./accessPlanCatalog";
 
 const SCOPE_VALUES = new Set(Object.values(ACCESS_SCOPE_TYPES));
 const MODULE_VALUES = new Set(Object.values(ACCESS_MODULE));
@@ -155,17 +151,101 @@ export const normalizeGrantCourse = (
 export const normalizeGrantPlanType = (
   planType = ACCESS_PLAN_TYPES.FREE
 ) => {
-  const normalized = cleanValue(
-    planType || ACCESS_PLAN_TYPES.FREE
-  ).toUpperCase();
-
-  const plan = PLAN_ALIASES[normalized];
-
-  if (!plan) {
+  try {
+    return normalizePlanCode(
+      planType || ACCESS_PLAN_TYPES.FREE,
+      {
+        fallback: ACCESS_PLAN_TYPES.FREE,
+        strict: true,
+      }
+    );
+  } catch {
     throw new Error("Plan type is invalid.");
   }
+};
 
-  return plan;
+export const normalizeGrantAccessRank = (
+  accessRank,
+  planType = ACCESS_PLAN_TYPES.FREE
+) => {
+  const planCode = normalizeGrantPlanType(planType);
+
+  return normalizeAccessRank(accessRank, {
+    planCode,
+    required: !isInitialSeedPlan(planCode),
+  });
+};
+
+export const normalizeGrantPurchaseTermsSnapshot = (
+  snapshot = null,
+  {
+    planType = ACCESS_PLAN_TYPES.FREE,
+    accessRank = null,
+    productId = null,
+  } = {}
+) => {
+  if (
+    snapshot === null ||
+    snapshot === undefined ||
+    snapshot === ""
+  ) {
+    return null;
+  }
+
+  if (
+    typeof snapshot !== "object" ||
+    Array.isArray(snapshot)
+  ) {
+    throw new Error(
+      "Purchase terms snapshot must be an object."
+    );
+  }
+
+  const expectedPlanType =
+    normalizeGrantPlanType(planType);
+  const snapshotPlanType =
+    normalizeGrantPlanType(
+      snapshot.planCode ||
+        snapshot.planType ||
+        expectedPlanType
+    );
+
+  if (snapshotPlanType !== expectedPlanType) {
+    throw new Error(
+      "Purchase terms snapshot plan does not match the grant."
+    );
+  }
+
+  const normalizedRank =
+    normalizeGrantAccessRank(
+      snapshot.accessRank ?? accessRank,
+      snapshotPlanType
+    );
+  const expectedProductId =
+    cleanValue(productId);
+  const snapshotProductId =
+    cleanValue(snapshot.productId);
+
+  if (
+    expectedProductId &&
+    snapshotProductId &&
+    expectedProductId !== snapshotProductId
+  ) {
+    throw new Error(
+      "Purchase terms snapshot product does not match the grant."
+    );
+  }
+
+  return Object.freeze({
+    ...snapshot,
+    productId:
+      snapshotProductId ||
+      expectedProductId ||
+      null,
+    planCode: snapshotPlanType,
+    planType: snapshotPlanType,
+    accessRank: normalizedRank,
+  });
 };
 
 export const normalizeGrantScopeType = (
@@ -283,7 +363,10 @@ export const buildGrantTargetKey = (target = {}) => {
   const scopeType = normalizeGrantScopeType(target.scopeType);
 
   if (scopeType === ACCESS_SCOPE_TYPES.PLAN) {
-    return `plan:${normalizeGrantPlanType(target.planType)}`;
+    return `plan:${normalizeGrantPlanType(
+      target.planCode ||
+        target.planType
+    )}`;
   }
 
   if (scopeType === ACCESS_SCOPE_TYPES.MODULE) {
@@ -345,12 +428,61 @@ export const normalizeAndValidateGrantTarget = (
     data.scopeType || ACCESS_SCOPE_TYPES.PLAN
   );
   const planType = normalizeGrantPlanType(
-    data.planType || ACCESS_PLAN_TYPES.FREE
+    data.planCode ||
+      data.planType ||
+      ACCESS_PLAN_TYPES.FREE
   );
+  const accessRank = normalizeGrantAccessRank(
+    data.accessRank ??
+      data.planRank,
+    planType
+  );
+  const productId =
+    cleanValue(data.productId) || null;
   const status = normalizeGrantStatus(
     data.status || ACCESS_STATUS.ACTIVE,
     allowedStatuses
   );
+  const rawValidityMode = cleanValue(
+    data.validityMode
+  ).toUpperCase();
+  if (
+    rawValidityMode &&
+    !Object.values(
+      ACCESS_PLAN_VALIDITY_MODES
+    ).includes(rawValidityMode)
+  ) {
+    throw new Error(
+      "Access validity mode is invalid."
+    );
+  }
+
+  const noExpiry =
+    data.noExpiry === true ||
+    rawValidityMode ===
+      ACCESS_PLAN_VALIDITY_MODES.NO_EXPIRY;
+  const untilManualChange =
+    data.untilManualChange === true ||
+    rawValidityMode ===
+      ACCESS_PLAN_VALIDITY_MODES.UNTIL_MANUAL_CHANGE;
+
+  if (
+    noExpiry &&
+    untilManualChange
+  ) {
+    throw new Error(
+      "Access cannot be both no-expiry and until-manual-change."
+    );
+  }
+
+  if (
+    (noExpiry || untilManualChange) &&
+    data.accessUntil
+  ) {
+    throw new Error(
+      "Open-ended access cannot include an access-until date."
+    );
+  }
 
   let module = null;
   let itemType = null;
@@ -386,10 +518,30 @@ export const normalizeAndValidateGrantTarget = (
     accessFrom: data.accessFrom,
     accessUntil: data.accessUntil,
   });
+  const validityMode = noExpiry
+    ? ACCESS_PLAN_VALIDITY_MODES.NO_EXPIRY
+    : untilManualChange
+      ? ACCESS_PLAN_VALIDITY_MODES.UNTIL_MANUAL_CHANGE
+      : rawValidityMode ||
+        (dates.accessFrom || dates.accessUntil
+          ? ACCESS_PLAN_VALIDITY_MODES.CUSTOM_WINDOW
+          : ACCESS_PLAN_VALIDITY_MODES.ADMIN_DEFINED);
+  const purchaseTermsSnapshot =
+    normalizeGrantPurchaseTermsSnapshot(
+      data.purchaseTermsSnapshot ||
+        data.termsSnapshot ||
+        null,
+      {
+        planType,
+        accessRank,
+        productId,
+      }
+    );
 
   const targetKey = buildGrantTargetKey({
     scopeType,
     planType,
+    planCode: planType,
     module,
     itemType,
     itemId,
@@ -399,6 +551,13 @@ export const normalizeAndValidateGrantTarget = (
   return {
     course,
     planType,
+    planCode: planType,
+    accessRank,
+    productId,
+    purchaseTermsSnapshot,
+    validityMode,
+    noExpiry,
+    untilManualChange,
     scopeType,
     status,
     module,

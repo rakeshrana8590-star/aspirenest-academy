@@ -551,4 +551,163 @@ describe("AspireNest idempotent grant lifecycle", () => {
       "uid:uid-1|CTET_TET|plan|plan-family"
     );
   });
+
+
+  test("custom plan upgrade uses accessRank and keeps the plan family stable", () => {
+    const existingRecord = {
+      id: "grant-1",
+      uid: "uid-1",
+      email: "student@example.com",
+      normalizedEmail: "student@example.com",
+      course: "CTET_TET",
+      scopeType: "plan",
+      planType: "BASIC",
+      planCode: "BASIC",
+      accessRank: 100,
+      status: "active",
+      accessFrom: "2026-01-01",
+      accessUntil: "2027-01-01",
+      purchaseTermsSnapshot: {
+        productId: "plan_basic",
+        planCode: "BASIC",
+        accessRank: 100,
+        priceINR: 499,
+        priceVersion: 1,
+      },
+    };
+    const incomingGrant = buildGrant({
+      planType: "CTET_CRASH_45",
+      planCode: "CTET_CRASH_45",
+      accessRank: 150,
+      productId: "plan_ctet_crash_45",
+      purchaseTermsSnapshot: {
+        productId: "plan_ctet_crash_45",
+        planCode: "CTET_CRASH_45",
+        accessRank: 150,
+        priceINR: 799,
+        priceVersion: 2,
+      },
+    });
+    const resolution =
+      buildIdempotentGrantResolution({
+        existingRecord,
+        incomingGrant,
+      });
+
+    expect(resolution).toMatchObject({
+      planType: "CTET_CRASH_45",
+      planCode: "CTET_CRASH_45",
+      accessRank: 150,
+      productId: "plan_ctet_crash_45",
+      preservedHigherPlan: false,
+      grantFamilyKey:
+        "uid:uid-1|CTET_TET|plan|plan-family",
+    });
+    expect(
+      resolution.purchaseTermsSnapshot
+    ).toMatchObject({
+      priceINR: 799,
+      priceVersion: 2,
+    });
+  });
+
+  test("higher existing dynamic plan and its terms are preserved", () => {
+    const existingRecord = {
+      id: "grant-1",
+      uid: "uid-1",
+      email: "student@example.com",
+      normalizedEmail: "student@example.com",
+      course: "CTET_TET",
+      scopeType: "plan",
+      planType: "CTET_MEGA",
+      planCode: "CTET_MEGA",
+      accessRank: 250,
+      productId: "plan_ctet_mega",
+      status: "active",
+      accessUntil: null,
+      purchaseTermsSnapshot: {
+        productId: "plan_ctet_mega",
+        planCode: "CTET_MEGA",
+        accessRank: 250,
+        priceINR: 1999,
+        priceVersion: 1,
+      },
+    };
+    const incomingGrant = buildGrant({
+      planType: "PREMIUM",
+      accessRank: 200,
+      productId: "plan_premium",
+      purchaseTermsSnapshot: {
+        productId: "plan_premium",
+        planCode: "PREMIUM",
+        accessRank: 200,
+        priceINR: 1499,
+        priceVersion: 4,
+      },
+    });
+    const resolution =
+      buildIdempotentGrantResolution({
+        existingRecord,
+        incomingGrant,
+      });
+
+    expect(resolution).toMatchObject({
+      planType: "CTET_MEGA",
+      planCode: "CTET_MEGA",
+      accessRank: 250,
+      productId: "plan_ctet_mega",
+      preservedHigherPlan: true,
+    });
+    expect(
+      resolution.purchaseTermsSnapshot
+    ).toMatchObject({
+      productId: "plan_ctet_mega",
+      priceINR: 1999,
+      priceVersion: 1,
+    });
+  });
+
+  test("custom plan change requires explicit rank and detects downgrade", () => {
+    const record = {
+      uid: "uid-1",
+      email: "student@example.com",
+      normalizedEmail: "student@example.com",
+      course: "CTET_TET",
+      scopeType: "plan",
+      planType: "PREMIUM",
+      planCode: "PREMIUM",
+      accessRank: 200,
+      productId: "plan_premium",
+      grantRevision: 3,
+    };
+
+    expect(() =>
+      resolvePlanChange({
+        record,
+        requestedPlanCode: "CTET_CRASH_45",
+      })
+    ).toThrow(
+      "Custom plan change requires an explicit access rank."
+    );
+
+    const resolution = resolvePlanChange({
+      record,
+      requestedPlanCode: "CTET_CRASH_45",
+      requestedAccessRank: 150,
+      requestedProductId: "plan_ctet_crash_45",
+      allowDowngrade: true,
+      reason: "Founder-approved catalog move",
+    });
+
+    expect(resolution).toMatchObject({
+      currentPlanCode: "PREMIUM",
+      planCode: "CTET_CRASH_45",
+      planType: "CTET_CRASH_45",
+      accessRank: 150,
+      productId: "plan_ctet_crash_45",
+      isDowngrade: true,
+      grantRevision: 4,
+    });
+  });
+
 });

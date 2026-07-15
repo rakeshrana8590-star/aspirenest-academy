@@ -1,12 +1,14 @@
 import {
   ACCESS_ACTIVE_STATUS_VALUES,
-  ACCESS_PLAN_LEVELS,
   ACCESS_PLAN_TYPES,
   ACCESS_SCOPE_TYPES,
   ACCESS_STATUS,
 } from "./accessConstants";
 import {
-  normalizeAccessPlan,
+  normalizePlanCode,
+  resolvePlanDescriptor,
+} from "./accessPlanCatalog";
+import {
   normalizeScopeType,
 } from "./accessUtils";
 
@@ -110,16 +112,48 @@ const compareProjectionCandidates = (
   first = {},
   second = {}
 ) => {
+  const firstPlan = resolvePlanDescriptor({
+    planCode:
+      first.planCode ||
+      first.planType,
+    accessRank:
+      first.accessRank,
+    productId:
+      first.productId,
+  });
+  const secondPlan = resolvePlanDescriptor({
+    planCode:
+      second.planCode ||
+      second.planType,
+    accessRank:
+      second.accessRank,
+    productId:
+      second.productId,
+  });
+  const firstRank =
+    firstPlan.accessRank === null
+      ? -1
+      : firstPlan.accessRank;
+  const secondRank =
+    secondPlan.accessRank === null
+      ? -1
+      : secondPlan.accessRank;
   const planDifference =
-    (ACCESS_PLAN_LEVELS[
-      normalizeAccessPlan(second.planType)
-    ] || 0) -
-    (ACCESS_PLAN_LEVELS[
-      normalizeAccessPlan(first.planType)
-    ] || 0);
+    secondRank - firstRank;
 
   if (planDifference !== 0) {
     return planDifference;
+  }
+
+  if (
+    firstPlan.planCode !==
+      secondPlan.planCode &&
+    firstPlan.accessRank === null &&
+    secondPlan.accessRank === null
+  ) {
+    return firstPlan.planCode.localeCompare(
+      secondPlan.planCode
+    );
   }
 
   const firstUntil = getAccessUntilRank(first);
@@ -176,7 +210,7 @@ export const ACCESS_PLAN_ENTITLEMENT_IDS =
       (planType) =>
         "plan_" +
         cleanEntitlementSegment(
-          normalizeAccessPlan(planType)
+          normalizePlanCode(planType)
         )
     )
   );
@@ -219,8 +253,9 @@ export const buildStudentEntitlementId = (
   return (
     "plan_" +
     cleanEntitlementSegment(
-      normalizeAccessPlan(
-        accessRecord.planType ||
+      normalizePlanCode(
+        accessRecord.planCode ||
+          accessRecord.planType ||
           ACCESS_PLAN_TYPES.FREE
       )
     )
@@ -502,9 +537,29 @@ export const buildEffectiveEntitlementProjection = (
         : null,
     effectivePlanType:
       effectivePlan
-        ? normalizeAccessPlan(
-            effectivePlan.planType
+        ? normalizePlanCode(
+            effectivePlan.planCode ||
+              effectivePlan.planType
           )
         : ACCESS_PLAN_TYPES.FREE,
+    effectivePlanCode:
+      effectivePlan
+        ? normalizePlanCode(
+            effectivePlan.planCode ||
+              effectivePlan.planType
+          )
+        : ACCESS_PLAN_TYPES.FREE,
+    effectivePlanAccessRank:
+      effectivePlan
+        ? resolvePlanDescriptor({
+            planCode:
+              effectivePlan.planCode ||
+              effectivePlan.planType,
+            accessRank:
+              effectivePlan.accessRank,
+            productId:
+              effectivePlan.productId,
+          }).accessRank
+        : 0,
   };
 };
