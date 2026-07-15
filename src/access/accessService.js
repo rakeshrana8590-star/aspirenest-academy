@@ -67,6 +67,11 @@ import {
   selectResumableBulkAccessRows,
   summarizeBulkAccessRows,
 } from "./accessBulkLifecycle";
+import {
+  buildPlanCatalogCreatePayload,
+  buildPlanCatalogDocumentId,
+  buildPlanCatalogUpdatePayload,
+} from "./accessPlanCatalogPersistence";
 
 export const ACCESS_COLLECTIONS = Object.freeze({
   STUDENT_ACCESS: "studentAccess",
@@ -2281,15 +2286,76 @@ const requireAccessEntityId = (id, label = "Access entity id") => {
 export const normalizeAccessKeyCode = (code = "") =>
   String(code || "").trim().toUpperCase();
 
-export const buildAccessProductPayload = (data = {}) => {
-  const target = normalizeAndValidateGrantTarget(data, {
-    allowedStatuses: ACCESS_GRANT_STATUS_VALUES,
-  });
+export const buildAccessProductPayload = (
+  data = {},
+  {
+    existing = null,
+    effectiveAt = new Date(),
+  } = {}
+) => {
+  const requestedScopeType = String(
+    data.scopeType ||
+      ACCESS_SCOPE_TYPES.PLAN
+  )
+    .trim()
+    .toLowerCase();
+
+  if (
+    requestedScopeType ===
+    ACCESS_SCOPE_TYPES.PLAN
+  ) {
+    const planPayload = existing
+      ? buildPlanCatalogUpdatePayload(
+          existing,
+          data,
+          { effectiveAt }
+        )
+      : buildPlanCatalogCreatePayload(
+          data,
+          { effectiveAt }
+        );
+
+    return {
+      ...planPayload,
+      campaignId:
+        data.campaignId ||
+        existing?.campaignId ||
+        null,
+      campaignName:
+        data.campaignName ||
+        existing?.campaignName ||
+        "",
+      campaignSource:
+        data.campaignSource ||
+        existing?.campaignSource ||
+        "",
+      updatedAt: serverTimestamp(),
+    };
+  }
+
+  const target =
+    normalizeAndValidateGrantTarget(
+      data,
+      {
+        allowedStatuses:
+          ACCESS_GRANT_STATUS_VALUES,
+      }
+    );
 
   return {
-    title: String(data.title || data.name || "").trim(),
-    name: String(data.name || data.title || "").trim(),
-    description: String(data.description || "").trim(),
+    title: String(
+      data.title ||
+        data.name ||
+        ""
+    ).trim(),
+    name: String(
+      data.name ||
+        data.title ||
+        ""
+    ).trim(),
+    description: String(
+      data.description || ""
+    ).trim(),
     course: target.course,
     planType: target.planType,
     scopeType: target.scopeType,
@@ -2299,59 +2365,136 @@ export const buildAccessProductPayload = (data = {}) => {
     itemTitle: target.itemTitle,
     itemIds: target.itemIds,
     bundleId: target.bundleId,
-    campaignId: data.campaignId || null,
-    campaignName: data.campaignName || "",
-    campaignSource: data.campaignSource || "",
-    validityDays: Number(data.validityDays || 0),
+    campaignId:
+      data.campaignId || null,
+    campaignName:
+      data.campaignName || "",
+    campaignSource:
+      data.campaignSource || "",
+    validityDays: Number(
+      data.validityDays || 0
+    ),
     accessFrom: target.accessFrom,
     accessUntil: target.accessUntil,
     price: Number(data.price || 0),
-    compareAtPrice: Number(data.compareAtPrice || 0),
+    compareAtPrice: Number(
+      data.compareAtPrice || 0
+    ),
     currency: data.currency || "INR",
     status: target.status,
-    isActive: data.isActive !== false,
-    notes: data.notes || data.adminNote || "",
-    adminNote: data.adminNote || data.notes || "",
+    isActive:
+      data.isActive !== false,
+    notes:
+      data.notes ||
+      data.adminNote ||
+      "",
+    adminNote:
+      data.adminNote ||
+      data.notes ||
+      "",
     updatedAt: serverTimestamp(),
   };
 };
 
-export const createAccessProduct = async (data = {}) => {
-  const actor = requireAdminActor(data.actor);
+export const createAccessProduct = async (
+  data = {}
+) => {
+  const actor = requireAdminActor(
+    data.actor
+  );
   const payload = {
-    ...buildAccessProductPayload(data),
+    ...buildAccessProductPayload(
+      data,
+      {
+        effectiveAt: new Date(),
+      }
+    ),
     createdAt: serverTimestamp(),
     createdBy: actor.uid,
     actorEmail: actor.email,
   };
 
   if (!payload.title) {
-    throw new Error("Access product title is required.");
+    throw new Error(
+      "Access product title is required."
+    );
   }
 
-  const docRef = await addDoc(
-    collection(db, ACCESS_COLLECTIONS.ACCESS_PRODUCTS),
-    payload
-  );
+  let productId = "";
+
+  if (
+    payload.scopeType ===
+    ACCESS_SCOPE_TYPES.PLAN
+  ) {
+    productId =
+      buildPlanCatalogDocumentId(
+        payload
+      );
+    const productRef = doc(
+      db,
+      ACCESS_COLLECTIONS.ACCESS_PRODUCTS,
+      productId
+    );
+
+    await runTransaction(
+      db,
+      async (transaction) => {
+        const existingSnapshot =
+          await transaction.get(
+            productRef
+          );
+
+        if (existingSnapshot.exists()) {
+          throw new Error(
+            "Access product already exists. Open it for an audited update."
+          );
+        }
+
+        transaction.set(
+          productRef,
+          payload
+        );
+      }
+    );
+  } else {
+    const docRef = await addDoc(
+      collection(
+        db,
+        ACCESS_COLLECTIONS.ACCESS_PRODUCTS
+      ),
+      payload
+    );
+    productId = docRef.id;
+  }
 
   await createAccessAuditLog({
     actor,
-    action: "create_access_product",
-    accessId: docRef.id,
+    action:
+      "create_access_product",
+    accessId: productId,
     after: {
-      id: docRef.id,
+      id: productId,
       ...payload,
     },
     metadata: {
-      collection: ACCESS_COLLECTIONS.ACCESS_PRODUCTS,
-      productId: docRef.id,
-      scopeType: payload.scopeType,
-      planType: payload.planType,
+      collection:
+        ACCESS_COLLECTIONS.ACCESS_PRODUCTS,
+      productId,
+      scopeType:
+        payload.scopeType,
+      planType:
+        payload.planType,
+      planCode:
+        payload.planCode ||
+        payload.planType,
+      priceVersion:
+        payload.priceVersion ||
+        null,
     },
   });
 
   return {
-    id: docRef.id,
+    id: productId,
     ...payload,
   };
 };
@@ -2415,6 +2558,143 @@ export const readAccessProductById = async (productId = "") => {
   );
 
   return toAccessRecord(productSnap);
+};
+
+export const listAccessProducts = async ({
+  maxCount = 100,
+} = {}) => {
+  const productSnapshot =
+    await getDocs(
+      collection(
+        db,
+        ACCESS_COLLECTIONS.ACCESS_PRODUCTS
+      )
+    );
+
+  return productSnapshot.docs
+    .map(toAccessRecord)
+    .filter(Boolean)
+    .sort((first, second) => {
+      const firstRank = Number(
+        first.accessRank ?? -1
+      );
+      const secondRank = Number(
+        second.accessRank ?? -1
+      );
+
+      if (firstRank !== secondRank) {
+        return firstRank - secondRank;
+      }
+
+      return String(
+        first.title ||
+          first.name ||
+          first.id
+      ).localeCompare(
+        String(
+          second.title ||
+            second.name ||
+            second.id
+        )
+      );
+    })
+    .slice(
+      0,
+      Math.max(
+        1,
+        Number(maxCount) || 100
+      )
+    );
+};
+
+export const updateAccessProduct = async (
+  id,
+  data = {}
+) => {
+  const productId =
+    requireAccessEntityId(
+      id,
+      "Access product id"
+    );
+  const actor = requireAdminActor(
+    data.actor
+  );
+  const productRef = doc(
+    db,
+    ACCESS_COLLECTIONS.ACCESS_PRODUCTS,
+    productId
+  );
+  const beforeSnapshot =
+    await getDoc(productRef);
+  const before =
+    toAccessRecord(
+      beforeSnapshot
+    );
+
+  if (!before) {
+    throw new Error(
+      "Access product was not found."
+    );
+  }
+
+  const payload =
+    buildAccessProductPayload(
+      {
+        ...before,
+        ...data,
+        productId:
+          before.productId ||
+          before.id,
+        planCode:
+          before.planCode ||
+          before.planType,
+      },
+      {
+        existing: before,
+        effectiveAt: new Date(),
+      }
+    );
+
+  await updateDoc(
+    productRef,
+    {
+      ...payload,
+      updatedBy: actor.uid,
+      actorEmail: actor.email,
+    }
+  );
+
+  await createAccessAuditLog({
+    actor,
+    action:
+      "update_access_product",
+    accessId: productId,
+    before,
+    after: {
+      id: productId,
+      ...payload,
+    },
+    metadata: {
+      collection:
+        ACCESS_COLLECTIONS.ACCESS_PRODUCTS,
+      productId,
+      scopeType:
+        payload.scopeType,
+      planType:
+        payload.planType,
+      planCode:
+        payload.planCode ||
+        payload.planType,
+      priceVersion:
+        payload.priceVersion ||
+        null,
+    },
+  });
+
+  return {
+    id: productId,
+    ...payload,
+  };
 };
 
 export const listAccessKeys = async ({ maxCount = 25 } = {}) => {
