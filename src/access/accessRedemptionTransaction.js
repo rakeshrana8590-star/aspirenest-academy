@@ -510,16 +510,41 @@ export const buildNextAccessKeyUsage = (
 export const requireAtomicAccessUntil = ({
   accessUntil = null,
   productId = "",
+  validityMode = "",
+  noExpiry = false,
+  untilManualChange = false,
 } = {}) => {
+  const normalizedMode =
+    cleanValue(
+      validityMode
+    ).toUpperCase();
+  const openEnded =
+    noExpiry === true ||
+    untilManualChange === true ||
+    normalizedMode ===
+      "NO_EXPIRY" ||
+    normalizedMode ===
+      "UNTIL_MANUAL_CHANGE";
+
   if (
     accessUntil === null ||
     accessUntil === undefined ||
     cleanValue(accessUntil) === ""
   ) {
+    if (openEnded) {
+      return null;
+    }
+
     throw new Error(
       productId
-        ? "Linked access product requires a fixed access-until date before student redemption."
-        : "Access key requires a fixed access-until date before student redemption."
+        ? "Linked access product requires an admin-selected validity before student redemption."
+        : "Access key requires an admin-selected validity before student redemption."
+    );
+  }
+
+  if (openEnded) {
+    throw new Error(
+      "Open-ended access cannot include an access-until date."
     );
   }
 

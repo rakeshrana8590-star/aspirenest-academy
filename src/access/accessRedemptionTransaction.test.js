@@ -371,7 +371,7 @@ describe("AspireNest atomic redemption transaction contract", () => {
     );
   });
 
-  test("atomic key redemption requires fixed access-until", () => {
+  test("atomic key redemption requires an admin-selected validity", () => {
     expect(
       requireAtomicAccessUntil({
         accessUntil: "2027-01-01",
@@ -383,7 +383,7 @@ describe("AspireNest atomic redemption transaction contract", () => {
         accessUntil: null,
       })
     ).toThrow(
-      "Access key requires a fixed access-until date before student redemption."
+      "Access key requires an admin-selected validity before student redemption."
     );
 
     expect(() =>
@@ -392,7 +392,52 @@ describe("AspireNest atomic redemption transaction contract", () => {
         productId: "product-1",
       })
     ).toThrow(
-      "Linked access product requires a fixed access-until date before student redemption."
+      "Linked access product requires an admin-selected validity before student redemption."
+    );
+  });
+
+  test("atomic redemption allows explicit no-expiry access", () => {
+    expect(
+      requireAtomicAccessUntil({
+        accessUntil: null,
+        noExpiry: true,
+      })
+    ).toBeNull();
+
+    expect(
+      requireAtomicAccessUntil({
+        accessUntil: "",
+        validityMode: "NO_EXPIRY",
+        productId: "plan-premium",
+      })
+    ).toBeNull();
+  });
+
+  test("atomic redemption allows until-manual-change access", () => {
+    expect(
+      requireAtomicAccessUntil({
+        accessUntil: null,
+        untilManualChange: true,
+      })
+    ).toBeNull();
+
+    expect(
+      requireAtomicAccessUntil({
+        accessUntil: "",
+        validityMode:
+          "UNTIL_MANUAL_CHANGE",
+      })
+    ).toBeNull();
+  });
+
+  test("open-ended access rejects a conflicting access-until date", () => {
+    expect(() =>
+      requireAtomicAccessUntil({
+        accessUntil: "2027-01-01",
+        noExpiry: true,
+      })
+    ).toThrow(
+      "Open-ended access cannot include an access-until date."
     );
   });
 });

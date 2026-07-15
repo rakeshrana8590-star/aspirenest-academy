@@ -72,6 +72,11 @@ import {
   buildPlanCatalogDocumentId,
   buildPlanCatalogUpdatePayload,
 } from "./accessPlanCatalogPersistence";
+import {
+  buildRuntimeEntitlementRecord,
+  buildRuntimeGrantRecord,
+  resolveAccessKeyGrantTerms,
+} from "./accessGrantRuntime";
 
 export const ACCESS_COLLECTIONS = Object.freeze({
   STUDENT_ACCESS: "studentAccess",
@@ -181,82 +186,137 @@ const readAccessQuery = async (fieldName, value) => {
 };
 
 const buildAccessPayload = (data = {}) => {
-  const grant = normalizeAndValidateGrantInput(
-    {
-      ...data,
-      email: normalizeAccessEmail(data.email),
-    },
-    {
-      allowEmailPrincipal: true,
-      allowedStatuses: ACCESS_GRANT_STATUS_VALUES,
-    }
-  );
+  const grant =
+    buildRuntimeGrantRecord(
+      {
+        ...data,
+        email:
+          normalizeAccessEmail(
+            data.email
+          ),
+      },
+      {
+        allowEmailPrincipal: true,
+        allowedStatuses:
+          ACCESS_GRANT_STATUS_VALUES,
+      }
+    );
 
   return {
     email: grant.email,
-    normalizedEmail: grant.normalizedEmail,
+    normalizedEmail:
+      grant.normalizedEmail,
     uid: grant.uid,
-    planType: grant.planType,
-    scopeType: grant.scopeType,
-    status: grant.status,
-    source: grant.source,
-    course: grant.course,
-    module: grant.module,
-    itemType: grant.itemType,
-    itemId: grant.itemId,
-    itemTitle: grant.itemTitle,
-    itemIds: grant.itemIds,
-    bundleId: grant.bundleId,
-    productId: data.productId || null,
-    accessKeyId: data.accessKeyId || null,
-    campaignId: data.campaignId || null,
-    campaignName: data.campaignName || "",
-    campaignSource: data.campaignSource || "",
-    learnerName: String(data.learnerName || data.name || "").trim(),
-    name: String(data.name || data.learnerName || "").trim(),
-    phone: String(data.phone || "").trim(),
-    accessFrom: grant.accessFrom,
-    accessUntil: grant.accessUntil,
-    notes: data.notes || data.adminNote || "",
-    adminNote: data.adminNote || data.notes || "",
-    updatedAt: serverTimestamp(),
+    planType:
+      grant.planType,
+    planCode:
+      grant.planCode,
+    accessRank:
+      grant.accessRank,
+    productId:
+      grant.productId,
+    purchaseTermsSnapshot:
+      grant.purchaseTermsSnapshot,
+    termsSnapshot:
+      grant.termsSnapshot,
+    priceVersion:
+      grant.purchaseTermsSnapshot
+        ?.priceVersion ??
+      data.priceVersion ??
+      null,
+    validityMode:
+      grant.validityMode,
+    noExpiry:
+      grant.noExpiry,
+    untilManualChange:
+      grant.untilManualChange,
+    scopeType:
+      grant.scopeType,
+    status:
+      grant.status,
+    source:
+      grant.source,
+    course:
+      grant.course,
+    module:
+      grant.module,
+    itemType:
+      grant.itemType,
+    itemId:
+      grant.itemId,
+    itemTitle:
+      grant.itemTitle,
+    itemIds:
+      grant.itemIds,
+    bundleId:
+      grant.bundleId,
+    accessKeyId:
+      data.accessKeyId ||
+      null,
+    campaignId:
+      data.campaignId ||
+      null,
+    campaignName:
+      data.campaignName ||
+      "",
+    campaignSource:
+      data.campaignSource ||
+      "",
+    learnerName:
+      String(
+        data.learnerName ||
+          data.name ||
+          ""
+      ).trim(),
+    name:
+      String(
+        data.name ||
+          data.learnerName ||
+          ""
+      ).trim(),
+    phone:
+      String(
+        data.phone || ""
+      ).trim(),
+    accessFrom:
+      grant.accessFrom,
+    accessUntil:
+      grant.accessUntil,
+    notes:
+      data.notes ||
+      data.adminNote ||
+      "",
+    adminNote:
+      data.adminNote ||
+      data.notes ||
+      "",
+    updatedAt:
+      serverTimestamp(),
   };
 };
 
 
 export { buildStudentEntitlementId };
 
-export const buildStudentEntitlementPayload = (accessRecord = {}, metadata = {}) => {
-  const uid = String(accessRecord.uid || metadata.uid || "").trim();
-  const normalizedEmail = normalizeAccessEmail(
-    accessRecord.normalizedEmail || accessRecord.email || metadata.email
-  );
-
-  if (!uid) {
-    throw new Error("Student entitlement requires uid.");
-  }
-
-  const entitlementId = buildStudentEntitlementId(accessRecord);
+export const buildStudentEntitlementPayload = (
+  accessRecord = {},
+  metadata = {}
+) => {
+  const runtime =
+    buildRuntimeEntitlementRecord(
+      accessRecord,
+      metadata
+    );
+  const entitlementId =
+    buildStudentEntitlementId(
+      accessRecord
+    );
 
   return {
     id: entitlementId,
-    uid,
-    email: normalizedEmail || null,
-    normalizedEmail,
-    accessId: accessRecord.id || metadata.accessId || null,
-    planType: normalizeAccessPlan(accessRecord.planType || ACCESS_PLAN_TYPES.FREE),
-    scopeType: accessRecord.scopeType || ACCESS_SCOPE_TYPES.PLAN,
-    module: accessRecord.module || null,
-    itemType: accessRecord.itemType || null,
-    itemId: accessRecord.itemId || null,
-    itemIds: Array.isArray(accessRecord.itemIds) ? accessRecord.itemIds : [],
-    bundleId: accessRecord.bundleId || null,
-    course: accessRecord.course || ACCESS_COURSE.CTET_TET,
-    status: String(accessRecord.status || ACCESS_STATUS.ACTIVE).trim().toLowerCase(),
-    source: accessRecord.source || ACCESS_SOURCE.ADMIN_MANUAL,
-    accessFrom: accessRecord.accessFrom || null,
-    accessUntil: accessRecord.accessUntil || null,
-    updatedAt: serverTimestamp(),
+    ...runtime,
+    updatedAt:
+      serverTimestamp(),
   };
 };
 
@@ -832,12 +892,31 @@ const writeIdempotentAccessGrant = async ({
         email: resolution.email,
         uid: resolution.uid,
         course: resolution.course,
-        scopeType: resolution.scopeType,
-        planType: resolution.planType,
-        accessFrom: resolution.accessFrom,
-        accessUntil: resolution.accessUntil,
+        scopeType:
+          resolution.scopeType,
+        planType:
+          resolution.planType,
+        planCode:
+          resolution.planCode,
+        accessRank:
+          resolution.accessRank,
+        productId:
+          resolution.productId,
+        purchaseTermsSnapshot:
+          resolution.purchaseTermsSnapshot,
+        validityMode:
+          resolution.validityMode,
+        noExpiry:
+          resolution.noExpiry,
+        untilManualChange:
+          resolution.untilManualChange,
+        accessFrom:
+          resolution.accessFrom,
+        accessUntil:
+          resolution.accessUntil,
         status:
-          data.status || ACCESS_STATUS.ACTIVE,
+          data.status ||
+          ACCESS_STATUS.ACTIVE,
       });
       const updatedAt = serverTimestamp();
       const writePayload = {
@@ -1082,68 +1161,218 @@ export const createUserAccessShell = async (data = {}) => {
   };
 };
 
-export const createAccessInvite = async (data = {}) => {
-  const actor = requireAdminActor(data.actor);
-  const normalizedEmail = normalizeAccessEmail(data.email);
-  const name = String(data.name || data.learnerName || "").trim();
-  const phone = String(data.phone || "").trim();
-  const inviteCode = String(data.inviteCode || createInviteCode()).trim();
-  const inviteLink = data.inviteLink || buildAccessInviteLink(inviteCode);
+export const createAccessInvite = async (
+  data = {}
+) => {
+  const actor =
+    requireAdminActor(
+      data.actor
+    );
+  const normalizedEmail =
+    normalizeAccessEmail(
+      data.email
+    );
+  const name =
+    String(
+      data.name ||
+        data.learnerName ||
+        ""
+    ).trim();
+  const phone =
+    String(
+      data.phone || ""
+    ).trim();
+  const inviteCode =
+    String(
+      data.inviteCode ||
+        createInviteCode()
+    ).trim();
+  const inviteLink =
+    data.inviteLink ||
+    buildAccessInviteLink(
+      inviteCode
+    );
 
   if (!normalizedEmail) {
-    throw new Error("Invite email is required.");
+    throw new Error(
+      "Invite email is required."
+    );
   }
 
+  const target =
+    normalizeAndValidateGrantTarget(
+      {
+        ...data,
+        email:
+          normalizedEmail,
+        status:
+          data.status ||
+          ACCESS_STATUS.PENDING,
+      },
+      {
+        allowedStatuses:
+          ACCESS_GRANT_STATUS_VALUES,
+      }
+    );
+
   const payload = {
-    email: normalizedEmail,
+    email:
+      normalizedEmail,
     normalizedEmail,
     inviteCode,
     inviteLink,
     learnerName: name,
     name,
     phone,
-    course: data.course || ACCESS_COURSE.CTET_TET,
-    planType: normalizeAccessPlan(data.planType || ACCESS_PLAN_TYPES.FREE),
-    status: data.status || ACCESS_STATUS.PENDING,
-    inviteStatus: data.inviteStatus || "pending",
-    sendInvite: data.sendInvite === true,
-    inviteType: data.inviteType || "manual",
-    deliveryStatus: data.deliveryStatus || "queued",
-    provider: data.provider || "phase14_backend_pending",
-    actionMode: data.actionMode || "password_setup_or_google_login",
-    expiresAt: data.expiresAt || getInviteExpiryDate(data.expiryDays || 7),
-    sentAt: data.sentAt || null,
-    usedAt: data.usedAt || null,
-    resendCount: Number(data.resendCount || 0),
-    profileCompletionRequired: data.profileCompletionRequired !== false,
-    profileCompletedAt: data.profileCompletedAt || null,
-    linkCopiedAt: data.linkCopiedAt || null,
-    manualSentAt: data.manualSentAt || null,
-    openedAt: data.openedAt || null,
+    course:
+      target.course,
+    planType:
+      target.planType,
+    planCode:
+      target.planCode,
+    accessRank:
+      target.accessRank,
+    productId:
+      target.productId,
+    purchaseTermsSnapshot:
+      target.purchaseTermsSnapshot,
+    termsSnapshot:
+      target.purchaseTermsSnapshot,
+    priceVersion:
+      target.purchaseTermsSnapshot
+        ?.priceVersion ??
+      data.priceVersion ??
+      null,
+    validityMode:
+      target.validityMode,
+    noExpiry:
+      target.noExpiry,
+    untilManualChange:
+      target.untilManualChange,
+    scopeType:
+      target.scopeType,
+    module:
+      target.module,
+    itemType:
+      target.itemType,
+    itemId:
+      target.itemId,
+    itemTitle:
+      target.itemTitle,
+    itemIds:
+      target.itemIds,
+    bundleId:
+      target.bundleId,
+    status:
+      target.status,
+    inviteStatus:
+      data.inviteStatus ||
+      "pending",
+    sendInvite:
+      data.sendInvite === true,
+    inviteType:
+      data.inviteType ||
+      "manual",
+    deliveryStatus:
+      data.deliveryStatus ||
+      "queued",
+    provider:
+      data.provider ||
+      "phase14_backend_pending",
+    actionMode:
+      data.actionMode ||
+      "password_setup_or_google_login",
+    expiresAt:
+      data.expiresAt ||
+      getInviteExpiryDate(
+        data.expiryDays || 7
+      ),
+    sentAt:
+      data.sentAt || null,
+    usedAt:
+      data.usedAt || null,
+    resendCount:
+      Number(
+        data.resendCount || 0
+      ),
+    profileCompletionRequired:
+      data.profileCompletionRequired !==
+      false,
+    profileCompletedAt:
+      data.profileCompletedAt ||
+      null,
+    linkCopiedAt:
+      data.linkCopiedAt ||
+      null,
+    manualSentAt:
+      data.manualSentAt ||
+      null,
+    openedAt:
+      data.openedAt ||
+      null,
     emailSent: false,
-    accessFrom: data.accessFrom || null,
-    accessUntil: data.accessUntil || null,
-    notes: data.notes || data.adminNote || "",
-    adminNote: data.adminNote || data.notes || "",
-    accessId: data.accessId || null,
-    createdAt: serverTimestamp(),
-    createdBy: actor.uid,
-    actorEmail: actor.email,
-    updatedAt: serverTimestamp(),
+    accessFrom:
+      target.accessFrom,
+    accessUntil:
+      target.accessUntil,
+    notes:
+      data.notes ||
+      data.adminNote ||
+      "",
+    adminNote:
+      data.adminNote ||
+      data.notes ||
+      "",
+    accessId:
+      data.accessId ||
+      null,
+    createdAt:
+      serverTimestamp(),
+    createdBy:
+      actor.uid,
+    actorEmail:
+      actor.email,
+    updatedAt:
+      serverTimestamp(),
   };
 
-  const docRef = doc(db, ACCESS_COLLECTIONS.ACCESS_INVITES, inviteCode);
-  await setDoc(docRef, payload);
+  const docRef = doc(
+    db,
+    ACCESS_COLLECTIONS.ACCESS_INVITES,
+    inviteCode
+  );
+  await setDoc(
+    docRef,
+    payload
+  );
 
   await createAccessAuditLog({
     actor,
-    action: "create_access_invite",
-    accessId: data.accessId || null,
-    email: normalizedEmail,
-    uid: data.uid || null,
+    action:
+      "create_access_invite",
+    accessId:
+      data.accessId ||
+      null,
+    email:
+      normalizedEmail,
+    uid:
+      data.uid ||
+      null,
     after: {
       id: docRef.id,
       ...payload,
+    },
+    metadata: {
+      scopeType:
+        target.scopeType,
+      planType:
+        target.planType,
+      planCode:
+        target.planCode,
+      accessRank:
+        target.accessRank,
+      productId:
+        target.productId,
     },
   });
 
@@ -2711,85 +2940,284 @@ export const listAccessKeys = async ({ maxCount = 25 } = {}) => {
     })
     .slice(0, maxCount);
 };
-export const buildAccessKeyPayload = (data = {}) => {
-  const code = normalizeAccessKeyCode(data.code);
+export const buildAccessKeyPayload = (
+  data = {}
+) => {
+  const code =
+    normalizeAccessKeyCode(
+      data.code
+    );
 
   if (!code) {
-    throw new Error("Access key code is required.");
+    throw new Error(
+      "Access key code is required."
+    );
   }
 
-  const target = normalizeAndValidateGrantTarget(data, {
-    allowedStatuses: ACCESS_KEY_GRANT_STATUS_VALUES,
-  });
+  const target =
+    normalizeAndValidateGrantTarget(
+      data,
+      {
+        allowedStatuses:
+          ACCESS_KEY_GRANT_STATUS_VALUES,
+      }
+    );
 
   return {
     code,
     normalizedCode: code,
-    productId: data.productId || null,
-    campaignId: data.campaignId || null,
-    campaignName: data.campaignName || "",
-    campaignSource: data.campaignSource || "",
-    course: target.course,
-    planType: target.planType,
-    scopeType: target.scopeType,
-    module: target.module,
-    itemType: target.itemType,
-    itemId: target.itemId,
-    itemTitle: target.itemTitle,
-    itemIds: target.itemIds,
-    bundleId: target.bundleId,
-    status: target.status,
-    maxUses: Number(data.maxUses || 1),
-    usedCount: Number(data.usedCount || 0),
-    assignedEmail: normalizeAccessEmail(data.assignedEmail || data.email || ""),
+    productId:
+      target.productId,
+    campaignId:
+      data.campaignId ||
+      null,
+    campaignName:
+      data.campaignName ||
+      "",
+    campaignSource:
+      data.campaignSource ||
+      "",
+    course:
+      target.course,
+    planType:
+      target.planType,
+    planCode:
+      target.planCode,
+    accessRank:
+      target.accessRank,
+    purchaseTermsSnapshot:
+      target.purchaseTermsSnapshot,
+    termsSnapshot:
+      target.purchaseTermsSnapshot,
+    priceVersion:
+      target.purchaseTermsSnapshot
+        ?.priceVersion ??
+      data.priceVersion ??
+      null,
+    validityMode:
+      target.validityMode,
+    noExpiry:
+      target.noExpiry,
+    untilManualChange:
+      target.untilManualChange,
+    scopeType:
+      target.scopeType,
+    module:
+      target.module,
+    itemType:
+      target.itemType,
+    itemId:
+      target.itemId,
+    itemTitle:
+      target.itemTitle,
+    itemIds:
+      target.itemIds,
+    bundleId:
+      target.bundleId,
+    status:
+      target.status,
+    maxUses:
+      Number(
+        data.maxUses || 1
+      ),
+    usedCount:
+      Number(
+        data.usedCount || 0
+      ),
+    assignedEmail:
+      normalizeAccessEmail(
+        data.assignedEmail ||
+          data.email ||
+          ""
+      ),
     redeemedByEmail: null,
     redeemedByUid: null,
     redeemedAt: null,
-    accessFrom: target.accessFrom,
-    accessUntil: target.accessUntil,
-    validityDays: Number(data.validityDays || 0),
-    notes: data.notes || data.adminNote || "",
-    adminNote: data.adminNote || data.notes || "",
-    updatedAt: serverTimestamp(),
+    accessFrom:
+      target.accessFrom,
+    accessUntil:
+      target.accessUntil,
+    validityDays:
+      Number(
+        data.validityDays ||
+          data.defaultValidityDays ||
+          0
+      ),
+    notes:
+      data.notes ||
+      data.adminNote ||
+      "",
+    adminNote:
+      data.adminNote ||
+      data.notes ||
+      "",
+    updatedAt:
+      serverTimestamp(),
   };
 };
 
-export const createAccessKey = async (data = {}) => {
-  const actor = requireAdminActor(data.actor);
-  const payload = {
-    ...buildAccessKeyPayload(data),
-    createdAt: serverTimestamp(),
-    createdBy: actor.uid,
-    actorEmail: actor.email,
-  };
+export const createAccessKey = async (
+  data = {}
+) => {
+  const actor =
+    requireAdminActor(
+      data.actor
+    );
+  const requestedProductId =
+    String(
+      data.productId || ""
+    ).trim();
+  let productRecord = null;
 
-  const existingKey = await readAccessKeyByCode(payload.code);
-
-  if (existingKey) {
-    throw new Error("Access key code already exists.");
+  if (requestedProductId) {
+    productRecord =
+      assertResolvableAccessProduct(
+        await readAccessProductById(
+          requestedProductId
+        ),
+        requestedProductId
+      );
   }
 
-  const docRef = doc(db, ACCESS_COLLECTIONS.ACCESS_KEYS, payload.code);
-  await setDoc(docRef, payload);
+  const productTarget =
+    productRecord
+      ? {
+          course:
+            productRecord.course,
+          planType:
+            productRecord.planCode ||
+            productRecord.planType,
+          planCode:
+            productRecord.planCode ||
+            productRecord.planType,
+          accessRank:
+            productRecord.accessRank,
+          productId:
+            productRecord.productId ||
+            productRecord.id,
+          scopeType:
+            productRecord.scopeType,
+          module:
+            productRecord.module,
+          itemType:
+            productRecord.itemType,
+          itemId:
+            productRecord.itemId,
+          itemTitle:
+            productRecord.itemTitle,
+          itemIds:
+            productRecord.itemIds,
+          bundleId:
+            productRecord.bundleId,
+          defaultValidityDays:
+            productRecord.defaultValidityDays,
+          validityDays:
+            data.validityDays ||
+            productRecord.defaultValidityDays ||
+            productRecord.validityDays ||
+            0,
+          priceVersion:
+            productRecord.priceVersion ||
+            null,
+        }
+      : {};
+
+  const payload = {
+    ...buildAccessKeyPayload({
+      ...data,
+      ...productTarget,
+      code:
+        data.code,
+      status:
+        data.status ||
+        ACCESS_KEY_STATUS.ACTIVE,
+      accessFrom:
+        data.accessFrom ||
+        null,
+      accessUntil:
+        data.accessUntil ||
+        null,
+      noExpiry:
+        data.noExpiry ===
+        true,
+      untilManualChange:
+        data.untilManualChange ===
+        true,
+      validityMode:
+        data.validityMode ||
+        null,
+      productId:
+        requestedProductId ||
+        productTarget.productId ||
+        null,
+    }),
+    createdAt:
+      serverTimestamp(),
+    createdBy:
+      actor.uid,
+    actorEmail:
+      actor.email,
+  };
+
+  const existingKey =
+    await readAccessKeyByCode(
+      payload.code
+    );
+
+  if (existingKey) {
+    throw new Error(
+      "Access key code already exists."
+    );
+  }
+
+  const docRef = doc(
+    db,
+    ACCESS_COLLECTIONS.ACCESS_KEYS,
+    payload.code
+  );
+  await setDoc(
+    docRef,
+    payload
+  );
 
   await createAccessAuditLog({
     actor,
-    action: "create_access_key",
-    accessId: docRef.id,
-    email: payload.assignedEmail,
+    action:
+      "create_access_key",
+    accessId:
+      docRef.id,
+    email:
+      payload.assignedEmail,
     after: {
       id: docRef.id,
       ...payload,
     },
     metadata: {
-      collection: ACCESS_COLLECTIONS.ACCESS_KEYS,
-      accessKeyId: docRef.id,
-      productId: payload.productId,
-      campaignId: payload.campaignId || null,
-      campaignName: payload.campaignName || "",
-      campaignSource: payload.campaignSource || "",
-      scopeType: payload.scopeType,
-      planType: payload.planType,
+      collection:
+        ACCESS_COLLECTIONS.ACCESS_KEYS,
+      accessKeyId:
+        docRef.id,
+      productId:
+        payload.productId,
+      campaignId:
+        payload.campaignId ||
+        null,
+      campaignName:
+        payload.campaignName ||
+        "",
+      campaignSource:
+        payload.campaignSource ||
+        "",
+      scopeType:
+        payload.scopeType,
+      planType:
+        payload.planType,
+      planCode:
+        payload.planCode,
+      accessRank:
+        payload.accessRank,
+      validityMode:
+        payload.validityMode,
     },
   });
 
@@ -2967,107 +3395,44 @@ export const validateAccessKeyForRedeem = async ({
   };
 };
 
-const resolveEntitlementValue = (primaryValue, fallbackValue, emptyValue = null) => {
-  if (Array.isArray(primaryValue)) {
-    return primaryValue.length ? primaryValue : Array.isArray(fallbackValue) ? fallbackValue : [];
+const assertResolvableAccessProduct = (
+  productRecord = null,
+  productId = ""
+) => {
+  if (
+    !String(
+      productId || ""
+    ).trim()
+  ) {
+    return null;
   }
-
-  if (primaryValue !== undefined && primaryValue !== null && String(primaryValue).trim() !== "") {
-    return primaryValue;
-  }
-
-  if (fallbackValue !== undefined && fallbackValue !== null && String(fallbackValue).trim() !== "") {
-    return fallbackValue;
-  }
-
-  return emptyValue;
-};
-
-const assertResolvableAccessProduct = (productRecord = null, productId = "") => {
-  if (!String(productId || "").trim()) return null;
 
   if (!productRecord?.id) {
-    throw new Error("Linked access product was not found.");
+    throw new Error(
+      "Linked access product was not found."
+    );
   }
 
-  const productStatus = String(productRecord.status || ACCESS_STATUS.ACTIVE)
-    .trim()
-    .toLowerCase();
+  const productStatus =
+    String(
+      productRecord.status ||
+        ACCESS_STATUS.ACTIVE
+    )
+      .trim()
+      .toLowerCase();
 
-  if (productRecord.isActive === false || productStatus !== ACCESS_STATUS.ACTIVE) {
-    throw new Error("Linked access product is not active.");
+  if (
+    productRecord.isActive ===
+      false ||
+    productStatus !==
+      ACCESS_STATUS.ACTIVE
+  ) {
+    throw new Error(
+      "Linked access product is not active."
+    );
   }
 
   return productRecord;
-};
-
-const resolveAccessKeyEntitlement = ({ keyRecord = {}, productRecord = null } = {}) => {
-  const hasProduct = Boolean(productRecord?.id);
-  const entitlementSource = hasProduct ? productRecord : keyRecord;
-  const fallbackSource = hasProduct ? keyRecord : {};
-
-  return {
-    course: resolveEntitlementValue(
-      entitlementSource.course,
-      fallbackSource.course,
-      ACCESS_COURSE.CTET_TET
-    ),
-    planType: normalizeAccessPlan(
-      resolveEntitlementValue(
-        entitlementSource.planType,
-        fallbackSource.planType,
-        ACCESS_PLAN_TYPES.FREE
-      )
-    ),
-    scopeType: resolveEntitlementValue(
-      entitlementSource.scopeType,
-      fallbackSource.scopeType,
-      ACCESS_SCOPE_TYPES.PLAN
-    ),
-    module: resolveEntitlementValue(entitlementSource.module, fallbackSource.module, null),
-    itemType: resolveEntitlementValue(
-      entitlementSource.itemType,
-      fallbackSource.itemType,
-      null
-    ),
-    itemId: resolveEntitlementValue(entitlementSource.itemId, fallbackSource.itemId, null),
-    itemTitle: resolveEntitlementValue(
-      entitlementSource.itemTitle,
-      fallbackSource.itemTitle,
-      ""
-    ),
-    itemIds: resolveEntitlementValue(
-      entitlementSource.itemIds,
-      fallbackSource.itemIds,
-      []
-    ),
-    bundleId: resolveEntitlementValue(
-      entitlementSource.bundleId,
-      fallbackSource.bundleId,
-      null
-    ),
-    productId: keyRecord.productId || productRecord?.id || null,
-    campaignId: resolveEntitlementValue(keyRecord.campaignId, productRecord?.campaignId, null),
-    campaignName: resolveEntitlementValue(keyRecord.campaignName, productRecord?.campaignName, ""),
-    campaignSource: resolveEntitlementValue(keyRecord.campaignSource, productRecord?.campaignSource, ""),
-    accessFrom: resolveEntitlementValue(
-      keyRecord.accessFrom,
-      productRecord?.accessFrom,
-      getTodayDateString()
-    ),
-    accessUntil: resolveEntitlementValue(
-      keyRecord.accessUntil,
-      productRecord?.accessUntil,
-      null
-    ),
-    validityDays: Number(
-      resolveEntitlementValue(
-        keyRecord.validityDays,
-        productRecord?.validityDays,
-        0
-      ) || 0
-    ),
-  };
 };
 
 export const redeemAccessKeyFoundation = async ({
@@ -3184,9 +3549,10 @@ export const redeemAccessKeyFoundation = async ({
       }
 
       const entitlement =
-        resolveAccessKeyEntitlement({
+        resolveAccessKeyGrantTerms({
           keyRecord,
           productRecord,
+          now: new Date(),
         });
       const accessUntil =
         requireAtomicAccessUntil({
@@ -3194,6 +3560,12 @@ export const redeemAccessKeyFoundation = async ({
             entitlement.accessUntil,
           productId:
             entitlement.productId,
+          validityMode:
+            entitlement.validityMode,
+          noExpiry:
+            entitlement.noExpiry,
+          untilManualChange:
+            entitlement.untilManualChange,
         });
       const keyUsage =
         buildNextAccessKeyUsage(
@@ -3208,8 +3580,24 @@ export const redeemAccessKeyFoundation = async ({
           name:
             name || learnerName || "",
           phone,
-          course: entitlement.course,
-          planType: entitlement.planType,
+          course:
+            entitlement.course,
+          planType:
+            entitlement.planType,
+          planCode:
+            entitlement.planCode,
+          accessRank:
+            entitlement.accessRank,
+          productId:
+            entitlement.productId,
+          purchaseTermsSnapshot:
+            entitlement.purchaseTermsSnapshot,
+          validityMode:
+            entitlement.validityMode,
+          noExpiry:
+            entitlement.noExpiry,
+          untilManualChange:
+            entitlement.untilManualChange,
           scopeType:
             entitlement.scopeType,
           module: entitlement.module,
@@ -3222,10 +3610,10 @@ export const redeemAccessKeyFoundation = async ({
           )
             ? entitlement.itemIds
             : [],
-          bundleId: entitlement.bundleId,
-          productId:
-            entitlement.productId,
-          accessKeyId: keyRecord.id,
+          bundleId:
+            entitlement.bundleId,
+          accessKeyId:
+            keyRecord.id,
           campaignId:
             entitlement.campaignId,
           campaignName:
@@ -3349,6 +3737,25 @@ export const redeemAccessKeyFoundation = async ({
           planType:
             entitlement.planType ||
             ACCESS_PLAN_TYPES.FREE,
+          planCode:
+            entitlement.planCode ||
+            entitlement.planType ||
+            ACCESS_PLAN_TYPES.FREE,
+          accessRank:
+            entitlement.accessRank ??
+            null,
+          validityMode:
+            entitlement.validityMode ||
+            null,
+          noExpiry:
+            entitlement.noExpiry ===
+            true,
+          untilManualChange:
+            entitlement.untilManualChange ===
+            true,
+          purchaseTermsSnapshot:
+            entitlement.purchaseTermsSnapshot ||
+            null,
           entitlementId:
             entitlementPayload.id,
           source:
