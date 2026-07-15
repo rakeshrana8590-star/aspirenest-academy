@@ -273,7 +273,7 @@ export default function AdminAccessAddRoute() {
 
     if (duplicateCourseMatches.length) {
       const proceedDuplicate = window.confirm(
-        "Existing access found for this email/course. Continue only if this is intentional."
+        "Existing access found for this learner. Matching logical grant will be updated safely instead of creating another active duplicate. Continue?"
       );
 
       if (!proceedDuplicate) return;
@@ -297,14 +297,25 @@ export default function AdminAccessAddRoute() {
         actor,
       });
 
-      if (form.createUserShell === "yes") {
+      const accessWriteMode =
+        accessRecord.accessWriteMode || "created";
+      const createdNewGrant =
+        accessWriteMode === "created";
+
+      if (
+        createdNewGrant &&
+        form.createUserShell === "yes"
+      ) {
         await createUserAccessShell({
           ...payload,
           actor,
         });
       }
 
-      if (form.sendInvite === "yes") {
+      if (
+        createdNewGrant &&
+        form.sendInvite === "yes"
+      ) {
         await createAccessInvite({
           ...payload,
           actor,
@@ -315,10 +326,27 @@ export default function AdminAccessAddRoute() {
         });
       }
 
+      const skippedFollowUp =
+        !createdNewGrant &&
+        (
+          form.createUserShell === "yes" ||
+          form.sendInvite === "yes"
+        );
+
       setSuccessMessage(
-        "Access saved successfully for " +
+        (
+          createdNewGrant
+            ? "New logical grant created"
+            : "Existing logical grant updated safely"
+        ) +
+          " for " +
           normalizedEmail +
-          ". Audit log created."
+          ". Audit log created." +
+          (
+            skippedFollowUp
+              ? " Duplicate user shell/invite creation was skipped; use Invite Manager for an intentional resend."
+              : ""
+          )
       );
 
       setShowConfirm(false);

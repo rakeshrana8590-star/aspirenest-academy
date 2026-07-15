@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 
 import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
 import { addAccessNote, extendAccess, listStudentAccess, normalizeAccessEmail, revokeAccess, updateAccessStatus, upgradeAccess } from "../accessService";
+import {
+  ACCESS_PLAN_LEVELS,
+  ACCESS_SCOPE_TYPES,
+} from "../accessConstants";
 import { AdminButton, AdminConfirmDialog, AdminEmptyState, AdminErrorBox, AdminFilterBar, AdminFilterField, AdminPortalActionMenu, AdminStatusPill } from "../../components/shared/admin";
 import "../../styles/shared/adminSystem.css";
 
@@ -18,6 +22,22 @@ const sourceOptions = ["all", "redeem_key", "admin_manual", "bulk_import", "paym
 const planOptions = ["all", "FREE", "BASIC", "PREMIUM", "MENTORSHIP"];
 const scopeOptions = ["all", "plan", "module", "item", "bundle"];
 const moduleOptions = ["all", "mock_test", "notes", "video", "current_affairs", "roadmap"];
+
+const getPlanLevel = (planType = "FREE") =>
+  ACCESS_PLAN_LEVELS[
+    String(planType || "FREE")
+      .trim()
+      .toUpperCase()
+  ] || 0;
+
+const isPlanScopeRecord = (record = {}) =>
+  String(
+    record.scopeType ||
+      ACCESS_SCOPE_TYPES.PLAN
+  )
+    .trim()
+    .toLowerCase() ===
+  ACCESS_SCOPE_TYPES.PLAN;
 
 const lockedActionConfigs = {
   extend: {
@@ -64,7 +84,7 @@ const lockedActionConfigs = {
   },
   plan: {
     title: "Plan Change",
-    message: "This will update the selected access plan and set the access status to ACTIVE. Audit log will be created.",
+    message: "This PLAN-only action can upgrade the selected plan and set status to ACTIVE. ITEM, MODULE, and BUNDLE records cannot be converted into plans.",
     requiresText: "PLAN",
     tone: "info",
   },
@@ -446,8 +466,25 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
         return;
       }
 
+      if (!isPlanScopeRecord(selectedRecord)) {
+        setMessage(
+          "Plan change is allowed only for PLAN access records. ITEM, MODULE, and BUNDLE grants remain isolated."
+        );
+        return;
+      }
+
       if (!actionDraft.planType) {
         setMessage("Select new access plan before confirming plan change.");
+        return;
+      }
+
+      if (
+        getPlanLevel(actionDraft.planType) <
+        getPlanLevel(selectedRecord.planType)
+      ) {
+        setMessage(
+          "Plan downgrade is blocked in this screen. Use a separately approved correction workflow."
+        );
         return;
       }
 
@@ -1012,16 +1049,33 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
                 value={actionDraft.planType}
                 onChange={(event) => handleActionDraftChange("planType", event.target.value)}
               >
-                <option value="FREE">FREE</option>
-                <option value="BASIC">BASIC</option>
-                <option value="PREMIUM">PREMIUM</option>
-                <option value="MENTORSHIP">MENTORSHIP</option>
+                {[
+                  "FREE",
+                  "BASIC",
+                  "PREMIUM",
+                  "MENTORSHIP",
+                ].map((planType) => (
+                  <option
+                    key={planType}
+                    value={planType}
+                    disabled={
+                      getPlanLevel(planType) <
+                      getPlanLevel(
+                        selectedRecord?.planType
+                      )
+                    }
+                  >
+                    {planType}
+                  </option>
+                ))}
               </select>
             </label>
           ) : null}
 
           {lockedActionConfirm.type === "plan" ? (
-            <p>Plan change will also set this access record status to ACTIVE.</p>
+            <p>
+              Only PLAN records can be changed here. Downgrades are blocked; ITEM, MODULE, and BUNDLE grants stay isolated.
+            </p>
           ) : null}
 
           {lockedActionConfirm.type === "revoke" ? (
@@ -1113,14 +1167,17 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
             tone: "danger",
             onClick: () => openLockedActionConfirm("revoke"),
           },
-          {
-            key: "plan-change",
-            label: "Plan Change",
-            description: "Update plan with audit log.",
-            tone: "info",
-            onClick: () => openLockedActionConfirm("plan"),
-          },
-        ]}
+          isPlanScopeRecord(selectedRecord)
+            ? {
+                key: "plan-change",
+                label: "Plan Change",
+                description: "PLAN-only upgrade with audit log.",
+                tone: "info",
+                onClick: () =>
+                  openLockedActionConfirm("plan"),
+              }
+            : null,
+        ].filter(Boolean)}
       />
     </AdminAccessRouteShell>
   );

@@ -5,6 +5,7 @@ import {
   getDoc,
   getDocs,
   query,
+  runTransaction,
   serverTimestamp,
   setDoc,
   updateDoc,
@@ -30,6 +31,15 @@ import {
   normalizeAndValidateGrantInput,
   normalizeAndValidateGrantTarget,
 } from "./accessGrantContract";
+import {
+  buildDeterministicGrantDocumentId,
+  buildGrantFamilyKey,
+  buildIdempotentGrantResolution,
+  assertGrantCandidateIdentitySafe,
+  findGrantCandidates,
+  isGrantCandidate,
+  resolvePlanChange,
+} from "./accessGrantLifecycle";
 
 export const ACCESS_COLLECTIONS = Object.freeze({
   STUDENT_ACCESS: "studentAccess",
@@ -317,23 +327,274 @@ const getRedeemedAccessByKeyForLearner = async ({
   );
 };
 
+const buildAccessAuditPayload = (data = {}, actor = {}) => ({
+  action: data.action || "access_action",
+  accessId: data.accessId || null,
+  email: normalizeAccessEmail(data.email),
+  uid: data.uid || null,
+  before: data.before || null,
+  after: data.after || null,
+  metadata: data.metadata || {},
+  createdAt: serverTimestamp(),
+  createdBy: actor.uid,
+  actorEmail: actor.email,
+  actorRole: actor.role,
+});
+
 export const createAccessAuditLog = async (data = {}) => {
   const actor = requireAdminActor(data.actor);
-  const auditPayload = {
-    action: data.action || "access_action",
-    accessId: data.accessId || null,
-    email: normalizeAccessEmail(data.email),
-    uid: data.uid || null,
-    before: data.before || null,
-    after: data.after || null,
-    metadata: data.metadata || {},
-    createdAt: serverTimestamp(),
-    createdBy: actor.uid,
-    actorEmail: actor.email,
-    actorRole: actor.role,
-  };
+  const auditPayload = buildAccessAuditPayload(data, actor);
 
-  return addDoc(collection(db, ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS), auditPayload);
+  return addDoc(
+    collection(db, ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS),
+    auditPayload
+  );
+};
+
+const uniqueAccessRecords = (records = []) => {
+  const recordMap = new Map();
+
+  (Array.isArray(records) ? records : [])
+    .filter(Boolean)
+    .forEach((record) => {
+      const key = String(record.id || "").trim();
+
+      if (key && !recordMap.has(key)) {
+        recordMap.set(key, record);
+      }
+    });
+
+  return Array.from(recordMap.values());
+};
+
+const writeIdempotentAccessGrant = async ({
+  data = {},
+  actor = {},
+  auditAction = "create_manual_access",
+  auditMetadata = {},
+  extraPayload = {},
+  allowReactivation = false,
+  reactivationReason = "",
+} = {}) => {
+  const adminActor = requireAdminActor(actor);
+  const requestedGrant = normalizeAndValidateGrantInput(
+    {
+      ...data,
+      email: normalizeAccessEmail(data.email),
+    },
+    {
+      allowEmailPrincipal: true,
+      allowedStatuses: ACCESS_GRANT_STATUS_VALUES,
+    }
+  );
+  const planFamily =
+    requestedGrant.scopeType === ACCESS_SCOPE_TYPES.PLAN;
+  const uidMatches = requestedGrant.uid
+    ? await getAccessByUid(requestedGrant.uid)
+    : [];
+  const emailMatches = requestedGrant.normalizedEmail
+    ? await getAccessByEmail(requestedGrant.normalizedEmail)
+    : [];
+  const candidateMatches = findGrantCandidates(
+    uniqueAccessRecords([
+      ...uidMatches,
+      ...emailMatches,
+    ]),
+    requestedGrant,
+    { planFamily }
+  );
+  assertGrantCandidateIdentitySafe(
+    candidateMatches,
+    requestedGrant
+  );
+  const candidate = candidateMatches[0] || null;
+  const requestedFamilyKey =
+    buildGrantFamilyKey(requestedGrant);
+  const accessId =
+    candidate?.id ||
+    buildDeterministicGrantDocumentId(
+      requestedFamilyKey
+    );
+  const accessRef = doc(
+    db,
+    ACCESS_COLLECTIONS.STUDENT_ACCESS,
+    accessId
+  );
+  const auditRef = doc(
+    collection(
+      db,
+      ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS
+    )
+  );
+
+  const result = await runTransaction(
+    db,
+    async (transaction) => {
+      const currentSnapshot =
+        await transaction.get(accessRef);
+      const current = toAccessRecord(
+        currentSnapshot
+      );
+
+      if (
+        current &&
+        !isGrantCandidate(
+          current,
+          requestedGrant,
+          { planFamily }
+        )
+      ) {
+        throw new Error(
+          "Deterministic grant identity collision detected."
+        );
+      }
+
+      const resolution =
+        buildIdempotentGrantResolution({
+          existingRecord: current,
+          incomingGrant: requestedGrant,
+          allowReactivation,
+          reactivationReason,
+        });
+      const normalizedPayload = buildAccessPayload({
+        ...data,
+        email: resolution.email,
+        uid: resolution.uid,
+        course: resolution.course,
+        scopeType: resolution.scopeType,
+        planType: resolution.planType,
+        accessFrom: resolution.accessFrom,
+        accessUntil: resolution.accessUntil,
+        status:
+          data.status || ACCESS_STATUS.ACTIVE,
+      });
+      const updatedAt = serverTimestamp();
+      const writePayload = {
+        ...normalizedPayload,
+        ...extraPayload,
+        grantKey: resolution.grantKey,
+        grantFamilyKey:
+          resolution.grantFamilyKey,
+        grantRevision:
+          resolution.grantRevision,
+        idempotencyVersion: 1,
+        lastGrantedAt: updatedAt,
+        updatedAt,
+        updatedBy: adminActor.uid,
+      };
+
+      if (resolution.reactivated) {
+        writePayload.reactivatedAt = updatedAt;
+        writePayload.reactivationReason =
+          resolution.reactivationReason;
+      }
+
+      if (!current) {
+        writePayload.createdAt = updatedAt;
+        writePayload.createdBy =
+          adminActor.uid;
+        writePayload.actorEmail =
+          adminActor.email;
+      }
+
+      if (current) {
+        transaction.set(
+          accessRef,
+          writePayload,
+          { merge: true }
+        );
+      } else {
+        transaction.set(
+          accessRef,
+          writePayload
+        );
+      }
+
+      const after = {
+        ...(current || {}),
+        ...writePayload,
+        id: accessId,
+      };
+      const metadata = {
+        ...auditMetadata,
+        grantKey: resolution.grantKey,
+        grantFamilyKey:
+          resolution.grantFamilyKey,
+        writeMode: resolution.writeMode,
+        duplicateMatchesDetected:
+          Math.max(
+            candidateMatches.length - 1,
+            0
+          ),
+        preservedHigherPlan:
+          resolution.preservedHigherPlan,
+        preservedLongerValidity:
+          resolution.preservedLongerValidity,
+        reactivated:
+          resolution.reactivated,
+      };
+
+      transaction.set(
+        auditRef,
+        buildAccessAuditPayload(
+          {
+            action: auditAction,
+            accessId,
+            email: resolution.email,
+            uid: resolution.uid,
+            before: current,
+            after: writePayload,
+            metadata,
+          },
+          adminActor
+        )
+      );
+
+      return {
+        after,
+        accessWriteMode:
+          resolution.writeMode,
+        duplicateMatchesDetected:
+          Math.max(
+            candidateMatches.length - 1,
+            0
+          ),
+        preservedHigherPlan:
+          resolution.preservedHigherPlan,
+        preservedLongerValidity:
+          resolution.preservedLongerValidity,
+        reactivated:
+          resolution.reactivated,
+      };
+    }
+  );
+
+  await syncStudentEntitlementIfUid(
+    result.after,
+    {
+      accessId,
+      actorUid: adminActor.uid,
+      actorEmail: adminActor.email,
+      source:
+        result.accessWriteMode === "created"
+          ? "idempotent_access_created"
+          : "idempotent_access_updated",
+    }
+  );
+
+  return {
+    ...result.after,
+    id: accessId,
+    accessWriteMode:
+      result.accessWriteMode,
+    duplicateMatchesDetected:
+      result.duplicateMatchesDetected,
+    preservedHigherPlan:
+      result.preservedHigherPlan,
+    preservedLongerValidity:
+      result.preservedLongerValidity,
+    reactivated: result.reactivated,
+  };
 };
 
 export const listStudentAccess = async ({ maxCount = 50, email = "" } = {}) => {
@@ -354,43 +615,34 @@ export const listStudentAccess = async ({ maxCount = 50, email = "" } = {}) => {
     })
     .slice(0, maxCount);
 };
-export const createManualAccess = async (data = {}) => {
-  const actor = requireAdminActor(data.actor);
-  const payload = {
-    ...buildAccessPayload({
+export const createManualAccess = async (data = {}) =>
+  writeIdempotentAccessGrant({
+    data: {
       ...data,
-      source: data.source || ACCESS_SOURCE.ADMIN_MANUAL,
-      status: data.status || ACCESS_STATUS.ACTIVE,
-    }),
-    createdAt: serverTimestamp(),
-    createdBy: actor.uid,
-    actorEmail: actor.email,
-  };
-
-  const docRef = await addDoc(collection(db, ACCESS_COLLECTIONS.STUDENT_ACCESS), payload);
-  const savedAccess = { id: docRef.id, ...payload };
-
-  await syncStudentEntitlementIfUid(savedAccess, {
-    accessId: docRef.id,
-    actorUid: actor.uid,
-    actorEmail: actor.email,
-    source: "create_manual_access",
+      source:
+        data.source ||
+        ACCESS_SOURCE.ADMIN_MANUAL,
+      status:
+        data.status ||
+        ACCESS_STATUS.ACTIVE,
+    },
+    actor: data.actor,
+    auditAction: "create_manual_access",
+    auditMetadata: {
+      source:
+        data.source ||
+        ACCESS_SOURCE.ADMIN_MANUAL,
+      requestedBy:
+        "admin_access_manager",
+    },
+    allowReactivation:
+      data.allowReactivation === true,
+    reactivationReason:
+      data.reactivationReason ||
+      data.adminNote ||
+      data.notes ||
+      "",
   });
-
-  await createAccessAuditLog({
-    actor,
-    action: "create_manual_access",
-    accessId: docRef.id,
-    email: payload.email,
-    uid: payload.uid,
-    after: payload,
-  });
-
-  return {
-    id: docRef.id,
-    ...payload,
-  };
-};
 
 export const createUserAccessShell = async (data = {}) => {
   const actor = requireAdminActor(data.actor);
@@ -979,41 +1231,125 @@ export const addAccessNote = async (id, note = "", actor = {}, metadata = {}) =>
   };
 };
 
-export const upgradeAccess = async (id, planType, actor = {}, metadata = {}) => {
+export const upgradeAccess = async (
+  id,
+  planType,
+  actor = {},
+  metadata = {}
+) => {
   const accessId = requireAccessId(id);
   const adminActor = requireAdminActor(actor);
-  const before = await readAccessById(accessId);
-  const payload = {
-    planType: normalizeAccessPlan(planType),
-    status: ACCESS_STATUS.ACTIVE,
-    updatedAt: serverTimestamp(),
-    updatedBy: adminActor.uid,
-  };
+  const accessRef = doc(
+    db,
+    ACCESS_COLLECTIONS.STUDENT_ACCESS,
+    accessId
+  );
+  const auditRef = doc(
+    collection(
+      db,
+      ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS
+    )
+  );
 
-  await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId), payload);
-  const after = { ...(before || {}), ...payload, id: accessId };
+  const result = await runTransaction(
+    db,
+    async (transaction) => {
+      const accessSnapshot =
+        await transaction.get(accessRef);
+      const before = toAccessRecord(
+        accessSnapshot
+      );
 
-  await syncStudentEntitlementIfUid(after, {
-    accessId,
-    actorUid: adminActor.uid,
-    actorEmail: adminActor.email,
-    source: "upgrade_access",
-  });
+      if (!before) {
+        throw new Error(
+          "Access record was not found."
+        );
+      }
 
-  await createAccessAuditLog({
-    actor: adminActor,
-    action: "upgrade_access",
-    accessId,
-    email: before?.email,
-    uid: before?.uid,
-    before,
-    after: payload,
-    metadata,
-  });
+      const planChange = resolvePlanChange({
+        record: before,
+        requestedPlanType: planType,
+        allowDowngrade:
+          metadata.allowDowngrade === true,
+        reason:
+          metadata.note ||
+          metadata.reason ||
+          "",
+      });
+      const updatedAt = serverTimestamp();
+      const payload = {
+        planType: planChange.planType,
+        scopeType: ACCESS_SCOPE_TYPES.PLAN,
+        status: ACCESS_STATUS.ACTIVE,
+        grantKey: planChange.grantKey,
+        grantFamilyKey:
+          planChange.grantFamilyKey,
+        grantRevision:
+          planChange.grantRevision,
+        idempotencyVersion: 1,
+        planChangedAt: updatedAt,
+        updatedAt,
+        updatedBy: adminActor.uid,
+      };
+
+      transaction.update(
+        accessRef,
+        payload
+      );
+
+      transaction.set(
+        auditRef,
+        buildAccessAuditPayload(
+          {
+            action: "upgrade_access",
+            accessId,
+            email: before.email,
+            uid: before.uid,
+            before,
+            after: payload,
+            metadata: {
+              ...metadata,
+              previousPlanType:
+                planChange.currentPlanType,
+              nextPlanType:
+                planChange.planType,
+              isDowngrade:
+                planChange.isDowngrade,
+              grantKey:
+                planChange.grantKey,
+              grantFamilyKey:
+                planChange.grantFamilyKey,
+            },
+          },
+          adminActor
+        )
+      );
+
+      return {
+        before,
+        after: {
+          ...before,
+          ...payload,
+          id: accessId,
+        },
+        payload,
+      };
+    }
+  );
+
+  await syncStudentEntitlementIfUid(
+    result.after,
+    {
+      accessId,
+      actorUid: adminActor.uid,
+      actorEmail: adminActor.email,
+      source: "upgrade_access",
+    }
+  );
 
   return {
     id: accessId,
-    ...payload,
+    ...result.payload,
   };
 };
 
@@ -1780,159 +2116,124 @@ function addPaymentAccessMonths(date, months) {
   return nextDate;
 }
 
-function getPaymentPlanLevel(planType) {
-  return ACCESS_PLAN_LEVELS[normalizeAccessPlan(planType)] || 0;
-}
-
-function uniquePaymentAccessRecords(records = []) {
-  const recordMap = new Map();
-
-  records.filter(Boolean).forEach(function(record) {
-    const key =
-      record.id ||
-      (String(record.uid || "") + ":" + String(record.normalizedEmail || record.email || ""));
-
-    if (key && !recordMap.has(key)) {
-      recordMap.set(key, record);
-    }
-  });
-
-  return Array.from(recordMap.values());
-}
-
-function pickPaymentAccessRecord(records = []) {
-  return records.find(function(record) {
-    return (record.course || ACCESS_COURSE.CTET_TET) === ACCESS_COURSE.CTET_TET && (record.scopeType || ACCESS_SCOPE_TYPES.PLAN) === ACCESS_SCOPE_TYPES.PLAN;
-  }) || records[0] || null;
-}
-
-export async function grantPaymentAccess(payment = {}, actor = {}) {
-  const adminActor = requireAdminActor(actor);
-  const normalizedEmail = normalizeAccessEmail(payment.studentEmail || payment.email || payment.userEmail);
-  const uid = String(payment.userId || payment.uid || "").trim();
+export async function grantPaymentAccess(
+  payment = {},
+  actor = {}
+) {
+  const normalizedEmail = normalizeAccessEmail(
+    payment.studentEmail ||
+      payment.email ||
+      payment.userEmail
+  );
+  const uid = String(
+    payment.userId ||
+      payment.uid ||
+      ""
+  ).trim();
 
   if (!normalizedEmail && !uid) {
-    throw new Error("Payment access requires learner email or user id.");
+    throw new Error(
+      "Payment access requires learner email or user id."
+    );
   }
 
-  const paymentPlanType = resolvePaymentPlanType(payment);
-  const validityMonths = resolvePaymentValidityMonths(payment);
-  const accessFrom = payment.accessFrom || payment.purchaseDate || new Date();
+  const paymentPlanType =
+    resolvePaymentPlanType(payment);
+  const validityMonths =
+    resolvePaymentValidityMonths(payment);
+  const accessFrom =
+    payment.accessFrom ||
+    payment.purchaseDate ||
+    new Date();
   const paymentAccessUntil =
     payment.accessUntil ||
     payment.expiryDate ||
-    addPaymentAccessMonths(accessFrom, validityMonths);
+    addPaymentAccessMonths(
+      accessFrom,
+      validityMonths
+    );
 
-  const uidMatches = uid ? await getAccessByUid(uid) : [];
-  const emailMatches = normalizedEmail ? await getAccessByEmail(normalizedEmail) : [];
-  const existingAccess = pickPaymentAccessRecord(uniquePaymentAccessRecords(uidMatches.concat(emailMatches)));
-
-  const before = existingAccess ? Object.assign({}, existingAccess) : null;
-  const existingPlanLevel = before ? getPaymentPlanLevel(before.planType) : -1;
-  const paymentPlanLevel = getPaymentPlanLevel(paymentPlanType);
-  const shouldPreserveExistingPlan = Boolean(before && Math.max(existingPlanLevel, paymentPlanLevel) === existingPlanLevel && existingPlanLevel !== paymentPlanLevel);
-  const finalPlanType = shouldPreserveExistingPlan ? normalizeAccessPlan(before.planType) : paymentPlanType;
-
-  const existingUntilDate = before ? toPaymentAccessDate(before.accessUntil) : null;
-  const paymentUntilDate = toPaymentAccessDate(paymentAccessUntil);
-  const shouldPreserveExistingUntil = Boolean(existingUntilDate && paymentUntilDate && Math.max(existingUntilDate.getTime(), paymentUntilDate.getTime()) === existingUntilDate.getTime() && existingUntilDate.getTime() !== paymentUntilDate.getTime());
-  const finalAccessUntil = shouldPreserveExistingUntil ? before.accessUntil : paymentAccessUntil;
-
-  const payload = Object.assign({}, buildAccessPayload({
-    email: normalizedEmail,
-    uid,
-    name: payment.studentName || payment.name || "",
-    learnerName: payment.studentName || payment.learnerName || payment.name || "",
-    phone: payment.studentMobile || payment.phone || "",
-    planType: finalPlanType,
-    status: ACCESS_STATUS.ACTIVE,
-    source: ACCESS_SOURCE.PAYMENT,
-    course: payment.course || ACCESS_COURSE.CTET_TET,
-    scopeType: ACCESS_SCOPE_TYPES.PLAN,
-    accessFrom,
-    accessUntil: finalAccessUntil,
-    notes: payment.notes || payment.adminNote || ("Payment approved" + (payment.orderId ? ": " + payment.orderId : "")),
-  }), {
-    paymentId: payment.paymentId || payment.id || null,
-    paymentRequestId: payment.paymentRequestId || payment.id || null,
-    orderId: payment.orderId || "",
-    amount: payment.amount || null,
-    paymentPlanName: payment.planName || "",
-    validityMonths,
-    updatedBy: adminActor.uid,
-  });
-
-  const auditMetadata = {
-    source: ACCESS_SOURCE.PAYMENT,
-    paymentId: payload.paymentId,
-    paymentRequestId: payload.paymentRequestId,
-    orderId: payload.orderId,
-    amount: payload.amount,
-    requestedPlanType: paymentPlanType,
-    finalPlanType,
-    validityMonths,
-    conflictSafe: Boolean(before),
-    preservedHigherPlan: shouldPreserveExistingPlan,
-    preservedLongerValidity: shouldPreserveExistingUntil,
-  };
-
-  if (before && before.id) {
-    await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, before.id), payload);
-    const updatedAccess = Object.assign({}, before, payload, { id: before.id });
-
-    await syncStudentEntitlementIfUid(updatedAccess, {
-      accessId: before.id,
-      actorUid: adminActor.uid,
-      actorEmail: adminActor.email,
-      source: "payment_access_updated",
-    });
-
-    await createAccessAuditLog({
-      actor: adminActor,
-      action: "PAYMENT_ACCESS_GRANTED",
-      accessId: before.id,
-      email: payload.email,
-      uid: payload.uid,
-      before,
-      after: payload,
-      metadata: auditMetadata,
-    });
-
-    return Object.assign({}, before, payload, {
-      id: before.id,
-      accessWriteMode: "updated",
-    });
-  }
-
-  const createPayload = Object.assign({}, payload, {
-    createdAt: serverTimestamp(),
-    createdBy: adminActor.uid,
-    actorEmail: adminActor.email,
-  });
-
-  const docRef = await addDoc(collection(db, ACCESS_COLLECTIONS.STUDENT_ACCESS), createPayload);
-  const createdAccess = { id: docRef.id, ...createPayload };
-
-  await syncStudentEntitlementIfUid(createdAccess, {
-    accessId: docRef.id,
-    actorUid: adminActor.uid,
-    actorEmail: adminActor.email,
-    source: "payment_access_created",
-  });
-
-  await createAccessAuditLog({
-    actor: adminActor,
-    action: "PAYMENT_ACCESS_GRANTED",
-    accessId: docRef.id,
-    email: createPayload.email,
-    uid: createPayload.uid,
-    before: null,
-    after: createPayload,
-    metadata: auditMetadata,
-  });
-
-  return Object.assign({}, createPayload, {
-    id: docRef.id,
-    accessWriteMode: "created",
+  return writeIdempotentAccessGrant({
+    data: {
+      email: normalizedEmail,
+      uid,
+      name:
+        payment.studentName ||
+        payment.name ||
+        "",
+      learnerName:
+        payment.studentName ||
+        payment.learnerName ||
+        payment.name ||
+        "",
+      phone:
+        payment.studentMobile ||
+        payment.phone ||
+        "",
+      planType: paymentPlanType,
+      status: ACCESS_STATUS.ACTIVE,
+      source: ACCESS_SOURCE.PAYMENT,
+      course:
+        payment.course ||
+        ACCESS_COURSE.CTET_TET,
+      scopeType:
+        ACCESS_SCOPE_TYPES.PLAN,
+      accessFrom,
+      accessUntil: paymentAccessUntil,
+      notes:
+        payment.notes ||
+        payment.adminNote ||
+        (
+          "Payment approved" +
+          (
+            payment.orderId
+              ? ": " + payment.orderId
+              : ""
+          )
+        ),
+    },
+    actor,
+    auditAction:
+      "PAYMENT_ACCESS_GRANTED",
+    auditMetadata: {
+      source: ACCESS_SOURCE.PAYMENT,
+      paymentId:
+        payment.paymentId ||
+        payment.id ||
+        null,
+      paymentRequestId:
+        payment.paymentRequestId ||
+        payment.id ||
+        null,
+      orderId: payment.orderId || "",
+      amount: payment.amount || null,
+      requestedPlanType:
+        paymentPlanType,
+      validityMonths,
+      conflictSafe: true,
+      planOnlySelection: true,
+    },
+    extraPayload: {
+      paymentId:
+        payment.paymentId ||
+        payment.id ||
+        null,
+      paymentRequestId:
+        payment.paymentRequestId ||
+        payment.id ||
+        null,
+      orderId: payment.orderId || "",
+      amount: payment.amount || null,
+      paymentPlanName:
+        payment.planName || "",
+      validityMonths,
+    },
+    allowReactivation:
+      payment.allowReactivation === true,
+    reactivationReason:
+      payment.reactivationReason ||
+      payment.adminNote ||
+      payment.notes ||
+      "",
   });
 }
