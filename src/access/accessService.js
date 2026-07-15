@@ -40,6 +40,10 @@ import {
   isGrantCandidate,
   resolvePlanChange,
 } from "./accessGrantLifecycle";
+import {
+  buildEffectiveEntitlementProjection,
+  buildStudentEntitlementId,
+} from "./accessEntitlementProjection";
 
 export const ACCESS_COLLECTIONS = Object.freeze({
   STUDENT_ACCESS: "studentAccess",
@@ -190,37 +194,7 @@ const buildAccessPayload = (data = {}) => {
 };
 
 
-const cleanEntitlementSegment = (value = "") =>
-  String(value || "")
-    .trim()
-    .replace(/[^a-zA-Z0-9_-]+/g, "_")
-    .replace(/^_+|_+$/g, "")
-    .slice(0, 120) || "all";
-
-export const buildStudentEntitlementId = (accessRecord = {}) => {
-  const scopeType = String(accessRecord.scopeType || ACCESS_SCOPE_TYPES.PLAN)
-    .trim()
-    .toLowerCase();
-
-  if (scopeType === ACCESS_SCOPE_TYPES.MODULE) {
-    return "module_" + cleanEntitlementSegment(accessRecord.module);
-  }
-
-  if (scopeType === ACCESS_SCOPE_TYPES.ITEM) {
-    return [
-      "item",
-      cleanEntitlementSegment(accessRecord.module),
-      cleanEntitlementSegment(accessRecord.itemType),
-      cleanEntitlementSegment(accessRecord.itemId),
-    ].join("_");
-  }
-
-  if (scopeType === ACCESS_SCOPE_TYPES.BUNDLE) {
-    return "bundle_" + cleanEntitlementSegment(accessRecord.bundleId || accessRecord.itemId);
-  }
-
-  return "plan_" + cleanEntitlementSegment(normalizeAccessPlan(accessRecord.planType || ACCESS_PLAN_TYPES.FREE));
-};
+export { buildStudentEntitlementId };
 
 export const buildStudentEntitlementPayload = (accessRecord = {}, metadata = {}) => {
   const uid = String(accessRecord.uid || metadata.uid || "").trim();
@@ -279,6 +253,141 @@ const syncStudentEntitlementIfUid = async (accessRecord = {}, metadata = {}) => 
   }
 
   return syncStudentEntitlement(accessRecord, metadata);
+};
+
+
+const uniqueProjectionAccessRecords = (records = []) => {
+  const recordMap = new Map();
+
+  (Array.isArray(records) ? records : [])
+    .filter(Boolean)
+    .forEach((record) => {
+      const recordId = String(record.id || "").trim();
+
+      if (recordId && !recordMap.has(recordId)) {
+        recordMap.set(recordId, record);
+      }
+    });
+
+  return Array.from(recordMap.values());
+};
+
+export const syncStudentEntitlementProjection = async ({
+  uid = "",
+  email = "",
+  accessRecords = null,
+  metadata = {},
+} = {}) => {
+  const learnerUid = String(uid || "").trim();
+  const learnerEmail = normalizeAccessEmail(email);
+
+  if (!learnerUid) {
+    throw new Error(
+      "Effective entitlement projection requires uid."
+    );
+  }
+
+  const records = Array.isArray(accessRecords)
+    ? uniqueProjectionAccessRecords(accessRecords)
+    : uniqueProjectionAccessRecords([
+        ...(await getAccessByUid(learnerUid)),
+        ...(learnerEmail
+          ? await getAccessByEmail(learnerEmail)
+          : []),
+      ]);
+
+  const projection =
+    buildEffectiveEntitlementProjection(records, {
+      uid: learnerUid,
+      email: learnerEmail,
+      now:
+        metadata.now instanceof Date
+          ? metadata.now.getTime()
+          : metadata.now || Date.now(),
+    });
+  const batch = writeBatch(db);
+  const projectedPayloads = [];
+
+  projection.desiredEntitlements.forEach(
+    ({ id: entitlementId, effectiveRecord }) => {
+      const payload = buildStudentEntitlementPayload(
+        {
+          ...effectiveRecord,
+          status: ACCESS_STATUS.ACTIVE,
+        },
+        {
+          uid: learnerUid,
+          email: learnerEmail,
+          accessId:
+            effectiveRecord.id ||
+            effectiveRecord.accessId ||
+            null,
+        }
+      );
+      const entitlementRef = doc(
+        db,
+        ACCESS_COLLECTIONS.STUDENT_ENTITLEMENTS,
+        learnerUid,
+        "items",
+        entitlementId
+      );
+
+      batch.set(entitlementRef, payload);
+      projectedPayloads.push(payload);
+    }
+  );
+
+  projection.staleEntitlementIds.forEach(
+    (entitlementId) => {
+      const entitlementRef = doc(
+        db,
+        ACCESS_COLLECTIONS.STUDENT_ENTITLEMENTS,
+        learnerUid,
+        "items",
+        entitlementId
+      );
+
+      batch.delete(entitlementRef);
+    }
+  );
+
+  if (
+    projectedPayloads.length ||
+    projection.staleEntitlementIds.length
+  ) {
+    await batch.commit();
+  }
+
+  return {
+    ...projection,
+    projectedPayloads,
+    projectionSource:
+      metadata.source ||
+      "effective_entitlement_projection",
+  };
+};
+
+const syncStudentEntitlementProjectionIfUid = async (
+  accessRecord = {},
+  metadata = {}
+) => {
+  const uid = String(
+    accessRecord.uid || metadata.uid || ""
+  ).trim();
+
+  if (!uid) {
+    return null;
+  }
+
+  return syncStudentEntitlementProjection({
+    uid,
+    email:
+      accessRecord.normalizedEmail ||
+      accessRecord.email ||
+      metadata.email ||
+      "",
+    metadata,
+  });
 };
 
 export const getAccessByEmail = async (email) => {
@@ -569,7 +678,7 @@ const writeIdempotentAccessGrant = async ({
     }
   );
 
-  await syncStudentEntitlementIfUid(
+  await syncStudentEntitlementProjectionIfUid(
     result.after,
     {
       accessId,
@@ -1128,7 +1237,7 @@ export const updateAccessStatus = async (id, status, actor = {}, metadata = {}) 
   await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId), payload);
   const after = { ...(before || {}), ...payload, id: accessId };
 
-  await syncStudentEntitlementIfUid(after, {
+  await syncStudentEntitlementProjectionIfUid(after, {
     accessId,
     actorUid: adminActor.uid,
     actorEmail: adminActor.email,
@@ -1171,7 +1280,7 @@ export const extendAccess = async (id, accessUntil, actor = {}, metadata = {}) =
   await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId), payload);
   const after = { ...(before || {}), ...payload, id: accessId };
 
-  await syncStudentEntitlementIfUid(after, {
+  await syncStudentEntitlementProjectionIfUid(after, {
     accessId,
     actorUid: adminActor.uid,
     actorEmail: adminActor.email,
@@ -1337,7 +1446,7 @@ export const upgradeAccess = async (
     }
   );
 
-  await syncStudentEntitlementIfUid(
+  await syncStudentEntitlementProjectionIfUid(
     result.after,
     {
       accessId,
@@ -1367,7 +1476,7 @@ export const revokeAccess = async (id, actor = {}, metadata = {}) => {
   await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId), payload);
   const after = { ...(before || {}), ...payload, id: accessId };
 
-  await syncStudentEntitlementIfUid(after, {
+  await syncStudentEntitlementProjectionIfUid(after, {
     accessId,
     actorUid: adminActor.uid,
     actorEmail: adminActor.email,
