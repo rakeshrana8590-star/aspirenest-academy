@@ -24,6 +24,12 @@ import {
   ACCESS_STATUS,
 } from "./accessConstants";
 import { normalizeAccessPlan } from "./accessUtils";
+import {
+  ACCESS_GRANT_STATUS_VALUES,
+  ACCESS_KEY_GRANT_STATUS_VALUES,
+  normalizeAndValidateGrantInput,
+  normalizeAndValidateGrantTarget,
+} from "./accessGrantContract";
 
 export const ACCESS_COLLECTIONS = Object.freeze({
   STUDENT_ACCESS: "studentAccess",
@@ -131,28 +137,32 @@ const readAccessQuery = async (fieldName, value) => {
 };
 
 const buildAccessPayload = (data = {}) => {
-  const normalizedEmail = normalizeAccessEmail(data.email);
-  const uid = String(data.uid || "").trim();
-
-  if (!normalizedEmail && !uid) {
-    throw new Error("Access record requires email or uid.");
-  }
+  const grant = normalizeAndValidateGrantInput(
+    {
+      ...data,
+      email: normalizeAccessEmail(data.email),
+    },
+    {
+      allowEmailPrincipal: true,
+      allowedStatuses: ACCESS_GRANT_STATUS_VALUES,
+    }
+  );
 
   return {
-    email: normalizedEmail || null,
-    normalizedEmail,
-    uid: uid || null,
-    planType: normalizeAccessPlan(data.planType || ACCESS_PLAN_TYPES.FREE),
-    scopeType: data.scopeType || ACCESS_SCOPE_TYPES.PLAN,
-    status: String(data.status || ACCESS_STATUS.ACTIVE).trim().toLowerCase(),
-    source: data.source || ACCESS_SOURCE.ADMIN_MANUAL,
-    course: data.course || ACCESS_COURSE.CTET_TET,
-    module: data.module || null,
-    itemType: data.itemType || null,
-    itemId: data.itemId || null,
-    itemTitle: data.itemTitle || "",
-    itemIds: Array.isArray(data.itemIds) ? data.itemIds : [],
-    bundleId: data.bundleId || null,
+    email: grant.email,
+    normalizedEmail: grant.normalizedEmail,
+    uid: grant.uid,
+    planType: grant.planType,
+    scopeType: grant.scopeType,
+    status: grant.status,
+    source: grant.source,
+    course: grant.course,
+    module: grant.module,
+    itemType: grant.itemType,
+    itemId: grant.itemId,
+    itemTitle: grant.itemTitle,
+    itemIds: grant.itemIds,
+    bundleId: grant.bundleId,
     productId: data.productId || null,
     accessKeyId: data.accessKeyId || null,
     campaignId: data.campaignId || null,
@@ -161,8 +171,8 @@ const buildAccessPayload = (data = {}) => {
     learnerName: String(data.learnerName || data.name || "").trim(),
     name: String(data.name || data.learnerName || "").trim(),
     phone: String(data.phone || "").trim(),
-    accessFrom: data.accessFrom || null,
-    accessUntil: data.accessUntil || null,
+    accessFrom: grant.accessFrom,
+    accessUntil: grant.accessUntil,
     notes: data.notes || data.adminNote || "",
     adminNote: data.adminNote || data.notes || "",
     updatedAt: serverTimestamp(),
@@ -1058,34 +1068,40 @@ const requireAccessEntityId = (id, label = "Access entity id") => {
 export const normalizeAccessKeyCode = (code = "") =>
   String(code || "").trim().toUpperCase();
 
-export const buildAccessProductPayload = (data = {}) => ({
-  title: String(data.title || data.name || "").trim(),
-  name: String(data.name || data.title || "").trim(),
-  description: String(data.description || "").trim(),
-  course: data.course || ACCESS_COURSE.CTET_TET,
-  planType: normalizeAccessPlan(data.planType || ACCESS_PLAN_TYPES.FREE),
-  scopeType: data.scopeType || ACCESS_SCOPE_TYPES.PLAN,
-  module: data.module || null,
-  itemType: data.itemType || null,
-  itemId: data.itemId || null,
-  itemTitle: data.itemTitle || "",
-  itemIds: Array.isArray(data.itemIds) ? data.itemIds : [],
-  bundleId: data.bundleId || null,
-  campaignId: data.campaignId || null,
-  campaignName: data.campaignName || "",
-  campaignSource: data.campaignSource || "",
-  validityDays: Number(data.validityDays || 0),
-  accessFrom: data.accessFrom || null,
-  accessUntil: data.accessUntil || null,
-  price: Number(data.price || 0),
-  compareAtPrice: Number(data.compareAtPrice || 0),
-  currency: data.currency || "INR",
-  status: String(data.status || ACCESS_STATUS.ACTIVE).trim().toLowerCase(),
-  isActive: data.isActive !== false,
-  notes: data.notes || data.adminNote || "",
-  adminNote: data.adminNote || data.notes || "",
-  updatedAt: serverTimestamp(),
-});
+export const buildAccessProductPayload = (data = {}) => {
+  const target = normalizeAndValidateGrantTarget(data, {
+    allowedStatuses: ACCESS_GRANT_STATUS_VALUES,
+  });
+
+  return {
+    title: String(data.title || data.name || "").trim(),
+    name: String(data.name || data.title || "").trim(),
+    description: String(data.description || "").trim(),
+    course: target.course,
+    planType: target.planType,
+    scopeType: target.scopeType,
+    module: target.module,
+    itemType: target.itemType,
+    itemId: target.itemId,
+    itemTitle: target.itemTitle,
+    itemIds: target.itemIds,
+    bundleId: target.bundleId,
+    campaignId: data.campaignId || null,
+    campaignName: data.campaignName || "",
+    campaignSource: data.campaignSource || "",
+    validityDays: Number(data.validityDays || 0),
+    accessFrom: target.accessFrom,
+    accessUntil: target.accessUntil,
+    price: Number(data.price || 0),
+    compareAtPrice: Number(data.compareAtPrice || 0),
+    currency: data.currency || "INR",
+    status: target.status,
+    isActive: data.isActive !== false,
+    notes: data.notes || data.adminNote || "",
+    adminNote: data.adminNote || data.notes || "",
+    updatedAt: serverTimestamp(),
+  };
+};
 
 export const createAccessProduct = async (data = {}) => {
   const actor = requireAdminActor(data.actor);
@@ -1209,6 +1225,10 @@ export const buildAccessKeyPayload = (data = {}) => {
     throw new Error("Access key code is required.");
   }
 
+  const target = normalizeAndValidateGrantTarget(data, {
+    allowedStatuses: ACCESS_KEY_GRANT_STATUS_VALUES,
+  });
+
   return {
     code,
     normalizedCode: code,
@@ -1216,24 +1236,24 @@ export const buildAccessKeyPayload = (data = {}) => {
     campaignId: data.campaignId || null,
     campaignName: data.campaignName || "",
     campaignSource: data.campaignSource || "",
-    course: data.course || ACCESS_COURSE.CTET_TET,
-    planType: normalizeAccessPlan(data.planType || ACCESS_PLAN_TYPES.FREE),
-    scopeType: data.scopeType || ACCESS_SCOPE_TYPES.PLAN,
-    module: data.module || null,
-    itemType: data.itemType || null,
-    itemId: data.itemId || null,
-    itemTitle: data.itemTitle || "",
-    itemIds: Array.isArray(data.itemIds) ? data.itemIds : [],
-    bundleId: data.bundleId || null,
-    status: String(data.status || ACCESS_KEY_STATUS.ACTIVE).trim().toLowerCase(),
+    course: target.course,
+    planType: target.planType,
+    scopeType: target.scopeType,
+    module: target.module,
+    itemType: target.itemType,
+    itemId: target.itemId,
+    itemTitle: target.itemTitle,
+    itemIds: target.itemIds,
+    bundleId: target.bundleId,
+    status: target.status,
     maxUses: Number(data.maxUses || 1),
     usedCount: Number(data.usedCount || 0),
     assignedEmail: normalizeAccessEmail(data.assignedEmail || data.email || ""),
     redeemedByEmail: null,
     redeemedByUid: null,
     redeemedAt: null,
-    accessFrom: data.accessFrom || null,
-    accessUntil: data.accessUntil || null,
+    accessFrom: target.accessFrom,
+    accessUntil: target.accessUntil,
     validityDays: Number(data.validityDays || 0),
     notes: data.notes || data.adminNote || "",
     adminNote: data.adminNote || data.notes || "",
