@@ -21,6 +21,10 @@ import {
 import useAccessProfile from "./access/useAccessProfile";
 import { grantPaymentAccess } from "./access/accessService";
 import {
+  buildDynamicPaymentApproval,
+  buildDynamicPaymentRequest,
+} from "./access/accessPaymentGrantContract";
+import {
   getProtectedContentUrl, readProtectedContentAsset, saveProtectedContentAsset, } from "./protectedContentAssetsService";
 import { upsertLearnerLoginSnapshot } from "./profile/learnerProfileService";
 
@@ -1748,49 +1752,106 @@ const [paymentHistory, setPaymentHistory] = useState([]);
 
   const provider = new GoogleAuthProvider();
   const createPaymentRequest = async (
-    planName,
-    amount
+    product
   ) => {
     if (!user) {
       alert("Please login first");
       return;
     }
 
+    if (
+      !product ||
+      typeof product !== "object"
+    ) {
+      alert(
+        "This purchase action is not linked to an active catalog plan. Please open the current pricing page."
+      );
+      return;
+    }
+
     try {
       setPaymentLoading(true);
 
-      const orderId = generateOrderId();
-
-      const upiLink = `upi://pay?pa=aspirenestplatform@oksbi&pn=AspireNest Academy&am=${amount}&tn=${orderId}`;
+      const orderId =
+        generateOrderId();
+      const requestedAt =
+        new Date();
+      const requestDraft =
+        buildDynamicPaymentRequest({
+          product,
+          learner: {
+            uid: user.uid,
+            email:
+              user.email || "",
+            name: fullName || "",
+            phone: mobile || "",
+          },
+          orderId,
+          requestedAt,
+        });
+      const upiLink =
+        "upi://pay?" +
+        new URLSearchParams({
+          pa:
+            "aspirenestplatform@oksbi",
+          pn:
+            "AspireNest Academy",
+          am: String(
+            requestDraft.amount
+          ),
+          tn: orderId,
+        }).toString();
       const paymentData = {
-        orderId,
-        userId: user.uid,
+        ...requestDraft,
         upiLink,
-        studentEmail: user.email || "",
-        studentMobile: mobile || "",
-        studentName: fullName || "",
-        planName,
-        amount,
-        status: "pending_payment",
-        studentProof: "",
-        adminProof: "",
-        matchStatus: "waiting",
-        createdAt: new Date().toISOString(),
       };
 
-      console.log("Payment Request Created:", paymentData);
-      const paymentDocRef = await addDoc(collection(db, "payments"), paymentData);
+      console.log(
+        "Catalog Payment Request Created:",
+        {
+          orderId:
+            paymentData.orderId,
+          productId:
+            paymentData.productId,
+          planCode:
+            paymentData.planCode,
+          amount:
+            paymentData.amount,
+          priceVersion:
+            paymentData.priceVersion,
+        }
+      );
+
+      const paymentDocRef =
+        await addDoc(
+          collection(
+            db,
+            "payments"
+          ),
+          paymentData
+        );
+
       setActivePayment({
         id: paymentDocRef.id,
         ...paymentData,
       });
 
       alert(
-        `Payment Request Created!\nOrder ID: ${orderId}`
+        "Payment Request Created!\n" +
+          "Plan: " +
+          paymentData.planName +
+          "\nOrder ID: " +
+          orderId
       );
     } catch (error) {
-      console.error("Payment Error:", error);
-      alert(error.message);
+      console.error(
+        "Payment Error:",
+        error
+      );
+      alert(
+        error?.message ||
+          "Payment request failed."
+      );
     } finally {
       setPaymentLoading(false);
     }
@@ -3463,97 +3524,108 @@ subjectName:
 
     alert("Announcement deleted successfully ✅");
   };
-  const approvePaymentRequest = async function(payment) {
-    if (!payment || !payment.id) {
-      alert("Payment record not found.");
-      return;
+  const approvePaymentRequest = async function(
+    payment,
+    adminSelection = {}
+  ) {
+    if (!payment?.id) {
+      throw new Error(
+        "Payment record not found."
+      );
     }
 
-    try {
-
-      if (payment.status === "approved" || payment.accessEngineSynced === true) {
-        alert("Payment is already approved and synced.");
-        return;
-      }
-      if (!payment.userId) {
-        alert("Student user ID not found in this payment.");
-        return;
-      }
-
-      const userRef = doc(db, "users", payment.userId);
-      const planType =
-        payment.planName === "Personal Mentorship"
-          ? "MENTORSHIP"
-          : payment.planName === "Premium Batch"
-          ? "PREMIUM"
-          : payment.planName === "Topic-wise Courses"
-          ? "BASIC"
-          : payment.planType || "PREMIUM";
-
-      const purchaseDate = new Date();
-      const validityMonthsRaw =
-        payment.validityMonths ||
-        payment.durationMonths ||
-        payment.durationInMonths ||
-        payment.selectedDurationMonths ||
-        payment.duration ||
-        6;
-      const validityMonths = Number(validityMonthsRaw);
-      const safeValidityMonths =
-        Number.isFinite(validityMonths) && Math.max(validityMonths, 0) === validityMonths && validityMonths !== 0
-          ? validityMonths
-          : 6;
-
-      const expiryDate = new Date();
-      expiryDate.setMonth(expiryDate.getMonth() + safeValidityMonths);
-
-      await grantPaymentAccess(
-        Object.assign({}, payment, {
-          planType,
-          accessFrom: purchaseDate,
-          accessUntil: expiryDate,
-          validityMonths: safeValidityMonths,
-        }),
-        {
-          uid: user && user.uid ? user.uid : null,
-          email: user && user.email ? user.email : "aspirenestplatform@gmail.com",
-          role: "admin",
-          isAdmin: true,
-        }
+    if (
+      payment.status ===
+        "approved" ||
+      payment.accessEngineSynced ===
+        true
+    ) {
+      throw new Error(
+        "Payment is already approved and synced."
       );
+    }
 
-      await setDoc(
-        userRef,
-        {
-          email: payment.studentEmail || payment.email || "",
-          isPremium: true,
-          subscriptionType: planType,
-          premiumStatus: "ACTIVE",
-          purchasedCourses: [payment.planName || planType],
-          purchaseDate,
-          expiryDate,
-          updatedAt: new Date(),
-        },
-        { merge: true }
+    if (!payment.userId) {
+      throw new Error(
+        "Student user ID not found in this payment."
       );
+    }
 
-      await updateDoc(doc(db, "payments", payment.id), {
-        status: "approved",
-        matchStatus: "admin_approved",
-        approvedAt: new Date(),
-        approvedPlanType: planType,
-        accessEngineSynced: true,
-        accessUntil: expiryDate,
+    const approvedAt =
+      new Date();
+    const approval =
+      buildDynamicPaymentApproval({
+        payment,
+        adminSelection,
+        now: approvedAt,
       });
+    const actor = {
+      uid:
+        user?.uid || null,
+      email:
+        user?.email ||
+        "aspirenestplatform@gmail.com",
+      role: "admin",
+      isAdmin: true,
+    };
+    const accessRecord =
+      await grantPaymentAccess(
+        approval.grant,
+        actor
+      );
+    const userRef = doc(
+      db,
+      "users",
+      payment.userId
+    );
 
-      alert("Payment approved and access activated ✅");
+    await setDoc(
+      userRef,
+      {
+        email:
+          payment.studentEmail ||
+          payment.email ||
+          "",
+        ...approval.userProjection,
+        purchasedCourses: [
+          approval.product.title,
+        ],
+        updatedAt: approvedAt,
+      },
+      { merge: true }
+    );
 
-      loadPaymentRequests();
-      loadPaymentHistory();
-      loadAdminData();
-    } catch (error) {
-      alert(error.message);
-    }
+    await updateDoc(
+      doc(
+        db,
+        "payments",
+        payment.id
+      ),
+      {
+        ...approval.paymentUpdate,
+        approvedAt,
+        accessId:
+          accessRecord.id,
+        accessWriteMode:
+          accessRecord.accessWriteMode ||
+          "created",
+      }
+    );
+
+    alert(
+      "Payment approved and " +
+        approval.product.planCode +
+        " access activated ✅"
+    );
+
+    await loadPaymentRequests();
+    await loadPaymentHistory();
+    await loadAdminData();
+
+    return {
+      approval,
+      accessRecord,
+    };
   };
   const handlePremiumControl = async (studentEmail, makePremium) => {
     try {
@@ -5391,36 +5463,10 @@ xpActivityEvents={ctetMockXpEvents}
 <Route
   path="/pricing"
   element={
-    <section className="coursePages">
-      <div className="sectionHeader">
-        <span className="badge">Plans & Pricing</span>
-
-        <h2>Choose Your AspireNest Plan</h2>
-
-        <p>
-          Upgrade your learning with premium notes,
-          mock tests, AI classroom, analytics, and mentor guidance.
-        </p>
-      </div>
-
-      <div className="courseGrid">
-        <button onClick={() => createPaymentRequest("Topic-wise Courses", 499)}>
-          BASIC — Topic-wise Courses
-        </button>
-
-        <button onClick={() => createPaymentRequest("Premium Batch", 999)}>
-          PREMIUM — Full Batch
-        </button>
-
-        <button onClick={() => createPaymentRequest("Personal Mentorship", 1999)}>
-          MENTORSHIP — Personal Guidance
-        </button>
-
-        <button onClick={() => navigate("/ctet-tet")}>
-          🔙 Back to CTET/TET Hub
-        </button>
-      </div>
-    </section>
+    <Navigate
+      to="/subjects/ctet-tet/pricing"
+      replace
+    />
   }
 />
 <Route

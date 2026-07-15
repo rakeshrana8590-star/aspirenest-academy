@@ -66,3 +66,91 @@
   background: rgba(239, 68, 68, 0.12);
   color: #b91c1c;
 }
+
+.adminPaymentValidityBox {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(56, 189, 248, 0.24);
+  border-radius: 20px;
+  background: rgba(14, 116, 144, 0.08);
+}
+
+.adminPaymentValidityHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.adminPaymentValidityHeader span,
+.adminPaymentValidityGrid label > span {
+  display: block;
+  color: rgba(226, 232, 240, 0.68);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.adminPaymentValidityHeader strong {
+  display: block;
+  margin-top: 4px;
+  color: #f8fafc;
+  font-size: 14px;
+}
+
+.adminPaymentValidityHeader small {
+  max-width: 180px;
+  color: rgba(226, 232, 240, 0.64);
+  font-size: 11px;
+  line-height: 1.45;
+  text-align: right;
+}
+
+.adminPaymentValidityGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.adminPaymentValidityGrid label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.adminPaymentValidityGrid input,
+.adminPaymentValidityGrid select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 14px;
+  padding: 9px 11px;
+  color: #f8fafc;
+  background: rgba(2, 6, 23, 0.46);
+  outline: none;
+}
+
+.adminPaymentValidityGrid input:focus,
+.adminPaymentValidityGrid select:focus {
+  border-color: rgba(56, 189, 248, 0.68);
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.14);
+}
+
+@media (max-width: 640px) {
+  .adminPaymentValidityHeader {
+    flex-direction: column;
+  }
+
+  .adminPaymentValidityHeader small {
+    max-width: none;
+    text-align: left;
+  }
+
+  .adminPaymentValidityGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -3781,76 +3781,15 @@ export const redeemAccessKeyFoundation = async ({
   );
 };
 
-const PAYMENT_PLAN_NAME_MAP = Object.freeze({
-  "Personal Mentorship": ACCESS_PLAN_TYPES.MENTORSHIP,
-  "Premium Batch": ACCESS_PLAN_TYPES.PREMIUM,
-  "Topic-wise Courses": ACCESS_PLAN_TYPES.BASIC,
-});
-
-function resolvePaymentPlanType(payment = {}) {
-  const mappedPlan =
-    PAYMENT_PLAN_NAME_MAP[payment.planName] ||
-    payment.planType ||
-    payment.activePlan ||
-    payment.subscriptionType ||
-    ACCESS_PLAN_TYPES.PREMIUM;
-
-  return normalizeAccessPlan(mappedPlan);
-}
-
-function resolvePaymentValidityMonths(payment = {}) {
-  const rawMonths =
-    payment.validityMonths ||
-    payment.durationMonths ||
-    payment.durationInMonths ||
-    payment.selectedDurationMonths ||
-    payment.duration;
-
-  const parsedMonths = Number(rawMonths);
-
-  if (Number.isFinite(parsedMonths) && Math.max(parsedMonths, 0) === parsedMonths && parsedMonths !== 0) {
-    return parsedMonths;
-  }
-
-  return 6;
-}
-
-function toPaymentAccessDate(value) {
-  if (!value) return null;
-
-  if (value instanceof Date) return value;
-
-  if (typeof value.toDate === "function") {
-    return value.toDate();
-  }
-
-  if (typeof value.seconds === "number") {
-    return new Date(value.seconds * 1000);
-  }
-
-  const parsed = new Date(value);
-
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
-}
-
-function addPaymentAccessMonths(date, months) {
-  const baseDate = toPaymentAccessDate(date) || new Date();
-  const nextDate = new Date(baseDate.getTime());
-
-  nextDate.setMonth(nextDate.getMonth() + months);
-
-  return nextDate;
-}
-
 export async function grantPaymentAccess(
-  payment = {},
-  actor = {}
+  payment = {}
 ) {
-  const normalizedEmail = normalizeAccessEmail(
-    payment.studentEmail ||
-      payment.email ||
-      payment.userEmail
-  );
+  const normalizedEmail =
+    normalizeAccessEmail(
+      payment.studentEmail ||
+        payment.email ||
+        payment.userEmail
+    );
   const uid = String(
     payment.userId ||
       payment.uid ||
@@ -3863,24 +3802,97 @@ export async function grantPaymentAccess(
     );
   }
 
-  const paymentPlanType =
-    resolvePaymentPlanType(payment);
-  const validityMonths =
-    resolvePaymentValidityMonths(payment);
+  const scopeType = String(
+    payment.scopeType ||
+      ACCESS_SCOPE_TYPES.PLAN
+  )
+    .trim()
+    .toLowerCase();
+  const planCode = String(
+    payment.planCode ||
+      payment.planType ||
+      ""
+  )
+    .trim()
+    .toUpperCase();
+  const productId = String(
+    payment.productId || ""
+  ).trim();
+  const accessRank = Number(
+    payment.accessRank
+  );
+  const purchaseTermsSnapshot =
+    payment.purchaseTermsSnapshot ||
+    payment.termsSnapshot ||
+    null;
   const accessFrom =
     payment.accessFrom ||
-    payment.purchaseDate ||
+    purchaseTermsSnapshot?.accessFrom ||
     new Date();
-  const paymentAccessUntil =
-    payment.accessUntil ||
-    payment.expiryDate ||
-    addPaymentAccessMonths(
-      accessFrom,
-      validityMonths
+  const noExpiry =
+    payment.noExpiry === true ||
+    purchaseTermsSnapshot?.noExpiry ===
+      true;
+  const untilManualChange =
+    payment.untilManualChange ===
+      true ||
+    purchaseTermsSnapshot
+      ?.untilManualChange === true;
+  const accessUntil =
+    payment.accessUntil ??
+    purchaseTermsSnapshot
+      ?.accessUntil ??
+    null;
+
+  if (
+    scopeType !==
+    ACCESS_SCOPE_TYPES.PLAN
+  ) {
+    throw new Error(
+      "Payment access must be plan scoped."
     );
+  }
+
+  if (!planCode) {
+    throw new Error(
+      "Payment access requires plan code."
+    );
+  }
+
+  if (!productId) {
+    throw new Error(
+      "Payment access requires catalog product ID."
+    );
+  }
+
+  if (
+    !Number.isFinite(accessRank) ||
+    accessRank < 0
+  ) {
+    throw new Error(
+      "Payment access requires a valid access rank."
+    );
+  }
+
+  if (!purchaseTermsSnapshot) {
+    throw new Error(
+      "Payment access requires purchase terms snapshot."
+    );
+  }
+
+  if (
+    !accessUntil &&
+    !noExpiry &&
+    !untilManualChange
+  ) {
+    throw new Error(
+      "Payment access requires approved validity."
+    );
+  }
 
   return writeIdempotentAccessGrant({
     data: {
+      ...payment,
       email: normalizedEmail,
       uid,
       name:
@@ -3896,16 +3908,36 @@ export async function grantPaymentAccess(
         payment.studentMobile ||
         payment.phone ||
         "",
-      planType: paymentPlanType,
-      status: ACCESS_STATUS.ACTIVE,
-      source: ACCESS_SOURCE.PAYMENT,
+      planType: planCode,
+      planCode,
+      accessRank,
+      productId,
+      purchaseTermsSnapshot,
+      termsSnapshot:
+        purchaseTermsSnapshot,
+      priceVersion:
+        purchaseTermsSnapshot
+          ?.priceVersion ??
+        payment.priceVersion ??
+        null,
+      validityMode:
+        payment.validityMode ||
+        purchaseTermsSnapshot
+          ?.validityMode ||
+        null,
+      noExpiry,
+      untilManualChange,
+      status:
+        ACCESS_STATUS.ACTIVE,
+      source:
+        ACCESS_SOURCE.PAYMENT,
       course:
         payment.course ||
         ACCESS_COURSE.CTET_TET,
       scopeType:
         ACCESS_SCOPE_TYPES.PLAN,
       accessFrom,
-      accessUntil: paymentAccessUntil,
+      accessUntil,
       notes:
         payment.notes ||
         payment.adminNote ||
@@ -3913,7 +3945,8 @@ export async function grantPaymentAccess(
           "Payment approved" +
           (
             payment.orderId
-              ? ": " + payment.orderId
+              ? ": " +
+                payment.orderId
               : ""
           )
         ),
@@ -3922,7 +3955,8 @@ export async function grantPaymentAccess(
     auditAction:
       "PAYMENT_ACCESS_GRANTED",
     auditMetadata: {
-      source: ACCESS_SOURCE.PAYMENT,
+      source:
+        ACCESS_SOURCE.PAYMENT,
       paymentId:
         payment.paymentId ||
         payment.id ||
@@ -3931,13 +3965,29 @@ export async function grantPaymentAccess(
         payment.paymentRequestId ||
         payment.id ||
         null,
-      orderId: payment.orderId || "",
-      amount: payment.amount || null,
-      requestedPlanType:
-        paymentPlanType,
-      validityMonths,
+      orderId:
+        payment.orderId || "",
+      amount:
+        payment.amount ?? null,
+      requestedPlanCode:
+        planCode,
+      productId,
+      accessRank,
+      priceVersion:
+        purchaseTermsSnapshot
+          ?.priceVersion ??
+        payment.priceVersion ??
+        null,
+      validityMode:
+        payment.validityMode ||
+        purchaseTermsSnapshot
+          ?.validityMode ||
+        null,
+      noExpiry,
+      untilManualChange,
       conflictSafe: true,
       planOnlySelection: true,
+      fixedDurationFallback: false,
     },
     extraPayload: {
       paymentId:
@@ -3948,14 +3998,33 @@ export async function grantPaymentAccess(
         payment.paymentRequestId ||
         payment.id ||
         null,
-      orderId: payment.orderId || "",
-      amount: payment.amount || null,
+      orderId:
+        payment.orderId || "",
+      amount:
+        payment.amount ?? null,
       paymentPlanName:
         payment.planName || "",
-      validityMonths,
+      productId,
+      accessRank,
+      priceVersion:
+        purchaseTermsSnapshot
+          ?.priceVersion ??
+        payment.priceVersion ??
+        null,
+      purchaseTermsSnapshot,
+      termsSnapshot:
+        purchaseTermsSnapshot,
+      validityMode:
+        payment.validityMode ||
+        purchaseTermsSnapshot
+          ?.validityMode ||
+        null,
+      noExpiry,
+      untilManualChange,
     },
     allowReactivation:
-      payment.allowReactivation === true,
+      payment.allowReactivation ===
+      true,
     reactivationReason:
       payment.reactivationReason ||
       payment.adminNote ||
