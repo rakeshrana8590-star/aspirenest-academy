@@ -2791,14 +2791,23 @@ export const readAccessProductById = async (productId = "") => {
 
 export const listAccessProducts = async ({
   maxCount = 100,
+  publicOnly = false,
 } = {}) => {
-  const productSnapshot =
-    await getDocs(
-      collection(
-        db,
-        ACCESS_COLLECTIONS.ACCESS_PRODUCTS
-      )
+  const productCollection =
+    collection(
+      db,
+      ACCESS_COLLECTIONS.ACCESS_PRODUCTS
     );
+  const productSource = publicOnly
+    ? query(
+        productCollection,
+        where("scopeType", "==", "plan"),
+        where("status", "==", "active"),
+        where("isActive", "==", true)
+      )
+    : productCollection;
+  const productSnapshot =
+    await getDocs(productSource);
 
   return productSnapshot.docs
     .map(toAccessRecord)

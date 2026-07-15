@@ -36,6 +36,7 @@ export default function Pricing({
         const products =
           await listAccessProducts({
             maxCount: 100,
+            publicOnly: true,
           });
 
         if (active) {

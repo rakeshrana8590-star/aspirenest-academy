@@ -173,22 +173,19 @@ service cloud.firestore {
     function hasProtectedPlanEntitlement(planType) {
       return planType == "FREE" ||
         (
+          planType is string &&
+          planType != "" &&
+          hasProtectedStudentEntitlement("plan_" + planType)
+        ) ||
+        (
           planType == "BASIC" &&
           (
-            hasProtectedStudentEntitlement("plan_BASIC") ||
             hasProtectedStudentEntitlement("plan_PREMIUM") ||
             hasProtectedStudentEntitlement("plan_MENTORSHIP")
           )
         ) ||
         (
           planType == "PREMIUM" &&
-          (
-            hasProtectedStudentEntitlement("plan_PREMIUM") ||
-            hasProtectedStudentEntitlement("plan_MENTORSHIP")
-          )
-        ) ||
-        (
-          planType == "MENTORSHIP" &&
           hasProtectedStudentEntitlement("plan_MENTORSHIP")
         );
     }
@@ -350,16 +347,117 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    function isActivePlanProductData(product) {
+      return product.productId is string &&
+        product.productId != "" &&
+        product.scopeType == "plan" &&
+        product.status == "active" &&
+        product.isActive == true &&
+        product.planCode is string &&
+        product.planCode != "" &&
+        product.planType == product.planCode &&
+        product.accessRank is int &&
+        product.accessRank >= 0 &&
+        product.priceINR is int &&
+        product.priceINR >= 0 &&
+        product.currency is string &&
+        product.currency != "" &&
+        product.priceVersion is int &&
+        product.priceVersion >= 1 &&
+        product.fixed365DayValidity == false;
+    }
+
+    function isActivePlanProduct(productId) {
+      return productId is string &&
+        productId != "" &&
+        exists(/databases/$(database)/documents/accessProducts/$(productId)) &&
+        get(/databases/$(database)/documents/accessProducts/$(productId)).data.productId == productId &&
+        isActivePlanProductData(
+          get(/databases/$(database)/documents/accessProducts/$(productId)).data
+        );
+    }
+
     match /payments/{docId} {
       function isPaymentOwner() {
         return isSignedIn() && resource.data.userId == request.auth.uid;
       }
 
       function isNewPaymentOwner() {
-        return isSignedIn() && request.resource.data.userId == request.auth.uid;
+        return isSignedIn() &&
+          request.resource.data.userId == request.auth.uid &&
+          request.resource.data.studentEmail == request.auth.token.email;
+      }
+
+      function isDynamicPaymentSnapshotMatch(productId) {
+        let product = get(
+          /databases/$(database)/documents/accessProducts/$(productId)
+        ).data;
+        let snapshot = request.resource.data.productSnapshot;
+
+        return snapshot is map &&
+          snapshot.keys().hasOnly([
+            "productId",
+            "planCode",
+            "planType",
+            "title",
+            "description",
+            "accessRank",
+            "scopeType",
+            "priceINR",
+            "compareAtPriceINR",
+            "currency",
+            "priceVersion",
+            "priceEffectiveFrom",
+            "validityMode",
+            "defaultValidityDays",
+            "allowNoExpiry",
+            "fixed365DayValidity",
+            "capturedAt"
+          ]) &&
+          snapshot.keys().hasAll([
+            "productId",
+            "planCode",
+            "planType",
+            "title",
+            "description",
+            "accessRank",
+            "scopeType",
+            "priceINR",
+            "compareAtPriceINR",
+            "currency",
+            "priceVersion",
+            "priceEffectiveFrom",
+            "validityMode",
+            "defaultValidityDays",
+            "allowNoExpiry",
+            "fixed365DayValidity",
+            "capturedAt"
+          ]) &&
+          snapshot.productId == productId &&
+          snapshot.planCode == product.planCode &&
+          snapshot.planType == product.planCode &&
+          snapshot.title == product.title &&
+          snapshot.description == product.description &&
+          snapshot.accessRank == product.accessRank &&
+          snapshot.scopeType == "plan" &&
+          snapshot.priceINR == product.priceINR &&
+          snapshot.compareAtPriceINR == product.compareAtPriceINR &&
+          snapshot.currency == product.currency &&
+          snapshot.priceVersion == product.priceVersion &&
+          snapshot.priceEffectiveFrom == product.priceEffectiveFrom &&
+          snapshot.validityMode == product.validityMode &&
+          snapshot.defaultValidityDays == product.defaultValidityDays &&
+          snapshot.allowNoExpiry == product.allowNoExpiry &&
+          snapshot.fixed365DayValidity == false &&
+          snapshot.capturedAt == request.resource.data.createdAt;
       }
 
       function isStudentPaymentCreate() {
+        let productId = request.resource.data.productId;
+        let product = get(
+          /databases/$(database)/documents/accessProducts/$(productId)
+        ).data;
+
         return isNewPaymentOwner() &&
           request.resource.data.keys().hasOnly([
             "orderId",
@@ -369,13 +467,64 @@ service cloud.firestore {
             "studentMobile",
             "studentName",
             "planName",
+            "planType",
+            "planCode",
+            "productId",
+            "accessRank",
             "amount",
+            "currency",
+            "priceVersion",
+            "priceEffectiveFrom",
+            "productSnapshot",
+            "fixed365DayValidity",
             "status",
             "studentProof",
             "adminProof",
             "matchStatus",
             "createdAt"
           ]) &&
+          request.resource.data.keys().hasAll([
+            "orderId",
+            "userId",
+            "upiLink",
+            "studentEmail",
+            "studentMobile",
+            "studentName",
+            "planName",
+            "planType",
+            "planCode",
+            "productId",
+            "accessRank",
+            "amount",
+            "currency",
+            "priceVersion",
+            "priceEffectiveFrom",
+            "productSnapshot",
+            "fixed365DayValidity",
+            "status",
+            "studentProof",
+            "adminProof",
+            "matchStatus",
+            "createdAt"
+          ]) &&
+          request.resource.data.orderId is string &&
+          request.resource.data.orderId != "" &&
+          request.resource.data.upiLink is string &&
+          request.resource.data.studentMobile is string &&
+          request.resource.data.studentName is string &&
+          request.resource.data.createdAt is timestamp &&
+          isActivePlanProduct(productId) &&
+          product.priceINR > 0 &&
+          request.resource.data.planName == product.title &&
+          request.resource.data.planType == product.planCode &&
+          request.resource.data.planCode == product.planCode &&
+          request.resource.data.accessRank == product.accessRank &&
+          request.resource.data.amount == product.priceINR &&
+          request.resource.data.currency == product.currency &&
+          request.resource.data.priceVersion == product.priceVersion &&
+          request.resource.data.priceEffectiveFrom == product.priceEffectiveFrom &&
+          request.resource.data.fixed365DayValidity == false &&
+          isDynamicPaymentSnapshotMatch(productId) &&
           request.resource.data.status == "pending_payment" &&
           request.resource.data.studentProof == "" &&
           request.resource.data.adminProof == "" &&
@@ -386,6 +535,7 @@ service cloud.firestore {
         return isPaymentOwner() &&
           resource.data.status in ["pending_payment", "student_proof_submitted"] &&
           request.resource.data.userId == resource.data.userId &&
+          request.resource.data.studentEmail == resource.data.studentEmail &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly([
             "studentProof",
             "status",
@@ -482,13 +632,191 @@ service cloud.firestore {
         resource.data.assignedEmail == request.auth.token.email;
     }
 
+    function legacyPlanAccessRank(planCode) {
+      return planCode == "FREE"
+        ? 0
+        : planCode == "BASIC"
+          ? 100
+          : planCode == "PREMIUM"
+            ? 200
+            : planCode == "MENTORSHIP"
+              ? 300
+              : null;
+    }
+
+    function isRedeemValidityShape() {
+      return request.resource.data.validityMode in [
+          "CUSTOM_WINDOW",
+          "NO_EXPIRY",
+          "UNTIL_MANUAL_CHANGE"
+        ] &&
+        request.resource.data.noExpiry is bool &&
+        request.resource.data.untilManualChange is bool &&
+        !(request.resource.data.noExpiry && request.resource.data.untilManualChange) &&
+        (
+          (
+            request.resource.data.validityMode == "CUSTOM_WINDOW" &&
+            request.resource.data.noExpiry == false &&
+            request.resource.data.untilManualChange == false &&
+            request.resource.data.accessUntil != null &&
+            request.resource.data.accessUntil != ""
+          ) ||
+          (
+            request.resource.data.validityMode == "NO_EXPIRY" &&
+            request.resource.data.noExpiry == true &&
+            request.resource.data.untilManualChange == false &&
+            request.resource.data.accessUntil == null
+          ) ||
+          (
+            request.resource.data.validityMode == "UNTIL_MANUAL_CHANGE" &&
+            request.resource.data.noExpiry == false &&
+            request.resource.data.untilManualChange == true &&
+            request.resource.data.accessUntil == null
+          )
+        );
+    }
+
+    function isDirectKeyValidityMatch(key) {
+      let explicitUntil = key.get("accessUntil", null);
+      let noExpiry = key.get("noExpiry", false) == true ||
+        key.get("validityMode", "") == "NO_EXPIRY";
+      let untilManualChange = key.get("untilManualChange", false) == true ||
+        key.get("validityMode", "") == "UNTIL_MANUAL_CHANGE";
+
+      return isRedeemValidityShape() &&
+        (
+          key.get("accessFrom", null) == null ||
+          key.get("accessFrom", null) == "" ||
+          request.resource.data.accessFrom == key.get("accessFrom", null)
+        ) &&
+        (
+          (
+            explicitUntil != null &&
+            explicitUntil != "" &&
+            request.resource.data.accessUntil == explicitUntil &&
+            request.resource.data.validityMode == "CUSTOM_WINDOW"
+          ) ||
+          (
+            noExpiry &&
+            request.resource.data.noExpiry == true
+          ) ||
+          (
+            untilManualChange &&
+            request.resource.data.untilManualChange == true
+          )
+        );
+    }
+
+    function isProductKeyValidityMatch(key, product) {
+      let keyUntil = key.get("accessUntil", null);
+      let productUntil = product.get("accessUntil", null);
+      let explicitUntil = keyUntil != null && keyUntil != ""
+        ? keyUntil
+        : productUntil;
+      let noExpiry = key.get("noExpiry", false) == true ||
+        key.get("validityMode", "") == "NO_EXPIRY" ||
+        product.get("validityMode", "") == "NO_EXPIRY";
+      let untilManualChange = key.get("untilManualChange", false) == true ||
+        key.get("validityMode", "") == "UNTIL_MANUAL_CHANGE" ||
+        product.get("validityMode", "") == "UNTIL_MANUAL_CHANGE";
+      let keyFrom = key.get("accessFrom", null);
+      let productFrom = product.get("accessFrom", null);
+      let expectedFrom = keyFrom != null && keyFrom != ""
+        ? keyFrom
+        : productFrom;
+
+      return isRedeemValidityShape() &&
+        (
+          expectedFrom == null ||
+          expectedFrom == "" ||
+          request.resource.data.accessFrom == expectedFrom
+        ) &&
+        (
+          (
+            explicitUntil != null &&
+            explicitUntil != "" &&
+            request.resource.data.accessUntil == explicitUntil &&
+            request.resource.data.validityMode == "CUSTOM_WINDOW"
+          ) ||
+          (
+            noExpiry &&
+            (
+              product.scopeType != "plan" ||
+              product.get("allowNoExpiry", false) == true
+            ) &&
+            request.resource.data.noExpiry == true
+          ) ||
+          (
+            untilManualChange &&
+            request.resource.data.untilManualChange == true
+          )
+        );
+    }
+
+    function isProductPlanSnapshotMatch(product) {
+      let snapshot = request.resource.data.purchaseTermsSnapshot;
+
+      return snapshot is map &&
+        snapshot.keys().hasOnly([
+          "productId",
+          "planCode",
+          "planType",
+          "accessRank",
+          "priceINR",
+          "compareAtPriceINR",
+          "currency",
+          "priceVersion",
+          "priceEffectiveFrom",
+          "validityMode",
+          "accessFrom",
+          "accessUntil",
+          "noExpiry",
+          "untilManualChange",
+          "capturedAt"
+        ]) &&
+        snapshot.keys().size() == 15 &&
+        snapshot.productId == product.productId &&
+        snapshot.planCode == product.planCode &&
+        snapshot.planType == product.planCode &&
+        snapshot.accessRank == product.accessRank &&
+        snapshot.priceINR == product.priceINR &&
+        snapshot.compareAtPriceINR == product.compareAtPriceINR &&
+        snapshot.currency == product.currency &&
+        snapshot.priceVersion == product.priceVersion &&
+        snapshot.priceEffectiveFrom == product.priceEffectiveFrom &&
+        snapshot.validityMode == request.resource.data.validityMode &&
+        snapshot.noExpiry == request.resource.data.noExpiry &&
+        snapshot.untilManualChange == request.resource.data.untilManualChange &&
+        snapshot.capturedAt is timestamp &&
+        (
+          snapshot.accessFrom == null ||
+          snapshot.accessFrom is timestamp
+        ) &&
+        (
+          snapshot.accessUntil == null ||
+          snapshot.accessUntil is timestamp
+        ) &&
+        request.resource.data.termsSnapshot == snapshot &&
+        request.resource.data.priceVersion == product.priceVersion;
+    }
+
     function isAccessKeyRedeemUpdate(keyCode) {
+      let data = request.resource.data;
+      let access = getAfter(
+        /databases/$(database)/documents/studentAccess/$(data.lastRedemptionAccessId)
+      ).data;
+      let entitlement = getAfter(
+        /databases/$(database)/documents/studentEntitlements/$(request.auth.uid)/items/$(data.lastRedemptionEntitlementId)
+      ).data;
+      let audit = getAfter(
+        /databases/$(database)/documents/accessAuditLogs/$(data.lastRedemptionAuditId)
+      ).data;
       return isSignedIn() &&
         keyCode == resource.data.normalizedCode &&
         resource.data.status == "active" &&
         resource.data.usedCount < resource.data.maxUses &&
         isAccessKeyAssignedToRequester() &&
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        data.diff(resource.data).affectedKeys().hasOnly([
           "usedCount",
           "status",
           "lastRedeemedByEmail",
@@ -503,93 +831,155 @@ service cloud.firestore {
           "updatedAt",
           "updatedBy"
         ]) &&
-        request.resource.data.usedCount == resource.data.usedCount + 1 &&
+        data.usedCount == resource.data.usedCount + 1 &&
         (
           (
-            request.resource.data.usedCount < request.resource.data.maxUses &&
-            request.resource.data.status == "active"
+            data.usedCount < data.maxUses &&
+            data.status == "active"
           ) ||
           (
-            request.resource.data.usedCount >= request.resource.data.maxUses &&
-            request.resource.data.status == "used"
+            data.usedCount >= data.maxUses &&
+            data.status == "used"
           )
         ) &&
-        request.resource.data.lastRedeemedByEmail == request.auth.token.email &&
-        request.resource.data.lastRedeemedByUid == request.auth.uid &&
+        data.lastRedeemedByEmail == request.auth.token.email &&
+        data.lastRedeemedByUid == request.auth.uid &&
         (
-          request.resource.data.redeemedByEmail == resource.data.redeemedByEmail ||
-          request.resource.data.redeemedByEmail == request.auth.token.email
+          data.redeemedByEmail == resource.data.redeemedByEmail ||
+          data.redeemedByEmail == request.auth.token.email
         ) &&
         (
-          request.resource.data.redeemedByUid == resource.data.redeemedByUid ||
-          request.resource.data.redeemedByUid == request.auth.uid
+          data.redeemedByUid == resource.data.redeemedByUid ||
+          data.redeemedByUid == request.auth.uid
         ) &&
-        request.resource.data.lastRedemptionAccessId is string &&
-        request.resource.data.lastRedemptionEntitlementId is string &&
-        request.resource.data.lastRedemptionAuditId is string &&
+        data.lastRedemptionAccessId is string &&
+        data.lastRedemptionEntitlementId is string &&
+        data.lastRedemptionAuditId is string &&
         existsAfter(
-          /databases/$(database)/documents/studentAccess/$(request.resource.data.lastRedemptionAccessId)
+          /databases/$(database)/documents/studentAccess/$(data.lastRedemptionAccessId)
         ) &&
-        getAfter(
-          /databases/$(database)/documents/studentAccess/$(request.resource.data.lastRedemptionAccessId)
-        ).data.uid == request.auth.uid &&
+        access.uid == request.auth.uid &&
         existsAfter(
-          /databases/$(database)/documents/studentEntitlements/$(request.auth.uid)/items/$(request.resource.data.lastRedemptionEntitlementId)
+          /databases/$(database)/documents/studentEntitlements/$(request.auth.uid)/items/$(data.lastRedemptionEntitlementId)
         ) &&
+        entitlement.accessId == data.lastRedemptionAccessId &&
         existsAfter(
-          /databases/$(database)/documents/accessAuditLogs/$(request.resource.data.lastRedemptionAuditId)
+          /databases/$(database)/documents/accessAuditLogs/$(data.lastRedemptionAuditId)
         ) &&
-        request.resource.data.updatedBy == request.auth.uid;
+        audit.accessId == data.lastRedemptionAccessId &&
+        data.updatedBy == request.auth.uid;
     }
 
-      function isRedeemDirectKeyAccessMatches(accessKeyId) {
-        let key = get(/databases/$(database)/documents/accessKeys/$(accessKeyId)).data;
+    function isRedeemDirectKeyAccessMatches(accessKeyId) {
+      let key = get(
+        /databases/$(database)/documents/accessKeys/$(accessKeyId)
+      ).data;
+      let planCode = key.get("planCode", key.planType);
+      let accessRank = key.get(
+        "accessRank",
+        legacyPlanAccessRank(planCode)
+      );
+      let purchaseTermsSnapshot = key.get(
+        "purchaseTermsSnapshot",
+        key.get("termsSnapshot", null)
+      );
 
-        return (key.productId == null || key.productId == "") &&
-          key.accessUntil != null &&
-          key.accessUntil != "" &&
-          request.resource.data.productId == key.productId &&
-          request.resource.data.course == key.course &&
-          request.resource.data.planType == key.planType &&
-          request.resource.data.scopeType == key.scopeType &&
-          request.resource.data.module == key.module &&
-          request.resource.data.itemType == key.itemType &&
-          request.resource.data.itemId == key.itemId &&
-          request.resource.data.itemIds == key.itemIds &&
-          request.resource.data.bundleId == key.bundleId &&
-          request.resource.data.accessUntil == key.accessUntil;
-      }
+      return (key.productId == null || key.productId == "") &&
+        request.resource.data.productId == key.productId &&
+        request.resource.data.course == key.course &&
+        request.resource.data.planType == planCode &&
+        request.resource.data.planCode == planCode &&
+        request.resource.data.accessRank == accessRank &&
+        request.resource.data.scopeType == key.scopeType &&
+        request.resource.data.module == key.module &&
+        request.resource.data.itemType == key.itemType &&
+        request.resource.data.itemId == key.itemId &&
+        request.resource.data.itemIds == key.itemIds &&
+        request.resource.data.bundleId == key.bundleId &&
+        request.resource.data.purchaseTermsSnapshot == purchaseTermsSnapshot &&
+        request.resource.data.termsSnapshot == purchaseTermsSnapshot &&
+        request.resource.data.priceVersion == key.get("priceVersion", null) &&
+        isDirectKeyValidityMatch(key);
+    }
 
-      function isRedeemProductAccessMatches(accessKeyId) {
-        let key = get(/databases/$(database)/documents/accessKeys/$(accessKeyId)).data;
-        let product = get(/databases/$(database)/documents/accessProducts/$(key.productId)).data;
+    function isRedeemProductAccessMatches(accessKeyId) {
+      let key = get(
+        /databases/$(database)/documents/accessKeys/$(accessKeyId)
+      ).data;
+      let product = get(
+        /databases/$(database)/documents/accessProducts/$(key.productId)
+      ).data;
+      let planCode = product.get("planCode", product.planType);
+      let accessRank = product.get(
+        "accessRank",
+        key.get(
+          "accessRank",
+          legacyPlanAccessRank(planCode)
+        )
+      );
+      let isPlanProduct = product.scopeType == "plan";
 
-        return key.productId is string &&
-          key.productId != "" &&
-          exists(/databases/$(database)/documents/accessProducts/$(key.productId)) &&
-          product.status == "active" &&
-          product.isActive != false &&
-          request.resource.data.productId == key.productId &&
-          request.resource.data.course == product.course &&
-          request.resource.data.planType == product.planType &&
-          request.resource.data.scopeType == product.scopeType &&
-          request.resource.data.module == product.module &&
-          request.resource.data.itemType == product.itemType &&
-          request.resource.data.itemId == product.itemId &&
-          request.resource.data.itemIds == product.itemIds &&
-          product.accessUntil != null &&
-          product.accessUntil != "" &&
-          request.resource.data.bundleId == product.bundleId &&
-          request.resource.data.accessUntil == product.accessUntil;
-      }
+      return key.productId is string &&
+        key.productId != "" &&
+        exists(/databases/$(database)/documents/accessProducts/$(key.productId)) &&
+        (
+          !isPlanProduct ||
+          product.productId == key.productId
+        ) &&
+        product.status == "active" &&
+        (
+          (isPlanProduct && product.isActive == true) ||
+          (!isPlanProduct && product.get("isActive", true) != false)
+        ) &&
+        request.resource.data.productId == key.productId &&
+        request.resource.data.course == product.course &&
+        request.resource.data.planType == planCode &&
+        request.resource.data.planCode == planCode &&
+        request.resource.data.accessRank == accessRank &&
+        request.resource.data.scopeType == product.scopeType &&
+        request.resource.data.module == product.get("module", null) &&
+        request.resource.data.itemType == product.get("itemType", null) &&
+        request.resource.data.itemId == product.get("itemId", null) &&
+        request.resource.data.itemIds == product.get("itemIds", []) &&
+        request.resource.data.bundleId == product.get("bundleId", null) &&
+        isProductKeyValidityMatch(key, product) &&
+        (
+          (
+            product.scopeType == "plan" &&
+            isProductPlanSnapshotMatch(product)
+          ) ||
+          (
+            product.scopeType != "plan" &&
+            request.resource.data.purchaseTermsSnapshot == null &&
+            request.resource.data.termsSnapshot == null &&
+            request.resource.data.priceVersion == null
+          )
+        );
+    }
 
     function isRedeemStudentAccessCreate(accessDocId) {
+      let data = request.resource.data;
+      let key = get(
+        /databases/$(database)/documents/accessKeys/$(data.accessKeyId)
+      ).data;
+      let redeemedKey = getAfter(
+        /databases/$(database)/documents/accessKeys/$(data.accessKeyId)
+      ).data;
       return isSignedIn() &&
-        request.resource.data.keys().hasOnly([
+        data.keys().hasOnly([
           "email",
           "normalizedEmail",
           "uid",
           "planType",
+          "planCode",
+          "accessRank",
+          "productId",
+          "purchaseTermsSnapshot",
+          "termsSnapshot",
+          "priceVersion",
+          "validityMode",
+          "noExpiry",
+          "untilManualChange",
           "scopeType",
           "status",
           "source",
@@ -600,7 +990,6 @@ service cloud.firestore {
           "itemTitle",
           "itemIds",
           "bundleId",
-          "productId",
           "accessKeyId",
           "campaignId",
           "campaignName",
@@ -617,51 +1006,45 @@ service cloud.firestore {
           "createdBy",
           "actorEmail"
         ]) &&
-        request.resource.data.keys().hasAll([
-          "email",
-          "normalizedEmail",
-          "uid",
-          "planType",
-          "scopeType",
-          "status",
-          "source",
-          "course",
-          "accessKeyId",
-          "updatedAt",
-          "createdAt",
-          "createdBy",
-          "actorEmail"
-        ]) &&
-        request.resource.data.source == "redeem_key" &&
-        request.resource.data.status == "active" &&
-        request.resource.data.uid == request.auth.uid &&
-        request.resource.data.email == request.auth.token.email &&
-        request.resource.data.normalizedEmail == request.auth.token.email &&
-        request.resource.data.createdBy == request.auth.uid &&
-        request.resource.data.actorEmail == request.auth.token.email &&
-        request.resource.data.accessKeyId is string &&
-        exists(/databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)) &&
-        get(/databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)).data.status == "active" &&
-        get(/databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)).data.usedCount <
-          get(/databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)).data.maxUses &&
+        data.keys().size() == 38 &&
+        data.source == "redeem_key" &&
+        data.status == "active" &&
+        data.uid == request.auth.uid &&
+        data.email == request.auth.token.email &&
+        data.normalizedEmail == request.auth.token.email &&
+        data.planCode == data.planType &&
+        data.accessRank is int &&
+        data.accessRank >= 0 &&
+        data.termsSnapshot == data.purchaseTermsSnapshot &&
         (
-          get(/databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)).data.assignedEmail == null ||
-          get(/databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)).data.assignedEmail == "" ||
-          get(/databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)).data.assignedEmail == request.auth.token.email
-          ) &&
+          data.priceVersion == null ||
           (
-            isRedeemDirectKeyAccessMatches(request.resource.data.accessKeyId) ||
-            isRedeemProductAccessMatches(request.resource.data.accessKeyId)
-          ) &&
-          getAfter(
-            /databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)
-          ).data.lastRedemptionAccessId == accessDocId &&
-          getAfter(
-            /databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)
-          ).data.lastRedemptionEntitlementId is string &&
-          getAfter(
-            /databases/$(database)/documents/accessKeys/$(request.resource.data.accessKeyId)
-          ).data.lastRedemptionAuditId is string;
+            data.priceVersion is int &&
+            data.priceVersion >= 1
+          )
+        ) &&
+        data.updatedAt is timestamp &&
+        data.createdAt is timestamp &&
+        data.createdBy == request.auth.uid &&
+        data.actorEmail == request.auth.token.email &&
+        data.accessKeyId is string &&
+        data.accessKeyId != "" &&
+        exists(/databases/$(database)/documents/accessKeys/$(data.accessKeyId)) &&
+        key.status == "active" &&
+        key.usedCount <
+          key.maxUses &&
+        (
+          key.assignedEmail == null ||
+          key.assignedEmail == "" ||
+          key.assignedEmail == request.auth.token.email
+        ) &&
+        (
+          isRedeemDirectKeyAccessMatches(data.accessKeyId) ||
+          isRedeemProductAccessMatches(data.accessKeyId)
+        ) &&
+        redeemedKey.lastRedemptionAccessId == accessDocId &&
+        redeemedKey.lastRedemptionEntitlementId is string &&
+        redeemedKey.lastRedemptionAuditId is string;
     }
 
     function isInviteOwnRecord() {
@@ -848,7 +1231,18 @@ service cloud.firestore {
     }
 
     match /accessProducts/{docId} {
-      allow read, create, update, delete: if isAdmin();
+      allow get: if isAdmin() ||
+        (
+          resource.data.productId == docId &&
+          isActivePlanProductData(resource.data)
+        );
+      allow list: if isAdmin() ||
+        (
+          resource.data.scopeType == "plan" &&
+          resource.data.status == "active" &&
+          resource.data.isActive == true
+        );
+      allow create, update, delete: if isAdmin();
     }
 
     match /accessKeys/{keyCode} {
@@ -862,15 +1256,33 @@ service cloud.firestore {
     }
 
     function isStudentEntitlementWrite(uid, entitlementId) {
+      let data = request.resource.data;
+      let access = getAfter(
+        /databases/$(database)/documents/studentAccess/$(data.accessId)
+      ).data;
+      let accessPlanCode = access.get("planCode", access.planType);
+      let accessRank = access.get(
+        "accessRank",
+        legacyPlanAccessRank(access.planType)
+      );
       return isSignedIn() &&
         uid == request.auth.uid &&
-        request.resource.data.keys().hasOnly([
+        data.keys().hasOnly([
           "id",
           "uid",
           "email",
           "normalizedEmail",
           "accessId",
           "planType",
+          "planCode",
+          "accessRank",
+          "productId",
+          "purchaseTermsSnapshot",
+          "termsSnapshot",
+          "priceVersion",
+          "validityMode",
+          "noExpiry",
+          "untilManualChange",
           "scopeType",
           "module",
           "itemType",
@@ -882,60 +1294,80 @@ service cloud.firestore {
           "source",
           "accessFrom",
           "accessUntil",
+          "grantKey",
+          "grantFamilyKey",
+          "grantRevision",
           "updatedAt"
         ]) &&
-        request.resource.data.keys().hasAll([
-          "id",
-          "uid",
-          "email",
-          "normalizedEmail",
-          "accessId",
-          "planType",
-          "scopeType",
-          "module",
-          "itemType",
-          "itemId",
-          "itemIds",
-          "bundleId",
-          "course",
-          "status",
-          "source",
-          "accessFrom",
-          "accessUntil",
-          "updatedAt"
-        ]) &&
-        request.resource.data.id == entitlementId &&
-        request.resource.data.uid == request.auth.uid &&
-        request.resource.data.normalizedEmail == request.auth.token.email &&
-        request.resource.data.accessId is string &&
-        existsAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)) &&
+        data.keys().size() == 30 &&
+        data.id == entitlementId &&
+        data.uid == request.auth.uid &&
+        data.email == request.auth.token.email &&
+        data.normalizedEmail == request.auth.token.email &&
+        data.accessId is string &&
+        data.accessId != "" &&
+        data.planCode == data.planType &&
+        data.accessRank is int &&
+        data.accessRank >= 0 &&
+        data.termsSnapshot == data.purchaseTermsSnapshot &&
+        data.noExpiry is bool &&
+        data.untilManualChange is bool &&
+        !(data.noExpiry && data.untilManualChange) &&
+        data.grantRevision is int &&
+        data.grantRevision >= 0 &&
+        data.updatedAt is timestamp &&
+        existsAfter(/databases/$(database)/documents/studentAccess/$(data.accessId)) &&
         (
-          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.uid == request.auth.uid ||
-          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.normalizedEmail == request.auth.token.email ||
-          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.email == request.auth.token.email
+          access.uid == request.auth.uid ||
+          access.normalizedEmail == request.auth.token.email ||
+          access.email == request.auth.token.email
         ) &&
-        request.resource.data.planType ==
-          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.planType &&
-        request.resource.data.scopeType ==
-          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.scopeType &&
-        request.resource.data.module ==
-          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.module &&
-        request.resource.data.itemType ==
-          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.itemType &&
-        request.resource.data.itemId ==
-          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.itemId &&
-        request.resource.data.itemIds ==
-          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.itemIds &&
-        request.resource.data.bundleId ==
-          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.bundleId &&
-        request.resource.data.course ==
-          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.course &&
-        request.resource.data.status ==
-          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.status &&
-        request.resource.data.source ==
-          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.source &&
-        request.resource.data.accessUntil ==
-          getAfter(/databases/$(database)/documents/studentAccess/$(request.resource.data.accessId)).data.accessUntil;
+        data.planType ==
+          access.planType &&
+        data.planCode ==
+          accessPlanCode &&
+        data.accessRank ==
+          accessRank &&
+        data.productId ==
+          access.get("productId", null) &&
+        data.purchaseTermsSnapshot ==
+          access.get("purchaseTermsSnapshot", null) &&
+        data.priceVersion ==
+          access.get("priceVersion", null) &&
+        data.validityMode ==
+          access.get("validityMode", "CUSTOM_WINDOW") &&
+        data.noExpiry ==
+          access.get("noExpiry", false) &&
+        data.untilManualChange ==
+          access.get("untilManualChange", false) &&
+        data.scopeType ==
+          access.scopeType &&
+        data.module ==
+          access.module &&
+        data.itemType ==
+          access.itemType &&
+        data.itemId ==
+          access.itemId &&
+        data.itemIds ==
+          access.itemIds &&
+        data.bundleId ==
+          access.bundleId &&
+        data.course ==
+          access.course &&
+        data.status ==
+          access.status &&
+        data.source ==
+          access.source &&
+        data.accessFrom ==
+          access.accessFrom &&
+        data.accessUntil ==
+          access.accessUntil &&
+        data.grantKey ==
+          access.get("grantKey", null) &&
+        data.grantFamilyKey ==
+          access.get("grantFamilyKey", null) &&
+        data.grantRevision ==
+          access.get("grantRevision", 0);
     }
 
     match /studentAccess/{docId} {

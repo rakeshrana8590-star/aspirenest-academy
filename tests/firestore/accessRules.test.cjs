@@ -14,12 +14,16 @@ const {
   initializeTestEnvironment,
 } = require("@firebase/rules-unit-testing");
 const {
+  collection,
   deleteDoc,
   doc,
   getDoc,
+  getDocs,
+  query,
   serverTimestamp,
   setDoc,
   updateDoc,
+  where,
   writeBatch,
 } = require("firebase/firestore");
 
@@ -79,6 +83,8 @@ const baseAccessRecord = (overrides = {}) => ({
   normalizedEmail: STUDENT_EMAIL,
   uid: null,
   planType: "PREMIUM",
+  planCode: "PREMIUM",
+  accessRank: 200,
   scopeType: "plan",
   status: "active",
   source: "admin_manual",
@@ -90,6 +96,12 @@ const baseAccessRecord = (overrides = {}) => ({
   itemIds: [],
   bundleId: null,
   productId: null,
+  purchaseTermsSnapshot: null,
+  termsSnapshot: null,
+  priceVersion: null,
+  validityMode: "CUSTOM_WINDOW",
+  noExpiry: false,
+  untilManualChange: false,
   accessKeyId: null,
   campaignId: null,
   campaignName: "",
@@ -113,6 +125,7 @@ const entitlementPayload = ({
   accessId,
   entitlementId = "plan_PREMIUM",
   source = "admin_manual",
+  ...overrides
 } = {}) => ({
   id: entitlementId,
   uid: STUDENT_UID,
@@ -120,6 +133,15 @@ const entitlementPayload = ({
   normalizedEmail: STUDENT_EMAIL,
   accessId,
   planType: "PREMIUM",
+  planCode: "PREMIUM",
+  accessRank: 200,
+  productId: null,
+  purchaseTermsSnapshot: null,
+  termsSnapshot: null,
+  priceVersion: null,
+  validityMode: "CUSTOM_WINDOW",
+  noExpiry: false,
+  untilManualChange: false,
   scopeType: "plan",
   module: null,
   itemType: null,
@@ -131,8 +153,269 @@ const entitlementPayload = ({
   source,
   accessFrom: null,
   accessUntil: FUTURE_DATE,
+  grantKey: null,
+  grantFamilyKey: null,
+  grantRevision: 0,
   updatedAt: serverTimestamp(),
+  ...overrides,
 });
+
+const DYNAMIC_PRODUCT_ID = "plan_ctet_crash_45";
+const DYNAMIC_PLAN_CODE = "CTET_CRASH_45";
+const DYNAMIC_ACCESS_RANK = 150;
+const DYNAMIC_PRICE_VERSION = 4;
+const DYNAMIC_PRICE_EFFECTIVE_FROM = new Date(
+  "2026-07-01T00:00:00.000Z"
+);
+const DYNAMIC_ACCESS_FROM = "2026-07-15";
+const DYNAMIC_ACCESS_UNTIL = "2030-01-01";
+const DYNAMIC_ACCESS_FROM_DATE = new Date(
+  "2026-07-15T00:00:00.000Z"
+);
+const DYNAMIC_ACCESS_UNTIL_DATE = new Date(
+  "2030-01-01T00:00:00.000Z"
+);
+const DYNAMIC_CAPTURED_AT = new Date(
+  "2026-07-15T12:00:00.000Z"
+);
+
+const activePlanProduct = (overrides = {}) => ({
+  productId: DYNAMIC_PRODUCT_ID,
+  planCode: DYNAMIC_PLAN_CODE,
+  planType: DYNAMIC_PLAN_CODE,
+  title: "CTET Crash 45",
+  name: "CTET Crash 45",
+  description: "Forty-five day CTET plan",
+  course: "CTET_TET",
+  scopeType: "plan",
+  accessRank: DYNAMIC_ACCESS_RANK,
+  priceINR: 799,
+  price: 799,
+  compareAtPriceINR: 999,
+  compareAtPrice: 999,
+  currency: "INR",
+  priceVersion: DYNAMIC_PRICE_VERSION,
+  priceEffectiveFrom: DYNAMIC_PRICE_EFFECTIVE_FROM,
+  validityMode: "ADMIN_DEFINED",
+  defaultValidityDays: 30,
+  validityDays: 30,
+  allowNoExpiry: true,
+  adminControlsValidity: true,
+  fixed365DayValidity: false,
+  supportsCustomWindow: true,
+  supportsUntilManualChange: true,
+  accessFrom: null,
+  accessUntil: null,
+  status: "active",
+  isActive: true,
+  notes: "",
+  adminNote: "",
+  ...overrides,
+});
+
+const dynamicPaymentProductSnapshot = (
+  product = activePlanProduct(),
+  capturedAt = DYNAMIC_CAPTURED_AT
+) => ({
+  productId: product.productId,
+  planCode: product.planCode,
+  planType: product.planCode,
+  title: product.title,
+  description: product.description,
+  accessRank: product.accessRank,
+  scopeType: "plan",
+  priceINR: product.priceINR,
+  compareAtPriceINR: product.compareAtPriceINR,
+  currency: product.currency,
+  priceVersion: product.priceVersion,
+  priceEffectiveFrom: product.priceEffectiveFrom,
+  validityMode: product.validityMode,
+  defaultValidityDays: product.defaultValidityDays,
+  allowNoExpiry: product.allowNoExpiry,
+  fixed365DayValidity: false,
+  capturedAt,
+});
+
+const dynamicPaymentPayload = (
+  product = activePlanProduct(),
+  overrides = {}
+) => ({
+  orderId: "ASP-DYNAMIC-001",
+  userId: STUDENT_UID,
+  upiLink: "upi://pay?pa=aspirenest@upi",
+  studentEmail: STUDENT_EMAIL,
+  studentMobile: "9999999999",
+  studentName: "Student",
+  planName: product.title,
+  planType: product.planCode,
+  planCode: product.planCode,
+  productId: product.productId,
+  accessRank: product.accessRank,
+  amount: product.priceINR,
+  currency: product.currency,
+  priceVersion: product.priceVersion,
+  priceEffectiveFrom: product.priceEffectiveFrom,
+  productSnapshot: dynamicPaymentProductSnapshot(product),
+  fixed365DayValidity: false,
+  status: "pending_payment",
+  studentProof: "",
+  adminProof: "",
+  matchStatus: "waiting",
+  createdAt: DYNAMIC_CAPTURED_AT,
+  ...overrides,
+});
+
+const dynamicPlanTermsSnapshot = (
+  product = activePlanProduct(),
+  overrides = {}
+) => ({
+  productId: product.productId,
+  planCode: product.planCode,
+  planType: product.planCode,
+  accessRank: product.accessRank,
+  priceINR: product.priceINR,
+  compareAtPriceINR: product.compareAtPriceINR,
+  currency: product.currency,
+  priceVersion: product.priceVersion,
+  priceEffectiveFrom: product.priceEffectiveFrom,
+  validityMode: "CUSTOM_WINDOW",
+  accessFrom: DYNAMIC_ACCESS_FROM_DATE,
+  accessUntil: DYNAMIC_ACCESS_UNTIL_DATE,
+  noExpiry: false,
+  untilManualChange: false,
+  capturedAt: DYNAMIC_CAPTURED_AT,
+  ...overrides,
+});
+
+const dynamicKeyAccessPayload = ({
+  keyId,
+  product = activePlanProduct(),
+  overrides = {},
+} = {}) => {
+  const purchaseTermsSnapshot =
+    dynamicPlanTermsSnapshot(product);
+  const payload = baseAccessRecord({
+    uid: STUDENT_UID,
+    planType: product.planCode,
+    planCode: product.planCode,
+    accessRank: product.accessRank,
+    productId: product.productId,
+    purchaseTermsSnapshot,
+    termsSnapshot: purchaseTermsSnapshot,
+    priceVersion: product.priceVersion,
+    validityMode: "CUSTOM_WINDOW",
+    noExpiry: false,
+    untilManualChange: false,
+    source: "redeem_key",
+    accessKeyId: keyId,
+    accessFrom: DYNAMIC_ACCESS_FROM,
+    accessUntil: DYNAMIC_ACCESS_UNTIL,
+    createdBy: STUDENT_UID,
+    actorEmail: STUDENT_EMAIL,
+    createdAt: DYNAMIC_CAPTURED_AT,
+    updatedAt: DYNAMIC_CAPTURED_AT,
+    ...overrides,
+  });
+
+  delete payload.updatedBy;
+  return payload;
+};
+
+const dynamicEntitlementPayload = ({
+  accessId,
+  product = activePlanProduct(),
+  source = "redeem_key",
+  overrides = {},
+} = {}) => {
+  const purchaseTermsSnapshot =
+    dynamicPlanTermsSnapshot(product);
+
+  return entitlementPayload({
+    accessId,
+    entitlementId: `plan_${product.planCode}`,
+    source,
+    planType: product.planCode,
+    planCode: product.planCode,
+    accessRank: product.accessRank,
+    productId: product.productId,
+    purchaseTermsSnapshot,
+    termsSnapshot: purchaseTermsSnapshot,
+    priceVersion: product.priceVersion,
+    validityMode: "CUSTOM_WINDOW",
+    noExpiry: false,
+    untilManualChange: false,
+    accessFrom: DYNAMIC_ACCESS_FROM,
+    accessUntil: DYNAMIC_ACCESS_UNTIL,
+    ...overrides,
+  });
+};
+
+const buildAtomicKeyRedemptionBatch = ({
+  db,
+  keyId,
+  accessId,
+  entitlementId,
+  auditId,
+  accessPayload,
+  entitlement,
+  metadata = {},
+}) => {
+  const batch = writeBatch(db);
+
+  batch.set(doc(db, "studentAccess", accessId), accessPayload);
+  batch.set(
+    doc(
+      db,
+      "studentEntitlements",
+      STUDENT_UID,
+      "items",
+      entitlementId
+    ),
+    entitlement
+  );
+  batch.set(doc(db, "accessAuditLogs", auditId), {
+    action: "redeem_access_key",
+    accessId,
+    email: STUDENT_EMAIL,
+    uid: STUDENT_UID,
+    before: { usedCount: 0, status: "active" },
+    after: {
+      usedCount: 1,
+      status: "used",
+      entitlementId,
+      accessId,
+      auditId,
+    },
+    metadata: {
+      source: "redeem_key",
+      accessKeyId: keyId,
+      entitlementId,
+      atomic: true,
+      ...metadata,
+    },
+    createdAt: serverTimestamp(),
+    createdBy: STUDENT_UID,
+    actorEmail: STUDENT_EMAIL,
+    actorRole: "student",
+  });
+  batch.update(doc(db, "accessKeys", keyId), {
+    usedCount: 1,
+    status: "used",
+    lastRedeemedByEmail: STUDENT_EMAIL,
+    lastRedeemedByUid: STUDENT_UID,
+    lastRedeemedAt: serverTimestamp(),
+    redeemedByEmail: STUDENT_EMAIL,
+    redeemedByUid: STUDENT_UID,
+    redeemedAt: serverTimestamp(),
+    lastRedemptionAccessId: accessId,
+    lastRedemptionEntitlementId: entitlementId,
+    lastRedemptionAuditId: auditId,
+    updatedAt: serverTimestamp(),
+    updatedBy: STUDENT_UID,
+  });
+
+  return batch;
+};
 
 before(async () => {
   const { host, port } = emulatorAddress();
@@ -866,4 +1149,564 @@ test("protected content requires active entitlement", async () => {
   );
 
   assert.equal(snapshot.exists(), true);
+});
+
+test("anonymous pricing query reads only active plan products", async () => {
+  await seed(async (db) => {
+    await setDoc(
+      doc(db, "accessProducts", DYNAMIC_PRODUCT_ID),
+      activePlanProduct()
+    );
+    await setDoc(
+      doc(db, "accessProducts", "plan_inactive"),
+      activePlanProduct({
+        productId: "plan_inactive",
+        planCode: "INACTIVE_PLAN",
+        planType: "INACTIVE_PLAN",
+        status: "inactive",
+        isActive: false,
+      })
+    );
+  });
+
+  const catalogQuery = query(
+    collection(anonymousDb(), "accessProducts"),
+    where("scopeType", "==", "plan"),
+    where("status", "==", "active"),
+    where("isActive", "==", true)
+  );
+  const snapshot = await assertSucceeds(
+    getDocs(catalogQuery)
+  );
+
+  assert.equal(snapshot.size, 1);
+  assert.equal(snapshot.docs[0].id, DYNAMIC_PRODUCT_ID);
+});
+
+test("anonymous reader cannot fetch an inactive plan product", async () => {
+  await seed(async (db) => {
+    await setDoc(
+      doc(db, "accessProducts", "plan_inactive"),
+      activePlanProduct({
+        productId: "plan_inactive",
+        planCode: "INACTIVE_PLAN",
+        planType: "INACTIVE_PLAN",
+        status: "inactive",
+        isActive: false,
+      })
+    );
+  });
+
+  await assertFails(
+    getDoc(
+      doc(anonymousDb(), "accessProducts", "plan_inactive")
+    )
+  );
+});
+
+test("student can create a catalog-bound dynamic payment request", async () => {
+  const product = activePlanProduct();
+
+  await seed(async (db) => {
+    await setDoc(
+      doc(db, "accessProducts", product.productId),
+      product
+    );
+  });
+
+  await assertSucceeds(
+    setDoc(
+      doc(studentDb(), "payments", "dynamic-payment"),
+      dynamicPaymentPayload(product)
+    )
+  );
+});
+
+test("student cannot tamper with dynamic payment amount or rank", async () => {
+  const product = activePlanProduct();
+
+  await seed(async (db) => {
+    await setDoc(
+      doc(db, "accessProducts", product.productId),
+      product
+    );
+  });
+
+  await assertFails(
+    setDoc(
+      doc(studentDb(), "payments", "tampered-payment"),
+      dynamicPaymentPayload(product, {
+        amount: product.priceINR + 1,
+        accessRank: product.accessRank + 1,
+      })
+    )
+  );
+});
+
+test("legacy student payment without catalog snapshot fails closed", async () => {
+  await assertFails(
+    setDoc(doc(studentDb(), "payments", "legacy-payment"), {
+      orderId: "ASP-LEGACY",
+      userId: STUDENT_UID,
+      upiLink: "upi://pay?pa=aspirenest@upi",
+      studentEmail: STUDENT_EMAIL,
+      studentMobile: "9999999999",
+      studentName: "Student",
+      planName: "Premium",
+      amount: 1499,
+      status: "pending_payment",
+      studentProof: "",
+      adminProof: "",
+      matchStatus: "waiting",
+      createdAt: DYNAMIC_CAPTURED_AT,
+    })
+  );
+});
+
+test("dynamic product-linked key redemption preserves catalog snapshot", async () => {
+  const product = activePlanProduct();
+  const keyId = "DYNAMIC-KEY-001";
+  const accessId = "dynamic-key-access";
+  const entitlementId = `plan_${product.planCode}`;
+  const auditId = "dynamic-key-audit";
+
+  await seed(async (db) => {
+    await setDoc(
+      doc(db, "accessProducts", product.productId),
+      product
+    );
+    await setDoc(doc(db, "accessKeys", keyId), {
+      code: keyId,
+      normalizedCode: keyId,
+      productId: product.productId,
+      campaignId: null,
+      campaignName: "",
+      campaignSource: "",
+      course: product.course,
+      planType: product.planCode,
+      planCode: product.planCode,
+      accessRank: product.accessRank,
+      purchaseTermsSnapshot: null,
+      termsSnapshot: null,
+      priceVersion: product.priceVersion,
+      validityMode: "CUSTOM_WINDOW",
+      noExpiry: false,
+      untilManualChange: false,
+      scopeType: "plan",
+      module: null,
+      itemType: null,
+      itemId: null,
+      itemTitle: "",
+      itemIds: [],
+      bundleId: null,
+      status: "active",
+      maxUses: 1,
+      usedCount: 0,
+      assignedEmail: STUDENT_EMAIL,
+      redeemedByEmail: null,
+      redeemedByUid: null,
+      redeemedAt: null,
+      accessFrom: DYNAMIC_ACCESS_FROM,
+      accessUntil: DYNAMIC_ACCESS_UNTIL,
+      validityDays: 0,
+      notes: "",
+      adminNote: "",
+    });
+  });
+
+  const db = studentDb();
+  const batch = writeBatch(db);
+  const accessPayload = dynamicKeyAccessPayload({
+    keyId,
+    product,
+  });
+  const entitlement = dynamicEntitlementPayload({
+    accessId,
+    product,
+  });
+
+  batch.set(doc(db, "studentAccess", accessId), accessPayload);
+  batch.set(
+    doc(
+      db,
+      "studentEntitlements",
+      STUDENT_UID,
+      "items",
+      entitlementId
+    ),
+    entitlement
+  );
+  batch.set(doc(db, "accessAuditLogs", auditId), {
+    action: "redeem_access_key",
+    accessId,
+    email: STUDENT_EMAIL,
+    uid: STUDENT_UID,
+    before: { usedCount: 0, status: "active" },
+    after: {
+      usedCount: 1,
+      status: "used",
+      entitlementId,
+      accessId,
+      auditId,
+    },
+    metadata: {
+      source: "redeem_key",
+      accessKeyId: keyId,
+      productId: product.productId,
+      planCode: product.planCode,
+      accessRank: product.accessRank,
+      priceVersion: product.priceVersion,
+      entitlementId,
+      atomic: true,
+    },
+    createdAt: serverTimestamp(),
+    createdBy: STUDENT_UID,
+    actorEmail: STUDENT_EMAIL,
+    actorRole: "student",
+  });
+  batch.update(doc(db, "accessKeys", keyId), {
+    usedCount: 1,
+    status: "used",
+    lastRedeemedByEmail: STUDENT_EMAIL,
+    lastRedeemedByUid: STUDENT_UID,
+    lastRedeemedAt: serverTimestamp(),
+    redeemedByEmail: STUDENT_EMAIL,
+    redeemedByUid: STUDENT_UID,
+    redeemedAt: serverTimestamp(),
+    lastRedemptionAccessId: accessId,
+    lastRedemptionEntitlementId: entitlementId,
+    lastRedemptionAuditId: auditId,
+    updatedAt: serverTimestamp(),
+    updatedBy: STUDENT_UID,
+  });
+
+  await assertSucceeds(batch.commit());
+});
+
+test("dynamic product-linked key rejects catalog rank tampering", async () => {
+  const product = activePlanProduct();
+  const keyId = "DYNAMIC-KEY-TAMPER";
+  const accessId = "dynamic-tampered-access";
+  const entitlementId = `plan_${product.planCode}`;
+  const auditId = "dynamic-tampered-audit";
+
+  await seed(async (db) => {
+    await setDoc(
+      doc(db, "accessProducts", product.productId),
+      product
+    );
+    await setDoc(doc(db, "accessKeys", keyId), {
+      code: keyId,
+      normalizedCode: keyId,
+      productId: product.productId,
+      course: product.course,
+      planType: product.planCode,
+      planCode: product.planCode,
+      accessRank: product.accessRank,
+      priceVersion: product.priceVersion,
+      validityMode: "CUSTOM_WINDOW",
+      noExpiry: false,
+      untilManualChange: false,
+      scopeType: "plan",
+      module: null,
+      itemType: null,
+      itemId: null,
+      itemIds: [],
+      bundleId: null,
+      status: "active",
+      maxUses: 1,
+      usedCount: 0,
+      assignedEmail: STUDENT_EMAIL,
+      redeemedByEmail: null,
+      redeemedByUid: null,
+      accessFrom: DYNAMIC_ACCESS_FROM,
+      accessUntil: DYNAMIC_ACCESS_UNTIL,
+      validityDays: 0,
+    });
+  });
+
+  const db = studentDb();
+  const batch = writeBatch(db);
+  const accessPayload = dynamicKeyAccessPayload({
+    keyId,
+    product,
+    overrides: {
+      accessRank: product.accessRank + 500,
+    },
+  });
+  const entitlement = dynamicEntitlementPayload({
+    accessId,
+    product,
+    overrides: {
+      accessRank: product.accessRank + 500,
+    },
+  });
+
+  batch.set(doc(db, "studentAccess", accessId), accessPayload);
+  batch.set(
+    doc(
+      db,
+      "studentEntitlements",
+      STUDENT_UID,
+      "items",
+      entitlementId
+    ),
+    entitlement
+  );
+  batch.set(doc(db, "accessAuditLogs", auditId), {
+    action: "redeem_access_key",
+    accessId,
+    email: STUDENT_EMAIL,
+    uid: STUDENT_UID,
+    before: { usedCount: 0, status: "active" },
+    after: {
+      usedCount: 1,
+      status: "used",
+      entitlementId,
+      accessId,
+      auditId,
+    },
+    metadata: {
+      source: "redeem_key",
+      accessKeyId: keyId,
+      entitlementId,
+      atomic: true,
+    },
+    createdAt: serverTimestamp(),
+    createdBy: STUDENT_UID,
+    actorEmail: STUDENT_EMAIL,
+    actorRole: "student",
+  });
+  batch.update(doc(db, "accessKeys", keyId), {
+    usedCount: 1,
+    status: "used",
+    lastRedeemedByEmail: STUDENT_EMAIL,
+    lastRedeemedByUid: STUDENT_UID,
+    lastRedeemedAt: serverTimestamp(),
+    redeemedByEmail: STUDENT_EMAIL,
+    redeemedByUid: STUDENT_UID,
+    redeemedAt: serverTimestamp(),
+    lastRedemptionAccessId: accessId,
+    lastRedemptionEntitlementId: entitlementId,
+    lastRedemptionAuditId: auditId,
+    updatedAt: serverTimestamp(),
+    updatedBy: STUDENT_UID,
+  });
+
+  await assertFails(batch.commit());
+});
+
+test("dynamic entitlement cannot diverge from its access snapshot", async () => {
+  const product = activePlanProduct();
+  const accessId = "dynamic-existing-access";
+
+  await seed(async (db) => {
+    await setDoc(
+      doc(db, "studentAccess", accessId),
+      dynamicKeyAccessPayload({
+        keyId: "DYNAMIC-SEED-KEY",
+        product,
+      })
+    );
+  });
+
+  await assertFails(
+    setDoc(
+      doc(
+        studentDb(),
+        "studentEntitlements",
+        STUDENT_UID,
+        "items",
+        `plan_${product.planCode}`
+      ),
+      dynamicEntitlementPayload({
+        accessId,
+        product,
+        overrides: {
+          priceVersion: product.priceVersion + 1,
+        },
+      })
+    )
+  );
+});
+
+test("validity-days-only product key redemption fails closed", async () => {
+  const product = activePlanProduct({
+    defaultValidityDays: 30,
+    validityDays: 30,
+    accessFrom: null,
+    accessUntil: null,
+  });
+  const keyId = "DYNAMIC-DAYS-ONLY";
+  const accessId = "dynamic-days-only-access";
+  const entitlementId = `plan_${product.planCode}`;
+  const auditId = "dynamic-days-only-audit";
+
+  await seed(async (db) => {
+    await setDoc(
+      doc(db, "accessProducts", product.productId),
+      product
+    );
+    await setDoc(doc(db, "accessKeys", keyId), {
+      code: keyId,
+      normalizedCode: keyId,
+      productId: product.productId,
+      course: product.course,
+      planType: product.planCode,
+      planCode: product.planCode,
+      accessRank: product.accessRank,
+      priceVersion: product.priceVersion,
+      validityMode: "ADMIN_DEFINED",
+      noExpiry: false,
+      untilManualChange: false,
+      scopeType: "plan",
+      module: null,
+      itemType: null,
+      itemId: null,
+      itemIds: [],
+      bundleId: null,
+      status: "active",
+      maxUses: 1,
+      usedCount: 0,
+      assignedEmail: STUDENT_EMAIL,
+      redeemedByEmail: null,
+      redeemedByUid: null,
+      accessFrom: null,
+      accessUntil: null,
+      validityDays: 30,
+    });
+  });
+
+  const db = studentDb();
+  const accessPayload = dynamicKeyAccessPayload({
+    keyId,
+    product,
+    overrides: {
+      accessFrom: "2026-07-15",
+      accessUntil: "2099-01-01",
+    },
+  });
+  const entitlement = dynamicEntitlementPayload({
+    accessId,
+    product,
+    overrides: {
+      accessFrom: "2026-07-15",
+      accessUntil: "2099-01-01",
+    },
+  });
+  const batch = buildAtomicKeyRedemptionBatch({
+    db,
+    keyId,
+    accessId,
+    entitlementId,
+    auditId,
+    accessPayload,
+    entitlement,
+  });
+
+  await assertFails(batch.commit());
+});
+
+test("legacy module product key redemption remains supported", async () => {
+  const productId = "legacy-notes-module";
+  const keyId = "LEGACY-MODULE-KEY";
+  const accessId = "legacy-module-access";
+  const entitlementId = "module_notes";
+  const auditId = "legacy-module-audit";
+
+  await seed(async (db) => {
+    await setDoc(doc(db, "accessProducts", productId), {
+      title: "Notes Module",
+      course: "CTET_TET",
+      planType: "BASIC",
+      scopeType: "module",
+      module: "notes",
+      status: "active",
+      accessUntil: FUTURE_DATE,
+    });
+    await setDoc(doc(db, "accessKeys", keyId), {
+      code: keyId,
+      normalizedCode: keyId,
+      productId,
+      course: "CTET_TET",
+      planType: "BASIC",
+      scopeType: "module",
+      module: "notes",
+      itemType: null,
+      itemId: null,
+      itemIds: [],
+      bundleId: null,
+      status: "active",
+      maxUses: 1,
+      usedCount: 0,
+      assignedEmail: STUDENT_EMAIL,
+      redeemedByEmail: null,
+      redeemedByUid: null,
+      accessFrom: null,
+      accessUntil: FUTURE_DATE,
+      validityDays: 0,
+    });
+  });
+
+  const accessPayload = baseAccessRecord({
+    uid: STUDENT_UID,
+    planType: "BASIC",
+    planCode: "BASIC",
+    accessRank: 100,
+    productId,
+    purchaseTermsSnapshot: null,
+    termsSnapshot: null,
+    priceVersion: null,
+    validityMode: "CUSTOM_WINDOW",
+    noExpiry: false,
+    untilManualChange: false,
+    scopeType: "module",
+    module: "notes",
+    source: "redeem_key",
+    accessKeyId: keyId,
+    accessFrom: null,
+    accessUntil: FUTURE_DATE,
+    createdBy: STUDENT_UID,
+    actorEmail: STUDENT_EMAIL,
+  });
+  delete accessPayload.updatedBy;
+
+  const entitlement = entitlementPayload({
+    accessId,
+    entitlementId,
+    source: "redeem_key",
+    planType: "BASIC",
+    planCode: "BASIC",
+    accessRank: 100,
+    productId,
+    purchaseTermsSnapshot: null,
+    termsSnapshot: null,
+    priceVersion: null,
+    validityMode: "CUSTOM_WINDOW",
+    noExpiry: false,
+    untilManualChange: false,
+    scopeType: "module",
+    module: "notes",
+    accessFrom: null,
+    accessUntil: FUTURE_DATE,
+  });
+
+  const db = studentDb();
+  const batch = buildAtomicKeyRedemptionBatch({
+    db,
+    keyId,
+    accessId,
+    entitlementId,
+    auditId,
+    accessPayload,
+    entitlement,
+    metadata: {
+      productId,
+      scopeType: "module",
+      planCode: "BASIC",
+      accessRank: 100,
+    },
+  });
+
+  await assertSucceeds(batch.commit());
 });
