@@ -8757,6 +8757,9 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   element={
     <StudentMockTestLibraryRoute
       universalContent={universalContent}
+      user={user}
+      isAdminUser={adaptiveShellRuntimeContext.isAdminUser}
+      accessProfile={accessProfile}
     />
   }
 />

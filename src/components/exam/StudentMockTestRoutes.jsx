@@ -2,6 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import StudentMockTestCard from "./StudentMockTestCard.jsx";
+import {
+  MOCK_TEST_DISCOVERY_STATES,
+  buildMockTestDiscoveryModel,
+} from "../../access/mockTestDiscoveryModel.js";
 import "./studentMockLeaderboard.css";
 import {
   getMockLeaderboardModeLabel,
@@ -10,22 +14,6 @@ import {
   maskMockLeaderboardName,
   rankMockLeaderboardEntries,
 } from "./mockLeaderboardUtils.js";
-
-const MOCK_PLAN_ORDER = ["FREE", "BASIC", "PREMIUM", "MENTORSHIP"];
-
-const PLAN_LABELS = {
-  FREE: "Free Mock Tests",
-  BASIC: "Basic Test Library",
-  PREMIUM: "Premium Test Library",
-  MENTORSHIP: "Mentorship Test Vault",
-};
-
-const PLAN_ICONS = {
-  FREE: "📝",
-  BASIC: "🔷",
-  PREMIUM: "⭐",
-  MENTORSHIP: "👩‍🏫",
-};
 
 const normalizeText = (value = "") =>
   value.toString().trim().toLowerCase();
@@ -273,28 +261,105 @@ function MockEmptyState({ title, text }) {
   );
 }
 
-export function StudentMockTestLibraryRoute({ universalContent = [] }) {
+const getDiscoveryPlanIcon = (planCode = "") => {
+  const normalizedPlan = String(planCode || "")
+    .trim()
+    .toUpperCase();
+
+  if (normalizedPlan === "FREE") return "📝";
+  if (normalizedPlan === "BASIC") return "🔷";
+  if (normalizedPlan === "PREMIUM") return "⭐";
+  if (normalizedPlan === "MENTORSHIP") return "👩‍🏫";
+
+  return "🧭";
+};
+
+const getDiscoveryStateCopy = (state = "") => {
+  if (state === MOCK_TEST_DISCOVERY_STATES.LOADING) {
+    return {
+      title: "Checking mock-test access",
+      text: "Your available tests are being verified securely.",
+    };
+  }
+
+  if (state === MOCK_TEST_DISCOVERY_STATES.BLOCKED) {
+    return {
+      title: "Mock-test access needs attention",
+      text: "Review My Access before opening protected mock tests.",
+    };
+  }
+
+  if (state === MOCK_TEST_DISCOVERY_STATES.ERROR) {
+    return {
+      title: "Mock-test access unavailable",
+      text: "Access could not be verified, so protected tests remain closed.",
+    };
+  }
+
+  return {
+    title: "No mock tests available",
+    text: "Published mock tests will appear here when they are ready.",
+  };
+};
+
+export function StudentMockTestLibraryRoute({
+  universalContent = [],
+  user = null,
+  isAdminUser = false,
+  accessProfile = {},
+}) {
   const navigate = useNavigate();
-  const publishedTests = getPublishedMockTests(universalContent);
+  const [selectedPlanCode, setSelectedPlanCode] = useState("");
+
+  const discoveryModel = buildMockTestDiscoveryModel({
+    universalContent,
+    user,
+    isAdminUser,
+    accessProfile,
+  });
+
+  useEffect(() => {
+    if (
+      selectedPlanCode &&
+      !discoveryModel.plans.some(
+        (plan) => plan.planCode === selectedPlanCode
+      )
+    ) {
+      setSelectedPlanCode("");
+    }
+  }, [discoveryModel.plans, selectedPlanCode]);
+
+  const visibleItems = selectedPlanCode
+    ? discoveryModel.items.filter(
+        (item) => item.planCode === selectedPlanCode
+      )
+    : discoveryModel.items;
+
+  const stateCopy = getDiscoveryStateCopy(discoveryModel.state);
+  const isReady =
+    discoveryModel.state === MOCK_TEST_DISCOVERY_STATES.READY;
 
   return (
-    <section className="mockStudentPage">
+    <section
+      className="mockStudentPage"
+      data-mock-discovery-state={discoveryModel.state}
+    >
       <MockStudentHero
         badge="CTET / TET MOCK TESTS"
         title="Practice & Performance Center"
-        text="Attempt plan-wise, subject-wise, and chapter-wise mock tests with score tracking and premium exam flow."
+        text="Discover available mock tests directly, with access-aware cards, score tracking, and the existing premium exam flow."
         stats={[
           {
-            label: "Published Tests",
-            value: publishedTests.length,
+            label: "Visible Tests",
+            value: discoveryModel.totalCount,
+          },
+          {
+            label: "Available",
+            value: discoveryModel.unlockedCount,
           },
           {
             label: "Plans",
-            value: MOCK_PLAN_ORDER.length,
-          },
-          {
-            label: "Mode",
-            value: "Premium",
+            value: discoveryModel.plans.length,
           },
         ]}
       />
@@ -302,110 +367,256 @@ export function StudentMockTestLibraryRoute({ universalContent = [] }) {
       <div className="mockStudentShelf mockStudentPlanShelfV2">
         <div className="mockStudentShelfHeader mockStudentShelfHeaderV2">
           <span>Mock Test Library</span>
-          <h2>Choose your preparation plan</h2>
+          <h2>Your entitlement-aware practice catalog</h2>
           <p>
-            Select the right plan shelf and continue into subject-wise,
-            chapter-wise, and test-wise practice inside one connected exam
-            system.
+            Plans are optional filters. Every visible test opens through its
+            direct item route, while locked previews stay connected to access
+            recovery.
           </p>
         </div>
 
-        <div className="mockStudentPlanGridV2">
-          {MOCK_PLAN_ORDER.map((planName) => {
-            const planTests = getPlanMockTests(universalContent, planName);
-            const subjects = buildSubjectList(planTests);
+        {!isReady ? (
+          <div data-mock-discovery-closed="true">
+            <MockEmptyState title={stateCopy.title} text={stateCopy.text} />
 
-            return (
+            {discoveryModel.recoveryRoute && (
+              <div className="mockStudentHeroButtons">
+                <button
+                  type="button"
+                  className="mockStudentPrimaryBtn"
+                  onClick={() => navigate(discoveryModel.recoveryRoute)}
+                >
+                  Review My Access →
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            <div
+              className="mockStudentPlanGridV2"
+              aria-label="Filter mock tests by plan"
+            >
               <button
                 type="button"
-                className={
-                  planName === "PREMIUM"
-                    ? "mockStudentPlanCardV2 isPremiumPlan"
-                    : "mockStudentPlanCardV2"
-                }
-                key={planName}
-                onClick={() =>
-                  navigate(`/ctet-tet/mock-tests/plan/${planName}`)
-                }
+                className={`mockStudentPlanCardV2 ${
+                  selectedPlanCode ? "" : "isSelected"
+                }`}
+                aria-pressed={!selectedPlanCode}
+                onClick={() => setSelectedPlanCode("")}
               >
                 <div className="mockStudentPlanCardTopV2">
-                  <span className="mockStudentPlanIconV2">
-                    {PLAN_ICONS[planName]}
-                  </span>
-
-                  <span className="mockStudentPlanPillV2">{planName}</span>
+                  <span className="mockStudentPlanIconV2">🧭</span>
+                  <span className="mockStudentPlanPillV2">ALL</span>
                 </div>
 
-                <h3>{PLAN_LABELS[planName]}</h3>
+                <h3>All Available Tests</h3>
 
                 <p>
-                  {subjects.length > 0
-                    ? `${subjects.length} subject shelves ready for practice.`
-                    : "Published mock tests will appear here after admin publishes them."}
+                  View every published test visible through your current
+                  access.
                 </p>
 
                 <div className="mockStudentPlanStatsV2">
                   <div>
-                    <strong>{planTests.length}</strong>
+                    <strong>{discoveryModel.totalCount}</strong>
                     <span>Tests</span>
                   </div>
 
                   <div>
-                    <strong>{subjects.length}</strong>
-                    <span>Subjects</span>
+                    <strong>{discoveryModel.unlockedCount}</strong>
+                    <span>Available</span>
                   </div>
                 </div>
 
                 <div className="mockStudentPlanFooterV2">
-                  <span>
-                    {planTests.length > 0
-                      ? "Open exam shelf"
-                      : "Waiting for tests"}
-                  </span>
-
-                  <strong>Open →</strong>
+                  <span>Direct test discovery</span>
+                  <strong>View →</strong>
                 </div>
               </button>
-            );
-          })}
-        </div>
+
+              {discoveryModel.plans.map((plan) => (
+                <button
+                  type="button"
+                  className={`mockStudentPlanCardV2 ${
+                    selectedPlanCode === plan.planCode ? "isSelected" : ""
+                  } ${
+                    plan.planCode === "PREMIUM" ? "isPremiumPlan" : ""
+                  }`}
+                  key={plan.planCode}
+                  aria-pressed={selectedPlanCode === plan.planCode}
+                  onClick={() => setSelectedPlanCode(plan.planCode)}
+                >
+                  <div className="mockStudentPlanCardTopV2">
+                    <span className="mockStudentPlanIconV2">
+                      {getDiscoveryPlanIcon(plan.planCode)}
+                    </span>
+                    <span className="mockStudentPlanPillV2">
+                      {plan.planCode}
+                    </span>
+                  </div>
+
+                  <h3>{plan.title}</h3>
+
+                  <p>
+                    {plan.unlockedCount} available and {plan.lockedCount} locked
+                    preview{plan.lockedCount === 1 ? "" : "s"}.
+                  </p>
+
+                  <div className="mockStudentPlanStatsV2">
+                    <div>
+                      <strong>{plan.count}</strong>
+                      <span>Tests</span>
+                    </div>
+
+                    <div>
+                      <strong>{plan.unlockedCount}</strong>
+                      <span>Available</span>
+                    </div>
+                  </div>
+
+                  <div className="mockStudentPlanFooterV2">
+                    <span>Use as filter</span>
+                    <strong>Filter →</strong>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            <div className="mockStudentLevelHeaderV2">
+              <div>
+                <span>
+                  {selectedPlanCode
+                    ? `${selectedPlanCode} FILTER`
+                    : "DIRECT TEST DISCOVERY"}
+                </span>
+                <h2>Visible mock tests</h2>
+                <p>
+                  Cards use the public-safe discovery projection. Questions,
+                  answers, explanations, and raw asset URLs are not passed into
+                  this catalog.
+                </p>
+              </div>
+
+              <div className="mockStudentLevelStatusV2">
+                <strong>{visibleItems.length}</strong>
+                <span>Visible tests</span>
+              </div>
+            </div>
+
+            {visibleItems.length === 0 ? (
+              <MockEmptyState
+                title="No tests in this filter"
+                text="Choose another plan filter to continue."
+              />
+            ) : (
+              <div className="mockStudentTestGrid mockStudentChapterTestGridV2">
+                {visibleItems.map((item) => (
+                  <article
+                    className={`mockTestPremiumCard ${
+                      item.isLocked ? "isLocked" : ""
+                    }`}
+                    key={item.id}
+                    data-mock-test-id={item.id}
+                    data-mock-access-state={item.accessState}
+                  >
+                    <div className="mockTestPremiumTop">
+                      <div className="mockTestPremiumIcon">📝</div>
+
+                      <div className="mockTestPremiumBadges">
+                        <span>{item.planCode}</span>
+                        <span>{item.isLocked ? "Locked" : "Available"}</span>
+                      </div>
+                    </div>
+
+                    <h3>{item.title}</h3>
+
+                    <p className="mockTestPremiumMeta">
+                      {item.subject} • {item.chapter}
+                    </p>
+
+                    <div className="mockTestPremiumStats">
+                      <div>
+                        <span>Questions</span>
+                        <strong>{item.totalQuestions}</strong>
+                      </div>
+
+                      <div>
+                        <span>Duration</span>
+                        <strong>{item.durationMinutes || "—"} min</strong>
+                      </div>
+
+                      <div>
+                        <span>Marks</span>
+                        <strong>{item.totalMarks || "—"}</strong>
+                      </div>
+
+                      <div>
+                        <span>Status</span>
+                        <strong>{item.scheduleStatus}</strong>
+                      </div>
+                    </div>
+
+                    <div className="mockTestPremiumFooter">
+                      <div>
+                        <span>Access</span>
+                        <strong>
+                          {item.isLocked ? "Access Required" : "Available"}
+                        </strong>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="mockTestPremiumButton"
+                        onClick={() => navigate(item.action.route)}
+                      >
+                        {item.action.label}
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       <div className="mockStudentShelf mockStudentPromisePanelV2">
         <div className="mockStudentPromiseCopyV2">
           <span>ONE APP • ONE SYSTEM</span>
 
-          <h2>No random links. No broken exam flow.</h2>
+          <h2>Direct discovery. Same premium exam engine.</h2>
 
           <p>
-            Plans, subjects, chapters, attempts, results, review, history, and
-            leaderboard stay connected inside one premium mock-test experience.
+            The catalog now uses centralized access evidence while existing
+            Start, Attempt, Result, Review, History, and Leaderboard routes stay
+            unchanged for the next controlled slices.
           </p>
         </div>
 
         <div className="mockStudentPromiseGridV2">
           <div>
             <span>🧭</span>
-            <strong>Plan Protected</strong>
-            <p>Every test remains connected with plan access and student flow.</p>
+            <strong>Access Aware</strong>
+            <p>ITEM, BUNDLE, MODULE, and PLAN evidence stays isolated.</p>
           </div>
 
           <div>
             <span>📚</span>
-            <strong>Subject-wise</strong>
-            <p>Students continue from plan shelf to subject and chapter.</p>
+            <strong>Dynamic Filters</strong>
+            <p>Custom plans appear from content instead of a fixed plan enum.</p>
           </div>
 
           <div>
             <span>📝</span>
-            <strong>Exam Engine</strong>
-            <p>Start, attempt, submit, result, and review stay in one system.</p>
+            <strong>Direct Routes</strong>
+            <p>Available tests open through the exact item start route.</p>
           </div>
 
           <div>
-            <span>🏆</span>
-            <strong>Performance</strong>
-            <p>History, score tracking, and leaderboard stay connected.</p>
+            <span>🔒</span>
+            <strong>Safe Projection</strong>
+            <p>Protected questions and answers never enter catalog markup.</p>
           </div>
         </div>
       </div>
