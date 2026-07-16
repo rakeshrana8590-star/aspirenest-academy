@@ -1,21 +1,16 @@
 import React from "react";
+import {
+  buildAdaptiveShellHeaderModel,
+} from "../../access/adaptiveShellHeaderModel";
 import AspireNestLogo from "../AspireNestLogo.jsx";
 import CtetHeaderNotificationCenter from "./CtetHeaderNotificationCenter.jsx";
-
-const HEADER_LINKS = [
-  ["Learning Hub", "/ctet-tet"],
-  ["Mock Tests", "/ctet-tet/mock-tests"],
-  ["Notes", "/ctet-tet/notes"],
-  ["Videos", "/ctet-tet/videos"],
-  ["Current Affairs", "/ctet-tet/current-affairs"],
-  ["Roadmaps", "/ctet-tet/roadmaps"],
-  ["Pricing", "/ctet-tet/pricing"],
-];
 
 export default function CtetPremiumHeader({
   className = "",
   user,
   isAdminUser = false,
+  shellNavigation = null,
+  currentPath = "",
   announcements = [],
   events = [],
   contentItems = [],
@@ -35,13 +30,18 @@ export default function CtetPremiumHeader({
     .filter(Boolean)
     .join(" ");
 
-  const roleLabel = user ? (isAdminUser ? "Admin" : "Student") : "Login";
-  const accessLabel = user
-    ? isAdminUser
-      ? "Premium Access"
-      : "Learning Access"
-    : "Start Learning";
-  const accountBadge = user ? (isAdminUser ? "AN" : "ST") : "IN";
+  const headerModel =
+    buildAdaptiveShellHeaderModel({
+      shellNavigation,
+      user,
+      isAdminUser,
+      currentPath,
+    });
+  const {
+    roleLabel,
+    accessLabel,
+    accountBadge,
+  } = headerModel;
 
   const handleAccountClick = () => {
     if (typeof window !== "undefined") {
@@ -57,23 +57,48 @@ export default function CtetPremiumHeader({
   };
 
   return (
-    <div className={rootClassName}>
+    <div
+      className={rootClassName}
+      data-shell-mode={headerModel.mode}
+      data-shell-fail-closed={
+        headerModel.isFailClosed
+          ? "true"
+          : "false"
+      }
+    >
       <div className="ctetLockedNav">
         <button
           type="button"
           className="ctetLockedBrand"
-          onClick={() => navigate("/ctet-tet")}
+          onClick={() =>
+            navigate(headerModel.brandRoute)
+          }
         >
           <AspireNestLogo />
         </button>
 
         <nav className="ctetLockedLinks" aria-label="AspireNest navigation">
-          {HEADER_LINKS.map(([label, url]) => (
-            <button type="button" key={label} onClick={() => navigate(url)}>
-              {label}
-              {label === "Pricing" ? <em>Premium</em> : null}
-            </button>
-          ))}
+          {headerModel.primaryItems.map(
+            (item) => (
+              <button
+                type="button"
+                key={item.id}
+                aria-current={
+                  item.isActive
+                    ? "page"
+                    : undefined
+                }
+                onClick={() =>
+                  navigate(item.route)
+                }
+              >
+                {item.label}
+                {item.badge ? (
+                  <em>{item.badge}</em>
+                ) : null}
+              </button>
+            )
+          )}
         </nav>
 
         <div className="ctetLockedTools">
@@ -94,6 +119,15 @@ export default function CtetPremiumHeader({
               type="button"
               className="ctetLockedAccount"
               onClick={handleAccountClick}
+              aria-haspopup={
+                user ? "menu" : undefined
+              }
+              aria-expanded={
+                user
+                  ? accountMenuOpen
+                  : undefined
+              }
+              title={`${roleLabel} — ${accessLabel}`}
             >
               <i />
               <span>
@@ -113,35 +147,34 @@ export default function CtetPremiumHeader({
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => openAccountTarget("/my-profile")}
-                >
-                  <span>👤</span>
-                  <div>
-                    <strong>Profile</strong>
-                    <small>View account details</small>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    openAccountTarget(
-                      isAdminUser ? "/admin" : "/student-dashboard"
-                    )
-                  }
-                >
-                  <span>{isAdminUser ? "⚙️" : "📊"}</span>
-                  <div>
-                    <strong>
-                      {isAdminUser ? "Admin Dashboard" : "Student Dashboard"}
-                    </strong>
-                    <small>
-                      {isAdminUser ? "Manage academy" : "Track learning"}
-                    </small>
-                  </div>
-                </button>
+                {headerModel.accountItems.map(
+                  (item) => (
+                    <button
+                      type="button"
+                      key={item.id}
+                      aria-current={
+                        item.isActive
+                          ? "page"
+                          : undefined
+                      }
+                      onClick={() =>
+                        openAccountTarget(
+                          item.route
+                        )
+                      }
+                    >
+                      <span>{item.icon}</span>
+                      <div>
+                        <strong>
+                          {item.label}
+                        </strong>
+                        <small>
+                          {item.description}
+                        </small>
+                      </div>
+                    </button>
+                  )
+                )}
 
                 <button
                   type="button"

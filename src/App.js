@@ -4327,6 +4327,10 @@ const studyTimeMessage =
       className={className}
       user={user}
       isAdminUser={Boolean(user && isAdmin(user))}
+      shellNavigation={
+        accessProfile?.shellNavigation
+      }
+      currentPath={location.pathname}
       announcements={announcements}
       events={ctetExperienceEvents}
       contentItems={universalContent}
