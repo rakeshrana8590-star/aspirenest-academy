@@ -35,6 +35,15 @@ describe(
               item.id === "search"
           )
         ).toBe(false);
+        expect(
+          model.primaryItems.some(
+            (item) =>
+              item.id === "home"
+          )
+        ).toBe(false);
+        expect(model.brandRoute).toBe(
+          "/ctet-tet"
+        );
       }
     );
 
@@ -86,6 +95,32 @@ describe(
           "my-access",
           "dashboard",
         ]);
+      }
+    );
+
+    test(
+      "authenticated Home is the canonical root destination",
+      () => {
+        const model =
+          buildAdaptiveShellHeaderModel({
+            user: {
+              uid: "student-1",
+            },
+            currentPath: "/",
+          });
+
+        expect(model.brandRoute).toBe("/");
+        expect(
+          model.primaryItems.find(
+            (item) =>
+              item.id === "home"
+          )
+        ).toEqual(
+          expect.objectContaining({
+            route: "/",
+            isActive: true,
+          })
+        );
       }
     );
 

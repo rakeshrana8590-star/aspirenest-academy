@@ -1,3 +1,10 @@
+const AUTHENTICATED_HOME_ITEM =
+  Object.freeze({
+    id: "home",
+    label: "Home",
+    route: "/",
+  });
+
 const AUTHENTICATED_SEARCH_ITEM =
   Object.freeze({
     id: "search",
@@ -277,11 +284,15 @@ export const buildAdaptiveShellHeaderModel = ({
     roleLabel,
     accessLabel,
     accountBadge,
-    brandRoute: "/ctet-tet",
+    brandRoute:
+      isAuthenticated
+        ? "/"
+        : "/ctet-tet",
     primaryItems: Object.freeze(
       (
         isAuthenticated
           ? [
+              AUTHENTICATED_HOME_ITEM,
               PRIMARY_HEADER_ITEMS[0],
               AUTHENTICATED_SEARCH_ITEM,
               ...PRIMARY_HEADER_ITEMS.slice(1),

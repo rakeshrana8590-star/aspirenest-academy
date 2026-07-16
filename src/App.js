@@ -142,6 +142,7 @@ import StudentLearnerProfileRoute from "./profile/StudentLearnerProfileRoute.jsx
 import StudentAccessInviteRoute from "./access/student/StudentAccessInviteRoute.jsx";
 import MyAccessRoute from "./access/student/MyAccessRoute.jsx";
 import SearchRoute from "./search/SearchRoute.jsx";
+import AuthenticatedHomeRoute from "./home/AuthenticatedHomeRoute.jsx";
 
 import MockTestActionMenu from "./components/exam/MockTestActionMenu.jsx";
 import { deleteMockTest } from "./components/exam/mockTestAdminActions.js";
@@ -4492,7 +4493,21 @@ return (
 
 <Route
   path="/"
-  element={<AcademyOverviewRoute />}
+  element={
+    user ? (
+      <AuthenticatedHomeRoute
+        user={user}
+        shellState={accessProfile?.shellState}
+        myAccess={accessProfile?.myAccess}
+        contentItems={universalContent}
+        roadmaps={ctetNotificationRoadmaps}
+        mockResults={mockResults}
+        navigate={navigate}
+      />
+    ) : (
+      <AcademyOverviewRoute />
+    )
+  }
 />
 
 
