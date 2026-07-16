@@ -19,6 +19,9 @@ import {
 import {
   ACCESS_ITEM_TYPES, ACCESS_MODULE, } from "./access/accessConstants";
 import useAccessProfile from "./access/useAccessProfile";
+import {
+  buildAdaptiveShellRuntimeContext,
+} from "./access/adaptiveShellRuntimeContext";
 import { grantPaymentAccess } from "./access/accessService";
 import {
   buildDynamicPaymentApproval,
@@ -524,6 +527,16 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
   const [userPlanType, setUserPlanType] = useState("FREE");
   const [membershipExpiry, setMembershipExpiry] = useState(null);
+  const adaptiveShellRuntimeContext =
+    buildAdaptiveShellRuntimeContext({
+      user,
+      isAdminUser:
+        user?.email ===
+        "aspirenestplatform@gmail.com",
+      currentPath: location.pathname,
+      resumeRoute: "/ctet-tet",
+    });
+
   const accessProfile = useAccessProfile({
     user,
     profile: {
@@ -537,7 +550,14 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
     fallbackPlanType: userPlanType || "FREE",
     fallbackExpiry: membershipExpiry,
     allowLegacyProfileFallback: false,
-    enabled: Boolean(user),
+    isAdminUser:
+      adaptiveShellRuntimeContext.isAdminUser,
+    resumeRoute:
+      adaptiveShellRuntimeContext.resumeRoute,
+    currentPath:
+      adaptiveShellRuntimeContext.currentPath,
+    enabled:
+      adaptiveShellRuntimeContext.enabled,
   });
 
   const activeAccessPlan = accessProfile?.activePlan || "FREE";
