@@ -8798,12 +8798,14 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   element={
     <ExamStartRoute
       universalContent={universalContent}
-      getMockTestAccessStatus={getMockTestAccessStatus}
       getMockTestScheduleStatus={getMockTestScheduleStatus}
       getMockTestRules={getMockTestRules}
       setMockAttemptState={setMockAttemptState}
       mockResults={mockResults}
       user={user}
+      isAdminUser={adaptiveShellRuntimeContext.isAdminUser}
+      accessProfile={accessProfile}
+      planCatalog={accessProfile?.planCatalog || []}
     />
   }
 />

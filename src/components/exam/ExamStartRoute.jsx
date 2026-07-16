@@ -2,6 +2,10 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { getAttemptStorageKey } from "./examAttemptStorage.js";
+import {
+  EXAM_START_ACCESS_STATES,
+  buildExamStartAccessModel,
+} from "./examStartAccessModel.js";
 
 const safeParseJson = (value, fallback = {}) => {
   try {
@@ -95,12 +99,14 @@ const hasSavedMockAttempt = (mockResults = [], attemptSaveKey = "") =>
 
 export default function ExamStartRoute({
   universalContent,
-  getMockTestAccessStatus,
   getMockTestScheduleStatus,
   getMockTestRules,
   setMockAttemptState,
   mockResults = [],
   user,
+  isAdminUser = false,
+  accessProfile = {},
+  planCatalog = [],
 }) {
   const navigate = useNavigate();
   const { testId } = useParams();
@@ -112,7 +118,13 @@ export default function ExamStartRoute({
       item.section === "mockTest" && item.id === activeStartMockTestId
   );
 
-  const accessStatus = getMockTestAccessStatus(test);
+  const startAccess = buildExamStartAccessModel({
+    test,
+    user,
+    isAdminUser,
+    accessProfile,
+    planCatalog,
+  });
 
   const renderStateCard = ({
     label,
@@ -136,14 +148,18 @@ export default function ExamStartRoute({
     </section>
   );
 
-  if (accessStatus === "NOT_FOUND") {
-    return renderStateCard({
-      label: "Unavailable",
-      title: "Test not found",
-      message: "This mock test is not available anymore.",
-      actionLabel: "Back to Mock Tests",
-      onAction: () => navigate("/ctet-tet/mock-tests"),
-    });
+  if (startAccess.state !== EXAM_START_ACCESS_STATES.READY) {
+    return (
+      <div data-exam-start-access-state={startAccess.state}>
+        {renderStateCard({
+          label: startAccess.label,
+          title: startAccess.title,
+          message: startAccess.message,
+          actionLabel: startAccess.actionLabel,
+          onAction: () => navigate(startAccess.recoveryRoute),
+        })}
+      </div>
+    );
   }
 
   const savedStartAttempt = safeParseJson(
@@ -155,43 +171,9 @@ export default function ExamStartRoute({
     !savedStartAttempt?.isSubmitted;
 
   const hasSubmittedAttempt = savedStartAttempt?.isSubmitted === true;
+  const scheduleStatus = getMockTestScheduleStatus(test);
 
-  if (accessStatus === "UNPUBLISHED") {
-    return renderStateCard({
-      label: "Unpublished",
-      title: "Test unavailable",
-      message: "This mock test is not published yet.",
-      actionLabel: "Back to Mock Tests",
-      onAction: () => navigate("/ctet-tet/mock-tests"),
-    });
-  }
-
-  if (accessStatus === "LOGIN_REQUIRED") {
-    return renderStateCard({
-      label: "Login Required",
-      title: "Login before starting",
-      message: "Please login before starting this mock test.",
-      actionLabel: "Login to Continue",
-      onAction: () => navigate("/login"),
-    });
-  }
-
-  if (
-    accessStatus === "PLAN_LOCKED" ||
-    accessStatus === "EXPIRED_MEMBERSHIP"
-  ) {
-    return renderStateCard({
-      label: "Plan Required",
-      title: "Upgrade required",
-      message: `This mock test needs ${
-        test.planType || "PREMIUM"
-      } access.`,
-      actionLabel: "View Pricing",
-      onAction: () => navigate("/ctet-tet/pricing"),
-    });
-  }
-
-  if (accessStatus === "UPCOMING" && !hasSubmittedAttempt) {
+  if (scheduleStatus === "UPCOMING" && !hasSubmittedAttempt) {
     const startsAt = formatScheduledMockDateTime(
       test.examStartDate,
       test.examStartTime
@@ -206,7 +188,7 @@ export default function ExamStartRoute({
     });
   }
 
-  if (accessStatus === "EXPIRED" && !hasSubmittedAttempt) {
+  if (scheduleStatus === "EXPIRED" && !hasSubmittedAttempt) {
     return renderStateCard({
       label: "Expired",
       title: "Test window closed",
@@ -225,8 +207,6 @@ export default function ExamStartRoute({
   const totalMarks =
     Number(test.totalMarks) || totalQuestions * marksPerQuestion;
   const passingMarks = Number(test.passingMarks || 0);
-  const scheduleStatus = getMockTestScheduleStatus(test);
-
   const attemptLimitInfo = parseAttemptLimit(test.attemptLimit);
   const activeAttemptSaveKey =
     savedStartAttempt?.startedAt || savedStartAttempt?.submittedAt
@@ -301,7 +281,11 @@ export default function ExamStartRoute({
       : "Begin Test";
 
   return (
-    <section className="examStartPage">
+    <section
+      className="examStartPage"
+      data-exam-start-access-state={startAccess.state}
+      data-exam-start-source-scope={startAccess.sourceScope}
+    >
       <div className="examStartShell">
         <div className="examStartTopBar">
           <button
