@@ -399,6 +399,22 @@ describe(
     );
 
     test(
+      "rejects a multi-token query when only one generic token matches",
+      () => {
+        const catalog =
+          buildUnifiedSearchCatalog();
+        const search =
+          searchUnifiedCatalog(
+            catalog,
+            "nonexistent aspirenest topic xyz"
+          );
+
+        expect(search.results).toEqual([]);
+        expect(search.totalMatches).toBe(0);
+      }
+    );
+
+    test(
       "category filtering returns only requested results",
       () => {
         const catalog =

@@ -748,6 +748,27 @@ const getSearchScore = (
     entry.description
   );
   const searchable = entry.searchText || "";
+  const phraseMatched =
+    title.includes(normalizedQuery) ||
+    description.includes(normalizedQuery) ||
+    searchable.includes(normalizedQuery);
+  const matchedTokens = tokens.filter(
+    (token) =>
+      title.includes(token) ||
+      description.includes(token) ||
+      searchable.includes(token)
+  );
+  const minimumTokenMatches = Math.max(
+    1,
+    Math.ceil(tokens.length * 0.6)
+  );
+
+  if (
+    !phraseMatched &&
+    matchedTokens.length < minimumTokenMatches
+  ) {
+    return 0;
+  }
 
   let score = 0;
 
@@ -774,6 +795,8 @@ const getSearchScore = (
     if (description.includes(token)) score += 8;
     if (searchable.includes(token)) score += 6;
   });
+
+  score += matchedTokens.length * 5;
 
   if (entry.kind === "module") {
     score += 4;

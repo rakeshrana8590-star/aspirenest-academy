@@ -1,3 +1,10 @@
+const AUTHENTICATED_SEARCH_ITEM =
+  Object.freeze({
+    id: "search",
+    label: "Search",
+    route: "/search",
+  });
+
 const PRIMARY_HEADER_ITEMS = Object.freeze([
   Object.freeze({
     id: "learning-hub",
@@ -272,12 +279,19 @@ export const buildAdaptiveShellHeaderModel = ({
     accountBadge,
     brandRoute: "/ctet-tet",
     primaryItems: Object.freeze(
-      PRIMARY_HEADER_ITEMS.map(
-        (item) =>
-          freezePrimaryItem(
-            item,
-            currentPath
-          )
+      (
+        isAuthenticated
+          ? [
+              PRIMARY_HEADER_ITEMS[0],
+              AUTHENTICATED_SEARCH_ITEM,
+              ...PRIMARY_HEADER_ITEMS.slice(1),
+            ]
+          : PRIMARY_HEADER_ITEMS
+      ).map((item) =>
+        freezePrimaryItem(
+          item,
+          currentPath
+        )
       )
     ),
     accountItems,

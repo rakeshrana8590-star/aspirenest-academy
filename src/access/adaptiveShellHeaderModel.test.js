@@ -29,6 +29,12 @@ describe(
         expect(model.accountItems).toEqual(
           []
         );
+        expect(
+          model.primaryItems.some(
+            (item) =>
+              item.id === "search"
+          )
+        ).toBe(false);
       }
     );
 
@@ -84,7 +90,7 @@ describe(
     );
 
     test(
-      "My Access is exposed while the future Search route remains hidden",
+      "authenticated Search is exposed as a primary destination while My Access remains in the account menu",
       () => {
         const model =
           buildAdaptiveShellHeaderModel({
@@ -92,7 +98,7 @@ describe(
               uid: "student-1",
             },
             currentPath:
-              "/my-access",
+              "/search",
             shellNavigation: {
               accountItems: [
                 {
@@ -122,6 +128,17 @@ describe(
           });
 
         expect(
+          model.primaryItems.find(
+            (item) =>
+              item.id === "search"
+          )
+        ).toEqual(
+          expect.objectContaining({
+            route: "/search",
+            isActive: true,
+          })
+        );
+        expect(
           model.accountItems.map(
             (item) => item.route
           )
@@ -130,12 +147,6 @@ describe(
           "/my-access",
           "/student-dashboard",
         ]);
-        expect(
-          model.accountItems.find(
-            (item) =>
-              item.id === "my-access"
-          )?.isActive
-        ).toBe(true);
       }
     );
 

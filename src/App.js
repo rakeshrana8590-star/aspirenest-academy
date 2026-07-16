@@ -141,6 +141,7 @@ import AdminAccessKeysRoute from "./access/admin/AdminAccessKeysRoute.jsx";
 import StudentLearnerProfileRoute from "./profile/StudentLearnerProfileRoute.jsx";
 import StudentAccessInviteRoute from "./access/student/StudentAccessInviteRoute.jsx";
 import MyAccessRoute from "./access/student/MyAccessRoute.jsx";
+import SearchRoute from "./search/SearchRoute.jsx";
 
 import MockTestActionMenu from "./components/exam/MockTestActionMenu.jsx";
 import { deleteMockTest } from "./components/exam/mockTestAdminActions.js";
@@ -623,6 +624,7 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
       "/profile/setup",
       "/my-profile",
       "/my-access",
+      "/search",
       "/my-courses",
       "/my-notes",
       "/my-tests",
@@ -5645,6 +5647,21 @@ xpActivityEvents={ctetMockXpEvents}
       <MyAccessRoute
         user={user}
         myAccess={accessProfile?.myAccess}
+      />
+    ) : null
+  }
+/>
+
+<Route
+  path="/search"
+  element={
+    requireLogin() ? (
+      <SearchRoute
+        user={user}
+        contentItems={universalContent}
+        roadmaps={ctetNotificationRoadmaps}
+        shellState={accessProfile?.shellState}
+        navigate={navigate}
       />
     ) : null
   }
