@@ -25,6 +25,9 @@ import {
 import {
   buildAdaptiveShellState,
 } from "./adaptiveShellModel";
+import {
+  buildAdaptiveShellNavigation,
+} from "./adaptiveShellNavigation";
 
 const EMPTY_ACCESS_RECORDS = [];
 
@@ -135,6 +138,8 @@ export default function useAccessProfile({
   fallbackExpiry = null,
   allowLegacyProfileFallback = false,
   isAdminUser = false,
+  resumeRoute = "",
+  currentPath = "",
   enabled = true,
 } = {}) {
   const [loading, setLoading] = useState(false);
@@ -302,6 +307,20 @@ export default function useAccessProfile({
     ]
   );
 
+  const shellNavigation = useMemo(
+    () =>
+      buildAdaptiveShellNavigation({
+        shellState,
+        resumeRoute,
+        currentPath,
+      }),
+    [
+      shellState,
+      resumeRoute,
+      currentPath,
+    ]
+  );
+
   return {
     loading,
     error,
@@ -318,6 +337,7 @@ export default function useAccessProfile({
     canAccessModule,
     canAccessItem,
     shellState,
+    shellNavigation,
     refreshAccess: loadAccessProfile,
   };
 }
