@@ -22,6 +22,9 @@ import {
 import {
   filterAccessRecordsForVerifiedPrincipal,
 } from "./accessIdentityClaim";
+import {
+  buildAdaptiveShellState,
+} from "./adaptiveShellModel";
 
 const EMPTY_ACCESS_RECORDS = [];
 
@@ -131,6 +134,7 @@ export default function useAccessProfile({
   fallbackPlanType = ACCESS_PLAN_TYPES.FREE,
   fallbackExpiry = null,
   allowLegacyProfileFallback = false,
+  isAdminUser = false,
   enabled = true,
 } = {}) {
   const [loading, setLoading] = useState(false);
@@ -280,6 +284,24 @@ export default function useAccessProfile({
     [hasAccess]
   );
 
+  const shellState = useMemo(
+    () =>
+      buildAdaptiveShellState({
+        user,
+        accessRecords,
+        loading,
+        error,
+        isAdminUser,
+      }),
+    [
+      user,
+      accessRecords,
+      loading,
+      error,
+      isAdminUser,
+    ]
+  );
+
   return {
     loading,
     error,
@@ -295,6 +317,7 @@ export default function useAccessProfile({
     hasAccess,
     canAccessModule,
     canAccessItem,
+    shellState,
     refreshAccess: loadAccessProfile,
   };
 }
