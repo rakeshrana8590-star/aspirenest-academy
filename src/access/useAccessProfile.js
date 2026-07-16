@@ -28,6 +28,9 @@ import {
 import {
   buildAdaptiveShellNavigation,
 } from "./adaptiveShellNavigation";
+import {
+  buildMyAccessModel,
+} from "./myAccessModel";
 
 const EMPTY_ACCESS_RECORDS = [];
 
@@ -321,6 +324,24 @@ export default function useAccessProfile({
     ]
   );
 
+  const myAccess = useMemo(
+    () =>
+      buildMyAccessModel({
+        user,
+        accessRecords,
+        shellState,
+        loading,
+        error,
+      }),
+    [
+      user,
+      accessRecords,
+      shellState,
+      loading,
+      error,
+    ]
+  );
+
   return {
     loading,
     error,
@@ -338,6 +359,7 @@ export default function useAccessProfile({
     canAccessItem,
     shellState,
     shellNavigation,
+    myAccess,
     refreshAccess: loadAccessProfile,
   };
 }
