@@ -2,9 +2,12 @@ import {
   ADMIN_PLAN_VALIDITY_CHOICES,
   applyPlanProductToGrantForm,
   buildDynamicPlanGrantPayload,
+  buildDynamicPlanGrantTerms,
   createInitialDynamicPlanGrantForm,
+  hasSameCatalogPlanGrantTarget,
   listGrantablePlanProducts,
   validateDynamicPlanGrantForm,
+  validateDynamicPlanGrantSelection,
 } from "./accessGrantFormModel";
 
 import {
@@ -352,4 +355,149 @@ describe("Admin dynamic plan grant form contract", () => {
       payload.untilManualChange
     ).toBe(true);
   });
+
+  test("dynamic bulk duplicate matching distinguishes different custom plans", () => {
+    expect(
+      hasSameCatalogPlanGrantTarget(
+        {
+          productId: "plan_alpha",
+          planCode: "ALPHA",
+        },
+        {
+          productId: "plan_beta",
+          planCode: "BETA",
+        }
+      )
+    ).toBe(false);
+
+    expect(
+      hasSameCatalogPlanGrantTarget(
+        {
+          productId: "plan_alpha",
+          planCode: "ALPHA",
+        },
+        {
+          productId: "plan_alpha",
+          planCode: "ALPHA",
+        }
+      )
+    ).toBe(true);
+  });
+
+  test("catalog selection validation works without a learner email for keys and bulk grants", () => {
+    const form = {
+      ...createInitialDynamicPlanGrantForm(),
+      productId:
+        "plan_ctet_crash_45",
+      adminNote:
+        "Founder approved campaign",
+      accessUntil:
+        "2026-08-30",
+    };
+
+    expect(
+      validateDynamicPlanGrantSelection({
+        form,
+        products,
+      })
+    ).toEqual([]);
+  });
+
+  test("catalog grant terms preserve custom product identity, rank, version, and snapshot", () => {
+    const form = {
+      ...createInitialDynamicPlanGrantForm(),
+      productId:
+        "plan_ctet_crash_45",
+      adminNote:
+        "Bulk campaign approved",
+      accessFrom:
+        "2026-07-15",
+      accessUntil:
+        "2026-08-30",
+    };
+    const terms =
+      buildDynamicPlanGrantTerms({
+        form,
+        products,
+        now: new Date(
+          "2026-07-15T12:00:00.000Z"
+        ),
+      });
+
+    expect(terms).toMatchObject({
+      scopeType: "plan",
+      planType:
+        "CTET_CRASH_45",
+      planCode:
+        "CTET_CRASH_45",
+      accessRank: 150,
+      productId:
+        "plan_ctet_crash_45",
+      priceVersion: 3,
+      validityMode:
+        ACCESS_PLAN_VALIDITY_MODES.CUSTOM_WINDOW,
+      fixed365DayValidity: false,
+    });
+    expect(
+      terms.purchaseTermsSnapshot
+        .productId
+    ).toBe(
+      "plan_ctet_crash_45"
+    );
+  });
+
+  test("catalog grant terms support validity days without a fixed-duration fallback", () => {
+    const form = {
+      ...createInitialDynamicPlanGrantForm(),
+      productId:
+        "plan_premium",
+      adminNote:
+        "Key campaign approved",
+      validityChoice:
+        ADMIN_PLAN_VALIDITY_CHOICES.VALIDITY_DAYS,
+      validityDays: "45",
+      accessFrom:
+        "2026-07-15",
+    };
+    const terms =
+      buildDynamicPlanGrantTerms({
+        form,
+        products,
+        now: new Date(
+          "2026-07-15T12:00:00.000Z"
+        ),
+      });
+
+    expect(terms.validityDays).toBe(45);
+    expect(
+      terms.accessUntil
+        .toISOString()
+        .slice(0, 10)
+    ).toBe("2026-08-29");
+    expect(
+      terms.fixed365DayValidity
+    ).toBe(false);
+  });
+
+  test("catalog selection fails closed when no-expiry is disallowed", () => {
+    const form = {
+      ...createInitialDynamicPlanGrantForm(),
+      productId:
+        "plan_ctet_crash_45",
+      adminNote:
+        "Key campaign approved",
+      validityChoice:
+        ADMIN_PLAN_VALIDITY_CHOICES.NO_EXPIRY,
+    };
+
+    expect(
+      validateDynamicPlanGrantSelection({
+        form,
+        products,
+      })
+    ).toContain(
+      "Selected plan does not allow no-expiry access."
+    );
+  });
+
 });

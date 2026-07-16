@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { auth } from "../../firebase";
 import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
@@ -9,26 +9,34 @@ import {
   ACCESS_ITEM_TYPES,
   ACCESS_KEY_STATUS,
   ACCESS_MODULE,
-  ACCESS_PLAN_TYPES,
   ACCESS_SCOPE_TYPES,
 } from "../accessConstants";
 
 import {
   createAccessKey,
   listAccessKeys,
+  listAccessProducts,
   normalizeAccessKeyCode,
 } from "../accessService";
 
-const initialForm = {
+import {
+  ADMIN_PLAN_VALIDITY_CHOICES,
+  applyPlanProductToGrantForm,
+  buildDynamicPlanGrantTerms,
+  createInitialDynamicPlanGrantForm,
+  listGrantablePlanProducts,
+  validateDynamicPlanGrantSelection,
+} from "./accessGrantFormModel";
+
+const createInitialForm = () => ({
+  ...createInitialDynamicPlanGrantForm(),
   code: "",
   assignedEmail: "",
-  productId: "",
   campaignId: "",
   campaignName: "",
   campaignSource: "",
   course: ACCESS_COURSE.CTET_TET,
   scopeType: ACCESS_SCOPE_TYPES.PLAN,
-  planType: ACCESS_PLAN_TYPES.PREMIUM,
   module: "",
   itemType: "",
   itemId: "",
@@ -36,13 +44,14 @@ const initialForm = {
   itemIdsText: "",
   bundleId: "",
   maxUses: "1",
+  validityChoice:
+    ADMIN_PLAN_VALIDITY_CHOICES.VALIDITY_DAYS,
   validityDays: "30",
   accessFrom: "",
   accessUntil: "",
   status: ACCESS_KEY_STATUS.ACTIVE,
   adminNote: "",
-};
-
+});
 const keyActions = [
   {
     icon: "K",
@@ -69,14 +78,78 @@ const buildRandomKeyCode = () => {
   return "AN-" + chunk() + "-" + chunk() + "-" + chunk();
 };
 
+const formatPrice = (product = {}) =>
+  "₹" +
+  Number(
+    product.priceINR ??
+      product.price ??
+      0
+  ).toLocaleString("en-IN");
+
+const formatPlanOption = (product = {}) =>
+  [
+    product.title ||
+      product.name ||
+      product.planCode,
+    product.planCode,
+    formatPrice(product),
+  ]
+    .filter(Boolean)
+    .join(" • ");
+
 export default function AdminAccessKeysRoute() {
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] = useState(createInitialForm);
   const [errors, setErrors] = useState([]);
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [saveError, setSaveError] = useState("");
   const [accessKeys, setAccessKeys] = useState([]);
   const [loadingKeys, setLoadingKeys] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [catalogLoading, setCatalogLoading] = useState(false);
+  const [catalogError, setCatalogError] = useState("");
+
+  const loadPlanCatalog = useCallback(async () => {
+    setCatalogLoading(true);
+    setCatalogError("");
+
+    try {
+      const nextProducts = await listAccessProducts({
+        maxCount: 200,
+      });
+
+      setProducts(
+        Array.isArray(nextProducts)
+          ? nextProducts
+          : []
+      );
+    } catch (error) {
+      setProducts([]);
+      setCatalogError(
+        error?.message ||
+          "Active plan catalog could not be loaded."
+      );
+    } finally {
+      setCatalogLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadPlanCatalog();
+  }, [loadPlanCatalog]);
+
+  const planProducts = useMemo(
+    () => listGrantablePlanProducts(products),
+    [products]
+  );
+
+  const selectedPlanProduct = useMemo(
+    () =>
+      planProducts.find(
+        (product) => product.productId === form.productId
+      ) || null,
+    [planProducts, form.productId]
+  );
 
   const normalizedCode = useMemo(
     () => normalizeAccessKeyCode(form.code),
@@ -97,6 +170,45 @@ export default function AdminAccessKeysRoute() {
       ...current,
       [field]: value,
     }));
+    setErrors([]);
+    setSaveError("");
+    setSuccessMessage("");
+  };
+
+  const handleScopeTypeChange = (scopeType) => {
+    setForm((current) => ({
+      ...current,
+      scopeType,
+      ...(scopeType === ACCESS_SCOPE_TYPES.PLAN
+        ? {}
+        : {
+            productId: "",
+            planCode: "",
+            planType: "",
+            accessRank: "",
+          }),
+    }));
+    setErrors([]);
+    setSaveError("");
+    setSuccessMessage("");
+  };
+
+  const handlePlanProductChange = (productId) => {
+    const product = planProducts.find(
+      (item) => item.productId === productId
+    );
+
+    setForm((current) =>
+      product
+        ? applyPlanProductToGrantForm(current, product)
+        : {
+            ...current,
+            productId: "",
+            planCode: "",
+            planType: "",
+            accessRank: "",
+          }
+    );
     setErrors([]);
     setSaveError("");
     setSuccessMessage("");
@@ -144,8 +256,34 @@ export default function AdminAccessKeysRoute() {
       nextErrors.push("Scope type is required.");
     }
 
-    if (form.scopeType === ACCESS_SCOPE_TYPES.PLAN && !form.planType) {
-      nextErrors.push("Plan is required for plan key.");
+    if (form.scopeType === ACCESS_SCOPE_TYPES.PLAN) {
+      if (catalogLoading) {
+        nextErrors.push(
+          "Wait for the active plan catalog to finish loading."
+        );
+      }
+
+      if (catalogError) {
+        nextErrors.push(
+          "Plan catalog must load successfully before a plan key can be saved."
+        );
+      }
+
+      if (!catalogLoading && !catalogError && !planProducts.length) {
+        nextErrors.push(
+          "No active plan product is available for this key."
+        );
+      }
+
+      validateDynamicPlanGrantSelection({
+        form,
+        products,
+        requireAdminNote: true,
+      }).forEach((message) => {
+        if (!nextErrors.includes(message)) {
+          nextErrors.push(message);
+        }
+      });
     }
 
     if (form.scopeType === ACCESS_SCOPE_TYPES.MODULE && !form.module) {
@@ -168,16 +306,26 @@ export default function AdminAccessKeysRoute() {
       nextErrors.push("Max uses must be at least 1.");
     }
 
-    if (Number(form.validityDays || 0) < 0) {
-      nextErrors.push("Validity days cannot be negative.");
-    }
+    if (form.scopeType !== ACCESS_SCOPE_TYPES.PLAN) {
+      if (Number(form.validityDays || 0) < 0) {
+        nextErrors.push("Validity days cannot be negative.");
+      }
 
-    if (form.accessFrom && form.accessUntil) {
-      const fromTime = new Date(form.accessFrom).getTime();
-      const untilTime = new Date(form.accessUntil).getTime();
+      if (form.accessFrom && form.accessUntil) {
+        const fromTime = new Date(form.accessFrom).getTime();
+        const untilTime = new Date(form.accessUntil).getTime();
 
-      if (Number.isFinite(fromTime) && Number.isFinite(untilTime) && untilTime < fromTime) {
-        nextErrors.push("Access until cannot be before access from.");
+        if (
+          Number.isFinite(fromTime) &&
+          Number.isFinite(untilTime) &&
+          untilTime < fromTime
+        ) {
+          nextErrors.push("Access until cannot be before access from.");
+        }
+      }
+
+      if (!form.adminNote.trim()) {
+        nextErrors.push("Admin note is required.");
       }
     }
 
@@ -189,30 +337,55 @@ export default function AdminAccessKeysRoute() {
     return nextErrors.length === 0;
   };
 
-  const buildPayload = () => ({
-    code: normalizedCode,
-    assignedEmail: form.assignedEmail.trim(),
-    productId: form.productId.trim() || null,
-    campaignId: form.campaignId.trim() || null,
-    campaignName: form.campaignName.trim(),
-    campaignSource: form.campaignSource.trim(),
-    course: form.course,
-    scopeType: form.scopeType,
-    planType: form.planType,
-    module: form.module || null,
-    itemType: form.itemType || null,
-    itemId: form.itemId.trim() || null,
-    itemTitle: form.itemTitle.trim(),
-    itemIds: bundleItemIds,
-    bundleId: form.bundleId.trim() || null,
-    maxUses: Number(form.maxUses || 1),
-    validityDays: Number(form.validityDays || 0),
-    accessFrom: form.accessFrom || null,
-    accessUntil: form.accessUntil || null,
-    status: form.status,
-    adminNote: form.adminNote.trim(),
-    notes: form.adminNote.trim(),
-  });
+  const buildPayload = () => {
+    const commonPayload = {
+      code: normalizedCode,
+      assignedEmail: form.assignedEmail.trim(),
+      campaignId: form.campaignId.trim() || null,
+      campaignName: form.campaignName.trim(),
+      campaignSource: form.campaignSource.trim(),
+      course: form.course,
+      scopeType: form.scopeType,
+      module: form.module || null,
+      itemType: form.itemType || null,
+      itemId: form.itemId.trim() || null,
+      itemTitle: form.itemTitle.trim(),
+      itemIds: bundleItemIds,
+      bundleId: form.bundleId.trim() || null,
+      maxUses: Number(form.maxUses || 1),
+      status: form.status,
+      adminNote: form.adminNote.trim(),
+      notes: form.adminNote.trim(),
+    };
+
+    if (form.scopeType === ACCESS_SCOPE_TYPES.PLAN) {
+      return {
+        ...commonPayload,
+        ...buildDynamicPlanGrantTerms({
+          form,
+          products,
+          now: new Date(),
+          requireAdminNote: true,
+        }),
+      };
+    }
+
+    return {
+      ...commonPayload,
+      productId: form.productId.trim() || null,
+      planType: null,
+      planCode: null,
+      accessRank: null,
+      purchaseTermsSnapshot: null,
+      termsSnapshot: null,
+      validityMode: null,
+      noExpiry: false,
+      untilManualChange: false,
+      validityDays: Number(form.validityDays || 0),
+      accessFrom: form.accessFrom || null,
+      accessUntil: form.accessUntil || null,
+    };
+  };
 
   const handleGenerateCode = () => {
     updateField("code", buildRandomKeyCode());
@@ -252,7 +425,7 @@ export default function AdminAccessKeysRoute() {
       setSuccessMessage(
         "Access key created successfully. Key ID: " + keyRecord.id
       );
-      setForm(initialForm);
+      setForm(createInitialForm());
       setErrors([]);
       await loadAccessKeys();
     } catch (error) {
@@ -265,12 +438,36 @@ export default function AdminAccessKeysRoute() {
   const previewRows = [
     ["Code", normalizedCode || "Required"],
     ["Assigned Email", form.assignedEmail.trim() || "Open key"],
-    ["Product ID", form.productId.trim() || "Optional"],
+    [
+      "Product",
+      form.scopeType === ACCESS_SCOPE_TYPES.PLAN
+        ? selectedPlanProduct
+          ? selectedPlanProduct.title + " • " + selectedPlanProduct.productId
+          : "Select active plan product"
+        : form.productId.trim() || "Optional",
+    ],
     ["Campaign ID", form.campaignId.trim() || "Optional"],
     ["Campaign Name", form.campaignName.trim() || "Optional"],
     ["Campaign Source", form.campaignSource.trim() || "Manual"],
     ["Scope", form.scopeType],
-    ["Plan", form.scopeType === ACCESS_SCOPE_TYPES.PLAN ? form.planType : "Not plan scoped"],
+    [
+      "Plan Code",
+      form.scopeType === ACCESS_SCOPE_TYPES.PLAN
+        ? selectedPlanProduct?.planCode || "Required"
+        : "Not plan scoped",
+    ],
+    [
+      "Access Rank",
+      form.scopeType === ACCESS_SCOPE_TYPES.PLAN
+        ? selectedPlanProduct?.accessRank ?? "Required"
+        : "Not plan scoped",
+    ],
+    [
+      "Price Version",
+      form.scopeType === ACCESS_SCOPE_TYPES.PLAN
+        ? selectedPlanProduct?.priceVersion ?? "Required"
+        : "Not plan scoped",
+    ],
     ["Module", form.module || "Not module scoped"],
     ["Item Type", form.itemType || "Not item scoped"],
     ["Item ID", form.itemId.trim() || "Not item scoped"],
@@ -278,9 +475,26 @@ export default function AdminAccessKeysRoute() {
     ["Bundle ID", form.bundleId.trim() || "Not bundle scoped"],
     ["Bundle Items", bundleItemIds.length ? bundleItemIds.join(", ") : "Not bundle scoped"],
     ["Max Uses", form.maxUses || "1"],
-    ["Validity Days", form.validityDays || "0"],
-    ["Access From", form.accessFrom || "Immediate"],
-    ["Access Until", form.accessUntil || "No expiry set"],
+    [
+      "Validity",
+      form.scopeType === ACCESS_SCOPE_TYPES.PLAN
+        ? form.validityChoice || "Required"
+        : form.validityDays || "0",
+    ],
+    ["Access From", form.accessFrom || "Redemption time"],
+    [
+      "Access Until",
+      form.validityChoice === ADMIN_PLAN_VALIDITY_CHOICES.NO_EXPIRY
+        ? "No expiry"
+        : form.validityChoice ===
+            ADMIN_PLAN_VALIDITY_CHOICES.UNTIL_MANUAL_CHANGE
+          ? "Until manual change"
+          : form.accessUntil ||
+            (form.validityChoice ===
+            ADMIN_PLAN_VALIDITY_CHOICES.VALIDITY_DAYS
+              ? `${form.validityDays || 0} day(s) after redemption`
+              : "Required"),
+    ],
     ["Status", form.status],
   ];
 
@@ -311,6 +525,19 @@ export default function AdminAccessKeysRoute() {
       actions={keyActions}
     >
       <div className="adminAccessFormPanel">
+        {form.scopeType === ACCESS_SCOPE_TYPES.PLAN ? (
+          <div className="adminAccessNotice">
+            <strong>Active plan catalog:</strong>{" "}
+            {catalogLoading
+              ? "Loading..."
+              : catalogError
+                ? "Unavailable — plan key creation is blocked."
+                : planProducts.length
+                  ? `${planProducts.length} active plan product(s) ready.`
+                  : "No active plan product is available."}
+          </div>
+        ) : null}
+
         <div className="adminAccessFormGrid">
           <div className="adminAccessField">
             <label>Access Key Code</label>
@@ -341,14 +568,48 @@ export default function AdminAccessKeysRoute() {
             />
           </div>
 
-          <div className="adminAccessField">
-            <label>Product ID optional</label>
-            <input
-              value={form.productId}
-              onChange={(event) => updateField("productId", event.target.value)}
-              placeholder="accessProducts document id"
-            />
-          </div>
+          {form.scopeType === ACCESS_SCOPE_TYPES.PLAN ? (
+            <div className="adminAccessField adminAccessFieldWide">
+              <label>Active Plan Product</label>
+              <select
+                value={form.productId}
+                onChange={(event) =>
+                  handlePlanProductChange(event.target.value)
+                }
+                disabled={
+                  catalogLoading ||
+                  Boolean(catalogError) ||
+                  !planProducts.length
+                }
+              >
+                <option value="">
+                  {catalogLoading
+                    ? "Loading active plans..."
+                    : "Select active plan product"}
+                </option>
+                {planProducts.map((product) => (
+                  <option
+                    value={product.productId}
+                    key={product.productId}
+                  >
+                    {formatPlanOption(product)}
+                  </option>
+                ))}
+              </select>
+              <small>
+                Product identity, access rank, price version, and validity terms are snapshotted when this key is created.
+              </small>
+            </div>
+          ) : (
+            <div className="adminAccessField">
+              <label>Product ID optional</label>
+              <input
+                value={form.productId}
+                onChange={(event) => updateField("productId", event.target.value)}
+                placeholder="Optional non-plan catalog reference"
+              />
+            </div>
+          )}
 
           <div className="adminAccessField">
             <label>Campaign ID optional</label>
@@ -391,7 +652,7 @@ export default function AdminAccessKeysRoute() {
             <label>Scope Type</label>
             <select
               value={form.scopeType}
-              onChange={(event) => updateField("scopeType", event.target.value)}
+              onChange={(event) => handleScopeTypeChange(event.target.value)}
             >
               <option value={ACCESS_SCOPE_TYPES.PLAN}>Plan Key</option>
               <option value={ACCESS_SCOPE_TYPES.MODULE}>Module Key</option>
@@ -400,19 +661,13 @@ export default function AdminAccessKeysRoute() {
             </select>
           </div>
 
-          {form.scopeType === ACCESS_SCOPE_TYPES.PLAN ? (
-            <div className="adminAccessField">
-              <label>Plan</label>
-              <select
-                value={form.planType}
-                onChange={(event) => updateField("planType", event.target.value)}
-              >
-                {Object.values(ACCESS_PLAN_TYPES).map((plan) => (
-                  <option value={plan} key={plan}>
-                    {plan}
-                  </option>
-                ))}
-              </select>
+          {form.scopeType === ACCESS_SCOPE_TYPES.PLAN &&
+          selectedPlanProduct ? (
+            <div className="adminAccessField adminAccessFieldWide">
+              <label>Selected Plan Snapshot</label>
+              <small>
+                {selectedPlanProduct.title} • {selectedPlanProduct.planCode} • rank {selectedPlanProduct.accessRank} • {formatPrice(selectedPlanProduct)} • price version {selectedPlanProduct.priceVersion}
+              </small>
             </div>
           ) : null}
 
@@ -504,34 +759,119 @@ export default function AdminAccessKeysRoute() {
             />
           </div>
 
-          <div className="adminAccessField">
-            <label>Validity Days</label>
-            <input
-              type="number"
-              min="0"
-              value={form.validityDays}
-              onChange={(event) => updateField("validityDays", event.target.value)}
-              placeholder="30"
-            />
-          </div>
+          {form.scopeType === ACCESS_SCOPE_TYPES.PLAN ? (
+            <>
+              <div className="adminAccessField">
+                <label>Plan Validity</label>
+                <select
+                  value={form.validityChoice}
+                  onChange={(event) =>
+                    updateField("validityChoice", event.target.value)
+                  }
+                >
+                  <option value={ADMIN_PLAN_VALIDITY_CHOICES.CUSTOM_WINDOW}>
+                    Custom date window
+                  </option>
+                  <option value={ADMIN_PLAN_VALIDITY_CHOICES.VALIDITY_DAYS}>
+                    Validity days
+                  </option>
+                  <option
+                    value={ADMIN_PLAN_VALIDITY_CHOICES.NO_EXPIRY}
+                    disabled={
+                      selectedPlanProduct
+                        ? !selectedPlanProduct.allowNoExpiry
+                        : true
+                    }
+                  >
+                    No expiry
+                  </option>
+                  <option value={ADMIN_PLAN_VALIDITY_CHOICES.UNTIL_MANUAL_CHANGE}>
+                    Until manual change
+                  </option>
+                </select>
+              </div>
 
-          <div className="adminAccessField">
-            <label>Access From</label>
-            <input
-              type="date"
-              value={form.accessFrom}
-              onChange={(event) => updateField("accessFrom", event.target.value)}
-            />
-          </div>
+              <div className="adminAccessField">
+                <label>Access From</label>
+                <input
+                  type="date"
+                  value={form.accessFrom}
+                  onChange={(event) =>
+                    updateField("accessFrom", event.target.value)
+                  }
+                />
+                <small>Blank starts from key redemption time.</small>
+              </div>
 
-          <div className="adminAccessField">
-            <label>Access Until</label>
-            <input
-              type="date"
-              value={form.accessUntil}
-              onChange={(event) => updateField("accessUntil", event.target.value)}
-            />
-          </div>
+              {form.validityChoice ===
+              ADMIN_PLAN_VALIDITY_CHOICES.CUSTOM_WINDOW ? (
+                <div className="adminAccessField">
+                  <label>Access Until</label>
+                  <input
+                    type="date"
+                    value={form.accessUntil}
+                    onChange={(event) =>
+                      updateField("accessUntil", event.target.value)
+                    }
+                  />
+                </div>
+              ) : null}
+
+              {form.validityChoice ===
+              ADMIN_PLAN_VALIDITY_CHOICES.VALIDITY_DAYS ? (
+                <div className="adminAccessField">
+                  <label>Validity Days</label>
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={form.validityDays}
+                    onChange={(event) =>
+                      updateField("validityDays", event.target.value)
+                    }
+                    placeholder="30"
+                  />
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <div className="adminAccessField">
+                <label>Validity Days</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={form.validityDays}
+                  onChange={(event) =>
+                    updateField("validityDays", event.target.value)
+                  }
+                  placeholder="30"
+                />
+              </div>
+
+              <div className="adminAccessField">
+                <label>Access From</label>
+                <input
+                  type="date"
+                  value={form.accessFrom}
+                  onChange={(event) =>
+                    updateField("accessFrom", event.target.value)
+                  }
+                />
+              </div>
+
+              <div className="adminAccessField">
+                <label>Access Until</label>
+                <input
+                  type="date"
+                  value={form.accessUntil}
+                  onChange={(event) =>
+                    updateField("accessUntil", event.target.value)
+                  }
+                />
+              </div>
+            </>
+          )}
 
           <div className="adminAccessField">
             <label>Status</label>
@@ -596,7 +936,7 @@ export default function AdminAccessKeysRoute() {
                       key.redeemedByEmail ||
                       key.assignedEmail ||
                       "open key"}{" "}
-                    • {key.scopeType || "plan"} • {key.planType || "FREE"}
+                    • {key.scopeType || "plan"} • {key.planCode || key.planType || "Unknown plan"}
                   </span>
                 </div>
               ))
@@ -622,8 +962,11 @@ export default function AdminAccessKeysRoute() {
             <span>Preview</span>
             <strong>{normalizedCode || "Key code pending"}</strong>
             <p>
-              {form.scopeType} key • {form.planType} • max uses{" "}
-              {form.maxUses || 1}
+              {form.scopeType} key • {
+                form.scopeType === ACCESS_SCOPE_TYPES.PLAN
+                  ? selectedPlanProduct?.planCode || "plan pending"
+                  : form.module || form.itemType || "target pending"
+              } • max uses {form.maxUses || 1}
             </p>
           </article>
 
@@ -631,9 +974,13 @@ export default function AdminAccessKeysRoute() {
             <span>Redeem</span>
             <strong>{form.assignedEmail.trim() || "Open key"}</strong>
             <p>
-              {form.productId.trim()
-                ? "Linked product: " + form.productId.trim()
-                : "No product linked yet"}
+              {form.scopeType === ACCESS_SCOPE_TYPES.PLAN
+                ? selectedPlanProduct
+                  ? "Catalog product: " + selectedPlanProduct.productId
+                  : "Active plan product required"
+                : form.productId.trim()
+                  ? "Linked product: " + form.productId.trim()
+                  : "No product linked"}
             </p>
           </article>
 
@@ -657,9 +1004,13 @@ export default function AdminAccessKeysRoute() {
           actionLabel="Create Access Key"
           loadingLabel="Saving..."
           actionLoading={saving}
-          actionDisabled={saving}
+          actionDisabled={
+            saving ||
+            (form.scopeType === ACCESS_SCOPE_TYPES.PLAN &&
+              (catalogLoading || Boolean(catalogError)))
+          }
           onAction={handleSaveKey}
-          footerNote="Key save writes redeem key + audit only. Student access is not created here."
+          footerNote="Plan keys fail closed without an active catalog product and explicit validity. Key save writes redeem key + audit only; student access is created only during redemption."
         />
       </div>
     </AdminAccessRouteShell>

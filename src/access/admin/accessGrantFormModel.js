@@ -17,6 +17,15 @@ const cleanString = (value = "") =>
 const normalizeEmail = (value = "") =>
   cleanString(value).toLowerCase();
 
+const pushUniqueError = (
+  errors,
+  message
+) => {
+  if (!errors.includes(message)) {
+    errors.push(message);
+  }
+};
+
 const toDate = (
   value,
   label
@@ -95,6 +104,7 @@ export const createInitialDynamicPlanGrantForm =
       ACCESS_SCOPE_TYPES.PLAN,
     productId: "",
     planCode: "",
+    planType: "",
     accessRank: "",
     validityChoice:
       ADMIN_PLAN_VALIDITY_CHOICES.CUSTOM_WINDOW,
@@ -151,6 +161,62 @@ export const listGrantablePlanProducts = (
         )
     );
 
+export const getSelectedGrantablePlanProduct = ({
+  form = {},
+  products = [],
+} = {}) =>
+  listGrantablePlanProducts(
+    products
+  ).find(
+    (item) =>
+      item.productId ===
+      cleanString(
+        form.productId
+      )
+  ) || null;
+
+export const hasSameCatalogPlanGrantTarget = (
+  record = {},
+  target = {}
+) => {
+  const recordProductId =
+    cleanString(
+      record.productId
+    ).toLowerCase();
+  const targetProductId =
+    cleanString(
+      target.productId
+    ).toLowerCase();
+
+  if (
+    recordProductId &&
+    targetProductId
+  ) {
+    return (
+      recordProductId ===
+      targetProductId
+    );
+  }
+
+  const recordPlanCode =
+    cleanString(
+      record.planCode ||
+        record.planType
+    ).toUpperCase();
+  const targetPlanCode =
+    cleanString(
+      target.planCode ||
+        target.planType
+    ).toUpperCase();
+
+  return Boolean(
+    recordPlanCode &&
+      targetPlanCode &&
+      recordPlanCode ===
+        targetPlanCode
+  );
+};
+
 export const applyPlanProductToGrantForm = (
   form = {},
   product = {}
@@ -174,56 +240,41 @@ export const applyPlanProductToGrantForm = (
   };
 };
 
-export const validateDynamicPlanGrantForm = ({
+export const validateDynamicPlanGrantSelection = ({
   form = {},
   products = [],
+  requireAdminNote = true,
 } = {}) => {
   const errors = [];
   const productId = cleanString(
     form.productId
   );
   const product =
-    listGrantablePlanProducts(
-      products
-    ).find(
-      (item) =>
-        item.productId ===
-        productId
-    ) || null;
-
-  const normalizedEmail =
-    normalizeEmail(
-      form.email
-    );
-
-  if (!normalizedEmail) {
-    errors.push(
-      "Learner email is required."
-    );
-  } else if (
-    !normalizedEmail.includes("@")
-  ) {
-    errors.push(
-      "Enter a valid learner email."
-    );
-  }
+    getSelectedGrantablePlanProduct({
+      form,
+      products,
+    });
 
   if (!productId) {
-    errors.push(
+    pushUniqueError(
+      errors,
       "Select an active plan product."
     );
   } else if (!product) {
-    errors.push(
+    pushUniqueError(
+      errors,
       "Selected plan product is not active or no longer exists."
     );
   }
 
   if (
+    requireAdminNote &&
     !cleanString(
       form.adminNote
     )
   ) {
-    errors.push(
+    pushUniqueError(
+      errors,
       "Admin note is required."
     );
   }
@@ -242,7 +293,8 @@ export const validateDynamicPlanGrantForm = ({
         form.accessUntil
       )
     ) {
-      errors.push(
+      pushUniqueError(
+        errors,
         "Access-until date is required for a custom window."
       );
     }
@@ -258,7 +310,8 @@ export const validateDynamicPlanGrantForm = ({
       !Number.isInteger(days) ||
       days <= 0
     ) {
-      errors.push(
+      pushUniqueError(
+        errors,
         "Validity days must be a positive whole number."
       );
     }
@@ -270,7 +323,8 @@ export const validateDynamicPlanGrantForm = ({
       product &&
       !product.allowNoExpiry
     ) {
-      errors.push(
+      pushUniqueError(
+        errors,
         "Selected plan does not allow no-expiry access."
       );
     }
@@ -278,7 +332,8 @@ export const validateDynamicPlanGrantForm = ({
     validityChoice !==
     ADMIN_PLAN_VALIDITY_CHOICES.UNTIL_MANUAL_CHANGE
   ) {
-    errors.push(
+    pushUniqueError(
+      errors,
       "Select a valid access duration."
     );
   }
@@ -287,21 +342,29 @@ export const validateDynamicPlanGrantForm = ({
     form.accessFrom &&
     form.accessUntil
   ) {
-    const start = toDate(
-      form.accessFrom,
-      "Access from date"
-    );
-    const end = toDate(
-      form.accessUntil,
-      "Access until date"
-    );
+    try {
+      const start = toDate(
+        form.accessFrom,
+        "Access from date"
+      );
+      const end = toDate(
+        form.accessUntil,
+        "Access until date"
+      );
 
-    if (
-      end.getTime() <
-      start.getTime()
-    ) {
-      errors.push(
-        "Access-until date cannot be before access-from date."
+      if (
+        end.getTime() <
+        start.getTime()
+      ) {
+        pushUniqueError(
+          errors,
+          "Access-until date cannot be before access-from date."
+        );
+      }
+    } catch (error) {
+      pushUniqueError(
+        errors,
+        error.message
       );
     }
   }
@@ -309,15 +372,53 @@ export const validateDynamicPlanGrantForm = ({
   return errors;
 };
 
-export const buildDynamicPlanGrantPayload = ({
+export const validateDynamicPlanGrantForm = ({
+  form = {},
+  products = [],
+} = {}) => {
+  const errors = [];
+  const normalizedEmail =
+    normalizeEmail(
+      form.email
+    );
+
+  if (!normalizedEmail) {
+    errors.push(
+      "Learner email is required."
+    );
+  } else if (
+    !normalizedEmail.includes("@")
+  ) {
+    errors.push(
+      "Enter a valid learner email."
+    );
+  }
+
+  validateDynamicPlanGrantSelection({
+    form,
+    products,
+    requireAdminNote: true,
+  }).forEach((message) =>
+    pushUniqueError(
+      errors,
+      message
+    )
+  );
+
+  return errors;
+};
+
+export const buildDynamicPlanGrantTerms = ({
   form = {},
   products = [],
   now = new Date(),
+  requireAdminNote = true,
 } = {}) => {
   const errors =
-    validateDynamicPlanGrantForm({
+    validateDynamicPlanGrantSelection({
       form,
       products,
+      requireAdminNote,
     });
 
   if (errors.length) {
@@ -327,15 +428,10 @@ export const buildDynamicPlanGrantPayload = ({
   }
 
   const product =
-    listGrantablePlanProducts(
-      products
-    ).find(
-      (item) =>
-        item.productId ===
-        cleanString(
-          form.productId
-        )
-    );
+    getSelectedGrantablePlanProduct({
+      form,
+      products,
+    });
   const accessFrom =
     toDate(
       form.accessFrom ||
@@ -347,6 +443,7 @@ export const buildDynamicPlanGrantPayload = ({
       form.validityChoice
     );
   let accessUntil = null;
+  let validityDays = 0;
   let noExpiry = false;
   let untilManualChange =
     false;
@@ -365,11 +462,12 @@ export const buildDynamicPlanGrantPayload = ({
     validityChoice ===
     ADMIN_PLAN_VALIDITY_CHOICES.VALIDITY_DAYS
   ) {
+    validityDays = Number(
+      form.validityDays
+    );
     accessUntil = addDays(
       accessFrom,
-      Number(
-        form.validityDays
-      )
+      validityDays
     );
   }
 
@@ -400,22 +498,6 @@ export const buildDynamicPlanGrantPayload = ({
     });
 
   return {
-    email:
-      normalizeEmail(
-        form.email
-      ),
-    learnerName:
-      cleanString(
-        form.name
-      ),
-    name:
-      cleanString(
-        form.name
-      ),
-    phone:
-      cleanString(
-        form.phone
-      ),
     course:
       form.course ||
       ACCESS_COURSE.CTET_TET,
@@ -436,10 +518,58 @@ export const buildDynamicPlanGrantPayload = ({
       product.priceVersion,
     validityMode:
       purchaseTermsSnapshot.validityMode,
+    validityDays,
     noExpiry,
     untilManualChange,
     accessFrom,
     accessUntil,
+    fixed365DayValidity: false,
+  };
+};
+
+export const buildDynamicPlanGrantPayload = ({
+  form = {},
+  products = [],
+  now = new Date(),
+} = {}) => {
+  const errors =
+    validateDynamicPlanGrantForm({
+      form,
+      products,
+    });
+
+  if (errors.length) {
+    throw new Error(
+      errors.join(" ")
+    );
+  }
+
+  const terms =
+    buildDynamicPlanGrantTerms({
+      form,
+      products,
+      now,
+      requireAdminNote: true,
+    });
+
+  return {
+    email:
+      normalizeEmail(
+        form.email
+      ),
+    learnerName:
+      cleanString(
+        form.name
+      ),
+    name:
+      cleanString(
+        form.name
+      ),
+    phone:
+      cleanString(
+        form.phone
+      ),
+    ...terms,
     status:
       form.status ||
       ACCESS_STATUS.ACTIVE,
@@ -454,6 +584,5 @@ export const buildDynamicPlanGrantPayload = ({
       cleanString(
         form.adminNote
       ),
-    fixed365DayValidity: false,
   };
 };

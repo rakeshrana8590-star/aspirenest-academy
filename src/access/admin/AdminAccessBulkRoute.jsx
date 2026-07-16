@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { auth } from "../../firebase";
 import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
@@ -7,7 +7,6 @@ import {
   ACCESS_COURSE,
   ACCESS_ITEM_TYPES,
   ACCESS_MODULE,
-  ACCESS_PLAN_TYPES,
   ACCESS_SCOPE_TYPES,
   ACCESS_SOURCE,
   ACCESS_STATUS,
@@ -17,26 +16,46 @@ import {
   createBulkAccessImportPlan,
   executeBulkAccessImport,
   getAccessByEmail,
+  listAccessProducts,
   normalizeAccessEmail,
 } from "../accessService";
 import {
   buildBulkAccessDryRun,
 } from "../accessBulkLifecycle";
 
+import {
+  ADMIN_PLAN_VALIDITY_CHOICES,
+  applyPlanProductToGrantForm,
+  buildDynamicPlanGrantTerms,
+  createInitialDynamicPlanGrantForm,
+  hasSameCatalogPlanGrantTarget,
+  listGrantablePlanProducts,
+  validateDynamicPlanGrantSelection,
+} from "./accessGrantFormModel";
+
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const initialForm = {
+const createInitialForm = () => ({
+  ...createInitialDynamicPlanGrantForm(),
   rawEmails: "",
+  email: "",
+  name: "",
+  phone: "",
   course: ACCESS_COURSE.CTET_TET,
   scopeType: ACCESS_SCOPE_TYPES.PLAN,
-  planType: ACCESS_PLAN_TYPES.PREMIUM,
+  productId: "",
+  planCode: "",
+  planType: "",
+  accessRank: "",
+  validityChoice:
+    ADMIN_PLAN_VALIDITY_CHOICES.CUSTOM_WINDOW,
+  validityDays: "",
   module: "",
   itemType: "",
   itemId: "",
   itemTitle: "",
   itemIdsText: "",
   bundleId: "",
-  productId: "",
   accessKeyId: "",
   source: ACCESS_SOURCE.BULK_IMPORT,
   accessFrom: "",
@@ -44,8 +63,7 @@ const initialForm = {
   status: ACCESS_STATUS.ACTIVE,
   sendInvite: "yes",
   adminNote: "",
-};
-
+});
 const sampleRegisteredEmails = [
   "jamilanri786@gmail.com",
   "ansarineha340@gmail.com",
@@ -173,12 +191,38 @@ const hasSameBulkAccessTarget = (records = [], target = {}) => {
       );
     }
 
-    return selectedScope === ACCESS_SCOPE_TYPES.PLAN;
+    if (selectedScope === ACCESS_SCOPE_TYPES.PLAN) {
+      return hasSameCatalogPlanGrantTarget(
+        record,
+        target
+      );
+    }
+
+    return false;
   });
 };
 
+const formatPrice = (product = {}) =>
+  "₹" +
+  Number(
+    product.priceINR ??
+      product.price ??
+      0
+  ).toLocaleString("en-IN");
+
+const formatPlanOption = (product = {}) =>
+  [
+    product.title ||
+      product.name ||
+      product.planCode,
+    product.planCode,
+    formatPrice(product),
+  ]
+    .filter(Boolean)
+    .join(" • ");
+
 export default function AdminAccessBulkRoute() {
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] = useState(createInitialForm);
   const [showPreview, setShowPreview] = useState(false);
   const [errors, setErrors] = useState([]);
 
@@ -190,6 +234,51 @@ export default function AdminAccessBulkRoute() {
   const [saveSummary, setSaveSummary] = useState(null);
   const [saveError, setSaveError] = useState("");
   const [dryRunPlan, setDryRunPlan] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [catalogLoading, setCatalogLoading] = useState(false);
+  const [catalogError, setCatalogError] = useState("");
+
+  const loadPlanCatalog = useCallback(async () => {
+    setCatalogLoading(true);
+    setCatalogError("");
+
+    try {
+      const nextProducts = await listAccessProducts({
+        maxCount: 200,
+      });
+
+      setProducts(
+        Array.isArray(nextProducts)
+          ? nextProducts
+          : []
+      );
+    } catch (error) {
+      setProducts([]);
+      setCatalogError(
+        error?.message ||
+          "Active plan catalog could not be loaded."
+      );
+    } finally {
+      setCatalogLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadPlanCatalog();
+  }, [loadPlanCatalog]);
+
+  const planProducts = useMemo(
+    () => listGrantablePlanProducts(products),
+    [products]
+  );
+
+  const selectedPlanProduct = useMemo(
+    () =>
+      planProducts.find(
+        (product) => product.productId === form.productId
+      ) || null,
+    [planProducts, form.productId]
+  );
 
   const parsed = useMemo(
     () => parseBulkEmails(form.rawEmails),
@@ -209,6 +298,9 @@ export default function AdminAccessBulkRoute() {
     () => ({
       course: form.course,
       scopeType: form.scopeType,
+      productId: form.productId,
+      planCode: form.planCode,
+      planType: form.planType,
       module: form.module,
       itemType: form.itemType,
       itemId: form.itemId.trim(),
@@ -218,6 +310,9 @@ export default function AdminAccessBulkRoute() {
     [
       form.course,
       form.scopeType,
+      form.productId,
+      form.planCode,
+      form.planType,
       form.module,
       form.itemType,
       form.itemId,
@@ -241,12 +336,7 @@ export default function AdminAccessBulkRoute() {
     [dryRunPlan]
   );
 
-  const updateField = (field, value) => {
-    setForm((current) => ({
-      ...current,
-      [field]: value,
-    }));
-
+  const clearPreviewState = () => {
     setShowPreview(false);
     setErrors([]);
     setFirestoreDuplicateMap({});
@@ -254,6 +344,48 @@ export default function AdminAccessBulkRoute() {
     setSaveSummary(null);
     setSaveError("");
     setDryRunPlan(null);
+  };
+
+  const updateField = (field, value) => {
+    setForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+
+    clearPreviewState();
+  };
+
+  const handleScopeTypeChange = (scopeType) => {
+    setForm((current) => ({
+      ...current,
+      scopeType,
+      productId: "",
+      planCode: "",
+      planType: "",
+      accessRank: "",
+    }));
+
+    clearPreviewState();
+  };
+
+  const handlePlanProductChange = (productId) => {
+    const product = planProducts.find(
+      (item) => item.productId === productId
+    );
+
+    setForm((current) =>
+      product
+        ? applyPlanProductToGrantForm(current, product)
+        : {
+            ...current,
+            productId: "",
+            planCode: "",
+            planType: "",
+            accessRank: "",
+          }
+    );
+
+    clearPreviewState();
   };
 
   const loadSampleEmails = () => {
@@ -293,8 +425,34 @@ export default function AdminAccessBulkRoute() {
       nextErrors.push("Access scope is required.");
     }
 
-    if (form.scopeType === ACCESS_SCOPE_TYPES.PLAN && !form.planType) {
-      nextErrors.push("Plan is required for plan access.");
+    if (form.scopeType === ACCESS_SCOPE_TYPES.PLAN) {
+      if (catalogLoading) {
+        nextErrors.push(
+          "Wait for the active plan catalog to finish loading."
+        );
+      }
+
+      if (catalogError) {
+        nextErrors.push(
+          "Plan catalog must load successfully before a bulk plan grant can be previewed."
+        );
+      }
+
+      if (!catalogLoading && !catalogError && !planProducts.length) {
+        nextErrors.push(
+          "No active plan product is available for bulk access."
+        );
+      }
+
+      validateDynamicPlanGrantSelection({
+        form,
+        products,
+        requireAdminNote: true,
+      }).forEach((message) => {
+        if (!nextErrors.includes(message)) {
+          nextErrors.push(message);
+        }
+      });
     }
 
     if (form.scopeType === ACCESS_SCOPE_TYPES.MODULE && !form.module) {
@@ -317,20 +475,22 @@ export default function AdminAccessBulkRoute() {
       nextErrors.push("Status is required.");
     }
 
-    if (!form.adminNote.trim()) {
-      nextErrors.push("Admin note is required for batch audit clarity.");
-    }
+    if (form.scopeType !== ACCESS_SCOPE_TYPES.PLAN) {
+      if (!form.adminNote.trim()) {
+        nextErrors.push("Admin note is required for batch audit clarity.");
+      }
 
-    if (form.accessFrom && form.accessUntil) {
-      const fromTime = new Date(form.accessFrom).getTime();
-      const untilTime = new Date(form.accessUntil).getTime();
+      if (form.accessFrom && form.accessUntil) {
+        const fromTime = new Date(form.accessFrom).getTime();
+        const untilTime = new Date(form.accessUntil).getTime();
 
-      if (
-        Number.isFinite(fromTime) &&
-        Number.isFinite(untilTime) &&
-        untilTime < fromTime
-      ) {
-        nextErrors.push("Access Until cannot be before Access From.");
+        if (
+          Number.isFinite(fromTime) &&
+          Number.isFinite(untilTime) &&
+          untilTime < fromTime
+        ) {
+          nextErrors.push("Access Until cannot be before Access From.");
+        }
       }
     }
 
@@ -349,34 +509,64 @@ export default function AdminAccessBulkRoute() {
     };
   };
 
-  const buildAccessPayload = (email, batchId) => ({
+  const buildAccessPayload = (
     email,
-    learnerName: "",
-    name: "",
-    phone: "",
-    course: form.course,
-    scopeType: form.scopeType,
-    planType: form.planType,
-    module: form.module || null,
-    itemType: form.itemType || null,
-    itemId: form.itemId.trim() || null,
-    itemTitle: form.itemTitle.trim(),
-    itemIds: bundleItemIds,
-    bundleId: form.bundleId.trim() || null,
-    productId: form.productId.trim() || null,
-    accessKeyId: form.accessKeyId.trim() || null,
-    source: form.source,
-    accessFrom: form.accessFrom || null,
-    accessUntil: form.accessUntil || null,
-    status: form.status,
-    adminNote: form.adminNote.trim(),
-    notes: form.adminNote.trim(),
-    metadata: {
-      batchId,
-      bulkImport: true,
+    batchId,
+    now = new Date()
+  ) => {
+    const commonPayload = {
+      email,
+      learnerName: "",
+      name: "",
+      phone: "",
+      course: form.course,
       scopeType: form.scopeType,
-    },
-  });
+      module: form.module || null,
+      itemType: form.itemType || null,
+      itemId: form.itemId.trim() || null,
+      itemTitle: form.itemTitle.trim(),
+      itemIds: bundleItemIds,
+      bundleId: form.bundleId.trim() || null,
+      accessKeyId: form.accessKeyId.trim() || null,
+      source: form.source,
+      status: form.status,
+      adminNote: form.adminNote.trim(),
+      notes: form.adminNote.trim(),
+      metadata: {
+        batchId,
+        bulkImport: true,
+        scopeType: form.scopeType,
+      },
+    };
+
+    if (form.scopeType === ACCESS_SCOPE_TYPES.PLAN) {
+      return {
+        ...commonPayload,
+        ...buildDynamicPlanGrantTerms({
+          form,
+          products,
+          now,
+          requireAdminNote: true,
+        }),
+      };
+    }
+
+    return {
+      ...commonPayload,
+      productId: form.productId.trim() || null,
+      planType: null,
+      planCode: null,
+      accessRank: null,
+      purchaseTermsSnapshot: null,
+      termsSnapshot: null,
+      validityMode: null,
+      noExpiry: false,
+      untilManualChange: false,
+      validityDays: 0,
+      accessFrom: form.accessFrom || null,
+      accessUntil: form.accessUntil || null,
+    };
+  };
 
   const checkFirestoreDuplicates = async () => {
     const nextMap = {};
@@ -420,10 +610,16 @@ export default function AdminAccessBulkRoute() {
 
     try {
       const previewId = "bulk_preview_" + Date.now();
+      const previewNow = new Date();
+      const grantData = buildAccessPayload(
+        "",
+        previewId,
+        previewNow
+      );
       const plan = buildBulkAccessDryRun({
         importId: previewId,
         rawEmails: form.rawEmails,
-        grantData: buildAccessPayload("", previewId),
+        grantData,
         existingRecordsByEmail: duplicateMap,
         maxRows: 100,
       });
@@ -482,10 +678,16 @@ export default function AdminAccessBulkRoute() {
     const batchId = "bulk_access_" + Date.now();
 
     try {
+      const executionNow = new Date();
+      const grantData = buildAccessPayload(
+        "",
+        batchId,
+        executionNow
+      );
       const executionPlan = buildBulkAccessDryRun({
         importId: batchId,
         rawEmails: form.rawEmails,
-        grantData: buildAccessPayload("", batchId),
+        grantData,
         existingRecordsByEmail: firestoreDuplicateMap,
         maxRows: 100,
       });
@@ -493,7 +695,7 @@ export default function AdminAccessBulkRoute() {
       await createBulkAccessImportPlan({
         importId: batchId,
         rows: executionPlan.rows,
-        grantData: buildAccessPayload("", batchId),
+        grantData,
         actor,
         sendInvite: form.sendInvite === "yes",
         metadata: {
@@ -554,7 +756,7 @@ export default function AdminAccessBulkRoute() {
   };
 
   const resetForm = () => {
-    setForm(initialForm);
+    setForm(createInitialForm());
     setShowPreview(false);
     setErrors([]);
     setFirestoreDuplicateMap({});
@@ -605,6 +807,19 @@ export default function AdminAccessBulkRoute() {
       ]}
     >
       <div className="adminAccessFormPanel">
+        {form.scopeType === ACCESS_SCOPE_TYPES.PLAN ? (
+          <div className="adminAccessNotice">
+            <strong>Active plan catalog:</strong>{" "}
+            {catalogLoading
+              ? "Loading..."
+              : catalogError
+                ? "Unavailable — bulk plan preview is blocked."
+                : planProducts.length
+                  ? `${planProducts.length} active plan product(s) ready.`
+                  : "No active plan product is available."}
+          </div>
+        ) : null}
+
         <div className="adminAccessFormGrid">
           <div className="adminAccessField adminAccessFull">
             <label>Paste Gmail List</label>
@@ -634,7 +849,9 @@ export default function AdminAccessBulkRoute() {
             <label>Access Scope for all</label>
             <select
               value={form.scopeType}
-              onChange={(event) => updateField("scopeType", event.target.value)}
+              onChange={(event) =>
+                handleScopeTypeChange(event.target.value)
+              }
             >
               <option value={ACCESS_SCOPE_TYPES.PLAN}>Plan Access</option>
               <option value={ACCESS_SCOPE_TYPES.MODULE}>Module Access</option>
@@ -645,18 +862,48 @@ export default function AdminAccessBulkRoute() {
           </div>
 
           {form.scopeType === ACCESS_SCOPE_TYPES.PLAN ? (
-            <div className="adminAccessField">
-              <label>Plan assign to all</label>
-              <select
-                value={form.planType}
-                onChange={(event) => updateField("planType", event.target.value)}
-              >
-                <option value={ACCESS_PLAN_TYPES.FREE}>FREE</option>
-                <option value={ACCESS_PLAN_TYPES.BASIC}>BASIC</option>
-                <option value={ACCESS_PLAN_TYPES.PREMIUM}>PREMIUM</option>
-                <option value={ACCESS_PLAN_TYPES.MENTORSHIP}>MENTORSHIP</option>
-              </select>
-            </div>
+            <>
+              <div className="adminAccessField adminAccessFull">
+                <label>Active Plan Product for all</label>
+                <select
+                  value={form.productId}
+                  onChange={(event) =>
+                    handlePlanProductChange(event.target.value)
+                  }
+                  disabled={
+                    catalogLoading ||
+                    Boolean(catalogError) ||
+                    !planProducts.length
+                  }
+                >
+                  <option value="">
+                    {catalogLoading
+                      ? "Loading active plans..."
+                      : "Select active plan product"}
+                  </option>
+                  {planProducts.map((product) => (
+                    <option
+                      value={product.productId}
+                      key={product.productId}
+                    >
+                      {formatPlanOption(product)}
+                    </option>
+                  ))}
+                </select>
+                <small>
+                  Product identity, plan code, access rank, price version, and validity terms are locked into every bulk grant row.
+                </small>
+              </div>
+
+              {selectedPlanProduct ? (
+                <div className="adminAccessField adminAccessFull">
+                  <label>Selected Plan Snapshot</label>
+                  <small>
+                    {selectedPlanProduct.title} • {selectedPlanProduct.planCode} • rank {selectedPlanProduct.accessRank} • {formatPrice(selectedPlanProduct)} • price version {selectedPlanProduct.priceVersion}
+                  </small>
+                </div>
+              ) : null}
+            </>
           ) : null}
 
           {form.scopeType === ACCESS_SCOPE_TYPES.MODULE ||
@@ -741,14 +988,16 @@ export default function AdminAccessBulkRoute() {
             </>
           ) : null}
 
-          <div className="adminAccessField">
-            <label>Product ID optional</label>
-            <input
-              value={form.productId}
-              onChange={(event) => updateField("productId", event.target.value)}
-              placeholder="Future catalog product id"
-            />
-          </div>
+          {form.scopeType !== ACCESS_SCOPE_TYPES.PLAN ? (
+            <div className="adminAccessField">
+              <label>Product ID optional</label>
+              <input
+                value={form.productId}
+                onChange={(event) => updateField("productId", event.target.value)}
+                placeholder="Optional non-plan catalog reference"
+              />
+            </div>
+          ) : null}
 
           <div className="adminAccessField">
             <label>Access Key ID optional</label>
@@ -772,26 +1021,107 @@ export default function AdminAccessBulkRoute() {
             </select>
           </div>
 
-          <div className="adminAccessField">
-            <label>Access From</label>
-            <input
-              type="date"
-              value={form.accessFrom}
-              onChange={(event) => updateField("accessFrom", event.target.value)}
-            />
-          </div>
+          {form.scopeType === ACCESS_SCOPE_TYPES.PLAN ? (
+            <>
+              <div className="adminAccessField">
+                <label>Plan Validity for all</label>
+                <select
+                  value={form.validityChoice}
+                  onChange={(event) =>
+                    updateField("validityChoice", event.target.value)
+                  }
+                >
+                  <option value={ADMIN_PLAN_VALIDITY_CHOICES.CUSTOM_WINDOW}>
+                    Custom date window
+                  </option>
+                  <option value={ADMIN_PLAN_VALIDITY_CHOICES.VALIDITY_DAYS}>
+                    Validity days
+                  </option>
+                  <option
+                    value={ADMIN_PLAN_VALIDITY_CHOICES.NO_EXPIRY}
+                    disabled={
+                      selectedPlanProduct
+                        ? !selectedPlanProduct.allowNoExpiry
+                        : true
+                    }
+                  >
+                    No expiry
+                  </option>
+                  <option value={ADMIN_PLAN_VALIDITY_CHOICES.UNTIL_MANUAL_CHANGE}>
+                    Until manual change
+                  </option>
+                </select>
+              </div>
 
-          <div className="adminAccessField">
-            <label>Access Until</label>
-            <input
-              type="date"
-              value={form.accessUntil}
-              onChange={(event) =>
-                updateField("accessUntil", event.target.value)
-              }
-            />
-            <small>Optional. Blank means no expiry set.</small>
-          </div>
+              <div className="adminAccessField">
+                <label>Access From</label>
+                <input
+                  type="date"
+                  value={form.accessFrom}
+                  onChange={(event) =>
+                    updateField("accessFrom", event.target.value)
+                  }
+                />
+                <small>Blank starts from bulk execution time.</small>
+              </div>
+
+              {form.validityChoice ===
+              ADMIN_PLAN_VALIDITY_CHOICES.CUSTOM_WINDOW ? (
+                <div className="adminAccessField">
+                  <label>Access Until</label>
+                  <input
+                    type="date"
+                    value={form.accessUntil}
+                    onChange={(event) =>
+                      updateField("accessUntil", event.target.value)
+                    }
+                  />
+                </div>
+              ) : null}
+
+              {form.validityChoice ===
+              ADMIN_PLAN_VALIDITY_CHOICES.VALIDITY_DAYS ? (
+                <div className="adminAccessField">
+                  <label>Validity Days</label>
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={form.validityDays}
+                    onChange={(event) =>
+                      updateField("validityDays", event.target.value)
+                    }
+                    placeholder="30"
+                  />
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <div className="adminAccessField">
+                <label>Access From</label>
+                <input
+                  type="date"
+                  value={form.accessFrom}
+                  onChange={(event) =>
+                    updateField("accessFrom", event.target.value)
+                  }
+                />
+              </div>
+
+              <div className="adminAccessField">
+                <label>Access Until</label>
+                <input
+                  type="date"
+                  value={form.accessUntil}
+                  onChange={(event) =>
+                    updateField("accessUntil", event.target.value)
+                  }
+                />
+                <small>Optional. Blank means no expiry set.</small>
+              </div>
+            </>
+          )}
 
           <div className="adminAccessField">
             <label>Status</label>
@@ -902,7 +1232,12 @@ export default function AdminAccessBulkRoute() {
             type="button"
             className="adminNotesLaunchPrimaryBtn"
             onClick={handlePreview}
-            disabled={checkingDuplicates || saving}
+            disabled={
+              checkingDuplicates ||
+              saving ||
+              (form.scopeType === ACCESS_SCOPE_TYPES.PLAN &&
+                (catalogLoading || Boolean(catalogError)))
+            }
           >
             {checkingDuplicates ? "Checking Duplicates..." : "Preview Bulk Import"}
           </button>
@@ -936,6 +1271,14 @@ export default function AdminAccessBulkRoute() {
               </div>
             ) : null}
 
+            {form.scopeType === ACCESS_SCOPE_TYPES.PLAN &&
+            selectedPlanProduct ? (
+              <div className="adminAccessNotice">
+                <strong>Catalog snapshot:</strong>{" "}
+                {selectedPlanProduct.title} • {selectedPlanProduct.planCode} • rank {selectedPlanProduct.accessRank} • price version {selectedPlanProduct.priceVersion} • {form.validityChoice}
+              </div>
+            ) : null}
+
             <div className="adminAccessTable">
               {previewStats.map((stat) => (
                 <div className="adminAccessRow" key={stat.label}>
@@ -956,7 +1299,9 @@ export default function AdminAccessBulkRoute() {
                   saving ||
                   checkingDuplicates ||
                   Boolean(duplicateCheckError) ||
-                  !safeToCreateEmails.length
+                  !safeToCreateEmails.length ||
+                  (form.scopeType === ACCESS_SCOPE_TYPES.PLAN &&
+                    !selectedPlanProduct)
                 }
               >
                 {saving
@@ -977,9 +1322,9 @@ export default function AdminAccessBulkRoute() {
             <div className="adminAccessTable">
               {parsed.rows.slice(0, 40).map((row) => {
                 const existingRecords = firestoreDuplicateMap[row.email] || [];
-                const existingSameCourse = hasSameCourseAccess(
+                const existingSameTarget = hasSameBulkAccessTarget(
                   existingRecords,
-                  form.course
+                  bulkAccessTarget
                 );
 
                 return (
@@ -994,7 +1339,7 @@ export default function AdminAccessBulkRoute() {
                         ? "Invalid"
                         : row.duplicateInPaste
                           ? "Paste Duplicate"
-                          : existingSameCourse
+                          : existingSameTarget
                             ? "Existing"
                             : "Safe"}
                     </span>
@@ -1003,7 +1348,7 @@ export default function AdminAccessBulkRoute() {
                         ? row.reason
                         : row.duplicateInPaste
                           ? "Will be skipped"
-                          : existingSameCourse
+                          : existingSameTarget
                             ? "Will be skipped"
                             : "Will be created"}
                     </span>

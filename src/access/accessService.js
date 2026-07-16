@@ -1445,8 +1445,47 @@ export const createBulkAccessImportPlan = async ({
       grantData.scopeType ||
       ACCESS_SCOPE_TYPES.PLAN,
     planType:
+      grantData.planCode ||
       grantData.planType ||
       ACCESS_PLAN_TYPES.FREE,
+    planCode:
+      grantData.planCode ||
+      grantData.planType ||
+      ACCESS_PLAN_TYPES.FREE,
+    accessRank:
+      grantData.accessRank ??
+      null,
+    productId:
+      grantData.productId ||
+      null,
+    priceVersion:
+      grantData.priceVersion ??
+      grantData.purchaseTermsSnapshot?.priceVersion ??
+      grantData.termsSnapshot?.priceVersion ??
+      null,
+    purchaseTermsSnapshot:
+      grantData.purchaseTermsSnapshot ||
+      grantData.termsSnapshot ||
+      null,
+    termsSnapshot:
+      grantData.purchaseTermsSnapshot ||
+      grantData.termsSnapshot ||
+      null,
+    validityMode:
+      grantData.validityMode ||
+      null,
+    validityDays:
+      Number(grantData.validityDays || 0),
+    noExpiry:
+      grantData.noExpiry === true,
+    untilManualChange:
+      grantData.untilManualChange === true,
+    accessFrom:
+      grantData.accessFrom ||
+      null,
+    accessUntil:
+      grantData.accessUntil ||
+      null,
     sendInvite: sendInvite === true,
     summary,
     metadata,
