@@ -140,6 +140,7 @@ import AdminAccessProductsRoute from "./access/admin/AdminAccessProductsRoute.js
 import AdminAccessKeysRoute from "./access/admin/AdminAccessKeysRoute.jsx";
 import StudentLearnerProfileRoute from "./profile/StudentLearnerProfileRoute.jsx";
 import StudentAccessInviteRoute from "./access/student/StudentAccessInviteRoute.jsx";
+import MyAccessRoute from "./access/student/MyAccessRoute.jsx";
 
 import MockTestActionMenu from "./components/exam/MockTestActionMenu.jsx";
 import { deleteMockTest } from "./components/exam/mockTestAdminActions.js";
@@ -621,6 +622,7 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
       "/student-dashboard",
       "/profile/setup",
       "/my-profile",
+      "/my-access",
       "/my-courses",
       "/my-notes",
       "/my-tests",
@@ -5631,6 +5633,18 @@ xpActivityEvents={ctetMockXpEvents}
         activePlan={activeAccessPlan}
         accessStatus={accessProfile?.accessStatus || "active"}
         membershipExpiry={activeAccessExpiry}
+      />
+    ) : null
+  }
+/>
+
+<Route
+  path="/my-access"
+  element={
+    requireLogin() ? (
+      <MyAccessRoute
+        user={user}
+        myAccess={accessProfile?.myAccess}
       />
     ) : null
   }

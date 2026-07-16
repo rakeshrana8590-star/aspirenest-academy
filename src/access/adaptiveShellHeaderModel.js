@@ -40,6 +40,7 @@ const PRIMARY_HEADER_ITEMS = Object.freeze([
 const SUPPORTED_ACCOUNT_ITEM_IDS =
   new Set([
     "profile",
+    "my-access",
     "dashboard",
     "admin",
   ]);
@@ -50,6 +51,11 @@ const ACCOUNT_ITEM_PRESENTATION =
       icon: "👤",
       description:
         "View account details",
+    }),
+    "my-access": Object.freeze({
+      icon: "🔐",
+      description:
+        "Review learning access",
     }),
     dashboard: Object.freeze({
       icon: "📊",

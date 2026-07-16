@@ -77,21 +77,29 @@ describe(
           )
         ).toEqual([
           "profile",
+          "my-access",
           "dashboard",
         ]);
       }
     );
 
     test(
-      "unsupported future account routes are not exposed before their route surface exists",
+      "My Access is exposed while the future Search route remains hidden",
       () => {
         const model =
           buildAdaptiveShellHeaderModel({
             user: {
               uid: "student-1",
             },
+            currentPath:
+              "/my-access",
             shellNavigation: {
               accountItems: [
+                {
+                  id: "profile",
+                  label: "Profile",
+                  route: "/my-profile",
+                },
                 {
                   id: "my-access",
                   label: "My Access",
@@ -101,6 +109,13 @@ describe(
                   id: "search",
                   label: "Search",
                   route: "/search",
+                },
+                {
+                  id: "dashboard",
+                  label:
+                    "Student Dashboard",
+                  route:
+                    "/student-dashboard",
                 },
               ],
             },
@@ -112,8 +127,15 @@ describe(
           )
         ).toEqual([
           "/my-profile",
+          "/my-access",
           "/student-dashboard",
         ]);
+        expect(
+          model.accountItems.find(
+            (item) =>
+              item.id === "my-access"
+          )?.isActive
+        ).toBe(true);
       }
     );
 
