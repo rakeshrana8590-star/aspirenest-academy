@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import toast from "react-hot-toast";
 
 import {
@@ -7,6 +7,10 @@ import {
 } from "./examAttemptStorage.js";
 
 import { getExamTimerSeconds } from "./examUtils.js";
+import {
+  MOCK_TEST_SUBMIT_RUNTIME_STATES,
+  createMockTestSubmitAuthorizer,
+} from "../../access/mockTestSubmitRuntime";
 
 const EXAM_ATTEMPT_PATH = "/ctet-tet/mock-tests/attempt/";
 
@@ -21,8 +25,25 @@ export const useExamTimer = ({
   universalContent = [],
   setMockAttemptState,
   navigate,
+  submitRuntimeContextRef = null,
 }) => {
   const autoSubmittedRef = useRef({});
+
+  const submitAuthorizer = useMemo(
+    () =>
+      createMockTestSubmitAuthorizer({
+        getCurrentUser: () => {
+          const context =
+            submitRuntimeContextRef?.current || {};
+
+          return {
+            uid: context.user?.uid,
+            email: context.user?.email,
+          };
+        },
+      }),
+    [submitRuntimeContextRef]
+  );
 
   useEffect(() => {
     const testId = getAttemptTestIdFromPathname(locationPathname);
@@ -47,17 +68,35 @@ export const useExamTimer = ({
       activeTimerTest,
       defaultTimeLeft
     );
+    const runtimeContext =
+      submitRuntimeContextRef?.current || {};
+    const ownedRestoredState = {
+      ...restoredState,
+      ownerUid:
+        restoredState.ownerUid ||
+        runtimeContext.user?.uid ||
+        "",
+      ownerEmail:
+        restoredState.ownerEmail ||
+        runtimeContext.user?.email ||
+        "",
+      status: restoredState.isSubmitted
+        ? "submitted"
+        : restoredState.status || "in_progress",
+    };
 
-    saveAttemptState(testId, restoredState);
+    saveAttemptState(testId, ownedRestoredState);
 
     setMockAttemptState((prev) => ({
       ...prev,
-      [testId]: restoredState,
+      [testId]: ownedRestoredState,
     }));
 
-    if (isNoTimer || restoredState.isSubmitted) {
+    if (isNoTimer || ownedRestoredState.isSubmitted) {
       return;
     }
+
+    let active = true;
 
     const timer = setInterval(() => {
       const currentState = restoreAttemptState(
@@ -86,15 +125,6 @@ export const useExamTimer = ({
       const nextState = {
         ...currentState,
         timeLeft: nextTime,
-        submittedAt: shouldAutoSubmit
-          ? Date.now()
-          : currentState.submittedAt,
-        isSubmitted: shouldAutoSubmit
-          ? true
-          : currentState.isSubmitted,
-        forceSubmittedReason: shouldAutoSubmit
-          ? "Time is over"
-          : currentState.forceSubmittedReason,
       };
 
       saveAttemptState(testId, nextState);
@@ -108,23 +138,103 @@ export const useExamTimer = ({
         shouldAutoSubmit &&
         !autoSubmittedRef.current[testId]
       ) {
-        autoSubmittedRef.current[testId] = true;
+        autoSubmittedRef.current[testId] = "pending";
+        clearInterval(timer);
 
-        toast.success(
-          "Time is over. Test submitted automatically ✅"
-        );
+        const context =
+          submitRuntimeContextRef?.current || {};
 
-        setTimeout(() => {
-          navigate(`/ctet-tet/mock-tests/result/${testId}`);
-        }, 300);
+        submitAuthorizer({
+          test: activeTimerTest,
+          user: context.user,
+          role: context.role,
+          isAdminUser: context.isAdminUser,
+          accessProfile: context.accessProfile,
+          planCatalog: context.planCatalog,
+          attemptState: nextState,
+        }).then((authorization) => {
+          if (
+            authorization?.state !==
+              MOCK_TEST_SUBMIT_RUNTIME_STATES.READY ||
+            authorization?.canSubmit !== true ||
+            !Number.isFinite(
+              Number(authorization?.submittedAtMs)
+            )
+          ) {
+            autoSubmittedRef.current[testId] = "failed";
+
+            if (active) {
+              toast.error(
+                authorization?.message ||
+                  "Time is over, but secure submission could not be verified. Use Submit to retry."
+              );
+            }
+
+            return;
+          }
+
+          const finalState = {
+            ...nextState,
+            ownerUid:
+              authorization.attempt?.ownerUid ||
+              nextState.ownerUid ||
+              context.user?.uid ||
+              "",
+            ownerEmail:
+              authorization.attempt?.ownerEmail ||
+              nextState.ownerEmail ||
+              context.user?.email ||
+              "",
+            status: "submitted",
+            submittedAt:
+              authorization.submittedAtMs,
+            isSubmitted: true,
+            forceSubmittedReason: "Time is over",
+            submissionAuthorization: {
+              action: "submit",
+              purpose: "mock_test_submit",
+              source: "server",
+              requestId:
+                authorization.requestId || null,
+              authorizedAt:
+                authorization.submittedAtMs,
+            },
+          };
+
+          saveAttemptState(testId, finalState);
+
+          setMockAttemptState((prev) => ({
+            ...prev,
+            [testId]: finalState,
+          }));
+
+          autoSubmittedRef.current[testId] = "submitted";
+
+          if (active) {
+            toast.success(
+              "Time is over. Test submitted automatically ✅"
+            );
+
+            setTimeout(() => {
+              navigate(
+                `/ctet-tet/mock-tests/result/${testId}`
+              );
+            }, 300);
+          }
+        });
       }
     }, 1000);
 
-    return () => clearInterval(timer);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
   }, [
     locationPathname,
     universalContent,
     setMockAttemptState,
     navigate,
+    submitAuthorizer,
+    submitRuntimeContextRef,
   ]);
 };

@@ -73,7 +73,7 @@ describe(
     );
 
     test(
-      "Phase 7F-E does not replace submit timestamps or timer calculations",
+      "attempt-entry barriers remain active while submit authorization is handled separately",
       () => {
         const routeSource = readSource(
           "src/components/exam/ExamAttemptRoute.jsx"
@@ -83,13 +83,16 @@ describe(
         );
 
         expect(routeSource).toContain(
-          "submittedAt: Date.now()"
+          "useMockTestAttemptEntryRuntime"
+        );
+        expect(routeSource).toContain(
+          "createMockTestSubmitAuthorizer"
         );
         expect(timerSource).toContain(
           "const timer = setInterval"
         );
         expect(timerSource).toContain(
-          "submittedAt: shouldAutoSubmit"
+          "mock_test_submit"
         );
       }
     );

@@ -519,6 +519,14 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
     mockAttemptRuntimeActivation.testId ===
       activeAttemptRuntimeTestId;
 
+  const mockTestSubmitRuntimeContextRef = React.useRef({
+    user: null,
+    role: "",
+    isAdminUser: false,
+    accessProfile: {},
+    planCatalog: [],
+  });
+
 
     const {
       mockAttemptState,
@@ -541,6 +549,8 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
       universalContent,
       setMockAttemptState,
       navigate,
+      submitRuntimeContextRef:
+        mockTestSubmitRuntimeContextRef,
     });
 
     useExamSecurity({
@@ -592,6 +602,16 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
     enabled:
       adaptiveShellRuntimeContext.enabled,
   });
+
+  mockTestSubmitRuntimeContextRef.current = {
+    user,
+    role: user?.role || "",
+    isAdminUser:
+      adaptiveShellRuntimeContext.isAdminUser,
+    accessProfile,
+    planCatalog:
+      accessProfile?.planCatalog || [],
+  };
 
   const activeAccessPlan = accessProfile?.activePlan || "FREE";
   const activeAccessExpiry =
@@ -8857,6 +8877,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
       setExamFontScale={setExamFontScale}
       fullName={fullName}
       user={user}
+      role={user?.role || ""}
       isAdminUser={adaptiveShellRuntimeContext.isAdminUser}
       accessProfile={accessProfile}
       planCatalog={accessProfile?.planCatalog || []}

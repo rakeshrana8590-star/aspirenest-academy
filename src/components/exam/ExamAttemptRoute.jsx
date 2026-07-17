@@ -24,6 +24,10 @@ import {
   MOCK_TEST_ATTEMPT_ENTRY_STATES,
   useMockTestAttemptEntryRuntime,
 } from "../../access/useMockTestAttemptEntryRuntime";
+import {
+  MOCK_TEST_SUBMIT_RUNTIME_STATES,
+  createMockTestSubmitAuthorizer,
+} from "../../access/mockTestSubmitRuntime";
 
 function ExamAttemptRuntime({
   universalContent,
@@ -39,6 +43,10 @@ function ExamAttemptRuntime({
   setExamFontScale,
   fullName,
   user,
+  role,
+  isAdminUser,
+  accessProfile,
+  planCatalog,
   runtimeGate,
   goToAttemptQuestion,
   selectAttemptAnswer,
@@ -57,6 +65,28 @@ function ExamAttemptRuntime({
       item.section === "mockTest" &&
       item.id === activeStartMockTestId
   );
+
+  const submitAuthorizer = React.useMemo(
+    () =>
+      createMockTestSubmitAuthorizer({
+        getCurrentUser: () => ({
+          uid: user?.uid,
+          email: user?.email,
+        }),
+      }),
+    [user?.uid, user?.email]
+  );
+
+  const [submitRuntimeState, setSubmitRuntimeState] =
+    React.useState({
+      state: MOCK_TEST_SUBMIT_RUNTIME_STATES.IDLE,
+      message: "",
+      errorCode: null,
+    });
+  const submissionInFlightRef = React.useRef(false);
+  const forceSubmitAttemptedRef = React.useRef(false);
+  const [forceSubmitRetryVersion, setForceSubmitRetryVersion] =
+    React.useState(0);
 
   const accessStatus =
     runtimeGate?.canActivateAttemptRuntime === true
@@ -282,36 +312,184 @@ function ExamAttemptRuntime({
     totalViolationCount >= 5 &&
     !attemptState?.isSubmitted;
 
+  const authorizeAndPersistSubmission = React.useCallback(
+    async ({
+      forceSubmittedReason = "",
+      successMessage = "Test submitted successfully ✅",
+    } = {}) => {
+      if (
+        !test ||
+        !attemptState ||
+        submissionInFlightRef.current
+      ) {
+        return null;
+      }
+
+      submissionInFlightRef.current = true;
+      setSubmitRuntimeState({
+        state: MOCK_TEST_SUBMIT_RUNTIME_STATES.LOADING,
+        message:
+          "Verifying ownership, access, and trusted server time before submission.",
+        errorCode: null,
+      });
+
+      let authorization;
+
+      try {
+        authorization = await submitAuthorizer({
+          test,
+          user,
+          role,
+          isAdminUser,
+          accessProfile,
+          planCatalog,
+          attemptState,
+        });
+      } catch (error) {
+        authorization = {
+          state: MOCK_TEST_SUBMIT_RUNTIME_STATES.ERROR,
+          canSubmit: false,
+          errorCode:
+            error?.code ||
+            "mock_test_submit_authorization_failed",
+          message:
+            error?.message ||
+            "Secure submission could not be verified.",
+        };
+      }
+
+      if (
+        authorization?.state !==
+          MOCK_TEST_SUBMIT_RUNTIME_STATES.READY ||
+        authorization?.canSubmit !== true ||
+        !Number.isFinite(
+          Number(authorization?.submittedAtMs)
+        )
+      ) {
+        const message =
+          authorization?.message ||
+          "Secure submission could not be verified. Your attempt remains open.";
+
+        setSubmitRuntimeState({
+          state:
+            authorization?.state ||
+            MOCK_TEST_SUBMIT_RUNTIME_STATES.ERROR,
+          message,
+          errorCode:
+            authorization?.errorCode ||
+            "mock_test_submit_not_authorized",
+        });
+        submissionInFlightRef.current = false;
+        toast.error(message);
+        return authorization;
+      }
+
+      const finalState = {
+        ...attemptState,
+        ownerUid:
+          authorization.attempt?.ownerUid ||
+          attemptState.ownerUid ||
+          user?.uid ||
+          "",
+        ownerEmail:
+          authorization.attempt?.ownerEmail ||
+          attemptState.ownerEmail ||
+          user?.email ||
+          "",
+        status: "submitted",
+        submittedAt: authorization.submittedAtMs,
+        isSubmitted: true,
+        ...(forceSubmittedReason
+          ? { forceSubmittedReason }
+          : {}),
+        submissionAuthorization: {
+          action: "submit",
+          purpose: "mock_test_submit",
+          source: "server",
+          requestId:
+            authorization.requestId || null,
+          authorizedAt:
+            authorization.submittedAtMs,
+        },
+      };
+
+      saveAttemptState(test.id, finalState);
+
+      setMockAttemptState((prev) => ({
+        ...prev,
+        [test.id]: finalState,
+      }));
+
+      setSubmitRuntimeState({
+        state: MOCK_TEST_SUBMIT_RUNTIME_STATES.READY,
+        message: successMessage,
+        errorCode: null,
+      });
+      submissionInFlightRef.current = false;
+      toast.success(successMessage);
+
+      return authorization;
+    },
+    [
+      test,
+      attemptState,
+      submitAuthorizer,
+      user,
+      role,
+      isAdminUser,
+      accessProfile,
+      planCatalog,
+      setMockAttemptState,
+    ]
+  );
+
   React.useEffect(() => {
-    if (!test || !attemptState || !shouldForceSubmit) return;
+    if (
+      !test ||
+      !attemptState ||
+      !shouldForceSubmit ||
+      forceSubmitAttemptedRef.current
+    ) {
+      return undefined;
+    }
 
-    const finalState = {
-      ...attemptState,
-      submittedAt: Date.now(),
-      isSubmitted: true,
-      forceSubmittedReason: "Violation limit exceeded",
+    let active = true;
+    let redirectTimer = null;
+    forceSubmitAttemptedRef.current = true;
+
+    authorizeAndPersistSubmission({
+      forceSubmittedReason:
+        "Violation limit exceeded",
+      successMessage:
+        "Violation limit exceeded. Test auto-submitted.",
+    }).then((authorization) => {
+      if (
+        active &&
+        authorization?.state ===
+          MOCK_TEST_SUBMIT_RUNTIME_STATES.READY &&
+        authorization?.canSubmit === true
+      ) {
+        redirectTimer = setTimeout(() => {
+          navigate(
+            `/ctet-tet/mock-tests/result/${test.id}`
+          );
+        }, 300);
+      }
+    });
+
+    return () => {
+      active = false;
+      if (redirectTimer) {
+        clearTimeout(redirectTimer);
+      }
     };
-
-    saveAttemptState(test.id, finalState);
-
-    setMockAttemptState((prev) => ({
-      ...prev,
-      [test.id]: finalState,
-    }));
-
-    toast.error("Violation limit exceeded. Test auto-submitted.");
-
-    const redirectTimer = setTimeout(() => {
-      navigate(`/ctet-tet/mock-tests/result/${test.id}`);
-    }, 300);
-
-    return () => clearTimeout(redirectTimer);
   }, [
     test,
     attemptState,
     shouldForceSubmit,
-    setMockAttemptState,
+    authorizeAndPersistSubmission,
     navigate,
+    forceSubmitRetryVersion,
   ]);
 
   const resetQuestionTimer = () => {
@@ -356,33 +534,41 @@ function ExamAttemptRuntime({
 
   const submitAttempt = () => {
     if (!test) return;
+
+    setSubmitRuntimeState({
+      state: MOCK_TEST_SUBMIT_RUNTIME_STATES.IDLE,
+      message: "",
+      errorCode: null,
+    });
     setSubmitConfirmTestId(test.id);
   };
 
-  const confirmFinalSubmit = () => {
+  const confirmFinalSubmit = async () => {
     if (!test || !attemptState) return;
 
-    const finalState = {
-      ...attemptState,
-      submittedAt: Date.now(),
-      isSubmitted: true,
-    };
+    const authorization =
+      await authorizeAndPersistSubmission();
 
-    saveAttemptState(test.id, finalState);
-
-    setMockAttemptState((prev) => ({
-      ...prev,
-      [test.id]: finalState,
-    }));
+    if (
+      authorization?.state !==
+        MOCK_TEST_SUBMIT_RUNTIME_STATES.READY ||
+      authorization?.canSubmit !== true
+    ) {
+      return;
+    }
 
     setSubmitConfirmTestId(null);
-
-    toast.success("Test submitted successfully ✅");
-
     navigate(`/ctet-tet/mock-tests/result/${test.id}`);
   };
 
   const cancelFinalSubmit = () => {
+    if (
+      submitRuntimeState.state ===
+      MOCK_TEST_SUBMIT_RUNTIME_STATES.LOADING
+    ) {
+      return;
+    }
+
     setSubmitConfirmTestId(null);
   };
 
@@ -515,7 +701,65 @@ function ExamAttemptRuntime({
   }
 
   if (shouldForceSubmit) {
-    return null;
+    const isSubmitError = [
+      MOCK_TEST_SUBMIT_RUNTIME_STATES.ERROR,
+      MOCK_TEST_SUBMIT_RUNTIME_STATES.DENIED,
+    ].includes(submitRuntimeState.state);
+
+    return (
+      <section
+        className="premiumExamPage"
+        data-submit-runtime-state={
+          submitRuntimeState.state
+        }
+      >
+        <div className="pdfMiniCard">
+          <span>Secure Auto-Submit</span>
+          <h3>
+            {isSubmitError
+              ? "Auto-submit verification unavailable"
+              : "Verifying secure submission"}
+          </h3>
+          <p>
+            {submitRuntimeState.message ||
+              "The violation threshold was reached. Ownership, access, and trusted server time are being verified before submission."}
+          </p>
+
+          {isSubmitError && (
+            <div>
+              <button
+                type="button"
+                className="btnLink"
+                onClick={() => {
+                  forceSubmitAttemptedRef.current = false;
+                  setSubmitRuntimeState({
+                    state:
+                      MOCK_TEST_SUBMIT_RUNTIME_STATES.IDLE,
+                    message: "",
+                    errorCode: null,
+                  });
+                  setForceSubmitRetryVersion(
+                    (current) => current + 1
+                  );
+                }}
+              >
+                Retry Secure Submit
+              </button>
+
+              <button
+                type="button"
+                className="btnLink"
+                onClick={() =>
+                  navigate("/ctet-tet/mock-tests")
+                }
+              >
+                Back to Mock Tests
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -568,15 +812,29 @@ function ExamAttemptRuntime({
               </div>
 
               <div className="examSubmitConfirmWarning">
-                Result will be generated after submission. You cannot
-                edit answers after this action.
+                Result will be generated only after ownership, access,
+                and trusted server time are verified. You cannot edit
+                answers after an authorized submission.
               </div>
+
+              {[
+                MOCK_TEST_SUBMIT_RUNTIME_STATES.ERROR,
+                MOCK_TEST_SUBMIT_RUNTIME_STATES.DENIED,
+              ].includes(submitRuntimeState.state) && (
+                <div className="examSubmitConfirmWarning">
+                  {submitRuntimeState.message}
+                </div>
+              )}
 
               <div className="examSubmitConfirmActions">
                 <button
                   type="button"
                   className="examSubmitCancelBtn"
                   onClick={cancelFinalSubmit}
+                  disabled={
+                    submitRuntimeState.state ===
+                    MOCK_TEST_SUBMIT_RUNTIME_STATES.LOADING
+                  }
                 >
                   Continue Exam
                 </button>
@@ -585,8 +843,15 @@ function ExamAttemptRuntime({
                   type="button"
                   className="examSubmitConfirmBtn"
                   onClick={confirmFinalSubmit}
+                  disabled={
+                    submitRuntimeState.state ===
+                    MOCK_TEST_SUBMIT_RUNTIME_STATES.LOADING
+                  }
                 >
-                  Yes, Submit Test
+                  {submitRuntimeState.state ===
+                  MOCK_TEST_SUBMIT_RUNTIME_STATES.LOADING
+                    ? "Verifying Secure Submit..."
+                    : "Yes, Submit Test"}
                 </button>
               </div>
             </div>
@@ -985,6 +1250,10 @@ export default function ExamAttemptRoute({
         {...runtimeProps}
         universalContent={universalContent}
         user={user}
+        role={role}
+        isAdminUser={isAdminUser}
+        accessProfile={accessProfile}
+        planCatalog={planCatalog}
         runtimeGate={entryRuntime.gate}
       />
     );
