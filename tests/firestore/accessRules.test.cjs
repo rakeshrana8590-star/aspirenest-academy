@@ -1710,3 +1710,314 @@ test("legacy module product key redemption remains supported", async () => {
 
   await assertSucceeds(batch.commit());
 });
+
+const privateLeaderboardPayload = (
+  overrides = {}
+) => ({
+  schemaVersion: 1,
+  privateEntryId: "private-entry-1",
+  publicEntryId: "public-entry-1",
+  leaderboardKey: "private-entry-1",
+  ownerUid: STUDENT_UID,
+  ownerEmail: STUDENT_EMAIL,
+  studentEmail: STUDENT_EMAIL,
+  studentName: "Student Example",
+  testId: "mock-1",
+  testTitle: "Mock Test",
+  leaderboardMode: "liveleaderboard",
+  score: 42,
+  totalMarks: 50,
+  percentage: 84,
+  accuracy: 88,
+  correctCount: 42,
+  wrongCount: 5,
+  skippedCount: 3,
+  totalQuestions: 50,
+  durationSeconds: 1200,
+  rankScore: 84,
+  rankTieBreakerScore: 42,
+  attemptId: "attempt-1",
+  source: "authenticated_callable",
+  createdAt: new Date(
+    "2026-07-17T00:00:00.000Z"
+  ),
+  updatedAt: new Date(
+    "2026-07-17T00:00:00.000Z"
+  ),
+  ...overrides,
+});
+
+const publicLeaderboardPayload = (
+  overrides = {}
+) => ({
+  schemaVersion: 1,
+  projectionVersion: 1,
+  publicEntryId: "public-entry-1",
+  displayName: "Student E.",
+  testId: "mock-1",
+  testTitle: "Mock Test",
+  leaderboardMode: "liveleaderboard",
+  subject: "CDP",
+  chapter: "Learning",
+  planType: "FREE",
+  examType: "CTET",
+  testType: "Full",
+  score: 42,
+  totalMarks: 50,
+  percentage: 84,
+  accuracy: 88,
+  correctCount: 42,
+  wrongCount: 5,
+  skippedCount: 3,
+  totalQuestions: 50,
+  durationSeconds: 1200,
+  rankScore: 84,
+  rankTieBreakerScore: 42,
+  source: "authenticated_callable",
+  createdAt: new Date(
+    "2026-07-17T00:00:00.000Z"
+  ),
+  updatedAt: new Date(
+    "2026-07-17T00:00:00.000Z"
+  ),
+  ...overrides,
+});
+
+test("anonymous users can read only the public-safe leaderboard projection", async () => {
+  await seed(async (db) => {
+    await setDoc(
+      doc(
+        db,
+        "mockLeaderboard",
+        "private-entry-1"
+      ),
+      privateLeaderboardPayload()
+    );
+    await setDoc(
+      doc(
+        db,
+        "mockLeaderboardPublic",
+        "public-entry-1"
+      ),
+      publicLeaderboardPayload()
+    );
+  });
+
+  await assertSucceeds(
+    getDoc(
+      doc(
+        anonymousDb(),
+        "mockLeaderboardPublic",
+        "public-entry-1"
+      )
+    )
+  );
+  await assertSucceeds(
+    getDocs(
+      collection(
+        anonymousDb(),
+        "mockLeaderboardPublic"
+      )
+    )
+  );
+  await assertFails(
+    getDoc(
+      doc(
+        anonymousDb(),
+        "mockLeaderboard",
+        "private-entry-1"
+      )
+    )
+  );
+  await assertFails(
+    getDocs(
+      collection(
+        anonymousDb(),
+        "mockLeaderboard"
+      )
+    )
+  );
+});
+
+test("student can read only their own private leaderboard record", async () => {
+  await seed(async (db) => {
+    await setDoc(
+      doc(
+        db,
+        "mockLeaderboard",
+        "private-entry-1"
+      ),
+      privateLeaderboardPayload()
+    );
+    await setDoc(
+      doc(
+        db,
+        "mockLeaderboard",
+        "private-entry-2"
+      ),
+      privateLeaderboardPayload({
+        privateEntryId:
+          "private-entry-2",
+        publicEntryId:
+          "public-entry-2",
+        leaderboardKey:
+          "private-entry-2",
+        ownerUid: OTHER_UID,
+        ownerEmail: OTHER_EMAIL,
+        studentEmail: OTHER_EMAIL,
+        attemptId: "attempt-2",
+      })
+    );
+  });
+
+  await assertSucceeds(
+    getDoc(
+      doc(
+        studentDb(),
+        "mockLeaderboard",
+        "private-entry-1"
+      )
+    )
+  );
+  await assertFails(
+    getDoc(
+      doc(
+        studentDb(),
+        "mockLeaderboard",
+        "private-entry-2"
+      )
+    )
+  );
+  await assertSucceeds(
+    getDocs(
+      query(
+        collection(
+          studentDb(),
+          "mockLeaderboard"
+        ),
+        where(
+          "ownerUid",
+          "==",
+          STUDENT_UID
+        )
+      )
+    )
+  );
+  await assertFails(
+    getDocs(
+      collection(
+        studentDb(),
+        "mockLeaderboard"
+      )
+    )
+  );
+});
+
+test("admin can read private leaderboard records", async () => {
+  await seed(async (db) => {
+    await setDoc(
+      doc(
+        db,
+        "mockLeaderboard",
+        "private-entry-1"
+      ),
+      privateLeaderboardPayload()
+    );
+  });
+
+  await assertSucceeds(
+    getDoc(
+      doc(
+        adminDb(),
+        "mockLeaderboard",
+        "private-entry-1"
+      )
+    )
+  );
+  await assertSucceeds(
+    getDocs(
+      collection(
+        adminDb(),
+        "mockLeaderboard"
+      )
+    )
+  );
+});
+
+test("browser clients cannot write private or public leaderboard collections", async () => {
+  const privateRef = doc(
+    studentDb(),
+    "mockLeaderboard",
+    "private-entry-1"
+  );
+  const publicRef = doc(
+    studentDb(),
+    "mockLeaderboardPublic",
+    "public-entry-1"
+  );
+
+  await assertFails(
+    setDoc(
+      privateRef,
+      privateLeaderboardPayload()
+    )
+  );
+  await assertFails(
+    setDoc(
+      publicRef,
+      publicLeaderboardPayload()
+    )
+  );
+
+  await seed(async (db) => {
+    await setDoc(
+      doc(
+        db,
+        "mockLeaderboard",
+        "private-entry-1"
+      ),
+      privateLeaderboardPayload()
+    );
+    await setDoc(
+      doc(
+        db,
+        "mockLeaderboardPublic",
+        "public-entry-1"
+      ),
+      publicLeaderboardPayload()
+    );
+  });
+
+  await assertFails(
+    updateDoc(
+      privateRef,
+      { score: 50 }
+    )
+  );
+  await assertFails(
+    updateDoc(
+      publicRef,
+      { score: 50 }
+    )
+  );
+  await assertFails(
+    deleteDoc(privateRef)
+  );
+  await assertFails(
+    deleteDoc(publicRef)
+  );
+
+  await assertFails(
+    setDoc(
+      doc(
+        adminDb(),
+        "mockLeaderboardPublic",
+        "admin-public-write"
+      ),
+      publicLeaderboardPayload({
+        publicEntryId:
+          "admin-public-write",
+      })
+    )
+  );
+});

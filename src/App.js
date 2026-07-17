@@ -890,6 +890,10 @@ const [adminPaymentProof, setAdminPaymentProof] = useState("");
 const [paymentLoading, setPaymentLoading] = useState(false);
 const [leaderboard, setLeaderboard] = useState([]);
 const [mockLeaderboardEntries, setMockLeaderboardEntries] = useState([]);
+const [
+  mockLeaderboardPublicEntries,
+  setMockLeaderboardPublicEntries,
+] = useState([]);
 const [mockQuestions, setMockQuestions] = useState([]);
 const [selectedSubject, setSelectedSubject] = useState("CDP");
 const [adminQuestion, setAdminQuestion] = useState("");
@@ -1972,6 +1976,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
         loadContentItemsFromFirestore();
         loadNotesSubjectsFromFirestore();
         loadNotesChaptersFromFirestore();
+        loadMockLeaderboardPublicEntries(verifiedUser);
       }, 300);
 
       // Admin heavy data sirf admin ke liye
@@ -2457,6 +2462,121 @@ if (expiryDate && expiryDate < new Date()) {
       setLeaderboard(sortedResults);
     } catch (error) {
       alert(error.message);
+    }
+  };
+
+  const loadMockLeaderboardPublicEntries = async (
+    currentUser = user
+  ) => {
+    try {
+      const publicSnapshot = await getDocs(
+        collection(
+          db,
+          "mockLeaderboardPublic"
+        )
+      );
+      const ownPublicEntryIds = new Set();
+
+      if (currentUser?.uid) {
+        const ownerQueries = [
+          query(
+            collection(
+              db,
+              "mockLeaderboard"
+            ),
+            where(
+              "ownerUid",
+              "==",
+              currentUser.uid
+            )
+          ),
+        ];
+
+        if (currentUser?.email) {
+          ownerQueries.push(
+            query(
+              collection(
+                db,
+                "mockLeaderboard"
+              ),
+              where(
+                "studentEmail",
+                "==",
+                currentUser.email
+              )
+            )
+          );
+        }
+
+        for (
+          const ownerQuery of ownerQueries
+        ) {
+          try {
+            const ownerSnapshot =
+              await getDocs(ownerQuery);
+
+            ownerSnapshot.docs.forEach(
+              (document) => {
+                const publicEntryId =
+                  String(
+                    document.data()
+                      ?.publicEntryId || ""
+                  ).trim();
+
+                if (publicEntryId) {
+                  ownPublicEntryIds.add(
+                    publicEntryId
+                  );
+                }
+              }
+            );
+          } catch (ownerError) {
+            console.warn(
+              "Own leaderboard identity load skipped:",
+              ownerError?.message ||
+                ownerError
+            );
+          }
+        }
+      }
+
+      const publicEntries =
+        publicSnapshot.docs.map(
+          (document) => {
+            const data =
+              document.data() || {};
+            const publicEntryId =
+              String(
+                data.publicEntryId ||
+                  document.id
+              ).trim();
+
+            return {
+              id: document.id,
+              ...data,
+              publicEntryId,
+              isOwn:
+                ownPublicEntryIds.has(
+                  publicEntryId
+                ),
+            };
+          }
+        );
+
+      setMockLeaderboardPublicEntries(
+        publicEntries
+      );
+
+      return publicEntries;
+    } catch (error) {
+      console.error(
+        "Public mock leaderboard load error:",
+        error
+      );
+      setMockLeaderboardPublicEntries(
+        []
+      );
+      return [];
     }
   };
 
@@ -8909,8 +9029,9 @@ handleSaveUniversalContent={handleSaveUniversalContent}
       fullName={fullName}
       isAdmin={isAdmin}
       loadUserMockResults={loadUserMockResults}
-      loadLeaderboard={loadLeaderboard}
-      loadMockLeaderboardEntries={loadMockLeaderboardEntries}
+      loadMockLeaderboardPublicEntries={
+        loadMockLeaderboardPublicEntries
+      }
       setMockAttemptState={setMockAttemptState}
       mockResults={mockResults}
       mockResultsLoaded={mockResultsLoaded}
@@ -8959,7 +9080,9 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   path="/leaderboard"
   element={
     <StudentMockLeaderboardRoute
-      mockLeaderboardEntries={mockLeaderboardEntries}
+      mockLeaderboardEntries={
+        mockLeaderboardPublicEntries
+      }
       universalContent={universalContent}
       user={user}
     />

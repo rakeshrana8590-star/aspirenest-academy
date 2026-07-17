@@ -16,6 +16,9 @@ import {
   buildMockTestResultReviewRuntime,
 } from "../../access/mockTestResultReviewRuntime";
 import {
+  saveMockTestLeaderboardEntry,
+} from "../../access/mockTestLeaderboardClient";
+import {
   getAttemptAnswerStorageKey,
   getAttemptStorageKey,
   removeAttemptAnswerState,
@@ -140,27 +143,6 @@ const hasSavedMockAttempt = (mockResults = [], attemptSaveKey = "") =>
       result?.attemptId === attemptSaveKey
   );
 
-const isBetterLeaderboardResult = (
-  currentEntry = {},
-  nextPercentage = 0,
-  nextScore = 0
-) => {
-  const currentPercentage = Number(
-    currentEntry.rankScore ?? currentEntry.percentage ?? 0
-  );
-  const currentScore = Number(
-    currentEntry.rankTieBreakerScore ?? currentEntry.score ?? 0
-  );
-  const safeNextPercentage = Number(nextPercentage || 0);
-  const safeNextScore = Number(nextScore || 0);
-
-  return (
-    safeNextPercentage > currentPercentage ||
-    (safeNextPercentage === currentPercentage &&
-      safeNextScore > currentScore)
-  );
-};
-
 const AutoSaveMockResult = ({
   testId,
   userEmail,
@@ -225,8 +207,7 @@ export default function ExamResultRoute({
   fullName,
   isAdmin,
   loadUserMockResults,
-  loadLeaderboard,
-  loadMockLeaderboardEntries,
+  loadMockLeaderboardPublicEntries,
   setMockAttemptState,
   mockResults = [],
   mockResultsLoaded = false,
@@ -963,107 +944,44 @@ export default function ExamResultRoute({
       }
 
       if (leaderboardEnabled) {
-        const leaderboardKey = `${test.id}_${user.email}_${test.leaderboardMode}`;
+        await saveMockTestLeaderboardEntry({
+          leaderboardMode: test.leaderboardMode,
 
-        const existingLeaderboard = await getDocs(
-          query(
-            collection(db, "mockLeaderboard"),
-            where("leaderboardKey", "==", leaderboardKey)
-          )
-        );
+          testId: test.id,
+          testTitle: test.title || "",
+          studentName: fullName || user.email,
 
-        if (existingLeaderboard.empty) {
-          await addDoc(collection(db, "mockLeaderboard"), {
-            leaderboardKey,
-            leaderboardMode: test.leaderboardMode,
+          subject: test.subject || "",
+          chapter: test.chapter || "",
+          planType: test.planType || "FREE",
+          examType: test.examType || "",
+          testType: test.testType || "",
 
-            testId: test.id,
-            testTitle: test.title || "",
+          score,
+          totalMarks,
+          percentage,
+          accuracy,
 
-            studentEmail: user.email,
-            studentName: fullName || user.email,
+          correctCount,
+          wrongCount,
+          skippedCount,
+          totalQuestions,
+          durationSeconds,
 
-            subject: test.subject || "",
-            chapter: test.chapter || "",
-            planType: test.planType || "FREE",
-            examType: test.examType || "",
-            testType: test.testType || "",
+          attemptId: attemptSaveKey,
+          attemptStartedAt,
+          attemptSubmittedAt,
+          attemptNumber: savedSubmittedCount + 1,
 
-            score,
-            totalMarks,
-            percentage,
-            accuracy,
-
-            correctCount,
-            wrongCount,
-            skippedCount,
-            totalQuestions,
-            durationSeconds,
-
-            rankScore: percentage,
-            rankTieBreakerScore: score,
-
-            attemptId: attemptSaveKey,
-            attemptStartedAt,
-            attemptSubmittedAt,
-            attemptNumber: savedSubmittedCount + 1,
-
-            startedAt: activeAttemptState.startedAt || null,
-            endedAt: activeAttemptState.submittedAt || null,
-
-            createdAt: new Date(),
-          });
-        } else {
-          const leaderboardDocumentsToUpdate =
-            existingLeaderboard.docs.filter((leaderboardDocument) => {
-              const leaderboardData =
-                leaderboardDocument.data() || {};
-
-              const isSameAttempt =
-                Boolean(attemptSaveKey) &&
-                leaderboardData.attemptId === attemptSaveKey;
-
-              return (
-                isSameAttempt ||
-                isBetterLeaderboardResult(
-                  leaderboardData,
-                  percentage,
-                  score
-                )
-              );
-            });
-
-          await Promise.all(
-            leaderboardDocumentsToUpdate.map((leaderboardDocument) =>
-              updateDoc(leaderboardDocument.ref, {
-                testTitle: test.title || "",
-                score,
-                totalMarks,
-                percentage,
-                accuracy,
-                correctCount,
-                wrongCount,
-                skippedCount,
-                totalQuestions,
-                durationSeconds,
-                rankScore: percentage,
-                rankTieBreakerScore: score,
-                attemptId: attemptSaveKey,
-                attemptStartedAt,
-                attemptSubmittedAt,
-                attemptNumber: savedSubmittedCount + 1,
-                startedAt: activeAttemptState.startedAt || null,
-                endedAt: activeAttemptState.submittedAt || null,
-                updatedAt: new Date(),
-              })
-            )
-          );
-        }
+          startedAt: activeAttemptState.startedAt || null,
+          endedAt: activeAttemptState.submittedAt || null,
+        });
       }
 
       await loadUserMockResults?.(user.email);
-      await loadLeaderboard?.();
-      await loadMockLeaderboardEntries?.();
+      await loadMockLeaderboardPublicEntries?.(
+        user
+      );
 
       if (showAlert) {
         alert(

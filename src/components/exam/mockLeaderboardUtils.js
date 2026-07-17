@@ -54,16 +54,22 @@ export const getMockLeaderboardScore = (entry = {}) => {
 
 export const getMockLeaderboardStudentKey = (entry = {}) =>
   normalizeValue(
-    entry.studentEmail ||
+    entry.publicEntryId ||
+      entry.studentEmail ||
       entry.email ||
       entry.uid ||
       entry.studentId ||
       entry.studentName ||
+      entry.displayName ||
       entry.id ||
       entry.leaderboardKey
   );
 
 export const isOwnMockLeaderboardEntry = (entry = {}, user = null) => {
+  if (entry?.isOwn === true) {
+    return true;
+  }
+
   const userEmail = normalizeValue(user?.email);
   const userUid = normalizeValue(user?.uid);
   const entryEmail = normalizeValue(entry.studentEmail || entry.email);
@@ -77,7 +83,8 @@ export const isOwnMockLeaderboardEntry = (entry = {}, user = null) => {
 
 export const maskMockLeaderboardName = (entry = {}, user = null) => {
   const raw = String(
-    entry.studentName ||
+    entry.displayName ||
+      entry.studentName ||
       entry.studentEmail ||
       entry.email ||
       "AspireNest Learner"
