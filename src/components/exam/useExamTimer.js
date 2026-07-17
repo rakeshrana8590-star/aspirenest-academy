@@ -261,7 +261,7 @@ export const useExamTimer = ({
         },
       };
 
-      saveAttemptState(testId, finalState);
+      saveAttemptState(testId, finalState, context.user);
 
       setMockAttemptState((prev) => ({
         ...prev,
@@ -335,7 +335,8 @@ export const useExamTimer = ({
 
       const restoredState = restoreAttemptState(
         activeTimerTest,
-        defaultTimeLeft
+        defaultTimeLeft,
+        context.user
       );
       const ownedRestoredState = {
         ...restoredState,
@@ -376,7 +377,7 @@ export const useExamTimer = ({
 
       const reconciledState = reconciliation.attemptState;
 
-      saveAttemptState(testId, reconciledState);
+      saveAttemptState(testId, reconciledState, context.user);
 
       setMockAttemptState((prev) => ({
         ...prev,
@@ -416,7 +417,8 @@ export const useExamTimer = ({
       const tick = () => {
         const currentState = restoreAttemptState(
           activeTimerTest,
-          defaultTimeLeft
+          defaultTimeLeft,
+          context.user
         );
 
         if (currentState.isSubmitted) {
@@ -468,7 +470,7 @@ export const useExamTimer = ({
             Number(currentState.timerRuntime?.deadlineAtServerMs);
 
         if (shouldPersist) {
-          saveAttemptState(testId, nextState);
+          saveAttemptState(testId, nextState, context.user);
 
           setMockAttemptState((prev) => ({
             ...prev,

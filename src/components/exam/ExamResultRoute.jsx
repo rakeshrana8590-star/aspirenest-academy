@@ -10,7 +10,12 @@ import {
 } from "firebase/firestore";
 
 import { db } from "../../firebase";
-import { getAttemptStorageKey } from "./examAttemptStorage.js";
+import {
+  getAttemptAnswerStorageKey,
+  getAttemptStorageKey,
+  removeAttemptAnswerState,
+  removeAttemptState,
+} from "./examAttemptStorage.js";
 import { isExamAnswerCorrect } from "./examAnswerUtils.js";
 
 const safeParseJson = (value, fallback = {}) => {
@@ -407,7 +412,7 @@ export default function ExamResultRoute({
   const questions = test.questions || [];
 
   const storedAttemptState = safeParseJson(
-    localStorage.getItem(getAttemptStorageKey(test.id))
+    localStorage.getItem(getAttemptStorageKey(test.id, user))
   );
 
   const liveAttemptState = mockAttemptState?.[test.id] || {};
@@ -465,10 +470,10 @@ export default function ExamResultRoute({
   const handleAttemptAgain = () => {
     if (!canAttemptAgain) return;
 
-    localStorage.removeItem(getAttemptStorageKey(test.id));
+    removeAttemptState(test.id, user);
 
     try {
-      localStorage.removeItem(`mockAttemptAnswers_${test.id}`);
+      removeAttemptAnswerState(test.id, user);
       sessionStorage.removeItem(`mockResultAutoSaved_${test.id}_${user?.email || ""}`);
       sessionStorage.removeItem(`mockResultAutoSaved_${attemptSaveKey}`);
     } catch {
@@ -590,7 +595,7 @@ export default function ExamResultRoute({
     savedResultForTest?.answers || {};
 
   const oldStoredAnswers = safeParseJson(
-    localStorage.getItem(`mockAttemptAnswers_${test.id}`)
+    localStorage.getItem(getAttemptAnswerStorageKey(test.id, user))
   );
 
   const attemptAnswers = hasObjectData(activeAttemptAnswers)

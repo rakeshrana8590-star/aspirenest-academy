@@ -1,7 +1,10 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { getAttemptStorageKey } from "./examAttemptStorage.js";
+import {
+  getAttemptAnswerStorageKey,
+  getAttemptStorageKey,
+} from "./examAttemptStorage.js";
 import {
   isExamAnswerCorrect,
   normalizeExamAnswerKey,
@@ -23,6 +26,7 @@ export default function ExamReviewRoute({
   getMockTestAccessStatus,
   mockAttemptAnswers,
   mockAttemptState,
+  user,
 }) {
   const navigate = useNavigate();
   const { testId } = useParams();
@@ -149,7 +153,7 @@ export default function ExamReviewRoute({
   const liveAttemptState = mockAttemptState?.[test.id] || {};
 
   const storedAttemptState = safeParseJson(
-    localStorage.getItem(getAttemptStorageKey(test.id))
+    localStorage.getItem(getAttemptStorageKey(test.id, user))
   );
 
   const activeAttemptState = liveAttemptState?.isSubmitted
@@ -180,7 +184,7 @@ export default function ExamReviewRoute({
   }
 
   const storedLegacyAnswers = safeParseJson(
-    localStorage.getItem(`mockAttemptAnswers_${test.id}`)
+    localStorage.getItem(getAttemptAnswerStorageKey(test.id, user))
   );
 
   const liveNewAnswers = liveAttemptState?.answers || {};

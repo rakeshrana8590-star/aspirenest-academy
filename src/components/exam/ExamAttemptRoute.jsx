@@ -136,7 +136,11 @@ function ExamAttemptRuntime({
 
   const attemptState = test
     ? mockAttemptState?.[test.id] ||
-      createDefaultAttemptState(test, defaultTimerSeconds)
+      createDefaultAttemptState(
+        test,
+        defaultTimerSeconds,
+        user
+      )
     : null;
 
   const currentQuestionIndex =
@@ -413,7 +417,7 @@ function ExamAttemptRuntime({
         },
       };
 
-      saveAttemptState(test.id, finalState);
+      saveAttemptState(test.id, finalState, user);
 
       setMockAttemptState((prev) => ({
         ...prev,

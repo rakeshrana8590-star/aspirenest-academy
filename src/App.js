@@ -539,7 +539,7 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
       markAttemptForReviewAndNext,
       saveAttemptAndNext,
       updateAttemptTimeLeft,
-    } = useExamAttemptState(universalContent);
+    } = useExamAttemptState(universalContent, user);
 
     const mockTestTimerRuntime = useExamTimer({
       locationPathname:
@@ -8926,7 +8926,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
     <ExamReviewRoute
       universalContent={universalContent}
       getMockTestAccessStatus={getMockTestAccessStatus}
-
+      user={user}
       mockAttemptState={mockAttemptState}
     />
   }

@@ -1,7 +1,11 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { getAttemptStorageKey } from "./examAttemptStorage.js";
+import {
+  getAttemptStorageKey,
+  removeAttemptAnswerState,
+  removeAttemptState,
+} from "./examAttemptStorage.js";
 import {
   EXAM_START_ACCESS_STATES,
   buildExamStartAccessModel,
@@ -163,7 +167,7 @@ export default function ExamStartRoute({
   }
 
   const savedStartAttempt = safeParseJson(
-    localStorage.getItem(getAttemptStorageKey(test.id))
+    localStorage.getItem(getAttemptStorageKey(test.id, user))
   );
 
   const hasStartedAttempt =
@@ -240,8 +244,8 @@ export default function ExamStartRoute({
   const isAutoSubmitOnViolation = isRuleEnabled(test.autoSubmitOnViolation);
 
   const clearCurrentAttemptState = () => {
-    localStorage.removeItem(getAttemptStorageKey(test.id));
-    localStorage.removeItem(`mockAttemptAnswers_${test.id}`);
+    removeAttemptState(test.id, user);
+    removeAttemptAnswerState(test.id, user);
 
     if (typeof setMockAttemptState === "function") {
       setMockAttemptState((prev) => {

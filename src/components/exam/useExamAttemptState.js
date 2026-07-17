@@ -1,7 +1,14 @@
-import { useState } from "react";
 import {
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
+import {
+  getAttemptOwnerScope,
+  isAttemptStateOwnedByIdentity,
   restoreAttemptState,
   saveAttemptState,
+  setAttemptStorageIdentity,
 } from "./examAttemptStorage.js";
 import {
   getGoToQuestionState,
@@ -13,90 +20,218 @@ import {
   getTimeLeftState,
 } from "./examAttemptActions.js";
 
-export const useExamAttemptState = (universalContent = []) => {
-  const [mockAttemptState, setMockAttemptState] = useState({});
+const safeAttemptMap = (value) =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? value
+    : {};
 
-  const updateAttemptState = (testId, updater) => {
-    if (!testId || typeof updater !== "function") return;
+const sanitizeOwnedAttemptMap = (
+  value,
+  ownerIdentity
+) =>
+  Object.entries(safeAttemptMap(value)).reduce(
+    (ownedAttempts, [testId, state]) => {
+      if (
+        isAttemptStateOwnedByIdentity(
+          state,
+          testId,
+          ownerIdentity
+        )
+      ) {
+        ownedAttempts[testId] = state;
+      }
 
-    setMockAttemptState((prev) => {
-      const activeTest = universalContent.find(
-        (item) =>
-          item.section === "mockTest" &&
-          item.id === testId
+      return ownedAttempts;
+    },
+    {}
+  );
+
+export const useExamAttemptState = (
+  universalContent = [],
+  user = null
+) => {
+  const ownerIdentity = useMemo(
+    () => ({
+      uid: user?.uid || "",
+      email: user?.email || "",
+    }),
+    [user?.uid, user?.email]
+  );
+  const ownerScope = getAttemptOwnerScope(ownerIdentity);
+
+  setAttemptStorageIdentity(ownerIdentity);
+
+  const [attemptContainer, setAttemptContainer] = useState({
+    ownerScope,
+    attempts: {},
+  });
+
+  const mockAttemptState =
+    attemptContainer.ownerScope === ownerScope
+      ? attemptContainer.attempts
+      : {};
+
+  const setMockAttemptState = useCallback(
+    (nextValue) => {
+      setAttemptContainer((previousContainer) => {
+        const currentAttempts =
+          previousContainer.ownerScope === ownerScope
+            ? previousContainer.attempts
+            : {};
+        const resolvedAttempts =
+          typeof nextValue === "function"
+            ? nextValue(currentAttempts)
+            : nextValue;
+
+        return {
+          ownerScope,
+          attempts: sanitizeOwnedAttemptMap(
+            resolvedAttempts,
+            ownerIdentity
+          ),
+        };
+      });
+    },
+    [ownerIdentity, ownerScope]
+  );
+
+  const updateAttemptState = useCallback(
+    (testId, updater) => {
+      if (
+        !testId ||
+        !ownerScope ||
+        typeof updater !== "function"
+      ) {
+        return;
+      }
+
+      setMockAttemptState((previousAttempts) => {
+        const activeTest = universalContent.find(
+          (item) =>
+            item.section === "mockTest" &&
+            item.id === testId
+        );
+        const liveState = previousAttempts[testId];
+        const currentState =
+          liveState &&
+          isAttemptStateOwnedByIdentity(
+            liveState,
+            testId,
+            ownerIdentity
+          )
+            ? liveState
+            : restoreAttemptState(
+                activeTest,
+                0,
+                ownerIdentity
+              );
+        const nextState = updater(currentState);
+
+        if (
+          !saveAttemptState(
+            testId,
+            nextState,
+            ownerIdentity
+          )
+        ) {
+          return previousAttempts;
+        }
+
+        return {
+          ...previousAttempts,
+          [testId]: {
+            ...nextState,
+            testId,
+            ownerUid: ownerIdentity.uid,
+            ownerEmail: String(
+              ownerIdentity.email || ""
+            ).toLowerCase(),
+          },
+        };
+      });
+    },
+    [
+      ownerIdentity,
+      ownerScope,
+      setMockAttemptState,
+      universalContent,
+    ]
+  );
+
+  const goToAttemptQuestion = useCallback(
+    (testId, index, paletteRangeStart = 0) => {
+      updateAttemptState(testId, (state) =>
+        getGoToQuestionState(
+          state,
+          index,
+          paletteRangeStart
+        )
       );
+    },
+    [updateAttemptState]
+  );
 
-      const currentState =
-        prev[testId] || restoreAttemptState(activeTest, 0);
+  const selectAttemptAnswer = useCallback(
+    (testId, index, optionKey) => {
+      updateAttemptState(testId, (state) =>
+        getSelectAnswerState(state, index, optionKey)
+      );
+    },
+    [updateAttemptState]
+  );
 
-      const nextState = updater(currentState);
+  const clearAttemptResponse = useCallback(
+    (testId, index) => {
+      updateAttemptState(testId, (state) =>
+        getClearResponseState(state, index)
+      );
+    },
+    [updateAttemptState]
+  );
 
-      saveAttemptState(testId, nextState);
+  const markAttemptForReviewAndNext = useCallback(
+    (testId, index, totalQuestions) => {
+      updateAttemptState(testId, (state) =>
+        getMarkForReviewAndNextState(
+          state,
+          index,
+          totalQuestions
+        )
+      );
+    },
+    [updateAttemptState]
+  );
 
-      return {
-        ...prev,
-        [testId]: nextState,
-      };
-    });
-  };
+  const saveAttemptAndNext = useCallback(
+    (testId, index, totalQuestions) => {
+      updateAttemptState(testId, (state) =>
+        getSaveAndNextState(
+          state,
+          index,
+          totalQuestions
+        )
+      );
+    },
+    [updateAttemptState]
+  );
 
-  const goToAttemptQuestion = (
-    testId,
-    index,
-    paletteRangeStart = 0
-  ) => {
-    updateAttemptState(testId, (state) =>
-      getGoToQuestionState(state, index, paletteRangeStart)
-    );
-  };
+  const submitAttemptState = useCallback(
+    (testId) => {
+      updateAttemptState(testId, (state) =>
+        getSubmitAttemptState(state)
+      );
+    },
+    [updateAttemptState]
+  );
 
-  const selectAttemptAnswer = (testId, index, optionKey) => {
-    updateAttemptState(testId, (state) =>
-      getSelectAnswerState(state, index, optionKey)
-    );
-  };
-
-  const clearAttemptResponse = (testId, index) => {
-    updateAttemptState(testId, (state) =>
-      getClearResponseState(state, index)
-    );
-  };
-
-  const markAttemptForReviewAndNext = (
-    testId,
-    index,
-    totalQuestions
-  ) => {
-    updateAttemptState(testId, (state) =>
-      getMarkForReviewAndNextState(
-        state,
-        index,
-        totalQuestions
-      )
-    );
-  };
-
-  const saveAttemptAndNext = (
-    testId,
-    index,
-    totalQuestions
-  ) => {
-    updateAttemptState(testId, (state) =>
-      getSaveAndNextState(state, index, totalQuestions)
-    );
-  };
-
-  const submitAttemptState = (testId) => {
-    updateAttemptState(testId, (state) =>
-      getSubmitAttemptState(state)
-    );
-  };
-
-  const updateAttemptTimeLeft = (testId, timeLeft) => {
-    updateAttemptState(testId, (state) =>
-      getTimeLeftState(state, timeLeft)
-    );
-  };
+  const updateAttemptTimeLeft = useCallback(
+    (testId, timeLeft) => {
+      updateAttemptState(testId, (state) =>
+        getTimeLeftState(state, timeLeft)
+      );
+    },
+    [updateAttemptState]
+  );
 
   return {
     mockAttemptState,
