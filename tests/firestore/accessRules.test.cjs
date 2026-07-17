@@ -1107,25 +1107,21 @@ test("student cannot write another learner entitlement", async () => {
   );
 });
 
-test("protected content requires active entitlement", async () => {
+test("protected assets deny anonymous and student browser reads even with active plan access", async () => {
   await seed(async (db) => {
     await setDoc(
       doc(db, "protectedContentAssets", "asset-1"),
       {
         status: "published",
+        contentId: "note-1",
+        module: "notes",
+        itemType: "notesPdf",
+        itemId: "note-1",
         requiredEntitlementId: "plan_PREMIUM",
         planType: "PREMIUM",
+        pdfUrl: "https://example.com/note-1.pdf",
       }
     );
-  });
-
-  await assertFails(
-    getDoc(
-      doc(studentDb(), "protectedContentAssets", "asset-1")
-    )
-  );
-
-  await seed(async (db) => {
     await setDoc(
       doc(
         db,
@@ -1137,18 +1133,146 @@ test("protected content requires active entitlement", async () => {
       {
         id: "plan_PREMIUM",
         uid: STUDENT_UID,
+        email: STUDENT_EMAIL,
         status: "active",
+        scopeType: "plan",
+        planType: "PREMIUM",
+        accessUntil: FUTURE_DATE,
+      }
+    );
+  });
+
+  await assertFails(
+    getDoc(
+      doc(anonymousDb(), "protectedContentAssets", "asset-1")
+    )
+  );
+  await assertFails(
+    getDoc(
+      doc(studentDb(), "protectedContentAssets", "asset-1")
+    )
+  );
+  await assertFails(
+    getDocs(
+      collection(studentDb(), "protectedContentAssets")
+    )
+  );
+});
+
+test("protected assets deny student browser reads even with an exact ITEM entitlement", async () => {
+  const entitlementId = "item_notes_notesPdf_note-1";
+
+  await seed(async (db) => {
+    await setDoc(
+      doc(db, "protectedContentAssets", "asset-1"),
+      {
+        status: "published",
+        contentId: "note-1",
+        module: "notes",
+        itemType: "notesPdf",
+        itemId: "note-1",
+        requiredEntitlementId: entitlementId,
+        planType: "PREMIUM",
+        pdfUrl: "https://example.com/note-1.pdf",
+      }
+    );
+    await setDoc(
+      doc(
+        db,
+        "studentEntitlements",
+        STUDENT_UID,
+        "items",
+        entitlementId
+      ),
+      {
+        id: entitlementId,
+        uid: STUDENT_UID,
+        email: STUDENT_EMAIL,
+        status: "active",
+        scopeType: "item",
+        module: "notes",
+        itemType: "notesPdf",
+        itemId: "note-1",
+        accessUntil: FUTURE_DATE,
+      }
+    );
+  });
+
+  await assertFails(
+    getDoc(
+      doc(studentDb(), "protectedContentAssets", "asset-1")
+    )
+  );
+});
+
+test("admin browser can read and list protected assets", async () => {
+  await seed(async (db) => {
+    await setDoc(
+      doc(db, "protectedContentAssets", "asset-1"),
+      {
+        status: "published",
+        contentId: "note-1",
+        pdfUrl: "https://example.com/note-1.pdf",
       }
     );
   });
 
   const snapshot = await assertSucceeds(
     getDoc(
-      doc(studentDb(), "protectedContentAssets", "asset-1")
+      doc(adminDb(), "protectedContentAssets", "asset-1")
+    )
+  );
+  const listing = await assertSucceeds(
+    getDocs(
+      collection(adminDb(), "protectedContentAssets")
     )
   );
 
   assert.equal(snapshot.exists(), true);
+  assert.equal(listing.size, 1);
+});
+
+test("protected asset browser writes are admin-only", async () => {
+  const studentRef = doc(
+    studentDb(),
+    "protectedContentAssets",
+    "asset-1"
+  );
+  const adminRef = doc(
+    adminDb(),
+    "protectedContentAssets",
+    "asset-1"
+  );
+
+  await assertFails(
+    setDoc(studentRef, {
+      status: "published",
+      contentId: "note-1",
+      pdfUrl: "https://example.com/note-1.pdf",
+    })
+  );
+
+  await assertSucceeds(
+    setDoc(adminRef, {
+      status: "published",
+      contentId: "note-1",
+      pdfUrl: "https://example.com/note-1.pdf",
+    })
+  );
+
+  await assertFails(
+    updateDoc(studentRef, {
+      status: "draft",
+    })
+  );
+  await assertFails(deleteDoc(studentRef));
+
+  await assertSucceeds(
+    updateDoc(adminRef, {
+      status: "draft",
+    })
+  );
+  await assertSucceeds(deleteDoc(adminRef));
 });
 
 test("anonymous pricing query reads only active plan products", async () => {
