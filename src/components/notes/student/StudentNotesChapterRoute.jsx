@@ -39,6 +39,7 @@ export default function StudentNotesChapterRoute({
   universalContent = [],
   handleNoteAccess,
   hasPlanAccess,
+  buildNoteAccessDecision,
 }) {
   const navigate = useNavigate();
   const { plan, subjectId, chapterId } = useParams();
@@ -115,14 +116,23 @@ export default function StudentNotesChapterRoute({
           />
         ) : (
           <div className="studentNotesPdfGrid">
-            {chapterNotes.map((note) => (
-              <StudentNotePdfCard
-                key={note.id}
-                note={note}
-                handleNoteAccess={handleNoteAccess}
-                hasPlanAccess={hasPlanAccess}
-              />
-            ))}
+            {chapterNotes.map((note) => {
+              const accessDecision =
+                typeof buildNoteAccessDecision ===
+                "function"
+                  ? buildNoteAccessDecision(note)
+                  : null;
+
+              return (
+                <StudentNotePdfCard
+                  key={note.id}
+                  note={note}
+                  handleNoteAccess={handleNoteAccess}
+                  hasPlanAccess={hasPlanAccess}
+                  accessDecision={accessDecision}
+                />
+              );
+            })}
           </div>
         )}
       </div>

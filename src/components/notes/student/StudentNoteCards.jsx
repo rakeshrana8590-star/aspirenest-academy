@@ -1,6 +1,10 @@
 import React from "react";
 
 import {
+  getStudentNotesAccessPresentation,
+} from "../../../access/notesStudentAssetRuntime";
+
+import {
   NOTES_PLAN_DESCRIPTIONS,
   NOTES_PLAN_ICONS,
   NOTES_PLAN_LABELS,
@@ -111,28 +115,53 @@ export function StudentNotePdfCard({
   note,
   handleNoteAccess,
   hasPlanAccess,
+  accessDecision = null,
 }) {
   const planName = getNotePlan(note);
   const hasProtectedAsset = hasNotePdf(note);
 
-  const canOpen = canAccessNotePlan({
-    planName,
-    hasPlanAccess,
-    accessOptions: {
-      module: "notes",
-      itemType: "notesPdf",
-      itemId: note.id,
-    },
-  });
+  const fallbackCanOpen =
+    canAccessNotePlan({
+      planName,
+      hasPlanAccess,
+      accessOptions: {
+        module: "notes",
+        itemType: "notesPdf",
+        itemId: note.id,
+      },
+    });
+  const presentation =
+    accessDecision
+      ? getStudentNotesAccessPresentation(
+          accessDecision
+        )
+      : {
+          canOpen: fallbackCanOpen,
+          disabled: false,
+          busy: false,
+          statusLabel: fallbackCanOpen
+            ? "Access ready"
+            : "Plan locked",
+          buttonLabel: fallbackCanOpen
+            ? "Open PDF"
+            : "Unlock",
+        };
 
   const openNote = () => {
+    if (presentation.disabled) {
+      return;
+    }
+
     const safeNote = {
       ...note,
       planType: planName,
       accessPlan: planName,
     };
 
-    if (typeof handleNoteAccess === "function") {
+    if (
+      typeof handleNoteAccess ===
+      "function"
+    ) {
       handleNoteAccess(safeNote);
     }
   };
@@ -171,10 +200,15 @@ export function StudentNotePdfCard({
       </div>
 
       <div className="studentNotesPdfFooter">
-        <span>{canOpen ? "Access ready" : "Plan locked"}</span>
+        <span>{presentation.statusLabel}</span>
 
-        <button type="button" onClick={openNote}>
-          {canOpen ? "Open PDF" : "Unlock"}
+        <button
+          type="button"
+          onClick={openNote}
+          disabled={presentation.disabled}
+          aria-busy={presentation.busy}
+        >
+          {presentation.buttonLabel}
         </button>
       </div>
     </article>

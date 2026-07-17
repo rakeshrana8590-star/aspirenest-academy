@@ -92,10 +92,19 @@ describe(
         const handler = source.slice(start, end);
 
         expect(handler).toContain(
-          'let notePdfUrl = ""'
+          "resolveStudentNotesProtectedAsset"
         );
         expect(handler).toContain(
-          "readProtectedContentAsset(noteId)"
+          "runtimeResult.asset.assetUrl"
+        );
+        expect(handler).toContain(
+          "window.open("
+        );
+        expect(handler).not.toContain(
+          "readProtectedContentAsset"
+        );
+        expect(handler).not.toContain(
+          "getProtectedContentUrl"
         );
         expect(handler).not.toContain(
           "note.pdfUrl || note.fileUrl"

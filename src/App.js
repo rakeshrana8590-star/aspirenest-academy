@@ -33,6 +33,14 @@ import {
   buildPublicNotesMetadata,
   sanitizeContentItemsForClient,
 } from "./access/notesPublicMetadata";
+import {
+  NOTES_ACTIONS,
+} from "./access/notesActionPolicy";
+import {
+  buildStudentNotesRuntimeDecision,
+  classifyStudentNotesRuntimeError,
+  resolveStudentNotesProtectedAsset,
+} from "./access/notesStudentAssetRuntime";
 import { upsertLearnerLoginSnapshot } from "./profile/learnerProfileService";
 
 import {
@@ -2186,79 +2194,68 @@ const [paymentHistory, setPaymentHistory] = useState([]);
       alert(error.message);
     }
   };
+  const buildStudentNoteAccessDecision = (
+    note,
+    action = NOTES_ACTIONS.OPEN
+  ) =>
+    buildStudentNotesRuntimeDecision({
+      action,
+      note,
+      user,
+      accessProfile,
+      planCatalog:
+        accessProfile?.planCatalog || [],
+    });
+
   const handleNoteAccess = async (note) => {
     if (!note) {
       return;
     }
 
-    const rawAccessType =
-      note.accessPlan || note.planType || note.plan || note.type || "FREE";
+    try {
+      const action = NOTES_ACTIONS.OPEN;
+      const decision =
+        buildStudentNoteAccessDecision(
+          note,
+          action
+        );
+      const runtimeResult =
+        await resolveStudentNotesProtectedAsset({
+          action,
+          note,
+          user,
+          accessProfile,
+          planCatalog:
+            accessProfile?.planCatalog || [],
+          decision,
+        });
 
-    const normalizedAccessType = String(rawAccessType || "FREE")
-      .trim()
-      .toUpperCase();
+      window.open(
+        runtimeResult.asset.assetUrl,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    } catch (error) {
+      console.warn(
+        "Protected Notes callable authorization failed:",
+        error
+      );
 
-    const knownPlanTypes = ["FREE", "BASIC", "PREMIUM", "MENTORSHIP"];
-    const isKnownPlan = knownPlanTypes.includes(normalizedAccessType);
-    const accessType = isKnownPlan ? normalizedAccessType : "PREMIUM";
-    const accessLabel = isKnownPlan ? accessType : normalizedAccessType;
+      const failure =
+        classifyStudentNotesRuntimeError(
+          error
+        );
 
-    const canOpenNote = hasPlanAccess(accessType, {
-      module: "notes",
-      itemType: "notesPdf",
-      itemId: String(note.id || note.slug || note.title || ""),
-    });
-
-    if (!canOpenNote) {
-      if (!user) {
+      if (failure.requiresLogin) {
         navigate("/login");
-      } else {
+      } else if (
+        failure.requiresUpgrade
+      ) {
         navigate("/ctet-tet/pricing");
       }
 
-      alert(
-        accessLabel === "FREE"
-          ? "This content is currently locked for your account."
-          : "This content requires " + accessLabel + " access."
-      );
-
-      return;
+      alert(failure.message);
     }
-
-    const noteId = String(note.id || "").trim();
-
-    if (!noteId) {
-      alert("Protected Notes asset is unavailable.");
-      return;
-    }
-
-    let notePdfUrl = "";
-
-    try {
-      const protectedAsset = await readProtectedContentAsset(noteId);
-
-      notePdfUrl = getProtectedContentUrl(protectedAsset, [
-        "pdfUrl",
-        "fileUrl",
-        "sourceUrl",
-        "downloadUrl",
-        "assetUrl",
-      ]);
-    } catch (error) {
-      console.warn(
-        "Protected Notes PDF authorization failed:",
-        error
-      );
-      alert("Protected Notes access is currently unavailable.");
-      return;
-    }
-
-    if (!notePdfUrl || notePdfUrl === "#") {
-      alert("PDF will be uploaded soon.");
-      return;
-    }
-
-    window.open(notePdfUrl, "_blank", "noopener,noreferrer");
   };
   const handlePremiumSectionAccess = () => {
     if (!user) {
@@ -8969,6 +8966,9 @@ handleSaveUniversalContent={handleSaveUniversalContent}
       universalContent={universalContent}
       handleNoteAccess={handleNoteAccess}
       hasPlanAccess={hasPlanAccess}
+      buildNoteAccessDecision={
+        buildStudentNoteAccessDecision
+      }
     />
   }
 />
