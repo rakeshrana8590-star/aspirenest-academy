@@ -57,8 +57,17 @@ const callUnauthenticated = async ({
     },
   });
 
+  await callUnauthenticated({
+    functionName:
+      "resolveNotesProtectedAsset",
+    data: {
+      noteId: "note-emulator-1",
+      action: "OPEN",
+    },
+  });
+
   console.log(
-    "PHASE7FJ_FUNCTIONS_EMULATOR_UNAUTHENTICATED_GUARDS=GREEN"
+    "PHASE8A3_FUNCTIONS_EMULATOR_UNAUTHENTICATED_GUARDS=GREEN"
   );
 })().catch((error) => {
   console.error(error);

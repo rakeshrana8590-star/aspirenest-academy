@@ -13,6 +13,13 @@ const {
   buildPublicLeaderboardName,
   loadOwnedSubmittedMockResult,
   shouldReplaceMockTestLeaderboardEntry,
+  normalizeNotesAssetResolverRequest,
+  isNotesEntitlementActive,
+  notesEntitlementMatchesResource,
+  resolveNotesEntitlementEvidence,
+  pickNotesProtectedAssetUrl,
+  loadNotesEntitlements,
+  resolveNotesProtectedAsset,
 } = require("./index.js").__test;
 
 const SERVER_TIME_AUTH = {
@@ -438,5 +445,818 @@ test("fails closed when no owned submitted result matches", async () => {
     (error) =>
       error.code ===
       "failed-precondition"
+  );
+});
+
+const NOTES_AUTH = {
+  uid: "student-notes-1",
+  token: {
+    email: "notes@example.com",
+    name: "Notes Learner",
+  },
+};
+
+const NOTES_NOW = 1_800_000_000_000;
+
+const PUBLISHED_NOTE = Object.freeze({
+  id: "note-1",
+  section: "notes",
+  module: "notes",
+  itemType: "notesPdf",
+  planType: "PREMIUM",
+  accessRank: 2,
+  status: "Published",
+  hasProtectedAsset: true,
+});
+
+const PUBLISHED_ASSET = Object.freeze({
+  id: "note-1",
+  contentId: "note-1",
+  section: "notes",
+  status: "published",
+  urls: {
+    pdfUrl:
+      "https://assets.example.com/note-1.pdf",
+    downloadUrl:
+      "https://assets.example.com/note-1-download.pdf",
+  },
+});
+
+const buildNotesEntitlement = (
+  overrides = {}
+) => ({
+  id: "item-notes-note-1",
+  uid: NOTES_AUTH.uid,
+  email: NOTES_AUTH.token.email,
+  normalizedEmail:
+    NOTES_AUTH.token.email,
+  status: "active",
+  scopeType: "item",
+  module: "notes",
+  itemType: "notesPdf",
+  itemId: "note-1",
+  itemIds: [],
+  planType: "PREMIUM",
+  planCode: "PREMIUM",
+  accessRank: 2,
+  accessFrom: NOTES_NOW - 10_000,
+  accessUntil: NOTES_NOW + 10_000,
+  ...overrides,
+});
+
+const createDocumentSnapshot = (
+  id,
+  value
+) => ({
+  id,
+  exists: Boolean(value),
+  data: () => value || undefined,
+});
+
+const createNotesFirestore = ({
+  note = PUBLISHED_NOTE,
+  asset = PUBLISHED_ASSET,
+  entitlements = [
+    buildNotesEntitlement(),
+  ],
+  reads = [],
+} = {}) => ({
+  collection: (name) => {
+    reads.push(["collection", name]);
+
+    if (name === "contentItems") {
+      return {
+        doc: (id) => ({
+          get: async () => {
+            reads.push([
+              "document",
+              name,
+              id,
+            ]);
+            return createDocumentSnapshot(
+              id,
+              note
+            );
+          },
+        }),
+      };
+    }
+
+    if (name === "protectedContentAssets") {
+      return {
+        doc: (id) => ({
+          get: async () => {
+            reads.push([
+              "document",
+              name,
+              id,
+            ]);
+            return createDocumentSnapshot(
+              id,
+              asset
+            );
+          },
+        }),
+      };
+    }
+
+    if (name === "studentEntitlements") {
+      return {
+        doc: (uid) => ({
+          collection: (childName) => ({
+            get: async () => {
+              reads.push([
+                "subcollection",
+                name,
+                uid,
+                childName,
+              ]);
+              return {
+                docs: entitlements.map(
+                  (record, index) => ({
+                    id:
+                      record.id ||
+                      `entitlement-${index + 1}`,
+                    data: () => record,
+                  })
+                ),
+              };
+            },
+          }),
+        }),
+      };
+    }
+
+    throw new Error(
+      `Unexpected collection ${name}`
+    );
+  },
+});
+
+test("normalizes the minimal authenticated Notes asset request", () => {
+  const request =
+    normalizeNotesAssetResolverRequest({
+      auth: NOTES_AUTH,
+      data: {
+        noteId: " note-1 ",
+        action: " download ",
+        pdfUrl:
+          "https://forged.example/file.pdf",
+        planType: "MENTORSHIP",
+        entitlementId: "forged",
+      },
+    });
+
+  assert.deepEqual(request, {
+    uid: NOTES_AUTH.uid,
+    email: NOTES_AUTH.token.email,
+    tokenName: "Notes Learner",
+    noteId: "note-1",
+    action: "DOWNLOAD",
+  });
+  assert.equal(
+    Object.hasOwn(request, "pdfUrl"),
+    false
+  );
+  assert.equal(Object.isFrozen(request), true);
+});
+
+test("rejects unauthenticated, missing, and unsupported Notes asset requests", () => {
+  assert.throws(
+    () =>
+      normalizeNotesAssetResolverRequest({
+        data: {
+          noteId: "note-1",
+          action: "OPEN",
+        },
+      }),
+    (error) =>
+      error.code === "unauthenticated"
+  );
+
+  assert.throws(
+    () =>
+      normalizeNotesAssetResolverRequest({
+        auth: NOTES_AUTH,
+        data: {
+          noteId: "",
+          action: "OPEN",
+        },
+      }),
+    (error) =>
+      error.code === "invalid-argument"
+  );
+
+  assert.throws(
+    () =>
+      normalizeNotesAssetResolverRequest({
+        auth: NOTES_AUTH,
+        data: {
+          noteId: "note-1",
+          action: "DELETE",
+        },
+      }),
+    (error) =>
+      error.code === "invalid-argument"
+  );
+});
+
+test("accepts only active principal-bound entitlement windows", () => {
+  assert.equal(
+    isNotesEntitlementActive(
+      buildNotesEntitlement(),
+      {
+        uid: NOTES_AUTH.uid,
+        email: NOTES_AUTH.token.email,
+        nowMs: NOTES_NOW,
+      }
+    ),
+    true
+  );
+
+  assert.equal(
+    isNotesEntitlementActive(
+      buildNotesEntitlement({
+        status: "verified",
+        accessUntil: null,
+      }),
+      {
+        uid: NOTES_AUTH.uid,
+        email: NOTES_AUTH.token.email,
+        nowMs: NOTES_NOW,
+      }
+    ),
+    true
+  );
+});
+
+test("fails closed for blocked, future, expired, malformed, or cross-user entitlements", () => {
+  const options = {
+    uid: NOTES_AUTH.uid,
+    email: NOTES_AUTH.token.email,
+    nowMs: NOTES_NOW,
+  };
+
+  [
+    buildNotesEntitlement({
+      status: "blocked",
+    }),
+    buildNotesEntitlement({
+      accessFrom: NOTES_NOW + 1,
+    }),
+    buildNotesEntitlement({
+      accessUntil: NOTES_NOW - 1,
+    }),
+    buildNotesEntitlement({
+      accessUntil: "not-a-date",
+    }),
+    buildNotesEntitlement({
+      uid: "student-other",
+    }),
+    buildNotesEntitlement({
+      email: "other@example.com",
+      normalizedEmail:
+        "other@example.com",
+    }),
+  ].forEach((record) => {
+    assert.equal(
+      isNotesEntitlementActive(
+        record,
+        options
+      ),
+      false
+    );
+  });
+});
+
+test("matches only the exact Notes ITEM resource", () => {
+  assert.equal(
+    notesEntitlementMatchesResource({
+      record: buildNotesEntitlement(),
+      note: PUBLISHED_NOTE,
+      noteId: "note-1",
+    }),
+    true
+  );
+
+  assert.equal(
+    notesEntitlementMatchesResource({
+      record: buildNotesEntitlement({
+        itemId: "note-2",
+      }),
+      note: PUBLISHED_NOTE,
+      noteId: "note-1",
+    }),
+    false
+  );
+});
+
+test("matches BUNDLE access only when the bundle contains the note", () => {
+  const bundle = buildNotesEntitlement({
+    scopeType: "bundle",
+    itemId: "",
+    itemIds: ["note-1", "note-2"],
+    bundleId: "bundle-1",
+  });
+
+  assert.equal(
+    notesEntitlementMatchesResource({
+      record: bundle,
+      note: PUBLISHED_NOTE,
+      noteId: "note-1",
+    }),
+    true
+  );
+
+  assert.equal(
+    notesEntitlementMatchesResource({
+      record: {
+        ...bundle,
+        itemIds: ["note-2"],
+      },
+      note: PUBLISHED_NOTE,
+      noteId: "note-1",
+    }),
+    false
+  );
+});
+
+test("requires sufficient plan rank for MODULE and PLAN access", () => {
+  const moduleAccess =
+    buildNotesEntitlement({
+      scopeType: "module",
+      itemId: "",
+      accessRank: 2,
+    });
+  const planAccess =
+    buildNotesEntitlement({
+      scopeType: "plan",
+      module: "",
+      itemId: "",
+      accessRank: 3,
+    });
+
+  assert.equal(
+    notesEntitlementMatchesResource({
+      record: moduleAccess,
+      note: PUBLISHED_NOTE,
+      noteId: "note-1",
+    }),
+    true
+  );
+  assert.equal(
+    notesEntitlementMatchesResource({
+      record: planAccess,
+      note: PUBLISHED_NOTE,
+      noteId: "note-1",
+    }),
+    true
+  );
+
+  assert.equal(
+    notesEntitlementMatchesResource({
+      record: {
+        ...moduleAccess,
+        accessRank: 1,
+      },
+      note: PUBLISHED_NOTE,
+      noteId: "note-1",
+    }),
+    false
+  );
+  assert.equal(
+    notesEntitlementMatchesResource({
+      record: {
+        ...planAccess,
+        accessRank: 1,
+      },
+      note: PUBLISHED_NOTE,
+      noteId: "note-1",
+    }),
+    false
+  );
+});
+
+test("resolves FREE Notes without an entitlement", () => {
+  const evidence =
+    resolveNotesEntitlementEvidence({
+      note: {
+        ...PUBLISHED_NOTE,
+        planType: "FREE",
+        accessRank: 0,
+      },
+      noteId: "note-1",
+      entitlements: [],
+      uid: NOTES_AUTH.uid,
+      email: NOTES_AUTH.token.email,
+      nowMs: NOTES_NOW,
+    });
+
+  assert.deepEqual(evidence, {
+    allowed: true,
+    scopeType: "free",
+    entitlementId: null,
+  });
+});
+
+test("prioritizes ITEM over BUNDLE, MODULE, and PLAN evidence", () => {
+  const evidence =
+    resolveNotesEntitlementEvidence({
+      note: PUBLISHED_NOTE,
+      noteId: "note-1",
+      entitlements: [
+        buildNotesEntitlement({
+          id: "plan-premium",
+          scopeType: "plan",
+          module: "",
+          itemId: "",
+        }),
+        buildNotesEntitlement({
+          id: "module-notes",
+          scopeType: "module",
+          itemId: "",
+        }),
+        buildNotesEntitlement({
+          id: "bundle-notes",
+          scopeType: "bundle",
+          itemId: "",
+          itemIds: ["note-1"],
+        }),
+        buildNotesEntitlement({
+          id: "item-note-1",
+        }),
+      ],
+      uid: NOTES_AUTH.uid,
+      email: NOTES_AUTH.token.email,
+      nowMs: NOTES_NOW,
+    });
+
+  assert.equal(evidence.allowed, true);
+  assert.equal(evidence.scopeType, "item");
+  assert.equal(
+    evidence.entitlementId,
+    "item-note-1"
+  );
+});
+
+test("denies when no active entitlement matches the note", () => {
+  const evidence =
+    resolveNotesEntitlementEvidence({
+      note: PUBLISHED_NOTE,
+      noteId: "note-1",
+      entitlements: [
+        buildNotesEntitlement({
+          itemId: "note-2",
+        }),
+        buildNotesEntitlement({
+          status: "expired",
+        }),
+      ],
+      uid: NOTES_AUTH.uid,
+      email: NOTES_AUTH.token.email,
+      nowMs: NOTES_NOW,
+    });
+
+  assert.deepEqual(evidence, {
+    allowed: false,
+    scopeType: "",
+    entitlementId: null,
+  });
+});
+
+test("selects action-aware HTTPS URLs from the protected asset only", () => {
+  assert.equal(
+    pickNotesProtectedAssetUrl({
+      asset: PUBLISHED_ASSET,
+      action: "OPEN",
+    }),
+    PUBLISHED_ASSET.urls.pdfUrl
+  );
+  assert.equal(
+    pickNotesProtectedAssetUrl({
+      asset: PUBLISHED_ASSET,
+      action: "DOWNLOAD",
+    }),
+    PUBLISHED_ASSET.urls.downloadUrl
+  );
+  assert.equal(
+    pickNotesProtectedAssetUrl({
+      asset: {
+        pdfUrl:
+          "https://top-level.invalid/file.pdf",
+        urls: {
+          pdfUrl:
+            "http://insecure.invalid/file.pdf",
+        },
+      },
+      action: "OPEN",
+    }),
+    ""
+  );
+});
+
+test("loads entitlement projections only from the authenticated UID path", async () => {
+  const reads = [];
+  const firestore = createNotesFirestore({
+    reads,
+  });
+
+  const records = await loadNotesEntitlements({
+    firestore,
+    uid: NOTES_AUTH.uid,
+  });
+
+  assert.equal(records.length, 1);
+  assert.equal(
+    records[0].itemId,
+    "note-1"
+  );
+  assert.deepEqual(
+    reads.find(
+      (entry) =>
+        entry[0] === "subcollection"
+    ),
+    [
+      "subcollection",
+      "studentEntitlements",
+      NOTES_AUTH.uid,
+      "items",
+    ]
+  );
+});
+
+test("resolves an exact ITEM grant with a minimal server-authorized response", async () => {
+  const result =
+    await resolveNotesProtectedAsset({
+      auth: NOTES_AUTH,
+      data: {
+        noteId: "note-1",
+        action: "OPEN",
+        pdfUrl:
+          "https://forged.invalid/file.pdf",
+        uid: "forged-user",
+        planType: "MENTORSHIP",
+      },
+      firestore: createNotesFirestore(),
+      now: () => NOTES_NOW,
+      makeRequestId: () =>
+        "notes-request-1",
+    });
+
+  assert.deepEqual(result, {
+    authorized: true,
+    source: "server_authorized",
+    noteId: "note-1",
+    action: "OPEN",
+    assetUrl:
+      PUBLISHED_ASSET.urls.pdfUrl,
+    accessScope: "item",
+    serverNowMs: NOTES_NOW,
+    requestId: "notes-request-1",
+  });
+  assert.equal(
+    Object.hasOwn(result, "uid"),
+    false
+  );
+  assert.equal(
+    Object.hasOwn(result, "email"),
+    false
+  );
+  assert.equal(
+    Object.hasOwn(result, "entitlementId"),
+    false
+  );
+});
+
+test("resolves BUNDLE access for a contained Notes item", async () => {
+  const result =
+    await resolveNotesProtectedAsset({
+      auth: NOTES_AUTH,
+      data: {
+        noteId: "note-1",
+        action: "READ",
+      },
+      firestore: createNotesFirestore({
+        entitlements: [
+          buildNotesEntitlement({
+            scopeType: "bundle",
+            itemId: "",
+            itemIds: ["note-1"],
+            bundleId: "bundle-1",
+          }),
+        ],
+      }),
+      now: () => NOTES_NOW,
+      makeRequestId: () =>
+        "notes-request-2",
+    });
+
+  assert.equal(result.accessScope, "bundle");
+  assert.equal(result.action, "READ");
+});
+
+test("resolves sufficient MODULE and PLAN access", async () => {
+  for (const [scopeType, moduleName] of [
+    ["module", "notes"],
+    ["plan", ""],
+  ]) {
+    const result =
+      await resolveNotesProtectedAsset({
+        auth: NOTES_AUTH,
+        data: {
+          noteId: "note-1",
+          action: "DOWNLOAD",
+        },
+        firestore: createNotesFirestore({
+          entitlements: [
+            buildNotesEntitlement({
+              scopeType,
+              module: moduleName,
+              itemId: "",
+              accessRank: 3,
+            }),
+          ],
+        }),
+        now: () => NOTES_NOW,
+        makeRequestId: () =>
+          `notes-${scopeType}`,
+      });
+
+    assert.equal(
+      result.accessScope,
+      scopeType
+    );
+    assert.equal(
+      result.assetUrl,
+      PUBLISHED_ASSET.urls.downloadUrl
+    );
+  }
+});
+
+test("resolves authenticated FREE Notes without reading entitlements", async () => {
+  const reads = [];
+  const result =
+    await resolveNotesProtectedAsset({
+      auth: NOTES_AUTH,
+      data: {
+        noteId: "note-1",
+        action: "OPEN",
+      },
+      firestore: createNotesFirestore({
+        note: {
+          ...PUBLISHED_NOTE,
+          planType: "FREE",
+          accessRank: 0,
+        },
+        entitlements: [],
+        reads,
+      }),
+      now: () => NOTES_NOW,
+      makeRequestId: () =>
+        "notes-free",
+    });
+
+  assert.equal(result.accessScope, "free");
+  assert.equal(
+    reads.some(
+      (entry) =>
+        entry[0] === "subcollection"
+    ),
+    false
+  );
+});
+
+test("rejects missing, non-Notes, and unpublished catalog records", async () => {
+  for (const note of [
+    null,
+    {
+      ...PUBLISHED_NOTE,
+      section: "video",
+    },
+    {
+      ...PUBLISHED_NOTE,
+      status: "Draft",
+    },
+  ]) {
+    await assert.rejects(
+      () =>
+        resolveNotesProtectedAsset({
+          auth: NOTES_AUTH,
+          data: {
+            noteId: "note-1",
+            action: "OPEN",
+          },
+          firestore: createNotesFirestore({
+            note,
+          }),
+          now: () => NOTES_NOW,
+          makeRequestId: () =>
+            "notes-denied",
+        }),
+      (error) =>
+        [
+          "not-found",
+          "failed-precondition",
+        ].includes(error.code)
+    );
+  }
+});
+
+test("rejects missing, mismatched, and unpublished protected assets", async () => {
+  for (const asset of [
+    null,
+    {
+      ...PUBLISHED_ASSET,
+      contentId: "note-2",
+    },
+    {
+      ...PUBLISHED_ASSET,
+      status: "draft",
+    },
+  ]) {
+    await assert.rejects(
+      () =>
+        resolveNotesProtectedAsset({
+          auth: NOTES_AUTH,
+          data: {
+            noteId: "note-1",
+            action: "OPEN",
+          },
+          firestore: createNotesFirestore({
+            asset,
+          }),
+          now: () => NOTES_NOW,
+          makeRequestId: () =>
+            "notes-asset-denied",
+        }),
+      (error) =>
+        [
+          "not-found",
+          "failed-precondition",
+        ].includes(error.code)
+    );
+  }
+});
+
+test("rejects sibling, expired, and insufficient Notes access", async () => {
+  for (const entitlement of [
+    buildNotesEntitlement({
+      itemId: "note-2",
+    }),
+    buildNotesEntitlement({
+      accessUntil: NOTES_NOW - 1,
+    }),
+    buildNotesEntitlement({
+      scopeType: "plan",
+      module: "",
+      itemId: "",
+      accessRank: 1,
+    }),
+  ]) {
+    await assert.rejects(
+      () =>
+        resolveNotesProtectedAsset({
+          auth: NOTES_AUTH,
+          data: {
+            noteId: "note-1",
+            action: "OPEN",
+          },
+          firestore: createNotesFirestore({
+            entitlements: [entitlement],
+          }),
+          now: () => NOTES_NOW,
+          makeRequestId: () =>
+            "notes-access-denied",
+        }),
+      (error) =>
+        error.code === "permission-denied"
+    );
+  }
+});
+
+test("rejects protected assets without an approved HTTPS URL", async () => {
+  await assert.rejects(
+    () =>
+      resolveNotesProtectedAsset({
+        auth: NOTES_AUTH,
+        data: {
+          noteId: "note-1",
+          action: "OPEN",
+        },
+        firestore: createNotesFirestore({
+          asset: {
+            ...PUBLISHED_ASSET,
+            urls: {
+              pdfUrl:
+                "http://insecure.invalid/file.pdf",
+            },
+          },
+        }),
+        now: () => NOTES_NOW,
+        makeRequestId: () =>
+          "notes-url-denied",
+      }),
+    (error) =>
+      error.code === "failed-precondition"
   );
 });
