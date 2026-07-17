@@ -1,6 +1,11 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import { MOCK_TEST_ACTIONS } from "../../access/mockTestActionPolicy";
+import {
+  MOCK_TEST_RESULT_REVIEW_STATES,
+  buildMockTestResultReviewRuntime,
+} from "../../access/mockTestResultReviewRuntime";
 import {
   getAttemptAnswerStorageKey,
   getAttemptStorageKey,
@@ -21,166 +26,370 @@ const safeParseJson = (value, fallback = {}) => {
 const hasObjectData = (value) =>
   value && typeof value === "object" && Object.keys(value).length > 0;
 
+const getResultTimestamp = (value) => {
+  if (!value) return 0;
+
+  if (typeof value?.toMillis === "function") {
+    return value.toMillis();
+  }
+
+  if (typeof value?.toDate === "function") {
+    const date = value.toDate();
+    return Number.isNaN(date?.getTime?.()) ? 0 : date.getTime();
+  }
+
+  if (typeof value?.seconds === "number") {
+    return value.seconds * 1000;
+  }
+
+  const numeric = Number(value);
+  if (Number.isFinite(numeric) && numeric > 0) {
+    return numeric < 10_000_000_000 ? numeric * 1000 : numeric;
+  }
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+};
+
 export default function ExamReviewRoute({
   universalContent,
-  getMockTestAccessStatus,
   mockAttemptAnswers,
   mockAttemptState,
   user,
+  role = "",
+  isAdminUser = false,
+  accessProfile = {},
+  planCatalog = [],
+  mockResults = [],
+  mockResultsLoaded = false,
+  mockResultsLoadError = "",
+  loadUserMockResults,
 }) {
   const navigate = useNavigate();
   const { testId } = useParams();
-
   const activeResultAttemptId = decodeURIComponent(testId || "");
 
-  const test = universalContent.find(
+  const test = (Array.isArray(universalContent)
+    ? universalContent
+    : []
+  ).find(
     (item) =>
       item.section === "mockTest" &&
       item.id === activeResultAttemptId
   );
 
-  const accessStatus = getMockTestAccessStatus(test);
+  const hasLoadedMockTestCatalog = React.useMemo(
+    () =>
+      (Array.isArray(universalContent)
+        ? universalContent
+        : []
+      ).some((item) => item?.section === "mockTest"),
+    [universalContent]
+  );
+  const [catalogWaitExpired, setCatalogWaitExpired] =
+    React.useState(false);
+  const [resultRecoveryRetry, setResultRecoveryRetry] =
+    React.useState(0);
+  const loadUserMockResultsRef = React.useRef(
+    loadUserMockResults
+  );
 
-  if (accessStatus === "NOT_FOUND") {
-    return (
-      <section className="notesSubjectRoutePage">
-        <div className="pdfMiniCard">
-          <h3>Review not found</h3>
-          <p>This review is not available anymore.</p>
-          <button
-            className="btnLink"
-            onClick={() => navigate("/ctet-tet/mock-tests")}
-          >
-            Back to Mock Tests
+  React.useEffect(() => {
+    loadUserMockResultsRef.current = loadUserMockResults;
+  }, [loadUserMockResults]);
+
+  React.useEffect(() => {
+    setCatalogWaitExpired(false);
+
+    if (test || hasLoadedMockTestCatalog) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      setCatalogWaitExpired(true);
+    }, 8000);
+
+    return () => window.clearTimeout(timer);
+  }, [activeResultAttemptId, hasLoadedMockTestCatalog, test]);
+
+  const savedResultForTest = React.useMemo(() => {
+    const expectedTestId = String(test?.id || "");
+    const expectedUid = String(user?.uid || "").trim();
+    const expectedEmail = String(user?.email || "")
+      .trim()
+      .toLowerCase();
+
+    if (!expectedTestId || (!expectedUid && !expectedEmail)) {
+      return null;
+    }
+
+    return [...(Array.isArray(mockResults) ? mockResults : [])]
+      .filter((item) => {
+        const itemTestId = String(
+          item?.testId ||
+            item?.mockTestId ||
+            item?.testID ||
+            item?.contentId ||
+            ""
+        );
+        const itemUid = String(
+          item?.ownerUid ||
+            item?.uid ||
+            item?.userId ||
+            item?.studentId ||
+            ""
+        ).trim();
+        const itemEmail = String(
+          item?.ownerEmail ||
+            item?.email ||
+            item?.studentEmail ||
+            item?.userEmail ||
+            ""
+        )
+          .trim()
+          .toLowerCase();
+        const hasOwnerIdentity = Boolean(itemUid || itemEmail);
+        const uidMatches = itemUid
+          ? Boolean(expectedUid) && itemUid === expectedUid
+          : true;
+        const emailMatches = itemEmail
+          ? Boolean(expectedEmail) && itemEmail === expectedEmail
+          : true;
+
+        return (
+          itemTestId === expectedTestId &&
+          hasOwnerIdentity &&
+          uidMatches &&
+          emailMatches
+        );
+      })
+      .sort(
+        (first, second) =>
+          getResultTimestamp(
+            second?.attemptSubmittedAt ||
+              second?.endedAt ||
+              second?.updatedAt ||
+              second?.createdAt
+          ) -
+          getResultTimestamp(
+            first?.attemptSubmittedAt ||
+              first?.endedAt ||
+              first?.updatedAt ||
+              first?.createdAt
+          )
+      )[0] || null;
+  }, [mockResults, test?.id, user?.email, user?.uid]);
+
+  React.useEffect(() => {
+    const email = user?.email;
+    const activeTestId = test?.id;
+    const loader = loadUserMockResultsRef.current;
+
+    if (!email || !activeTestId || typeof loader !== "function") {
+      return undefined;
+    }
+
+    let isActive = true;
+
+    Promise.resolve(loader(email)).catch((error) => {
+      if (isActive) {
+        console.error("Review recovery request failed:", error);
+      }
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, [resultRecoveryRetry, test?.id, user?.email]);
+
+  const renderStateCard = ({
+    title,
+    message,
+    actionLabel,
+    onAction,
+  }) => (
+    <section className="notesSubjectRoutePage">
+      <div className="pdfMiniCard">
+        <h3>{title}</h3>
+        <p>{message}</p>
+        {actionLabel && typeof onAction === "function" ? (
+          <button className="btnLink" onClick={onAction}>
+            {actionLabel}
           </button>
-        </div>
-      </section>
-    );
+        ) : null}
+      </div>
+    </section>
+  );
+
+  const isCatalogPending =
+    !test && !hasLoadedMockTestCatalog && !catalogWaitExpired;
+
+  if (isCatalogPending) {
+    return renderStateCard({
+      title: "Preparing answer review",
+      message:
+        "Mock-test details and your owned result are being securely restored.",
+      actionLabel: "",
+      onAction: undefined,
+    });
   }
 
-  if (accessStatus === "UNPUBLISHED") {
-    return (
-      <section className="notesSubjectRoutePage">
-        <div className="pdfMiniCard">
-          <h3>Review unavailable</h3>
-          <p>This mock test is not published.</p>
-          <button
-            className="btnLink"
-            onClick={() => navigate("/ctet-tet/mock-tests")}
-          >
-            Back to Mock Tests
-          </button>
-        </div>
-      </section>
-    );
-  }
-
-  if (accessStatus === "LOGIN_REQUIRED") {
-    return (
-      <section className="notesSubjectRoutePage">
-        <div className="pdfMiniCard">
-          <h3>Login required</h3>
-          <p>Please login to view review.</p>
-          <button
-            className="btnLink"
-            onClick={() => navigate("/login")}
-          >
-            Login to Continue
-          </button>
-        </div>
-      </section>
-    );
-  }
-
-  if (
-    accessStatus === "PLAN_LOCKED" ||
-    accessStatus === "EXPIRED_MEMBERSHIP"
-  ) {
-    return (
-      <section className="notesSubjectRoutePage">
-        <div className="pdfMiniCard">
-          <h3>Plan required</h3>
-          <p>
-            This review needs {test.planType || "PREMIUM"} access.
-          </p>
-          <button
-            className="btnLink"
-            onClick={() => navigate("/ctet-tet/pricing")}
-          >
-            View Pricing
-          </button>
-        </div>
-      </section>
-    );
-  }
-
-  if (accessStatus === "UPCOMING") {
-    return (
-      <section className="notesSubjectRoutePage">
-        <div className="pdfMiniCard">
-          <h3>Test upcoming</h3>
-          <p>
-            This mock test is scheduled for a future date or time.
-          </p>
-          <button
-            className="btnLink"
-            onClick={() => navigate("/ctet-tet/mock-tests")}
-          >
-            Back to Mock Tests
-          </button>
-        </div>
-      </section>
-    );
-  }
-
-  if (accessStatus === "EXPIRED") {
-    return (
-      <section className="notesSubjectRoutePage">
-        <div className="pdfMiniCard">
-          <h3>Test expired</h3>
-          <p>This mock test window is closed.</p>
-          <button
-            className="btnLink"
-            onClick={() => navigate("/ctet-tet/mock-tests")}
-          >
-            Back to Mock Tests
-          </button>
-        </div>
-      </section>
-    );
+  if (!test) {
+    return renderStateCard({
+      title: "Review not found",
+      message: "This review is not available anymore.",
+      actionLabel: "Back to Mock Tests",
+      onAction: () => navigate("/ctet-tet/mock-tests"),
+    });
   }
 
   const liveAttemptState = mockAttemptState?.[test.id] || {};
-
   const storedAttemptState = safeParseJson(
     localStorage.getItem(getAttemptStorageKey(test.id, user))
   );
-
   const activeAttemptState = liveAttemptState?.isSubmitted
     ? liveAttemptState
     : storedAttemptState?.isSubmitted
     ? storedAttemptState
     : {};
+  const hasSubmittedAttempt =
+    activeAttemptState?.isSubmitted === true;
+  const resultEvidence = hasSubmittedAttempt
+    ? activeAttemptState
+    : savedResultForTest;
+  const reviewAuthorization =
+    buildMockTestResultReviewRuntime({
+      action: MOCK_TEST_ACTIONS.REVIEW,
+      test,
+      user,
+      role,
+      isAdminUser,
+      accessProfile,
+      planCatalog,
+      result: resultEvidence,
+      dataLoading: Boolean(
+        !hasSubmittedAttempt &&
+          user?.email &&
+          !mockResultsLoaded
+      ),
+      dataError:
+        !hasSubmittedAttempt &&
+        mockResultsLoaded &&
+        !savedResultForTest
+          ? mockResultsLoadError
+          : "",
+    });
 
-  if (!activeAttemptState?.isSubmitted) {
-    return (
-      <section className="notesSubjectRoutePage">
-        <div className="pdfMiniCard">
-          <h3>Review locked</h3>
-          <p>
-            Please submit the mock test before viewing solutions.
-          </p>
-          <button
-            className="btnLink"
-            onClick={() =>
-              navigate(`/ctet-tet/mock-tests/attempt/${test.id}`)
-            }
-          >
-            Continue Test
-          </button>
-        </div>
-      </section>
-    );
+  if (!reviewAuthorization.canExposeAnswers) {
+    if (
+      reviewAuthorization.state ===
+      MOCK_TEST_RESULT_REVIEW_STATES.UNPUBLISHED
+    ) {
+      return renderStateCard({
+        title: "Review unavailable",
+        message: "This mock test is not published right now.",
+        actionLabel: "Back to Mock Tests",
+        onAction: () => navigate("/ctet-tet/mock-tests"),
+      });
+    }
+
+    if (
+      reviewAuthorization.state ===
+      MOCK_TEST_RESULT_REVIEW_STATES.LOGIN_REQUIRED
+    ) {
+      return renderStateCard({
+        title: "Login required",
+        message: "Please login to view answer review.",
+        actionLabel: "Login to Continue",
+        onAction: () => navigate("/login"),
+      });
+    }
+
+    if (
+      reviewAuthorization.state ===
+      MOCK_TEST_RESULT_REVIEW_STATES.LOCKED
+    ) {
+      return renderStateCard({
+        title: "Review access required",
+        message:
+          "Your current access does not include this mock-test review.",
+        actionLabel: "View My Access",
+        onAction: () => navigate("/ctet-tet/my-access"),
+      });
+    }
+
+    if (
+      reviewAuthorization.state ===
+      MOCK_TEST_RESULT_REVIEW_STATES.LOADING
+    ) {
+      return renderStateCard({
+        title: "Preparing answer review",
+        message:
+          "Your owned submitted result is being securely restored.",
+        actionLabel: "",
+        onAction: undefined,
+      });
+    }
+
+    if (
+      reviewAuthorization.state ===
+      MOCK_TEST_RESULT_REVIEW_STATES.ERROR
+    ) {
+      return renderStateCard({
+        title: "Review could not be verified",
+        message:
+          reviewAuthorization.dataError ||
+          "Review authorization is temporarily unavailable. Correct answers remain protected.",
+        actionLabel: mockResultsLoadError
+          ? "Retry Review"
+          : "Back to Mock Tests",
+        onAction: mockResultsLoadError
+          ? () =>
+              setResultRecoveryRetry(
+                (current) => current + 1
+              )
+          : () => navigate("/ctet-tet/mock-tests"),
+      });
+    }
+
+    if (
+      reviewAuthorization.state ===
+      MOCK_TEST_RESULT_REVIEW_STATES.REVIEW_LOCKED
+    ) {
+      return renderStateCard({
+        title: "Answer review not released",
+        message:
+          "Your result is available, but correct answers and explanations have not been released for this test.",
+        actionLabel: "Back to Result",
+        onAction: () =>
+          navigate(`/ctet-tet/mock-tests/result/${test.id}`),
+      });
+    }
+
+    if (
+      [
+        MOCK_TEST_RESULT_REVIEW_STATES
+          .RESULT_OWNERSHIP_DENIED,
+        MOCK_TEST_RESULT_REVIEW_STATES.INVALID_RESULT,
+      ].includes(reviewAuthorization.state)
+    ) {
+      return renderStateCard({
+        title: "Review unavailable",
+        message:
+          "This submitted result does not belong to the current account or could not be validated.",
+        actionLabel: "Back to Mock Tests",
+        onAction: () => navigate("/ctet-tet/mock-tests"),
+      });
+    }
+
+    return renderStateCard({
+      title: "Review locked",
+      message:
+        "Please submit this mock test before viewing correct answers and explanations.",
+      actionLabel: "Continue Test",
+      onAction: () =>
+        navigate(`/ctet-tet/mock-tests/attempt/${test.id}`),
+    });
   }
 
   const storedLegacyAnswers = safeParseJson(
@@ -191,6 +400,7 @@ export default function ExamReviewRoute({
   const storedNewAnswers = storedAttemptState?.answers || {};
   const activeNewAnswers = activeAttemptState?.answers || {};
   const liveLegacyAnswers = mockAttemptAnswers?.[test.id] || {};
+  const recoveredAnswers = savedResultForTest?.answers || {};
 
   const attemptAnswers = hasObjectData(activeNewAnswers)
     ? activeNewAnswers
@@ -198,9 +408,22 @@ export default function ExamReviewRoute({
     ? liveNewAnswers
     : hasObjectData(storedNewAnswers)
     ? storedNewAnswers
+    : hasObjectData(recoveredAnswers)
+    ? recoveredAnswers
     : hasObjectData(liveLegacyAnswers)
     ? liveLegacyAnswers
     : storedLegacyAnswers;
+
+  if (!hasObjectData(attemptAnswers)) {
+    return renderStateCard({
+      title: "Answer review unavailable",
+      message:
+        "Your result is verified, but answer-level review data is not available for this attempt.",
+      actionLabel: "Back to Result",
+      onAction: () =>
+        navigate(`/ctet-tet/mock-tests/result/${test.id}`),
+    });
+  }
 
   const questions = test.questions || [];
 
@@ -209,6 +432,8 @@ export default function ExamReviewRoute({
       ? activeAttemptState.questionOrder
       : storedAttemptState?.questionOrder?.length
       ? storedAttemptState.questionOrder
+      : savedResultForTest?.questionOrder?.length
+      ? savedResultForTest.questionOrder
       : questions.map((_, index) => index);
 
   const reviewQuestions = questionOrder

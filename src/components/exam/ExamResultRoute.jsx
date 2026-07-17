@@ -10,6 +10,11 @@ import {
 } from "firebase/firestore";
 
 import { db } from "../../firebase";
+import { MOCK_TEST_ACTIONS } from "../../access/mockTestActionPolicy";
+import {
+  MOCK_TEST_RESULT_REVIEW_STATES,
+  buildMockTestResultReviewRuntime,
+} from "../../access/mockTestResultReviewRuntime";
 import {
   getAttemptAnswerStorageKey,
   getAttemptStorageKey,
@@ -215,7 +220,6 @@ const AutoSaveMockResult = ({
 
 export default function ExamResultRoute({
   universalContent,
-  getMockTestAccessStatus,
   mockAttemptState,
   user,
   fullName,
@@ -227,6 +231,10 @@ export default function ExamResultRoute({
   mockResults = [],
   mockResultsLoaded = false,
   mockResultsLoadError = "",
+  role = "",
+  isAdminUser = false,
+  accessProfile = {},
+  planCatalog = [],
 }) {
   const navigate = useNavigate();
   const { testId } = useParams();
@@ -242,7 +250,6 @@ export default function ExamResultRoute({
       item.id === activeResultAttemptId
   );
 
-  const accessStatus = getMockTestAccessStatus(test);
 
   /* === P0 mock-test catalog loading gate v2 === */
   const hasLoadedMockTestCatalog = React.useMemo(
@@ -295,11 +302,14 @@ export default function ExamResultRoute({
 
   const savedResultForTest = React.useMemo(() => {
     const expectedTestId = String(test?.id || "");
+    const expectedUid = String(user?.uid || "").trim();
     const expectedEmail = String(user?.email || "")
       .trim()
       .toLowerCase();
 
-    if (!expectedTestId || !expectedEmail) return null;
+    if (!expectedTestId || (!expectedUid && !expectedEmail)) {
+      return null;
+    }
 
     return [...(Array.isArray(mockResults) ? mockResults : [])]
       .filter((item) => {
@@ -311,18 +321,35 @@ export default function ExamResultRoute({
             ""
         );
 
+        const itemUid = String(
+          item?.ownerUid ||
+            item?.uid ||
+            item?.userId ||
+            item?.studentId ||
+            ""
+        ).trim();
         const itemEmail = String(
-          item?.email ||
+          item?.ownerEmail ||
+            item?.email ||
             item?.studentEmail ||
             item?.userEmail ||
             ""
         )
           .trim()
           .toLowerCase();
+        const hasOwnerIdentity = Boolean(itemUid || itemEmail);
+        const uidMatches = itemUid
+          ? Boolean(expectedUid) && itemUid === expectedUid
+          : true;
+        const emailMatches = itemEmail
+          ? Boolean(expectedEmail) && itemEmail === expectedEmail
+          : true;
 
         return (
           itemTestId === expectedTestId &&
-          itemEmail === expectedEmail
+          hasOwnerIdentity &&
+          uidMatches &&
+          emailMatches
         );
       })
       .sort(
@@ -340,7 +367,7 @@ export default function ExamResultRoute({
               first?.createdAt
           )
       )[0] || null;
-  }, [mockResults, test?.id, user?.email]);
+  }, [mockResults, test?.id, user?.email, user?.uid]);
 
   React.useEffect(() => {
     const email = user?.email;
@@ -399,7 +426,7 @@ export default function ExamResultRoute({
     });
   }
 
-  if (accessStatus === "NOT_FOUND") {
+  if (!test) {
     return renderStateCard({
       label: "Unavailable",
       title: "Result not found",
@@ -427,8 +454,31 @@ export default function ExamResultRoute({
 
   const useRecoveredSummary =
     !hasSubmittedAttempt && Boolean(savedResultForTest);
-  const hasViewableResult =
-    hasSubmittedAttempt || useRecoveredSummary;
+  const resultEvidence = hasSubmittedAttempt
+    ? activeAttemptState
+    : savedResultForTest;
+  const resultAuthorization =
+    buildMockTestResultReviewRuntime({
+      action: MOCK_TEST_ACTIONS.VIEW_RESULT,
+      test,
+      user,
+      role,
+      isAdminUser,
+      accessProfile,
+      planCatalog,
+      result: resultEvidence,
+      dataLoading: Boolean(
+        !hasSubmittedAttempt &&
+          user?.email &&
+          !mockResultsLoaded
+      ),
+      dataError:
+        !hasSubmittedAttempt &&
+        mockResultsLoaded &&
+        !savedResultForTest
+          ? mockResultsLoadError
+          : "",
+    });
   const attemptStartedAt =
     activeAttemptState?.startedAt ||
     activeAttemptState?.submittedAt ||
@@ -491,97 +541,105 @@ export default function ExamResultRoute({
     navigate(`/ctet-tet/mock-tests/attempt/${test.id}`);
   };
 
-  if (accessStatus === "UNPUBLISHED") {
-    return renderStateCard({
-      label: "Unpublished",
-      title: "Result unavailable",
-      message: "This mock test is not published right now.",
-      actionLabel: "Back to Mock Tests",
-      onAction: () => navigate("/ctet-tet/mock-tests"),
-    });
-  }
+  if (!resultAuthorization.canExposeResult) {
+    if (
+      resultAuthorization.state ===
+      MOCK_TEST_RESULT_REVIEW_STATES.UNPUBLISHED
+    ) {
+      return renderStateCard({
+        label: "Unpublished",
+        title: "Result unavailable",
+        message: "This mock test is not published right now.",
+        actionLabel: "Back to Mock Tests",
+        onAction: () => navigate("/ctet-tet/mock-tests"),
+      });
+    }
 
-  if (accessStatus === "LOGIN_REQUIRED") {
-    return renderStateCard({
-      label: "Login Required",
-      title: "Login required",
-      message: "Please login to view your result.",
-      actionLabel: "Login to Continue",
-      onAction: () => navigate("/login"),
-    });
-  }
+    if (
+      resultAuthorization.state ===
+      MOCK_TEST_RESULT_REVIEW_STATES.LOGIN_REQUIRED
+    ) {
+      return renderStateCard({
+        label: "Login Required",
+        title: "Login required",
+        message: "Please login to view your result.",
+        actionLabel: "Login to Continue",
+        onAction: () => navigate("/login"),
+      });
+    }
 
-  if (
-    accessStatus === "PLAN_LOCKED" ||
-    accessStatus === "EXPIRED_MEMBERSHIP"
-  ) {
-    return renderStateCard({
-      label: "Plan Required",
-      title: "Plan required",
-      message: `This result needs ${test.planType || "PREMIUM"} access.`,
-      actionLabel: "View Pricing",
-      onAction: () => navigate("/ctet-tet/pricing"),
-    });
-  }
+    if (
+      resultAuthorization.state ===
+      MOCK_TEST_RESULT_REVIEW_STATES.LOCKED
+    ) {
+      return renderStateCard({
+        label: "Access Required",
+        title: "Result access required",
+        message:
+          "Your current access does not include this mock-test result.",
+        actionLabel: "View My Access",
+        onAction: () => navigate("/ctet-tet/my-access"),
+      });
+    }
 
-  if (
-    !hasSubmittedAttempt &&
-    user?.email &&
-    !mockResultsLoaded
-  ) {
-    return renderStateCard({
-      label: "Preparing",
-      title: "Preparing your result",
-      message:
-        "Your submitted attempt is being securely restored. Please wait a moment.",
-      actionLabel: "",
-      onAction: undefined,
-    });
-  }
+    if (
+      resultAuthorization.state ===
+      MOCK_TEST_RESULT_REVIEW_STATES.LOADING
+    ) {
+      return renderStateCard({
+        label: "Preparing",
+        title: "Preparing your result",
+        message:
+          "Your owned submitted result is being securely restored. Please wait a moment.",
+        actionLabel: "",
+        onAction: undefined,
+      });
+    }
 
-  if (
-    !hasSubmittedAttempt &&
-    user?.email &&
-    mockResultsLoaded &&
-    mockResultsLoadError &&
-    !savedResultForTest
-  ) {
-    return renderStateCard({
-      label: "Recovery Needed",
-      title: "Result could not be loaded",
-      message: mockResultsLoadError,
-      actionLabel: "Retry Result",
-      onAction: () =>
-        setResultRecoveryRetry((current) => current + 1),
-    });
-  }
+    if (
+      resultAuthorization.state ===
+      MOCK_TEST_RESULT_REVIEW_STATES.ERROR
+    ) {
+      return renderStateCard({
+        label: "Recovery Needed",
+        title: "Result could not be verified",
+        message:
+          resultAuthorization.dataError ||
+          "Result authorization is temporarily unavailable. Protected result data remains closed.",
+        actionLabel: mockResultsLoadError
+          ? "Retry Result"
+          : "Back to Mock Tests",
+        onAction: mockResultsLoadError
+          ? () =>
+              setResultRecoveryRetry(
+                (current) => current + 1
+              )
+          : () => navigate("/ctet-tet/mock-tests"),
+      });
+    }
 
-  if (accessStatus === "UPCOMING" && !hasViewableResult) {
-    return renderStateCard({
-      label: "Upcoming",
-      title: "Test upcoming",
-      message: "This mock test is scheduled for a future date or time.",
-      actionLabel: "Back to Mock Tests",
-      onAction: () => navigate("/ctet-tet/mock-tests"),
-    });
-  }
+    if (
+      [
+        MOCK_TEST_RESULT_REVIEW_STATES
+          .RESULT_OWNERSHIP_DENIED,
+        MOCK_TEST_RESULT_REVIEW_STATES.INVALID_RESULT,
+      ].includes(resultAuthorization.state)
+    ) {
+      return renderStateCard({
+        label: "Protected",
+        title: "Result unavailable",
+        message:
+          "This submitted result does not belong to the current account or could not be validated.",
+        actionLabel: "Back to Mock Tests",
+        onAction: () => navigate("/ctet-tet/mock-tests"),
+      });
+    }
 
-  if (accessStatus === "EXPIRED" && !hasViewableResult) {
     return renderStateCard({
       label: "Locked",
       title: "Result locked",
       message:
-        "This mock test window is closed and no submitted attempt was found on this device.",
-      actionLabel: "Back to Mock Tests",
-      onAction: () => navigate("/ctet-tet/mock-tests"),
-    });
-  }
-
-  if (!hasViewableResult) {
-    return renderStateCard({
-      label: "Locked",
-      title: "Result locked",
-      message: "No submitted attempt was found for this test and account.",
+        "No owned submitted result was found for this test and account.",
       actionLabel: "Continue Test",
       onAction: () =>
         navigate(`/ctet-tet/mock-tests/attempt/${test.id}`),
@@ -792,8 +850,11 @@ export default function ExamResultRoute({
   const leaderboardEnabled =
     test.leaderboardMode && test.leaderboardMode !== "disabled";
 
-  const isAdminUser = Boolean(isAdmin?.(user));
-  const canShowLeaderboardButton = leaderboardEnabled || isAdminUser;
+  const resolvedIsAdminUser = Boolean(
+    isAdminUser || isAdmin?.(user)
+  );
+  const canShowLeaderboardButton =
+    leaderboardEnabled || resolvedIsAdminUser;
 
   const startedAt = getResultTimestamp(
     activeAttemptState.startedAt ||

@@ -8915,6 +8915,10 @@ handleSaveUniversalContent={handleSaveUniversalContent}
       mockResults={mockResults}
       mockResultsLoaded={mockResultsLoaded}
       mockResultsLoadError={mockResultsLoadError}
+      role={user?.role || ""}
+      isAdminUser={adaptiveShellRuntimeContext.isAdminUser}
+      accessProfile={accessProfile}
+      planCatalog={accessProfile?.planCatalog || []}
     />
   }
 />
@@ -8927,7 +8931,15 @@ handleSaveUniversalContent={handleSaveUniversalContent}
       universalContent={universalContent}
       getMockTestAccessStatus={getMockTestAccessStatus}
       user={user}
+      role={user?.role || ""}
+      isAdminUser={adaptiveShellRuntimeContext.isAdminUser}
+      accessProfile={accessProfile}
+      planCatalog={accessProfile?.planCatalog || []}
       mockAttemptState={mockAttemptState}
+      mockResults={mockResults}
+      mockResultsLoaded={mockResultsLoaded}
+      mockResultsLoadError={mockResultsLoadError}
+      loadUserMockResults={loadUserMockResults}
     />
   }
 />
