@@ -3,6 +3,10 @@ import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import {
+  connectFunctionsEmulator,
+  getFunctions,
+} from "firebase/functions";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCmNoqrNkHnVn-WlJYvL6HXJvFtMQ6UNRA",
@@ -23,5 +27,19 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 export const storage = getStorage(app);
+
+export const functions = getFunctions(app, "asia-south1");
+
+const shouldUseFirebaseEmulators =
+  process.env.NODE_ENV !== "production" &&
+  process.env.REACT_APP_USE_FIREBASE_EMULATORS === "true";
+
+if (shouldUseFirebaseEmulators) {
+  connectFunctionsEmulator(
+    functions,
+    "127.0.0.1",
+    5001
+  );
+}
 
 export default app;
