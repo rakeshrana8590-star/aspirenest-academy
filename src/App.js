@@ -496,6 +496,28 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
   const [submitConfirmTestId, setSubmitConfirmTestId] =
   useState(null);
   const [examFontScale, setExamFontScale] = useState(1);
+  const [
+    mockAttemptRuntimeActivation,
+    setMockAttemptRuntimeActivation,
+  ] = useState({
+    testId: "",
+    canActivateTimer: false,
+    canActivateSecurity: false,
+  });
+
+  const activeAttemptRuntimeTestId =
+    location.pathname.includes(
+      "/ctet-tet/mock-tests/attempt/"
+    )
+      ? decodeURIComponent(
+          location.pathname.split("/")[4] || ""
+        )
+      : "";
+
+  const isCurrentAttemptRuntimeAuthorized =
+    Boolean(activeAttemptRuntimeTestId) &&
+    mockAttemptRuntimeActivation.testId ===
+      activeAttemptRuntimeTestId;
 
 
     const {
@@ -511,14 +533,22 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
     } = useExamAttemptState(universalContent);
 
     useExamTimer({
-      locationPathname: location.pathname,
+      locationPathname:
+        isCurrentAttemptRuntimeAuthorized &&
+        mockAttemptRuntimeActivation.canActivateTimer
+          ? location.pathname
+          : "",
       universalContent,
       setMockAttemptState,
       navigate,
     });
 
     useExamSecurity({
-      locationPathname: location.pathname,
+      locationPathname:
+        isCurrentAttemptRuntimeAuthorized &&
+        mockAttemptRuntimeActivation.canActivateSecurity
+          ? location.pathname
+          : "",
       universalContent,
       mockAttemptState,
       updateAttemptState,
@@ -8827,6 +8857,10 @@ handleSaveUniversalContent={handleSaveUniversalContent}
       setExamFontScale={setExamFontScale}
       fullName={fullName}
       user={user}
+      isAdminUser={adaptiveShellRuntimeContext.isAdminUser}
+      accessProfile={accessProfile}
+      planCatalog={accessProfile?.planCatalog || []}
+      onRuntimeGateChange={setMockAttemptRuntimeActivation}
       goToAttemptQuestion={goToAttemptQuestion}
       selectAttemptAnswer={selectAttemptAnswer}
       clearAttemptResponse={clearAttemptResponse}

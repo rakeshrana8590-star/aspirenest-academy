@@ -17,8 +17,15 @@ import {
   createDefaultAttemptState,
   saveAttemptState,
 } from "./examAttemptStorage.js";
+import {
+  MOCK_TEST_ATTEMPT_GATE_STATES,
+} from "../../access/mockTestAttemptRuntimeGate";
+import {
+  MOCK_TEST_ATTEMPT_ENTRY_STATES,
+  useMockTestAttemptEntryRuntime,
+} from "../../access/useMockTestAttemptEntryRuntime";
 
-export default function ExamAttemptRoute({
+function ExamAttemptRuntime({
   universalContent,
   getMockTestAccessStatus,
   getMockTestRules,
@@ -32,6 +39,7 @@ export default function ExamAttemptRoute({
   setExamFontScale,
   fullName,
   user,
+  runtimeGate,
   goToAttemptQuestion,
   selectAttemptAnswer,
   clearAttemptResponse,
@@ -50,7 +58,10 @@ export default function ExamAttemptRoute({
       item.id === activeStartMockTestId
   );
 
-  const accessStatus = getMockTestAccessStatus(test);
+  const accessStatus =
+    runtimeGate?.canActivateAttemptRuntime === true
+      ? "AVAILABLE"
+      : getMockTestAccessStatus(test);
 
   const questions = test?.questions || [];
   const mockRules = getMockTestRules(test);
@@ -741,6 +752,288 @@ export default function ExamAttemptRoute({
             }}
             onOpenStatus={jumpToFirstFilteredQuestion}
           />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const getAttemptEntryStateCopy = ({
+  state = "",
+  gate = null,
+  message = "",
+} = {}) => {
+  if (
+    state ===
+    MOCK_TEST_ATTEMPT_ENTRY_STATES.LOADING
+  ) {
+    return {
+      label: "Secure Check",
+      title: "Verifying attempt access",
+      message:
+        message ||
+        "Your entitlement and active test window are being verified before the exam engine starts.",
+      actionLabel: "Back to Mock Tests",
+      recoveryRoute:
+        "/ctet-tet/mock-tests",
+      canRetry: false,
+    };
+  }
+
+  if (
+    state ===
+    MOCK_TEST_ATTEMPT_ENTRY_STATES.ERROR
+  ) {
+    return {
+      label: "Verification Error",
+      title: "Attempt access unavailable",
+      message:
+        message ||
+        "Trusted attempt access could not be verified. The test remains closed.",
+      actionLabel: "Back to Mock Tests",
+      recoveryRoute:
+        gate?.recoveryRoute ||
+        "/ctet-tet/mock-tests",
+      canRetry: true,
+    };
+  }
+
+  switch (gate?.state) {
+    case MOCK_TEST_ATTEMPT_GATE_STATES.NOT_FOUND:
+      return {
+        label: "Not Found",
+        title: "Test not found",
+        message:
+          "This mock test is not available anymore.",
+        actionLabel: "Back to Mock Tests",
+        recoveryRoute:
+          "/ctet-tet/mock-tests",
+        canRetry: false,
+      };
+
+    case MOCK_TEST_ATTEMPT_GATE_STATES.UNPUBLISHED:
+      return {
+        label: "Unavailable",
+        title: "Test unavailable",
+        message:
+          "This mock test is not published yet.",
+        actionLabel: "Back to Mock Tests",
+        recoveryRoute:
+          "/ctet-tet/mock-tests",
+        canRetry: false,
+      };
+
+    case MOCK_TEST_ATTEMPT_GATE_STATES.LOGIN_REQUIRED:
+      return {
+        label: "Login Required",
+        title: "Login required",
+        message:
+          "Please login before attempting this mock test.",
+        actionLabel: "Login to Continue",
+        recoveryRoute: "/login",
+        canRetry: false,
+      };
+
+    case MOCK_TEST_ATTEMPT_GATE_STATES.LOCKED:
+      return {
+        label: "Plan Locked",
+        title: "Mock-test access required",
+        message:
+          "This test is not included in your current valid access.",
+        actionLabel: "View Pricing",
+        recoveryRoute:
+          gate?.recoveryRoute ||
+          "/ctet-tet/pricing",
+        canRetry: false,
+      };
+
+    case MOCK_TEST_ATTEMPT_GATE_STATES.BLOCKED:
+      return {
+        label: "Access Blocked",
+        title: "Account access needs attention",
+        message:
+          "Review My Access before opening protected mock tests.",
+        actionLabel: "Review My Access",
+        recoveryRoute:
+          gate?.recoveryRoute ||
+          "/my-access",
+        canRetry: false,
+      };
+
+    case MOCK_TEST_ATTEMPT_GATE_STATES.UPCOMING:
+      return {
+        label: "Upcoming",
+        title: "Test upcoming",
+        message:
+          "This mock test is scheduled for a future date or time.",
+        actionLabel: "Back to Mock Tests",
+        recoveryRoute:
+          "/ctet-tet/mock-tests",
+        canRetry: false,
+      };
+
+    case MOCK_TEST_ATTEMPT_GATE_STATES.CLOSED:
+      return {
+        label: "Closed",
+        title: "Test window closed",
+        message:
+          "This mock test window is closed.",
+        actionLabel: "Back to Mock Tests",
+        recoveryRoute:
+          "/ctet-tet/mock-tests",
+        canRetry: false,
+      };
+
+    case MOCK_TEST_ATTEMPT_GATE_STATES.INVALID_SCHEDULE:
+      return {
+        label: "Schedule Error",
+        title: "Test schedule unavailable",
+        message:
+          "The test schedule is invalid, so this attempt remains closed.",
+        actionLabel: "Back to Mock Tests",
+        recoveryRoute:
+          "/ctet-tet/mock-tests",
+        canRetry: false,
+      };
+
+    default:
+      return {
+        label: "Access Denied",
+        title: "Attempt unavailable",
+        message:
+          "This mock-test attempt could not be authorized.",
+        actionLabel: "Back to Mock Tests",
+        recoveryRoute:
+          gate?.recoveryRoute ||
+          "/ctet-tet/mock-tests",
+        canRetry: false,
+      };
+  }
+};
+
+export default function ExamAttemptRoute({
+  universalContent = [],
+  user = null,
+  role = "",
+  isAdminUser = false,
+  accessProfile = {},
+  planCatalog = [],
+  onRuntimeGateChange = null,
+  ...runtimeProps
+}) {
+  const navigate = useNavigate();
+  const { testId } = useParams();
+
+  const activeAttemptTestId =
+    decodeURIComponent(testId || "");
+
+  const test = universalContent.find(
+    (item) =>
+      item.section === "mockTest" &&
+      item.id === activeAttemptTestId
+  );
+
+  const entryRuntime =
+    useMockTestAttemptEntryRuntime({
+      test,
+      user,
+      role,
+      isAdminUser,
+      accessProfile,
+      planCatalog,
+    });
+
+  React.useEffect(() => {
+    if (
+      typeof onRuntimeGateChange !==
+      "function"
+    ) {
+      return undefined;
+    }
+
+    onRuntimeGateChange({
+      testId: entryRuntime.testId,
+      canActivateTimer:
+        entryRuntime.canActivateTimer ===
+        true,
+      canActivateSecurity:
+        entryRuntime.canActivateSecurity ===
+        true,
+    });
+
+    return () => {
+      onRuntimeGateChange({
+        testId: entryRuntime.testId,
+        canActivateTimer: false,
+        canActivateSecurity: false,
+      });
+    };
+  }, [
+    onRuntimeGateChange,
+    entryRuntime.testId,
+    entryRuntime.canActivateTimer,
+    entryRuntime.canActivateSecurity,
+  ]);
+
+  if (
+    entryRuntime.state ===
+      MOCK_TEST_ATTEMPT_ENTRY_STATES.READY &&
+    entryRuntime.canActivateAttemptRuntime
+  ) {
+    return (
+      <ExamAttemptRuntime
+        {...runtimeProps}
+        universalContent={universalContent}
+        user={user}
+        runtimeGate={entryRuntime.gate}
+      />
+    );
+  }
+
+  const stateCopy =
+    getAttemptEntryStateCopy({
+      state: entryRuntime.state,
+      gate: entryRuntime.gate,
+      message: entryRuntime.message,
+    });
+
+  return (
+    <section
+      className="premiumExamPage"
+      data-attempt-entry-state={
+        entryRuntime.state
+      }
+      data-attempt-gate-state={
+        entryRuntime.gate?.state || ""
+      }
+    >
+      <div className="pdfMiniCard">
+        <span>{stateCopy.label}</span>
+        <h3>{stateCopy.title}</h3>
+        <p>{stateCopy.message}</p>
+
+        <div>
+          {stateCopy.canRetry && (
+            <button
+              type="button"
+              className="btnLink"
+              onClick={entryRuntime.retry}
+            >
+              Try Again
+            </button>
+          )}
+
+          <button
+            type="button"
+            className="btnLink"
+            onClick={() =>
+              navigate(
+                stateCopy.recoveryRoute
+              )
+            }
+          >
+            {stateCopy.actionLabel}
+          </button>
         </div>
       </div>
     </section>
