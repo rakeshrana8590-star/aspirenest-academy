@@ -503,6 +503,7 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
     testId: "",
     canActivateTimer: false,
     canActivateSecurity: false,
+    trustedTimeEvidence: null,
   });
 
   const activeAttemptRuntimeTestId =
@@ -540,7 +541,7 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
       updateAttemptTimeLeft,
     } = useExamAttemptState(universalContent);
 
-    useExamTimer({
+    const mockTestTimerRuntime = useExamTimer({
       locationPathname:
         isCurrentAttemptRuntimeAuthorized &&
         mockAttemptRuntimeActivation.canActivateTimer
@@ -611,6 +612,10 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
     accessProfile,
     planCatalog:
       accessProfile?.planCatalog || [],
+    trustedTimeEvidence:
+      isCurrentAttemptRuntimeAuthorized
+        ? mockAttemptRuntimeActivation.trustedTimeEvidence
+        : null,
   };
 
   const activeAccessPlan = accessProfile?.activePlan || "FREE";
@@ -8882,6 +8887,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
       accessProfile={accessProfile}
       planCatalog={accessProfile?.planCatalog || []}
       onRuntimeGateChange={setMockAttemptRuntimeActivation}
+      timerRuntime={mockTestTimerRuntime}
       goToAttemptQuestion={goToAttemptQuestion}
       selectAttemptAnswer={selectAttemptAnswer}
       clearAttemptResponse={clearAttemptResponse}

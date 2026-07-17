@@ -1184,6 +1184,7 @@ export default function ExamAttemptRoute({
   accessProfile = {},
   planCatalog = [],
   onRuntimeGateChange = null,
+  timerRuntime = null,
   ...runtimeProps
 }) {
   const navigate = useNavigate();
@@ -1224,6 +1225,8 @@ export default function ExamAttemptRoute({
       canActivateSecurity:
         entryRuntime.canActivateSecurity ===
         true,
+      trustedTimeEvidence:
+        entryRuntime.providerResult?.evidence || null,
     });
 
     return () => {
@@ -1231,6 +1234,7 @@ export default function ExamAttemptRoute({
         testId: entryRuntime.testId,
         canActivateTimer: false,
         canActivateSecurity: false,
+        trustedTimeEvidence: null,
       });
     };
   }, [
@@ -1238,13 +1242,20 @@ export default function ExamAttemptRoute({
     entryRuntime.testId,
     entryRuntime.canActivateTimer,
     entryRuntime.canActivateSecurity,
+    entryRuntime.providerResult?.evidence,
   ]);
 
-  if (
+  const isEntryRuntimeReady =
     entryRuntime.state ===
       MOCK_TEST_ATTEMPT_ENTRY_STATES.READY &&
-    entryRuntime.canActivateAttemptRuntime
-  ) {
+    entryRuntime.canActivateAttemptRuntime;
+  const isTimerRuntimeForCurrentTest =
+    timerRuntime?.testId === activeAttemptTestId;
+  const isTimerRuntimeReady =
+    isTimerRuntimeForCurrentTest &&
+    timerRuntime?.canRenderAttempt === true;
+
+  if (isEntryRuntimeReady && isTimerRuntimeReady) {
     return (
       <ExamAttemptRuntime
         {...runtimeProps}
@@ -1256,6 +1267,65 @@ export default function ExamAttemptRoute({
         planCatalog={planCatalog}
         runtimeGate={entryRuntime.gate}
       />
+    );
+  }
+
+  if (isEntryRuntimeReady) {
+    const isTimerError =
+      isTimerRuntimeForCurrentTest &&
+      timerRuntime?.state === "error";
+
+    return (
+      <section
+        className="premiumExamPage"
+        data-attempt-timer-state={
+          isTimerRuntimeForCurrentTest
+            ? timerRuntime?.state || "loading"
+            : "loading"
+        }
+      >
+        <div className="pdfMiniCard">
+          <span>
+            {isTimerError
+              ? "Timer Verification Error"
+              : "Secure Timer Check"}
+          </span>
+          <h3>
+            {isTimerError
+              ? "Exam timer unavailable"
+              : "Reconciling exam timer"}
+          </h3>
+          <p>
+            {isTimerError
+              ? timerRuntime?.message ||
+                "Trusted timer verification failed, so the attempt remains closed."
+              : "Your saved remaining time is being reconciled with trusted server time before questions open."}
+          </p>
+
+          <div>
+            {isTimerError &&
+              typeof timerRuntime?.retry === "function" && (
+                <button
+                  type="button"
+                  className="btnLink"
+                  onClick={timerRuntime.retry}
+                >
+                  Retry Timer Verification
+                </button>
+              )}
+
+            <button
+              type="button"
+              className="btnLink"
+              onClick={() =>
+                navigate("/ctet-tet/mock-tests")
+              }
+            >
+              Back to Mock Tests
+            </button>
+          </div>
+        </div>
+      </section>
     );
   }
 

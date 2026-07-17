@@ -27,6 +27,9 @@ describe(
         expect(source).toContain(
           "onRuntimeGateChange={setMockAttemptRuntimeActivation}"
         );
+        expect(source).toContain(
+          "timerRuntime={mockTestTimerRuntime}"
+        );
       }
     );
 
@@ -69,6 +72,12 @@ describe(
         expect(source).toContain(
           "data-attempt-entry-state"
         );
+        expect(source).toContain(
+          "data-attempt-timer-state"
+        );
+        expect(source).toContain(
+          "timerRuntime?.canRenderAttempt === true"
+        );
       }
     );
 
@@ -89,7 +98,7 @@ describe(
           "createMockTestSubmitAuthorizer"
         );
         expect(timerSource).toContain(
-          "const timer = setInterval"
+          "setInterval(tick, 250)"
         );
         expect(timerSource).toContain(
           "mock_test_submit"
