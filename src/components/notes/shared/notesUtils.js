@@ -82,7 +82,10 @@ export const NOTES_PLAN_ORDER = [
   }
   
   export function hasNotePdf(note = {}) {
-    return Boolean(String(getNotePdfUrl(note) || "").trim());
+    return (
+      note.hasProtectedAsset === true ||
+      Boolean(String(getNotePdfUrl(note) || "").trim())
+    );
   }
   
   export function getNoteSubject(note = {}) {

@@ -29,6 +29,10 @@ import {
 } from "./access/accessPaymentGrantContract";
 import {
   getProtectedContentUrl, readProtectedContentAsset, saveProtectedContentAsset, } from "./protectedContentAssetsService";
+import {
+  buildPublicNotesMetadata,
+  sanitizeContentItemsForClient,
+} from "./access/notesPublicMetadata";
 import { upsertLearnerLoginSnapshot } from "./profile/learnerProfileService";
 
 import {
@@ -2199,8 +2203,6 @@ const [paymentHistory, setPaymentHistory] = useState([]);
     const accessType = isKnownPlan ? normalizedAccessType : "PREMIUM";
     const accessLabel = isKnownPlan ? accessType : normalizedAccessType;
 
-    let notePdfUrl = note.pdfUrl || note.fileUrl || note.pdf || "";
-
     const canOpenNote = hasPlanAccess(accessType, {
       module: "notes",
       itemType: "notesPdf",
@@ -2223,26 +2225,33 @@ const [paymentHistory, setPaymentHistory] = useState([]);
       return;
     }
 
-    if (note.id) {
-        try {
-          const protectedAsset = await readProtectedContentAsset(note.id);
-          const protectedPdfUrl = getProtectedContentUrl(protectedAsset, [
-            "pdfUrl",
-            "fileUrl",
-            "sourceUrl",
-            "downloadUrl",
-            "assetUrl",
-          ]);
+    const noteId = String(note.id || "").trim();
 
-          if (protectedPdfUrl) {
-            notePdfUrl = protectedPdfUrl;
-          }
-        } catch (error) {
-          console.warn("Protected notes PDF not available, using legacy URL fallback:", error);
-        }
-      }
+    if (!noteId) {
+      alert("Protected Notes asset is unavailable.");
+      return;
+    }
 
+    let notePdfUrl = "";
 
+    try {
+      const protectedAsset = await readProtectedContentAsset(noteId);
+
+      notePdfUrl = getProtectedContentUrl(protectedAsset, [
+        "pdfUrl",
+        "fileUrl",
+        "sourceUrl",
+        "downloadUrl",
+        "assetUrl",
+      ]);
+    } catch (error) {
+      console.warn(
+        "Protected Notes PDF authorization failed:",
+        error
+      );
+      alert("Protected Notes access is currently unavailable.");
+      return;
+    }
 
     if (!notePdfUrl || notePdfUrl === "#") {
       alert("PDF will be uploaded soon.");
@@ -3304,10 +3313,22 @@ subjectName:
       await loadNotesChaptersFromFirestore();
     }
 
+    const existingNotesItem = editingNotesCmsId
+      ? universalContent.find(
+          (item) => item.id === editingNotesCmsId
+        )
+      : null;
+    const hasNewProtectedPdf = Boolean(
+      notesCmsPdfUrl.trim()
+    );
+
     const notesPayload = {
       title: notesCmsTitle,
       description: notesCmsDescription,
       planType: notesCmsPlanType,
+      scopeType: "ITEM",
+      module: "notes",
+      itemType: "notesPdf",
       subject: normalizedNotesSubject,
       chapter: notesCmsChapter,
       month: notesCmsMonth,
@@ -3317,17 +3338,22 @@ subjectName:
       thumbnailUrl: notesCmsThumbnailUrl,
       status: notesCmsStatus,
       section: "notes",
+      hasProtectedAsset:
+        hasNewProtectedPdf ||
+        existingNotesItem?.hasProtectedAsset === true,
       updatedAt: new Date().toISOString(),
     };
+    const publicNotesPayload =
+      buildPublicNotesMetadata(notesPayload);
 
     try {
       if (editingNotesCmsId) {
         await updateDoc(
           doc(db, "contentItems", editingNotesCmsId),
-          notesPayload
+          publicNotesPayload
         );
 
-          if (notesCmsPdfUrl.trim()) {
+          if (hasNewProtectedPdf) {
             await saveProtectedContentAsset(
               editingNotesCmsId,
               {
@@ -3344,11 +3370,13 @@ subjectName:
         alert("Notes updated successfully.");
       } else {
         const notesRef = await addDoc(collection(db, "contentItems"), {
-            ...notesPayload,
-            createdAt: new Date().toISOString(),
+            ...buildPublicNotesMetadata({
+              ...notesPayload,
+              createdAt: new Date().toISOString(),
+            }),
           });
 
-          if (notesCmsPdfUrl.trim()) {
+          if (hasNewProtectedPdf) {
             await saveProtectedContentAsset(
               notesRef.id,
               {
@@ -3495,10 +3523,13 @@ subjectName:
         collection(db, "contentItems")
       );
 
-      const loadedItems = snapshot.docs.map((docItem) => ({
-        id: docItem.id,
-        ...docItem.data(),
-      }));
+      const loadedItems =
+        sanitizeContentItemsForClient(
+          snapshot.docs.map((docItem) => ({
+            id: docItem.id,
+            ...docItem.data(),
+          }))
+        );
 
       setUniversalContent(loadedItems);
 
@@ -6533,7 +6564,7 @@ xpActivityEvents={ctetMockXpEvents}
         notesPlanFilter={notesPlanFilter}
         setNotesPlanFilter={setNotesPlanFilter}
         onBackfillProtectedNotesAssets={handleBackfillProtectedNotesAssets}
-        onEditNote={(item) => {
+        onEditNote={async (item) => {
           setEditingNotesCmsId(item.id);
           setNotesCmsTitle(item.title || "");
           setNotesCmsDescription(item.description || "");
@@ -6543,15 +6574,31 @@ xpActivityEvents={ctetMockXpEvents}
           setNotesCmsMonth(item.month || "");
           setNotesCmsYear(item.year || "");
           setNotesCmsWeek(item.week || "");
-          setNotesCmsPdfUrl(
-            item.pdfUrl ||
-              item.fileUrl ||
-              item.pdf ||
-              item.url ||
-              ""
-          );
+          setNotesCmsPdfUrl("");
           setNotesCmsThumbnailUrl(item.thumbnailUrl || "");
           setNotesCmsStatus(item.status || "Draft");
+
+          if (item.id && item.hasProtectedAsset === true) {
+            try {
+              const protectedAsset =
+                await readProtectedContentAsset(item.id);
+              const protectedPdfUrl =
+                getProtectedContentUrl(protectedAsset, [
+                  "pdfUrl",
+                  "fileUrl",
+                  "sourceUrl",
+                  "downloadUrl",
+                  "assetUrl",
+                ]);
+
+              setNotesCmsPdfUrl(protectedPdfUrl);
+            } catch (error) {
+              console.warn(
+                "Admin Notes protected asset could not be loaded:",
+                error
+              );
+            }
+          }
 
           navigate("/admin/content/notes/form");
         }}

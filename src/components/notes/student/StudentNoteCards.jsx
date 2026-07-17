@@ -7,8 +7,8 @@ import {
   buildNotesSubjectList,
   canAccessNotePlan,
   getNoteChapter,
-  getNotePdfUrl,
   getNotePlan,
+  hasNotePdf,
   getNoteSubject,
   getNotesPdfCount,
 } from "../shared/notesUtils";
@@ -113,7 +113,7 @@ export function StudentNotePdfCard({
   hasPlanAccess,
 }) {
   const planName = getNotePlan(note);
-  const pdfUrl = getNotePdfUrl(note);
+  const hasProtectedAsset = hasNotePdf(note);
 
   const canOpen = canAccessNotePlan({
     planName,
@@ -128,20 +128,12 @@ export function StudentNotePdfCard({
   const openNote = () => {
     const safeNote = {
       ...note,
-      pdf: pdfUrl,
-      pdfUrl,
-      fileUrl: pdfUrl,
       planType: planName,
       accessPlan: planName,
     };
 
     if (typeof handleNoteAccess === "function") {
       handleNoteAccess(safeNote);
-      return;
-    }
-
-    if (canOpen && pdfUrl) {
-      window.open(pdfUrl, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -172,7 +164,9 @@ export function StudentNotePdfCard({
 
         <div>
           <span>Source</span>
-          <strong>{pdfUrl ? "PDF Ready" : "Pending"}</strong>
+          <strong>
+            {hasProtectedAsset ? "PDF Ready" : "Pending"}
+          </strong>
         </div>
       </div>
 
