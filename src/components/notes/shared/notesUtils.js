@@ -1,31 +1,35 @@
+import {
+  INTELLITEXT_DELIVERY_MODES,
+} from "../../../access/intelliTextConstants";
+
 export const NOTES_PLAN_ORDER = [
     "FREE",
     "BASIC",
     "PREMIUM",
     "MENTORSHIP",
   ];
-  
+
   export const NOTES_PLAN_LABELS = {
     FREE: "Free Notes",
     BASIC: "Basic Notes",
     PREMIUM: "Premium Notes",
     MENTORSHIP: "Mentorship Notes",
   };
-  
+
   export const NOTES_PLAN_ICONS = {
     FREE: "📘",
     BASIC: "🔷",
     PREMIUM: "⭐",
     MENTORSHIP: "👩‍🏫",
   };
-  
+
   export const NOTES_PLAN_DESCRIPTIONS = {
     FREE: "Start with free CTET/TET revision PDFs and foundation notes.",
     BASIC: "Continue with structured subject-wise and chapter-wise notes.",
     PREMIUM: "Unlock exam-ready premium notes, deep revision PDFs, and smart study material.",
     MENTORSHIP: "Access mentor-guided notes and focused material for guided preparation.",
   };
-  
+
   export function normalizeNoteText(value = "") {
     return String(value || "")
       .trim()
@@ -34,16 +38,16 @@ export const NOTES_PLAN_ORDER = [
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
   }
-  
+
   export function cleanNoteText(value = "", fallback = "") {
     const text = String(value || "").trim();
     return text || fallback;
   }
-  
+
   export function createNoteSlug(value = "") {
     return normalizeNoteText(value);
   }
-  
+
   export function getNotePlan(note = {}) {
     return String(
       note.planType ||
@@ -54,23 +58,23 @@ export const NOTES_PLAN_ORDER = [
       .trim()
       .toUpperCase();
   }
-  
+
   export function getNoteStatus(note = {}) {
     return String(note.status || "")
       .trim()
       .toLowerCase();
   }
-  
+
   export function isPublishedNote(note = {}) {
     return getNoteStatus(note) === "published";
   }
-  
+
   export function isNotesContent(note = {}) {
     return String(note.section || "")
       .trim()
       .toLowerCase() === "notes";
   }
-  
+
   export function getNotePdfUrl(note = {}) {
     return (
       note.pdfUrl ||
@@ -80,21 +84,83 @@ export const NOTES_PLAN_ORDER = [
       ""
     );
   }
-  
+
+  export function getNoteDeliveryMode(note = {}) {
+    const rawMode =
+      note.deliveryMode ||
+      note.deliveryType ||
+      note.intelliText?.deliveryMode ||
+      note.nativeContent?.deliveryMode ||
+      "";
+
+    const normalized = String(rawMode || "")
+      .trim()
+      .toUpperCase();
+
+    if (
+      normalized ===
+      INTELLITEXT_DELIVERY_MODES.NATIVE_TEXT
+    ) {
+      return INTELLITEXT_DELIVERY_MODES.NATIVE_TEXT;
+    }
+
+    return INTELLITEXT_DELIVERY_MODES.LEGACY_PDF;
+  }
+
+  export function getNoteTextbookId(note = {}) {
+    return String(
+      note.textbookId ||
+        note.intelliTextId ||
+        note.readerId ||
+        note.intelliText?.textbookId ||
+        note.nativeContent?.textbookId ||
+        ""
+    ).trim();
+  }
+
+  export function hasNativeIntelliText(note = {}) {
+    if (
+      getNoteDeliveryMode(note) !==
+      INTELLITEXT_DELIVERY_MODES.NATIVE_TEXT
+    ) {
+      return false;
+    }
+
+    return Boolean(
+      getNoteTextbookId(note) &&
+        (
+          note.nativeReady === true ||
+          note.intelliText?.nativeReady === true ||
+          note.nativeContent?.nativeReady === true ||
+          Array.isArray(note.intelliText?.sections) ||
+          Array.isArray(note.nativeContent?.sections) ||
+          Array.isArray(note.sections)
+        )
+    );
+  }
+
+  export function isNativeIntelliTextNote(note = {}) {
+    return hasNativeIntelliText(note);
+  }
+
   export function hasNotePdf(note = {}) {
     return (
       note.hasProtectedAsset === true ||
       Boolean(String(getNotePdfUrl(note) || "").trim())
     );
   }
-  
+
+  export function hasReadableNoteContent(note = {}) {
+    return hasNativeIntelliText(note) || hasNotePdf(note);
+  }
+
   export function getNoteSubject(note = {}) {
     return cleanNoteText(
       note.subject || note.subjectName || note.subjectTitle,
       "General"
     );
   }
-  
+
   export function getNoteChapter(note = {}) {
     return cleanNoteText(
       note.chapter ||
@@ -104,43 +170,43 @@ export const NOTES_PLAN_ORDER = [
       "General"
     );
   }
-  
+
   export function getPublishedNotes(contentItems = []) {
     return contentItems.filter(
       (item) =>
         isNotesContent(item) &&
         isPublishedNote(item) &&
-        hasNotePdf(item)
+        hasReadableNoteContent(item)
     );
   }
-  
+
   export function getPlanNotes(contentItems = [], planName = "FREE") {
     const activePlan = String(planName || "FREE").trim().toUpperCase();
-  
+
     return getPublishedNotes(contentItems).filter(
       (note) => getNotePlan(note) === activePlan
     );
   }
-  
+
   export function getSubjectNotes(notes = [], subjectId = "") {
     const activeSubject = normalizeNoteText(subjectId);
-  
+
     return notes.filter((note) => {
       const subjectName = getNoteSubject(note);
-  
+
       return (
         normalizeNoteText(subjectName) === activeSubject ||
         normalizeNoteText(note.subjectSlug) === activeSubject
       );
     });
   }
-  
+
   export function getChapterNotes(notes = [], chapterId = "") {
     const activeChapter = normalizeNoteText(chapterId);
-  
+
     return notes.filter((note) => {
       const chapterName = getNoteChapter(note);
-  
+
       return (
         normalizeNoteText(chapterName) === activeChapter ||
         normalizeNoteText(note.chapterSlug) === activeChapter ||
@@ -148,37 +214,37 @@ export const NOTES_PLAN_ORDER = [
       );
     });
   }
-  
+
   export function uniqueNotesByKey(items = [], getKey) {
     const seen = new Set();
-  
+
     return items.filter((item) => {
       const key = normalizeNoteText(getKey(item));
-  
+
       if (!key || seen.has(key)) {
         return false;
       }
-  
+
       seen.add(key);
       return true;
     });
   }
-  
+
   export function buildNotesSubjectList(notes = []) {
     return uniqueNotesByKey(notes, getNoteSubject)
       .map((note) => {
         const title = getNoteSubject(note);
-  
+
         const subjectNotes = notes.filter(
           (item) =>
             normalizeNoteText(getNoteSubject(item)) === normalizeNoteText(title)
         );
-  
+
         const chapterCount = uniqueNotesByKey(
           subjectNotes,
           getNoteChapter
         ).length;
-  
+
         return {
           id: createNoteSlug(title),
           title,
@@ -192,48 +258,60 @@ export const NOTES_PLAN_ORDER = [
       })
       .sort((a, b) => a.title.localeCompare(b.title));
   }
-  
+
   export function buildNotesChapterList(notes = []) {
     return uniqueNotesByKey(notes, getNoteChapter)
       .map((note) => {
         const title = getNoteChapter(note);
-  
+
         const chapterNotes = notes.filter(
           (item) =>
             normalizeNoteText(getNoteChapter(item)) === normalizeNoteText(title)
         );
-  
+
         return {
           id: createNoteSlug(title),
           title,
           description:
             note.description ||
-            `${chapterNotes.length} PDF notes ready inside this chapter.`,
+            `${chapterNotes.length} study notes ready inside this chapter.`,
           count: chapterNotes.length,
           cover: note.cover || "📄",
         };
       })
       .sort((a, b) => a.title.localeCompare(b.title));
   }
-  
+
   export function getNotesPdfCount(notes = []) {
     return notes.filter((note) => hasNotePdf(note)).length;
   }
-  
+
+  export function getNotesNativeCount(notes = []) {
+    return notes.filter((note) =>
+      hasNativeIntelliText(note)
+    ).length;
+  }
+
+  export function getNotesResourceCount(notes = []) {
+    return notes.filter((note) =>
+      hasReadableNoteContent(note)
+    ).length;
+  }
+
   export function canAccessNotePlan({
     planName = "FREE",
     hasPlanAccess,
     accessOptions = {},
   } = {}) {
     const activePlan = String(planName || "FREE").trim().toUpperCase();
-  
+
     if (activePlan === "FREE") {
       return true;
     }
-  
+
     if (typeof hasPlanAccess !== "function") {
       return false;
     }
-  
+
     return Boolean(hasPlanAccess(activePlan, accessOptions));
   }

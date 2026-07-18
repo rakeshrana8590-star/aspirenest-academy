@@ -106,7 +106,7 @@ import {
   StudentMockTestLibraryRoute, StudentMockTestPlanRoute, StudentMockTestSubjectRoute, StudentMockTestChapterRoute, StudentMockTestHistoryRoute, StudentMockLeaderboardRoute, } from "./components/exam/StudentMockTestRoutes.jsx";
 
 import {
-  StudentNotesLibraryRoute, StudentNotesPlanRoute, StudentNotesSubjectRoute, StudentNotesChapterRoute, } from "./components/notes/student/index.js";
+  StudentNotesLibraryRoute, StudentNotesPlanRoute, StudentNotesSubjectRoute, StudentNotesChapterRoute, StudentNativeReaderRoute, } from "./components/notes/student/index.js";
 
 import {
   AdminNotesHomeRoute, AdminNotesPlanRoute, AdminNotesSubjectRoute, AdminNotesChapterRoute, AdminNotesManageRoute, } from "./components/notes/admin/index.js";
@@ -8937,6 +8937,19 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   element={
     <StudentNotesLibraryRoute
       universalContent={universalContent}
+    />
+  }
+/>
+
+<Route
+  path="/ctet-tet/notes/read/:textbookId"
+  element={
+    <StudentNativeReaderRoute
+      universalContent={universalContent}
+      user={user}
+      buildNoteAccessDecision={
+        buildStudentNoteAccessDecision
+      }
     />
   }
 />

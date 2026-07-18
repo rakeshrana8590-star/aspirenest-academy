@@ -12,13 +12,18 @@ import {
   canAccessNotePlan,
   getNoteChapter,
   getNotePlan,
-  hasNotePdf,
   getNoteSubject,
   getNotesPdfCount,
+  getNotesNativeCount,
+  getNotesResourceCount,
+  hasNotePdf,
+  isNativeIntelliTextNote,
 } from "../shared/notesUtils";
 
 export function StudentNotesPlanCard({ planName, notes = [], onOpen }) {
   const subjects = buildNotesSubjectList(notes);
+  const resourceCount = getNotesResourceCount(notes);
+  const nativeCount = getNotesNativeCount(notes);
   const pdfCount = getNotesPdfCount(notes);
 
   return (
@@ -53,13 +58,17 @@ export function StudentNotesPlanCard({ planName, notes = [], onOpen }) {
         </div>
 
         <div>
-          <strong>{pdfCount}</strong>
-          <span>PDFs</span>
+          <strong>{resourceCount}</strong>
+          <span>Notes</span>
         </div>
       </div>
 
       <div className="studentNotesPlanFooter">
-        <span>{notes.length > 0 ? "Open subject shelf" : "Waiting for PDFs"}</span>
+        <span>
+          {resourceCount > 0
+            ? `${nativeCount} native • ${pdfCount} PDF`
+            : "Waiting for study notes"}
+        </span>
         <strong>Open →</strong>
       </div>
     </button>
@@ -114,10 +123,12 @@ export function StudentNotesLevelCard({
 export function StudentNotePdfCard({
   note,
   handleNoteAccess,
+  handleNativeNoteAccess,
   hasPlanAccess,
   accessDecision = null,
 }) {
   const planName = getNotePlan(note);
+  const isNative = isNativeIntelliTextNote(note);
   const hasProtectedAsset = hasNotePdf(note);
 
   const fallbackCanOpen =
@@ -130,7 +141,8 @@ export function StudentNotePdfCard({
         itemId: note.id,
       },
     });
-  const presentation =
+
+  const basePresentation =
     accessDecision
       ? getStudentNotesAccessPresentation(
           accessDecision
@@ -143,9 +155,19 @@ export function StudentNotePdfCard({
             ? "Access ready"
             : "Plan locked",
           buttonLabel: fallbackCanOpen
-            ? "Open PDF"
+            ? "Open"
             : "Unlock",
         };
+
+  const presentation = {
+    ...basePresentation,
+    buttonLabel:
+      basePresentation.canOpen === true
+        ? isNative
+          ? "Start Reading"
+          : "Open PDF"
+        : basePresentation.buttonLabel,
+  };
 
   const openNote = () => {
     if (presentation.disabled) {
@@ -159,25 +181,43 @@ export function StudentNotePdfCard({
     };
 
     if (
-      typeof handleNoteAccess ===
-      "function"
+      isNative &&
+      typeof handleNativeNoteAccess === "function"
+    ) {
+      handleNativeNoteAccess(safeNote);
+      return;
+    }
+
+    if (
+      !isNative &&
+      typeof handleNoteAccess === "function"
     ) {
       handleNoteAccess(safeNote);
     }
   };
 
   return (
-    <article className="studentNotesPdfCard">
+    <article
+      className={
+        isNative
+          ? "studentNotesPdfCard isNativeNote"
+          : "studentNotesPdfCard"
+      }
+    >
       <div className="studentNotesPdfTop">
-        <span className="studentNotesPdfIcon">📄</span>
+        <span className="studentNotesPdfIcon">
+          {isNative ? "📖" : "📄"}
+        </span>
 
         <div className="studentNotesPdfBadges">
           <span>{planName}</span>
-          <span>{getNoteSubject(note)}</span>
+          <span>
+            {isNative ? "IntelliText" : getNoteSubject(note)}
+          </span>
         </div>
       </div>
 
-      <h3>{note.title || "Study PDF"}</h3>
+      <h3>{note.title || "Study Note"}</h3>
 
       <p>
         {note.description ||
@@ -192,9 +232,13 @@ export function StudentNotePdfCard({
         </div>
 
         <div>
-          <span>Source</span>
+          <span>Format</span>
           <strong>
-            {hasProtectedAsset ? "PDF Ready" : "Pending"}
+            {isNative
+              ? "Native Reader"
+              : hasProtectedAsset
+                ? "Protected PDF"
+                : "Pending"}
           </strong>
         </div>
       </div>
@@ -214,3 +258,6 @@ export function StudentNotePdfCard({
     </article>
   );
 }
+
+export const StudentNoteResourceCard =
+  StudentNotePdfCard;
