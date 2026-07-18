@@ -27,6 +27,7 @@ import {
   writeIntelliTextProgress,
 } from "../../../access/intelliTextReaderProgress";
 import IntelliTextBlockRenderer from "./IntelliTextBlockRenderer";
+import IntelliTextStudyWorkspace from "./IntelliTextStudyWorkspace";
 
 const FONT_SCALES = Object.freeze([
   {
@@ -155,6 +156,8 @@ export default function StudentNativeReaderRoute({
     useState(false);
   const [fontScale, setFontScale] =
     useState(1);
+  const [workspaceOpen, setWorkspaceOpen] =
+    useState(false);
 
   useEffect(() => {
     if (
@@ -433,6 +436,23 @@ export default function StudentNativeReaderRoute({
           <button
             type="button"
             className={
+              workspaceOpen
+                ? "intelliTextWorkspaceButton isActive"
+                : "intelliTextWorkspaceButton"
+            }
+            onClick={() =>
+              setWorkspaceOpen(
+                (current) => !current
+              )
+            }
+            aria-expanded={workspaceOpen}
+          >
+            Study
+          </button>
+
+          <button
+            type="button"
+            className={
               focusMode
                 ? "intelliTextFocusButton isActive"
                 : "intelliTextFocusButton"
@@ -457,7 +477,13 @@ export default function StudentNativeReaderRoute({
         />
       </div>
 
-      <div className="intelliTextReaderShell">
+      <div
+        className={
+          workspaceOpen
+            ? "intelliTextReaderShell isWorkspaceOpen"
+            : "intelliTextReaderShell"
+        }
+      >
         <aside
           className={
             tocOpen
@@ -526,7 +552,10 @@ export default function StudentNativeReaderRoute({
           </nav>
         </aside>
 
-        <article className="intelliTextReadingCanvas">
+        <article
+          id="intelliTextReadingCanvas"
+          className="intelliTextReadingCanvas"
+        >
           <div className="intelliTextSectionKicker">
             Section {navigation.index + 1} of{" "}
             {model.sections.length}
@@ -548,6 +577,11 @@ export default function StudentNativeReaderRoute({
                   id={`block-${block.blockId}`}
                   className="intelliTextBlock"
                   data-block-type={block.type}
+                  data-intellitext-block="true"
+                  data-textbook-id={model.textbookId}
+                  data-section-id={activeSection.sectionId}
+                  data-block-id={block.blockId}
+                  data-content-version={model.contentVersion}
                 >
                   <IntelliTextBlockRenderer
                     block={block}
@@ -598,6 +632,14 @@ export default function StudentNativeReaderRoute({
             </button>
           </footer>
         </article>
+
+        <IntelliTextStudyWorkspace
+          model={model}
+          activeSection={activeSection}
+          isOpen={workspaceOpen}
+          onClose={() => setWorkspaceOpen(false)}
+          onOpenSection={openSection}
+        />
       </div>
     </main>
   );

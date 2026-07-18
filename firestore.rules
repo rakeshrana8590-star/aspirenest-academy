@@ -31,6 +31,197 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    /* ================================
+       IntelliText Private Study Workspace — Phase 8B-4
+       Authenticated UID owner-only; no admin or mentor bypass.
+       ================================ */
+
+    function isStudentLearningOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isValidStudyId(value) {
+      return value is string &&
+        value.size() >= 1 &&
+        value.size() <= 128 &&
+        value.matches("^[A-Za-z0-9_-]+$");
+    }
+
+    function isValidPrivateSelectionAnchor(anchor) {
+      return anchor is map &&
+        anchor.keys().hasOnly([
+          "exactText",
+          "prefix",
+          "suffix",
+          "startOffset",
+          "endOffset"
+        ]) &&
+        anchor.keys().size() == 5 &&
+        anchor.exactText is string &&
+        anchor.exactText.size() >= 1 &&
+        anchor.exactText.size() <= 2000 &&
+        anchor.prefix is string &&
+        anchor.prefix.size() <= 128 &&
+        anchor.suffix is string &&
+        anchor.suffix.size() <= 128 &&
+        anchor.startOffset is int &&
+        anchor.startOffset >= 0 &&
+        anchor.endOffset is int &&
+        anchor.endOffset > anchor.startOffset;
+    }
+
+    function isValidPrivateAnnotationData(uid, annotationId, data) {
+      return data.keys().hasOnly([
+          "schemaVersion",
+          "annotationId",
+          "uid",
+          "textbookId",
+          "sectionId",
+          "blockId",
+          "contentVersion",
+          "type",
+          "state",
+          "shareState",
+          "selectionAnchor",
+          "body",
+          "createdAt",
+          "updatedAt"
+        ]) &&
+        data.keys().size() == 14 &&
+        data.schemaVersion == 1 &&
+        data.annotationId == annotationId &&
+        data.uid == uid &&
+        isValidStudyId(data.annotationId) &&
+        isValidStudyId(data.uid) &&
+        isValidStudyId(data.textbookId) &&
+        isValidStudyId(data.sectionId) &&
+        isValidStudyId(data.blockId) &&
+        data.contentVersion is int &&
+        data.contentVersion >= 1 &&
+        data.type in ["HIGHLIGHT", "UNDERLINE", "NOTE", "DOUBT"] &&
+        data.state in ["ACTIVE", "RESOLVED"] &&
+        data.shareState == "PRIVATE" &&
+        isValidPrivateSelectionAnchor(data.selectionAnchor) &&
+        data.body is string &&
+        data.body.size() <= 4000 &&
+        (
+          !(data.type in ["NOTE", "DOUBT"]) ||
+          data.body.size() >= 1
+        ) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidPrivateAnnotationCreate(uid, annotationId) {
+      return isStudentLearningOwner(uid) &&
+        request.resource.data.uid == request.auth.uid &&
+        isValidPrivateAnnotationData(
+          uid,
+          annotationId,
+          request.resource.data
+        ) &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time;
+    }
+
+    function isValidPrivateAnnotationUpdate(uid, annotationId) {
+      return isStudentLearningOwner(uid) &&
+        resource.data.uid == request.auth.uid &&
+        request.resource.data.uid == request.auth.uid &&
+        isValidPrivateAnnotationData(
+          uid,
+          annotationId,
+          request.resource.data
+        ) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "body",
+          "state",
+          "updatedAt"
+        ]) &&
+        request.resource.data.updatedAt == request.time;
+    }
+
+    function isValidPrivateBookmarkData(uid, bookmarkId, data) {
+      return data.keys().hasOnly([
+          "schemaVersion",
+          "bookmarkId",
+          "uid",
+          "textbookId",
+          "sectionId",
+          "blockId",
+          "contentVersion",
+          "shareState",
+          "label",
+          "createdAt",
+          "updatedAt"
+        ]) &&
+        data.keys().size() == 11 &&
+        data.schemaVersion == 1 &&
+        data.bookmarkId == bookmarkId &&
+        data.uid == uid &&
+        isValidStudyId(data.bookmarkId) &&
+        isValidStudyId(data.uid) &&
+        isValidStudyId(data.textbookId) &&
+        isValidStudyId(data.sectionId) &&
+        isValidStudyId(data.blockId) &&
+        data.contentVersion is int &&
+        data.contentVersion >= 1 &&
+        data.shareState == "PRIVATE" &&
+        data.label is string &&
+        data.label.size() <= 300 &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidPrivateBookmarkCreate(uid, bookmarkId) {
+      return isStudentLearningOwner(uid) &&
+        request.resource.data.uid == request.auth.uid &&
+        isValidPrivateBookmarkData(
+          uid,
+          bookmarkId,
+          request.resource.data
+        ) &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time;
+    }
+
+    function isValidPrivateBookmarkUpdate(uid, bookmarkId) {
+      return isStudentLearningOwner(uid) &&
+        resource.data.uid == request.auth.uid &&
+        request.resource.data.uid == request.auth.uid &&
+        isValidPrivateBookmarkData(
+          uid,
+          bookmarkId,
+          request.resource.data
+        ) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "label",
+          "updatedAt"
+        ]) &&
+        request.resource.data.updatedAt == request.time;
+    }
+
+    match /studentLearning/{uid} {
+      allow read, write: if false;
+
+      match /annotations/{annotationId} {
+        allow get, list: if isStudentLearningOwner(uid);
+        allow create: if isValidPrivateAnnotationCreate(uid, annotationId);
+        allow update: if isValidPrivateAnnotationUpdate(uid, annotationId);
+        allow delete: if isStudentLearningOwner(uid) &&
+          resource.data.uid == request.auth.uid;
+      }
+
+      match /bookmarks/{bookmarkId} {
+        allow get, list: if isStudentLearningOwner(uid);
+        allow create: if isValidPrivateBookmarkCreate(uid, bookmarkId);
+        allow update: if isValidPrivateBookmarkUpdate(uid, bookmarkId);
+        allow delete: if isStudentLearningOwner(uid) &&
+          resource.data.uid == request.auth.uid;
+      }
+    }
+
+
     function isUidKeyedUserRequest(userId) {
       return request.resource.data.uid is string &&
         request.resource.data.uid == userId &&

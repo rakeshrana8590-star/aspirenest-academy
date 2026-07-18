@@ -108,6 +108,7 @@
 }
 
 .intelliTextTocToggle,
+.intelliTextWorkspaceButton,
 .intelliTextFocusButton {
   min-height: 40px;
   padding: 0 13px;
@@ -118,6 +119,7 @@
   font-weight: 950;
 }
 
+.intelliTextWorkspaceButton.isActive,
 .intelliTextFocusButton.isActive {
   color: #ffffff;
   background: #0f172a;
@@ -724,5 +726,457 @@
 
   .intelliTextReaderPage * {
     scroll-behavior: auto !important;
+  }
+}
+
+/* ===============================
+   Phase 8B-4 Private Study Workspace
+================================ */
+
+.intelliTextReaderShell.isWorkspaceOpen {
+  width: min(1640px, 100%);
+  grid-template-columns: 260px minmax(0, 820px) 340px;
+}
+
+.intelliTextStudyWorkspace {
+  position: sticky;
+  top: 140px;
+  max-height: calc(100vh - 172px);
+  overflow: auto;
+  padding: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.09);
+  border-radius: 28px;
+  display: none;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.1);
+  scrollbar-width: none;
+}
+
+.intelliTextStudyWorkspace::-webkit-scrollbar {
+  display: none;
+}
+
+.intelliTextStudyWorkspace.isOpen {
+  display: block;
+}
+
+.intelliTextReaderPage.isFocusMode .intelliTextStudyWorkspace {
+  display: none;
+}
+
+.intelliTextStudyWorkspace > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.intelliTextStudyWorkspace > header span,
+.intelliTextStudyComposer span {
+  color: #ea580c;
+  font-size: 0.66rem;
+  font-weight: 1000;
+  letter-spacing: 0.12em;
+}
+
+.intelliTextStudyWorkspace > header h2,
+.intelliTextStudyComposer h3 {
+  margin: 6px 0 0;
+  color: #0f172a;
+  font-size: 1.15rem;
+  font-weight: 1000;
+  letter-spacing: -0.03em;
+}
+
+.intelliTextStudyWorkspace > header button {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  color: #334155;
+  background: #f1f5f9;
+  font-size: 1.2rem;
+}
+
+.intelliTextWorkspacePrivacy {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 15px;
+  color: #475569;
+  background: #f8fafc;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  font-weight: 750;
+}
+
+.intelliTextBookmarkCurrent {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 14px;
+  cursor: pointer;
+  color: #ffffff;
+  background: #0f172a;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 950;
+}
+
+.intelliTextWorkspaceTabs {
+  margin-top: 14px;
+  padding: 4px;
+  border-radius: 14px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 3px;
+  background: #f1f5f9;
+}
+
+.intelliTextWorkspaceTabs button {
+  min-width: 0;
+  min-height: 34px;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #64748b;
+  background: transparent;
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 950;
+}
+
+.intelliTextWorkspaceTabs button.isActive {
+  color: #ffffff;
+  background: #2563eb;
+}
+
+.intelliTextWorkspaceList {
+  margin-top: 17px;
+  display: grid;
+  gap: 10px;
+}
+
+.intelliTextWorkspaceListTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #0f172a;
+  font-size: 0.76rem;
+  font-weight: 1000;
+}
+
+.intelliTextWorkspaceListTitle span {
+  min-width: 25px;
+  padding: 4px 7px;
+  border-radius: 999px;
+  text-align: center;
+  color: #2563eb;
+  background: #eff6ff;
+}
+
+.intelliTextWorkspaceCard {
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 17px;
+  background: #ffffff;
+}
+
+.intelliTextWorkspaceCard.isUnresolved {
+  border-color: rgba(220, 38, 38, 0.22);
+  background: #fff8f8;
+}
+
+.intelliTextWorkspaceCardMain {
+  width: 100%;
+  padding: 13px;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  background: transparent;
+}
+
+.intelliTextWorkspaceCardMain span,
+.intelliTextWorkspaceCardMain strong,
+.intelliTextWorkspaceCardMain small {
+  display: block;
+}
+
+.intelliTextWorkspaceCardMain span {
+  color: #ea580c;
+  font-size: 0.62rem;
+  font-weight: 1000;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.intelliTextWorkspaceCardMain strong {
+  margin-top: 6px;
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  font-weight: 900;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.intelliTextWorkspaceCardMain p {
+  margin: 8px 0 0;
+  color: #475569;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  font-weight: 700;
+}
+
+.intelliTextWorkspaceCardMain small {
+  margin-top: 8px;
+  color: #94a3b8;
+  font-size: 0.64rem;
+  font-weight: 800;
+}
+
+.intelliTextWorkspaceCard > div {
+  padding: 8px 10px;
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.intelliTextWorkspaceCard > div button {
+  min-height: 30px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 9px;
+  cursor: pointer;
+  color: #475569;
+  background: #f1f5f9;
+  font: inherit;
+  font-size: 0.64rem;
+  font-weight: 900;
+}
+
+.intelliTextWorkspaceEmpty,
+.intelliTextWorkspaceError {
+  margin: 14px 0 0;
+  padding: 14px;
+  border-radius: 14px;
+  color: #64748b;
+  background: #f8fafc;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  font-weight: 750;
+}
+
+.intelliTextWorkspaceError {
+  color: #b91c1c;
+  background: #fff1f2;
+}
+
+.intelliTextUnresolvedSummary {
+  padding: 13px;
+  border: 1px solid rgba(220, 38, 38, 0.14);
+  border-radius: 15px;
+  display: grid;
+  gap: 5px;
+  color: #7f1d1d;
+  background: #fff7f7;
+}
+
+.intelliTextUnresolvedSummary strong {
+  font-size: 0.74rem;
+  font-weight: 1000;
+}
+
+.intelliTextUnresolvedSummary span {
+  font-size: 0.69rem;
+  line-height: 1.45;
+  font-weight: 700;
+}
+
+.intelliTextSelectionToolbar {
+  position: fixed;
+  z-index: 120;
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 15px;
+  display: flex;
+  gap: 4px;
+  transform: translate(-50%, -100%);
+  background: #0f172a;
+  box-shadow: 0 16px 44px rgba(15, 23, 42, 0.28);
+}
+
+.intelliTextSelectionToolbar button {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #ffffff;
+  background: transparent;
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 900;
+}
+
+.intelliTextSelectionToolbar button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.intelliTextStudyComposer {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  padding: 20px;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 23, 42, 0.58);
+  backdrop-filter: blur(8px);
+}
+
+.intelliTextStudyComposer > div {
+  width: min(520px, 100%);
+  padding: 24px;
+  border-radius: 26px;
+  background: #ffffff;
+  box-shadow: 0 30px 90px rgba(15, 23, 42, 0.28);
+}
+
+.intelliTextStudyComposer p {
+  margin: 14px 0 0;
+  padding: 12px;
+  border-left: 4px solid #f97316;
+  color: #475569;
+  background: #fff7ed;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  font-weight: 750;
+}
+
+.intelliTextStudyComposer textarea {
+  width: 100%;
+  min-height: 150px;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 16px;
+  resize: vertical;
+  color: #172033;
+  background: #f8fafc;
+  font: inherit;
+  line-height: 1.55;
+}
+
+.intelliTextStudyComposer > div > div {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+}
+
+.intelliTextStudyComposer button {
+  min-height: 40px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  color: #ffffff;
+  background: #0f172a;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 950;
+}
+
+.intelliTextStudyComposer button.isSecondary {
+  color: #475569;
+  background: #f1f5f9;
+}
+
+.intelliTextAnnotationDecoration {
+  border-radius: 3px;
+}
+
+.intelliTextAnnotationDecoration--highlight {
+  color: inherit;
+  background: rgba(250, 204, 21, 0.46);
+}
+
+.intelliTextAnnotationDecoration--underline {
+  text-decoration-line: underline;
+  text-decoration-color: #2563eb;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 3px;
+}
+
+.intelliTextAnnotationDecoration--note {
+  background: rgba(37, 99, 235, 0.12);
+  box-shadow: inset 0 -2px 0 #2563eb;
+}
+
+.intelliTextAnnotationDecoration--doubt {
+  background: rgba(249, 115, 22, 0.12);
+  box-shadow: inset 0 -2px 0 #f97316;
+}
+
+@media (max-width: 1280px) {
+  .intelliTextReaderShell.isWorkspaceOpen {
+    grid-template-columns: minmax(0, 860px);
+  }
+
+  .intelliTextStudyWorkspace {
+    position: fixed;
+    inset: 0 0 0 auto;
+    z-index: 80;
+    width: min(380px, 92vw);
+    max-height: none;
+    border-radius: 28px 0 0 28px;
+    transform: translateX(105%);
+    transition: transform 0.22s ease;
+  }
+
+  .intelliTextStudyWorkspace.isOpen {
+    display: block;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 720px) {
+  .intelliTextStudyWorkspace {
+    inset: auto 0 0;
+    width: 100%;
+    max-height: min(78vh, 720px);
+    border-radius: 26px 26px 0 0;
+    transform: translateY(105%);
+  }
+
+  .intelliTextStudyWorkspace.isOpen {
+    transform: translateY(0);
+  }
+
+  .intelliTextSelectionToolbar {
+    left: 12px !important;
+    right: 12px;
+    top: auto !important;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    overflow-x: auto;
+    transform: none;
+    scrollbar-width: none;
+  }
+
+  .intelliTextSelectionToolbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intelliTextStudyWorkspace {
+    transition: none;
   }
 }
