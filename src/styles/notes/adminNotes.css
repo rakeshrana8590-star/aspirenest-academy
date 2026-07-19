@@ -8,3 +8,538 @@
 @import "./admin/adminNoteCards.css";
 @import "./admin/adminNotesEmptyState.css";
 @import "./admin/adminNotesManage.css";
+/* ===============================
+   PHASE 8B-5 — INTELLITEXT AUTHORING STUDIO
+   Additive admin workspace; existing PDF CMS remains preserved.
+================================ */
+
+.intelliTextAuthoringRoute,
+.intelliTextAuthoringCatalog {
+  width: min(100%, 1540px);
+  margin: 0 auto;
+  padding: clamp(18px, 2.2vw, 34px);
+  box-sizing: border-box;
+}
+
+.intelliTextAuthoringCatalog > header,
+.intelliTextAuthoringHero,
+.intelliTextAuthoringMetadata,
+.intelliTextAuthoringEditor,
+.intelliTextAuthoringPreview,
+.intelliTextPreviewAuditPanel,
+.intelliTextAuthoringActions,
+.intelliTextAuthoringState {
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(249, 115, 22, 0.12), transparent 34%),
+    linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.96));
+  color: #f8fafc;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+}
+
+.intelliTextAuthoringCatalog > header,
+.intelliTextAuthoringHero {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(22px, 3vw, 40px);
+}
+
+.intelliTextAuthoringCatalog > header button,
+.intelliTextAuthoringHero button {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.intelliTextAuthoringCatalog > header span,
+.intelliTextAuthoringHero span,
+.intelliTextAuthoringEditorHeader span,
+.intelliTextAuthoringPreview header span,
+.intelliTextAccessMappingPanel > div > span,
+.intelliTextPreviewAuditPanel > div > span {
+  display: block;
+  color: #fb923c;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.intelliTextAuthoringCatalog > header h1,
+.intelliTextAuthoringHero h1 {
+  margin: 12px 0 8px;
+  font-size: clamp(2rem, 4vw, 4.2rem);
+  line-height: 1.02;
+}
+
+.intelliTextAuthoringCatalog > header p,
+.intelliTextAuthoringHero p {
+  max-width: 780px;
+  color: #cbd5e1;
+  line-height: 1.65;
+}
+
+.intelliTextAuthoringHeroStatus {
+  min-width: 230px;
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  padding: 20px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.intelliTextAuthoringHeroStatus strong {
+  color: #86efac;
+  font-size: 1.08rem;
+}
+
+.intelliTextAuthoringHeroStatus span {
+  color: #e2e8f0;
+  font-size: 0.92rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.intelliTextAuthoringCatalogGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.intelliTextAuthoringCatalogGrid article {
+  padding: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+}
+
+.intelliTextAuthoringCatalogGrid article > span {
+  color: #ea580c;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.intelliTextAuthoringCatalogGrid h2 {
+  margin: 10px 0;
+  color: #0f172a;
+}
+
+.intelliTextAuthoringCatalogGrid p,
+.intelliTextAuthoringCatalogGrid code {
+  color: #64748b;
+}
+
+.intelliTextAuthoringCatalogGrid button,
+.adminNotesNativeAuthoringButton {
+  margin-top: 14px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #ffffff;
+  padding: 11px 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.intelliTextAuthoringMetadata {
+  margin-top: 20px;
+  padding: 24px;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.intelliTextAuthoringMetadataGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.intelliTextAuthoringMetadata label,
+.intelliTextAccessMappingPanel label,
+.intelliTextAuthoringSectionFields label {
+  display: grid;
+  gap: 8px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.intelliTextAuthoringMetadata input,
+.intelliTextAuthoringMetadata textarea,
+.intelliTextAuthoringSectionFields input,
+.intelliTextAuthoringSectionFields textarea,
+.intelliTextAuthoringBlockCard select,
+.intelliTextPayloadEditor textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #0f172a;
+  padding: 11px 12px;
+  font: inherit;
+}
+
+.intelliTextAccessMappingPanel {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.2fr) minmax(180px, 0.5fr) minmax(280px, 1fr);
+  gap: 18px;
+  align-items: start;
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.intelliTextAccessMappingPanel h2,
+.intelliTextAuthoringEditorHeader h2,
+.intelliTextAuthoringPreview h2,
+.intelliTextPreviewAuditPanel h2 {
+  margin: 8px 0;
+}
+
+.intelliTextAccessMappingPanel p,
+.intelliTextAuthoringEditorHeader p,
+.intelliTextAuthoringPreview p,
+.intelliTextPreviewAuditPanel p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.55;
+}
+
+.intelliTextPublicReadToggle {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+}
+
+.intelliTextAuthoringWorkspaceGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(380px, 0.88fr);
+  gap: 20px;
+  align-items: start;
+  margin-top: 20px;
+}
+
+.intelliTextAuthoringEditor,
+.intelliTextAuthoringPreview {
+  padding: 22px;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.intelliTextAuthoringEditorHeader,
+.intelliTextAuthoringPreview > header,
+.intelliTextPreviewAuditPanel,
+.intelliTextAuthoringActions {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+}
+
+.intelliTextAuthoringEditorHeader > button,
+.intelliTextAddBlockButton,
+.intelliTextPayloadEditor button,
+.intelliTextPreviewModeSwitch button,
+.intelliTextAuthoringActions button {
+  border: 1px solid #cbd5e1;
+  border-radius: 11px;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 10px 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.intelliTextAuthoringSections {
+  display: grid;
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.intelliTextAuthoringSectionCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #f8fafc;
+  padding: 18px;
+}
+
+.intelliTextAuthoringSectionCard > header,
+.intelliTextAuthoringBlockCard > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.intelliTextAuthoringSectionCard > header button,
+.intelliTextAuthoringBlockCard > header button {
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: #ffffff;
+  padding: 7px 9px;
+  cursor: pointer;
+}
+
+.intelliTextAuthoringSectionFields {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.intelliTextAuthoringBlocksList {
+  display: grid;
+  gap: 12px;
+}
+
+.intelliTextAuthoringBlockCard {
+  border: 1px solid #dbeafe;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 14px;
+}
+
+.intelliTextAuthoringBlockCard > code {
+  display: block;
+  margin: 8px 0;
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.intelliTextPayloadEditor {
+  display: grid;
+  gap: 8px;
+}
+
+.intelliTextPayloadEditor p {
+  margin: 0;
+  color: #b91c1c;
+}
+
+.intelliTextAddBlockButton {
+  width: 100%;
+  margin-top: 12px;
+  border-style: dashed;
+}
+
+.intelliTextPreviewModeSwitch {
+  display: flex;
+  gap: 8px;
+}
+
+.intelliTextPreviewModeSwitch button.isActive {
+  border-color: #f97316;
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.intelliTextPreviewDevice {
+  margin-top: 20px;
+  max-height: 70vh;
+  overflow: auto;
+  border: 10px solid #0f172a;
+  border-radius: 24px;
+  background: #f8fafc;
+  transition: max-width 180ms ease;
+}
+
+.intelliTextPreviewDevice.isMobile {
+  max-width: 390px;
+  margin-inline: auto;
+}
+
+.intelliTextPreviewDevice.isDesktop {
+  max-width: 100%;
+}
+
+.intelliTextPreviewDevice > article {
+  min-height: 520px;
+  padding: clamp(18px, 3vw, 32px);
+  color: #0f172a;
+}
+
+.intelliTextPreviewBrand {
+  color: #ea580c;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.intelliTextPreviewSection {
+  margin-top: 24px;
+}
+
+.intelliTextPreviewSection > span {
+  color: #f97316;
+  font-weight: 800;
+}
+
+.intelliTextPreviewBlocks {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.intelliTextPreviewAuditPanel {
+  margin-top: 20px;
+  padding: 20px 24px;
+  background: #ffffff;
+  color: #0f172a;
+  flex-wrap: wrap;
+}
+
+.intelliTextPreviewAuditPanel label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-weight: 700;
+}
+
+.intelliTextAuthoringNotice {
+  margin-top: 14px;
+  border-radius: 14px;
+  padding: 14px 18px;
+  font-weight: 800;
+}
+
+.intelliTextAuthoringNotice.isError {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.intelliTextAuthoringNotice.isSuccess {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.intelliTextAuthoringActions {
+  position: sticky;
+  z-index: 15;
+  bottom: 12px;
+  margin-top: 20px;
+  padding: 16px 20px;
+  flex-wrap: wrap;
+}
+
+.intelliTextAuthoringActions > div {
+  flex: 1 1 280px;
+  display: grid;
+  gap: 4px;
+}
+
+.intelliTextAuthoringActions > div span {
+  color: #cbd5e1;
+  font-size: 0.85rem;
+}
+
+.intelliTextAuthoringActions button {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.intelliTextAuthoringActions button.isPublish {
+  border: 0;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+}
+
+.intelliTextAuthoringActions button:disabled,
+.intelliTextAuthoringEditor button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.intelliTextAuthoringState {
+  padding: 34px;
+  text-align: center;
+}
+
+.intelliTextAuthoringState span {
+  color: #fb923c;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.intelliTextAuthoringState p {
+  color: #cbd5e1;
+}
+
+@media (max-width: 1180px) {
+  .intelliTextAuthoringWorkspaceGrid,
+  .intelliTextAccessMappingPanel {
+    grid-template-columns: 1fr;
+  }
+
+  .intelliTextAuthoringMetadataGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .intelliTextAuthoringRoute,
+  .intelliTextAuthoringCatalog {
+    padding: 12px;
+  }
+
+  .intelliTextAuthoringCatalog > header,
+  .intelliTextAuthoringHero,
+  .intelliTextAuthoringEditorHeader,
+  .intelliTextAuthoringPreview > header,
+  .intelliTextAuthoringActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .intelliTextAuthoringHeroStatus {
+    min-width: 0;
+  }
+
+  .intelliTextAuthoringMetadataGrid,
+  .intelliTextAuthoringSectionFields {
+    grid-template-columns: 1fr;
+  }
+
+  .intelliTextAuthoringSectionCard,
+  .intelliTextAuthoringBlockCard,
+  .intelliTextAuthoringMetadata,
+  .intelliTextAuthoringEditor,
+  .intelliTextAuthoringPreview {
+    padding: 14px;
+  }
+
+  .intelliTextAuthoringBlockCard > header,
+  .intelliTextAuthoringSectionCard > header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .intelliTextPreviewDevice {
+    border-width: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intelliTextPreviewDevice {
+    transition: none;
+  }
+}

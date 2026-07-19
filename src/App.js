@@ -109,7 +109,7 @@ import {
   StudentNotesLibraryRoute, StudentNotesPlanRoute, StudentNotesSubjectRoute, StudentNotesChapterRoute, StudentNativeReaderRoute, } from "./components/notes/student/index.js";
 
 import {
-  AdminNotesHomeRoute, AdminNotesPlanRoute, AdminNotesSubjectRoute, AdminNotesChapterRoute, AdminNotesManageRoute, } from "./components/notes/admin/index.js";
+  AdminNotesHomeRoute, AdminNotesPlanRoute, AdminNotesSubjectRoute, AdminNotesChapterRoute, AdminNotesManageRoute, AdminIntelliTextAuthoringRoute, } from "./components/notes/admin/index.js";
 
 import {
   StudentCurrentAffairsLibraryRoute, StudentCurrentAffairsMonthRoute, } from "./components/currentAffairs/student/index.js";
@@ -6602,6 +6602,28 @@ xpActivityEvents={ctetMockXpEvents}
         onDeleteNote={(item) => {
           handleDeleteLocalContentItem(item.id);
         }}
+      />
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/notes/intellitext"
+  element={
+    requireAdmin() ? (
+      <AdminIntelliTextAuthoringRoute
+        universalContent={universalContent}
+      />
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/notes/intellitext/:textbookId"
+  element={
+    requireAdmin() ? (
+      <AdminIntelliTextAuthoringRoute
+        universalContent={universalContent}
       />
     ) : null
   }

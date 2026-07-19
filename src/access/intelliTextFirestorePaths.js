@@ -8,6 +8,7 @@ import {
 export const INTELLITEXT_COLLECTIONS = Object.freeze({
   ROOT: "learningTexts",
   SECTIONS: "sections",
+  AUTHORING_VERSIONS: "authoringVersions",
   BLOCKS: "blocks",
   STUDENT_ROOT: "studentLearning",
 });
@@ -28,6 +29,75 @@ export function buildIntelliTextRootPath(textbookId) {
   return [
     INTELLITEXT_COLLECTIONS.ROOT,
     normalizeIntelliTextId(textbookId, "textbookId"),
+  ].join("/");
+}
+
+export function buildIntelliTextAuthoringVersionsPath(textbookId) {
+  return [
+    buildIntelliTextRootPath(textbookId),
+    INTELLITEXT_COLLECTIONS.AUTHORING_VERSIONS,
+  ].join("/");
+}
+
+export function buildIntelliTextAuthoringVersionPath(
+  textbookId,
+  versionId
+) {
+  return [
+    buildIntelliTextAuthoringVersionsPath(textbookId),
+    normalizeIntelliTextId(versionId, "versionId"),
+  ].join("/");
+}
+
+export function buildIntelliTextAuthoringSectionsPath(
+  textbookId,
+  versionId
+) {
+  return [
+    buildIntelliTextAuthoringVersionPath(textbookId, versionId),
+    INTELLITEXT_COLLECTIONS.SECTIONS,
+  ].join("/");
+}
+
+export function buildIntelliTextAuthoringSectionPath(
+  textbookId,
+  versionId,
+  sectionId
+) {
+  return [
+    buildIntelliTextAuthoringSectionsPath(textbookId, versionId),
+    normalizeIntelliTextId(sectionId, "sectionId"),
+  ].join("/");
+}
+
+export function buildIntelliTextAuthoringBlocksPath(
+  textbookId,
+  versionId,
+  sectionId
+) {
+  return [
+    buildIntelliTextAuthoringSectionPath(
+      textbookId,
+      versionId,
+      sectionId
+    ),
+    INTELLITEXT_COLLECTIONS.BLOCKS,
+  ].join("/");
+}
+
+export function buildIntelliTextAuthoringBlockPath(
+  textbookId,
+  versionId,
+  sectionId,
+  blockId
+) {
+  return [
+    buildIntelliTextAuthoringBlocksPath(
+      textbookId,
+      versionId,
+      sectionId
+    ),
+    normalizeIntelliTextId(blockId, "blockId"),
   ].join("/");
 }
 

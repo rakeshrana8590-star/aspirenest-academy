@@ -360,8 +360,8 @@ export default function AdminNotesManageRoute({
           <h1>Notes Control Room</h1>
 
           <p>
-            Review, filter, open, edit, export, and safely manage every
-            CTET/TET PDF note from one premium notes command center.
+            Review every canonical CTET/TET note, preserve its PDF fallback,
+            and open the controlled IntelliText authoring studio from one command center.
           </p>
 
           <div className="adminNotesLaunchHeroActions">
@@ -371,6 +371,14 @@ export default function AdminNotesManageRoute({
               onClick={() => navigate("/admin/content/notes/form")}
             >
               + Add Note PDF
+            </button>
+
+            <button
+              type="button"
+              className="adminNotesLaunchGhostBtn"
+              onClick={() => navigate("/admin/content/notes/intellitext")}
+            >
+              ✦ Native Authoring
             </button>
 
             {typeof onBackfillProtectedNotesAssets === "function" ? (
@@ -702,6 +710,20 @@ export default function AdminNotesManageRoute({
                         Edit
                       </button>
 
+                      <button
+                        type="button"
+                        className="adminNotesNativeAuthoringButton"
+                        onClick={() =>
+                          navigate(
+                            `/admin/content/notes/intellitext/${encodeURIComponent(
+                              note.id
+                            )}`
+                          )
+                        }
+                      >
+                        Open IntelliText Studio
+                      </button>
+
                       <div className="adminNotesManageActionMenuWrap">
                         <button
                           type="button"
@@ -759,6 +781,20 @@ export default function AdminNotesManageRoute({
                               }}
                             >
                               ✏️ Edit
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigate(
+                                  `/admin/content/notes/intellitext/${encodeURIComponent(
+                                    note.id
+                                  )}`
+                                );
+                                setActiveMenuId(null);
+                              }}
+                            >
+                              ✦ Open IntelliText Studio
                             </button>
 
                             <button
@@ -826,6 +862,13 @@ export default function AdminNotesManageRoute({
             onClick={() => navigate("/admin/content/notes/pdfs")}
           >
             Published PDFs
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate("/admin/content/notes/intellitext")}
+          >
+            IntelliText Authoring
           </button>
 
           <button

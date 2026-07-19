@@ -16,6 +16,127 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    /* ================================
+       IntelliText Admin Authoring + Published Graph — Phase 8B-5
+       DIRECT_STUDENT_DRAFT_READ=DENIED
+       Published reads require explicit publicRead or one active entitlement.
+       ================================ */
+
+    function isValidLearningTextAccessMap(access) {
+      return access is map &&
+        access.keys().hasOnly([
+          "publicRead",
+          "readEntitlementIds",
+          "requiredPlanCode"
+        ]) &&
+        access.publicRead is bool &&
+        access.readEntitlementIds is list &&
+        access.readEntitlementIds.size() <= 6 &&
+        (
+          access.requiredPlanCode == null ||
+          access.requiredPlanCode is string
+        );
+    }
+
+    function isActiveLearningTextEntitlementData(data) {
+      let accessFrom = data.get("accessFrom", null);
+      let accessUntil = data.get("accessUntil", null);
+      let noExpiry = data.get("noExpiry", false) == true;
+      let untilManualChange = data.get("untilManualChange", false) == true;
+      return data.status == "active" &&
+        (
+          accessFrom == null ||
+          (accessFrom is timestamp && accessFrom <= request.time)
+        ) &&
+        (
+          noExpiry ||
+          untilManualChange ||
+          (accessUntil is timestamp && accessUntil > request.time)
+        );
+    }
+
+    function hasActiveLearningTextEntitlement(entitlementId) {
+      let entitlementPath = /databases/$(database)/documents/studentEntitlements/$(request.auth.uid)/items/$(entitlementId);
+      return entitlementId is string &&
+        entitlementId.size() >= 1 &&
+        entitlementId.size() <= 128 &&
+        exists(entitlementPath) &&
+        isActiveLearningTextEntitlementData(
+          get(entitlementPath).data
+        );
+    }
+
+    function hasValidLearningTextEntitlement(data) {
+      let ids = data.access.readEntitlementIds;
+      return isSignedIn() &&
+        ids.size() >= 1 &&
+        ids.size() <= 6 &&
+        (
+          (ids.size() > 0 && hasActiveLearningTextEntitlement(ids[0])) ||
+          (ids.size() > 1 && hasActiveLearningTextEntitlement(ids[1])) ||
+          (ids.size() > 2 && hasActiveLearningTextEntitlement(ids[2])) ||
+          (ids.size() > 3 && hasActiveLearningTextEntitlement(ids[3])) ||
+          (ids.size() > 4 && hasActiveLearningTextEntitlement(ids[4])) ||
+          (ids.size() > 5 && hasActiveLearningTextEntitlement(ids[5]))
+        );
+    }
+
+    function isPublishedLearningTextReadable(data, textbookId) {
+      return data.textbookId == textbookId &&
+        data.resourceType == "NOTE" &&
+        data.deliveryMode == "NATIVE_TEXT" &&
+        data.publicationState == "PUBLISHED" &&
+        data.nativeReady == true &&
+        data.contentVersion is int &&
+        data.contentVersion >= 1 &&
+        isValidLearningTextAccessMap(data.access) &&
+        (
+          data.access.publicRead == true ||
+          hasValidLearningTextEntitlement(data)
+        );
+    }
+
+    match /learningTexts/{textbookId} {
+      allow get: if isAdmin() ||
+        isPublishedLearningTextReadable(resource.data, textbookId);
+      allow list: if isAdmin();
+      allow create, update, delete: if isAdmin();
+
+      match /authoringVersions/{versionId} {
+        allow read, write: if isAdmin();
+
+        match /sections/{sectionId} {
+          allow read, write: if isAdmin();
+
+          match /blocks/{blockId} {
+            allow read, write: if isAdmin();
+          }
+        }
+      }
+
+      match /sections/{sectionId} {
+        allow get, list: if isAdmin() ||
+          isPublishedLearningTextReadable(
+            get(
+              /databases/$(database)/documents/learningTexts/$(textbookId)
+            ).data,
+            textbookId
+          );
+        allow create, update, delete: if isAdmin();
+
+        match /blocks/{blockId} {
+          allow get, list: if isAdmin() ||
+            isPublishedLearningTextReadable(
+              get(
+                /databases/$(database)/documents/learningTexts/$(textbookId)
+              ).data,
+              textbookId
+            );
+          allow create, update, delete: if isAdmin();
+        }
+      }
+    }
+
     function isProgressOwner() {
       return isSignedIn() &&
         request.resource.data.userId == request.auth.uid;

@@ -26,6 +26,9 @@ import {
   resolveContinueReadingSection,
   writeIntelliTextProgress,
 } from "../../../access/intelliTextReaderProgress";
+import {
+  intelliTextPublishedContentClient,
+} from "../../../access/intelliTextPublishedContentClient";
 import IntelliTextBlockRenderer from "./IntelliTextBlockRenderer";
 import IntelliTextStudyWorkspace from "./IntelliTextStudyWorkspace";
 
@@ -140,12 +143,81 @@ export default function StudentNativeReaderRoute({
     [accessDecision]
   );
 
-  const model = useMemo(
+  const inlineModel = useMemo(
     () =>
       note
         ? buildIntelliTextReaderModel(note)
         : null,
     [note]
+  );
+
+  const [publishedModel, setPublishedModel] =
+    useState(null);
+  const [publishedContentState, setPublishedContentState] =
+    useState("IDLE");
+  const [publishedContentError, setPublishedContentError] =
+    useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    setPublishedModel(null);
+    setPublishedContentError("");
+
+    if (
+      !note ||
+      accessPresentation.canOpen !== true
+    ) {
+      setPublishedContentState("IDLE");
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setPublishedContentState("LOADING");
+
+    intelliTextPublishedContentClient
+      .loadPublishedTextbook(decodedTextbookId)
+      .then((publishedNote) => {
+        if (cancelled) return;
+
+        const nextModel =
+          buildIntelliTextReaderModel(
+            publishedNote
+          );
+
+        if (!nextModel?.ready) {
+          throw new Error(
+            "The published IntelliText graph is incomplete."
+          );
+        }
+
+        setPublishedModel(nextModel);
+        setPublishedContentState("READY");
+      })
+      .catch((error) => {
+        if (cancelled) return;
+
+        setPublishedContentError(
+          error?.message ||
+            "Published IntelliText content could not be loaded."
+        );
+        setPublishedContentState("ERROR");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    note,
+    decodedTextbookId,
+    accessPresentation.canOpen,
+  ]);
+
+  const model = useMemo(
+    () =>
+      publishedModel || inlineModel,
+    [publishedModel, inlineModel]
   );
 
   const [activeSectionId, setActiveSectionId] =
@@ -354,13 +426,32 @@ export default function StudentNativeReaderRoute({
     );
   }
 
+  if (
+    !inlineModel?.ready &&
+    publishedContentState === "LOADING"
+  ) {
+    return (
+      <main className="intelliTextReaderPage">
+        <ReaderState
+          badge="SECURE CONTENT LOADING"
+          title="Loading the published IntelliText graph…"
+          text="Your existing Notes access was verified before any native section or learning block was requested."
+          onSecondary={returnToNotes}
+        />
+      </main>
+    );
+  }
+
   if (!model?.ready) {
     return (
       <main className="intelliTextReaderPage">
         <ReaderState
           badge="READER NOT READY"
           title="This native note is not ready for student delivery."
-          text="Its canonical sections or approved learning blocks are incomplete. The existing PDF inventory remains unchanged."
+          text={
+            publishedContentError ||
+            "Its canonical sections or approved learning blocks are incomplete. The existing PDF inventory remains unchanged."
+          }
           onSecondary={returnToNotes}
         />
       </main>

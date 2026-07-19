@@ -3,6 +3,7 @@ export { default as AdminNotesPlanRoute } from "./AdminNotesPlanRoute";
 export { default as AdminNotesSubjectRoute } from "./AdminNotesSubjectRoute";
 export { default as AdminNotesChapterRoute } from "./AdminNotesChapterRoute";
 export { default as AdminNotesManageRoute } from "./AdminNotesManageRoute";
+export { default as AdminIntelliTextAuthoringRoute } from "./AdminIntelliTextAuthoringRoute";
 
 export { default as AdminNotesHero } from "./AdminNotesHero";
 export { default as AdminNotesEmptyState } from "./AdminNotesEmptyState";
