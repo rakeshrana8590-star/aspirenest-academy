@@ -1211,3 +1211,79 @@
       gap: 4px;
     }
   }
+
+/* Phase 8B-7 — private mock-to-mastery actions */
+.reviewMasteryNotice,
+.reviewMasteryError {
+  margin: 16px 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.reviewMasteryNotice {
+  border: 1px solid rgba(22, 163, 74, 0.28);
+  background: rgba(22, 163, 74, 0.08);
+}
+
+.reviewMasteryError {
+  border: 1px solid rgba(220, 38, 38, 0.28);
+  background: rgba(220, 38, 38, 0.08);
+}
+
+.reviewMasteryActions {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.035);
+}
+
+.reviewMasteryActions > span {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.reviewMasteryActions > p {
+  margin: 0 0 12px;
+  line-height: 1.55;
+}
+
+.reviewMasteryActions > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.reviewMasteryActions button {
+  min-height: 40px;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 750;
+}
+
+.reviewMasteryActions button.secondary {
+  border: 1px solid rgba(100, 116, 139, 0.32);
+  background: transparent;
+}
+
+.reviewMasteryActions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
+@media (max-width: 640px) {
+  .reviewMasteryActions > div {
+    display: grid;
+  }
+
+  .reviewMasteryActions button {
+    width: 100%;
+  }
+}

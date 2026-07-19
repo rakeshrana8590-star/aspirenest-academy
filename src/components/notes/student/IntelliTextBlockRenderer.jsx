@@ -149,7 +149,8 @@ export default function IntelliTextBlockRenderer({
   const text = textFromPayload(payload);
   const items = normalizeItems(payload);
 
-  switch (type) {
+  const renderBlock = () => {
+    switch (type) {
     case "HEADING":
       return (
         <h2 className="intelliTextBlockHeading">
@@ -354,5 +355,17 @@ export default function IntelliTextBlockRenderer({
           This approved learning block is not available in this reader version.
         </div>
       );
-  }
+    }
+  };
+
+  return (
+    <div
+      id={`intellitext-block-content-${cleanText(block?.blockId)}`}
+      className="intelliTextBlockContentAnchor"
+      data-intellitext-block-content="true"
+      data-block-id={cleanText(block?.blockId)}
+    >
+      {renderBlock()}
+    </div>
+  );
 }

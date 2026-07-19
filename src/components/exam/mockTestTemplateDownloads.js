@@ -64,6 +64,12 @@ export const downloadMockTestXlsxTemplate = () => {
       "Negative Marks": 0,
       "Question Status": "published",
       "Save To Question Bank": "yes",
+      "Concept ID": "child_development",
+      "Concept Label": "Child Development",
+      "Textbook ID": "cdp_note_1",
+      "Section ID": "section_1",
+      "Block ID": "block_1",
+      "Content Version": 1,
     },
   ];
 
@@ -88,6 +94,12 @@ export const downloadMockTestXlsxTemplate = () => {
     { wch: 16 },
     { wch: 20 },
     { wch: 22 },
+    { wch: 24 },
+    { wch: 32 },
+    { wch: 24 },
+    { wch: 24 },
+    { wch: 24 },
+    { wch: 18 },
   ];
 
   const workbook = XLSX.utils.book_new();
@@ -120,6 +132,12 @@ export const downloadMockTestCsvTemplate = () => {
     "Positive Marks",
     "Negative Marks",
     "Question Status",
+    "Concept ID",
+    "Concept Label",
+    "Textbook ID",
+    "Section ID",
+    "Block ID",
+    "Content Version",
   ];
 
   const sampleRow = [
@@ -143,6 +161,12 @@ export const downloadMockTestCsvTemplate = () => {
     "1",
     "0",
     "published",
+    "child_development",
+    "Child Development",
+    "cdp_note_1",
+    "section_1",
+    "block_1",
+    "1",
   ];
 
   const safeCsvValue = (value = "") =>

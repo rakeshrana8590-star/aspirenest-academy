@@ -1,4 +1,10 @@
 export const createEmptyMockQuestion = () => ({
+    blockId: "",
+    conceptId: "",
+    conceptLabel: "",
+    contentVersion: "",
+    sectionId: "",
+    textbookId: "",
     question: "",
     option1: "",
     option2: "",
@@ -145,6 +151,12 @@ export const createEmptyMockQuestion = () => ({
   export const buildMockTestQuestionsFormFromTest = (test = {}) =>
     test.questions?.length
       ? test.questions.map((question) => ({
+          blockId: question.blockId || "",
+          conceptId: question.conceptId || "",
+          conceptLabel: question.conceptLabel || "",
+          contentVersion: question.contentVersion?.toString() || "",
+          sectionId: question.sectionId || "",
+          textbookId: question.textbookId || "",
           question: question.question || "",
           option1: question.option1 || "",
           option2: question.option2 || "",

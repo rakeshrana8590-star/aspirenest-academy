@@ -14,6 +14,19 @@ import {
   isExamAnswerCorrect,
   normalizeExamAnswerKey,
 } from "./examAnswerUtils.js";
+import {
+  createIntelliTextMasteryClient,
+} from "../../access/intelliTextMasteryClient";
+import {
+  buildEvaluatedQuestionId,
+} from "../../access/intelliTextMasteryAggregation";
+import {
+  buildIntelliTextMistakeId,
+  buildIntelliTextResultIdentity,
+} from "../../access/intelliTextMasteryContract";
+import {
+  hasCompleteMockQuestionConceptLink,
+} from "../../access/mockTestConceptLinkingContract";
 
 const safeParseJson = (value, fallback = {}) => {
   try {
@@ -67,6 +80,13 @@ export default function ExamReviewRoute({
 }) {
   const navigate = useNavigate();
   const { testId } = useParams();
+  const masteryClient = React.useMemo(
+    () => createIntelliTextMasteryClient(),
+    []
+  );
+  const [masteryBusyId, setMasteryBusyId] = React.useState("");
+  const [masteryNotice, setMasteryNotice] = React.useState("");
+  const [masteryError, setMasteryError] = React.useState("");
   const activeResultAttemptId = decodeURIComponent(testId || "");
 
   const test = (Array.isArray(universalContent)
@@ -443,6 +463,57 @@ export default function ExamReviewRoute({
     }))
     .filter((item) => Boolean(item.question));
 
+  const rawResultIdentity =
+    savedResultForTest?.attemptKey ||
+    savedResultForTest?.attemptId ||
+    `${test.id}_${user?.email || "anonymous"}_${getResultTimestamp(
+      activeAttemptState?.startedAt ||
+        activeAttemptState?.submittedAt ||
+        savedResultForTest?.attemptStartedAt ||
+        savedResultForTest?.createdAt ||
+        0
+    )}`;
+  const learningResultId = buildIntelliTextResultIdentity(
+    rawResultIdentity
+  );
+
+  const updateMistakeLearningState = async (
+    question,
+    actualQuestionIndex,
+    state
+  ) => {
+    const questionId = buildEvaluatedQuestionId(
+      question,
+      actualQuestionIndex
+    );
+    const mistakeId = buildIntelliTextMistakeId({
+      questionId,
+      resultId: learningResultId,
+    });
+
+    setMasteryBusyId(mistakeId);
+    setMasteryNotice("");
+    setMasteryError("");
+
+    try {
+      await masteryClient.updateMistakeState(mistakeId, state, {
+        now: new Date(),
+      });
+      setMasteryNotice(
+        state === "RESOLVED"
+          ? "Mistake marked resolved in your private workspace."
+          : "Retry progress saved in your private workspace."
+      );
+    } catch (error) {
+      setMasteryError(
+        error?.message ||
+          "Private Mistake Book state could not be updated. Reopen the result once and retry."
+      );
+    } finally {
+      setMasteryBusyId("");
+    }
+  };
+
   const correctCount = reviewQuestions.filter(
     ({ actualQuestionIndex, question }) =>
       isExamAnswerCorrect(
@@ -509,6 +580,17 @@ export default function ExamReviewRoute({
         <p>
           Review your answers, correct answers, and explanations.
         </p>
+
+        {masteryNotice ? (
+          <p className="reviewMasteryNotice" role="status">
+            {masteryNotice}
+          </p>
+        ) : null}
+        {masteryError ? (
+          <p className="reviewMasteryError" role="alert">
+            {masteryError}
+          </p>
+        ) : null}
 
         <div className="reviewSummaryGrid">
           <div>
@@ -674,6 +756,63 @@ export default function ExamReviewRoute({
                         <p>{question.explanation}</p>
                       </div>
                     )}
+
+
+                    {!isCorrect ? (
+                      <div className="reviewMasteryActions">
+                        <span>PRIVATE PREPARATION LOOP</span>
+                        <p>
+                          Repair this wrong or skipped question without copying
+                          protected answer content into your Mistake Book.
+                        </p>
+                        <div>
+                          <button
+                            type="button"
+                            disabled={
+                              !hasCompleteMockQuestionConceptLink(question)
+                            }
+                            onClick={() => {
+                              const route =
+                                masteryClient.buildExactSectionRoute(question);
+
+                              if (route) {
+                                navigate(route);
+                              }
+                            }}
+                          >
+                            Study exact textbook section
+                          </button>
+                          <button
+                            type="button"
+                            className="secondary"
+                            disabled={Boolean(masteryBusyId)}
+                            onClick={() =>
+                              updateMistakeLearningState(
+                                question,
+                                actualQuestionIndex,
+                                "RETRIED"
+                              )
+                            }
+                          >
+                            Mark retried
+                          </button>
+                          <button
+                            type="button"
+                            className="secondary"
+                            disabled={Boolean(masteryBusyId)}
+                            onClick={() =>
+                              updateMistakeLearningState(
+                                question,
+                                actualQuestionIndex,
+                                "RESOLVED"
+                              )
+                            }
+                          >
+                            Mark resolved
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 </details>
               );

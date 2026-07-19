@@ -3,6 +3,9 @@ import { addDoc, collection } from "firebase/firestore";
 
 import { db } from "../../firebase";
 import { normalizeExamQuestion } from "./examAnswerUtils.js";
+import {
+  preserveMockQuestionConceptLink,
+} from "../../access/mockTestConceptLinkingContract";
 
 export const convertGoogleDriveUrlToDownloadUrl = (url = "") => {
   const fileIdMatch =
@@ -25,7 +28,15 @@ export const importMockTestJsonAsDraft = async ({
   }
 
   const normalizedQuestions = importedTest.questions.map((question) =>
-    normalizeExamQuestion(question)
+    preserveMockQuestionConceptLink({
+      ...normalizeExamQuestion(question),
+      blockId: question.blockId || "",
+      conceptId: question.conceptId || "",
+      conceptLabel: question.conceptLabel || "",
+      contentVersion: question.contentVersion || "",
+      sectionId: question.sectionId || "",
+      textbookId: question.textbookId || "",
+    })
   );
 
   const importPayload = {
@@ -78,7 +89,8 @@ const buildImportedQuestionsFromRows = ({
   testInfo = {},
 }) =>
   questionRows.map((row, index) =>
-    normalizeExamQuestion({
+    preserveMockQuestionConceptLink({
+    ...normalizeExamQuestion({
     questionNumber: Number(row["Question Number"] || index + 1),
     question: row["Question"]?.toString().trim() || "",
     option1: row["Option A"]?.toString().trim() || "",
@@ -108,6 +120,13 @@ const buildImportedQuestionsFromRows = ({
       row["Question Status"]?.toString().trim() || "published",
     saveToQuestionBank:
       row["Save To Question Bank"]?.toString().trim() || "yes",
+    }),
+    blockId: row["Block ID"]?.toString().trim() || "",
+    conceptId: row["Concept ID"]?.toString().trim() || "",
+    conceptLabel: row["Concept Label"]?.toString().trim() || "",
+    contentVersion: row["Content Version"]?.toString().trim() || "",
+    sectionId: row["Section ID"]?.toString().trim() || "",
+    textbookId: row["Textbook ID"]?.toString().trim() || "",
     })
   );
 

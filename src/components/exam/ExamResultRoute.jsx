@@ -19,6 +19,12 @@ import {
   saveMockTestLeaderboardEntry,
 } from "../../access/mockTestLeaderboardClient";
 import {
+  createIntelliTextMasteryClient,
+} from "../../access/intelliTextMasteryClient";
+import {
+  createEvaluatedMockQuestion,
+} from "../../access/intelliTextMasteryAggregation";
+import {
   getAttemptAnswerStorageKey,
   getAttemptStorageKey,
   removeAttemptAnswerState,
@@ -196,6 +202,77 @@ const AutoSaveMockResult = ({
       isActive = false;
     };
   }, [testId, userEmail, attemptSaveKey]);
+
+  return null;
+};
+
+const AutoSyncMockMastery = ({
+  attemptId,
+  evaluatedQuestions,
+  resultId,
+  test,
+  userUid,
+}) => {
+  const client = React.useMemo(
+    () => createIntelliTextMasteryClient(),
+    []
+  );
+
+  React.useEffect(() => {
+    if (!userUid || !resultId || !test?.id) {
+      return undefined;
+    }
+
+    const successKey = `mockMasterySyncedV1_${resultId}`;
+    const inFlightKey = `${successKey}_inFlight`;
+
+    if (
+      sessionStorage.getItem(successKey) ||
+      sessionStorage.getItem(inFlightKey)
+    ) {
+      return undefined;
+    }
+
+    sessionStorage.setItem(inFlightKey, "yes");
+    let isActive = true;
+
+    Promise.resolve(
+      client.syncResultLearning({
+        attemptId,
+        evaluatedQuestions,
+        now: new Date(),
+        resultId,
+        test,
+      })
+    )
+      .then(() => {
+        if (isActive) {
+          sessionStorage.setItem(successKey, "yes");
+        }
+      })
+      .catch((error) => {
+        if (isActive) {
+          console.warn(
+            "Private Mistake Book and mastery sync will retry when this owned result is reopened:",
+            error
+          );
+        }
+      })
+      .finally(() => {
+        sessionStorage.removeItem(inFlightKey);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [
+    attemptId,
+    client,
+    evaluatedQuestions,
+    resultId,
+    test,
+    userUid,
+  ]);
 
   return null;
 };
@@ -675,6 +752,20 @@ export default function ExamResultRoute({
     }))
     .filter((item) => Boolean(item.question));
 
+  const evaluatedQuestions = resultQuestions.map(
+    ({ actualQuestionIndex, question }) =>
+      createEvaluatedMockQuestion({
+        answered: Boolean(attemptAnswers[actualQuestionIndex]),
+        correct: isExamAnswerCorrect(
+          attemptAnswers[actualQuestionIndex],
+          question.answer,
+          question
+        ),
+        question,
+        questionIndex: actualQuestionIndex,
+      })
+  );
+
   const calculatedQuestionCount = resultQuestions.length;
 
   const calculatedCorrectCount = resultQuestions.filter(
@@ -1041,6 +1132,14 @@ export default function ExamResultRoute({
             saveToLeaderboard={saveToLeaderboard}
           />
         ) : null}
+
+        <AutoSyncMockMastery
+          attemptId={attemptSaveKey}
+          evaluatedQuestions={evaluatedQuestions}
+          resultId={attemptSaveKey}
+          test={test}
+          userUid={user?.uid || ""}
+        />
 
         <div className="examResultHero">
           <div className="examResultHeroContent">

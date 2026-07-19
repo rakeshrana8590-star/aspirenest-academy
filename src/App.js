@@ -163,6 +163,9 @@ import { deleteMockTest } from "./components/exam/mockTestAdminActions.js";
 
 import {
   createEmptyMockQuestion, createDefaultMockTestForm, buildMockTestFormFromTest, buildMockTestQuestionsFormFromTest, } from "./components/exam/mockTestFormUtils.js";
+import {
+  normalizeMockQuestionConceptLink,
+} from "./access/mockTestConceptLinkingContract";
 
 import { useExamAttemptState } from "./components/exam/useExamAttemptState.js";
 import { useExamTimer } from "./components/exam/useExamTimer.js";
@@ -1339,8 +1342,17 @@ const handleSaveMockTest = async () => {
       const negativeMarks = Number(
         q.negativeMarks ?? finalNegativeMarks
       );
+      const conceptLink = normalizeMockQuestionConceptLink(q, {
+        allowEmpty: true,
+      });
 
       return {
+        blockId: conceptLink?.blockId || "",
+        conceptId: conceptLink?.conceptId || "",
+        conceptLabel: conceptLink?.conceptLabel || "",
+        contentVersion: conceptLink?.contentVersion || 0,
+        sectionId: conceptLink?.sectionId || "",
+        textbookId: conceptLink?.textbookId || "",
         questionNumber: index + 1,
         question: q.question?.trim() || "",
         option1: q.option1?.trim() || "",

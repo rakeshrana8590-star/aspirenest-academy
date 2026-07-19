@@ -883,7 +883,7 @@ export default function AdminMockTestAddRoute({
             <p>
               Add unlimited questions manually. Each question supports options,
               answer key, explanation, difficulty, topic tag, marks, negative
-              marks, language, and status.
+              marks, language, status, and optional IntelliText concept mapping.
             </p>
           </div>
 
@@ -1040,6 +1040,98 @@ export default function AdminMockTestAddRoute({
                     }
                   />
                 </AdminMockField>
+
+                <details className="adminMockConceptMapping">
+                  <summary>Optional IntelliText concept mapping</summary>
+                  <p>
+                    Fill all six fields together to connect a wrong or skipped
+                    question with the exact protected textbook section. Leave all fields blank
+                    when no mapping is available.
+                  </p>
+
+                  <div className="contentStudioGrid">
+                    <AdminMockField label="Concept ID">
+                      <input
+                        type="text"
+                        placeholder="e.g. child_development"
+                        value={questionItem.conceptId || ""}
+                        onChange={(e) =>
+                          updateQuestion(questionIndex, {
+                            conceptId: e.target.value,
+                          })
+                        }
+                      />
+                    </AdminMockField>
+
+                    <AdminMockField label="Concept Label">
+                      <input
+                        type="text"
+                        maxLength="180"
+                        placeholder="e.g. Child Development"
+                        value={questionItem.conceptLabel || ""}
+                        onChange={(e) =>
+                          updateQuestion(questionIndex, {
+                            conceptLabel: e.target.value,
+                          })
+                        }
+                      />
+                    </AdminMockField>
+
+                    <AdminMockField label="Textbook ID">
+                      <input
+                        type="text"
+                        placeholder="Published IntelliText textbook ID"
+                        value={questionItem.textbookId || ""}
+                        onChange={(e) =>
+                          updateQuestion(questionIndex, {
+                            textbookId: e.target.value,
+                          })
+                        }
+                      />
+                    </AdminMockField>
+
+                    <AdminMockField label="Section ID">
+                      <input
+                        type="text"
+                        placeholder="Published section ID"
+                        value={questionItem.sectionId || ""}
+                        onChange={(e) =>
+                          updateQuestion(questionIndex, {
+                            sectionId: e.target.value,
+                          })
+                        }
+                      />
+                    </AdminMockField>
+
+                    <AdminMockField label="Block ID">
+                      <input
+                        type="text"
+                        placeholder="Published block ID"
+                        value={questionItem.blockId || ""}
+                        onChange={(e) =>
+                          updateQuestion(questionIndex, {
+                            blockId: e.target.value,
+                          })
+                        }
+                      />
+                    </AdminMockField>
+
+                    <AdminMockField label="Content Version">
+                      <input
+                        type="number"
+                        min="1"
+                        step="1"
+                        placeholder="e.g. 1"
+                        value={questionItem.contentVersion || ""}
+                        onChange={(e) =>
+                          updateQuestion(questionIndex, {
+                            contentVersion: e.target.value,
+                          })
+                        }
+                      />
+                    </AdminMockField>
+                  </div>
+                </details>
 
                 <div className="adminMockAddQuestionBankSettings">
                   <AdminMockField label="Question Status">

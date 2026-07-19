@@ -11,8 +11,14 @@ import {
 import {
   createIntelliTextRevisionClient,
 } from "../../../access/intelliTextRevisionClient";
+import {
+  createIntelliTextMasteryClient,
+} from "../../../access/intelliTextMasteryClient";
 import IntelliTextFlashcardReview from "./IntelliTextFlashcardReview";
 import IntelliTextRevisionQueue from "./IntelliTextRevisionQueue";
+import IntelliTextMistakeBook from "./IntelliTextMistakeBook";
+import IntelliTextWeakConcepts from "./IntelliTextWeakConcepts";
+import IntelliTextChapterMastery from "./IntelliTextChapterMastery";
 
 const EMPTY_WORKSPACE = Object.freeze({
   due: Object.freeze([]),
@@ -20,6 +26,12 @@ const EMPTY_WORKSPACE = Object.freeze({
   inactive: Object.freeze([]),
   revisionItems: Object.freeze([]),
   upcoming: Object.freeze([]),
+});
+
+const EMPTY_MASTERY_WORKSPACE = Object.freeze({
+  mastery: Object.freeze([]),
+  mistakeBook: Object.freeze([]),
+  weakConcepts: Object.freeze([]),
 });
 
 const MANUAL_SOURCE = Object.freeze({
@@ -39,7 +51,14 @@ export default function MyStudyWorkspaceRoute({
     () => createIntelliTextRevisionClient(),
     []
   );
+  const masteryClient = useMemo(
+    () => createIntelliTextMasteryClient(),
+    []
+  );
   const [workspace, setWorkspace] = useState(EMPTY_WORKSPACE);
+  const [masteryWorkspace, setMasteryWorkspace] = useState(
+    EMPTY_MASTERY_WORKSPACE
+  );
   const [activeTab, setActiveTab] = useState("DUE");
   const [loading, setLoading] = useState(Boolean(user));
   const [busy, setBusy] = useState(false);
@@ -53,6 +72,7 @@ export default function MyStudyWorkspaceRoute({
   const loadWorkspace = useCallback(async () => {
     if (!user?.uid) {
       setWorkspace(EMPTY_WORKSPACE);
+      setMasteryWorkspace(EMPTY_MASTERY_WORKSPACE);
       setLoading(false);
       return;
     }
@@ -63,11 +83,17 @@ export default function MyStudyWorkspaceRoute({
     setError("");
 
     try {
-      setWorkspace(
-        await client.loadWorkspace({
+      const [revisionWorkspace, nextMasteryWorkspace] = await Promise.all([
+        client.loadWorkspace({
           now: loadNow,
-        })
-      );
+        }),
+        masteryClient.loadWorkspace({
+          now: loadNow,
+        }),
+      ]);
+
+      setWorkspace(revisionWorkspace);
+      setMasteryWorkspace(nextMasteryWorkspace);
     } catch (loadError) {
       setError(
         loadError?.message ||
@@ -76,7 +102,7 @@ export default function MyStudyWorkspaceRoute({
     } finally {
       setLoading(false);
     }
-  }, [client, user?.uid]);
+  }, [client, masteryClient, user?.uid]);
 
   useEffect(() => {
     loadWorkspace();
@@ -143,6 +169,34 @@ export default function MyStudyWorkspaceRoute({
     );
   };
 
+  const openMistakeReview = (item) => {
+    navigate(masteryClient.buildSourceReviewRoute(item));
+  };
+
+  const openMistakeExactSection = (item) => {
+    const route = masteryClient.buildExactSectionRoute(item);
+
+    if (route) {
+      navigate(route);
+    }
+  };
+
+  const openWeakConcept = (item) => {
+    if (item.textbookId) {
+      navigate(
+        `/ctet-tet/notes/read/${encodeURIComponent(item.textbookId)}`
+      );
+    }
+  };
+
+  const openMasteryChapter = (item) => {
+    if (item.textbookId) {
+      navigate(
+        `/ctet-tet/notes/read/${encodeURIComponent(item.textbookId)}`
+      );
+    }
+  };
+
   if (!user?.uid) {
     return (
       <main className="intelliTextRevisionWorkspacePage">
@@ -190,8 +244,8 @@ export default function MyStudyWorkspaceRoute({
           <span>ASPIRENEST PREPARATION ENGINE</span>
           <h1>My Study Workspace</h1>
           <p>
-            Turn important concepts into private flashcards, recall them before
-            revealing answers, and follow a calm due-date revision queue.
+            Turn important concepts into private flashcards, repair mock-test
+            mistakes, revisit exact textbook sections, and build chapter mastery.
           </p>
         </div>
 
@@ -209,6 +263,14 @@ export default function MyStudyWorkspaceRoute({
             <span>Upcoming</span>
           </article>
           <article>
+            <strong>{masteryWorkspace.mistakeBook.length}</strong>
+            <span>Mistakes</span>
+          </article>
+          <article>
+            <strong>{masteryWorkspace.mastery.length}</strong>
+            <span>Mastery chapters</span>
+          </article>
+          <article>
             <strong>Private</strong>
             <span>Owner-only</span>
           </article>
@@ -217,7 +279,7 @@ export default function MyStudyWorkspaceRoute({
 
       <section className="intelliTextRevisionWorkspaceCommand">
         <div>
-          <span>READ → HIGHLIGHT → ACTIVE RECALL → SPACED REVISION</span>
+          <span>READ → HIGHLIGHT → ACTIVE RECALL → PRACTICE → SPACED REVISION → MASTERY</span>
           <h2>One private preparation loop</h2>
         </div>
         <button
@@ -247,6 +309,9 @@ export default function MyStudyWorkspaceRoute({
           ["DUE", `Due (${workspace.due.length})`],
           ["FLASHCARDS", `Flashcards (${workspace.flashcards.length})`],
           ["REVISION", `Revision (${allRevisionItems.length})`],
+          ["MISTAKE_BOOK", `Mistake Book (${masteryWorkspace.mistakeBook.length})`],
+          ["WEAK_CONCEPTS", `Weak Concepts (${masteryWorkspace.weakConcepts.length})`],
+          ["MASTERY", `Mastery (${masteryWorkspace.mastery.length})`],
         ].map(([id, label]) => (
           <button
             type="button"
@@ -389,6 +454,42 @@ export default function MyStudyWorkspaceRoute({
               );
             }
           }}
+        />
+      ) : null}
+
+
+      {!loading && activeTab === "MISTAKE_BOOK" ? (
+        <IntelliTextMistakeBook
+          items={masteryWorkspace.mistakeBook}
+          now={now}
+          busy={busy}
+          onOpenReview={openMistakeReview}
+          onOpenExactSection={openMistakeExactSection}
+          onStateChange={(item, state) =>
+            runMutation(
+              () =>
+                masteryClient.updateMistakeState(
+                  item.mistakeId || item.id,
+                  state,
+                  { now: new Date() }
+                ),
+              "Mistake Book state updated."
+            )
+          }
+        />
+      ) : null}
+
+      {!loading && activeTab === "WEAK_CONCEPTS" ? (
+        <IntelliTextWeakConcepts
+          items={masteryWorkspace.weakConcepts}
+          onOpenConcept={openWeakConcept}
+        />
+      ) : null}
+
+      {!loading && activeTab === "MASTERY" ? (
+        <IntelliTextChapterMastery
+          items={masteryWorkspace.mastery}
+          onOpenChapter={openMasteryChapter}
         />
       ) : null}
 

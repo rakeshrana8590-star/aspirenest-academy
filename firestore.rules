@@ -609,6 +609,363 @@ service cloud.firestore {
         request.resource.data.state == "ACTIVE";
     }
 
+    function isValidMasteryOptionalLabel(value) {
+      return value is string && value.size() <= 300;
+    }
+
+    function isValidMasteryConceptLabel(value) {
+      return value is string && value.size() <= 180;
+    }
+
+    function isValidMistakeSourceKind(value) {
+      return value in ["WRONG", "UNANSWERED"];
+    }
+
+    function isValidMistakeState(value) {
+      return value in [
+        "OPEN",
+        "RETRY_DUE",
+        "RETRIED",
+        "RESOLVED",
+        "ARCHIVED"
+      ];
+    }
+
+    function isValidMasteryState(value) {
+      return value in [
+        "STARTING",
+        "BUILDING",
+        "RETRY_DUE",
+        "STRONG",
+        "EXAM_READY"
+      ];
+    }
+
+    function isValidQuestionConceptMapping(data) {
+      return (
+        data.conceptId == "" &&
+        data.conceptLabel == "" &&
+        data.textbookId == "" &&
+        data.sectionId == "" &&
+        data.blockId == "" &&
+        data.contentVersion == 0
+      ) || (
+        isValidStudyId(data.conceptId) &&
+        isValidMasteryConceptLabel(data.conceptLabel) &&
+        data.conceptLabel.size() >= 1 &&
+        isValidStudyId(data.textbookId) &&
+        isValidStudyId(data.sectionId) &&
+        isValidStudyId(data.blockId) &&
+        data.contentVersion is int &&
+        data.contentVersion >= 1
+      );
+    }
+
+    function isValidPrivateMistakeData(uid, mistakeId, data) {
+      return data is map &&
+        data.keys().hasOnly([
+          "attemptId",
+          "blockId",
+          "chapter",
+          "conceptId",
+          "conceptLabel",
+          "contentVersion",
+          "createdAt",
+          "firstSeenAt",
+          "lastSeenAt",
+          "mistakeId",
+          "occurrenceCount",
+          "questionId",
+          "questionIndex",
+          "resolvedAt",
+          "resultId",
+          "retriedAt",
+          "retryDueAt",
+          "schemaVersion",
+          "sectionId",
+          "shareState",
+          "sourceKind",
+          "state",
+          "subject",
+          "testId",
+          "testTitle",
+          "textbookId",
+          "uid",
+          "updatedAt"
+        ]) &&
+        data.keys().size() == 28 &&
+        data.schemaVersion == 1 &&
+        data.uid == uid &&
+        data.mistakeId == mistakeId &&
+        isValidStudyId(data.uid) &&
+        isValidStudyId(data.mistakeId) &&
+        isValidStudyId(data.resultId) &&
+        isValidStudyId(data.attemptId) &&
+        isValidStudyId(data.testId) &&
+        isValidStudyId(data.questionId) &&
+        data.questionIndex is int &&
+        data.questionIndex >= 0 &&
+        data.questionIndex <= 500 &&
+        isValidQuestionConceptMapping(data) &&
+        isValidMasteryOptionalLabel(data.testTitle) &&
+        isValidMasteryOptionalLabel(data.subject) &&
+        isValidMasteryOptionalLabel(data.chapter) &&
+        data.occurrenceCount is int &&
+        data.occurrenceCount >= 1 &&
+        isValidMistakeSourceKind(data.sourceKind) &&
+        isValidMistakeState(data.state) &&
+        data.shareState == "PRIVATE" &&
+        data.createdAt is timestamp &&
+        data.firstSeenAt is timestamp &&
+        data.lastSeenAt is timestamp &&
+        data.retryDueAt is timestamp &&
+        (
+          data.retriedAt == null ||
+          data.retriedAt is timestamp
+        ) &&
+        (
+          data.resolvedAt == null ||
+          data.resolvedAt is timestamp
+        ) &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidPrivateMistakeCreate(uid, mistakeId) {
+      return isStudentLearningOwner(uid) &&
+        request.resource.data.uid == request.auth.uid &&
+        isValidPrivateMistakeData(
+          uid,
+          mistakeId,
+          request.resource.data
+        ) &&
+        request.resource.data.state == "OPEN" &&
+        request.resource.data.occurrenceCount >= 1 &&
+        request.resource.data.createdAt == request.time &&
+        (
+          (
+            request.resource.data.occurrenceCount == 1 &&
+            request.resource.data.firstSeenAt == request.time
+          ) || (
+            request.resource.data.occurrenceCount > 1 &&
+            request.resource.data.firstSeenAt <= request.time
+          )
+        ) &&
+        request.resource.data.lastSeenAt == request.time &&
+        request.resource.data.updatedAt == request.time &&
+        request.resource.data.retryDueAt > request.time &&
+        request.resource.data.retriedAt == null &&
+        request.resource.data.resolvedAt == null;
+    }
+
+    function isValidMistakeStateTransition(before, after) {
+      return before == after ||
+        (
+          before == "OPEN" &&
+          after in ["RETRY_DUE", "RETRIED", "RESOLVED", "ARCHIVED"]
+        ) ||
+        (
+          before == "RETRY_DUE" &&
+          after in ["OPEN", "RETRIED", "RESOLVED", "ARCHIVED"]
+        ) ||
+        (
+          before == "RETRIED" &&
+          after in ["OPEN", "RETRY_DUE", "RESOLVED", "ARCHIVED"]
+        ) ||
+        (
+          before == "RESOLVED" &&
+          after in ["OPEN", "ARCHIVED"]
+        ) ||
+        (
+          before == "ARCHIVED" &&
+          after == "OPEN"
+        );
+    }
+
+    function isValidPrivateMistakeUpdate(uid, mistakeId) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "resolvedAt",
+          "retriedAt",
+          "retryDueAt",
+          "state",
+          "updatedAt"
+        ]) &&
+        isStudentLearningOwner(uid) &&
+        resource.data.uid == request.auth.uid &&
+        request.resource.data.uid == request.auth.uid &&
+        isValidPrivateMistakeData(
+          uid,
+          mistakeId,
+          request.resource.data
+        ) &&
+        request.resource.data.createdAt == resource.data.createdAt &&
+        request.resource.data.firstSeenAt == resource.data.firstSeenAt &&
+        request.resource.data.lastSeenAt == resource.data.lastSeenAt &&
+        request.resource.data.occurrenceCount == resource.data.occurrenceCount &&
+        isValidMistakeStateTransition(
+          resource.data.state,
+          request.resource.data.state
+        ) &&
+        request.resource.data.updatedAt == request.time &&
+        (
+          request.resource.data.state != "RETRIED" ||
+          request.resource.data.retriedAt == request.time
+        ) &&
+        (
+          request.resource.data.state != "RESOLVED" ||
+          request.resource.data.resolvedAt == request.time
+        );
+    }
+
+    function isValidMasteryScore(value) {
+      return value is int && value >= 0 && value <= 100;
+    }
+
+    function isValidMasteryStateForData(data) {
+      return (
+        data.overdueRetryCount > 0 &&
+        data.masteryScore >= 50 &&
+        data.state == "RETRY_DUE"
+      ) || (
+        data.overdueRetryCount == 0 &&
+        data.masteryScore >= 85 &&
+        data.practiceAccuracy >= 80 &&
+        data.state == "EXAM_READY"
+      ) || (
+        data.overdueRetryCount == 0 &&
+        data.masteryScore >= 70 &&
+        (
+          data.masteryScore < 85 ||
+          data.practiceAccuracy < 80
+        ) &&
+        data.state == "STRONG"
+      ) || (
+        data.masteryScore >= 50 &&
+        data.masteryScore <= 69 &&
+        data.state == "RETRY_DUE"
+      ) || (
+        data.masteryScore >= 25 &&
+        data.masteryScore <= 49 &&
+        data.state == "BUILDING"
+      ) || (
+        data.masteryScore <= 24 &&
+        data.state == "STARTING"
+      );
+    }
+
+    function isValidPrivateMasteryData(uid, masteryId, data) {
+      return data is map &&
+        data.keys().hasOnly([
+          "calculatedAt",
+          "chapterId",
+          "chapterLabel",
+          "contentVersion",
+          "correctCount",
+          "createdAt",
+          "mappedQuestionCount",
+          "masteryId",
+          "masteryScore",
+          "mistakeCount",
+          "overdueRetryCount",
+          "practiceAccuracy",
+          "practiceScore",
+          "readingScore",
+          "resolvedMistakeCount",
+          "revisionCompleted",
+          "revisionScore",
+          "revisionTotal",
+          "schemaVersion",
+          "shareState",
+          "state",
+          "textbookId",
+          "uid",
+          "updatedAt"
+        ]) &&
+        data.keys().size() == 24 &&
+        data.schemaVersion == 1 &&
+        data.uid == uid &&
+        data.masteryId == masteryId &&
+        isValidStudyId(data.uid) &&
+        isValidStudyId(data.masteryId) &&
+        isValidStudyId(data.textbookId) &&
+        isValidStudyId(data.chapterId) &&
+        isValidMasteryOptionalLabel(data.chapterLabel) &&
+        data.contentVersion is int &&
+        data.contentVersion >= 1 &&
+        isValidMasteryScore(data.readingScore) &&
+        isValidMasteryScore(data.practiceScore) &&
+        isValidMasteryScore(data.revisionScore) &&
+        isValidMasteryScore(data.masteryScore) &&
+        isValidMasteryScore(data.practiceAccuracy) &&
+        data.mappedQuestionCount is int &&
+        data.mappedQuestionCount >= 0 &&
+        data.correctCount is int &&
+        data.correctCount >= 0 &&
+        data.correctCount <= data.mappedQuestionCount &&
+        data.mistakeCount is int &&
+        data.mistakeCount >= 0 &&
+        data.resolvedMistakeCount is int &&
+        data.resolvedMistakeCount >= 0 &&
+        data.resolvedMistakeCount <= data.mistakeCount &&
+        data.overdueRetryCount is int &&
+        data.overdueRetryCount >= 0 &&
+        data.overdueRetryCount <= data.mistakeCount &&
+        data.revisionTotal is int &&
+        data.revisionTotal >= 0 &&
+        data.revisionCompleted is int &&
+        data.revisionCompleted >= 0 &&
+        data.revisionCompleted <= data.revisionTotal &&
+        isValidMasteryState(data.state) &&
+        isValidMasteryStateForData(data) &&
+        data.shareState == "PRIVATE" &&
+        data.calculatedAt is timestamp &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidPrivateMasteryCreate(uid, masteryId) {
+      return isStudentLearningOwner(uid) &&
+        request.resource.data.uid == request.auth.uid &&
+        isValidPrivateMasteryData(
+          uid,
+          masteryId,
+          request.resource.data
+        ) &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.calculatedAt == request.time &&
+        request.resource.data.updatedAt == request.time;
+    }
+
+    function isValidPrivateMasteryUpdate(uid, masteryId) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "calculatedAt",
+          "correctCount",
+          "mappedQuestionCount",
+          "masteryScore",
+          "mistakeCount",
+          "overdueRetryCount",
+          "practiceAccuracy",
+          "practiceScore",
+          "readingScore",
+          "resolvedMistakeCount",
+          "revisionCompleted",
+          "revisionScore",
+          "revisionTotal",
+          "state",
+          "updatedAt"
+        ]) &&
+        isStudentLearningOwner(uid) &&
+        resource.data.uid == request.auth.uid &&
+        request.resource.data.uid == request.auth.uid &&
+        isValidPrivateMasteryData(
+          uid,
+          masteryId,
+          request.resource.data
+        ) &&
+        request.resource.data.createdAt == resource.data.createdAt &&
+        request.resource.data.calculatedAt == request.time &&
+        request.resource.data.updatedAt == request.time;
+    }
+
     match /studentLearning/{uid} {
       allow read, write: if false;
 
@@ -653,6 +1010,21 @@ service cloud.firestore {
               /databases/$(database)/documents/studentLearning/$(uid)/flashcards/$(revisionId)
             )
           );
+      }
+
+
+      match /mistakeBook/{mistakeId} {
+        allow get, list: if isStudentLearningOwner(uid);
+        allow create: if isValidPrivateMistakeCreate(uid, mistakeId);
+        allow update: if isValidPrivateMistakeUpdate(uid, mistakeId);
+        allow delete: if false;
+      }
+
+      match /masteryProgress/{masteryId} {
+        allow get, list: if isStudentLearningOwner(uid);
+        allow create: if isValidPrivateMasteryCreate(uid, masteryId);
+        allow update: if isValidPrivateMasteryUpdate(uid, masteryId);
+        allow delete: if false;
       }
     }
 

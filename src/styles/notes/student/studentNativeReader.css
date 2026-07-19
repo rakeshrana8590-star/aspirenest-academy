@@ -1980,3 +1980,205 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Phase 8B-7 — Mistake Book, Weak Concepts and Chapter Mastery */
+.intelliTextBlockContentAnchor {
+  min-width: 0;
+}
+
+.intelliTextBlock.isMistakeBookFocus {
+  scroll-margin-top: 150px;
+  outline: 3px solid rgba(245, 158, 11, 0.38);
+  outline-offset: 6px;
+  border-radius: 18px;
+  animation: intelliTextMistakeBookFocus 1.4s ease-out 1;
+}
+
+@keyframes intelliTextMistakeBookFocus {
+  from {
+    transform: translateY(6px);
+    box-shadow: 0 0 0 10px rgba(245, 158, 11, 0.15);
+  }
+  to {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+}
+
+.intelliTextMasteryEmpty {
+  padding: 28px;
+  border: 1px dashed rgba(148, 163, 184, 0.36);
+  border-radius: 20px;
+  text-align: center;
+}
+
+.intelliTextMasteryEmpty > span,
+.intelliTextMistakeBook article header span,
+.intelliTextWeakConceptGrid article > span,
+.intelliTextChapterMasteryGrid article header span {
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+}
+
+.intelliTextMistakeBook,
+.intelliTextWeakConceptGrid,
+.intelliTextChapterMasteryGrid {
+  display: grid;
+  gap: 16px;
+}
+
+.intelliTextMistakeBook article,
+.intelliTextWeakConceptGrid article,
+.intelliTextChapterMasteryGrid article {
+  padding: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
+}
+
+.intelliTextMistakeBook article header,
+.intelliTextChapterMasteryGrid article header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.intelliTextMistakeBook h3,
+.intelliTextWeakConceptGrid h3,
+.intelliTextChapterMasteryGrid h3 {
+  margin: 5px 0 0;
+}
+
+.intelliTextMistakeBook dl,
+.intelliTextChapterMasteryGrid dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.intelliTextMistakeBook dl div,
+.intelliTextChapterMasteryGrid dl div {
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(148, 163, 184, 0.09);
+}
+
+.intelliTextMistakeBook dt,
+.intelliTextChapterMasteryGrid dt {
+  font-size: 0.72rem;
+  opacity: 0.72;
+}
+
+.intelliTextMistakeBook dd,
+.intelliTextChapterMasteryGrid dd {
+  margin: 4px 0 0;
+  font-weight: 800;
+}
+
+.intelliTextMistakePrivacyNote,
+.intelliTextMasteryRetryNotice {
+  font-size: 0.84rem;
+  line-height: 1.55;
+  opacity: 0.78;
+}
+
+.intelliTextMistakeBook footer,
+.intelliTextWeakConceptGrid,
+.intelliTextChapterMasteryGrid {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.intelliTextMistakeBook footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.intelliTextMistakeBook button,
+.intelliTextWeakConceptGrid button,
+.intelliTextChapterMasteryGrid button {
+  min-height: 40px;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 760;
+}
+
+.intelliTextMistakeBook button.isSecondary {
+  border: 1px solid rgba(100, 116, 139, 0.28);
+  background: transparent;
+}
+
+.intelliTextMistakeBook button:disabled,
+.intelliTextWeakConceptGrid button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.intelliTextWeakConceptGrid article {
+  display: grid;
+  gap: 12px;
+}
+
+.intelliTextWeakConceptGrid article > div {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.intelliTextWeakConceptGrid article > div strong {
+  font-size: 1.5rem;
+}
+
+.intelliTextMasteryMeter {
+  height: 9px;
+  margin: 18px 0 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.18);
+}
+
+.intelliTextMasteryMeter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #f59e0b, #16a34a);
+}
+
+.intelliTextMasteryState {
+  display: inline-flex;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.12);
+  font-size: 0.78rem;
+  font-weight: 820;
+}
+
+.intelliTextMasteryState.isEXAM_READY {
+  background: rgba(22, 163, 74, 0.12);
+}
+
+.intelliTextMasteryState.isRETRY_DUE {
+  background: rgba(245, 158, 11, 0.14);
+}
+
+@media (max-width: 720px) {
+  .intelliTextMistakeBook dl,
+  .intelliTextChapterMasteryGrid dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .intelliTextMistakeBook footer {
+    display: grid;
+  }
+
+  .intelliTextMistakeBook footer button {
+    width: 100%;
+  }
+}

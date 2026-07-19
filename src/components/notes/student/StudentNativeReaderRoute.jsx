@@ -4,6 +4,7 @@ import React, {
   useState,
 } from "react";
 import {
+  useLocation,
   useNavigate,
   useParams,
 } from "react-router-dom";
@@ -93,11 +94,28 @@ export default function StudentNativeReaderRoute({
   buildNoteAccessDecision,
 }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { textbookId = "" } = useParams();
 
   const decodedTextbookId = decodeURIComponent(
     textbookId || ""
   );
+
+
+  const exactSectionRequest = useMemo(() => {
+    const params = new URLSearchParams(location.search || "");
+    const sectionId = params.get("sectionId") || "";
+    const blockId = params.get("blockId") || "";
+    const contentVersion = Number(params.get("contentVersion") || 0);
+    const source = params.get("source") || "";
+
+    return Object.freeze({
+      blockId,
+      contentVersion,
+      sectionId,
+      source,
+    });
+  }, [location.search]);
 
   const note = useMemo(
     () =>
@@ -230,6 +248,8 @@ export default function StudentNativeReaderRoute({
     useState(1);
   const [workspaceOpen, setWorkspaceOpen] =
     useState(false);
+  const [focusedBlockId, setFocusedBlockId] =
+    useState("");
 
   useEffect(() => {
     if (
@@ -252,7 +272,17 @@ export default function StudentNativeReaderRoute({
         contentVersion:
           model.contentVersion,
       });
+    const exactSection =
+      exactSectionRequest.source === "mistake-book" &&
+      exactSectionRequest.sectionId &&
+      exactSectionRequest.contentVersion === model.contentVersion
+        ? model.sections.find(
+            (section) =>
+              section.sectionId === exactSectionRequest.sectionId
+          )
+        : null;
     const initialSection =
+      exactSection ||
       resolveContinueReadingSection({
         sections: model.sections,
         progress,
@@ -265,6 +295,40 @@ export default function StudentNativeReaderRoute({
     model,
     accessPresentation.canOpen,
     user?.uid,
+    exactSectionRequest,
+  ]);
+
+  useEffect(() => {
+    if (
+      accessPresentation.canOpen !== true ||
+      exactSectionRequest.source !== "mistake-book" ||
+      !exactSectionRequest.blockId ||
+      exactSectionRequest.contentVersion !== model?.contentVersion ||
+      activeSectionId !== exactSectionRequest.sectionId
+    ) {
+      setFocusedBlockId("");
+      return undefined;
+    }
+
+    const targetId = `block-${exactSectionRequest.blockId}`;
+    const timer = window.setTimeout(() => {
+      const target = document.getElementById(targetId);
+
+      if (target) {
+        setFocusedBlockId(exactSectionRequest.blockId);
+        target.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+    }, 120);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    accessPresentation.canOpen,
+    activeSectionId,
+    exactSectionRequest,
+    model?.contentVersion,
   ]);
 
   const activeSection = useMemo(
@@ -666,7 +730,11 @@ export default function StudentNativeReaderRoute({
                 <section
                   key={block.blockId}
                   id={`block-${block.blockId}`}
-                  className="intelliTextBlock"
+                  className={
+                    focusedBlockId === block.blockId
+                      ? "intelliTextBlock isMistakeBookFocus"
+                      : "intelliTextBlock"
+                  }
                   data-block-type={block.type}
                   data-intellitext-block="true"
                   data-textbook-id={model.textbookId}
