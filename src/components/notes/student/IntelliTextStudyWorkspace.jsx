@@ -13,6 +13,9 @@ import {
   createIntelliTextStudyWorkspaceClient,
 } from "../../../access/intelliTextStudyWorkspaceClient";
 import {
+  createIntelliTextRevisionClient,
+} from "../../../access/intelliTextRevisionClient";
+import {
   INTELLITEXT_ANCHOR_RESOLUTION,
   applyIntelliTextAnnotationDecorations,
   captureIntelliTextSelection,
@@ -26,6 +29,8 @@ const actionLabel = (type) => ({
   UNDERLINE: "Underline",
   NOTE: "Add Note",
   DOUBT: "Mark as Doubt",
+  FLASHCARD: "Create Flashcard",
+  REVISION: "Add to Revision",
 }[type] || type);
 
 const displayDate = (value) => {
@@ -54,11 +59,16 @@ export default function IntelliTextStudyWorkspace({
     () => createIntelliTextStudyWorkspaceClient(),
     []
   );
+  const revisionClient = useMemo(
+    () => createIntelliTextRevisionClient(),
+    []
+  );
   const [annotations, setAnnotations] = useState([]);
   const [bookmarks, setBookmarks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [selectionCandidate, setSelectionCandidate] = useState(null);
   const [toolbarPosition, setToolbarPosition] = useState(null);
   const [composer, setComposer] = useState(null);
@@ -143,6 +153,7 @@ export default function IntelliTextStudyWorkspace({
             top: Math.max(12, rect.top - 12),
           });
           setError("");
+          setNotice("");
         } catch (selectionError) {
           if (
             selectionError?.code === "CROSS_BLOCK_SELECTION_DENIED"
@@ -212,6 +223,52 @@ export default function IntelliTextStudyWorkspace({
     createAnnotation(type);
   };
 
+  const createFlashcardFromSelection = () => {
+    if (!selectionCandidate) {
+      return;
+    }
+
+    setComposer({
+      answer: selectionCandidate.selectionAnchor?.exactText || "",
+      exactText: selectionCandidate.selectionAnchor?.exactText || "",
+      mode: "FLASHCARD_CREATE",
+      prompt: "",
+      type: "FLASHCARD",
+    });
+  };
+
+  const addSelectionToRevision = async () => {
+    if (!selectionCandidate) {
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+    setNotice("");
+
+    try {
+      await revisionClient.addSelectionToRevision(
+        {
+          ...selectionCandidate,
+          answer: selectionCandidate.selectionAnchor?.exactText || "",
+          noteTitle: model?.title || "",
+          prompt: "Recall this saved concept.",
+          sectionTitle: activeSection?.title || "",
+        },
+        { now: new Date() }
+      );
+      clearSelection();
+      setNotice("Selection added to your private revision queue.");
+    } catch (saveError) {
+      setError(
+        saveError?.message ||
+          "Selection could not be added to revision."
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const editAnnotation = (annotation) => {
     setComposer({
       annotationId: annotation.annotationId,
@@ -223,6 +280,43 @@ export default function IntelliTextStudyWorkspace({
   };
 
   const saveComposer = async () => {
+    if (composer?.mode === "FLASHCARD_CREATE") {
+      if (!composer.prompt?.trim() || !composer.answer?.trim()) {
+        return;
+      }
+
+      setSaving(true);
+      setError("");
+      setNotice("");
+
+      try {
+        await revisionClient.createFlashcardFromSelection(
+          {
+            ...selectionCandidate,
+            answer: composer.answer,
+            noteTitle: model?.title || "",
+            prompt: composer.prompt,
+            sectionTitle: activeSection?.title || "",
+          },
+          { now: new Date() }
+        );
+        clearSelection();
+        setComposer(null);
+        setNotice(
+          "Flashcard created and added to your private due queue."
+        );
+      } catch (saveError) {
+        setError(
+          saveError?.message ||
+            "Flashcard could not be created."
+        );
+      } finally {
+        setSaving(false);
+      }
+
+      return;
+    }
+
     if (!composer?.body?.trim()) {
       return;
     }
@@ -369,6 +463,22 @@ export default function IntelliTextStudyWorkspace({
               {actionLabel(type)}
             </button>
           ))}
+          <button
+            type="button"
+            className="isRecallAction"
+            disabled={saving}
+            onClick={createFlashcardFromSelection}
+          >
+            Create Flashcard
+          </button>
+          <button
+            type="button"
+            className="isRevisionAction"
+            disabled={saving}
+            onClick={addSelectionToRevision}
+          >
+            Add to Revision
+          </button>
         </div>
       ) : null}
 
@@ -378,22 +488,58 @@ export default function IntelliTextStudyWorkspace({
             <span>PRIVATE {actionLabel(composer.type).toUpperCase()}</span>
             <h3>{actionLabel(composer.type)}</h3>
             <p>{composer.exactText}</p>
-            <textarea
-              autoFocus
-              maxLength={4000}
-              value={composer.body}
-              onChange={(event) =>
-                setComposer((current) => ({
-                  ...current,
-                  body: event.target.value,
-                }))
-              }
-              placeholder={
-                composer.type === "DOUBT"
-                  ? "Write your doubt clearly…"
-                  : "Write your private note…"
-              }
-            />
+
+            {composer.mode === "FLASHCARD_CREATE" ? (
+              <>
+                <label>
+                  Recall prompt
+                  <textarea
+                    autoFocus
+                    maxLength={1000}
+                    value={composer.prompt}
+                    onChange={(event) =>
+                      setComposer((current) => ({
+                        ...current,
+                        prompt: event.target.value,
+                      }))
+                    }
+                    placeholder="Write the question you want to recall…"
+                  />
+                </label>
+                <label>
+                  Answer
+                  <textarea
+                    maxLength={3000}
+                    value={composer.answer}
+                    onChange={(event) =>
+                      setComposer((current) => ({
+                        ...current,
+                        answer: event.target.value,
+                      }))
+                    }
+                    placeholder="Answer revealed after active recall…"
+                  />
+                </label>
+              </>
+            ) : (
+              <textarea
+                autoFocus
+                maxLength={4000}
+                value={composer.body}
+                onChange={(event) =>
+                  setComposer((current) => ({
+                    ...current,
+                    body: event.target.value,
+                  }))
+                }
+                placeholder={
+                  composer.type === "DOUBT"
+                    ? "Write your doubt clearly…"
+                    : "Write your private note…"
+                }
+              />
+            )}
+
             <div>
               <button
                 type="button"
@@ -404,10 +550,17 @@ export default function IntelliTextStudyWorkspace({
               </button>
               <button
                 type="button"
-                disabled={saving || !composer.body.trim()}
+                disabled={
+                  saving ||
+                  (composer.mode === "FLASHCARD_CREATE"
+                    ? !composer.prompt.trim() || !composer.answer.trim()
+                    : !composer.body.trim())
+                }
                 onClick={saveComposer}
               >
-                Save privately
+                {composer.mode === "FLASHCARD_CREATE"
+                  ? "Create + add to due queue"
+                  : "Save privately"}
               </button>
             </div>
           </div>
@@ -436,6 +589,19 @@ export default function IntelliTextStudyWorkspace({
         <div className="intelliTextWorkspacePrivacy">
           Only your authenticated account can read or change these records.
         </div>
+
+        <a
+          className="intelliTextOpenRevisionWorkspace"
+          href="/ctet-tet/notes/my-study-workspace"
+        >
+          Open My Study Workspace →
+        </a>
+
+        {notice ? (
+          <p className="intelliTextWorkspaceNotice" role="status">
+            {notice}
+          </p>
+        ) : null}
 
         <button
           type="button"

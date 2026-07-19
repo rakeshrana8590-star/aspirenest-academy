@@ -41,6 +41,27 @@ export default function StudentNotesLibraryRoute({
         ]}
       />
 
+      <section className="intelliTextRevisionLibraryEntry">
+        <div>
+          <span>MY PRIVATE PREPARATION SYSTEM</span>
+          <h2>Flashcards, active recall, and due-date revision</h2>
+          <p>
+            Open one owner-only workspace for flashcards created from
+            IntelliText selections, manual recall cards, and your personal
+            revision queue.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() =>
+            navigate("/ctet-tet/notes/my-study-workspace")
+          }
+        >
+          Open My Study Workspace →
+        </button>
+      </section>
+
       <div className="studentNotesShelf studentNotesPlanShelf">
         <div className="studentNotesShelfHeader">
           <span>Notes Library</span>

@@ -322,6 +322,293 @@ service cloud.firestore {
         request.resource.data.updatedAt == request.time;
     }
 
+
+    /* ================================
+       IntelliText Preparation + Revision — Phase 8B-6
+       Private UID owner-only; no admin or mentor bypass.
+       Flashcard creation is atomically coupled to one revision queue item.
+       ================================ */
+
+    function isValidRevisionText(value, maximum) {
+      return value is string &&
+        value.size() >= 1 &&
+        value.size() <= maximum;
+    }
+
+    function isValidOptionalRevisionLabel(value) {
+      return value is string && value.size() <= 300;
+    }
+
+    function isValidFlashcardSourceKind(value) {
+      return value in ["SELECTION", "ANNOTATION", "MANUAL"];
+    }
+
+    function isValidRevisionSourceKind(value) {
+      return value in ["FLASHCARD", "SELECTION"];
+    }
+
+    function isValidFlashcardState(value) {
+      return value in ["ACTIVE", "ARCHIVED"];
+    }
+
+    function isValidRevisionState(value) {
+      return value in ["ACTIVE", "PAUSED", "MASTERED", "ARCHIVED"];
+    }
+
+    function isValidRecallRating(value) {
+      return value == null ||
+        value in ["AGAIN", "HARD", "GOOD", "EASY"];
+    }
+
+    function isValidRevisionSelectionAnchorForSource(data) {
+      return (
+        data.sourceKind == "MANUAL" &&
+        data.selectionAnchor == null
+      ) ||
+      (
+        data.sourceKind in ["SELECTION", "ANNOTATION"] &&
+        isValidPrivateSelectionAnchor(data.selectionAnchor)
+      ) ||
+      (
+        data.sourceKind == "FLASHCARD" &&
+        (
+          data.selectionAnchor == null ||
+          isValidPrivateSelectionAnchor(data.selectionAnchor)
+        )
+      );
+    }
+
+    function isValidPrivateFlashcardData(uid, flashcardId, data) {
+      return data is map &&
+        data.keys().hasOnly([
+          "answer",
+          "blockId",
+          "contentVersion",
+          "createdAt",
+          "flashcardId",
+          "noteTitle",
+          "prompt",
+          "schemaVersion",
+          "sectionId",
+          "sectionTitle",
+          "selectionAnchor",
+          "shareState",
+          "sourceId",
+          "sourceKind",
+          "state",
+          "textbookId",
+          "uid",
+          "updatedAt"
+        ]) &&
+        data.keys().size() == 18 &&
+        data.schemaVersion == 1 &&
+        data.uid == uid &&
+        data.flashcardId == flashcardId &&
+        isValidStudyId(data.uid) &&
+        isValidStudyId(data.flashcardId) &&
+        isValidStudyId(data.sourceId) &&
+        isValidStudyId(data.textbookId) &&
+        isValidStudyId(data.sectionId) &&
+        isValidStudyId(data.blockId) &&
+        data.contentVersion is int &&
+        data.contentVersion >= 1 &&
+        isValidFlashcardSourceKind(data.sourceKind) &&
+        (
+          data.sourceKind != "ANNOTATION" ||
+          data.sourceId.size() >= 1
+        ) &&
+        isValidFlashcardState(data.state) &&
+        data.shareState == "PRIVATE" &&
+        isValidRevisionText(data.prompt, 1000) &&
+        isValidRevisionText(data.answer, 3000) &&
+        isValidOptionalRevisionLabel(data.noteTitle) &&
+        isValidOptionalRevisionLabel(data.sectionTitle) &&
+        isValidRevisionSelectionAnchorForSource(data) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidPrivateRevisionData(uid, revisionId, data) {
+      return data is map &&
+        data.keys().hasOnly([
+          "answer",
+          "blockId",
+          "contentVersion",
+          "createdAt",
+          "dueAt",
+          "intervalDays",
+          "lastRating",
+          "lastReviewedAt",
+          "noteTitle",
+          "prompt",
+          "recallStreak",
+          "reviewCount",
+          "revisionId",
+          "schemaVersion",
+          "sectionId",
+          "sectionTitle",
+          "selectionAnchor",
+          "shareState",
+          "sourceId",
+          "sourceKind",
+          "state",
+          "textbookId",
+          "uid",
+          "updatedAt"
+        ]) &&
+        data.keys().size() == 24 &&
+        data.schemaVersion == 1 &&
+        data.uid == uid &&
+        data.revisionId == revisionId &&
+        isValidStudyId(data.uid) &&
+        isValidStudyId(data.revisionId) &&
+        isValidStudyId(data.sourceId) &&
+        isValidStudyId(data.textbookId) &&
+        isValidStudyId(data.sectionId) &&
+        isValidStudyId(data.blockId) &&
+        data.contentVersion is int &&
+        data.contentVersion >= 1 &&
+        isValidRevisionSourceKind(data.sourceKind) &&
+        (
+          data.sourceKind != "FLASHCARD" ||
+          data.sourceId == revisionId
+        ) &&
+        isValidRevisionState(data.state) &&
+        data.shareState == "PRIVATE" &&
+        isValidRevisionText(data.prompt, 1000) &&
+        isValidRevisionText(data.answer, 3000) &&
+        isValidOptionalRevisionLabel(data.noteTitle) &&
+        isValidOptionalRevisionLabel(data.sectionTitle) &&
+        isValidRevisionSelectionAnchorForSource(data) &&
+        data.dueAt is timestamp &&
+        data.intervalDays is int &&
+        data.intervalDays >= 0 &&
+        data.intervalDays <= 180 &&
+        data.reviewCount is int &&
+        data.reviewCount >= 0 &&
+        data.recallStreak is int &&
+        data.recallStreak >= 0 &&
+        isValidRecallRating(data.lastRating) &&
+        (
+          data.lastReviewedAt == null ||
+          data.lastReviewedAt is timestamp
+        ) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function hasPairedFlashcardRevisionAfter(uid, flashcardId) {
+      let path = /databases/$(database)/documents/studentLearning/$(uid)/revisionQueue/$(flashcardId);
+      return existsAfter(path) &&
+        getAfter(path).data.uid == uid &&
+        getAfter(path).data.revisionId == flashcardId &&
+        getAfter(path).data.sourceKind == "FLASHCARD" &&
+        getAfter(path).data.sourceId == flashcardId;
+    }
+
+    function hasPairedFlashcardAfter(uid, revisionId) {
+      let path = /databases/$(database)/documents/studentLearning/$(uid)/flashcards/$(revisionId);
+      return existsAfter(path) &&
+        getAfter(path).data.uid == uid &&
+        getAfter(path).data.flashcardId == revisionId;
+    }
+
+    function isValidPrivateFlashcardCreate(uid, flashcardId) {
+      return isStudentLearningOwner(uid) &&
+        request.resource.data.uid == request.auth.uid &&
+        isValidPrivateFlashcardData(
+          uid,
+          flashcardId,
+          request.resource.data
+        ) &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time &&
+        hasPairedFlashcardRevisionAfter(uid, flashcardId);
+    }
+
+    function isValidPrivateFlashcardUpdate(uid, flashcardId) {
+      return isStudentLearningOwner(uid) &&
+        resource.data.uid == request.auth.uid &&
+        request.resource.data.uid == request.auth.uid &&
+        isValidPrivateFlashcardData(
+          uid,
+          flashcardId,
+          request.resource.data
+        ) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "prompt",
+          "answer",
+          "state",
+          "updatedAt"
+        ]) &&
+        request.resource.data.createdAt == resource.data.createdAt &&
+        request.resource.data.updatedAt == request.time;
+    }
+
+    function isValidPrivateRevisionCreate(uid, revisionId) {
+      return isStudentLearningOwner(uid) &&
+        request.resource.data.uid == request.auth.uid &&
+        isValidPrivateRevisionData(
+          uid,
+          revisionId,
+          request.resource.data
+        ) &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time &&
+        (
+          request.resource.data.sourceKind == "SELECTION" ||
+          hasPairedFlashcardAfter(uid, revisionId)
+        );
+    }
+
+    function isValidPrivateRevisionStateUpdate(uid, revisionId) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "state",
+          "updatedAt"
+        ]) &&
+        isStudentLearningOwner(uid) &&
+        resource.data.uid == request.auth.uid &&
+        request.resource.data.uid == request.auth.uid &&
+        isValidPrivateRevisionData(
+          uid,
+          revisionId,
+          request.resource.data
+        ) &&
+        request.resource.data.updatedAt == request.time;
+    }
+
+    function isValidPrivateRevisionReviewUpdate(uid, revisionId) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "dueAt",
+          "intervalDays",
+          "lastRating",
+          "lastReviewedAt",
+          "recallStreak",
+          "reviewCount",
+          "state",
+          "updatedAt"
+        ]) &&
+        isStudentLearningOwner(uid) &&
+        resource.data.uid == request.auth.uid &&
+        request.resource.data.uid == request.auth.uid &&
+        isValidPrivateRevisionData(
+          uid,
+          revisionId,
+          request.resource.data
+        ) &&
+        request.resource.data.reviewCount == resource.data.reviewCount + 1 &&
+        request.resource.data.lastRating in [
+          "AGAIN",
+          "HARD",
+          "GOOD",
+          "EASY"
+        ] &&
+        request.resource.data.lastReviewedAt == request.time &&
+        request.resource.data.updatedAt == request.time &&
+        request.resource.data.dueAt > request.time &&
+        request.resource.data.state == "ACTIVE";
+    }
+
     match /studentLearning/{uid} {
       allow read, write: if false;
 
@@ -339,6 +626,33 @@ service cloud.firestore {
         allow update: if isValidPrivateBookmarkUpdate(uid, bookmarkId);
         allow delete: if isStudentLearningOwner(uid) &&
           resource.data.uid == request.auth.uid;
+      }
+
+      match /flashcards/{flashcardId} {
+        allow get, list: if isStudentLearningOwner(uid);
+        allow create: if isValidPrivateFlashcardCreate(uid, flashcardId);
+        allow update: if isValidPrivateFlashcardUpdate(uid, flashcardId);
+        allow delete: if isStudentLearningOwner(uid) &&
+          resource.data.uid == request.auth.uid &&
+          !existsAfter(
+            /databases/$(database)/documents/studentLearning/$(uid)/revisionQueue/$(flashcardId)
+          );
+      }
+
+      match /revisionQueue/{revisionId} {
+        allow get, list: if isStudentLearningOwner(uid);
+        allow create: if isValidPrivateRevisionCreate(uid, revisionId);
+        allow update: if
+          isValidPrivateRevisionStateUpdate(uid, revisionId) ||
+          isValidPrivateRevisionReviewUpdate(uid, revisionId);
+        allow delete: if isStudentLearningOwner(uid) &&
+          resource.data.uid == request.auth.uid &&
+          (
+            resource.data.sourceKind != "FLASHCARD" ||
+            !existsAfter(
+              /databases/$(database)/documents/studentLearning/$(uid)/flashcards/$(revisionId)
+            )
+          );
       }
     }
 
