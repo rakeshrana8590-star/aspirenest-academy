@@ -367,6 +367,9 @@
 }
 
 .intelliTextPreviewDevice > article {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   min-height: 520px;
   padding: clamp(18px, 3vw, 32px);
   color: #0f172a;
@@ -380,6 +383,8 @@
 }
 
 .intelliTextPreviewSection {
+  min-width: 0;
+  max-width: 100%;
   margin-top: 24px;
 }
 
@@ -389,6 +394,8 @@
 }
 
 .intelliTextPreviewBlocks {
+  min-width: 0;
+  max-width: 100%;
   display: grid;
   gap: 14px;
   margin-top: 14px;

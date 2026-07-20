@@ -297,12 +297,16 @@
 }
 
 .intelliTextBlocks {
+  min-width: 0;
+  max-width: 100%;
   display: grid;
   gap: 22px;
   margin-top: 38px;
 }
 
 .intelliTextBlock {
+  min-width: 0;
+  max-width: 100%;
   scroll-margin-top: 150px;
 }
 
@@ -402,6 +406,10 @@
 }
 
 .intelliTextTableScroll {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   overflow-x: auto;
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 20px;
