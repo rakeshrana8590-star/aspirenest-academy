@@ -326,7 +326,7 @@ test("unrelated studentLearning collections remain denied", async () => {
     studentDb(),
     "studentLearning",
     STUDENT_UID,
-    "flashcards",
+    "unsupportedCollection",
     "flashcard_1"
   );
   await assertFails(getDoc(reference));
