@@ -2,28 +2,33 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
-  isVideoContentItem,
-  normalizePlanType,
-  normalizeVideoStatus,
-} from "./videoUtils.js";
+  VIDEO_ACTIONS,
+  VIDEO_REASON_CODES,
+  buildVideoActionDecision,
+  getVideoRequiredPlan,
+} from "../../access/videoActionPolicy.js";
+import { normalizePlanType } from "./videoUtils.js";
 
 const resolvePlanAccess = ({
   requiredPlan,
   hasPlanAccess,
-  accessOptions = {},
+  itemId = "",
 }) => {
   const normalizedRequiredPlan = normalizePlanType(requiredPlan);
 
   if (normalizedRequiredPlan === "FREE") return true;
-
   if (typeof hasPlanAccess !== "function") return false;
 
   return Boolean(
-    hasPlanAccess(normalizedRequiredPlan, accessOptions)
+    hasPlanAccess(normalizedRequiredPlan, {
+      module: "video",
+      itemType: "video",
+      itemId,
+    })
   );
 };
 
-function GuardScreen({
+export function VideoGuardScreen({
   badge = "CLASSROOM",
   title = "Classroom unavailable",
   message = "",
@@ -67,22 +72,111 @@ function GuardScreen({
   );
 }
 
+const buildAccessEvidence = ({
+  item,
+  user,
+  isAdmin,
+  hasPlanAccess,
+  accessState,
+  isLoading,
+}) => {
+  const itemId = String(item?.id || item?.videoId || item?.classId || "");
+  const requiredPlan = getVideoRequiredPlan(item || {});
+
+  if (isLoading || accessState?.loading) {
+    return {
+      status: "loading",
+      sourceScope: "resolved",
+      resourceId: itemId,
+      resolvedForResource: false,
+    };
+  }
+
+  if (
+    accessState?.error ||
+    accessState?.isAccessCheckUnavailable
+  ) {
+    return {
+      status: "error",
+      sourceScope: "resolved",
+      resourceId: itemId,
+      resolvedForResource: false,
+    };
+  }
+
+  if (isAdmin) {
+    return {
+      status: "allowed",
+      sourceScope: "admin",
+      resourceId: itemId,
+      resolvedForResource: true,
+    };
+  }
+
+  if (!user) {
+    return {
+      status: "denied",
+      sourceScope: "resolved",
+      resourceId: itemId,
+      resolvedForResource: false,
+    };
+  }
+
+  const allowed = resolvePlanAccess({
+    requiredPlan,
+    hasPlanAccess,
+    itemId,
+  });
+
+  return {
+    status: allowed ? "allowed" : "denied",
+    sourceScope: "resolved",
+    module: "video",
+    itemType: "video",
+    resourceId: itemId,
+    resolvedForResource: allowed,
+  };
+};
+
 export default function VideoAccessGuard({
   item,
   user,
   isAdmin = false,
   hasPlanAccess,
+  accessState = {},
   isLoading = false,
   children,
 }) {
   const navigate = useNavigate();
 
-  if (isLoading) {
+  const access = buildAccessEvidence({
+    item,
+    user,
+    isAdmin,
+    hasPlanAccess,
+    accessState,
+    isLoading,
+  });
+
+  const decision = buildVideoActionDecision({
+    action: VIDEO_ACTIONS.WATCH,
+    video: item,
+    principal: {
+      uid: user?.uid || "",
+      email: user?.email || "",
+      role: user?.role || "",
+      isAuthenticated: Boolean(user),
+      isAdmin,
+    },
+    access,
+  });
+
+  if (decision.reason === VIDEO_REASON_CODES.ACCESS_LOADING) {
     return (
-      <GuardScreen
+      <VideoGuardScreen
         badge="PREPARING CLASSROOM"
-        title="Loading classroom"
-        message="AspireNest is preparing this classroom. If it does not open, reload or go back to Classes & Recordings."
+        title="Loading classroom access"
+        message="AspireNest is verifying this classroom and its protected source. The class will not open until the access decision is complete."
         primaryLabel="Reload Classroom"
         onPrimary={() => window.location.reload()}
         secondaryLabel="Back to Classes"
@@ -91,9 +185,12 @@ export default function VideoAccessGuard({
     );
   }
 
-  if (!item || !isVideoContentItem(item)) {
+  if (
+    decision.reason === VIDEO_REASON_CODES.NOT_FOUND ||
+    decision.reason === VIDEO_REASON_CODES.NOT_VIDEO
+  ) {
     return (
-      <GuardScreen
+      <VideoGuardScreen
         badge="CLASS NOT FOUND"
         title="This classroom item was not found"
         message="The class may be unpublished, deleted, or the link may be incorrect."
@@ -105,11 +202,9 @@ export default function VideoAccessGuard({
     );
   }
 
-  const status = normalizeVideoStatus(item.status);
-
-  if (!isAdmin && status !== "published") {
+  if (decision.reason === VIDEO_REASON_CODES.UNPUBLISHED) {
     return (
-      <GuardScreen
+      <VideoGuardScreen
         badge="CLASS UNAVAILABLE"
         title="This class is not available right now"
         message="This classroom item is currently draft, unpublished, or archived."
@@ -121,14 +216,12 @@ export default function VideoAccessGuard({
     );
   }
 
-  const requiredPlan = normalizePlanType(item.planType || "FREE");
-
-  if (!user && !isAdmin) {
+  if (decision.reason === VIDEO_REASON_CODES.LOGIN_REQUIRED) {
     return (
-      <GuardScreen
+      <VideoGuardScreen
         badge="LOGIN REQUIRED"
         title="Login required to open this classroom"
-        message={`Please login with your student account to open this ${requiredPlan} classroom.`}
+        message={`Please login with your student account to open this ${decision.requiredPlan} classroom.`}
         primaryLabel="Login"
         onPrimary={() => navigate("/login")}
         secondaryLabel="View Plans"
@@ -137,24 +230,26 @@ export default function VideoAccessGuard({
     );
   }
 
-  const hasAccess = isAdmin
-    ? true
-    : resolvePlanAccess({
-        requiredPlan,
-        hasPlanAccess,
-        accessOptions: {
-          module: "video",
-          itemType: "video",
-          itemId: item.id,
-        },
-      });
-
-  if (!hasAccess) {
+  if (decision.reason === VIDEO_REASON_CODES.ACCESS_ERROR) {
     return (
-      <GuardScreen
-        badge="PLAN LOCKED"
-        title={`${requiredPlan} classroom access required`}
-        message="Upgrade your plan to open this class, live session, or replay."
+      <VideoGuardScreen
+        badge="ACCESS UNAVAILABLE"
+        title="Classroom access could not be verified"
+        message="AspireNest kept this protected class closed because the access check was unavailable. Reload or contact support if the issue continues."
+        primaryLabel="Reload Classroom"
+        onPrimary={() => window.location.reload()}
+        secondaryLabel="Back to Classes"
+        onSecondary={() => navigate("/ctet-tet/videos")}
+      />
+    );
+  }
+
+  if (!decision.allowed) {
+    return (
+      <VideoGuardScreen
+        badge="ACCESS LOCKED"
+        title={`${decision.requiredPlan} classroom access required`}
+        message="This exact class is not included in the currently verified plan, module, bundle, or item access."
         primaryLabel="View Plans"
         onPrimary={() => navigate("/ctet-tet/pricing")}
         secondaryLabel="Back to Classes"
@@ -163,5 +258,7 @@ export default function VideoAccessGuard({
     );
   }
 
-  return children;
+  return typeof children === "function"
+    ? children(decision)
+    : children;
 }

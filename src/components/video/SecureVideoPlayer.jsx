@@ -78,27 +78,52 @@ export default function SecureVideoPlayer({
   videoUrl = "",
   title = "",
   viewerLabel = "",
+  authorizationDecision = null,
+  resourceId = "",
 }) {
   const classroomItem = video?.id ? video : item || {};
+  const expectedResourceId = String(
+    resourceId ||
+      classroomItem.id ||
+      classroomItem.videoId ||
+      classroomItem.classId ||
+      ""
+  ).trim();
 
-  const finalUrl =
-    sourceUrl ||
-    url ||
-    videoUrl ||
-    classroomItem.videoUrl ||
-    classroomItem.fileUrl ||
-    classroomItem.sourceUrl ||
-    classroomItem.replayUrl ||
-    classroomItem.joinUrl ||
-    classroomItem.liveUrl ||
-    "";
+  const verifiedWatch = Boolean(
+    authorizationDecision?.allowed === true &&
+      authorizationDecision?.canWatch === true &&
+      authorizationDecision?.videoId === expectedResourceId
+  );
+
+  const finalUrl = verifiedWatch
+    ? String(sourceUrl || url || videoUrl || "").trim()
+    : "";
 
   const source = getEmbedSource(finalUrl);
-  const finalTitle = title || classroomItem.title || "AspireNest Classroom";
+  const finalTitle =
+    title || classroomItem.title || "AspireNest Classroom";
 
   const blockInteraction = (event) => {
     event.preventDefault();
   };
+
+  if (!verifiedWatch) {
+    return (
+      <div className="secureVideoPlayerShell secureVideoPlayerPremium">
+        <div className="secureVideoPlayerExternal">
+          <span>🔐</span>
+
+          <h3>Verified WATCH access required</h3>
+
+          <p>
+            AspireNest kept this player closed because the current resource
+            did not carry a matching authorization decision.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -110,7 +135,7 @@ export default function SecureVideoPlayer({
     >
       <div className="secureVideoPlayerTop">
         <span>{source.label}</span>
-        <strong>Login + plan gated</strong>
+        <strong>Verified WATCH access</strong>
       </div>
 
       <div className="secureVideoWatermark">
@@ -137,14 +162,18 @@ export default function SecureVideoPlayer({
 
           <p>
             This class uses an external live or video platform. AspireNest
-            protects access inside the app, but public platform links cannot be
-            made impossible to share.
+            verifies access before exposing the link, but a public platform
+            link cannot be made impossible to share.
           </p>
 
           <button
             type="button"
             onClick={() =>
-              window.open(source.externalUrl, "_blank", "noopener,noreferrer")
+              window.open(
+                source.externalUrl,
+                "_blank",
+                "noopener,noreferrer"
+              )
             }
           >
             Open Classroom →
@@ -157,8 +186,8 @@ export default function SecureVideoPlayer({
           <h3>Classroom source pending</h3>
 
           <p>
-            Admin has not added a playable video, replay, or live classroom link
-            yet.
+            The verified classroom does not currently have a playable video,
+            replay, or live source.
           </p>
         </div>
       )}
@@ -167,9 +196,10 @@ export default function SecureVideoPlayer({
         <span>🔐</span>
 
         <p>
-          Protected by AspireNest login, plan access, unpublished lock, and
-          guarded embed flow. For absolute anti-sharing protection, use a future
-          signed private stream or DRM provider.
+          Protected by AspireNest login, resource-bound WATCH authorization,
+          unpublished lock, and guarded source resolution. Screen capture and
+          external public links remain deterrence limits, not a false
+          piracy-proof guarantee.
         </p>
       </div>
     </div>

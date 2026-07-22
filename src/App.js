@@ -8961,6 +8961,13 @@ handleSaveUniversalContent={handleSaveUniversalContent}
       user={user}
       isAdmin={isAdmin(user)}
       hasPlanAccess={hasPlanAccess}
+      accessState={{
+        loading: Boolean(accessProfile?.loading),
+        error: Boolean(accessProfile?.error),
+        isAccessCheckUnavailable: Boolean(
+          accessProfile?.isAccessCheckUnavailable
+        ),
+      }}
     />
   }
 />

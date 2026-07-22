@@ -18,6 +18,8 @@ export const PROTECTED_CONTENT_URL_FIELDS = Object.freeze([
   "liveUrl",
   "joinUrl",
   "replayUrl",
+  "recordingUrl",
+  "meetingUrl",
   "sourceUrl",
   "downloadUrl",
   "assetUrl",
@@ -155,4 +157,28 @@ export const getProtectedContentUrl = (
   }
 
   return "";
+};
+
+export const readProtectedVideoAssetForDecision = async ({
+  assetId = "",
+  videoId = "",
+  decision = {},
+} = {}) => {
+  const normalizedAssetId = cleanString(assetId || videoId);
+  const normalizedVideoId = cleanString(videoId);
+
+  if (!normalizedAssetId || !normalizedVideoId) {
+    throw new Error("Protected video asset requires assetId and videoId.");
+  }
+
+  if (
+    decision?.allowed !== true ||
+    decision?.canWatch !== true ||
+    decision?.canResolveAsset !== true ||
+    cleanString(decision?.videoId) !== normalizedVideoId
+  ) {
+    throw new Error("Protected video asset authorization denied.");
+  }
+
+  return readProtectedContentAsset(normalizedAssetId);
 };

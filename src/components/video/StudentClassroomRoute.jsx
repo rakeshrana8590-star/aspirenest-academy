@@ -66,13 +66,12 @@ const getLiveActionLabel = (liveState = "") => {
   return "Schedule Pending";
 };
 
-const canOpenLiveAction = (item = {}, liveState = "", playbackUrl = "") => {
-  if (liveState === LIVE_CLASS_STATUS.JOIN_NOW) {
-    return Boolean(item.joinUrl || item.liveUrl || item.meetingUrl || playbackUrl);
-  }
-
-  if (liveState === LIVE_CLASS_STATUS.REPLAY_AVAILABLE) {
-    return Boolean(item.replayUrl || item.recordingUrl || playbackUrl);
+const canOpenLiveAction = (liveState = "", playbackUrl = "") => {
+  if (
+    liveState === LIVE_CLASS_STATUS.JOIN_NOW ||
+    liveState === LIVE_CLASS_STATUS.REPLAY_AVAILABLE
+  ) {
+    return Boolean(playbackUrl);
   }
 
   return false;
@@ -83,6 +82,10 @@ export default function StudentClassroomRoute({
   user = null,
   isAdmin = false,
   hasPlanAccess,
+  classroomItemOverride = null,
+  watchDecision = null,
+  authorizedSourceUrl = "",
+  requiresProtectedAsset = false,
 }) {
   const navigate = useNavigate();
   const { videoId = "" } = useParams();
@@ -90,10 +93,22 @@ export default function StudentClassroomRoute({
 
   const activeVideoId = safeDecodeRouteValue(videoId);
 
-  const classroomItem = React.useMemo(
+  const libraryClassroomItem = React.useMemo(
     () => videoLibrary.getVideoById(activeVideoId),
     [videoLibrary, activeVideoId]
   );
+
+  const overrideVideoId = String(
+    classroomItemOverride?.id ||
+      classroomItemOverride?.videoId ||
+      classroomItemOverride?.classId ||
+      ""
+  );
+
+  const classroomItem =
+    overrideVideoId === activeVideoId
+      ? classroomItemOverride
+      : libraryClassroomItem;
 
   const requiredPlan = normalizePlanType(classroomItem?.planType || "FREE");
   const classMode = getClassMode(classroomItem || {});
@@ -106,9 +121,29 @@ export default function StudentClassroomRoute({
   const liveStateLabel =
     classMode === "LIVE" ? getLiveStatusLabel(liveState) : "Recorded Lesson";
 
-  const playbackUrl = getClassroomSourceUrl(classroomItem || {});
+  const verifiedWatch =
+    isAdmin ||
+    Boolean(
+      watchDecision?.allowed === true &&
+        watchDecision?.canWatch === true &&
+        watchDecision?.videoId === activeVideoId
+    );
+
+  const legacyPlaybackUrl = getClassroomSourceUrl(
+    classroomItem || {}
+  );
+
+  const playbackUrl = requiresProtectedAsset
+    ? String(authorizedSourceUrl || "").trim()
+    : String(
+        authorizedSourceUrl ||
+          (watchDecision?.legacySourceAllowed
+            ? legacyPlaybackUrl
+            : "")
+      ).trim();
 
   const canShowPlayer =
+    verifiedWatch &&
     Boolean(playbackUrl) &&
     (classMode === "RECORDED" ||
       liveState === LIVE_CLASS_STATUS.JOIN_NOW ||
@@ -262,7 +297,6 @@ export default function StudentClassroomRoute({
   const safeMentor = classroomItem.mentorName || "AspireNest Mentor";
   const safeSource = getSafeClassroomSourceLabel(classroomItem);
   const liveActionEnabled = canOpenLiveAction(
-    classroomItem,
     liveState,
     playbackUrl
   );
@@ -342,6 +376,8 @@ export default function StudentClassroomRoute({
                   videoUrl={playbackUrl}
                   title={safeTitle}
                   viewerLabel={user?.email || user?.displayName || ""}
+                  authorizationDecision={watchDecision}
+                  resourceId={activeVideoId}
                 />
               ) : (
                 <div className="studentClassroomWaitingCard">
