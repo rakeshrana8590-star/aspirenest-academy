@@ -182,3 +182,37 @@ export const readProtectedVideoAssetForDecision = async ({
 
   return readProtectedContentAsset(normalizedAssetId);
 };
+
+export const readProtectedCurrentAffairsAssetForDecision = async ({
+  assetId = "",
+  resourceId = "",
+  decision = {},
+} = {}) => {
+  const normalizedAssetId = cleanString(
+    assetId || resourceId
+  );
+  const normalizedResourceId =
+    cleanString(resourceId);
+
+  if (!normalizedAssetId || !normalizedResourceId) {
+    throw new Error(
+      "Protected Current Affairs asset requires assetId and resourceId."
+    );
+  }
+
+  if (
+    decision?.allowed !== true ||
+    decision?.canRead !== true ||
+    decision?.canResolveAsset !== true ||
+    cleanString(decision?.resourceId) !==
+      normalizedResourceId
+  ) {
+    throw new Error(
+      "Protected Current Affairs asset authorization denied."
+    );
+  }
+
+  return readProtectedContentAsset(
+    normalizedAssetId
+  );
+};

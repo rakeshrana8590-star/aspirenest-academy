@@ -113,6 +113,7 @@ import {
 
 import {
   StudentCurrentAffairsLibraryRoute, StudentCurrentAffairsMonthRoute, } from "./components/currentAffairs/student/index.js";
+import StudentCurrentAffairsViewerRoute from "./components/currentAffairs/student/StudentCurrentAffairsViewerRoute.jsx";
 import { AdminCurrentAffairsHomeRoute } from "./components/currentAffairs/admin/index.js";
 import AdminCurrentAffairsManageRoute from "./components/currentAffairs/admin/AdminCurrentAffairsManageRoute";
 import AdminCurrentAffairsAddRoute from "./components/currentAffairs/admin/AdminCurrentAffairsAddRoute";
@@ -9215,7 +9216,33 @@ handleSaveUniversalContent={handleSaveUniversalContent}
     <StudentCurrentAffairsMonthRoute
       universalContent={universalContent}
       currentAffairsList={currentAffairsList}
+      user={user}
       hasPlanAccess={hasPlanAccess}
+      accessState={{
+        loading: accessProfile?.loading,
+        error: accessProfile?.error,
+        isAccessCheckUnavailable:
+          accessProfile?.isAccessCheckUnavailable,
+      }}
+      isAdmin={isAdmin(user)}
+    />
+  }
+/>
+
+<Route
+  path="/ctet-tet/current-affairs/:monthId/read/:resourceId"
+  element={
+    <StudentCurrentAffairsViewerRoute
+      universalContent={universalContent}
+      currentAffairsList={currentAffairsList}
+      user={user}
+      hasPlanAccess={hasPlanAccess}
+      accessState={{
+        loading: accessProfile?.loading,
+        error: accessProfile?.error,
+        isAccessCheckUnavailable:
+          accessProfile?.isAccessCheckUnavailable,
+      }}
       isAdmin={isAdmin(user)}
     />
   }

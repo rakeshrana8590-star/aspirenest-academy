@@ -101,6 +101,25 @@ export const CURRENT_AFFAIRS_PLAN_ORDER = [
     return true;
   }
   
+  export function hasCurrentAffairsProtectedAsset(item = {}) {
+    return (
+      item.hasProtectedAsset === true ||
+      Boolean(
+        cleanCurrentAffairsText(
+          item.protectedAssetId || item.assetId,
+          ""
+        )
+      )
+    );
+  }
+
+  export function hasCurrentAffairsReadableAsset(item = {}) {
+    return (
+      hasCurrentAffairsProtectedAsset(item) ||
+      hasValidCurrentAffairsPdf(item)
+    );
+  }
+
   export function getCurrentAffairsPlan(item = {}) {
     return cleanCurrentAffairsText(
       item.planType ||
@@ -132,7 +151,7 @@ export const CURRENT_AFFAIRS_PLAN_ORDER = [
     return (
       status === "published" &&
       plan !== "COMING_SOON" &&
-      hasValidCurrentAffairsPdf(item)
+      hasCurrentAffairsReadableAsset(item)
     );
   }
   
@@ -222,10 +241,20 @@ export const CURRENT_AFFAIRS_PLAN_ORDER = [
     const pdfUrl = getCurrentAffairsPdfUrl(item);
     const planType = getCurrentAffairsPlan(item);
     const status = getCurrentAffairsStatus(item);
-  
+    const id =
+      item.id ||
+      createCurrentAffairsSlug(
+        `${title}-${month}-${week}-${planType}-${pdfUrl}`
+      );
+
     return {
       ...item,
+      id,
+      resourceId: item.resourceId || id,
       source,
+      section: item.section || "currentAffairs",
+      module: item.module || "currentAffairs",
+      itemType: item.itemType || "currentAffairsPdf",
       title,
       month,
       week,
@@ -234,16 +263,11 @@ export const CURRENT_AFFAIRS_PLAN_ORDER = [
       status,
       fileUrl: item.fileUrl || pdfUrl,
       pdfUrl,
-      id:
-        item.id ||
-        createCurrentAffairsSlug(
-          `${title}-${month}-${week}-${planType}-${pdfUrl}`
-        ),
       monthSlug: createCurrentAffairsSlug(month),
       weekSlug: createCurrentAffairsSlug(week),
     };
   }
-  
+
   export function uniqueCurrentAffairsByKey(items = [], getKey) {
     const seen = new Set();
   
@@ -294,7 +318,9 @@ export const CURRENT_AFFAIRS_PLAN_ORDER = [
   }
   
   export function getCurrentAffairsPdfCount(items = []) {
-    return items.filter((item) => hasValidCurrentAffairsPdf(item)).length;
+    return items.filter((item) =>
+      hasCurrentAffairsReadableAsset(item)
+    ).length;
   }
   
   export function getMonthSortValue(monthLabel = "") {
