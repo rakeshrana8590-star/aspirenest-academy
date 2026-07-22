@@ -4604,6 +4604,12 @@ return (
       userPlanType={userPlanType}
       hasPlanAccess={hasPlanAccess}
       isAdminUser={isAdmin(user)}
+      accessState={{
+        loading: accessProfile?.loading,
+        error: accessProfile?.error,
+        isAccessCheckUnavailable:
+          accessProfile?.isAccessCheckUnavailable,
+      }}
     />
   }
 />
@@ -4616,6 +4622,12 @@ return (
       userPlanType={userPlanType}
       hasPlanAccess={hasPlanAccess}
       isAdminUser={isAdmin(user)}
+      accessState={{
+        loading: accessProfile?.loading,
+        error: accessProfile?.error,
+        isAccessCheckUnavailable:
+          accessProfile?.isAccessCheckUnavailable,
+      }}
     />
   }
 />
@@ -4628,6 +4640,12 @@ return (
       userPlanType={userPlanType}
       hasPlanAccess={hasPlanAccess}
       isAdminUser={isAdmin(user)}
+      accessState={{
+        loading: accessProfile?.loading,
+        error: accessProfile?.error,
+        isAccessCheckUnavailable:
+          accessProfile?.isAccessCheckUnavailable,
+      }}
     />
   }
 />
@@ -4640,6 +4658,12 @@ return (
       userPlanType={userPlanType}
       hasPlanAccess={hasPlanAccess}
       isAdminUser={isAdmin(user)}
+      accessState={{
+        loading: accessProfile?.loading,
+        error: accessProfile?.error,
+        isAccessCheckUnavailable:
+          accessProfile?.isAccessCheckUnavailable,
+      }}
     />
   }
 />

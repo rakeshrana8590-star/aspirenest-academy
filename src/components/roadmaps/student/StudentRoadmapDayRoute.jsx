@@ -1,8 +1,22 @@
 import React from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 
 import {
-  canAccessRoadmap,
+  ROADMAP_ACTIONS,
+  ROADMAP_REASON_CODES,
+  buildRoadmapAccessEvidence,
+  buildRoadmapActionDecision,
+} from "../../../access/roadmapActionPolicy.js";
+import {
+  ROADMAP_LINKED_RESOURCE_REASON_CODES,
+  buildRoadmapLinkedResourceAccessEvidence,
+  buildRoadmapLinkedResourceDecision,
+} from "../../../access/roadmapLinkedResourcePolicy.js";
+import {
   loadRoadmapSmartRecommendations,
   loadStudyRoadmapWithDays,
   saveUserRoadmapDayProgress,
@@ -30,23 +44,36 @@ export default function StudentRoadmapDayRoute({
   userPlanType = "FREE",
   hasPlanAccess,
   isAdminUser = false,
+  accessState = {},
 }) {
   const { roadmapId, dayId } = useParams();
   const navigate = useNavigate();
 
-  const [roadmap, setRoadmap] = React.useState(null);
-  const [progressItems, setProgressItems] = React.useState([]);
-  const [smartRecommendations, setSmartRecommendations] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
+  const [roadmap, setRoadmap] =
+    React.useState(null);
+  const [progressItems, setProgressItems] =
+    React.useState([]);
+  const [
+    smartRecommendations,
+    setSmartRecommendations,
+  ] = React.useState(null);
+  const [loading, setLoading] =
+    React.useState(true);
+  const [loadError, setLoadError] =
+    React.useState("");
 
-  const reloadProgress = React.useCallback(async () => {
-    const progress = await getRoadmapProgressForUser({
-      user,
-      roadmapId,
-    });
+  const reloadProgress = React.useCallback(
+    async () => {
+      const progress =
+        await getRoadmapProgressForUser({
+          user,
+          roadmapId,
+        });
 
-    setProgressItems(progress);
-  }, [user, roadmapId]);
+      setProgressItems(progress);
+    },
+    [user, roadmapId]
+  );
 
   React.useEffect(() => {
     let mounted = true;
@@ -54,25 +81,37 @@ export default function StudentRoadmapDayRoute({
     const loadDay = async () => {
       try {
         setLoading(true);
+        setLoadError("");
 
-        const roadmapWithDays = await loadStudyRoadmapWithDays(roadmapId);
+        const roadmapWithDays =
+          await loadStudyRoadmapWithDays(roadmapId);
 
         if (!mounted) return;
 
         setRoadmap(roadmapWithDays);
 
         if (user?.uid) {
-          const progress = await getRoadmapProgressForUser({
-            user,
-            roadmapId,
-          });
+          const progress =
+            await getRoadmapProgressForUser({
+              user,
+              roadmapId,
+            });
 
           if (mounted) {
             setProgressItems(progress);
           }
         }
       } catch (error) {
-        console.error("Load roadmap day error:", error);
+        console.error(
+          "Load roadmap day error:",
+          error
+        );
+
+        if (mounted) {
+          setLoadError(
+            "Unable to load this roadmap day right now."
+          );
+        }
       } finally {
         if (mounted) {
           setLoading(false);
@@ -87,59 +126,74 @@ export default function StudentRoadmapDayRoute({
     };
   }, [roadmapId, user]);
 
-  const hasRoadmapAccess = canAccessRoadmap({
-    roadmapPlanType: roadmap?.planType,
-    userPlanType,
+  const activeDay = roadmap?.days?.find(
+    (day) => day.id === dayId
+  );
+
+  const roadmapAccess =
+    buildRoadmapAccessEvidence({
+      roadmap,
+      user,
+      isAdmin: isAdminUser,
+      hasPlanAccess,
+      accessState,
+      isLoading: loading,
+    });
+
+  const principal = {
+    uid: user?.uid || "",
+    email: user?.email || "",
+    role: user?.role || "",
+    isAuthenticated: Boolean(user),
     isAdmin: isAdminUser,
-    hasPlanAccess,
-    accessOptions: {
-      module: "roadmap",
-      itemType: "roadmap",
-      itemId: roadmap?.id || roadmapId,
-    },
-  });
+  };
 
-  const hasDayAccess = canAccessRoadmap({
-    roadmapPlanType: roadmap?.planType,
-    userPlanType,
-    isAdmin: isAdminUser,
-    hasPlanAccess,
-    accessOptions: {
-      module: "roadmap",
-      itemType: "roadmapDay",
-      itemId: dayId,
-    },
-  });
+  const dayDecision =
+    buildRoadmapActionDecision({
+      action: ROADMAP_ACTIONS.VIEW_DAY,
+      roadmap,
+      principal,
+      access: roadmapAccess,
+    });
 
-  const hasAccess = hasRoadmapAccess || hasDayAccess;
+  const progressDecision =
+    buildRoadmapActionDecision({
+      action: ROADMAP_ACTIONS.UPDATE_PROGRESS,
+      roadmap,
+      principal,
+      access: roadmapAccess,
+    });
 
-  const activeDay = roadmap?.days?.find((day) => day.id === dayId);
-
-  const completedTaskIds = getCompletedTaskIdsForDay({
-    progressItems,
-    dayId,
-  });
+  const completedTaskIds =
+    getCompletedTaskIdsForDay({
+      progressItems,
+      dayId,
+    });
 
   React.useEffect(() => {
     let mounted = true;
 
     const loadRecommendations = async () => {
-      if (!activeDay) {
+      if (!activeDay || !dayDecision.allowed) {
         setSmartRecommendations(null);
         return;
       }
 
       try {
-        const recommendations = await loadRoadmapSmartRecommendations({
-          day: activeDay,
-          limit: 4,
-        });
+        const recommendations =
+          await loadRoadmapSmartRecommendations({
+            day: activeDay,
+            limit: 4,
+          });
 
         if (mounted) {
           setSmartRecommendations(recommendations);
         }
       } catch (error) {
-        console.error("Load roadmap smart recommendations error:", error);
+        console.error(
+          "Load roadmap smart recommendations error:",
+          error
+        );
 
         if (mounted) {
           setSmartRecommendations({
@@ -157,47 +211,131 @@ export default function StudentRoadmapDayRoute({
     return () => {
       mounted = false;
     };
-  }, [activeDay?.id]);
+  }, [activeDay?.id, dayDecision.allowed]);
 
-  const canOpenRecommendation = (item = {}) => {
-    const itemPlan = String(item.planType || roadmap?.planType || "FREE")
-      .trim()
-      .toUpperCase();
+  const getLinkedResourceDecision =
+    React.useCallback(
+      (resource = {}, resourceType = "") => {
+        const access =
+          buildRoadmapLinkedResourceAccessEvidence({
+            resource,
+            resourceType,
+            parentPlanType:
+              roadmap?.planType || "FREE",
+            user,
+            isAdmin: isAdminUser,
+            hasPlanAccess,
+            accessState,
+          });
 
-    if (isAdminUser) return true;
+        return buildRoadmapLinkedResourceDecision({
+          resource,
+          resourceType,
+          parentPlanType:
+            roadmap?.planType || "FREE",
+          principal,
+          access,
+        });
+      },
+      [
+        accessState,
+        hasPlanAccess,
+        isAdminUser,
+        principal.email,
+        principal.isAuthenticated,
+        principal.role,
+        principal.uid,
+        roadmap?.planType,
+        user,
+      ]
+    );
 
-    if (typeof hasPlanAccess === "function") {
-      return Boolean(
-        hasPlanAccess(itemPlan, {
-          module: "roadmap",
-          itemType: "roadmapResource",
-          itemId: String(item.id || item.href || item.title || ""),
-        })
+  const openLinkedResource = React.useCallback(
+    (
+      resource = {},
+      resourceType = "",
+      suppliedDecision = null
+    ) => {
+      const decision =
+        suppliedDecision ||
+        getLinkedResourceDecision(
+          resource,
+          resourceType
+        );
+
+      if (!decision?.allowed || !decision.canOpen) {
+        if (
+          decision?.reason ===
+          ROADMAP_LINKED_RESOURCE_REASON_CODES
+            .ACCESS_ERROR
+        ) {
+          window.location.reload();
+          return;
+        }
+
+        navigate(
+          user ? "/ctet-tet/pricing" : "/login"
+        );
+        return;
+      }
+
+      const href = decision.authorizedHref;
+
+      if (!href) return;
+
+      if (href.startsWith("/")) {
+        navigate(href);
+        return;
+      }
+
+      window.open(
+        href,
+        "_blank",
+        "noopener,noreferrer"
       );
-    }
-
-    return canAccessRoadmap({
-      roadmapPlanType: itemPlan,
-      userPlanType,
-      isAdmin: isAdminUser,
-    });
-  };
+    },
+    [
+      getLinkedResourceDecision,
+      navigate,
+      user,
+    ]
+  );
 
   const handleToggleTask = async (task) => {
-    if (!user?.uid) {
-      navigate("/login");
+    if (
+      !progressDecision.allowed ||
+      !progressDecision.canUpdateProgress
+    ) {
+      if (
+        progressDecision.reason ===
+        ROADMAP_REASON_CODES.ACCESS_ERROR
+      ) {
+        window.location.reload();
+        return;
+      }
+
+      navigate(
+        user ? "/ctet-tet/pricing" : "/login"
+      );
       return;
     }
 
-    const alreadyCompleted = completedTaskIds.includes(task.taskId);
+    const alreadyCompleted =
+      completedTaskIds.includes(task.taskId);
 
     const nextCompletedIds = alreadyCompleted
-      ? completedTaskIds.filter((taskId) => taskId !== task.taskId)
+      ? completedTaskIds.filter(
+          (taskId) => taskId !== task.taskId
+        )
       : [...completedTaskIds, task.taskId];
 
     const nextProgressPercent =
       activeDay?.tasks?.length > 0
-        ? Math.round((nextCompletedIds.length / activeDay.tasks.length) * 100)
+        ? Math.round(
+            (nextCompletedIds.length /
+              activeDay.tasks.length) *
+              100
+          )
         : 0;
 
     await saveUserRoadmapDayProgress({
@@ -212,12 +350,25 @@ export default function StudentRoadmapDayRoute({
     await reloadProgress();
   };
 
+  const accessLoading =
+    dayDecision.reason ===
+    ROADMAP_REASON_CODES.ACCESS_LOADING;
+
+  const accessError =
+    dayDecision.reason ===
+    ROADMAP_REASON_CODES.ACCESS_ERROR;
+
   return (
     <RoadmapShell>
-      {loading ? (
+      {loading || accessLoading ? (
         <RoadmapEmptyState
-          title="Loading day..."
-          text="Please wait while AspirePath loads the selected day."
+          title="Verifying roadmap day..."
+          text="AspireNest is loading this day and checking exact roadmap access before tasks or progress are enabled."
+        />
+      ) : loadError ? (
+        <RoadmapEmptyState
+          title="Unable to load"
+          text={loadError}
         />
       ) : !roadmap || !activeDay ? (
         <RoadmapEmptyState
@@ -227,49 +378,114 @@ export default function StudentRoadmapDayRoute({
             <button
               className="aspirePathPrimaryBtn"
               type="button"
-              onClick={() => navigate(`/ctet-tet/roadmaps/${roadmapId}`)}
+              onClick={() =>
+                navigate(
+                  `/ctet-tet/roadmaps/${roadmapId}`
+                )
+              }
             >
               Back to Roadmap
             </button>
           }
         />
-      ) : !hasAccess ? (
+      ) : accessError ? (
         <RoadmapAccessLock
+          title="Roadmap access could not be verified"
+          text="AspireNest kept this day, its linked resources, and progress actions closed because the access check was unavailable."
           action={
             <button
               className="aspirePathPrimaryBtn"
               type="button"
-              onClick={() => navigate("/ctet-tet/pricing")}
+              onClick={() =>
+                window.location.reload()
+              }
             >
-              View Pricing
+              Reload Access
+            </button>
+          }
+        />
+      ) : !dayDecision.allowed ? (
+        <RoadmapAccessLock
+          title={
+            user
+              ? "This roadmap day is locked"
+              : "Login required to open this roadmap day"
+          }
+          text="The day route requires exact roadmap authorization. Linked Notes, Videos, Live classes, and Mock Tests are checked independently."
+          action={
+            <button
+              className="aspirePathPrimaryBtn"
+              type="button"
+              onClick={() =>
+                navigate(
+                  user
+                    ? "/ctet-tet/pricing"
+                    : "/login"
+                )
+              }
+            >
+              {user ? "View Pricing" : "Login"}
             </button>
           }
         />
       ) : (
         <>
           <AspirePathHero
-            eyebrow={`Day ${activeDay.dayNumber || "--"}`}
-            title={activeDay.focusArea || activeDay.subject || "Daily Path"}
-            subtitle={`${formatLongDate(activeDay.date)} • ${
-              activeDay.chapter || roadmap.title || "AspirePath task"
+            eyebrow={`Day ${
+              activeDay.dayNumber || "--"
+            }`}
+            title={
+              activeDay.focusArea ||
+              activeDay.subject ||
+              "Daily Path"
+            }
+            subtitle={`${formatLongDate(
+              activeDay.date
+            )} • ${
+              activeDay.chapter ||
+              roadmap.title ||
+              "AspirePath task"
             }`}
             metrics={[
-              { value: activeDay.tasks?.length || 0, label: "Tasks" },
-              { value: activeDay.dayType || "study", label: "Type" },
-              { value: activeDay.subject || "Subject", label: "Subject" },
-              { value: roadmap.planType || "FREE", label: "Plan" },
+              {
+                value:
+                  activeDay.tasks?.length || 0,
+                label: "Tasks",
+              },
+              {
+                value:
+                  activeDay.dayType || "study",
+                label: "Type",
+              },
+              {
+                value:
+                  activeDay.subject || "Subject",
+                label: "Subject",
+              },
+              {
+                value:
+                  roadmap.planType || "FREE",
+                label: "Plan",
+              },
             ]}
             actions={
               <>
                 <button
                   className="aspirePathSecondaryBtn"
                   type="button"
-                  onClick={() => navigate(`/ctet-tet/roadmaps/${roadmapId}`)}
+                  onClick={() =>
+                    navigate(
+                      `/ctet-tet/roadmaps/${roadmapId}`
+                    )
+                  }
                 >
                   Back to Roadmap
                 </button>
 
-                <Link className="aspirePathGhostBtn" to="/my-aspirepath">
+                <Link
+                  className="aspirePathGhostBtn"
+                  to="/my-aspirepath"
+                >
                   My AspirePath
                 </Link>
               </>
@@ -280,18 +496,32 @@ export default function StudentRoadmapDayRoute({
             <RoadmapSectionHeader
               kicker="Daily Tasks"
               title="Complete today’s learning path"
-              text="Mark each task complete as you finish your study, live session, mock test, or revision."
+              text="Mark each task complete after exact roadmap access is verified. Every linked resource keeps its own authorization boundary."
             />
 
             <div className="aspirePathTaskList">
-              {(activeDay.tasks || []).map((task) => (
-                <RoadmapTaskCard
-                  key={task.taskId || task.title}
-                  task={task}
-                  completed={completedTaskIds.includes(task.taskId)}
-                  onToggleComplete={handleToggleTask}
-                />
-              ))}
+              {(activeDay.tasks || []).map(
+                (task) => (
+                  <RoadmapTaskCard
+                    key={
+                      task.taskId || task.title
+                    }
+                    task={task}
+                    completed={completedTaskIds.includes(
+                      task.taskId
+                    )}
+                    onToggleComplete={
+                      handleToggleTask
+                    }
+                    getResourceDecision={
+                      getLinkedResourceDecision
+                    }
+                    onOpenResource={
+                      openLinkedResource
+                    }
+                  />
+                )
+              )}
             </div>
           </section>
 
@@ -299,7 +529,7 @@ export default function StudentRoadmapDayRoute({
             <RoadmapSectionHeader
               kicker="Smart Guide"
               title="Recommended resources"
-              text="AspirePath matches this day’s subject, chapter, focus area, and tasks with available notes, videos, and mock tests."
+              text="AspirePath can recommend Notes, Videos, Live classes, and Mock Tests, but roadmap access never authorizes those resources by itself."
             />
 
             {!smartRecommendations ? (
@@ -307,76 +537,94 @@ export default function StudentRoadmapDayRoute({
                 title="Checking recommendations..."
                 text="AspirePath is finding useful resources for this day."
               />
-            ) : smartRecommendations.all?.length === 0 ? (
+            ) : smartRecommendations.all?.length ===
+              0 ? (
               <RoadmapEmptyState
                 title="No smart recommendations yet"
                 text="Add matching notes, videos, or mock tests in Content Studio to enable recommendations for this day."
               />
             ) : (
               <div className="aspirePathGrid">
-                {smartRecommendations.all.map((item) => (
-                  <article className="aspirePathCard" key={item.id}>
-                    <div className="aspirePathCardTop">
-                      <div>
-                        <h3 className="aspirePathCardTitle">{item.title}</h3>
+                {smartRecommendations.all.map(
+                  (item) => {
+                    const resourceDecision =
+                      getLinkedResourceDecision(
+                        item,
+                        item.type
+                      );
 
-                        <p className="aspirePathCardText">
-                          {item.subject || activeDay.subject || "Subject"} •{" "}
-                          {item.chapter ||
-                            activeDay.chapter ||
-                            activeDay.focusArea ||
-                            "Recommended resource"}
-                        </p>
-                      </div>
+                    return (
+                      <article
+                        className="aspirePathCard"
+                        key={item.id}
+                      >
+                        <div className="aspirePathCardTop">
+                          <div>
+                            <h3 className="aspirePathCardTitle">
+                              {item.title}
+                            </h3>
 
-                      <RoadmapBadge>
-                        {item.type === "note"
-                          ? "Notes"
-                          : item.type === "video"
-                          ? "Video"
-                          : "Mock"}
-                      </RoadmapBadge>
-                    </div>
+                            <p className="aspirePathCardText">
+                              {item.subject ||
+                                activeDay.subject ||
+                                "Subject"}{" "}
+                              •{" "}
+                              {item.chapter ||
+                                activeDay.chapter ||
+                                activeDay.focusArea ||
+                                "Recommended resource"}
+                            </p>
+                          </div>
 
-                    <div className="aspirePathResourceRow">
-                      <RoadmapBadge>{item.planType || "FREE"}</RoadmapBadge>
+                          <RoadmapBadge>
+                            {item.type === "note"
+                              ? "Notes"
+                              : item.type ===
+                                  "video"
+                                ? "Video"
+                                : "Mock"}
+                          </RoadmapBadge>
+                        </div>
 
-                      <RoadmapBadge>
-                        {item.contentType || item.section}
-                      </RoadmapBadge>
-                    </div>
+                        <div className="aspirePathResourceRow">
+                          <RoadmapBadge>
+                            {item.planType ||
+                              "FREE"}
+                          </RoadmapBadge>
 
-                    <div className="aspirePathHeroActions">
-                      {canOpenRecommendation(item) && item.href ? (
-                        item.href.startsWith("/") ? (
-                          <Link
-                            className="aspirePathPrimaryBtn"
-                            to={item.href}
+                          <RoadmapBadge>
+                            {item.contentType ||
+                              item.section}
+                          </RoadmapBadge>
+                        </div>
+
+                        <div className="aspirePathHeroActions">
+                          <button
+                            className={
+                              resourceDecision.allowed
+                                ? "aspirePathPrimaryBtn"
+                                : "aspirePathSecondaryBtn"
+                            }
+                            type="button"
+                            onClick={() =>
+                              openLinkedResource(
+                                item,
+                                item.type,
+                                resourceDecision
+                              )
+                            }
                           >
-                            Open Recommendation
-                          </Link>
-                        ) : (
-                          <a
-                            className="aspirePathPrimaryBtn"
-                            href={item.href}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Open Recommendation
-                          </a>
-                        )
-                      ) : (
-                        <button
-                          className="aspirePathSecondaryBtn"
-                          type="button"
-                          onClick={() => navigate(user ? "/ctet-tet/pricing" : "/login")}
-                        >
-                          Unlock Recommendation
-                        </button>
-                      )}
-                    </div>
-                  </article>
-                ))}
+                            {resourceDecision.allowed
+                              ? "Open Recommendation"
+                              : user
+                                ? "Unlock Recommendation"
+                                : "Login to Open"}
+                          </button>
+                        </div>
+                      </article>
+                    );
+                  }
+                )}
               </div>
             )}
           </section>

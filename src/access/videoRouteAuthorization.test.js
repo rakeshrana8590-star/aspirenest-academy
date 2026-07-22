@@ -36,8 +36,12 @@ describe("AspireNest Video route authorization wiring", () => {
     expect(guard).toContain('itemType: "video"');
     expect(guard).toContain("resolvedForResource");
 
-    expect(route).toContain("{(watchDecision) =>");
+    expect(route).toContain("watchDecision,");
+    expect(route).toContain("liveActionDecision,");
     expect(route).toContain("watchDecision={watchDecision}");
+    expect(route).toContain(
+      "liveActionDecision={liveActionDecision}"
+    );
   });
 
   test("loading and access lookup errors fail closed", () => {
@@ -66,7 +70,12 @@ describe("AspireNest Video route authorization wiring", () => {
     expect(route).toContain(
       "readProtectedVideoAssetForDecision"
     );
-    expect(route).toContain("decision: watchDecision");
+    expect(route).toContain(
+      "decision: playbackDecision"
+    );
+    expect(route).toContain(
+      "shouldResolveProtectedSource"
+    );
     expect(route).toContain("requiresProtectedAsset");
     expect(service).toContain(
       "decision?.canResolveAsset !== true"
@@ -87,10 +96,10 @@ describe("AspireNest Video route authorization wiring", () => {
       "src/components/video/SecureVideoPlayer.jsx"
     );
 
-    expect(classroom).toContain("verifiedWatch");
+    expect(classroom).toContain("verifiedClassroomAccess");
     expect(classroom).toContain("authorizedSourceUrl");
     expect(classroom).toContain(
-      "authorizationDecision={watchDecision}"
+      "playbackDecision || watchDecision"
     );
 
     expect(player).toContain("authorizationDecision?.allowed");
@@ -117,7 +126,7 @@ describe("AspireNest Video route authorization wiring", () => {
     );
 
     expect(classroom).toContain(
-      "watchDecision?.legacySourceAllowed"
+      "playbackDecision?.legacySourceAllowed"
     );
     expect(classroom).toContain("legacyPlaybackUrl");
     expect(policy).toContain(

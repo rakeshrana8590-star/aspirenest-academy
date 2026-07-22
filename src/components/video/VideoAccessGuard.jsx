@@ -7,17 +7,25 @@ import {
   buildVideoActionDecision,
   getVideoRequiredPlan,
 } from "../../access/videoActionPolicy.js";
-import { normalizePlanType } from "./videoUtils.js";
+import {
+  LIVE_CLASS_STATUS,
+  getLiveClassStatus,
+  isLiveClass,
+  normalizePlanType,
+} from "./videoUtils.js";
 
 const resolvePlanAccess = ({
   requiredPlan,
   hasPlanAccess,
   itemId = "",
 }) => {
-  const normalizedRequiredPlan = normalizePlanType(requiredPlan);
+  const normalizedRequiredPlan =
+    normalizePlanType(requiredPlan);
 
   if (normalizedRequiredPlan === "FREE") return true;
-  if (typeof hasPlanAccess !== "function") return false;
+  if (typeof hasPlanAccess !== "function") {
+    return false;
+  }
 
   return Boolean(
     hasPlanAccess(normalizedRequiredPlan, {
@@ -80,8 +88,15 @@ const buildAccessEvidence = ({
   accessState,
   isLoading,
 }) => {
-  const itemId = String(item?.id || item?.videoId || item?.classId || "");
-  const requiredPlan = getVideoRequiredPlan(item || {});
+  const itemId = String(
+    item?.id ||
+      item?.videoId ||
+      item?.classId ||
+      ""
+  );
+  const requiredPlan = getVideoRequiredPlan(
+    item || {}
+  );
 
   if (isLoading || accessState?.loading) {
     return {
@@ -138,6 +153,26 @@ const buildAccessEvidence = ({
   };
 };
 
+const getLivePlaybackAction = (
+  item = null,
+  liveStatus = ""
+) => {
+  if (!item || !isLiveClass(item)) return "";
+
+  if (liveStatus === LIVE_CLASS_STATUS.JOIN_NOW) {
+    return VIDEO_ACTIONS.JOIN_LIVE;
+  }
+
+  if (
+    liveStatus ===
+    LIVE_CLASS_STATUS.REPLAY_AVAILABLE
+  ) {
+    return VIDEO_ACTIONS.WATCH_REPLAY;
+  }
+
+  return "";
+};
+
 export default function VideoAccessGuard({
   item,
   user,
@@ -158,20 +193,43 @@ export default function VideoAccessGuard({
     isLoading,
   });
 
-  const decision = buildVideoActionDecision({
+  const principal = {
+    uid: user?.uid || "",
+    email: user?.email || "",
+    role: user?.role || "",
+    isAuthenticated: Boolean(user),
+    isAdmin,
+  };
+
+  const watchDecision = buildVideoActionDecision({
     action: VIDEO_ACTIONS.WATCH,
     video: item,
-    principal: {
-      uid: user?.uid || "",
-      email: user?.email || "",
-      role: user?.role || "",
-      isAuthenticated: Boolean(user),
-      isAdmin,
-    },
+    principal,
     access,
   });
 
-  if (decision.reason === VIDEO_REASON_CODES.ACCESS_LOADING) {
+  const liveStatus =
+    item && isLiveClass(item)
+      ? getLiveClassStatus(item)
+      : "";
+
+  const livePlaybackAction =
+    getLivePlaybackAction(item, liveStatus);
+
+  const liveActionDecision = livePlaybackAction
+    ? buildVideoActionDecision({
+        action: livePlaybackAction,
+        video: item,
+        principal,
+        access,
+        liveStatus,
+      })
+    : null;
+
+  if (
+    watchDecision.reason ===
+    VIDEO_REASON_CODES.ACCESS_LOADING
+  ) {
     return (
       <VideoGuardScreen
         badge="PREPARING CLASSROOM"
@@ -180,14 +238,18 @@ export default function VideoAccessGuard({
         primaryLabel="Reload Classroom"
         onPrimary={() => window.location.reload()}
         secondaryLabel="Back to Classes"
-        onSecondary={() => navigate("/ctet-tet/videos")}
+        onSecondary={() =>
+          navigate("/ctet-tet/videos")
+        }
       />
     );
   }
 
   if (
-    decision.reason === VIDEO_REASON_CODES.NOT_FOUND ||
-    decision.reason === VIDEO_REASON_CODES.NOT_VIDEO
+    watchDecision.reason ===
+      VIDEO_REASON_CODES.NOT_FOUND ||
+    watchDecision.reason ===
+      VIDEO_REASON_CODES.NOT_VIDEO
   ) {
     return (
       <VideoGuardScreen
@@ -195,42 +257,59 @@ export default function VideoAccessGuard({
         title="This classroom item was not found"
         message="The class may be unpublished, deleted, or the link may be incorrect."
         primaryLabel="Back to Classes"
-        onPrimary={() => navigate("/ctet-tet/videos")}
+        onPrimary={() =>
+          navigate("/ctet-tet/videos")
+        }
         secondaryLabel="CTET/TET Hub"
         onSecondary={() => navigate("/ctet-tet")}
       />
     );
   }
 
-  if (decision.reason === VIDEO_REASON_CODES.UNPUBLISHED) {
+  if (
+    watchDecision.reason ===
+    VIDEO_REASON_CODES.UNPUBLISHED
+  ) {
     return (
       <VideoGuardScreen
         badge="CLASS UNAVAILABLE"
         title="This class is not available right now"
         message="This classroom item is currently draft, unpublished, or archived."
         primaryLabel="Back to Classes"
-        onPrimary={() => navigate("/ctet-tet/videos")}
+        onPrimary={() =>
+          navigate("/ctet-tet/videos")
+        }
         secondaryLabel="View Plans"
-        onSecondary={() => navigate("/ctet-tet/pricing")}
+        onSecondary={() =>
+          navigate("/ctet-tet/pricing")
+        }
       />
     );
   }
 
-  if (decision.reason === VIDEO_REASON_CODES.LOGIN_REQUIRED) {
+  if (
+    watchDecision.reason ===
+    VIDEO_REASON_CODES.LOGIN_REQUIRED
+  ) {
     return (
       <VideoGuardScreen
         badge="LOGIN REQUIRED"
         title="Login required to open this classroom"
-        message={`Please login with your student account to open this ${decision.requiredPlan} classroom.`}
+        message={`Please login with your student account to open this ${watchDecision.requiredPlan} classroom.`}
         primaryLabel="Login"
         onPrimary={() => navigate("/login")}
         secondaryLabel="View Plans"
-        onSecondary={() => navigate("/ctet-tet/pricing")}
+        onSecondary={() =>
+          navigate("/ctet-tet/pricing")
+        }
       />
     );
   }
 
-  if (decision.reason === VIDEO_REASON_CODES.ACCESS_ERROR) {
+  if (
+    watchDecision.reason ===
+    VIDEO_REASON_CODES.ACCESS_ERROR
+  ) {
     return (
       <VideoGuardScreen
         badge="ACCESS UNAVAILABLE"
@@ -239,26 +318,36 @@ export default function VideoAccessGuard({
         primaryLabel="Reload Classroom"
         onPrimary={() => window.location.reload()}
         secondaryLabel="Back to Classes"
-        onSecondary={() => navigate("/ctet-tet/videos")}
+        onSecondary={() =>
+          navigate("/ctet-tet/videos")
+        }
       />
     );
   }
 
-  if (!decision.allowed) {
+  if (!watchDecision.allowed) {
     return (
       <VideoGuardScreen
         badge="ACCESS LOCKED"
-        title={`${decision.requiredPlan} classroom access required`}
+        title={`${watchDecision.requiredPlan} classroom access required`}
         message="This exact class is not included in the currently verified plan, module, bundle, or item access."
         primaryLabel="View Plans"
-        onPrimary={() => navigate("/ctet-tet/pricing")}
+        onPrimary={() =>
+          navigate("/ctet-tet/pricing")
+        }
         secondaryLabel="Back to Classes"
-        onSecondary={() => navigate("/ctet-tet/videos")}
+        onSecondary={() =>
+          navigate("/ctet-tet/videos")
+        }
       />
     );
   }
 
   return typeof children === "function"
-    ? children(decision)
+    ? children({
+        watchDecision,
+        liveActionDecision,
+        liveStatus,
+      })
     : children;
 }

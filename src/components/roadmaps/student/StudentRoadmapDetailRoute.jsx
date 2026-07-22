@@ -1,9 +1,18 @@
 import React from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 
 import {
+  ROADMAP_ACTIONS,
+  ROADMAP_REASON_CODES,
+  buildRoadmapAccessEvidence,
+  buildRoadmapActionDecision,
+} from "../../../access/roadmapActionPolicy.js";
+import {
   calculateRoadmapProgressPercent,
-  canAccessRoadmap,
   getTodayRoadmapDay,
   getUpcomingRoadmapDays,
   loadStudyRoadmapWithDays,
@@ -34,14 +43,19 @@ export default function StudentRoadmapDetailRoute({
   userPlanType = "FREE",
   hasPlanAccess,
   isAdminUser = false,
+  accessState = {},
 }) {
   const { roadmapId } = useParams();
   const navigate = useNavigate();
 
-  const [roadmap, setRoadmap] = React.useState(null);
-  const [progressItems, setProgressItems] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
-  const [loadError, setLoadError] = React.useState("");
+  const [roadmap, setRoadmap] =
+    React.useState(null);
+  const [progressItems, setProgressItems] =
+    React.useState([]);
+  const [loading, setLoading] =
+    React.useState(true);
+  const [loadError, setLoadError] =
+    React.useState("");
 
   React.useEffect(() => {
     let mounted = true;
@@ -51,27 +65,34 @@ export default function StudentRoadmapDetailRoute({
         setLoading(true);
         setLoadError("");
 
-        const roadmapWithDays = await loadStudyRoadmapWithDays(roadmapId);
+        const roadmapWithDays =
+          await loadStudyRoadmapWithDays(roadmapId);
 
         if (!mounted) return;
 
         setRoadmap(roadmapWithDays);
 
         if (user?.uid) {
-          const progress = await getRoadmapProgressForUser({
-            user,
-            roadmapId,
-          });
+          const progress =
+            await getRoadmapProgressForUser({
+              user,
+              roadmapId,
+            });
 
           if (mounted) {
             setProgressItems(progress);
           }
         }
       } catch (error) {
-        console.error("Load roadmap detail error:", error);
+        console.error(
+          "Load roadmap detail error:",
+          error
+        );
 
         if (mounted) {
-          setLoadError("Unable to load this roadmap right now.");
+          setLoadError(
+            "Unable to load this roadmap right now."
+          );
         }
       } finally {
         if (mounted) {
@@ -87,72 +108,142 @@ export default function StudentRoadmapDetailRoute({
     };
   }, [roadmapId, user]);
 
-  const hasAccess = canAccessRoadmap({
-    roadmapPlanType: roadmap?.planType,
-    userPlanType,
+  const access = buildRoadmapAccessEvidence({
+    roadmap,
+    user,
     isAdmin: isAdminUser,
     hasPlanAccess,
-    accessOptions: {
-      module: "roadmap",
-      itemType: "roadmap",
-      itemId: roadmap?.id || roadmapId,
-    },
+    accessState,
+    isLoading: loading,
   });
 
-  const progressPercent = calculateRoadmapProgressPercent({
-    days: roadmap?.days || [],
-    progressItems,
-  });
+  const openDecision =
+    buildRoadmapActionDecision({
+      action: ROADMAP_ACTIONS.OPEN,
+      roadmap,
+      principal: {
+        uid: user?.uid || "",
+        email: user?.email || "",
+        role: user?.role || "",
+        isAuthenticated: Boolean(user),
+        isAdmin: isAdminUser,
+      },
+      access,
+    });
 
-  const todayDay = getTodayRoadmapDay(roadmap?.days || []);
+  const progressPercent =
+    calculateRoadmapProgressPercent({
+      days: roadmap?.days || [],
+      progressItems,
+    });
+
+  const todayDay = getTodayRoadmapDay(
+    roadmap?.days || []
+  );
 
   const upcomingDays = getUpcomingRoadmapDays({
     days: roadmap?.days || [],
     limit: 7,
   });
 
-  const weekGroups = groupDaysByWeek(roadmap?.days || []);
+  const weekGroups = groupDaysByWeek(
+    roadmap?.days || []
+  );
+
+  const accessLoading =
+    openDecision.reason ===
+    ROADMAP_REASON_CODES.ACCESS_LOADING;
+
+  const accessError =
+    openDecision.reason ===
+    ROADMAP_REASON_CODES.ACCESS_ERROR;
 
   return (
     <RoadmapShell>
-      {loading ? (
+      {loading || accessLoading ? (
         <RoadmapEmptyState
-          title="Loading roadmap..."
-          text="Please wait while AspirePath loads your guided path."
+          title="Verifying roadmap access..."
+          text="AspireNest is loading this roadmap and checking its exact plan, module, bundle, or item access."
         />
       ) : loadError ? (
-        <RoadmapEmptyState title="Unable to load" text={loadError} />
+        <RoadmapEmptyState
+          title="Unable to load"
+          text={loadError}
+        />
       ) : !roadmap ? (
         <RoadmapEmptyState
           title="Roadmap not found"
           text="This roadmap may have been removed or unpublished."
         />
-      ) : !hasAccess ? (
+      ) : accessError ? (
+        <RoadmapAccessLock
+          title="Roadmap access could not be verified"
+          text="AspireNest kept this roadmap closed because the access check was unavailable."
+          action={
+            <button
+              className="aspirePathPrimaryBtn"
+              type="button"
+              onClick={() =>
+                window.location.reload()
+              }
+            >
+              Reload Access
+            </button>
+          }
+        />
+      ) : !openDecision.allowed ? (
         <>
           <AspirePathHero
             eyebrow="Locked AspirePath"
-            title={roadmap.title || "Premium Roadmap"}
-            subtitle="This guided roadmap is available for upgraded students."
+            title={
+              roadmap.title || "Premium Roadmap"
+            }
+            subtitle="This guided roadmap is available only after exact access is verified."
             metrics={[
               {
-                value: roadmap.totalDays || roadmap.days?.length || 0,
+                value:
+                  roadmap.totalDays ||
+                  roadmap.days?.length ||
+                  0,
                 label: "Days",
               },
-              { value: roadmap.planType || "PREMIUM", label: "Plan" },
-              { value: roadmap.examType || "Exam", label: "Exam" },
+              {
+                value:
+                  roadmap.planType || "PREMIUM",
+                label: "Plan",
+              },
+              {
+                value:
+                  roadmap.examType || "Exam",
+                label: "Exam",
+              },
               { value: "Locked", label: "Access" },
             ]}
           />
 
           <section className="aspirePathSection">
             <RoadmapAccessLock
+              title={
+                user
+                  ? "This roadmap is not included in your verified access"
+                  : "Login required to open this roadmap"
+              }
+              text="A roadmap route does not open from plan labels alone. AspireNest verifies the exact roadmap resource before showing its days and progress."
               action={
                 <button
                   className="aspirePathPrimaryBtn"
                   type="button"
-                  onClick={() => navigate("/ctet-tet/pricing")}
+                  onClick={() =>
+                    navigate(
+                      user
+                        ? "/ctet-tet/pricing"
+                        : "/login"
+                    )
+                  }
                 >
-                  View Pricing
+                  {user
+                    ? "View Pricing"
+                    : "Login"}
                 </button>
               }
             />
@@ -162,16 +253,31 @@ export default function StudentRoadmapDetailRoute({
         <>
           <AspirePathHero
             eyebrow="My AspirePath"
-            title={roadmap.title || "Smart Study Roadmap"}
+            title={
+              roadmap.title ||
+              "Smart Study Roadmap"
+            }
             subtitle={
               roadmap.description ||
               "Follow your guided preparation plan with daily tasks, live sessions, mock tests, and revision."
             }
             metrics={[
-              { value: roadmap.days?.length || 0, label: "Days" },
-              { value: `${progressPercent}%`, label: "Progress" },
-              { value: roadmap.planType || "FREE", label: "Plan" },
-              { value: roadmap.examType || "Exam", label: "Exam" },
+              {
+                value: roadmap.days?.length || 0,
+                label: "Days",
+              },
+              {
+                value: `${progressPercent}%`,
+                label: "Progress",
+              },
+              {
+                value: roadmap.planType || "FREE",
+                label: "Plan",
+              },
+              {
+                value: roadmap.examType || "Exam",
+                label: "Exam",
+              },
             ]}
             actions={
               <>
@@ -189,7 +295,9 @@ export default function StudentRoadmapDetailRoute({
                 <button
                   className="aspirePathSecondaryBtn"
                   type="button"
-                  onClick={() => navigate("/ctet-tet/roadmaps")}
+                  onClick={() =>
+                    navigate("/ctet-tet/roadmaps")
+                  }
                 >
                   All Roadmaps
                 </button>
@@ -201,20 +309,28 @@ export default function StudentRoadmapDetailRoute({
             <RoadmapSectionHeader
               kicker="Progress"
               title="Your preparation status"
-              text={`${formatLongDate(roadmap.startDate)} to ${formatLongDate(
+              text={`${formatLongDate(
+                roadmap.startDate
+              )} to ${formatLongDate(
                 roadmap.endDate
               )}`}
               action={
                 <>
-                  <RoadmapPlanBadge planType={roadmap.planType} />
-                  <RoadmapStatusBadge status={roadmap.status} />
+                  <RoadmapPlanBadge
+                    planType={roadmap.planType}
+                  />
+                  <RoadmapStatusBadge
+                    status={roadmap.status}
+                  />
                 </>
               }
             />
 
             <div className="aspirePathTodayCard">
               <h3 className="aspirePathCardTitle">
-                {todayDay ? "Today’s AspirePath" : "Upcoming AspirePath"}
+                {todayDay
+                  ? "Today’s AspirePath"
+                  : "Upcoming AspirePath"}
               </h3>
 
               <p className="aspirePathCardText">
@@ -225,15 +341,21 @@ export default function StudentRoadmapDetailRoute({
                       "Daily tasks"
                     }`
                   : upcomingDays[0]
-                  ? `${upcomingDays[0].subject || "Study"} • ${
-                      upcomingDays[0].focusArea ||
-                      upcomingDays[0].chapter ||
-                      "Next task"
-                    }`
-                  : "No upcoming tasks available."}
+                    ? `${
+                        upcomingDays[0].subject ||
+                        "Study"
+                      } • ${
+                        upcomingDays[0]
+                          .focusArea ||
+                        upcomingDays[0].chapter ||
+                        "Next task"
+                      }`
+                    : "No upcoming tasks available."}
               </p>
 
-              <RoadmapProgressBar value={progressPercent} />
+              <RoadmapProgressBar
+                value={progressPercent}
+              />
 
               <div className="aspirePathHeroActions">
                 {todayDay ? (
@@ -245,7 +367,10 @@ export default function StudentRoadmapDetailRoute({
                   </Link>
                 ) : null}
 
-                <Link className="aspirePathSecondaryBtn" to="/my-aspirepath">
+                <Link
+                  className="aspirePathSecondaryBtn"
+                  to="/my-aspirepath"
+                >
                   My AspirePath
                 </Link>
               </div>
@@ -260,38 +385,48 @@ export default function StudentRoadmapDetailRoute({
             />
 
             <div className="aspirePathTimeline">
-              {Object.entries(weekGroups).map(([weekNumber, days]) => (
-                <div className="aspirePathWeekSection" key={weekNumber}>
-                  <div className="aspirePathWeekHeader">
-                    <h3 className="aspirePathWeekTitle">
-                      Week {weekNumber}
-                    </h3>
+              {Object.entries(weekGroups).map(
+                ([weekNumber, days]) => (
+                  <div
+                    className="aspirePathWeekSection"
+                    key={weekNumber}
+                  >
+                    <div className="aspirePathWeekHeader">
+                      <h3 className="aspirePathWeekTitle">
+                        Week {weekNumber}
+                      </h3>
 
-                    <RoadmapBadge>{days.length} days</RoadmapBadge>
-                  </div>
+                      <RoadmapBadge>
+                        {days.length} days
+                      </RoadmapBadge>
+                    </div>
 
-                  <div className="aspirePathDayGrid">
-                    {days.map((day) => (
-                      <Link
-                        key={day.id}
-                        to={`/ctet-tet/roadmaps/${roadmap.id}/day/${day.id}`}
-                        style={{
-                          textDecoration: "none",
-                          color: "inherit",
-                        }}
-                      >
-                        <RoadmapDayCard
-                          day={day}
-                          completedTaskIds={getCompletedTaskIdsForDay({
-                            progressItems,
-                            dayId: day.id,
-                          })}
-                        />
-                      </Link>
-                    ))}
+                    <div className="aspirePathDayGrid">
+                      {days.map((day) => (
+                        <Link
+                          key={day.id}
+                          to={`/ctet-tet/roadmaps/${roadmap.id}/day/${day.id}`}
+                          style={{
+                            textDecoration: "none",
+                            color: "inherit",
+                          }}
+                        >
+                          <RoadmapDayCard
+                            day={day}
+                            completedTaskIds={getCompletedTaskIdsForDay(
+                              {
+                                progressItems,
+                                dayId: day.id,
+                              }
+                            )}
+                            hideResources
+                          />
+                        </Link>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              )}
             </div>
           </section>
         </>

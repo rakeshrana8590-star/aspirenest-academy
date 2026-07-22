@@ -2,7 +2,11 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import {
-  canAccessRoadmap,
+  ROADMAP_ACTIONS,
+  buildRoadmapAccessEvidence,
+  buildRoadmapActionDecision,
+} from "../../access/roadmapActionPolicy.js";
+import {
   loadPublishedStudyRoadmaps,
 } from "../../services/roadmapService";
 
@@ -14,7 +18,9 @@ import {
   RoadmapShell,
 } from "./RoadmapShared";
 
-import { buildRoadmapMetrics } from "./student/roadmapStudentUtils.js";
+import {
+  buildRoadmapMetrics,
+} from "./student/roadmapStudentUtils.js";
 
 import MyAspirePathRoute from "./student/MyAspirePathRoute.jsx";
 import StudentRoadmapDetailRoute from "./student/StudentRoadmapDetailRoute.jsx";
@@ -25,11 +31,15 @@ export const StudentRoadmapHub = ({
   userPlanType = "FREE",
   hasPlanAccess,
   isAdminUser = false,
+  accessState = {},
 }) => {
   const navigate = useNavigate();
-  const [roadmaps, setRoadmaps] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
-  const [loadError, setLoadError] = React.useState("");
+  const [roadmaps, setRoadmaps] =
+    React.useState([]);
+  const [loading, setLoading] =
+    React.useState(true);
+  const [loadError, setLoadError] =
+    React.useState("");
 
   React.useEffect(() => {
     let mounted = true;
@@ -39,16 +49,22 @@ export const StudentRoadmapHub = ({
         setLoading(true);
         setLoadError("");
 
-        const publishedRoadmaps = await loadPublishedStudyRoadmaps();
+        const publishedRoadmaps =
+          await loadPublishedStudyRoadmaps();
 
         if (mounted) {
           setRoadmaps(publishedRoadmaps);
         }
       } catch (error) {
-        console.error("Load student roadmaps error:", error);
+        console.error(
+          "Load student roadmaps error:",
+          error
+        );
 
         if (mounted) {
-          setLoadError("Unable to load AspirePath roadmaps right now.");
+          setLoadError(
+            "Unable to load AspirePath roadmaps right now."
+          );
         }
       } finally {
         if (mounted) {
@@ -64,6 +80,37 @@ export const StudentRoadmapHub = ({
     };
   }, []);
 
+  const getRoadmapDecision = React.useCallback(
+    (roadmap, action) => {
+      const access = buildRoadmapAccessEvidence({
+        roadmap,
+        user,
+        isAdmin: isAdminUser,
+        hasPlanAccess,
+        accessState,
+      });
+
+      return buildRoadmapActionDecision({
+        action,
+        roadmap,
+        principal: {
+          uid: user?.uid || "",
+          email: user?.email || "",
+          role: user?.role || "",
+          isAuthenticated: Boolean(user),
+          isAdmin: isAdminUser,
+        },
+        access,
+      });
+    },
+    [
+      accessState,
+      hasPlanAccess,
+      isAdminUser,
+      user,
+    ]
+  );
+
   return (
     <RoadmapShell>
       <AspirePathHero
@@ -76,12 +123,21 @@ export const StudentRoadmapHub = ({
             <button
               className="aspirePathPrimaryBtn"
               type="button"
-              onClick={() => navigate("/my-aspirepath")}
+              onClick={() =>
+                navigate(
+                  user
+                    ? "/my-aspirepath"
+                    : "/login"
+                )
+              }
             >
               My AspirePath
             </button>
 
-            <Link className="aspirePathSecondaryBtn" to="/ctet-tet/courses">
+            <Link
+              className="aspirePathSecondaryBtn"
+              to="/ctet-tet/courses"
+            >
               Explore CTET/TET
             </Link>
           </>
@@ -101,7 +157,10 @@ export const StudentRoadmapHub = ({
             text="Please wait while AspirePath prepares available study paths."
           />
         ) : loadError ? (
-          <RoadmapEmptyState title="Unable to load" text={loadError} />
+          <RoadmapEmptyState
+            title="Unable to load"
+            text={loadError}
+          />
         ) : roadmaps.length === 0 ? (
           <RoadmapEmptyState
             title="No roadmap published yet"
@@ -110,29 +169,39 @@ export const StudentRoadmapHub = ({
         ) : (
           <div className="aspirePathGrid">
             {roadmaps.map((roadmap) => {
-              const hasAccess = canAccessRoadmap({
-                roadmapPlanType: roadmap.planType,
-                userPlanType,
-                isAdmin: isAdminUser,
-                hasPlanAccess,
-                accessOptions: {
-                  module: "roadmap",
-                  itemType: "roadmap",
-                  itemId: roadmap.id,
-                },
-              });
+              const discoveryDecision =
+                getRoadmapDecision(
+                  roadmap,
+                  ROADMAP_ACTIONS.DISCOVER
+                );
+
+              if (!discoveryDecision.visible) {
+                return null;
+              }
+
+              const openDecision =
+                getRoadmapDecision(
+                  roadmap,
+                  ROADMAP_ACTIONS.OPEN
+                );
+              const openRoute =
+                `/ctet-tet/roadmaps/${roadmap.id}`;
 
               return (
                 <RoadmapCard
                   key={roadmap.id}
                   roadmap={roadmap}
                   progress={0}
-                  to={hasAccess ? `/ctet-tet/roadmaps/${roadmap.id}` : ""}
+                  to={
+                    openDecision.allowed
+                      ? openRoute
+                      : ""
+                  }
                   action={
-                    hasAccess ? (
+                    openDecision.allowed ? (
                       <Link
                         className="aspirePathPrimaryBtn"
-                        to={`/ctet-tet/roadmaps/${roadmap.id}`}
+                        to={openRoute}
                       >
                         Start Roadmap
                       </Link>
@@ -140,9 +209,17 @@ export const StudentRoadmapHub = ({
                       <button
                         className="aspirePathSecondaryBtn"
                         type="button"
-                        onClick={() => navigate("/ctet-tet/pricing")}
+                        onClick={() =>
+                          navigate(
+                            user
+                              ? "/ctet-tet/pricing"
+                              : "/login"
+                          )
+                        }
                       >
-                        Unlock Access
+                        {user
+                          ? "Unlock Access"
+                          : "Login to Open"}
                       </button>
                     )
                   }
@@ -156,8 +233,10 @@ export const StudentRoadmapHub = ({
   );
 };
 
-export const StudentRoadmapDetail = StudentRoadmapDetailRoute;
+export const StudentRoadmapDetail =
+  StudentRoadmapDetailRoute;
 
-export const StudentRoadmapDay = StudentRoadmapDayRoute;
+export const StudentRoadmapDay =
+  StudentRoadmapDayRoute;
 
 export const MyAspirePath = MyAspirePathRoute;

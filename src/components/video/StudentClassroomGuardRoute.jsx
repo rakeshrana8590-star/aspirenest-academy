@@ -57,6 +57,8 @@ function AuthorizedClassroom({
   isAdmin,
   hasPlanAccess,
   watchDecision,
+  liveActionDecision,
+  liveStatus,
 }) {
   const videoResourceId = String(
     classroomItem?.id ||
@@ -66,21 +68,32 @@ function AuthorizedClassroom({
   );
   const protectedSourceRequired =
     requiresProtectedSource(classroomItem);
-  const [assetState, setAssetState] = React.useState(() => ({
-    loading: protectedSourceRequired,
-    error: "",
-    sourceUrl: "",
-  }));
+  const isLiveClassroom = Boolean(liveStatus);
+  const playbackDecision = isLiveClassroom
+    ? liveActionDecision
+    : watchDecision;
+  const shouldResolveProtectedSource =
+    protectedSourceRequired &&
+    playbackDecision?.allowed === true &&
+    playbackDecision?.canWatch === true;
+
+  const [assetState, setAssetState] =
+    React.useState(() => ({
+      loading: shouldResolveProtectedSource,
+      error: "",
+      sourceUrl: "",
+    }));
 
   React.useEffect(() => {
     let active = true;
 
-    if (!protectedSourceRequired) {
+    if (!shouldResolveProtectedSource) {
       setAssetState({
         loading: false,
         error: "",
         sourceUrl: "",
       });
+
       return () => {
         active = false;
       };
@@ -100,7 +113,7 @@ function AuthorizedClassroom({
     readProtectedVideoAssetForDecision({
       assetId,
       videoId: videoResourceId,
-      decision: watchDecision,
+      decision: playbackDecision,
     })
       .then((asset) => {
         if (!active) return;
@@ -127,7 +140,8 @@ function AuthorizedClassroom({
 
         setAssetState({
           loading: false,
-          error: "Protected classroom source is unavailable.",
+          error:
+            "Protected classroom source is unavailable.",
           sourceUrl: "",
         });
       });
@@ -137,9 +151,9 @@ function AuthorizedClassroom({
     };
   }, [
     classroomItem,
-    protectedSourceRequired,
+    playbackDecision,
+    shouldResolveProtectedSource,
     videoResourceId,
-    watchDecision,
   ]);
 
   if (assetState.loading) {
@@ -147,7 +161,7 @@ function AuthorizedClassroom({
       <VideoGuardScreen
         badge="SECURE SOURCE"
         title="Preparing protected classroom"
-        message="AspireNest verified WATCH access and is now resolving the protected media source."
+        message="AspireNest verified the exact playback action and is now resolving the protected media source."
         primaryLabel="Reload Classroom"
         onPrimary={() => window.location.reload()}
         secondaryLabel="Back to Classes"
@@ -178,8 +192,12 @@ function AuthorizedClassroom({
       hasPlanAccess={hasPlanAccess}
       classroomItemOverride={classroomItem}
       watchDecision={watchDecision}
+      playbackDecision={playbackDecision}
+      liveStatusOverride={liveStatus}
       authorizedSourceUrl={assetState.sourceUrl}
-      requiresProtectedAsset={protectedSourceRequired}
+      requiresProtectedAsset={
+        protectedSourceRequired
+      }
     />
   );
 }
@@ -192,16 +210,22 @@ export default function StudentClassroomGuardRoute({
   accessState = {},
 }) {
   const { videoId = "" } = useParams();
-  const activeVideoId = safeDecodeRouteValue(videoId);
+  const activeVideoId =
+    safeDecodeRouteValue(videoId);
 
   const classroomItem = React.useMemo(
-    () => findClassroomItem(universalContent, activeVideoId),
+    () =>
+      findClassroomItem(
+        universalContent,
+        activeVideoId
+      ),
     [universalContent, activeVideoId]
   );
 
   const isLoading =
     accessState?.loading === true ||
-    (!classroomItem && universalContent.length === 0);
+    (!classroomItem &&
+      universalContent.length === 0);
 
   return (
     <VideoAccessGuard
@@ -212,7 +236,11 @@ export default function StudentClassroomGuardRoute({
       accessState={accessState}
       isLoading={isLoading}
     >
-      {(watchDecision) => (
+      {({
+        watchDecision,
+        liveActionDecision,
+        liveStatus,
+      }) => (
         <AuthorizedClassroom
           classroomItem={classroomItem}
           universalContent={universalContent}
@@ -220,6 +248,8 @@ export default function StudentClassroomGuardRoute({
           isAdmin={isAdmin}
           hasPlanAccess={hasPlanAccess}
           watchDecision={watchDecision}
+          liveActionDecision={liveActionDecision}
+          liveStatus={liveStatus}
         />
       )}
     </VideoAccessGuard>

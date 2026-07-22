@@ -2,6 +2,8 @@ export const VIDEO_ACTIONS = Object.freeze({
   DISCOVER: "DISCOVER",
   OPEN: "OPEN",
   WATCH: "WATCH",
+  JOIN_LIVE: "JOIN_LIVE",
+  WATCH_REPLAY: "WATCH_REPLAY",
   RESOLVE_ASSET: "RESOLVE_ASSET",
 });
 
@@ -23,6 +25,8 @@ export const VIDEO_REASON_CODES = Object.freeze({
   ACCESS_ERROR: "access_error",
   ACCESS_DENIED: "access_denied",
   ACCESS_SCOPE_MISMATCH: "access_scope_mismatch",
+  LIVE_NOT_OPEN: "live_not_open",
+  REPLAY_UNAVAILABLE: "replay_unavailable",
   PROTECTED_ASSET_REQUIRED: "protected_asset_required",
 });
 
@@ -36,6 +40,11 @@ export const VIDEO_ACCESS_STATES = Object.freeze({
   DENIED: "denied",
   LOADING: "loading",
   ERROR: "error",
+});
+
+export const VIDEO_LIVE_STATES = Object.freeze({
+  JOIN_NOW: "JOIN_NOW",
+  REPLAY_AVAILABLE: "REPLAY_AVAILABLE",
 });
 
 const KNOWN_ACTIONS = new Set(Object.values(VIDEO_ACTIONS));
@@ -65,6 +74,8 @@ const normalizeAction = (value = "") => cleanString(value).toUpperCase();
 const normalizeStatus = (value = "") =>
   normalizeText(value).replace(/\s+/g, "_").replace(/-/g, "_");
 const normalizeScope = (value = "") => normalizeText(value);
+const normalizeLiveState = (value = "") =>
+  cleanString(value).toUpperCase();
 
 const cleanArray = (values = []) =>
   Object.freeze(
@@ -233,6 +244,8 @@ const freezeDecision = ({
   canExposeCatalogMetadata = false,
   canOpen = false,
   canWatch = false,
+  canJoinLive = false,
+  canWatchReplay = false,
   canResolveAsset = false,
   legacySourceAllowed = false,
 } = {}) =>
@@ -254,6 +267,8 @@ const freezeDecision = ({
     canExposeCatalogMetadata: Boolean(canExposeCatalogMetadata),
     canOpen: Boolean(canOpen),
     canWatch: Boolean(canWatch),
+    canJoinLive: Boolean(canJoinLive),
+    canWatchReplay: Boolean(canWatchReplay),
     canResolveAsset: Boolean(canResolveAsset),
     legacySourceAllowed: Boolean(legacySourceAllowed),
     canExposeAssetUrl: false,
@@ -284,6 +299,7 @@ export const buildVideoActionDecision = ({
   principal = {},
   access = {},
   discoveryMode = VIDEO_DISCOVERY_MODES.CATALOG,
+  liveStatus = "",
 } = {}) => {
   const normalizedAction = normalizeAction(action);
   const normalizedPrincipal = normalizeVideoPrincipal(principal);
@@ -292,6 +308,7 @@ export const buildVideoActionDecision = ({
   const sourceScope = normalizeScope(
     access.sourceScope || access.scopeType || access.scope
   );
+  const normalizedLiveState = normalizeLiveState(liveStatus);
 
   if (!KNOWN_ACTIONS.has(normalizedAction)) {
     return denied({
@@ -458,6 +475,37 @@ export const buildVideoActionDecision = ({
   }
 
   if (
+    normalizedAction === VIDEO_ACTIONS.JOIN_LIVE &&
+    normalizedLiveState !== VIDEO_LIVE_STATES.JOIN_NOW
+  ) {
+    return denied({
+      action: normalizedAction,
+      reason: VIDEO_REASON_CODES.LIVE_NOT_OPEN,
+      videoId,
+      requiredPlan,
+      sourceScope,
+      requiresAuthentication: true,
+      requiresServerAuthorization: true,
+    });
+  }
+
+  if (
+    normalizedAction === VIDEO_ACTIONS.WATCH_REPLAY &&
+    normalizedLiveState !==
+      VIDEO_LIVE_STATES.REPLAY_AVAILABLE
+  ) {
+    return denied({
+      action: normalizedAction,
+      reason: VIDEO_REASON_CODES.REPLAY_UNAVAILABLE,
+      videoId,
+      requiredPlan,
+      sourceScope,
+      requiresAuthentication: true,
+      requiresServerAuthorization: true,
+    });
+  }
+
+  if (
     normalizedAction === VIDEO_ACTIONS.RESOLVE_ASSET &&
     !hasVideoProtectedAsset(video)
   ) {
@@ -487,7 +535,13 @@ export const buildVideoActionDecision = ({
     canOpen: normalizedAction === VIDEO_ACTIONS.OPEN,
     canWatch:
       normalizedAction === VIDEO_ACTIONS.WATCH ||
+      normalizedAction === VIDEO_ACTIONS.JOIN_LIVE ||
+      normalizedAction === VIDEO_ACTIONS.WATCH_REPLAY ||
       normalizedAction === VIDEO_ACTIONS.RESOLVE_ASSET,
+    canJoinLive:
+      normalizedAction === VIDEO_ACTIONS.JOIN_LIVE,
+    canWatchReplay:
+      normalizedAction === VIDEO_ACTIONS.WATCH_REPLAY,
     canResolveAsset: protectedAsset,
     legacySourceAllowed: !protectedAsset,
   });

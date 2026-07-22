@@ -73,6 +73,44 @@ const hasResourceValue = (resource = {}) => {
   );
 };
 
+const getRoadmapResourceActions = (resource = {}) => {
+  const actions = [];
+
+  if (resource.noteUrl) {
+    actions.push({
+      type: "notes",
+      href: resource.noteUrl,
+      label: `📘 ${resource.noteTitle || "Open Notes"}`,
+    });
+  }
+
+  if (resource.videoUrl) {
+    actions.push({
+      type: "video",
+      href: resource.videoUrl,
+      label: `▶️ ${resource.videoTitle || "Watch Video"}`,
+    });
+  }
+
+  if (resource.liveUrl) {
+    actions.push({
+      type: "live",
+      href: resource.liveUrl,
+      label: "🔴 Join Live",
+    });
+  }
+
+  if (resource.mockId) {
+    actions.push({
+      type: "mockTest",
+      href: `/ctet-tet/mock-tests/start/${resource.mockId}`,
+      label: `📝 ${resource.mockTestTitle || "Start Mock"}`,
+    });
+  }
+
+  return actions;
+};
+
 export const AspirePathHero = ({
   eyebrow = "AspirePath",
   title = "Smart Study Roadmaps",
@@ -342,6 +380,9 @@ export const RoadmapTaskCard = ({
   task,
   completed = false,
   onToggleComplete = null,
+  getResourceDecision = null,
+  onOpenResource = null,
+  hideResources = false,
 }) => {
   if (!task) return null;
 
@@ -391,39 +432,44 @@ export const RoadmapTaskCard = ({
         ) : null}
       </div>
 
-      {visibleResources.length > 0 ? (
+      {!hideResources && visibleResources.length > 0 ? (
         <div className="aspirePathResourceRow">
-          {visibleResources.map((resource, index) => (
-            <React.Fragment
-              key={`${resource.resourceRowNumber || index}-${task.taskId}`}
-            >
-              {resource.noteUrl ? (
-                <RoadmapResourceButton href={resource.noteUrl}>
-                  📘 {resource.noteTitle || "Open Notes"}
-                </RoadmapResourceButton>
-              ) : null}
+          {visibleResources.flatMap((resource, index) =>
+            getRoadmapResourceActions(resource).map((action) => {
+              const secureMode =
+                typeof getResourceDecision === "function" &&
+                typeof onOpenResource === "function";
+              const decision = secureMode
+                ? getResourceDecision(resource, action.type)
+                : null;
+              const label =
+                secureMode && decision?.allowed !== true
+                  ? `🔒 ${action.label}`
+                  : action.label;
 
-              {resource.videoUrl ? (
-                <RoadmapResourceButton href={resource.videoUrl}>
-                  ▶️ {resource.videoTitle || "Watch Video"}
-                </RoadmapResourceButton>
-              ) : null}
-
-              {resource.liveUrl ? (
-                <RoadmapResourceButton href={resource.liveUrl}>
-                  🔴 Join Live
-                </RoadmapResourceButton>
-              ) : null}
-
-              {resource.mockId ? (
+              return secureMode ? (
                 <RoadmapResourceButton
-                  href={`/ctet-tet/mock-tests/start/${resource.mockId}`}
+                  key={`${resource.resourceRowNumber || index}-${action.type}-${task.taskId}`}
+                  onClick={() =>
+                    onOpenResource(
+                      resource,
+                      action.type,
+                      decision
+                    )
+                  }
                 >
-                  📝 {resource.mockTestTitle || "Start Mock"}
+                  {label}
                 </RoadmapResourceButton>
-              ) : null}
-            </React.Fragment>
-          ))}
+              ) : (
+                <RoadmapResourceButton
+                  key={`${resource.resourceRowNumber || index}-${action.type}-${task.taskId}`}
+                  href={action.href}
+                >
+                  {label}
+                </RoadmapResourceButton>
+              );
+            })
+          )}
         </div>
       ) : null}
     </div>
@@ -434,6 +480,9 @@ export const RoadmapDayCard = ({
   day,
   completedTaskIds = [],
   onToggleTask = null,
+  getResourceDecision = null,
+  onOpenResource = null,
+  hideResources = false,
 }) => {
   if (!day) return null;
 
@@ -467,6 +516,9 @@ export const RoadmapDayCard = ({
               task={task}
               completed={completedTaskIds.includes(task.taskId)}
               onToggleComplete={onToggleTask}
+              getResourceDecision={getResourceDecision}
+              onOpenResource={onOpenResource}
+              hideResources={hideResources}
             />
           ))}
         </div>

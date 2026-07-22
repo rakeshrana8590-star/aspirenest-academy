@@ -84,6 +84,8 @@ export default function StudentClassroomRoute({
   hasPlanAccess,
   classroomItemOverride = null,
   watchDecision = null,
+  playbackDecision = null,
+  liveStatusOverride = "",
   authorizedSourceUrl = "",
   requiresProtectedAsset = false,
 }) {
@@ -115,18 +117,33 @@ export default function StudentClassroomRoute({
 
   const liveState =
     classroomItem && classMode === "LIVE"
-      ? getLiveClassStatus(classroomItem)
+      ? liveStatusOverride ||
+        getLiveClassStatus(classroomItem)
       : "";
 
   const liveStateLabel =
     classMode === "LIVE" ? getLiveStatusLabel(liveState) : "Recorded Lesson";
 
-  const verifiedWatch =
+  const verifiedClassroomAccess =
     isAdmin ||
     Boolean(
       watchDecision?.allowed === true &&
         watchDecision?.canWatch === true &&
         watchDecision?.videoId === activeVideoId
+    );
+
+  const verifiedPlayback =
+    isAdmin ||
+    Boolean(
+      playbackDecision?.allowed === true &&
+        playbackDecision?.canWatch === true &&
+        playbackDecision?.videoId === activeVideoId &&
+        (classMode === "RECORDED" ||
+          (liveState === LIVE_CLASS_STATUS.JOIN_NOW &&
+            playbackDecision?.canJoinLive === true) ||
+          (liveState ===
+            LIVE_CLASS_STATUS.REPLAY_AVAILABLE &&
+            playbackDecision?.canWatchReplay === true))
     );
 
   const legacyPlaybackUrl = getClassroomSourceUrl(
@@ -137,17 +154,19 @@ export default function StudentClassroomRoute({
     ? String(authorizedSourceUrl || "").trim()
     : String(
         authorizedSourceUrl ||
-          (watchDecision?.legacySourceAllowed
+          (playbackDecision?.legacySourceAllowed
             ? legacyPlaybackUrl
             : "")
       ).trim();
 
   const canShowPlayer =
-    verifiedWatch &&
+    verifiedClassroomAccess &&
+    verifiedPlayback &&
     Boolean(playbackUrl) &&
     (classMode === "RECORDED" ||
       liveState === LIVE_CLASS_STATUS.JOIN_NOW ||
-      liveState === LIVE_CLASS_STATUS.REPLAY_AVAILABLE);
+      liveState ===
+        LIVE_CLASS_STATUS.REPLAY_AVAILABLE);
 
   const relatedVideos = React.useMemo(() => {
     if (!classroomItem) return [];
@@ -376,7 +395,9 @@ export default function StudentClassroomRoute({
                   videoUrl={playbackUrl}
                   title={safeTitle}
                   viewerLabel={user?.email || user?.displayName || ""}
-                  authorizationDecision={watchDecision}
+                  authorizationDecision={
+                    playbackDecision || watchDecision
+                  }
                   resourceId={activeVideoId}
                 />
               ) : (

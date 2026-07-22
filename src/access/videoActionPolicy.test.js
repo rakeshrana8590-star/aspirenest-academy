@@ -2,6 +2,7 @@ import {
   VIDEO_ACTIONS,
   VIDEO_DECISIONS,
   VIDEO_DISCOVERY_MODES,
+  VIDEO_LIVE_STATES,
   VIDEO_REASON_CODES,
   buildVideoActionDecision,
   isVideoAccessBoundToResource,
@@ -288,6 +289,101 @@ describe("AspireNest Video action policy", () => {
     expect(decision.allowed).toBe(false);
     expect(decision.reason).toBe(
       VIDEO_REASON_CODES.PROTECTED_ASSET_REQUIRED
+    );
+  });
+
+
+  test("live JOIN authorization opens only during the verified live window", () => {
+    const liveVideo = {
+      ...VIDEO,
+      classMode: "LIVE",
+      joinUrl: "https://live.invalid/join",
+    };
+
+    const allowed = decide({
+      action: VIDEO_ACTIONS.JOIN_LIVE,
+      video: liveVideo,
+      liveStatus: VIDEO_LIVE_STATES.JOIN_NOW,
+    });
+
+    const denied = decide({
+      action: VIDEO_ACTIONS.JOIN_LIVE,
+      video: liveVideo,
+      liveStatus: "UPCOMING",
+    });
+
+    expect(allowed.allowed).toBe(true);
+    expect(allowed.canJoinLive).toBe(true);
+    expect(allowed.canWatch).toBe(true);
+    expect(denied.allowed).toBe(false);
+    expect(denied.reason).toBe(
+      VIDEO_REASON_CODES.LIVE_NOT_OPEN
+    );
+  });
+
+  test("replay authorization opens only after replay state is verified", () => {
+    const replayVideo = {
+      ...VIDEO,
+      classMode: "LIVE",
+      replayUrl: "https://video.invalid/replay",
+    };
+
+    const allowed = decide({
+      action: VIDEO_ACTIONS.WATCH_REPLAY,
+      video: replayVideo,
+      liveStatus:
+        VIDEO_LIVE_STATES.REPLAY_AVAILABLE,
+    });
+
+    const denied = decide({
+      action: VIDEO_ACTIONS.WATCH_REPLAY,
+      video: replayVideo,
+      liveStatus: "ENDED",
+    });
+
+    expect(allowed.allowed).toBe(true);
+    expect(allowed.canWatchReplay).toBe(true);
+    expect(allowed.canWatch).toBe(true);
+    expect(denied.allowed).toBe(false);
+    expect(denied.reason).toBe(
+      VIDEO_REASON_CODES.REPLAY_UNAVAILABLE
+    );
+  });
+
+  test("live and replay decisions stay bound to the exact video resource", () => {
+    const mismatchAccess = {
+      ...ITEM_ACCESS,
+      itemId: "video-2",
+    };
+
+    const joinDecision = decide({
+      action: VIDEO_ACTIONS.JOIN_LIVE,
+      video: {
+        ...VIDEO,
+        classMode: "LIVE",
+        joinUrl: "https://live.invalid/join",
+      },
+      liveStatus: VIDEO_LIVE_STATES.JOIN_NOW,
+      access: mismatchAccess,
+    });
+
+    const replayDecision = decide({
+      action: VIDEO_ACTIONS.WATCH_REPLAY,
+      video: {
+        ...VIDEO,
+        classMode: "LIVE",
+        replayUrl: "https://video.invalid/replay",
+      },
+      liveStatus:
+        VIDEO_LIVE_STATES.REPLAY_AVAILABLE,
+      access: mismatchAccess,
+    });
+
+    expect(joinDecision.reason).toBe(
+      VIDEO_REASON_CODES.ACCESS_SCOPE_MISMATCH
+    );
+    expect(replayDecision.reason).toBe(
+      VIDEO_REASON_CODES.ACCESS_SCOPE_MISMATCH
     );
   });
 
