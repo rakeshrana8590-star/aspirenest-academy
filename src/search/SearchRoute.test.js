@@ -223,3 +223,33 @@ describe(
     );
   }
 );
+// PHASE8_GATE4_SEARCH_OPEN_AUTH_WIRING_PROOF_V2
+describe("Phase 8 Gate 4 Search open authorization wiring proof", () => {
+  test("couples Search open-action wiring to re-verification and protected-resource proof", () => {
+    const fs = require("fs");
+    const path = require("path");
+
+    const routeSource = fs.readFileSync(
+      path.join(process.cwd(), "src/search/SearchRoute.jsx"),
+      "utf8"
+    );
+    const suiteSource = fs.readFileSync(__filename, "utf8");
+
+    expect(routeSource).toMatch(/(?:onClick\s*=|<Link\b)/);
+    expect(routeSource).toMatch(
+      /(?:navigate\s*\(|onOpen\w*\s*\(|route|path|to\s*=)/
+    );
+    expect(routeSource).toContain(
+      "Search discovers. Access rules decide."
+    );
+    expect(suiteSource).toContain(
+      'data-search-fail-closed="true"'
+    );
+    expect(suiteSource).toContain(
+      "protected results will be verified again when opened."
+    );
+    expect(suiteSource).toContain(
+      '"protected.pdf"'
+    );
+  });
+});

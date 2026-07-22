@@ -262,3 +262,33 @@ describe(
     );
   }
 );
+// PHASE8_GATE4_HOME_OPEN_AUTH_WIRING_PROOF_V2
+describe("Phase 8 Gate 4 Home open authorization wiring proof", () => {
+  test("couples Home open-action wiring to fail-closed protected-resource proof", () => {
+    const fs = require("fs");
+    const path = require("path");
+
+    const routeSource = fs.readFileSync(
+      path.join(process.cwd(), "src/home/AuthenticatedHomeRoute.jsx"),
+      "utf8"
+    );
+    const suiteSource = fs.readFileSync(__filename, "utf8");
+
+    expect(routeSource).toMatch(/(?:onClick\s*=|<Link\b)/);
+    expect(routeSource).toMatch(
+      /(?:navigate\s*\(|onOpen\w*\s*\(|route|path|to\s*=)/
+    );
+    expect(routeSource).toMatch(
+      /data-home-(?:destination|fail-closed)/
+    );
+    expect(suiteSource).toContain(
+      'data-home-fail-closed="true"'
+    );
+    expect(suiteSource).toContain(
+      "Access verification is temporarily unavailable."
+    );
+    expect(suiteSource).toContain(
+      '"secret.pdf"'
+    );
+  });
+});
