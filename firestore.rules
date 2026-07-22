@@ -17,6 +17,364 @@ service cloud.firestore {
     }
 
     /* ================================
+       Mentor Assignment Engine — Phase 12
+       Mentor role is separate from the Mentor-Guided commercial plan.
+       Assigned-student ownership is exact and deny-by-default.
+       ================================ */
+
+    function isActiveMentor() {
+      return isSignedIn() &&
+        exists(
+          /databases/$(database)/documents/mentorProfiles/$(request.auth.uid)
+        ) &&
+        get(
+          /databases/$(database)/documents/mentorProfiles/$(request.auth.uid)
+        ).data.mentorUid == request.auth.uid &&
+        get(
+          /databases/$(database)/documents/mentorProfiles/$(request.auth.uid)
+        ).data.role == "mentor" &&
+        get(
+          /databases/$(database)/documents/mentorProfiles/$(request.auth.uid)
+        ).data.status == "active";
+    }
+
+    function isAssignedMentor(studentUid) {
+      return isActiveMentor() &&
+        studentUid is string &&
+        studentUid != "" &&
+        exists(
+          /databases/$(database)/documents/mentorProfiles/$(request.auth.uid)/students/$(studentUid)
+        ) &&
+        get(
+          /databases/$(database)/documents/mentorProfiles/$(request.auth.uid)/students/$(studentUid)
+        ).data.mentorUid == request.auth.uid &&
+        get(
+          /databases/$(database)/documents/mentorProfiles/$(request.auth.uid)/students/$(studentUid)
+        ).data.studentUid == studentUid &&
+        get(
+          /databases/$(database)/documents/mentorProfiles/$(request.auth.uid)/students/$(studentUid)
+        ).data.status == "active";
+    }
+
+    function isSafeMentorCanonicalRoute(value) {
+      return value is string &&
+        value.size() >= 2 &&
+        value.size() <= 500 &&
+        value.matches("^/[^/].*");
+    }
+
+    function mentorRequiredPlanRank(planCode) {
+      return planCode == "MENTORSHIP" ? 3 :
+        planCode == "PREMIUM" ? 2 :
+        planCode == "BASIC" ? 1 :
+        0;
+    }
+
+    function isActiveMentorAssignmentEntitlement(entitlement, data) {
+      let accessFrom = entitlement.get("accessFrom", null);
+      let accessUntil = entitlement.get("accessUntil", null);
+      let noExpiry = entitlement.get("noExpiry", false) == true;
+      let untilManualChange = entitlement.get("untilManualChange", false) == true;
+      let scopeType = entitlement.get("scopeType", "plan");
+      let planCode = entitlement.get(
+        "planCode",
+        entitlement.get("planType", "FREE")
+      );
+      let moduleKey = entitlement.get("module", "");
+      let itemType = entitlement.get("itemType", "");
+      let itemId = entitlement.get("itemId", "");
+      let itemIds = entitlement.get("itemIds", []);
+
+      return entitlement.get("uid", "") == data.studentUid &&
+        entitlement.get("status", "") == "active" &&
+        (
+          accessFrom == null ||
+          (accessFrom is timestamp && accessFrom <= request.time)
+        ) &&
+        (
+          noExpiry ||
+          untilManualChange ||
+          (accessUntil is timestamp && accessUntil > request.time)
+        ) &&
+        (
+          (
+            scopeType == "item" &&
+            moduleKey == data.moduleKey &&
+            itemType == data.itemType &&
+            itemId == data.resourceId
+          ) ||
+          (
+            scopeType == "bundle" &&
+            itemIds is list &&
+            itemIds.hasAny([data.resourceId]) &&
+            (moduleKey == "" || moduleKey == data.moduleKey)
+          ) ||
+          (
+            scopeType == "module" &&
+            moduleKey == data.moduleKey &&
+            mentorRequiredPlanRank(planCode) >=
+              mentorRequiredPlanRank(data.requiredPlan)
+          ) ||
+          (
+            scopeType == "plan" &&
+            mentorRequiredPlanRank(planCode) >=
+              mentorRequiredPlanRank(data.requiredPlan)
+          )
+        );
+    }
+
+    function isValidProtectedMentorAssignmentAccessProof(data) {
+      let entitlementPath = /databases/$(database)/documents/studentEntitlements/$(data.studentUid)/items/$(data.matchedGrantId);
+      return exists(entitlementPath) &&
+        isActiveMentorAssignmentEntitlement(
+          get(entitlementPath).data,
+          data
+        );
+    }
+
+    function isValidMentorAssignmentAccessProof(data) {
+      return (
+        data.requiredPlan == "FREE" &&
+        data.matchedGrantId == ""
+      ) ||
+      (
+        data.requiredPlan in ["BASIC", "PREMIUM", "MENTORSHIP"] &&
+        data.matchedGrantId is string &&
+        data.matchedGrantId != "" &&
+        isValidProtectedMentorAssignmentAccessProof(data)
+      );
+    }
+
+    function isMentorAssignmentParticipant(data) {
+      return isSignedIn() &&
+        (
+          data.studentUid == request.auth.uid ||
+          (
+            data.mentorUid == request.auth.uid &&
+            isAssignedMentor(data.studentUid)
+          )
+        );
+    }
+
+    function isValidMentorAssignmentCreate(assignmentId) {
+      let data = request.resource.data;
+      return isActiveMentor() &&
+        data.keys().hasOnly([
+          "assignmentId",
+          "mentorUid",
+          "studentUid",
+          "studentName",
+          "resourceId",
+          "resourceType",
+          "moduleKey",
+          "itemType",
+          "title",
+          "canonicalRoute",
+          "requiredPlan",
+          "accessState",
+          "matchedGrantId",
+          "status",
+          "dueAt",
+          "objective",
+          "completedAt",
+          "reviewedAt",
+          "feedbackCount",
+          "createdAt",
+          "updatedAt"
+        ]) &&
+        data.assignmentId == assignmentId &&
+        data.mentorUid == request.auth.uid &&
+        isAssignedMentor(data.studentUid) &&
+        data.studentName is string &&
+        data.studentName.size() <= 200 &&
+        data.resourceId is string &&
+        data.resourceId != "" &&
+        data.resourceId.size() <= 240 &&
+        data.resourceType is string &&
+        data.resourceType in [
+          "notes",
+          "video",
+          "live",
+          "mockTest",
+          "currentAffairs",
+          "roadmap"
+        ] &&
+        data.moduleKey is string &&
+        data.moduleKey != "" &&
+        data.itemType is string &&
+        data.itemType != "" &&
+        data.title is string &&
+        data.title.size() >= 1 &&
+        data.title.size() <= 500 &&
+        isSafeMentorCanonicalRoute(data.canonicalRoute) &&
+        data.requiredPlan in ["FREE", "BASIC", "PREMIUM", "MENTORSHIP"] &&
+        data.accessState in ["HAS_ACCESS", "ACCESS_EXPIRES_SOON"] &&
+        isValidMentorAssignmentAccessProof(data) &&
+        data.status == "assigned" &&
+        (data.dueAt == null || data.dueAt is timestamp) &&
+        data.objective is string &&
+        data.objective.size() <= 1000 &&
+        data.completedAt == null &&
+        data.reviewedAt == null &&
+        data.feedbackCount == 0 &&
+        data.createdAt == request.time &&
+        data.updatedAt == request.time;
+    }
+
+    function isValidMentorAssignmentUpdate() {
+      return isActiveMentor() &&
+        resource.data.mentorUid == request.auth.uid &&
+        isAssignedMentor(resource.data.studentUid) &&
+        request.resource.data.assignmentId == resource.data.assignmentId &&
+        request.resource.data.mentorUid == resource.data.mentorUid &&
+        request.resource.data.studentUid == resource.data.studentUid &&
+        request.resource.data.resourceId == resource.data.resourceId &&
+        request.resource.data.resourceType == resource.data.resourceType &&
+        request.resource.data.moduleKey == resource.data.moduleKey &&
+        request.resource.data.itemType == resource.data.itemType &&
+        request.resource.data.canonicalRoute == resource.data.canonicalRoute &&
+        request.resource.data.requiredPlan == resource.data.requiredPlan &&
+        request.resource.data.accessState == resource.data.accessState &&
+        request.resource.data.matchedGrantId == resource.data.matchedGrantId &&
+        request.resource.data.status in [
+          "assigned",
+          "in_progress",
+          "completed",
+          "reviewed",
+          "cancelled"
+        ] &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "status",
+          "dueAt",
+          "objective",
+          "reviewedAt",
+          "feedbackCount",
+          "updatedAt"
+        ]) &&
+        request.resource.data.updatedAt == request.time;
+    }
+
+    function isValidStudentAssignmentComplete() {
+      return isSignedIn() &&
+        resource.data.studentUid == request.auth.uid &&
+        resource.data.status in ["assigned", "in_progress"] &&
+        request.resource.data.studentUid == resource.data.studentUid &&
+        request.resource.data.mentorUid == resource.data.mentorUid &&
+        request.resource.data.status == "completed" &&
+        request.resource.data.completedAt == request.time &&
+        request.resource.data.updatedAt == request.time &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "status",
+          "completedAt",
+          "updatedAt"
+        ]);
+    }
+
+    function isValidMentorAccessRequestCreate(requestId) {
+      let data = request.resource.data;
+      return isActiveMentor() &&
+        data.keys().hasOnly([
+          "requestId",
+          "mentorUid",
+          "studentUid",
+          "resourceId",
+          "resourceType",
+          "moduleKey",
+          "itemType",
+          "title",
+          "canonicalRoute",
+          "status",
+          "reason",
+          "accessId",
+          "resolvedAt",
+          "resolvedBy",
+          "createdAt",
+          "updatedAt"
+        ]) &&
+        data.requestId == requestId &&
+        data.mentorUid == request.auth.uid &&
+        isAssignedMentor(data.studentUid) &&
+        data.resourceId is string &&
+        data.resourceId != "" &&
+        data.resourceType in [
+          "notes",
+          "video",
+          "live",
+          "mockTest",
+          "currentAffairs",
+          "roadmap"
+        ] &&
+        data.moduleKey is string &&
+        data.moduleKey != "" &&
+        data.itemType is string &&
+        data.itemType != "" &&
+        data.title is string &&
+        data.title.size() >= 1 &&
+        data.title.size() <= 500 &&
+        isSafeMentorCanonicalRoute(data.canonicalRoute) &&
+        data.status == "pending" &&
+        data.reason is string &&
+        data.reason.size() <= 1000 &&
+        data.accessId == null &&
+        data.resolvedAt == null &&
+        data.resolvedBy == null &&
+        data.createdAt == request.time &&
+        data.updatedAt == request.time;
+    }
+
+    function isMentorAccessRequestParticipant(data) {
+      return isSignedIn() &&
+        (
+          data.studentUid == request.auth.uid ||
+          (
+            data.mentorUid == request.auth.uid &&
+            isAssignedMentor(data.studentUid)
+          )
+        );
+    }
+
+    function isValidMentorFeedbackCreate(feedbackId) {
+      let data = request.resource.data;
+      let assignmentPath = /databases/$(database)/documents/mentorAssignments/$(data.assignmentId);
+      return isActiveMentor() &&
+        data.keys().hasOnly([
+          "feedbackId",
+          "assignmentId",
+          "mentorUid",
+          "studentUid",
+          "message",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]) &&
+        data.feedbackId == feedbackId &&
+        data.mentorUid == request.auth.uid &&
+        isAssignedMentor(data.studentUid) &&
+        data.assignmentId is string &&
+        data.assignmentId != "" &&
+        exists(assignmentPath) &&
+        get(assignmentPath).data.mentorUid == request.auth.uid &&
+        get(assignmentPath).data.studentUid == data.studentUid &&
+        data.message is string &&
+        data.message.size() >= 1 &&
+        data.message.size() <= 4000 &&
+        data.status == "published" &&
+        data.createdAt == request.time &&
+        data.updatedAt == request.time;
+    }
+
+    function isMentorFeedbackParticipant(data) {
+      return isSignedIn() &&
+        (
+          data.studentUid == request.auth.uid ||
+          (
+            data.mentorUid == request.auth.uid &&
+            isAssignedMentor(data.studentUid)
+          )
+        );
+    }
+
+    /* ================================
        IntelliText Admin Authoring + Published Graph — Phase 8B-5
        DIRECT_STUDENT_DRAFT_READ=DENIED
        Published reads require explicit publicRead or one active entitlement.
@@ -1143,7 +1501,9 @@ service cloud.firestore {
           studentProfileCreateKeysOnly()
         );
 
-      allow read: if isAdmin() || isLearnerProfileOwnerExisting(profileId);
+      allow read: if isAdmin() ||
+        isLearnerProfileOwnerExisting(profileId) ||
+        isAssignedMentor(profileId);
 
       allow update: if isAdmin() ||
         (
@@ -1536,7 +1896,9 @@ service cloud.firestore {
     match /studyRoadmapProgress/{docId} {
       allow create: if isProgressOwner();
 
-      allow read: if isAdmin() || isExistingProgressOwner();
+      allow read: if isAdmin() ||
+        isExistingProgressOwner() ||
+        isAssignedMentor(resource.data.userId);
 
       allow update: if isAdmin() ||
         (
@@ -1551,6 +1913,54 @@ service cloud.firestore {
 
     match /studyRoadmapAnalytics/{docId} {
       allow read, create, update, delete: if isAdmin();
+    }
+
+    /* ================================
+       Mentor Assignment Engine — Phase 12 collections
+       ================================ */
+
+    match /mentorProfiles/{mentorUid} {
+      allow read: if isAdmin() ||
+        (
+          isSignedIn() &&
+          mentorUid == request.auth.uid
+        );
+      allow create, update, delete: if isAdmin();
+
+      match /students/{studentUid} {
+        allow read: if isAdmin() ||
+          (
+            isActiveMentor() &&
+            mentorUid == request.auth.uid
+          ) ||
+          (
+            isSignedIn() &&
+            studentUid == request.auth.uid
+          );
+        allow create, update, delete: if isAdmin();
+      }
+    }
+
+    match /mentorAssignments/{assignmentId} {
+      allow read: if isAdmin() || isMentorAssignmentParticipant(resource.data);
+      allow create: if isValidMentorAssignmentCreate(assignmentId);
+      allow update: if isAdmin() ||
+        isValidMentorAssignmentUpdate() ||
+        isValidStudentAssignmentComplete();
+      allow delete: if isAdmin();
+    }
+
+    match /mentorAccessRequests/{requestId} {
+      allow read: if isAdmin() ||
+        isMentorAccessRequestParticipant(resource.data);
+      allow create: if isValidMentorAccessRequestCreate(requestId);
+      allow update, delete: if isAdmin();
+    }
+
+    match /mentorFeedback/{feedbackId} {
+      allow read: if isAdmin() || isMentorFeedbackParticipant(resource.data);
+      allow create: if isValidMentorFeedbackCreate(feedbackId);
+      allow update, delete: if isAdmin();
     }
 
     /* ================================
@@ -2324,7 +2734,9 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
     match /studentEntitlements/{uid}/items/{entitlementId} {
-      allow read: if isAdmin() || (isSignedIn() && uid == request.auth.uid);
+      allow read: if isAdmin() ||
+        (isSignedIn() && uid == request.auth.uid) ||
+        isAssignedMentor(uid);
       allow create, update: if isAdmin() || isStudentEntitlementWrite(uid, entitlementId);
       allow delete: if isAdmin();
     }

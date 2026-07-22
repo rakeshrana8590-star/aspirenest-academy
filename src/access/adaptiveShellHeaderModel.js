@@ -57,6 +57,9 @@ const SUPPORTED_ACCOUNT_ITEM_IDS =
     "my-access",
     "dashboard",
     "admin",
+    "mentor",
+    "assignments",
+    "mentor-setup",
   ]);
 
 const ACCOUNT_ITEM_PRESENTATION =
@@ -80,6 +83,21 @@ const ACCOUNT_ITEM_PRESENTATION =
       icon: "⚙️",
       description:
         "Manage academy",
+    }),
+    mentor: Object.freeze({
+      icon: "🧭",
+      description:
+        "Open assigned learner workspace",
+    }),
+    assignments: Object.freeze({
+      icon: "📚",
+      description:
+        "Open mentor-assigned work",
+    }),
+    "mentor-setup": Object.freeze({
+      icon: "🧑‍🏫",
+      description:
+        "Manage mentor and learner links",
     }),
   });
 
@@ -160,30 +178,69 @@ const freezeAccountItem = (
   });
 };
 
-const getFallbackAccountItems = ({
-  isAdminUser = false,
-} = {}) => [
-  {
+const ROLE_ACCOUNT_ITEM_IDS =
+  new Set([
+    "dashboard",
+    "admin",
+    "mentor",
+    "assignments",
+    "mentor-setup",
+  ]);
+
+const PROFILE_ACCOUNT_ITEM =
+  Object.freeze({
     id: "profile",
     label: "Profile",
     route: "/my-profile",
-  },
-  isAdminUser
-    ? {
+  });
+
+const getCanonicalRoleAccountItems = ({
+  isAdminUser = false,
+  isMentorUser = false,
+} = {}) => {
+  if (isAdminUser) {
+    return [
+      {
         id: "admin",
         label: "Admin Dashboard",
         route: "/admin",
-      }
-    : {
-        id: "dashboard",
-        label: "Student Dashboard",
-        route: "/student-dashboard",
       },
-];
+      {
+        id: "mentor-setup",
+        label: "Mentor Setup",
+        route: "/admin/content/mentor",
+      },
+    ];
+  }
+
+  if (isMentorUser) {
+    return [
+      {
+        id: "mentor",
+        label: "Mentor Workspace",
+        route: "/mentor",
+      },
+    ];
+  }
+
+  return [
+    {
+      id: "dashboard",
+      label: "Student Dashboard",
+      route: "/student-dashboard",
+    },
+    {
+      id: "assignments",
+      label: "My Assignments",
+      route: "/assignments",
+    },
+  ];
+};
 
 const buildSafeAccountItems = ({
   shellNavigation = {},
   isAdminUser = false,
+  isMentorUser = false,
   currentPath = "",
 } = {}) => {
   const requestedItems =
@@ -205,12 +262,25 @@ const buildSafeAccountItems = ({
         isSafeInternalRoute(item?.route)
       );
     });
-  const items =
-    supportedItems.length > 0
-      ? supportedItems
-      : getFallbackAccountItems({
-          isAdminUser,
-        });
+  const nonRoleItems =
+    supportedItems.filter((item) => {
+      const id = cleanString(
+        item?.id
+      ).toLowerCase();
+
+      return !ROLE_ACCOUNT_ITEM_IDS.has(id);
+    });
+  const identityItems =
+    nonRoleItems.length > 0
+      ? nonRoleItems
+      : [PROFILE_ACCOUNT_ITEM];
+  const items = [
+    ...identityItems,
+    ...getCanonicalRoleAccountItems({
+      isAdminUser,
+      isMentorUser,
+    }),
+  ];
 
   return Object.freeze(
     items.map((item) =>
@@ -226,28 +296,37 @@ export const buildAdaptiveShellHeaderModel = ({
   shellNavigation = {},
   user = null,
   isAdminUser = false,
+  isMentorUser = false,
   currentPath = "",
 } = {}) => {
   const isAuthenticated =
     Boolean(user?.uid || user?.email);
+  const hasMentorRole =
+    isAuthenticated &&
+    !isAdminUser &&
+    isMentorUser === true;
   const mode =
-    cleanString(
-      shellNavigation.mode
-    ).toLowerCase() ||
-    (isAuthenticated
-      ? isAdminUser
-        ? "admin"
-        : "free"
-      : "guest");
+    isAuthenticated && isAdminUser
+      ? "admin"
+      : hasMentorRole
+        ? "mentor"
+        : cleanString(
+            shellNavigation.mode
+          ).toLowerCase() ||
+          (isAuthenticated
+            ? "free"
+            : "guest");
   const roleLabel =
-    cleanString(
-      shellNavigation.roleLabel
-    ) ||
-    (isAuthenticated
-      ? isAdminUser
-        ? "Admin"
-        : "Student"
-      : "Login");
+    isAuthenticated && isAdminUser
+      ? "Admin"
+      : hasMentorRole
+        ? "Mentor"
+        : cleanString(
+            shellNavigation.roleLabel
+          ) ||
+          (isAuthenticated
+            ? "Student"
+            : "Login");
   const accessLabel =
     cleanString(
       shellNavigation.accessLabel
@@ -261,13 +340,16 @@ export const buildAdaptiveShellHeaderModel = ({
     isAuthenticated
       ? isAdminUser
         ? "AN"
-        : "ST"
+        : hasMentorRole
+          ? "MN"
+          : "ST"
       : "IN";
   const accountItems =
     isAuthenticated
       ? buildSafeAccountItems({
           shellNavigation,
           isAdminUser,
+          isMentorUser: hasMentorRole,
           currentPath,
         })
       : Object.freeze([]);
@@ -278,6 +360,7 @@ export const buildAdaptiveShellHeaderModel = ({
     isAdminUser:
       isAuthenticated &&
       isAdminUser === true,
+    isMentorUser: hasMentorRole,
     isFailClosed:
       shellNavigation.isFailClosed ===
       true,

@@ -548,6 +548,7 @@ const PUBLIC_NOTE_FIELDS = Object.freeze([
   "id",
   "itemId",
   "contentId",
+  "textbookId",
   "slug",
   "title",
   "description",
@@ -593,6 +594,7 @@ const PUBLIC_NOTE_FIELDS = Object.freeze([
   "createdAt",
   "updatedAt",
   "route",
+  "canonicalRoute",
   "hasProtectedAsset",
 ]);
 

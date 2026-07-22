@@ -81,6 +81,11 @@ export const AUTHENTICATED_HOME_DESTINATIONS =
       label: "My Access",
       route: "/my-access",
     }),
+    ASSIGNMENTS: Object.freeze({
+      id: "assignments",
+      label: "Assignments",
+      route: "/assignments",
+    }),
     DASHBOARD: Object.freeze({
       id: "dashboard",
       label: "Student Dashboard",
@@ -574,6 +579,12 @@ const buildLearningSections = (
       description:
         "Review plans, modules, bundles, and items.",
       tone: "access",
+    }),
+    freezeDestination({
+      ...AUTHENTICATED_HOME_DESTINATIONS.ASSIGNMENTS,
+      description:
+        "Open mentor-assigned work without changing your access.",
+      tone: "mentor",
     }),
     freezeDestination({
       ...AUTHENTICATED_HOME_DESTINATIONS.DASHBOARD,

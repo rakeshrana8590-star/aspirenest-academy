@@ -444,6 +444,29 @@ describe(
     );
 
     test(
+      "student workspace surfaces mentor assignments without treating them as access",
+      () => {
+        const model =
+          buildAuthenticatedHomeModel({
+            user: {
+              uid: "student-1",
+            },
+            shellState: ACTIVE_SHELL,
+          });
+        const workspace = model.sections.find(
+          (section) => section.id === "workspace"
+        );
+        const assignments = workspace.items.find(
+          (item) => item.route === "/assignments"
+        );
+
+        expect(assignments).toBeDefined();
+        expect(assignments.label).toBe("Assignments");
+        expect(assignments.description).toContain("without changing your access");
+      }
+    );
+
+    test(
       "all exposed routes stay internal",
       () => {
         const model =

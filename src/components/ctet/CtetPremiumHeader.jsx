@@ -4,6 +4,7 @@ import {
 } from "../../access/adaptiveShellHeaderModel";
 import AspireNestLogo from "../AspireNestLogo.jsx";
 import CtetHeaderNotificationCenter from "./CtetHeaderNotificationCenter.jsx";
+import useMentorSession from "../../mentor/useMentorSession";
 
 export default function CtetPremiumHeader({
   className = "",
@@ -26,6 +27,17 @@ export default function CtetPremiumHeader({
   openAccountTarget,
   logoutFromAccountMenu,
 }) {
+  const mentorSession = useMentorSession({
+    user,
+    isAdminUser,
+  });
+  const isMentorUser = Boolean(
+    !mentorSession.loading &&
+      !mentorSession.error &&
+      mentorSession.isMentor &&
+      !isAdminUser
+  );
+
   const rootClassName = ["ctetExperienceStickyHeader", className]
     .filter(Boolean)
     .join(" ");
@@ -35,6 +47,7 @@ export default function CtetPremiumHeader({
       shellNavigation,
       user,
       isAdminUser,
+      isMentorUser,
       currentPath,
     });
   const {

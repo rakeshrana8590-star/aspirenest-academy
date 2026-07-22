@@ -33,9 +33,11 @@ import {
 } from "../RoadmapShared";
 
 import {
+  buildRoadmapTaskToggle,
   formatLongDate,
   getCompletedTaskIdsForDay,
   getRoadmapProgressForUser,
+  getRoadmapTaskId,
   getStudentIdentity,
 } from "./roadmapStudentUtils.js";
 
@@ -320,19 +322,23 @@ export default function StudentRoadmapDayRoute({
       return;
     }
 
-    const alreadyCompleted =
-      completedTaskIds.includes(task.taskId);
+    const taskToggle = buildRoadmapTaskToggle({
+      completedTaskIds,
+      task,
+    });
 
-    const nextCompletedIds = alreadyCompleted
-      ? completedTaskIds.filter(
-          (taskId) => taskId !== task.taskId
-        )
-      : [...completedTaskIds, task.taskId];
+    if (!taskToggle.allowed) {
+      console.error(
+        "Roadmap task progress blocked:",
+        taskToggle.reason
+      );
+      return;
+    }
 
     const nextProgressPercent =
       activeDay?.tasks?.length > 0
         ? Math.round(
-            (nextCompletedIds.length /
+            (taskToggle.nextCompletedTaskIds.length /
               activeDay.tasks.length) *
               100
           )
@@ -342,7 +348,8 @@ export default function StudentRoadmapDayRoute({
       userId: user.uid,
       roadmapId,
       dayId,
-      completedTaskIds: nextCompletedIds,
+      completedTaskIds:
+        taskToggle.nextCompletedTaskIds,
       progressPercent: nextProgressPercent,
       ...getStudentIdentity(user),
     });
@@ -501,26 +508,33 @@ export default function StudentRoadmapDayRoute({
 
             <div className="aspirePathTaskList">
               {(activeDay.tasks || []).map(
-                (task) => (
-                  <RoadmapTaskCard
-                    key={
-                      task.taskId || task.title
-                    }
-                    task={task}
-                    completed={completedTaskIds.includes(
-                      task.taskId
-                    )}
-                    onToggleComplete={
-                      handleToggleTask
-                    }
-                    getResourceDecision={
-                      getLinkedResourceDecision
-                    }
-                    onOpenResource={
-                      openLinkedResource
-                    }
-                  />
-                )
+                (task) => {
+                  const taskId =
+                    getRoadmapTaskId(task);
+
+                  return (
+                    <RoadmapTaskCard
+                      key={taskId || task.title}
+                      task={task}
+                      completed={
+                        taskId
+                          ? completedTaskIds.includes(
+                              taskId
+                            )
+                          : false
+                      }
+                      onToggleComplete={
+                        handleToggleTask
+                      }
+                      getResourceDecision={
+                        getLinkedResourceDecision
+                      }
+                      onOpenResource={
+                        openLinkedResource
+                      }
+                    />
+                  );
+                }
               )}
             </div>
           </section>

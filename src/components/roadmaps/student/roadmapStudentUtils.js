@@ -1,5 +1,55 @@
 import { loadUserRoadmapProgress } from "../../../services/roadmapService";
 
+const normalizeRoadmapTaskId = (value = "") =>
+  String(value ?? "").trim();
+
+export const getRoadmapTaskId = (task = {}) =>
+  normalizeRoadmapTaskId(task.taskId || task.id);
+
+export const buildRoadmapTaskToggle = ({
+  completedTaskIds = [],
+  task = {},
+} = {}) => {
+  const taskId = getRoadmapTaskId(task);
+
+  const safeCompletedTaskIds = [
+    ...new Set(
+      (Array.isArray(completedTaskIds)
+        ? completedTaskIds
+        : []
+      )
+        .map(normalizeRoadmapTaskId)
+        .filter(Boolean)
+    ),
+  ];
+
+  if (!taskId) {
+    return {
+      allowed: false,
+      reason: "TASK_ID_MISSING",
+      taskId: "",
+      alreadyCompleted: false,
+      nextCompletedTaskIds: safeCompletedTaskIds,
+    };
+  }
+
+  const alreadyCompleted =
+    safeCompletedTaskIds.includes(taskId);
+
+  return {
+    allowed: true,
+    reason: "",
+    taskId,
+    alreadyCompleted,
+    nextCompletedTaskIds: alreadyCompleted
+      ? safeCompletedTaskIds.filter(
+          (completedTaskId) =>
+            completedTaskId !== taskId
+        )
+      : [...safeCompletedTaskIds, taskId],
+  };
+};
+
 export const getRoadmapProgressForUser = async ({ user, roadmapId }) => {
   if (!user?.uid || !roadmapId) return [];
 
@@ -17,6 +67,8 @@ export const getCompletedTaskIdsForDay = ({
 
   return Array.isArray(progressItem?.completedTaskIds)
     ? progressItem.completedTaskIds
+        .map(normalizeRoadmapTaskId)
+        .filter(Boolean)
     : [];
 };
 

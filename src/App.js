@@ -156,6 +156,11 @@ import StudentAccessInviteRoute from "./access/student/StudentAccessInviteRoute.
 import MyAccessRoute from "./access/student/MyAccessRoute.jsx";
 import SearchRoute from "./search/SearchRoute.jsx";
 import AuthenticatedHomeRoute from "./home/AuthenticatedHomeRoute.jsx";
+import {
+  MentorWorkspaceRoute,
+  StudentAssignmentsRoute,
+  AdminMentorSetupRoute,
+} from "./mentor/index.js";
 
 import MockTestActionMenu from "./components/exam/MockTestActionMenu.jsx";
 import { deleteMockTest } from "./components/exam/mockTestAdminActions.js";
@@ -215,6 +220,7 @@ import "./styles/video/studentVideoHub.css";
 import "./styles/video/studentVideoShelves.css";
 import "./styles/video/videoLiveStates.css";
 import "./styles/shared/mobileNoScrollbar.css";
+import "./styles/mentor/mentorWorkspace.css";
 
 import {
   CONTENT_SECTIONS,
@@ -696,6 +702,7 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
       "/profile/setup",
       "/my-profile",
       "/my-access",
+      "/assignments",
       "/search",
       "/my-courses",
       "/my-notes",
@@ -4727,6 +4734,53 @@ return (
   element={
     requireAdmin() ? (
       <RoadmapProgressRoute />
+    ) : null
+  }
+/>
+
+<Route
+  path="/mentor"
+  element={
+    <MentorWorkspaceRoute
+      user={user}
+      isAdminUser={isAdmin(user)}
+      contentItems={universalContent}
+      roadmaps={ctetNotificationRoadmaps}
+    />
+  }
+/>
+
+<Route
+  path="/mentor/students/:studentId"
+  element={
+    <MentorWorkspaceRoute
+      user={user}
+      isAdminUser={isAdmin(user)}
+      contentItems={universalContent}
+      roadmaps={ctetNotificationRoadmaps}
+    />
+  }
+/>
+
+<Route
+  path="/ctet-tet/mentor"
+  element={<Navigate to="/mentor" replace />}
+/>
+
+<Route
+  path="/assignments"
+  element={
+    requireLogin() ? (
+      <StudentAssignmentsRoute user={user} />
+    ) : null
+  }
+/>
+
+<Route
+  path="/admin/content/mentor"
+  element={
+    requireAdmin() ? (
+      <AdminMentorSetupRoute />
     ) : null
   }
 />

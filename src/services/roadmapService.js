@@ -602,24 +602,183 @@ export const loadStudyRoadmaps = async ({
     return roadmapId;
   };
   
+  const normalizeRoadmapProgressIdentity = (value = "") =>
+    String(value ?? "").trim();
+
+  export const buildRoadmapProgressKey = ({
+    userId = "",
+    roadmapId = "",
+    dayId = "",
+  } = {}) => {
+    if (!userId || !roadmapId || !dayId) {
+      return "";
+    }
+
+    return [
+      normalizeRoadmapProgressIdentity(userId),
+      normalizeRoadmapProgressIdentity(roadmapId),
+      normalizeRoadmapProgressIdentity(dayId),
+    ]
+      .join("_")
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]+/g, "-")
+      .slice(0, 240);
+  };
+
+  const getRoadmapProgressTimestamp = (item = {}) => {
+    const value = item.updatedAt || item.createdAt;
+
+    if (typeof value?.toMillis === "function") {
+      return Number(value.toMillis() || 0);
+    }
+
+    if (typeof value?.toDate === "function") {
+      return Number(value.toDate()?.getTime?.() || 0);
+    }
+
+    if (Number.isFinite(Number(value?.seconds))) {
+      return Number(value.seconds) * 1000;
+    }
+
+    const parsed = new Date(value || 0).getTime();
+
+    return Number.isNaN(parsed) ? 0 : parsed;
+  };
+
+  const normalizeRoadmapProgressItem = (item = {}) => ({
+    ...item,
+    completedTaskIds: [
+      ...new Set(
+        (Array.isArray(item.completedTaskIds)
+          ? item.completedTaskIds
+          : []
+        )
+          .map(normalizeRoadmapProgressIdentity)
+          .filter(Boolean)
+      ),
+    ],
+    progressPercent: Math.max(
+      0,
+      Math.min(100, Number(item.progressPercent || 0))
+    ),
+  });
+
+  const shouldReplaceRoadmapProgressItem = ({
+    current,
+    candidate,
+  }) => {
+    if (!current) return true;
+
+    const currentTimestamp =
+      getRoadmapProgressTimestamp(current);
+    const candidateTimestamp =
+      getRoadmapProgressTimestamp(candidate);
+
+    if (candidateTimestamp !== currentTimestamp) {
+      return candidateTimestamp > currentTimestamp;
+    }
+
+    const canonicalId = buildRoadmapProgressKey({
+      userId: candidate.userId,
+      roadmapId: candidate.roadmapId,
+      dayId: candidate.dayId,
+    });
+
+    const currentIsCanonical =
+      Boolean(canonicalId) && current.id === canonicalId;
+    const candidateIsCanonical =
+      Boolean(canonicalId) && candidate.id === canonicalId;
+
+    if (candidateIsCanonical !== currentIsCanonical) {
+      return candidateIsCanonical;
+    }
+
+    return String(candidate.id || "").localeCompare(
+      String(current.id || "")
+    ) > 0;
+  };
+
+  export const selectCanonicalRoadmapProgressItems = ({
+    items = [],
+    userId = "",
+    roadmapId = "",
+  } = {}) => {
+    const winners = new Map();
+
+    (Array.isArray(items) ? items : [])
+      .filter((item) => {
+        if (userId && item.userId !== userId) return false;
+        if (roadmapId && item.roadmapId !== roadmapId) {
+          return false;
+        }
+
+        return Boolean(
+          item.userId &&
+          item.roadmapId &&
+          item.dayId
+        );
+      })
+      .map(normalizeRoadmapProgressItem)
+      .forEach((candidate) => {
+        const identity = [
+          candidate.userId,
+          candidate.roadmapId,
+          candidate.dayId,
+        ].join("::");
+
+        const current = winners.get(identity);
+
+        if (
+          shouldReplaceRoadmapProgressItem({
+            current,
+            candidate,
+          })
+        ) {
+          winners.set(identity, candidate);
+        }
+      });
+
+    return [...winners.values()].sort((first, second) => {
+      const userCompare = String(first.userId).localeCompare(
+        String(second.userId)
+      );
+
+      if (userCompare !== 0) return userCompare;
+
+      const roadmapCompare = String(
+        first.roadmapId
+      ).localeCompare(String(second.roadmapId));
+
+      if (roadmapCompare !== 0) return roadmapCompare;
+
+      return String(first.dayId).localeCompare(
+        String(second.dayId)
+      );
+    });
+  };
+
   export const loadUserRoadmapProgress = async ({
     userId,
     roadmapId,
   }) => {
     if (!userId || !roadmapId) return [];
-  
+
     const progressQuery = query(
       collection(db, ROADMAP_COLLECTIONS.PROGRESS),
       where("userId", "==", userId),
       where("roadmapId", "==", roadmapId)
     );
-  
+
     const snapshot = await getDocs(progressQuery);
-  
-    return snapshot.docs.map((item) => ({
-      id: item.id,
-      ...item.data(),
-    }));
+
+    return selectCanonicalRoadmapProgressItems({
+      items: snapshot.docs.map((item) => ({
+        id: item.id,
+        ...item.data(),
+      })),
+      userId,
+      roadmapId,
+    });
   };
   
   export const saveUserRoadmapDayProgress = async ({
@@ -636,10 +795,11 @@ export const loadStudyRoadmaps = async ({
       throw new Error("User ID, roadmap ID, and day ID are required.");
     }
   
-    const progressKey = `${userId}_${roadmapId}_${dayId}`
-      .toLowerCase()
-      .replace(/[^a-z0-9_-]+/g, "-")
-      .slice(0, 240);
+    const progressKey = buildRoadmapProgressKey({
+      userId,
+      roadmapId,
+      dayId,
+    });
   
     const progressRef = doc(
       db,
@@ -710,18 +870,21 @@ export const loadStudyRoadmaps = async ({
 
   export const loadRoadmapProgressByRoadmapId = async (roadmapId) => {
     if (!roadmapId) return [];
-  
+
     const progressQuery = query(
       collection(db, ROADMAP_COLLECTIONS.PROGRESS),
       where("roadmapId", "==", roadmapId)
     );
-  
+
     const snapshot = await getDocs(progressQuery);
-  
-    return snapshot.docs.map((item) => ({
-      id: item.id,
-      ...item.data(),
-    }));
+
+    return selectCanonicalRoadmapProgressItems({
+      items: snapshot.docs.map((item) => ({
+        id: item.id,
+        ...item.data(),
+      })),
+      roadmapId,
+    });
   };
   
   const ROADMAP_RECOMMENDATION_SECTIONS = {
