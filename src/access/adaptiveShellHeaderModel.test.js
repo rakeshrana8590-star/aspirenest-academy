@@ -94,6 +94,7 @@ describe(
           "profile",
           "my-access",
           "dashboard",
+          "assignments",
         ]);
       }
     );
@@ -181,6 +182,7 @@ describe(
           "/my-profile",
           "/my-access",
           "/student-dashboard",
+          "/assignments",
         ]);
       }
     );
@@ -224,6 +226,7 @@ describe(
         ).toEqual([
           "profile",
           "admin",
+          "mentor-setup",
         ]);
       }
     );
@@ -305,6 +308,7 @@ describe(
         ).toEqual([
           "/my-profile",
           "/student-dashboard",
+          "/assignments",
         ]);
       }
     );
