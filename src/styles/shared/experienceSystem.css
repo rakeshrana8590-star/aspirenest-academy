@@ -18601,3 +18601,186 @@ button.ctetHeaderNotificationBell {
     width: 100%;
   }
 }
+
+/* =====================================================================
+   ASPIRENEST PREMIUM UNIFIED FOUNDATION V1
+   Promoted from the approved CTET/TET Experience Engine.
+   Global behavior: scroll remains functional; visible scrollbars do not.
+   Interaction behavior: restrained lift, depth, focus and active feedback.
+===================================================================== */
+
+:root {
+  --aspire-ui-canvas: #020716;
+  --aspire-ui-canvas-raised: #07101f;
+  --aspire-ui-surface: #0f172a;
+  --aspire-ui-surface-raised: #111b2d;
+  --aspire-ui-surface-soft: #162238;
+  --aspire-ui-line: rgba(255, 255, 255, 0.1);
+  --aspire-ui-line-accent: rgba(245, 158, 11, 0.42);
+  --aspire-ui-text: #f8fafc;
+  --aspire-ui-text-soft: #cbd5e1;
+  --aspire-ui-text-muted: #94a3b8;
+  --aspire-ui-orange: #f97316;
+  --aspire-ui-orange-deep: #ea580c;
+  --aspire-ui-gold: #f59e0b;
+  --aspire-ui-gold-soft: #facc15;
+  --aspire-ui-success: #34d399;
+  --aspire-ui-danger: #fca5a5;
+  --aspire-ui-radius-major: 28px;
+  --aspire-ui-radius-card: 22px;
+  --aspire-ui-radius-control: 15px;
+  --aspire-ui-duration-fast: 160ms;
+  --aspire-ui-duration-card: 220ms;
+  --aspire-ui-ease:
+    cubic-bezier(0.22, 1, 0.36, 1);
+  --aspire-ui-focus-ring:
+    0 0 0 4px rgba(249, 115, 22, 0.2);
+  --aspire-ui-shadow-card:
+    0 24px 70px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  --aspire-ui-shadow-hover:
+    0 34px 88px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(245, 158, 11, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+/* App-wide hidden-scrollbar contract.
+   Scrolling remains available through wheel, touch and keyboard. */
+html,
+body,
+#root,
+html body #root .appShell,
+html body #root .appShell * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#root::-webkit-scrollbar,
+html body #root .appShell::-webkit-scrollbar,
+html body #root .appShell *::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+  background: transparent !important;
+}
+
+html,
+body,
+#root,
+html body #root .appShell {
+  max-width: 100%;
+}
+
+body,
+#root,
+html body #root .appShell {
+  overflow-x: clip;
+}
+
+@supports not (overflow: clip) {
+  body,
+  #root,
+  html body #root .appShell {
+    overflow-x: hidden;
+  }
+}
+
+/* Shared interactive primitive for approved clickable surfaces. */
+:where(
+  button.experienceCard,
+  button.experienceHeroQuickCard,
+  button.experienceResourceCard,
+  button.ctetNextStepCard,
+  button.ctetS4TvCard,
+  button.ctetS4UpdateRow,
+  button.mentorStudentCard,
+  button.mentorResourceCard,
+  .mentorPrimaryButton,
+  .mentorBackButton,
+  .mentorAssignmentActions button
+):not(:disabled) {
+  cursor: pointer;
+  transform: translateZ(0);
+  transform-origin: center;
+  will-change: transform;
+  transition:
+    transform var(--aspire-ui-duration-card) var(--aspire-ui-ease),
+    border-color var(--aspire-ui-duration-fast) ease,
+    box-shadow var(--aspire-ui-duration-card) var(--aspire-ui-ease),
+    background var(--aspire-ui-duration-fast) ease,
+    color var(--aspire-ui-duration-fast) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :where(
+    button.experienceCard,
+    button.experienceHeroQuickCard,
+    button.experienceResourceCard,
+    button.ctetNextStepCard,
+    button.ctetS4TvCard,
+    button.ctetS4UpdateRow
+  ):not(:disabled):hover {
+    transform: translateY(-4px);
+    border-color: rgba(245, 158, 11, 0.45);
+    box-shadow: var(--aspire-ui-shadow-hover);
+  }
+}
+
+:where(
+  button.experienceCard,
+  button.experienceHeroQuickCard,
+  button.experienceResourceCard,
+  button.ctetNextStepCard,
+  button.ctetS4TvCard,
+  button.ctetS4UpdateRow,
+  button.mentorStudentCard,
+  button.mentorResourceCard,
+  .mentorPrimaryButton,
+  .mentorBackButton,
+  .mentorAssignmentActions button
+):not(:disabled):active {
+  transform: translateY(-1px) scale(0.992);
+  transition-duration: 80ms;
+}
+
+:where(
+  button.experienceCard,
+  button.experienceHeroQuickCard,
+  button.experienceResourceCard,
+  button.ctetNextStepCard,
+  button.ctetS4TvCard,
+  button.ctetS4UpdateRow,
+  button.mentorStudentCard,
+  button.mentorResourceCard,
+  .mentorPrimaryButton,
+  .mentorBackButton,
+  .mentorAssignmentActions button
+):focus-visible {
+  outline: 2px solid rgba(250, 204, 21, 0.84);
+  outline-offset: 4px;
+  box-shadow:
+    var(--aspire-ui-focus-ring),
+    var(--aspire-ui-shadow-hover);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(
+    button.experienceCard,
+    button.experienceHeroQuickCard,
+    button.experienceResourceCard,
+    button.ctetNextStepCard,
+    button.ctetS4TvCard,
+    button.ctetS4UpdateRow,
+    button.mentorStudentCard,
+    button.mentorResourceCard,
+    .mentorPrimaryButton,
+    .mentorBackButton,
+    .mentorAssignmentActions button
+  ) {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
