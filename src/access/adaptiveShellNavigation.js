@@ -348,3 +348,270 @@ export const buildAdaptiveShellNavigation = ({
     accountItems,
   });
 };
+
+// LD-R2-G2: LEARNING DRIVE TWO-LEVEL NAVIGATION CONTRACT
+// This presentation-only contract owns parent/context navigation structure.
+// It does not grant access, change plans, or replace route/service authorization.
+const freezeAdaptiveDriveValue = (value) => {
+  if (!value || typeof value !== "object" || Object.isFrozen(value)) {
+    return value;
+  }
+
+  Object.keys(value).forEach((key) => {
+    freezeAdaptiveDriveValue(value[key]);
+  });
+
+  return Object.freeze(value);
+};
+
+export const ADAPTIVE_DRIVE_ROLES = freezeAdaptiveDriveValue({
+  STUDENT: "student",
+  ADMIN: "admin",
+});
+
+export const ADAPTIVE_DRIVE_VIEWPORTS = freezeAdaptiveDriveValue({
+  DESKTOP: "desktop",
+  MOBILE: "mobile",
+});
+
+export const ADAPTIVE_DRIVE_PARENT_AREAS = freezeAdaptiveDriveValue({
+  [ADAPTIVE_DRIVE_ROLES.STUDENT]: [
+    {
+      id: "home",
+      label: "Home",
+      iconKey: "home",
+      children: [
+        { id: "overview", label: "Overview" },
+        { id: "continue-learning", label: "Continue Learning" },
+        { id: "todays-learning", label: "Today’s Learning" },
+        { id: "my-access", label: "My Access" },
+        { id: "recent", label: "Recent" },
+        { id: "recommended", label: "Recommended" },
+      ],
+    },
+    {
+      id: "learning",
+      label: "Learning",
+      iconKey: "learning",
+      children: [
+        { id: "all-learning", label: "All Learning" },
+        { id: "my-access", label: "My Access" },
+        { id: "subjects", label: "Subjects" },
+        { id: "notes", label: "Notes" },
+        { id: "videos", label: "Videos" },
+        { id: "practice", label: "Practice" },
+        { id: "current-affairs", label: "Current Affairs" },
+        { id: "roadmaps", label: "Roadmaps" },
+        { id: "assigned", label: "Assigned" },
+        { id: "recent", label: "Recent" },
+        { id: "saved", label: "Saved" },
+      ],
+    },
+    {
+      id: "mentor",
+      label: "Mentor",
+      iconKey: "mentor",
+      children: [
+        { id: "my-mentor", label: "My Mentor" },
+        { id: "assignments", label: "Assignments" },
+        { id: "ask-question", label: "Ask a Question" },
+        { id: "guidance-history", label: "Guidance History" },
+        { id: "access-discussion", label: "Access Discussion" },
+      ],
+    },
+    {
+      id: "live",
+      label: "Live",
+      iconKey: "live",
+      children: [
+        { id: "upcoming", label: "Upcoming" },
+        { id: "join-live", label: "Join Live" },
+        { id: "calendar", label: "Calendar" },
+        { id: "replays", label: "Replays" },
+        { id: "attendance", label: "Attendance" },
+      ],
+    },
+    {
+      id: "success",
+      label: "Success",
+      iconKey: "success",
+      children: [
+        { id: "progress", label: "Progress" },
+        { id: "results", label: "Results" },
+        { id: "history", label: "History" },
+        { id: "leaderboard", label: "Leaderboard" },
+        { id: "achievements", label: "Achievements" },
+        { id: "success-wall", label: "Success Wall" },
+      ],
+    },
+    {
+      id: "help",
+      label: "Help",
+      iconKey: "help",
+      children: [
+        { id: "support", label: "Support" },
+        { id: "faqs", label: "FAQs" },
+        { id: "access-plan-help", label: "Access & Plan Help" },
+        { id: "contact", label: "Contact" },
+        { id: "privacy", label: "Privacy" },
+        { id: "account-help", label: "Account Help" },
+      ],
+    },
+  ],
+  [ADAPTIVE_DRIVE_ROLES.ADMIN]: [
+    {
+      id: "home",
+      label: "Home",
+      iconKey: "home",
+      children: [
+        { id: "overview", label: "Overview" },
+        { id: "needs-attention", label: "Needs Attention" },
+        { id: "recent-activity", label: "Recent Activity" },
+      ],
+    },
+    {
+      id: "content",
+      label: "Content",
+      iconKey: "content",
+      children: [
+        { id: "all-content", label: "All Content" },
+        { id: "notes-intellitext", label: "Notes / IntelliText" },
+        { id: "videos", label: "Videos" },
+        { id: "mock-tests", label: "Mock Tests" },
+        { id: "current-affairs", label: "Current Affairs" },
+        { id: "roadmaps", label: "Roadmaps" },
+        { id: "live-replays", label: "Live & Replays" },
+        { id: "drafts-staged", label: "Drafts & Staged" },
+      ],
+    },
+    {
+      id: "access",
+      label: "Access",
+      iconKey: "access",
+      children: [
+        { id: "access-manager", label: "Access Manager" },
+        { id: "active-grants", label: "Active Grants" },
+        { id: "expiring-soon", label: "Expiring Soon" },
+        { id: "bulk-access", label: "Bulk Access" },
+        { id: "pending-claims", label: "Pending Claims" },
+      ],
+    },
+    {
+      id: "people",
+      label: "People",
+      iconKey: "people",
+      children: [
+        { id: "learners", label: "Learners" },
+        { id: "mentors", label: "Mentors" },
+        { id: "accounts-migration", label: "Accounts & Migration" },
+      ],
+    },
+    {
+      id: "commerce",
+      label: "Commerce",
+      iconKey: "commerce",
+      children: [
+        { id: "payments", label: "Payments" },
+        { id: "plans-products", label: "Plans & Products" },
+      ],
+    },
+    {
+      id: "system",
+      label: "System",
+      iconKey: "system",
+      children: [
+        { id: "audit-safety", label: "Audit & Safety" },
+        { id: "settings", label: "Settings" },
+      ],
+    },
+  ],
+});
+
+const normalizeAdaptiveDriveId = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase();
+
+const resolveAdaptiveDriveRole = (role) => {
+  const normalizedRole = normalizeAdaptiveDriveId(role);
+
+  return Object.values(ADAPTIVE_DRIVE_ROLES).includes(normalizedRole)
+    ? normalizedRole
+    : "";
+};
+
+const resolveAdaptiveDriveViewport = (viewportMode) =>
+  normalizeAdaptiveDriveId(viewportMode) === ADAPTIVE_DRIVE_VIEWPORTS.MOBILE
+    ? ADAPTIVE_DRIVE_VIEWPORTS.MOBILE
+    : ADAPTIVE_DRIVE_VIEWPORTS.DESKTOP;
+
+export const buildAdaptiveDriveNavigation = ({
+  role = "",
+  activeParentId = "",
+  activeChildId = "",
+  viewportMode = ADAPTIVE_DRIVE_VIEWPORTS.DESKTOP,
+  contextRailCollapsed = false,
+} = {}) => {
+  const normalizedRole = resolveAdaptiveDriveRole(role);
+  const normalizedViewport = resolveAdaptiveDriveViewport(viewportMode);
+
+  if (!normalizedRole) {
+    return freezeAdaptiveDriveValue({
+      enabled: false,
+      isFailClosed: true,
+      role: "",
+      viewportMode: normalizedViewport,
+      activeParentId: "",
+      activeChildId: "",
+      parentItems: [],
+      contextItems: [],
+      contextRail: {
+        visible: false,
+        collapsed: false,
+        presentation: "none",
+      },
+      authorizationIndependent: true,
+    });
+  }
+
+  const roleParents = ADAPTIVE_DRIVE_PARENT_AREAS[normalizedRole];
+  const requestedParentId = normalizeAdaptiveDriveId(activeParentId);
+  const requestedChildId = normalizeAdaptiveDriveId(activeChildId);
+  const activeParent =
+    roleParents.find((item) => item.id === requestedParentId) || roleParents[0];
+  const activeChild =
+    activeParent.children.find((item) => item.id === requestedChildId) ||
+    activeParent.children[0];
+  const isDesktop = normalizedViewport === ADAPTIVE_DRIVE_VIEWPORTS.DESKTOP;
+
+  const parentItems = roleParents.map((item) => ({
+    id: item.id,
+    label: item.label,
+    iconKey: item.iconKey,
+    isActive: item.id === activeParent.id,
+  }));
+
+  const contextItems = activeParent.children.map((item) => ({
+    id: item.id,
+    label: item.label,
+    parentId: activeParent.id,
+    isActive: item.id === activeChild.id,
+  }));
+
+  return freezeAdaptiveDriveValue({
+    enabled: true,
+    isFailClosed: false,
+    role: normalizedRole,
+    viewportMode: normalizedViewport,
+    activeParentId: activeParent.id,
+    activeChildId: activeChild.id,
+    parentItems,
+    contextItems,
+    contextRail: {
+      visible: isDesktop,
+      collapsed: isDesktop && Boolean(contextRailCollapsed),
+      presentation: isDesktop ? "rail" : "tabs",
+    },
+    authorizationIndependent: true,
+  });
+};
