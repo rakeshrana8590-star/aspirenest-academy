@@ -403,3 +403,13 @@
 .aspireLoginBox {
   padding-top: 24px !important;
 }
+
+.aspireUsernameHint {
+  margin-top: -2px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0;
+  line-height: 1.35;
+  text-transform: none;
+}

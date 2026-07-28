@@ -24,6 +24,7 @@ export const NOTES_REASON_CODES = Object.freeze({
   ACCESS_DENIED: "access_denied",
   ACCESS_SCOPE_MISMATCH: "access_scope_mismatch",
   PROTECTED_ASSET_REQUIRED: "protected_asset_required",
+  NATIVE_CONTENT_REQUIRED: "native_content_required",
 });
 
 export const NOTES_DISCOVERY_MODES = Object.freeze({
@@ -138,6 +139,43 @@ export const hasNotesProtectedAsset = (note = {}) =>
         note.assetId
     )
   );
+
+export const hasNotesNativeContent = (note = {}) => {
+  const deliveryMode = normalizeAction(
+    note.deliveryMode ||
+      note.deliveryType ||
+      note.intelliText?.deliveryMode ||
+      note.nativeContent?.deliveryMode
+  );
+  const textbookId = cleanString(
+    note.textbookId ||
+      note.intelliTextId ||
+      note.readerId ||
+      note.intelliText?.textbookId ||
+      note.nativeContent?.textbookId ||
+      note.id ||
+      note.itemId ||
+      note.contentId ||
+      note.noteId
+  );
+  const publicationState = normalizeAction(
+    note.publicationState ||
+      note.intelliText?.publicationState ||
+      note.nativeContent?.publicationState ||
+      note.status
+  );
+
+  return Boolean(
+    deliveryMode === "NATIVE_TEXT" &&
+      textbookId &&
+      (
+        note.nativeReady === true ||
+        note.intelliText?.nativeReady === true ||
+        note.nativeContent?.nativeReady === true
+      ) &&
+      publicationState === "PUBLISHED"
+  );
+};
 
 export const normalizeNotesPrincipal = (
   principal = {}
@@ -506,7 +544,26 @@ export const buildNotesActionDecision = ({
     });
   }
 
-  if (!hasNotesProtectedAsset(note)) {
+  const isNativeRead =
+    normalizedAction === NOTES_ACTIONS.READ;
+
+  if (isNativeRead && !hasNotesNativeContent(note)) {
+    return buildDeniedDecision({
+      action: normalizedAction,
+      reason:
+        NOTES_REASON_CODES.NATIVE_CONTENT_REQUIRED,
+      noteId,
+      requiredPlan,
+      sourceScope,
+      requiresAuthentication: true,
+      requiresServerAuthorization: false,
+    });
+  }
+
+  if (
+    !isNativeRead &&
+    !hasNotesProtectedAsset(note)
+  ) {
     return buildDeniedDecision({
       action: normalizedAction,
       reason:
@@ -533,12 +590,11 @@ export const buildNotesActionDecision = ({
       sourceScope === "item" &&
       accessIsBound,
     requiresAuthentication: true,
-    requiresServerAuthorization: true,
-    canResolveAsset: true,
+    requiresServerAuthorization: !isNativeRead,
+    canResolveAsset: !isNativeRead,
     canOpenAsset:
       normalizedAction === NOTES_ACTIONS.OPEN,
-    canReadAsset:
-      normalizedAction === NOTES_ACTIONS.READ,
+    canReadAsset: isNativeRead,
     canDownloadAsset:
       normalizedAction === NOTES_ACTIONS.DOWNLOAD,
   });
@@ -549,6 +605,18 @@ const PUBLIC_NOTE_FIELDS = Object.freeze([
   "itemId",
   "contentId",
   "textbookId",
+  "intelliTextId",
+  "readerId",
+  "deliveryMode",
+  "deliveryType",
+  "nativeReady",
+  "publicationState",
+  "contentVersion",
+  "publishedVersionId",
+  "migrationState",
+  "targetDeliveryMode",
+  "resourceType",
+  "schemaVersion",
   "slug",
   "title",
   "description",

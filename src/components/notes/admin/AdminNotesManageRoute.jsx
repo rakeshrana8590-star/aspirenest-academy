@@ -381,15 +381,13 @@ export default function AdminNotesManageRoute({
               ✦ Native Authoring
             </button>
 
-            {typeof onBackfillProtectedNotesAssets === "function" ? (
-              <button
-                type="button"
-                className="adminNotesLaunchGhostBtn"
-                onClick={onBackfillProtectedNotesAssets}
-              >
-                🔒 Sync Protected PDFs
-              </button>
-            ) : null}
+            <button
+              type="button"
+              className="adminNotesLaunchGhostBtn"
+              onClick={() => navigate("/admin/content/notes/migration")}
+            >
+              ⚡ Migrate 48 Notes to IntelliText
+            </button>
 
             <button
               type="button"
@@ -869,6 +867,13 @@ export default function AdminNotesManageRoute({
             onClick={() => navigate("/admin/content/notes/intellitext")}
           >
             IntelliText Authoring
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate("/admin/content/notes/migration")}
+          >
+            Existing Notes Migration
           </button>
 
           <button

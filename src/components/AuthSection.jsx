@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { validateUsername } from "../profile/usernameModel";
 
 const TARGET_EXAMS = [
   "CTET Paper I",
@@ -27,8 +28,9 @@ export default function AuthSection({
   handleGoogleLogin,
   handleForgotPassword,
   handleRegister,
+  initialRegisterOpen = false,
 }) {
-  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [isRegisterOpen, setIsRegisterOpen] = useState(Boolean(initialRegisterOpen));
   const [showPassword, setShowPassword] = useState(false);
 
   const [loginEmail, setLoginEmail] = useState(email || "");
@@ -39,6 +41,7 @@ export default function AuthSection({
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
   const [targetExam, setTargetExam] = useState("CTET Paper I + II");
   const [preparationLevel, setPreparationLevel] = useState("Beginner");
@@ -49,9 +52,14 @@ export default function AuthSection({
     []
   );
 
+  useEffect(() => {
+    if (initialRegisterOpen) setIsRegisterOpen(true);
+  }, [initialRegisterOpen]);
+
   const resetRegisterFields = () => {
     setConfirmPassword("");
     setFullName("");
+    setUsername("");
     setMobileNumber("");
     setTargetExam("CTET Paper I + II");
     setPreparationLevel("Beginner");
@@ -101,6 +109,13 @@ export default function AuthSection({
       return;
     }
 
+    const usernameValidation = validateUsername(username);
+
+    if (!usernameValidation.ok) {
+      alert(usernameValidation.message);
+      return;
+    }
+
     if (!cleanEmail) {
       alert("Please enter email address.");
       return;
@@ -126,6 +141,7 @@ export default function AuthSection({
 
     handleRegister?.({
       fullName: fullName.trim(),
+      username: usernameValidation.normalizedUsername,
       mobileNumber: mobileNumber.trim(),
       targetExam,
       preparationLevel,
@@ -295,6 +311,20 @@ export default function AuthSection({
                   autoComplete="name"
                   onChange={(event) => setFullName(event.target.value)}
                 />
+              </label>
+
+              <label className="aspireLoginField">
+                <span>Unique Username</span>
+                <input
+                  type="text"
+                  placeholder="e.g. rakesh_rana"
+                  value={username}
+                  autoComplete="username"
+                  minLength={3}
+                  maxLength={24}
+                  onChange={(event) => setUsername(event.target.value)}
+                />
+                <small className="aspireUsernameHint">Used as @username across your profile, assignments and learning activity.</small>
               </label>
 
               <label className="aspireLoginField">

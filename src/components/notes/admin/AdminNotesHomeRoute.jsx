@@ -6,6 +6,7 @@ import {
   getAdminNotesHealthSummary,
   getAdminNotesPlanSummary,
 } from "../shared/adminNotesUtils";
+import { buildRealNotesBindingReport } from "../shared/realNotesBinding";
 
 export default function AdminNotesHomeRoute({
   universalContent = [],
@@ -15,6 +16,7 @@ export default function AdminNotesHomeRoute({
   const adminNotes = getAdminNotes(universalContent);
   const planSummary = getAdminNotesPlanSummary(universalContent);
   const healthSummary = getAdminNotesHealthSummary(adminNotes);
+  const realNotesBinding = buildRealNotesBindingReport(universalContent);
 
   const systemStats = [
     {
@@ -185,6 +187,23 @@ export default function AdminNotesHomeRoute({
               <span>PDF</span>
             </div>
           </div>
+        </section>
+
+        <section className={`realNotesAdminBinding status-${realNotesBinding.status}`} aria-label="Real Notes source">
+          <div>
+            <span>REAL NOTES SOURCE</span>
+            <h2>{realNotesBinding.readableNotes} existing notes connected to the V8 Drive</h2>
+            <p>
+              Existing contentItems remain the single source of truth. No duplicate Notes database, no re-upload, and no plan or entitlement reset.
+            </p>
+          </div>
+          <div className="realNotesAdminBindingStats">
+            <div><strong>{realNotesBinding.publishedNotes}</strong><span>Published</span></div>
+            <div><strong>{realNotesBinding.nativeIntelliText}</strong><span>IntelliText</span></div>
+            <div><strong>{realNotesBinding.protectedAssets}</strong><span>Protected assets</span></div>
+            <div><strong>{realNotesBinding.legacyPdfFallback}</strong><span>PDF fallback</span></div>
+          </div>
+          <button type="button" onClick={() => navigate("/ctet-tet/notes?adminPreview=student")}>Preview real Notes</button>
         </section>
 
         <section className="adminMockCommandCenter">

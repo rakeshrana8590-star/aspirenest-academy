@@ -102,8 +102,11 @@ function ReaderImage({ payload = {}, type }) {
       payload.url ||
       payload.imageUrl
   );
+  const isProtectedEmbeddedVisual =
+    source.length <= 850000 &&
+    /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(source);
   const safeSource =
-    source.startsWith("https://")
+    source.startsWith("https://") || isProtectedEmbeddedVisual
       ? source
       : "";
 

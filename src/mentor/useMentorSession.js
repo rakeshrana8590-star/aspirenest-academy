@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { loadMentorProfile } from "./mentorService";
+import { getAspireNestDisplayName, isAspireNestMentor } from "../auth/aspireNestIdentity";
 
 export default function useMentorSession({
   user = null,
@@ -17,12 +18,13 @@ export default function useMentorSession({
       return;
     }
 
-    if (isAdminUser) {
+    if (isAdminUser || isAspireNestMentor(user)) {
       setProfile({
         mentorUid: user.uid,
-        role: "admin",
+        role: isAdminUser ? "admin" : "mentor",
         status: "active",
-        displayName: user.displayName || "Administrator",
+        email: user.email || "",
+        displayName: getAspireNestDisplayName(user),
       });
       setError(null);
       setLoading(false);
@@ -49,6 +51,7 @@ export default function useMentorSession({
 
   const isMentor = Boolean(
     isAdminUser ||
+      isAspireNestMentor(user) ||
       (profile?.role === "mentor" && profile?.status === "active")
   );
 

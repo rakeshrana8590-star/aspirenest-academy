@@ -253,3 +253,1417 @@ body.aspireExamAttemptMode iframe[src*="chat"] {
       font-size: 0.86rem !important;
     }
   }
+
+/* ASPIRENEST_DRIVE_MOCK_TEST_V1_START */
+/* =====================================================================
+   ASPIRENEST MOCK TEST — LEARNING DRIVE EXPERIENCE v1
+   Visual source: founder-approved AspireNest Learning Drive V8
+   Boundary: presentation only; timer, persistence, authorization,
+   autosave, submission, result and review logic remain unchanged.
+===================================================================== */
+
+:root {
+  --an-drive-navy-950: #07101f;
+  --an-drive-navy-900: #0b1326;
+  --an-drive-navy-800: #16223c;
+  --an-drive-blue-700: #285ea8;
+  --an-drive-blue-600: #3576c8;
+  --an-drive-blue-100: #e9f2ff;
+  --an-drive-orange-600: #f47b20;
+  --an-drive-orange-500: #ff8a00;
+  --an-drive-orange-100: #fff2e7;
+  --an-drive-green-600: #168b68;
+  --an-drive-green-100: #e9f8f2;
+  --an-drive-red-600: #c64a55;
+  --an-drive-red-100: #fff0f1;
+  --an-drive-amber-700: #9a6615;
+  --an-drive-amber-100: #fff7df;
+  --an-drive-ink: #172033;
+  --an-drive-muted: #6d768a;
+  --an-drive-line: #dfe5ee;
+  --an-drive-surface: #ffffff;
+  --an-drive-surface-2: #f5f7fb;
+  --an-drive-surface-3: #eef2f7;
+  --an-drive-shadow-sm: 0 2px 8px rgba(7, 16, 31, 0.07);
+  --an-drive-shadow-md: 0 12px 32px rgba(7, 16, 31, 0.12);
+  --an-drive-shadow-lg: 0 24px 64px rgba(7, 16, 31, 0.20);
+  --an-drive-radius-sm: 10px;
+  --an-drive-radius-md: 16px;
+  --an-drive-radius-lg: 24px;
+}
+
+/* ---------- Shared Mock Test page foundation ---------- */
+
+:is(
+  .mockStudentPage,
+  .examStartPage,
+  .examResultPage,
+  .notesSubjectRoutePage,
+  .premiumExamPage,
+  .adminMockHomePage,
+  .adminMockAddFormPage,
+  .adminMockManagePage,
+  .adminMockPublishedPage,
+  .adminMockSubjectsPage,
+  .adminMockChaptersPage,
+  .adminMockSeriesPage,
+  .adminMockAnalyticsPage,
+  .adminMockResultsPage,
+  .adminMockLeaderboardPage,
+  .adminMockQuestionBankPage
+) {
+  color: var(--an-drive-ink) !important;
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+  background:
+    radial-gradient(circle at 7% 0%, rgba(53, 118, 200, 0.10), transparent 28%),
+    radial-gradient(circle at 96% 7%, rgba(244, 123, 32, 0.10), transparent 24%),
+    var(--an-drive-surface-2) !important;
+}
+
+:is(
+  .mockStudentPage,
+  .examStartPage,
+  .examResultPage,
+  .notesSubjectRoutePage,
+  .adminMockHomePage,
+  .adminMockAddFormPage,
+  .adminMockManagePage,
+  .adminMockPublishedPage,
+  .adminMockSubjectsPage,
+  .adminMockChaptersPage,
+  .adminMockSeriesPage,
+  .adminMockAnalyticsPage,
+  .adminMockResultsPage,
+  .adminMockLeaderboardPage,
+  .adminMockQuestionBankPage
+) {
+  min-height: 100vh !important;
+  padding: clamp(18px, 2.2vw, 34px) !important;
+}
+
+:is(
+  .mockStudentPage,
+  .examStartPage,
+  .examResultPage,
+  .notesSubjectRoutePage,
+  [class*="adminMock"][class*="Page"]
+) :is(h1, h2, h3, h4) {
+  color: var(--an-drive-navy-900) !important;
+  letter-spacing: -0.025em !important;
+}
+
+:is(
+  .mockStudentPage,
+  .examStartPage,
+  .examResultPage,
+  .notesSubjectRoutePage,
+  [class*="adminMock"][class*="Page"]
+) :is(p, small, label) {
+  color: var(--an-drive-muted);
+}
+
+/* ---------- Shared Drive buttons and fields ---------- */
+
+:is(
+  .mockStudentPage,
+  .examStartPage,
+  .examResultPage,
+  .notesSubjectRoutePage,
+  [class*="adminMock"][class*="Page"]
+) :is(
+  button,
+  .btnLink,
+  .publishButton,
+  .backButton,
+  .secondary,
+  .mockTestPremiumButton
+) {
+  font-family: inherit !important;
+  border-radius: 12px !important;
+  min-height: 42px !important;
+  font-weight: 760 !important;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease !important;
+}
+
+:is(
+  .mockStudentPrimaryBtn,
+  .mockTestPremiumButton,
+  .examStartActionPanel > button,
+  .examStartSecondaryAction.primary,
+  .examResultActionStack > button:not(.secondary),
+  .adminMockPrimaryButton,
+  [class*="adminMock"][class*="PrimaryBtn"],
+  [class*="adminMock"][class*="PrimaryButton"],
+  .publishButton,
+  .examSubmitConfirmBtn
+) {
+  background: var(--an-drive-navy-900) !important;
+  color: #fff !important;
+  border: 1px solid var(--an-drive-navy-900) !important;
+  box-shadow: 0 8px 20px rgba(11, 19, 38, 0.16) !important;
+}
+
+:is(
+  .mockStudentPrimaryBtn,
+  .mockTestPremiumButton,
+  .examStartActionPanel > button,
+  .examResultActionStack > button:not(.secondary),
+  .adminMockPrimaryButton,
+  [class*="adminMock"][class*="PrimaryBtn"],
+  [class*="adminMock"][class*="PrimaryButton"],
+  .publishButton,
+  .examSubmitConfirmBtn
+):not(:disabled):hover {
+  background: var(--an-drive-navy-800) !important;
+  border-color: var(--an-drive-navy-800) !important;
+  transform: translateY(-1px) !important;
+}
+
+:is(
+  .mockStudentGhostBtn,
+  .mockStudentBackBtn,
+  .examStartBackBtn,
+  .examStartSecondaryAction,
+  .examResultActionStack .secondary,
+  [class*="adminMock"][class*="GhostBtn"],
+  [class*="adminMock"][class*="SecondaryButton"],
+  .adminMockBackButton,
+  .backButton,
+  .examSubmitCancelBtn
+) {
+  background: #fff !important;
+  color: var(--an-drive-navy-900) !important;
+  border: 1px solid #d9e2ec !important;
+  box-shadow: var(--an-drive-shadow-sm) !important;
+}
+
+:is(
+  .mockStudentGhostBtn,
+  .mockStudentBackBtn,
+  .examStartBackBtn,
+  .examStartSecondaryAction,
+  .examResultActionStack .secondary,
+  [class*="adminMock"][class*="GhostBtn"],
+  [class*="adminMock"][class*="SecondaryButton"],
+  .adminMockBackButton,
+  .backButton,
+  .examSubmitCancelBtn
+):not(:disabled):hover {
+  background: #f8fafc !important;
+  border-color: #b9cce4 !important;
+  transform: translateY(-1px) !important;
+}
+
+:is(
+  .mockStudentPage,
+  .examStartPage,
+  .examResultPage,
+  .notesSubjectRoutePage,
+  [class*="adminMock"][class*="Page"]
+) :is(input, select, textarea) {
+  width: 100%;
+  color: var(--an-drive-ink) !important;
+  background: #fff !important;
+  border: 1px solid #d8e0eb !important;
+  border-radius: 12px !important;
+  box-shadow: inset 0 1px 2px rgba(7, 16, 31, 0.03) !important;
+  outline: none !important;
+}
+
+:is(
+  .mockStudentPage,
+  .examStartPage,
+  .examResultPage,
+  .notesSubjectRoutePage,
+  [class*="adminMock"][class*="Page"]
+) :is(input, select, textarea):focus {
+  border-color: #9ebbe2 !important;
+  box-shadow: 0 0 0 4px rgba(53, 118, 200, 0.10) !important;
+}
+
+/* ---------- Student library / Practice ---------- */
+
+.mockStudentPage {
+  max-width: none !important;
+}
+
+:is(.mockStudentHero, .mockStudentCommandHero) {
+  overflow: hidden !important;
+  position: relative !important;
+  padding: clamp(24px, 4vw, 46px) !important;
+  border-radius: var(--an-drive-radius-lg) !important;
+  border: 1px solid rgba(223, 229, 238, 0.95) !important;
+  background:
+    linear-gradient(135deg, rgba(233, 242, 255, 0.96), rgba(255, 242, 231, 0.96)),
+    #fff !important;
+  box-shadow: var(--an-drive-shadow-md) !important;
+}
+
+:is(.mockStudentHero, .mockStudentCommandHero)::after {
+  content: "";
+  position: absolute;
+  right: -70px;
+  top: -100px;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(53, 118, 200, 0.18), transparent 68%);
+  pointer-events: none;
+}
+
+.mockStudentHeroCopy {
+  position: relative !important;
+  z-index: 1 !important;
+  max-width: 820px !important;
+}
+
+.mockStudentHeroCopy h1 {
+  margin: 8px 0 10px !important;
+  font-size: clamp(30px, 4.1vw, 54px) !important;
+  line-height: 1.04 !important;
+  font-weight: 860 !important;
+}
+
+.mockStudentHeroCopy p {
+  max-width: 720px !important;
+  font-size: 15px !important;
+  line-height: 1.62 !important;
+}
+
+.mockStudentBadge,
+.mockStudentPlanPillV2,
+.mockStudentLevelPillV2,
+.mockTestPremiumBadges span,
+.examStartBadge,
+.examResultBadge,
+[class*="adminMock"] .badge {
+  border-radius: 999px !important;
+  font-weight: 820 !important;
+  letter-spacing: 0.025em !important;
+}
+
+.mockStudentBadge,
+.examStartBadge,
+.examResultBadge,
+[class*="adminMock"] .badge {
+  color: var(--an-drive-orange-600) !important;
+  background: var(--an-drive-orange-100) !important;
+  border: 1px solid #fed7aa !important;
+}
+
+:is(
+  .mockStudentSystemCard,
+  .mockStudentShelf,
+  .mockStudentPromisePanelV2
+) {
+  margin-top: 18px !important;
+  border: 1px solid var(--an-drive-line) !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  box-shadow: var(--an-drive-shadow-sm) !important;
+}
+
+.mockStudentSystemCard {
+  padding: 18px !important;
+}
+
+.mockStudentSystemGrid,
+.mockStudentPromiseGridV2 {
+  gap: 12px !important;
+}
+
+.mockStudentFeatureCard,
+.mockStudentPromiseGridV2 > * {
+  border: 1px solid #e3e8ef !important;
+  border-radius: 14px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+:is(
+  .mockStudentPlanCardV2,
+  .mockStudentLevelCardV2,
+  .mockTestPremiumCard
+) {
+  position: relative !important;
+  overflow: hidden !important;
+  border: 1px solid var(--an-drive-line) !important;
+  border-radius: 18px !important;
+  background: #fff !important;
+  box-shadow: var(--an-drive-shadow-sm) !important;
+  transform: none !important;
+}
+
+:is(
+  .mockStudentPlanCardV2,
+  .mockStudentLevelCardV2,
+  .mockTestPremiumCard
+)::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--an-drive-blue-600), var(--an-drive-orange-500));
+}
+
+:is(
+  .mockStudentPlanCardV2,
+  .mockStudentLevelCardV2,
+  .mockTestPremiumCard
+):hover {
+  border-color: #bfd1e8 !important;
+  box-shadow: var(--an-drive-shadow-md) !important;
+  transform: translateY(-3px) !important;
+}
+
+.mockTestPremiumIcon,
+.mockStudentPlanIconV2,
+.mockStudentLevelIconV2 {
+  display: grid !important;
+  place-items: center !important;
+  color: var(--an-drive-blue-700) !important;
+  background: var(--an-drive-blue-100) !important;
+  border: 1px solid #cfe0f5 !important;
+  border-radius: 14px !important;
+}
+
+.mockTestPremiumStats,
+.mockStudentPlanStatsV2,
+.mockStudentLevelMiniV2 {
+  border-radius: 12px !important;
+  background: var(--an-drive-surface-2) !important;
+  border: 1px solid #e4e9f0 !important;
+}
+
+.mockTestPremiumFooter,
+.mockStudentPlanFooterV2,
+.mockStudentLevelFooterV2 {
+  border-top-color: var(--an-drive-line) !important;
+}
+
+.mockStudentEmpty {
+  border: 1px dashed #cbd7e5 !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+}
+
+/* ---------- Start / Instructions ---------- */
+
+.examStartShell,
+.examResultShell {
+  width: min(100%, 1440px) !important;
+  margin: 0 auto !important;
+}
+
+.examStartTopBar {
+  min-height: 56px !important;
+  margin-bottom: 14px !important;
+  padding: 8px 10px !important;
+  border: 1px solid var(--an-drive-line) !important;
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  box-shadow: var(--an-drive-shadow-sm) !important;
+  backdrop-filter: blur(16px) !important;
+}
+
+.examStartTopNote {
+  color: var(--an-drive-muted) !important;
+  font-weight: 700 !important;
+}
+
+.examStartLaunch {
+  overflow: hidden !important;
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.75fr) !important;
+  gap: 18px !important;
+  padding: clamp(24px, 4vw, 48px) !important;
+  border: 1px solid var(--an-drive-line) !important;
+  border-radius: 24px !important;
+  background:
+    linear-gradient(135deg, rgba(233, 242, 255, 0.98), rgba(255, 242, 231, 0.94)),
+    #fff !important;
+  box-shadow: var(--an-drive-shadow-md) !important;
+}
+
+.examStartHeroContent h1 {
+  margin: 10px 0 !important;
+  font-size: clamp(30px, 4vw, 50px) !important;
+  line-height: 1.04 !important;
+  font-weight: 860 !important;
+}
+
+.examStartHeroContent p {
+  max-width: 720px !important;
+  line-height: 1.62 !important;
+}
+
+.examStartHeroMeta,
+.examStartQuickGrid {
+  gap: 9px !important;
+}
+
+.examStartHeroMeta > *,
+.examStartQuickGrid > * {
+  border: 1px solid rgba(215, 224, 235, 0.96) !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+  box-shadow: none !important;
+}
+
+.examStartActionPanel {
+  align-self: stretch !important;
+  border: 1px solid #d7e1ec !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  box-shadow: var(--an-drive-shadow-sm) !important;
+}
+
+.examStartActionChecks {
+  border-radius: 12px !important;
+  background: var(--an-drive-surface-2) !important;
+}
+
+.examStartGrid {
+  gap: 14px !important;
+}
+
+.examStartCard {
+  border: 1px solid var(--an-drive-line) !important;
+  border-radius: 18px !important;
+  background: #fff !important;
+  box-shadow: var(--an-drive-shadow-sm) !important;
+}
+
+.examStartCardHead {
+  border-bottom-color: var(--an-drive-line) !important;
+}
+
+.examStartCardIcon {
+  color: var(--an-drive-blue-700) !important;
+  background: var(--an-drive-blue-100) !important;
+  border-radius: 12px !important;
+}
+
+.examStartMetricGrid > *,
+.examStartInfoList > *,
+.examStartRuleList > * {
+  border-radius: 12px !important;
+  background: var(--an-drive-surface-2) !important;
+  border: 1px solid #e6ebf1 !important;
+}
+
+.examStartRuleList .active {
+  background: var(--an-drive-green-100) !important;
+  border-color: rgba(22, 139, 104, 0.25) !important;
+}
+
+.examStartRuleList .danger {
+  background: var(--an-drive-red-100) !important;
+  border-color: rgba(198, 74, 85, 0.25) !important;
+}
+
+/* ---------- Timed Attempt: Drive Focus Workspace ---------- */
+
+body.aspireExamAttemptMode {
+  background:
+    radial-gradient(circle at 8% -8%, rgba(53, 118, 200, 0.14), transparent 28%),
+    radial-gradient(circle at 100% 0%, rgba(244, 123, 32, 0.12), transparent 24%),
+    var(--an-drive-surface-2) !important;
+  color: var(--an-drive-ink) !important;
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+}
+
+body.aspireExamAttemptMode :is(header, .ctetPremiumHeader, .studentNav, .mobileBottomNav, .premiumFooter) {
+  display: none !important;
+}
+
+.premiumExamPage {
+  width: 100% !important;
+  min-height: 100vh !important;
+  height: 100vh !important;
+  padding: 12px !important;
+  overflow: hidden !important;
+}
+
+.premiumExamShell {
+  width: min(100%, 1880px) !important;
+  height: 100% !important;
+  margin: 0 auto !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  gap: 12px !important;
+}
+
+.premiumExamTop.examHeaderCompact {
+  min-height: 82px !important;
+  max-height: none !important;
+  grid-template-columns: 112px minmax(270px, 1fr) minmax(620px, 1.15fr) !important;
+  gap: 12px !important;
+  padding: 9px 12px !important;
+  border: 1px solid rgba(223, 229, 238, 0.98) !important;
+  border-radius: 20px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: var(--an-drive-shadow-md) !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+.premiumExamBrand {
+  border-right: 1px solid var(--an-drive-line) !important;
+}
+
+.examTitleBlock.compactExamTitleBlock h1 {
+  color: var(--an-drive-navy-900) !important;
+  font-size: clamp(1.1rem, 1.35vw, 1.55rem) !important;
+  font-weight: 860 !important;
+  letter-spacing: -0.035em !important;
+}
+
+.examTitleBlock.compactExamTitleBlock p {
+  color: var(--an-drive-muted) !important;
+  font-weight: 680 !important;
+}
+
+.examTopStats.compactExamStats {
+  grid-template-columns:
+    minmax(205px, 1.2fr)
+    minmax(104px, 0.58fr)
+    minmax(92px, 0.48fr)
+    minmax(92px, 0.48fr)
+    minmax(140px, 0.66fr) !important;
+  gap: 7px !important;
+}
+
+.examTopStats.compactExamStats > div {
+  min-height: 56px !important;
+  border: 1px solid #e1e7ef !important;
+  border-radius: 13px !important;
+  background: var(--an-drive-surface-2) !important;
+  box-shadow: none !important;
+}
+
+.examTopStats.compactExamStats span {
+  color: #788398 !important;
+  font-size: 0.66rem !important;
+  letter-spacing: 0.075em !important;
+}
+
+.examTopStats.compactExamStats strong {
+  color: var(--an-drive-navy-900) !important;
+  font-size: 0.95rem !important;
+}
+
+.examTopStats.compactExamStats .timerStat {
+  background: var(--an-drive-orange-100) !important;
+  border-color: #fed7aa !important;
+}
+
+.examTopStats.compactExamStats .timerStat strong {
+  color: #c24f0a !important;
+}
+
+.examTopStats.compactExamStats .examSubmitBtn {
+  min-height: 56px !important;
+  border-radius: 13px !important;
+  background: var(--an-drive-navy-900) !important;
+  color: #fff !important;
+  border: 1px solid var(--an-drive-navy-900) !important;
+  box-shadow: 0 8px 20px rgba(11, 19, 38, 0.16) !important;
+}
+
+.premiumExamGrid {
+  min-height: 0 !important;
+  grid-template-columns: minmax(0, 1fr) minmax(330px, 390px) !important;
+  gap: 12px !important;
+}
+
+.premiumQuestionWorkspace.aspireExamMain,
+.premiumPalettePanel.aspireExamSide {
+  min-height: 0 !important;
+  border: 1px solid var(--an-drive-line) !important;
+  border-radius: 20px !important;
+  background: #fff !important;
+  box-shadow: var(--an-drive-shadow-sm) !important;
+}
+
+.premiumQuestionWorkspace.aspireExamMain {
+  padding: 16px 18px 12px !important;
+}
+
+.premiumQuestionWorkspace .questionWorkspaceHeader,
+.premiumQuestionWorkspace .questionTopRow,
+.premiumQuestionWorkspace .questionHeaderRow {
+  border-bottom: 1px solid var(--an-drive-line) !important;
+}
+
+.premiumQuestionWorkspace :is(.questionNumber, .questionBadge, .questionTypeBadge) {
+  color: var(--an-drive-blue-700) !important;
+  background: var(--an-drive-blue-100) !important;
+  border: 1px solid #cfe0f5 !important;
+  border-radius: 999px !important;
+}
+
+.premiumQuestionWorkspace :is(.questionText, .examQuestionText) {
+  color: var(--an-drive-navy-900) !important;
+  line-height: 1.64 !important;
+  letter-spacing: -0.012em !important;
+}
+
+.premiumQuestionWorkspace :is(.optionRow, .questionOption, .premiumOption, label[class*="option"]) {
+  border: 1px solid #dfe5ee !important;
+  border-radius: 14px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+.premiumQuestionWorkspace :is(.optionRow, .questionOption, .premiumOption, label[class*="option"]):hover {
+  border-color: #9ebbe2 !important;
+  background: #f8fbff !important;
+}
+
+.premiumQuestionWorkspace :is(.optionRow.selected, .questionOption.selected, .premiumOption.selected, label[class*="option"].selected) {
+  border-color: var(--an-drive-blue-600) !important;
+  background: var(--an-drive-blue-100) !important;
+  box-shadow: 0 0 0 3px rgba(53, 118, 200, 0.09) !important;
+}
+
+.premiumQuestionWorkspace input[type="radio"] {
+  accent-color: var(--an-drive-blue-600) !important;
+}
+
+.premiumPalettePanel.aspireExamSide {
+  padding: 14px !important;
+}
+
+.premiumPalettePanel.aspireExamSide :is(h2, h3, strong) {
+  color: var(--an-drive-navy-900) !important;
+}
+
+.premiumPalettePanel.aspireExamSide .paletteRangeBtn {
+  min-height: 30px !important;
+  border-radius: 999px !important;
+  background: #fff !important;
+  color: var(--an-drive-navy-900) !important;
+  border: 1px solid var(--an-drive-line) !important;
+  box-shadow: none !important;
+}
+
+.premiumPalettePanel.aspireExamSide .paletteRangeBtn.active {
+  background: var(--an-drive-navy-900) !important;
+  color: #fff !important;
+  border-color: var(--an-drive-navy-900) !important;
+  box-shadow: 0 8px 18px rgba(11, 19, 38, 0.16) !important;
+}
+
+.premiumPalettePanel.aspireExamSide .paletteNumber {
+  height: 38px !important;
+  border-radius: 10px !important;
+  border: 1px solid #d8e0ea !important;
+  background: var(--an-drive-surface-2) !important;
+  color: var(--an-drive-navy-900) !important;
+  box-shadow: none !important;
+}
+
+.premiumPalettePanel.aspireExamSide .paletteNumber.paletteAnswered {
+  background: var(--an-drive-green-600) !important;
+  color: #fff !important;
+  border-color: var(--an-drive-green-600) !important;
+}
+
+.premiumPalettePanel.aspireExamSide .paletteNumber.paletteMarked {
+  background: var(--an-drive-blue-700) !important;
+  color: #fff !important;
+  border-color: var(--an-drive-blue-700) !important;
+}
+
+.premiumPalettePanel.aspireExamSide .paletteNumber.paletteAnsweredReview {
+  background: linear-gradient(135deg, var(--an-drive-green-600) 0 48%, var(--an-drive-blue-700) 48% 100%) !important;
+  color: #fff !important;
+  border-color: var(--an-drive-blue-700) !important;
+}
+
+.premiumPalettePanel.aspireExamSide .paletteNumber.paletteNotAnswered {
+  background: var(--an-drive-orange-100) !important;
+  color: #b54c0c !important;
+  border-color: #fed7aa !important;
+}
+
+.premiumPalettePanel.aspireExamSide .paletteNumber.paletteCurrent {
+  outline: 3px solid rgba(244, 123, 32, 0.72) !important;
+  outline-offset: 2px !important;
+}
+
+.premiumPalettePanel.aspireExamSide .paletteSummaryCard {
+  min-height: 54px !important;
+  border: 1px solid var(--an-drive-line) !important;
+  border-radius: 13px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+.premiumPalettePanel.aspireExamSide .paletteSummaryCard.answeredQuickItem {
+  background: var(--an-drive-green-100) !important;
+}
+
+.premiumPalettePanel.aspireExamSide .paletteSummaryCard.reviewQuickItem {
+  background: var(--an-drive-blue-100) !important;
+}
+
+.premiumPalettePanel.aspireExamSide .paletteSummaryCard.pendingQuickItem {
+  background: var(--an-drive-orange-100) !important;
+}
+
+.aspireExamActionBar {
+  min-height: 62px !important;
+  padding-top: 10px !important;
+  border-top: 1px solid var(--an-drive-line) !important;
+  background: #fff !important;
+  gap: 9px !important;
+}
+
+.examControlBtn {
+  min-height: 48px !important;
+  border-radius: 12px !important;
+  font-weight: 760 !important;
+  box-shadow: none !important;
+}
+
+.examControlBtn.secondary,
+.examControlBtn.ghost {
+  color: var(--an-drive-navy-900) !important;
+  background: #fff !important;
+  border: 1px solid #d8e0ea !important;
+}
+
+.examControlBtn.review {
+  color: var(--an-drive-blue-700) !important;
+  background: var(--an-drive-blue-100) !important;
+  border: 1px solid #cfe0f5 !important;
+}
+
+.examControlBtn.primary {
+  color: #fff !important;
+  background: var(--an-drive-navy-900) !important;
+  border: 1px solid var(--an-drive-navy-900) !important;
+  box-shadow: 0 8px 20px rgba(11, 19, 38, 0.16) !important;
+}
+
+/* ---------- Secure gates and submission ---------- */
+
+.examSubmitConfirmBackdrop,
+.examFullscreenGate {
+  background: rgba(7, 16, 31, 0.62) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.examSubmitConfirmModal,
+.examFullscreenGateCard {
+  border: 1px solid rgba(223, 229, 238, 0.98) !important;
+  border-radius: 22px !important;
+  background: #fff !important;
+  box-shadow: var(--an-drive-shadow-lg) !important;
+}
+
+.examSubmitConfirmBadge,
+.examFullscreenGateCard > span {
+  color: var(--an-drive-orange-600) !important;
+  background: var(--an-drive-orange-100) !important;
+  border: 1px solid #fed7aa !important;
+  border-radius: 999px !important;
+}
+
+.examSubmitConfirmStats > *,
+.submitStat {
+  border: 1px solid var(--an-drive-line) !important;
+  border-radius: 12px !important;
+  background: var(--an-drive-surface-2) !important;
+}
+
+.submitStat.answered {
+  background: var(--an-drive-green-100) !important;
+}
+
+.submitStat.review {
+  background: var(--an-drive-blue-100) !important;
+}
+
+.submitStat.pending {
+  background: var(--an-drive-orange-100) !important;
+}
+
+.examSubmitConfirmWarning {
+  border: 1px solid #f0dfb7 !important;
+  border-radius: 12px !important;
+  background: var(--an-drive-amber-100) !important;
+  color: var(--an-drive-amber-700) !important;
+}
+
+/* ---------- Result ---------- */
+
+.examResultHero {
+  overflow: hidden !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.8fr) !important;
+  gap: 18px !important;
+  padding: clamp(24px, 4vw, 46px) !important;
+  border: 1px solid var(--an-drive-line) !important;
+  border-radius: 24px !important;
+  background:
+    linear-gradient(135deg, rgba(233, 242, 255, 0.98), rgba(255, 242, 231, 0.94)),
+    #fff !important;
+  box-shadow: var(--an-drive-shadow-md) !important;
+}
+
+.examResultHeroContent h1 {
+  font-size: clamp(30px, 4vw, 50px) !important;
+  line-height: 1.04 !important;
+  font-weight: 860 !important;
+}
+
+.examResultHeroStats > *,
+.examResultMetricsPanel,
+.examResultInfoCard,
+.examResultStatusCard {
+  border: 1px solid var(--an-drive-line) !important;
+  border-radius: 18px !important;
+  background: #fff !important;
+  box-shadow: var(--an-drive-shadow-sm) !important;
+}
+
+.examResultScorePanel {
+  border: 1px solid #d6e1ee !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  box-shadow: var(--an-drive-shadow-sm) !important;
+}
+
+.examResultScoreRing {
+  background:
+    radial-gradient(circle at center, #fff 58%, transparent 59%),
+    conic-gradient(var(--an-drive-blue-600), var(--an-drive-orange-500)) !important;
+}
+
+.examResultMetricCard {
+  border: 1px solid #e2e7ee !important;
+  border-radius: 14px !important;
+  background: var(--an-drive-surface-2) !important;
+  box-shadow: none !important;
+}
+
+.examResultStatusBox {
+  border-radius: 14px !important;
+  background: var(--an-drive-blue-100) !important;
+  border: 1px solid #cfe0f5 !important;
+}
+
+/* ---------- Review ---------- */
+
+.notesSubjectRoutePage:has(.reviewSummaryGrid) {
+  width: min(100%, 1480px) !important;
+  margin: 0 auto !important;
+}
+
+.reviewMasteryNotice,
+.reviewMasteryError {
+  border-radius: 14px !important;
+  border: 1px solid var(--an-drive-line) !important;
+  box-shadow: var(--an-drive-shadow-sm) !important;
+}
+
+.reviewMasteryNotice {
+  background: var(--an-drive-blue-100) !important;
+  border-color: #cfe0f5 !important;
+}
+
+.reviewMasteryError {
+  background: var(--an-drive-red-100) !important;
+  border-color: rgba(198, 74, 85, 0.25) !important;
+}
+
+.reviewSummaryGrid > *,
+.reviewQuestionPalette,
+.reviewQuestionBody,
+.reviewAnswerDetails,
+.reviewExplanation {
+  border: 1px solid var(--an-drive-line) !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  box-shadow: var(--an-drive-shadow-sm) !important;
+}
+
+.reviewQuestionPalette {
+  background: rgba(255, 255, 255, 0.96) !important;
+}
+
+.reviewQuestionNo {
+  color: var(--an-drive-blue-700) !important;
+  background: var(--an-drive-blue-100) !important;
+  border-radius: 999px !important;
+}
+
+.reviewStatusPill {
+  border-radius: 999px !important;
+}
+
+.reviewAnswerLine {
+  border-radius: 12px !important;
+  background: var(--an-drive-surface-2) !important;
+  border: 1px solid #e5eaf0 !important;
+}
+
+.reviewOptionsList > * {
+  border: 1px solid var(--an-drive-line) !important;
+  border-radius: 12px !important;
+  background: #fff !important;
+}
+
+.reviewExplanation {
+  background: var(--an-drive-orange-100) !important;
+  border-color: #fed7aa !important;
+}
+
+/* ---------- Student leaderboard ---------- */
+
+.mockLeaderboardBoard,
+.mockLeaderboardPodiumCard,
+.mockLeaderboardOwnStrip,
+.mockLeaderboardRankList {
+  border: 1px solid var(--an-drive-line) !important;
+  border-radius: 18px !important;
+  background: #fff !important;
+  box-shadow: var(--an-drive-shadow-sm) !important;
+}
+
+.mockLeaderboardBoardHead {
+  border-bottom-color: var(--an-drive-line) !important;
+}
+
+.mockLeaderboardPodiumCard.isRank1 {
+  background: linear-gradient(180deg, #fff, var(--an-drive-amber-100)) !important;
+}
+
+.mockLeaderboardOwnStrip {
+  background: var(--an-drive-blue-100) !important;
+  border-color: #cfe0f5 !important;
+}
+
+/* ---------- Admin Drive Mock Test workspace ---------- */
+
+:is(
+  .adminMockHomeShell,
+  .adminMockAddSetupConsole,
+  .adminMockAddQuestionBuilderConsole,
+  .adminMockManageFilterPanel,
+  [class*="adminMock"][class*="Panel"],
+  [class*="adminMock"][class*="SystemCard"],
+  [class*="adminMock"][class*="SystemPanel"]
+) {
+  border: 1px solid var(--an-drive-line) !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.97) !important;
+  box-shadow: var(--an-drive-shadow-sm) !important;
+}
+
+:is(
+  .adminMockHomeHero,
+  .adminMockAddCommandHero,
+  .adminMockManageHero,
+  .adminMockPublishedHero,
+  .adminMockSubjectsHero,
+  .adminMockChaptersHero,
+  .adminMockSeriesHero,
+  .adminMockAnalyticsHero,
+  .adminMockResultsHero,
+  .adminMockLeaderboardHero,
+  .adminMockQuestionBankHero
+) {
+  overflow: hidden !important;
+  position: relative !important;
+  padding: clamp(24px, 3.5vw, 44px) !important;
+  border: 1px solid var(--an-drive-line) !important;
+  border-radius: 24px !important;
+  background:
+    linear-gradient(135deg, rgba(233, 242, 255, 0.98), rgba(255, 242, 231, 0.94)),
+    #fff !important;
+  box-shadow: var(--an-drive-shadow-md) !important;
+}
+
+:is(
+  .adminMockHomeHero,
+  .adminMockAddCommandHero,
+  .adminMockManageHero,
+  .adminMockPublishedHero,
+  .adminMockSubjectsHero,
+  .adminMockChaptersHero,
+  .adminMockSeriesHero,
+  .adminMockAnalyticsHero,
+  .adminMockResultsHero,
+  .adminMockLeaderboardHero,
+  .adminMockQuestionBankHero
+)::after {
+  content: "";
+  position: absolute;
+  right: -80px;
+  top: -100px;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(53, 118, 200, 0.16), transparent 69%);
+  pointer-events: none;
+}
+
+:is(
+  .adminMockHeroCopy,
+  .adminMockAddHeroCopy,
+  .adminMockManageHeroCopy,
+  .adminMockPublishedHeroCopy,
+  .adminMockSubjectsHeroCopy,
+  .adminMockChaptersHeroCopy,
+  .adminMockSeriesHeroCopy,
+  .adminMockAnalyticsHeroCopy,
+  .adminMockResultsHeroCopy,
+  .adminMockLeaderboardHeroCopy,
+  .adminMockQuestionBankHeroCopy
+) {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+:is(
+  .adminMockHeroCopy,
+  .adminMockAddHeroCopy,
+  .adminMockManageHeroCopy,
+  .adminMockPublishedHeroCopy,
+  .adminMockSubjectsHeroCopy,
+  .adminMockChaptersHeroCopy,
+  .adminMockSeriesHeroCopy,
+  .adminMockAnalyticsHeroCopy,
+  .adminMockResultsHeroCopy,
+  .adminMockLeaderboardHeroCopy,
+  .adminMockQuestionBankHeroCopy
+) h1 {
+  font-size: clamp(30px, 4vw, 50px) !important;
+  line-height: 1.04 !important;
+  font-weight: 860 !important;
+}
+
+:is(
+  [class*="adminMock"][class*="KpiCard"],
+  [class*="adminMock"][class*="ActionCard"],
+  [class*="adminMock"][class*="Card"],
+  .adminMockAddQuestionCard,
+  .contentStudioItem
+) {
+  border: 1px solid var(--an-drive-line) !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  box-shadow: var(--an-drive-shadow-sm) !important;
+}
+
+:is(
+  [class*="adminMock"][class*="KpiCard"],
+  [class*="adminMock"][class*="ActionCard"],
+  [class*="adminMock"][class*="Card"],
+  .adminMockAddQuestionCard
+):hover {
+  border-color: #bfd1e8 !important;
+  box-shadow: var(--an-drive-shadow-md) !important;
+}
+
+:is(
+  [class*="adminMock"][class*="Icon"],
+  .adminMockActionIcon
+) {
+  color: var(--an-drive-blue-700) !important;
+  background: var(--an-drive-blue-100) !important;
+  border: 1px solid #cfe0f5 !important;
+  border-radius: 13px !important;
+}
+
+:is(
+  [class*="adminMock"][class*="Flow"],
+  [class*="adminMock"][class*="SystemGrid"],
+  [class*="adminMock"][class*="MiniStats"],
+  [class*="adminMock"][class*="MiniGrid"]
+) {
+  border-radius: 14px !important;
+}
+
+.contentStudioForm,
+.contentStudioList,
+.contentStudioGrid {
+  gap: 14px !important;
+}
+
+.adminMockAddQuestionCard {
+  padding: 18px !important;
+}
+
+.adminMockAddQuestionBankSettings,
+.adminMockConceptMapping {
+  border: 1px solid #d8e2ed !important;
+  border-radius: 14px !important;
+  background: var(--an-drive-surface-2) !important;
+}
+
+.adminMockManageFilterPanel,
+.adminMockManageBulkBar {
+  border: 1px solid var(--an-drive-line) !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  box-shadow: var(--an-drive-shadow-sm) !important;
+}
+
+:is(
+  .adminMockLeaderboardTable,
+  .adminMockResultsTable,
+  [class*="adminMock"][class*="Table"]
+) {
+  overflow: hidden !important;
+  border: 1px solid var(--an-drive-line) !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+}
+
+:is(
+  .adminMockLeaderboardRow,
+  .adminMockResultsRow,
+  [class*="adminMock"][class*="Row"]
+) {
+  border-bottom-color: var(--an-drive-line) !important;
+}
+
+:is(
+  .adminMockLeaderboardScorePill,
+  [class*="adminMock"][class*="ScorePill"]
+) {
+  color: var(--an-drive-blue-700) !important;
+  background: var(--an-drive-blue-100) !important;
+  border-radius: 999px !important;
+}
+
+/* ---------- Generic runtime states ---------- */
+
+.premiumExamPage .pdfMiniCard,
+.examStartStateCard,
+.examResultStateCard {
+  width: min(100%, 620px) !important;
+  margin: min(12vh, 120px) auto 0 !important;
+  padding: 28px !important;
+  border: 1px solid var(--an-drive-line) !important;
+  border-radius: 22px !important;
+  background: #fff !important;
+  box-shadow: var(--an-drive-shadow-lg) !important;
+  text-align: center !important;
+}
+
+.premiumExamPage .pdfMiniCard .btnLink,
+.examStartStateCard .btnLink,
+.examResultStateCard .btnLink {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 8px 5px 0 !important;
+}
+
+/* ---------- Responsive continuity ---------- */
+
+@media (max-width: 1280px) {
+  .premiumExamTop.examHeaderCompact {
+    grid-template-columns: 96px minmax(230px, 0.8fr) minmax(560px, 1.2fr) !important;
+  }
+
+  .premiumExamGrid {
+    grid-template-columns: minmax(0, 1fr) 330px !important;
+  }
+
+  .examTopStats.compactExamStats {
+    grid-template-columns: minmax(170px, 1fr) repeat(3, minmax(84px, 0.55fr)) minmax(126px, 0.68fr) !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .examStartLaunch,
+  .examResultHero {
+    grid-template-columns: 1fr !important;
+  }
+
+  .premiumExamPage {
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow-y: auto !important;
+  }
+
+  .premiumExamShell {
+    height: auto !important;
+    min-height: 100vh !important;
+    display: block !important;
+  }
+
+  .premiumExamTop.examHeaderCompact {
+    grid-template-columns: 80px minmax(0, 1fr) !important;
+    margin-bottom: 12px !important;
+    overflow: visible !important;
+  }
+
+  .examTopStats.compactExamStats {
+    grid-column: 1 / -1 !important;
+    grid-template-columns: repeat(5, minmax(110px, 1fr)) !important;
+    overflow-x: auto !important;
+    padding-bottom: 2px !important;
+  }
+
+  .premiumExamGrid {
+    height: auto !important;
+    grid-template-columns: 1fr !important;
+    overflow: visible !important;
+  }
+
+  .premiumQuestionWorkspace.aspireExamMain,
+  .premiumPalettePanel.aspireExamSide {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .premiumPalettePanel.aspireExamSide {
+    order: 2 !important;
+  }
+}
+
+@media (max-width: 720px) {
+  :is(
+    .mockStudentPage,
+    .examStartPage,
+    .examResultPage,
+    .notesSubjectRoutePage,
+    [class*="adminMock"][class*="Page"]
+  ) {
+    padding: 12px !important;
+  }
+
+  :is(
+    .mockStudentHero,
+    .mockStudentCommandHero,
+    .examStartLaunch,
+    .examResultHero,
+    .adminMockHomeHero,
+    .adminMockAddCommandHero,
+    .adminMockManageHero,
+    .adminMockPublishedHero,
+    .adminMockSubjectsHero,
+    .adminMockChaptersHero,
+    .adminMockSeriesHero,
+    .adminMockAnalyticsHero,
+    .adminMockResultsHero,
+    .adminMockLeaderboardHero,
+    .adminMockQuestionBankHero
+  ) {
+    padding: 21px !important;
+    border-radius: 18px !important;
+  }
+
+  .mockStudentHeroCopy h1,
+  .examStartHeroContent h1,
+  .examResultHeroContent h1,
+  [class*="adminMock"][class*="HeroCopy"] h1 {
+    font-size: 30px !important;
+  }
+
+  .premiumExamPage {
+    padding: 8px !important;
+  }
+
+  .premiumExamTop.examHeaderCompact {
+    grid-template-columns: 1fr !important;
+    border-radius: 16px !important;
+    padding: 10px !important;
+  }
+
+  .premiumExamBrand {
+    display: none !important;
+  }
+
+  .examTopStats.compactExamStats {
+    grid-template-columns: repeat(2, minmax(125px, 1fr)) !important;
+  }
+
+  .examTopStats.compactExamStats .examSubmitBtn {
+    grid-column: 1 / -1 !important;
+  }
+
+  .premiumQuestionWorkspace.aspireExamMain,
+  .premiumPalettePanel.aspireExamSide {
+    border-radius: 16px !important;
+  }
+
+  .premiumQuestionWorkspace.aspireExamMain {
+    padding: 13px !important;
+  }
+
+  .aspireExamActionBar {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .examControlBtn {
+    min-height: 46px !important;
+    white-space: normal !important;
+  }
+
+  .examSubmitConfirmModal,
+  .examFullscreenGateCard {
+    border-radius: 18px !important;
+    padding: 20px !important;
+  }
+}
+
+@media (max-width: 460px) {
+  .examTopStats.compactExamStats {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .aspireExamActionBar {
+    grid-template-columns: 1fr !important;
+  }
+
+  .premiumPalettePanel.aspireExamSide .premiumPaletteGrid {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(
+    .mockStudentPage,
+    .examStartPage,
+    .examResultPage,
+    .notesSubjectRoutePage,
+    .premiumExamPage,
+    [class*="adminMock"][class*="Page"]
+  ) *,
+  :is(
+    .mockStudentPage,
+    .examStartPage,
+    .examResultPage,
+    .notesSubjectRoutePage,
+    .premiumExamPage,
+    [class*="adminMock"][class*="Page"]
+  ) *::before,
+  :is(
+    .mockStudentPage,
+    .examStartPage,
+    .examResultPage,
+    .notesSubjectRoutePage,
+    .premiumExamPage,
+    [class*="adminMock"][class*="Page"]
+  ) *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+/* ASPIRENEST_DRIVE_MOCK_TEST_V1_END */

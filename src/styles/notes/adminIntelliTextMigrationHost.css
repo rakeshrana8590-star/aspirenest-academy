@@ -1,0 +1,56 @@
+.aspirenestIntelliTextMigrationHost {
+  min-height: calc(100vh - 112px);
+  padding: 28px;
+  background: #f4f7fb;
+  color: #0f172a;
+  font-family: inherit;
+}
+
+.aspirenestIntelliTextMigrationHost .coursePages {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.intelliTextMigrationHostState {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  min-height: 360px;
+  padding: 32px;
+  border: 1px solid #dbe4ef;
+  border-radius: 24px;
+  background: #fff;
+  text-align: center;
+}
+
+.intelliTextMigrationHostState strong {
+  color: #102a56;
+  font-size: 24px;
+}
+
+.intelliTextMigrationHostState p {
+  margin: 0;
+  color: #64748b;
+}
+
+.intelliTextMigrationHostState button {
+  min-height: 42px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 12px;
+  background: #df6b18;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.intelliTextMigrationHostState.isError {
+  border-color: #fecaca;
+  background: #fff7f7;
+}
+
+@media (max-width: 900px) {
+  .aspirenestIntelliTextMigrationHost {
+    padding: 18px;
+  }
+}

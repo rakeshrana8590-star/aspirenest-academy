@@ -308,4 +308,16 @@ describe("IntelliText reader model", () => {
       "/ctet-tet/notes/plan/PREMIUM/cdp/learning-theories"
     );
   });
+  test("uses the canonical contentItems id as the IntelliText identity", () => {
+    const note = createNativeNote({
+      id: "canonical-note-id",
+      textbookId: "",
+      intelliTextId: "",
+      readerId: "",
+    });
+
+    expect(getReaderNoteTextbookId(note)).toBe("canonical-note-id");
+    expect(findIntelliTextNoteById([note], "canonical-note-id")).toBe(note);
+  });
+
 });

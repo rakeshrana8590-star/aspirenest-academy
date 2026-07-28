@@ -49,7 +49,11 @@ export function getReaderNoteTextbookId(note = {}) {
       note.intelliTextId ||
       note.readerId ||
       note.intelliText?.textbookId ||
-      note.nativeContent?.textbookId
+      note.nativeContent?.textbookId ||
+      note.id ||
+      note.itemId ||
+      note.contentId ||
+      note.noteId
   );
 }
 

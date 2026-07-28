@@ -11,7 +11,7 @@ import html2canvas from "html2canvas";
 
 
 import {
-  createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification, GoogleAuthProvider, signInWithPopup, } from "firebase/auth";
+  createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification, GoogleAuthProvider, signInWithPopup, deleteUser, updateProfile, } from "firebase/auth";
 
 import {
   getVerifiedAuthSession, resendVerificationEmailAndLogout, syncVerifiedStudentAccountStatus, } from "./utils/authAccountService";
@@ -42,6 +42,16 @@ import {
   resolveStudentNotesProtectedAsset,
 } from "./access/notesStudentAssetRuntime";
 import { upsertLearnerLoginSnapshot } from "./profile/learnerProfileService";
+import {
+  getAspireNestDisplayName,
+  getAspireNestLandingRoute,
+  resolveAspireNestPostLoginRoute,
+  isAspireNestAdmin,
+  isAspireNestMentor,
+  isAspireNestStudent,
+  mergeAspireNestStudentDirectory,
+} from "./auth/aspireNestIdentity";
+import { createVerifiedStudentAccountRecords } from "./profile/usernameService";
 
 import {
   LineChart, Line, PieChart, Pie, Cell, Tooltip, ResponsiveContainer
@@ -67,6 +77,13 @@ import {
 import AspireNestLogo from "./components/AspireNestLogo.jsx";
 import AcademyOverviewRoute from "./components/public/AcademyOverviewRoute.jsx";
 import AuthRoute from "./components/public/AuthRoute";
+import LearningDriveShell from "./learningDrive/LearningDriveShell.jsx";
+import V8LearningDriveRuntime from "./learningDrive/V8LearningDriveRuntime.jsx";
+import AdminDriveHomeRoute from "./learningDrive/AdminDriveHomeRoute.jsx";
+import AdminDriveLearnersRoute from "./learningDrive/AdminDriveLearnersRoute.jsx";
+import {
+  resolveLearningDrivePresentation,
+} from "./learningDrive/learningDriveRouteMap";
 
 
 import AppDashboard from "./components/AppDashboard.jsx";
@@ -109,7 +126,7 @@ import {
   StudentNotesLibraryRoute, StudentNotesPlanRoute, StudentNotesSubjectRoute, StudentNotesChapterRoute, StudentNativeReaderRoute, MyStudyWorkspaceRoute, } from "./components/notes/student/index.js";
 
 import {
-  AdminNotesHomeRoute, AdminNotesPlanRoute, AdminNotesSubjectRoute, AdminNotesChapterRoute, AdminNotesManageRoute, AdminIntelliTextAuthoringRoute, } from "./components/notes/admin/index.js";
+  AdminNotesHomeRoute, AdminNotesPlanRoute, AdminNotesSubjectRoute, AdminNotesChapterRoute, AdminNotesManageRoute, AdminIntelliTextAuthoringRoute, AdminIntelliTextMigrationRoute, } from "./components/notes/admin/index.js";
 
 import {
   StudentCurrentAffairsLibraryRoute, StudentCurrentAffairsMonthRoute, } from "./components/currentAffairs/student/index.js";
@@ -152,6 +169,7 @@ import StudentRedeemAccessRoute from "./access/StudentRedeemAccessRoute.jsx";
 import AdminAccessProductsRoute from "./access/admin/AdminAccessProductsRoute.jsx";
 import AdminAccessKeysRoute from "./access/admin/AdminAccessKeysRoute.jsx";
 import StudentLearnerProfileRoute from "./profile/StudentLearnerProfileRoute.jsx";
+import StudentUsernameSetupRoute from "./profile/StudentUsernameSetupRoute.jsx";
 import StudentAccessInviteRoute from "./access/student/StudentAccessInviteRoute.jsx";
 import MyAccessRoute from "./access/student/MyAccessRoute.jsx";
 import SearchRoute from "./search/SearchRoute.jsx";
@@ -204,6 +222,7 @@ import "./styles/currentAffairs/studentCurrentAffairs.css";
 import "./styles/currentAffairs/adminCurrentAffairs.css";
 
 import "./styles/notes/adminNotes.css";
+import "./styles/notes/adminIntelliTextMigration.css";
 
 import "./styles/exam/adminMockTests.css";
 import "./styles/exam/examLayoutLock.css";
@@ -413,6 +432,7 @@ const [fullName, setFullName] = useState("");
 const [mobile, setMobile] = useState("");
 const [contactEmail, setContactEmail] = useState("");
   const [user, setUser] = useState(null);
+  const [accountUsername, setAccountUsername] = useState("");
   const [universalContent, setUniversalContent] = useState([]);
   const [notesCmsTitle, setNotesCmsTitle] = useState("");
 const [notesCmsDescription, setNotesCmsDescription] = useState("");
@@ -596,9 +616,7 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
   const adaptiveShellRuntimeContext =
     buildAdaptiveShellRuntimeContext({
       user,
-      isAdminUser:
-        user?.email ===
-        "aspirenestplatform@gmail.com",
+      isAdminUser: isAspireNestAdmin(user),
       currentPath: location.pathname,
       resumeRoute: "/ctet-tet",
     });
@@ -650,10 +668,9 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const accountMenuRef = React.useRef(null);
 
-  const accountDisplayName =
-    user?.displayName ||
-    user?.email?.split("@")?.[0] ||
-    (user ? "AspireNest User" : "Guest");
+  const accountDisplayName = user
+    ? getAspireNestDisplayName(user)
+    : "Guest";
 
   const accountEmail = user?.email || "";
 
@@ -664,6 +681,7 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
 
   const logoutFromAccountMenu = async () => {
     setAccountMenuOpen(false);
+    setAccountUsername("");
     await handleLogout();
   };
 
@@ -715,17 +733,27 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
       "/ctet-tet/redeem",
     ]);
 
-    const isStudentProtectedRoute = studentProtectedRoutes.has(location.pathname);
+    const isStudentRoute =
+      location.pathname === "/student" || location.pathname.startsWith("/student/");
+    const isStudentProtectedRoute =
+      isStudentRoute || studentProtectedRoutes.has(location.pathname);
+    const isMentorRoute =
+      location.pathname === "/mentor" || location.pathname.startsWith("/mentor/");
     const isAdminRoute = location.pathname.startsWith("/admin");
 
-    if (!user && (isStudentProtectedRoute || isAdminRoute)) {
+    if (!user && (isStudentProtectedRoute || isMentorRoute || isAdminRoute)) {
       const returnToPath = `${location.pathname}${location.search || ""}`;
       navigate(`/login?returnTo=${encodeURIComponent(returnToPath)}`, { replace: true });
       return;
     }
 
     if (user && isAdminRoute && !isAdmin(user)) {
-      navigate("/", { replace: true });
+      navigate(getAspireNestLandingRoute(user), { replace: true });
+      return;
+    }
+
+    if (user && isMentorRoute && !isAdmin(user) && !isMentor(user)) {
+      navigate("/student", { replace: true });
     }
   }, [authLoading, location.pathname, location.search, navigate, user]);
 
@@ -895,8 +923,22 @@ const [editingNotesCmsId, setEditingNotesCmsId] = useState(null);
 
   const [activePlan, setActivePlan] = useState("FREE");
   const adminEmail = "aspirenestplatform@gmail.com";
-  const isAdmin = (currentUser = user) =>
-  currentUser?.email === adminEmail;
+  const isAdmin = (currentUser = user) => isAspireNestAdmin(currentUser);
+  const isMentor = (currentUser = user) => isAspireNestMentor(currentUser);
+
+  const learningDrivePresentation = resolveLearningDrivePresentation({
+    pathname: location.pathname,
+    search: location.search,
+    isAuthenticated: Boolean(user),
+    isAdminUser: isAdmin(user),
+    isMentorUser: isMentor(user),
+    isExamAttemptPage,
+  });
+
+  const learningDriveResumeRoute =
+    accessProfile?.shellNavigation?.primaryItems?.find(
+      (item) => item?.id === "continue" && item?.disabled !== true
+    )?.route || "/ctet-tet";
   const generateOrderId = () => {
     return "ASP-" + Date.now();
   };
@@ -1978,7 +2020,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
 
         setUser(verifiedUser);
 
-        if (verifiedUser && !isAdmin(verifiedUser)) {
+        if (verifiedUser && isAspireNestStudent(verifiedUser)) {
           syncVerifiedStudentAccountStatus(db, verifiedUser);
 
           upsertLearnerLoginSnapshot({ user: verifiedUser }).catch((error) => {
@@ -1991,6 +2033,7 @@ const [paymentHistory, setPaymentHistory] = useState([]);
 
         if (!verifiedUser) {
         setIsPremiumUser(false);
+        setAccountUsername("");
         setAuthLoading(false);
         return;
       }
@@ -2055,22 +2098,34 @@ const [paymentHistory, setPaymentHistory] = useState([]);
   }, [location.pathname, userPlanType]);
 
   const handleRegister = async (studentProfile = {}) => {
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanEmail = String(studentProfile.email ?? email)
+      .trim()
+      .toLowerCase();
+    const registrationPassword = String(studentProfile.password ?? password);
     const cleanFullName =
       studentProfile.fullName?.trim() || cleanEmail.split("@")[0];
+    let createdUser = null;
 
     try {
+      if (!cleanEmail || !registrationPassword) {
+        throw new Error("Email and password are required to create an account.");
+      }
+
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         cleanEmail,
-        password
+        registrationPassword
       );
+      createdUser = userCredential.user;
+
+      await updateProfile(createdUser, {
+        displayName: cleanFullName,
+      });
 
       const baseStudentProfile = {
-        uid: userCredential.user.uid,
         fullName: cleanFullName,
         name: cleanFullName,
-        email: cleanEmail,
+        username: studentProfile.username || "",
         mobileNumber: studentProfile.mobileNumber || "",
         whatsappNumber: studentProfile.mobileNumber || "",
         targetExam: studentProfile.targetExam || "CTET Paper I + II",
@@ -2086,33 +2141,32 @@ const [paymentHistory, setPaymentHistory] = useState([]);
         emailVerified: false,
         accountStatus: "pendingEmailVerification",
         profileStatus: "basicProfileCreated",
-        profileCompletion: 55,
+        profileCompletion: 60,
         onboardingStatus: "basicProfilePending",
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
 
-      await setDoc(
-        doc(db, "students", userCredential.user.uid),
-        baseStudentProfile
-      );
-
-      await setDoc(doc(db, "users", userCredential.user.uid), {
-        ...baseStudentProfile,
-        displayName: cleanFullName,
-        paymentStatus: "FREE",
-        premiumStatus: "FREE",
+      const accountResult = await createVerifiedStudentAccountRecords({
+        firebaseUser: createdUser,
+        profile: baseStudentProfile,
       });
 
-      await sendEmailVerification(userCredential.user);
-
+      setAccountUsername(accountResult.username);
+      await sendEmailVerification(createdUser);
       await signOut(auth);
 
       alert(
-        "Account created ✅ Verification email sent. Please verify your Gmail before login."
+        `Account created ✅\nUsername: @${accountResult.username}\nVerification email sent. Please verify your email before login.`
       );
     } catch (error) {
-      alert(error.message);
+      if (createdUser) {
+        try {
+          await deleteUser(createdUser);
+        } catch (rollbackError) {
+          console.error("Registration rollback failed:", rollbackError);
+        }
+      }
+
+      alert(error?.message || "Account creation failed.");
     }
   };
 
@@ -2139,13 +2193,15 @@ const [paymentHistory, setPaymentHistory] = useState([]);
       setPassword(loginPassword);
 
       const returnTo = new URLSearchParams(window.location.search).get("returnTo");
-      navigate(returnTo || "/ctet-tet", { replace: true });
+      navigate(resolveAspireNestPostLoginRoute(userCredential.user, returnTo), {
+        replace: true,
+      });
     } catch (error) {
       alert(error.message);
     }
   };
 
-  const handleGoogleLogin = async (redirectPath = "/ctet-tet") => {
+  const handleGoogleLogin = async (redirectPath = "") => {
     if (window.self !== window.top) {
       alert(
         "StackBlitz preview me Google login block hota hai. App new tab me open ho rahi hai."
@@ -2156,8 +2212,16 @@ const [paymentHistory, setPaymentHistory] = useState([]);
     }
 
     try {
-      await signInWithPopup(auth, provider);
-      navigate(redirectPath || "/ctet-tet", { replace: true });
+      const userCredential = await signInWithPopup(auth, provider);
+      const explicitRoute = typeof redirectPath === "string" ? redirectPath : "";
+      const returnTo = new URLSearchParams(window.location.search).get("returnTo");
+      navigate(
+        resolveAspireNestPostLoginRoute(
+          userCredential.user,
+          explicitRoute || returnTo
+        ),
+        { replace: true }
+      );
     } catch (error) {
       if (error?.code === "auth/cancelled-popup-request") {
         return;
@@ -2176,14 +2240,16 @@ const [paymentHistory, setPaymentHistory] = useState([]);
     }
   };
 
-  const handleForgotPassword = async () => {
-    if (!email) {
+  const handleForgotPassword = async (requestedEmail = "") => {
+    const resetEmail = String(requestedEmail || email || "").trim().toLowerCase();
+
+    if (!resetEmail) {
       alert("Please enter your email first");
       return;
     }
 
     try {
-      await sendPasswordResetEmail(auth, email);
+      await sendPasswordResetEmail(auth, resetEmail);
       alert("Password reset email sent 📩");
     } catch (error) {
       alert(error.message);
@@ -2214,18 +2280,21 @@ const [paymentHistory, setPaymentHistory] = useState([]);
       alert(error.message);
     }
   };
-  const buildStudentNoteAccessDecision = (
-    note,
-    action = NOTES_ACTIONS.OPEN
-  ) =>
-    buildStudentNotesRuntimeDecision({
-      action,
+  const buildStudentNoteAccessDecision = React.useCallback(
+    (
       note,
-      user,
-      accessProfile,
-      planCatalog:
-        accessProfile?.planCatalog || [],
-    });
+      action = NOTES_ACTIONS.OPEN
+    ) =>
+      buildStudentNotesRuntimeDecision({
+        action,
+        note,
+        user,
+        accessProfile,
+        planCatalog:
+          accessProfile?.planCatalog || [],
+      }),
+    [user, accessProfile]
+  );
 
   const handleNoteAccess = async (note) => {
     if (!note) {
@@ -2326,22 +2395,16 @@ const usersData = usersSnap.docs.map((doc) => ({
 }));
       const enquiriesSnap = await getDocs(collection(db, "enquiries"));
 
+      const studentRecords = studentsSnap.docs.map((studentDoc) => ({
+        id: studentDoc.id,
+        uid: studentDoc.id,
+        ...studentDoc.data(),
+      }));
+
       setStudents(
-        studentsSnap.docs.map((doc) => {
-          const student = {
-            id: doc.id,
-            ...doc.data(),
-          };
-
-          const userRecord = usersData.find(
-            (u) => u.email === student.email
-          );
-
-          return {
-            ...student,
-            isPremium: userRecord?.isPremium || false,
-            subscriptionType: userRecord?.subscriptionType || "FREE",
-          };
+        mergeAspireNestStudentDirectory({
+          students: studentRecords,
+          users: usersData,
         })
       );
 
@@ -2362,6 +2425,7 @@ const usersData = usersSnap.docs.map((doc) => ({
 
     if (currentUser.email === adminEmail) {
       setIsPremiumUser(true);
+      setAccountUsername("aspirenest_admin");
       return;
     }
 
@@ -2370,6 +2434,7 @@ const usersData = usersSnap.docs.map((doc) => ({
       const userSnap = await getDoc(userRef);
 
       if (!userSnap.exists()) {
+        setAccountUsername("");
         await setDoc(userRef, {
           email: currentUser.email,
           isPremium: false,
@@ -2383,11 +2448,13 @@ const usersData = usersSnap.docs.map((doc) => ({
         return;
       }
 
-      setIsPremiumUser(userSnap.data().isPremium === true);
-      const expiryDate = userSnap.data().expiryDate?.toDate
-  ? userSnap.data().expiryDate.toDate()
-  : userSnap.data().expiryDate
-  ? new Date(userSnap.data().expiryDate)
+      const userData = userSnap.data();
+      setAccountUsername(userData.username || userData.normalizedUsername || "");
+      setIsPremiumUser(userData.isPremium === true);
+      const expiryDate = userData.expiryDate?.toDate
+  ? userData.expiryDate.toDate()
+  : userData.expiryDate
+  ? new Date(userData.expiryDate)
   : null;
 
 if (expiryDate && expiryDate < new Date()) {
@@ -2405,7 +2472,7 @@ if (expiryDate && expiryDate < new Date()) {
   );
 } else {
   setUserPlanType(
-    userSnap.data().subscriptionType || "PREMIUM"
+    userData.subscriptionType || "PREMIUM"
   );
 
   setMembershipExpiry(expiryDate);
@@ -3355,6 +3422,7 @@ subjectName:
       thumbnailUrl: notesCmsThumbnailUrl,
       status: notesCmsStatus,
       section: "notes",
+      targetDeliveryMode: "NATIVE_TEXT",
       hasProtectedAsset:
         hasNewProtectedPdf ||
         existingNotesItem?.hasProtectedAsset === true,
@@ -3362,6 +3430,8 @@ subjectName:
     };
     const publicNotesPayload =
       buildPublicNotesMetadata(notesPayload);
+
+    let createdIntelliTextNoteId = "";
 
     try {
       if (editingNotesCmsId) {
@@ -3387,27 +3457,42 @@ subjectName:
         alert("Notes updated successfully.");
       } else {
         const notesRef = await addDoc(collection(db, "contentItems"), {
-            ...buildPublicNotesMetadata({
+          ...buildPublicNotesMetadata({
+            ...notesPayload,
+            status: "Draft",
+            deliveryMode: "NATIVE_TEXT",
+            deliveryType: "NATIVE_TEXT",
+            nativeReady: false,
+            publicationState: "DRAFT",
+            createdAt: new Date().toISOString(),
+          }),
+        });
+
+        await updateDoc(doc(db, "contentItems", notesRef.id), {
+          textbookId: notesRef.id,
+          canonicalRoute: `/ctet-tet/notes/read/${encodeURIComponent(notesRef.id)}`,
+          migrationState: "AUTHORING_REQUIRED",
+          updatedAt: new Date().toISOString(),
+        });
+
+        if (hasNewProtectedPdf) {
+          await saveProtectedContentAsset(
+            notesRef.id,
+            {
+              id: notesRef.id,
               ...notesPayload,
-              createdAt: new Date().toISOString(),
-            }),
-          });
+            },
+            {
+              actorEmail: user?.email || "admin",
+              source: "notes_intellitext_source_backup",
+            }
+          );
+        }
 
-          if (hasNewProtectedPdf) {
-            await saveProtectedContentAsset(
-              notesRef.id,
-              {
-                id: notesRef.id,
-                ...notesPayload,
-              },
-              {
-                actorEmail: user?.email || "admin",
-                source: "notes_cms",
-              }
-            );
-          }
-
-        alert("Notes saved to Firestore successfully.");
+        createdIntelliTextNoteId = notesRef.id;
+        alert(
+          "Canonical Note created. Complete and publish its IntelliText version before it becomes student-visible."
+        );
       }
 
       setNotesCmsTitle("");
@@ -3423,6 +3508,14 @@ subjectName:
       setEditingNotesCmsId(null);
 
       await loadContentItemsFromFirestore();
+
+      if (createdIntelliTextNoteId) {
+        navigate(
+          `/admin/content/notes/intellitext/${encodeURIComponent(
+            createdIntelliTextNoteId
+          )}`
+        );
+      }
     } catch (error) {
       console.error("Notes save/update error:", error);
       alert("Notes save/update failed.");
@@ -4496,6 +4589,41 @@ const studyTimeMessage =
       </div>
     );
   }
+  const exactV8Experience = (() => {
+    const path = location.pathname;
+    if (path === "/") return "public";
+    if (path === "/student" && user) return "student";
+    if (path === "/mentor" && user && (isAdmin(user) || isMentor(user))) return "mentor";
+    if (path === "/admin" && user && isAdmin(user)) return "admin";
+    return "";
+  })();
+
+  if (exactV8Experience) {
+    return (
+      <V8LearningDriveRuntime
+        experience={exactV8Experience}
+        user={
+          user
+            ? {
+                uid: user.uid,
+                email: user.email,
+                displayName: getAspireNestDisplayName(user),
+              }
+            : null
+        }
+        isAdminUser={Boolean(user && isAdmin(user))}
+        isMentorUser={Boolean(user && isMentor(user))}
+        onLogout={logoutFromAccountMenu}
+        universalContent={universalContent}
+        buildNoteAccessDecision={buildStudentNoteAccessDecision}
+        onOpenLegacyNote={handleNoteAccess}
+        accessProfile={accessProfile}
+        mockResults={mockResults}
+        mockLeaderboardEntries={mockLeaderboardPublicEntries}
+      />
+    );
+  }
+
   if (false && !user){
     return (
       <React.Suspense
@@ -4596,10 +4724,57 @@ return (
             </div>
           }
         >
+        <div
+          className={
+            learningDrivePresentation.enabled
+              ? "learningDriveAppFrame is-active"
+              : "learningDriveAppFrame"
+          }
+        >
+        {learningDrivePresentation.enabled ? (
+          <LearningDriveShell
+            presentation={learningDrivePresentation}
+            user={
+              user
+                ? {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: getAspireNestDisplayName(user),
+                    username: accountUsername,
+                  }
+                : null
+            }
+            isAdminUser={isAdmin(user)}
+            activePlan={activeAccessPlan}
+            membershipExpiry={activeAccessExpiry}
+            resumeRoute={learningDriveResumeRoute}
+            navigate={navigate}
+            locationKey={`${location.key || ""}:${location.pathname}:${location.search}`}
+            onLogout={logoutFromAccountMenu}
+            notificationCount={
+              (Array.isArray(announcements) ? announcements.length : 0) +
+              (Array.isArray(ctetUpcomingExperienceEvents)
+                ? ctetUpcomingExperienceEvents.length
+                : 0)
+            }
+            accessCount={
+              Array.isArray(accessProfile?.myAccess?.items)
+                ? accessProfile.myAccess.items.length
+                : Number(accessProfile?.myAccess?.totalCount) || 0
+            }
+          />
+        ) : null}
         {!isExamAttemptPage &&
           !ctetExperienceEnabled &&
+          !learningDrivePresentation.enabled &&
           renderCtetPremiumHeader("ctetGlobalPremiumHeader")}
-<main className="appShell">
+<main
+  className={
+    learningDrivePresentation.enabled
+      ? "appShell learningDriveMain"
+      : "appShell"
+  }
+>
 <Routes key={location.key || location.pathname}>
 
 
@@ -4741,24 +4916,32 @@ return (
 <Route
   path="/mentor"
   element={
-    <MentorWorkspaceRoute
-      user={user}
-      isAdminUser={isAdmin(user)}
-      contentItems={universalContent}
-      roadmaps={ctetNotificationRoadmaps}
-    />
+    isAdmin(user) || isMentor(user) ? (
+      <MentorWorkspaceRoute
+        user={user}
+        isAdminUser={isAdmin(user)}
+        contentItems={universalContent}
+        roadmaps={ctetNotificationRoadmaps}
+      />
+    ) : (
+      <Navigate to={user ? "/student" : "/login?returnTo=%2Fmentor"} replace />
+    )
   }
 />
 
 <Route
   path="/mentor/students/:studentId"
   element={
-    <MentorWorkspaceRoute
-      user={user}
-      isAdminUser={isAdmin(user)}
-      contentItems={universalContent}
-      roadmaps={ctetNotificationRoadmaps}
-    />
+    isAdmin(user) || isMentor(user) ? (
+      <MentorWorkspaceRoute
+        user={user}
+        isAdminUser={isAdmin(user)}
+        contentItems={universalContent}
+        roadmaps={ctetNotificationRoadmaps}
+      />
+    ) : (
+      <Navigate to={user ? "/student" : "/login?returnTo=%2Fmentor"} replace />
+    )
   }
 />
 
@@ -4786,9 +4969,20 @@ return (
 />
 
 <Route
-  path="/"
+  path="/admin/preview/public"
   element={
-    user ? (
+    requireAdmin() ? (
+      <AcademyOverviewRoute />
+    ) : (
+      <Navigate to="/" replace />
+    )
+  }
+/>
+
+<Route
+  path="/admin/preview/student"
+  element={
+    requireAdmin() ? (
       <AuthenticatedHomeRoute
         user={user}
         shellState={accessProfile?.shellState}
@@ -4799,11 +4993,47 @@ return (
         navigate={navigate}
       />
     ) : (
-      <AcademyOverviewRoute />
+      <Navigate to="/" replace />
     )
   }
 />
 
+<Route
+  path="/admin/preview/mentor"
+  element={
+    requireAdmin() ? (
+      <MentorWorkspaceRoute
+        user={user}
+        isAdminUser={true}
+        contentItems={universalContent}
+        roadmaps={ctetNotificationRoadmaps}
+      />
+    ) : (
+      <Navigate to="/" replace />
+    )
+  }
+/>
+
+<Route path="/" element={<AcademyOverviewRoute />} />
+
+<Route
+  path="/student"
+  element={
+    requireLogin() ? (
+      <AuthenticatedHomeRoute
+        user={user}
+        shellState={accessProfile?.shellState}
+        myAccess={accessProfile?.myAccess}
+        contentItems={universalContent}
+        roadmaps={ctetNotificationRoadmaps}
+        mockResults={mockResults}
+        navigate={navigate}
+      />
+    ) : (
+      <Navigate to="/login?returnTo=%2Fstudent" replace />
+    )
+  }
+/>
 
 <Route
   path="/login"
@@ -4818,6 +5048,24 @@ return (
       handleGoogleLogin={handleGoogleLogin}
       handleForgotPassword={handleForgotPassword}
       handleRegister={handleRegister}
+    />
+  }
+/>
+
+<Route
+  path="/create-account"
+  element={
+    <AuthRoute
+      user={user}
+      email={email}
+      setEmail={setEmail}
+      password={password}
+      setPassword={setPassword}
+      handleLogin={handleLogin}
+      handleGoogleLogin={handleGoogleLogin}
+      handleForgotPassword={handleForgotPassword}
+      handleRegister={handleRegister}
+      initialMode="register"
     />
   }
 />
@@ -5922,6 +6170,20 @@ xpActivityEvents={ctetMockXpEvents}
 />
 
 <Route
+  path="/profile/username"
+  element={
+    requireLogin() ? (
+      <StudentUsernameSetupRoute
+        user={user}
+        currentUsername={accountUsername}
+        onUsernameSaved={setAccountUsername}
+        navigate={navigate}
+      />
+    ) : null
+  }
+/>
+
+<Route
   path="/profile/setup"
   element={
     requireLogin() ? (
@@ -6104,123 +6366,15 @@ xpActivityEvents={ctetMockXpEvents}
   path="/admin"
   element={
     requireAdmin() ? (
-      <section className="coursePages">
-        <div className="sectionHeader">
-          <span className="badge">Admin Dashboard</span>
-
-          <h2>AspireNest Admin Control Center</h2>
-
-          <p>
-            Manage students, mentors, content,
-            payments, analytics, and platform systems.
-          </p>
-        </div>
-
-        <div className="courseGrid">
-          <button onClick={() => { setActiveAdminTab("Dashboard"); navigate("/admin"); }}>
-            📊 Dashboard
-          </button>
-
-          <button onClick={() => { setActiveAdminTab("Enquiries"); navigate("/admin/enquiries"); }}>
-            📩 Enquiries
-          </button>
-
-          <button onClick={() => { setActiveAdminTab("Students"); navigate("/admin/students"); }}>
-            👨‍🎓 Students
-          </button>
-
-          <button onClick={() => { setActiveAdminTab("Notes"); navigate("/admin/notes"); }}>
-            📘 Notes CMS
-          </button>
-
-          <button onClick={() => { setActiveAdminTab("Mock Tests"); navigate("/admin/mock-tests"); }}>
-            📝 Mock Tests CMS
-          </button>
-
-          <button onClick={() => { setActiveAdminTab("Current Affairs"); navigate("/admin/current-affairs"); }}>
-            📰 Current Affairs CMS
-          </button>
-
-          <button onClick={() => { setActiveAdminTab("Payments"); navigate("/admin/content/payments"); }}>
-            💳 Payments
-          </button>
-
-          <button onClick={() => { setActiveAdminTab("Analytics"); navigate("/admin/analytics"); }}>
-            📊 Analytics
-          </button>
-
-          <button onClick={() => { setActiveAdminTab("Announcements"); navigate("/admin/announcements"); }}>
-            📢 Announcements
-          </button>
-
-          <button onClick={() => { setActiveAdminTab("Universal CMS"); navigate("/admin/universal-cms"); }}>
-            🌍 Universal CMS
-          </button>
-
-          <button
-  onClick={() => {
-    setActiveAdminTab("Content Studio");
-    navigate("/admin/content");
-  }}
->
-  🧩 Content Studio
-</button>
-
-        </div>
-
-        <div style={{ marginTop: "30px" }}>
-          <AdminPanel
-            user={user}
-            isAdmin={isAdmin(user)}
-            activeAdminTab="Dashboard"
-            setActiveAdminTab={setActiveAdminTab}
-            students={students || []}
-            enquiries={enquiries || []}
-            mockResults={mockResults || []}
-            leaderboard={leaderboard || []}
-            mockQuestions={mockQuestions || []}
-            adminQuestion={adminQuestion}
-            setAdminQuestion={setAdminQuestion}
-            adminOption1={adminOption1}
-            setAdminOption1={setAdminOption1}
-            adminOption2={adminOption2}
-            setAdminOption2={setAdminOption2}
-            adminOption3={adminOption3}
-            setAdminOption3={setAdminOption3}
-            adminOption4={adminOption4}
-            setAdminOption4={setAdminOption4}
-            adminAnswer={adminAnswer}
-            setAdminAnswer={setAdminAnswer}
-            adminSubject={adminSubject}
-            setAdminSubject={setAdminSubject}
-            adminLevel={adminLevel}
-            setAdminLevel={setAdminLevel}
-            adminAccessPlan={adminAccessPlan}
-            setAdminAccessPlan={setAdminAccessPlan}
-            notesData={[]}
-            firebaseNotes={firebaseNotes || []}
-            currentAffairs={currentAffairsList || []}
-            currentAffairsList={currentAffairsList || []}
-            fallbackCurrentAffairs={currentAffairsList || []}
-            announcements={announcements || []}
-            paymentHistory={paymentHistory || []}
-            loadAdminData={loadAdminData}
-            loadLeaderboard={loadLeaderboard}
-            loadPaymentHistory={loadPaymentHistory}
-            handlePremiumControl={handlePremiumControl}
-            handleDeleteMockQuestion={handleDeleteMockQuestion}
-            handleAddMockQuestion={handleAddMockQuestion}
-            handleSaveNote={handleSaveNote}
-            handleEditNote={handleEditNote}
-            handleDeleteNote={handleDeleteNote}
-            handleSaveCurrentAffairs={handleSaveCurrentAffairs}
-            handleEditCurrentAffairs={handleEditCurrentAffairs}
-            handleDeleteCurrentAffairs={handleDeleteCurrentAffairs}
-            handleAddAnnouncement={handleAddAnnouncement}
-            handleDeleteAnnouncement={handleDeleteAnnouncement}
-          />
-        </div>
-      </section>
+      <AdminDriveHomeRoute
+        students={students || []}
+        contentItems={universalContent || []}
+        payments={paymentRequests || []}
+        announcements={announcements || []}
+        mockResults={mockResults || []}
+        roadmaps={ctetNotificationRoadmaps || []}
+        navigate={navigate}
+      />
     ) : null
   }
 />
@@ -6592,7 +6746,7 @@ xpActivityEvents={ctetMockXpEvents}
 
             <input
               type="text"
-              placeholder="PDF URL"
+              placeholder="Legacy PDF source / rollback URL (optional)"
               value={notesCmsPdfUrl}
               onChange={(e) =>
                 setNotesCmsPdfUrl(e.target.value)
@@ -6609,9 +6763,15 @@ xpActivityEvents={ctetMockXpEvents}
             />
 
             <select
-              value={notesCmsStatus}
+              value={editingNotesCmsId ? notesCmsStatus : "Draft"}
               onChange={(e) =>
                 setNotesCmsStatus(e.target.value)
+              }
+              disabled={!editingNotesCmsId}
+              title={
+                editingNotesCmsId
+                  ? "Update the existing canonical Note status"
+                  : "New Notes become student-visible only after IntelliText publishing"
               }
             >
               <option>Draft</option>
@@ -6626,8 +6786,8 @@ xpActivityEvents={ctetMockXpEvents}
               onClick={handlePublishNotesContent}
             >
               {editingNotesCmsId
-                ? "Update Content"
-                : "Publish Content"}
+                ? "Update Canonical Note"
+                : "Create Note & Open IntelliText Studio"}
             </button>
 
             <button
@@ -6693,6 +6853,18 @@ xpActivityEvents={ctetMockXpEvents}
         onDeleteNote={(item) => {
           handleDeleteLocalContentItem(item.id);
         }}
+      />
+    ) : null
+  }
+/>
+
+
+<Route
+  path="/admin/content/notes/migration"
+  element={
+    requireAdmin() ? (
+      <AdminIntelliTextMigrationRoute
+        universalContent={universalContent}
       />
     ) : null
   }
@@ -8353,50 +8525,12 @@ This action cannot be undone.`
   path="/admin/students"
   element={
     requireAdmin() ? (
-      <section className="coursePages">
-        {(() => {
-          setTimeout(() => setActiveAdminTab("Students"), 0);
-
-          return (
-            <AdminPanel
-              user={user}
-              isAdmin={isAdmin}
-              activeAdminTab="Students"
-              setActiveAdminTab={setActiveAdminTab}
-              students={students || []}
-              enquiries={enquiries || []}
-              mockResults={mockResults || []}
-              leaderboard={leaderboard || []}
-              mockQuestions={mockQuestions || []}
-              notesData={[]}
-              firebaseNotes={firebaseNotes || []}
-              currentAffairs={currentAffairsList || []}
-              currentAffairsList={currentAffairsList || []}
-              fallbackCurrentAffairs={currentAffairsList || []}
-              announcementTitle={announcementTitle}
-              setAnnouncementTitle={setAnnouncementTitle}
-              announcementMessage={announcementMessage}
-              setAnnouncementMessage={setAnnouncementMessage}
-              announcements={announcements || []}
-              paymentHistory={paymentHistory || []}
-              loadAdminData={loadAdminData}
-              loadLeaderboard={loadLeaderboard}
-              loadPaymentHistory={loadPaymentHistory}
-              handlePremiumControl={handlePremiumControl}
-              handleDeleteMockQuestion={handleDeleteMockQuestion}
-              handleAddMockQuestion={handleAddMockQuestion}
-              handleSaveNote={handleSaveNote}
-              handleEditNote={handleEditNote}
-              handleDeleteNote={handleDeleteNote}
-              handleSaveCurrentAffairs={handleSaveCurrentAffairs}
-              handleEditCurrentAffairs={handleEditCurrentAffairs}
-              handleDeleteCurrentAffairs={handleDeleteCurrentAffairs}
-              handleAddAnnouncement={handleAddAnnouncement}
-              handleDeleteAnnouncement={handleDeleteAnnouncement}
-            />
-          );
-        })()}
-      </section>
+      <AdminDriveLearnersRoute
+        students={students || []}
+        user={user}
+        isAdminUser={isAdmin(user)}
+        navigate={navigate}
+      />
     ) : null
   }
 />
@@ -9440,6 +9574,7 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   setMockTestQuestionsForm={setMockTestQuestionsForm}
 />
 </main>
+</div>
 
 {selectedCourse && (
   <div

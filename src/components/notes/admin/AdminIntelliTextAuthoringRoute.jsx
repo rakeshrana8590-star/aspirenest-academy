@@ -5,6 +5,7 @@ import {
   getNoteChapter,
   getNotePlan,
   getNoteSubject,
+  hasNativeIntelliText,
   isNotesContent,
 } from "../shared/notesUtils";
 import IntelliTextAuthoringStudio from "./IntelliTextAuthoringStudio";
@@ -37,17 +38,29 @@ export default function AdminIntelliTextAuthoringRoute({
           >
             ← Notes Manager
           </button>
-          <span>NATIVE AUTHORING</span>
-          <h1>Select the canonical Notes resource</h1>
-          <p>
-            IntelliText attaches to the existing contentItems document. It never creates a duplicate plan-owned note.
-          </p>
+          <div className="intelliTextMigrationHeroCopy">
+            <span>ALL-NOTES INTELLITEXT MIGRATION</span>
+            <h1>Convert every existing and future Note into one IntelliText experience</h1>
+            <p>
+              Every card below is the existing canonical contentItems resource. PDF files remain hidden rollback sources only until that exact Note passes IntelliText publishing and student QA.
+            </p>
+          </div>
+          <div className="intelliTextMigrationSummary" aria-label="IntelliText migration status">
+            <div>
+              <strong>{notes.filter(hasNativeIntelliText).length}</strong>
+              <span>IntelliText ready</span>
+            </div>
+            <div>
+              <strong>{notes.filter((note) => !hasNativeIntelliText(note)).length}</strong>
+              <span>Conversion required</span>
+            </div>
+          </div>
         </header>
 
         <div className="intelliTextAuthoringCatalogGrid">
           {notes.map((note) => (
             <article key={note.id}>
-              <span>{getNotePlan(note)}</span>
+              <span>{getNotePlan(note)} • {hasNativeIntelliText(note) ? "INTELLITEXT READY" : "CONVERSION REQUIRED"}</span>
               <h2>{note.title || "Untitled note"}</h2>
               <p>
                 {getNoteSubject(note) || "No subject"} • {getNoteChapter(note) || "No chapter"}
@@ -63,7 +76,7 @@ export default function AdminIntelliTextAuthoringRoute({
                   )
                 }
               >
-                Open IntelliText Studio
+                {hasNativeIntelliText(note) ? "Review IntelliText" : "Convert to IntelliText"}
               </button>
             </article>
           ))}

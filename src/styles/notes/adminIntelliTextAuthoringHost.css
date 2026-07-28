@@ -1,0 +1,22 @@
+.aspirenestIntelliTextAuthoringHost {
+  width: 100%;
+  min-width: 0;
+}
+
+.intelliTextAuthoringHostState {
+  margin: 36px;
+  padding: 28px;
+  border: 1px solid #d8e1ee;
+  border-radius: 20px;
+  background: #fff;
+  color: #11213f;
+}
+
+.intelliTextAuthoringHostState.isError {
+  border-color: #f2b8b5;
+  background: #fff6f5;
+}
+
+.intelliTextAuthoringHostState button {
+  margin-top: 12px;
+}

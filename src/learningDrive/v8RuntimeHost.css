@@ -1,0 +1,46 @@
+.aspirenestV8RuntimeBoundary,
+.aspirenestV8ShadowHost {
+  min-height: 100vh;
+  width: 100%;
+}
+
+.aspirenestV8RuntimeBoundary {
+  position: relative;
+  background: #f5f7fb;
+}
+
+.aspirenestV8ShadowHost {
+  display: block;
+  isolation: isolate;
+}
+
+.aspirenestV8RuntimeLoading {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: grid;
+  place-content: center;
+  gap: 4px;
+  text-align: center;
+  background: #f5f7fb;
+  color: #0b1326;
+}
+
+.aspirenestV8RuntimeLoading strong {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.aspirenestV8RuntimeLoading span {
+  color: #ff7a00;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.aspirenestV8RuntimeLoading small {
+  margin-top: 14px;
+  color: #6f7b91;
+  font-size: 14px;
+}

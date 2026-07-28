@@ -1,1 +1,10 @@
 node_modules
+.vercel
+.env*
+
+# AspireNest local deployment and diagnostic files
+.env.local
+.vercel/
+firestore-debug.log
+react-scripts
+react@0.0.0

@@ -1,5 +1,6 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
+import { getAspireNestLandingRoute } from "../../auth/aspireNestIdentity";
 
 import AuthSection from "../AuthSection";
 
@@ -13,9 +14,10 @@ export default function AuthRoute({
   handleGoogleLogin,
   handleForgotPassword,
   handleRegister,
+  initialMode = "login",
 }) {
   if (user) {
-    return <Navigate to="/ctet-tet" replace />;
+    return <Navigate to={getAspireNestLandingRoute(user)} replace />;
   }
 
   return (
@@ -28,6 +30,7 @@ export default function AuthRoute({
       handleGoogleLogin={handleGoogleLogin}
       handleForgotPassword={handleForgotPassword}
       handleRegister={handleRegister}
+      initialRegisterOpen={initialMode === "register"}
     />
   );
 }

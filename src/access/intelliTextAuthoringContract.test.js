@@ -306,6 +306,9 @@ test("canonical content patch contains metadata but no native body", () => {
     title: "Child Development",
   });
   expect(patch.deliveryType).toBe("NATIVE_TEXT");
+  expect(patch.status).toBe("Published");
+  expect(patch.migrationState).toBe("PUBLISHED");
+  expect(patch.canonicalRoute).toBe("/ctet-tet/notes/read/note_1");
   expect(patch.intelliText.sections).toBeUndefined();
   expect(patch.pdfUrl).toBeUndefined();
 });

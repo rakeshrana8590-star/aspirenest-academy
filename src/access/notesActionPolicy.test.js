@@ -9,6 +9,7 @@ import {
   getNotesRequiredPlan,
   getNotesResourceId,
   hasNotesProtectedAsset,
+  hasNotesNativeContent,
   isNotesAccessBoundToResource,
   normalizeNotesAccessState,
   normalizeNotesPrincipal,
@@ -318,14 +319,53 @@ describe("AspireNest Notes action policy", () => {
     expect(decision.canExposeAssetUrl).toBe(false);
   });
 
-  test("READ and DOWNLOAD expose distinct action capabilities", () => {
-    const read = decide({ action: NOTES_ACTIONS.READ });
+  test("native READ and legacy DOWNLOAD expose distinct capabilities", () => {
+    const read = decide({
+      action: NOTES_ACTIONS.READ,
+      note: {
+        ...NOTE,
+        deliveryMode: "NATIVE_TEXT",
+        textbookId: NOTE.id,
+        nativeReady: true,
+        publicationState: "PUBLISHED",
+      },
+    });
     const download = decide({ action: NOTES_ACTIONS.DOWNLOAD });
 
+    expect(read.allowed).toBe(true);
     expect(read.canReadAsset).toBe(true);
-    expect(read.canDownloadAsset).toBe(false);
+    expect(read.canResolveAsset).toBe(false);
+    expect(read.requiresServerAuthorization).toBe(false);
     expect(download.canDownloadAsset).toBe(true);
     expect(download.canReadAsset).toBe(false);
+  });
+
+  test("legacy PDF cannot impersonate a published IntelliText READ", () => {
+    const decision = decide({ action: NOTES_ACTIONS.READ });
+
+    expect(decision.allowed).toBe(false);
+    expect(decision.reason).toBe(
+      NOTES_REASON_CODES.NATIVE_CONTENT_REQUIRED
+    );
+  });
+
+  test("recognizes only published native content as IntelliText-ready", () => {
+    expect(
+      hasNotesNativeContent({
+        id: "note-native",
+        deliveryMode: "NATIVE_TEXT",
+        nativeReady: true,
+        publicationState: "PUBLISHED",
+      })
+    ).toBe(true);
+    expect(
+      hasNotesNativeContent({
+        id: "note-draft",
+        deliveryMode: "NATIVE_TEXT",
+        nativeReady: false,
+        publicationState: "DRAFT",
+      })
+    ).toBe(false);
   });
 
   test("missing protected asset fails closed", () => {

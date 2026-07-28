@@ -16,6 +16,11 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    function isDesignatedMentor() {
+      return isSignedIn() &&
+        request.auth.token.email == "dr.varshamaru@gmail.com";
+    }
+
     /* ================================
        Mentor Assignment Engine — Phase 12
        Mentor role is separate from the Mentor-Guided commercial plan.
@@ -23,19 +28,22 @@ service cloud.firestore {
        ================================ */
 
     function isActiveMentor() {
-      return isSignedIn() &&
-        exists(
-          /databases/$(database)/documents/mentorProfiles/$(request.auth.uid)
-        ) &&
-        get(
-          /databases/$(database)/documents/mentorProfiles/$(request.auth.uid)
-        ).data.mentorUid == request.auth.uid &&
-        get(
-          /databases/$(database)/documents/mentorProfiles/$(request.auth.uid)
-        ).data.role == "mentor" &&
-        get(
-          /databases/$(database)/documents/mentorProfiles/$(request.auth.uid)
-        ).data.status == "active";
+      return isDesignatedMentor() ||
+        (
+          isSignedIn() &&
+          exists(
+            /databases/$(database)/documents/mentorProfiles/$(request.auth.uid)
+          ) &&
+          get(
+            /databases/$(database)/documents/mentorProfiles/$(request.auth.uid)
+          ).data.mentorUid == request.auth.uid &&
+          get(
+            /databases/$(database)/documents/mentorProfiles/$(request.auth.uid)
+          ).data.role == "mentor" &&
+          get(
+            /databases/$(database)/documents/mentorProfiles/$(request.auth.uid)
+          ).data.status == "active"
+        );
     }
 
     function isAssignedMentor(studentUid) {
@@ -505,9 +513,40 @@ service cloud.firestore {
         resource.data.userId == request.auth.uid;
     }
 
+    function isSafeStudentSelfCreate(studentUid) {
+      return isSignedIn() &&
+        studentUid == request.auth.uid &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.email == request.auth.token.email &&
+        request.resource.data.normalizedEmail == request.auth.token.email &&
+        request.resource.data.role == "student";
+    }
+
+    function isSafeStudentSelfStatusUpdate(studentUid) {
+      return isSignedIn() &&
+        studentUid == request.auth.uid &&
+        request.resource.data.get("uid", "") == request.auth.uid &&
+        request.resource.data.get("email", "") == request.auth.token.email &&
+        request.resource.data.get("normalizedEmail", "") == request.auth.token.email &&
+        request.resource.data.get("role", "") == "student" &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "uid",
+          "email",
+          "normalizedEmail",
+          "role",
+          "emailVerified",
+          "accountStatus",
+          "profileStatus",
+          "lastLoginAt",
+          "updatedAt"
+        ]);
+    }
+
     match /students/{docId} {
-      allow create: if isSignedIn();
-      allow read, update, delete: if isAdmin();
+      allow create: if isAdmin() || isSafeStudentSelfCreate(docId);
+      allow read: if isAdmin() || isOwner(docId);
+      allow update: if isAdmin() || isSafeStudentSelfStatusUpdate(docId);
+      allow delete: if isAdmin();
     }
 
     /* ================================
@@ -1393,6 +1432,56 @@ service cloud.firestore {
         !userId.matches(".*@.*");
     }
 
+    function isValidUsernameDocument(usernameId, data) {
+      return usernameId is string &&
+        usernameId.size() >= 3 &&
+        usernameId.size() <= 24 &&
+        usernameId.matches("^[a-z][a-z0-9_]*$") &&
+        data.keys().hasOnly([
+          "uid",
+          "username",
+          "normalizedUsername",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]) &&
+        data.uid == request.auth.uid &&
+        data.username == usernameId &&
+        data.normalizedUsername == usernameId &&
+        data.status == "active";
+    }
+
+    match /usernames/{usernameId} {
+      allow get: if isSignedIn();
+      allow list: if false;
+      allow create: if isSignedIn() &&
+        isValidUsernameDocument(usernameId, request.resource.data);
+      allow update: if isSignedIn() &&
+        resource.data.uid == request.auth.uid &&
+        request.resource.data.uid == resource.data.uid &&
+        request.resource.data.username == resource.data.username &&
+        request.resource.data.normalizedUsername == resource.data.normalizedUsername &&
+        isValidUsernameDocument(usernameId, request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    function isSafeUserUsernameUpdate(userId) {
+      return isOwner(userId) &&
+        request.resource.data.uid == userId &&
+        request.resource.data.username is string &&
+        request.resource.data.normalizedUsername == request.resource.data.username &&
+        request.resource.data.username.size() >= 3 &&
+        request.resource.data.username.size() <= 24 &&
+        request.resource.data.username.matches("^[a-z][a-z0-9_]*$") &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "uid",
+          "email",
+          "username",
+          "normalizedUsername",
+          "updatedAt"
+        ]);
+    }
+
     match /users/{userId} {
       allow create: if
         (isOwner(userId) || isAdmin()) &&
@@ -1405,6 +1494,7 @@ service cloud.firestore {
         && request.resource.data.subscriptionType == resource.data.subscriptionType
         && request.resource.data.premiumStatus == resource.data.premiumStatus;
 
+      allow update: if isSafeUserUsernameUpdate(userId);
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
@@ -1441,6 +1531,13 @@ service cloud.firestore {
         request.resource.data.updatedBy == request.auth.uid;
     }
 
+    function studentDefaultMentorFieldsSafe() {
+      return request.resource.data.mentorEmail == "dr.varshamaru@gmail.com" &&
+        request.resource.data.mentorName == "Dr. Varsha Maru" &&
+        request.resource.data.mentorAssignmentStatus == "active" &&
+        request.resource.data.mentorAssignmentSource == "default-mentor-v1";
+    }
+
     function studentProfileCreateKeysOnly() {
       return request.resource.data.keys().hasOnly([
         "uid",
@@ -1460,6 +1557,12 @@ service cloud.firestore {
         "profileMissingFields",
         "profileStatus",
         "source",
+        "mentorUid",
+        "mentorEmail",
+        "mentorName",
+        "mentorAssignmentStatus",
+        "mentorAssignedAt",
+        "mentorAssignmentSource",
         "updatedAt",
         "updatedBy",
         "createdAt",
@@ -1486,6 +1589,12 @@ service cloud.firestore {
         "profileMissingFields",
         "profileStatus",
         "source",
+        "mentorUid",
+        "mentorEmail",
+        "mentorName",
+        "mentorAssignmentStatus",
+        "mentorAssignedAt",
+        "mentorAssignmentSource",
         "updatedAt",
         "updatedBy",
         "createdAt",
@@ -1498,6 +1607,7 @@ service cloud.firestore {
         (
           isLearnerProfileOwnerRequest(profileId) &&
           studentProfileIdentitySafe() &&
+          studentDefaultMentorFieldsSafe() &&
           studentProfileCreateKeysOnly()
         );
 
@@ -1510,6 +1620,7 @@ service cloud.firestore {
           isLearnerProfileOwnerExisting(profileId) &&
           isLearnerProfileOwnerRequest(profileId) &&
           studentProfileIdentitySafe() &&
+          studentDefaultMentorFieldsSafe() &&
           studentProfileUpdateKeysOnly()
         );
 
@@ -1536,6 +1647,11 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+
+    match /platformSettings/{docId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
 
     match /experienceEvents/{docId} {
       allow read: if true;
@@ -1919,6 +2035,43 @@ service cloud.firestore {
        Mentor Assignment Engine — Phase 12 collections
        ================================ */
 
+    match /mentorStudentLinks/{studentUid} {
+      allow read: if isAdmin() ||
+        (isSignedIn() && studentUid == request.auth.uid) ||
+        (isActiveMentor() && resource.data.mentorUid == request.auth.uid);
+      allow create: if isAdmin() ||
+        (
+          isSignedIn() &&
+          studentUid == request.auth.uid &&
+          request.resource.data.keys().hasOnly([
+            "linkId",
+            "mentorUid",
+            "mentorName",
+            "mentorEmail",
+            "studentUid",
+            "studentName",
+            "studentEmail",
+            "status",
+            "source",
+            "createdAt",
+            "updatedAt"
+          ]) &&
+          request.resource.data.studentUid == request.auth.uid &&
+          request.resource.data.studentEmail == request.auth.token.email &&
+          request.resource.data.mentorEmail == "dr.varshamaru@gmail.com" &&
+          request.resource.data.mentorName == "Dr. Varsha Maru" &&
+          request.resource.data.status == "active" &&
+          request.resource.data.source == "default-mentor-v1" &&
+          request.resource.data.createdAt == request.time &&
+          request.resource.data.updatedAt == request.time &&
+          exists(/databases/$(database)/documents/platformSettings/defaultMentor) &&
+          get(/databases/$(database)/documents/platformSettings/defaultMentor).data.mentorUid == request.resource.data.mentorUid &&
+          get(/databases/$(database)/documents/platformSettings/defaultMentor).data.mentorEmail == "dr.varshamaru@gmail.com" &&
+          get(/databases/$(database)/documents/platformSettings/defaultMentor).data.status == "active"
+        );
+      allow update, delete: if isAdmin();
+    }
+
     match /mentorProfiles/{mentorUid} {
       allow read: if isAdmin() ||
         (
@@ -1937,7 +2090,20 @@ service cloud.firestore {
             isSignedIn() &&
             studentUid == request.auth.uid
           );
-        allow create, update, delete: if isAdmin();
+        allow create: if isAdmin() ||
+          (
+            isSignedIn() &&
+            studentUid == request.auth.uid &&
+            request.resource.data.studentUid == request.auth.uid &&
+            request.resource.data.mentorUid == mentorUid &&
+            request.resource.data.mentorEmail == "dr.varshamaru@gmail.com" &&
+            request.resource.data.status == "active" &&
+            exists(/databases/$(database)/documents/platformSettings/defaultMentor) &&
+            get(/databases/$(database)/documents/platformSettings/defaultMentor).data.mentorUid == mentorUid &&
+            get(/databases/$(database)/documents/platformSettings/defaultMentor).data.mentorEmail == "dr.varshamaru@gmail.com" &&
+            get(/databases/$(database)/documents/platformSettings/defaultMentor).data.status == "active"
+          );
+        allow update, delete: if isAdmin();
       }
     }
 
@@ -2788,5 +2954,165 @@ service cloud.firestore {
       allow read, create: if isAdmin();
       allow update, delete: if false;
     }
+
+    /* ================================
+       Unified V8 live Mentor communication and sessions
+       ================================ */
+
+    match /mentorQuestions/{questionId} {
+      allow read: if isAdmin() ||
+        (
+          isSignedIn() &&
+          (
+            resource.data.studentUid == request.auth.uid ||
+            (
+              isActiveMentor() &&
+              resource.data.mentorUid == request.auth.uid &&
+              isAssignedMentor(resource.data.studentUid)
+            )
+          )
+        );
+
+      allow create: if isAdmin() ||
+        (
+          isSignedIn() &&
+          request.resource.data.keys().hasOnly([
+            "questionId",
+            "studentUid",
+            "studentEmail",
+            "studentName",
+            "mentorUid",
+            "mentorEmail",
+            "resourceId",
+            "resourceTitle",
+            "question",
+            "answer",
+            "status",
+            "createdAt",
+            "updatedAt",
+            "answeredAt"
+          ]) &&
+          request.resource.data.questionId == questionId &&
+          request.resource.data.studentUid == request.auth.uid &&
+          request.resource.data.studentEmail == request.auth.token.email &&
+          request.resource.data.studentName is string &&
+          request.resource.data.studentName.size() <= 200 &&
+          request.resource.data.mentorEmail == "dr.varshamaru@gmail.com" &&
+          request.resource.data.resourceId is string &&
+          request.resource.data.resourceId.size() <= 240 &&
+          request.resource.data.resourceTitle is string &&
+          request.resource.data.resourceTitle.size() <= 500 &&
+          request.resource.data.question is string &&
+          request.resource.data.question.size() >= 8 &&
+          request.resource.data.question.size() <= 4000 &&
+          request.resource.data.answer == "" &&
+          request.resource.data.status == "open" &&
+          request.resource.data.createdAt == request.time &&
+          request.resource.data.updatedAt == request.time &&
+          request.resource.data.answeredAt == null &&
+          exists(/databases/$(database)/documents/platformSettings/defaultMentor) &&
+          get(/databases/$(database)/documents/platformSettings/defaultMentor).data.mentorUid == request.resource.data.mentorUid &&
+          get(/databases/$(database)/documents/platformSettings/defaultMentor).data.mentorEmail == "dr.varshamaru@gmail.com" &&
+          get(/databases/$(database)/documents/platformSettings/defaultMentor).data.status == "active"
+        );
+
+      allow update: if isAdmin() ||
+        (
+          isActiveMentor() &&
+          resource.data.mentorUid == request.auth.uid &&
+          isAssignedMentor(resource.data.studentUid) &&
+          request.resource.data.questionId == resource.data.questionId &&
+          request.resource.data.studentUid == resource.data.studentUid &&
+          request.resource.data.studentEmail == resource.data.studentEmail &&
+          request.resource.data.mentorUid == resource.data.mentorUid &&
+          request.resource.data.mentorEmail == resource.data.mentorEmail &&
+          request.resource.data.question == resource.data.question &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "answer",
+            "status",
+            "answeredAt",
+            "answeredBy",
+            "updatedAt"
+          ]) &&
+          request.resource.data.answer is string &&
+          request.resource.data.answer.size() >= 8 &&
+          request.resource.data.answer.size() <= 4000 &&
+          request.resource.data.status == "answered" &&
+          request.resource.data.answeredBy == request.auth.uid &&
+          request.resource.data.answeredAt == request.time &&
+          request.resource.data.updatedAt == request.time
+        );
+
+      allow delete: if isAdmin();
+    }
+
+    match /mentorLiveSessions/{sessionId} {
+      allow read: if isSignedIn();
+
+      allow create: if isAdmin() ||
+        (
+          isActiveMentor() &&
+          request.resource.data.keys().hasOnly([
+            "sessionId",
+            "mentorUid",
+            "mentorEmail",
+            "title",
+            "startsAt",
+            "group",
+            "joinUrl",
+            "replayUrl",
+            "status",
+            "createdBy",
+            "createdAt",
+            "updatedAt"
+          ]) &&
+          request.resource.data.sessionId == "" &&
+          request.resource.data.mentorUid == request.auth.uid &&
+          request.resource.data.mentorEmail == "dr.varshamaru@gmail.com" &&
+          request.resource.data.title is string &&
+          request.resource.data.title.size() >= 4 &&
+          request.resource.data.title.size() <= 500 &&
+          request.resource.data.startsAt is timestamp &&
+          request.resource.data.group is string &&
+          request.resource.data.group.size() <= 500 &&
+          request.resource.data.joinUrl is string &&
+          request.resource.data.joinUrl.size() <= 1000 &&
+          request.resource.data.replayUrl == "" &&
+          request.resource.data.status == "scheduled" &&
+          request.resource.data.createdBy == request.auth.uid &&
+          request.resource.data.createdAt == request.time &&
+          request.resource.data.updatedAt == request.time
+        );
+
+      allow update: if isAdmin() ||
+        (
+          isActiveMentor() &&
+          resource.data.mentorUid == request.auth.uid &&
+          request.resource.data.mentorUid == resource.data.mentorUid &&
+          request.resource.data.mentorEmail == resource.data.mentorEmail &&
+          request.resource.data.createdBy == resource.data.createdBy &&
+          request.resource.data.createdAt == resource.data.createdAt &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "sessionId",
+            "title",
+            "startsAt",
+            "group",
+            "joinUrl",
+            "replayUrl",
+            "status",
+            "updatedAt"
+          ]) &&
+          request.resource.data.sessionId == sessionId &&
+          request.resource.data.status in ["scheduled", "live", "ended", "replay", "cancelled"] &&
+          request.resource.data.updatedAt == request.time
+        );
+
+      allow delete: if isAdmin() ||
+        (
+          isActiveMentor() &&
+          resource.data.mentorUid == request.auth.uid
+        );
+    }
+
   }
 }

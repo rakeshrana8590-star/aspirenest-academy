@@ -3,6 +3,7 @@ import {
     doc,
     getDoc,
     getDocs,
+    limit,
     query,
     serverTimestamp,
     setDoc,
@@ -10,6 +11,10 @@ import {
   } from "firebase/firestore";
   
   import { db } from "../firebase";
+  import {
+    isAspireNestStudent,
+    mergeAspireNestStudentDirectory,
+  } from "../auth/aspireNestIdentity";
   import {
     LEARNER_PROFILE_COLLECTION,
     LEARNER_PROFILE_SOURCE,
@@ -156,6 +161,37 @@ import {
     };
   };
   
+  export const listLearnerProfiles = async ({ maxCount = 200 } = {}) => {
+    const safeLimit = Math.max(1, Math.min(500, Number(maxCount) || 200));
+    const profileQuery = query(
+      collection(db, LEARNER_PROFILE_COLLECTION),
+      limit(safeLimit)
+    );
+    const profileSnap = await getDocs(profileQuery);
+    return profileSnap.docs.map(toProfileRecord).filter(Boolean);
+  };
+  
+  export const listExistingStudentDirectory = async ({ maxCount = 500 } = {}) => {
+    const safeLimit = Math.max(1, Math.min(500, Number(maxCount) || 500));
+    const [studentsSnap, usersSnap] = await Promise.all([
+      getDocs(query(collection(db, "students"), limit(safeLimit))),
+      getDocs(query(collection(db, "users"), limit(safeLimit))),
+    ]);
+
+    const students = studentsSnap.docs.map((studentDoc) => ({
+      id: studentDoc.id,
+      uid: studentDoc.id,
+      ...studentDoc.data(),
+    }));
+    const users = usersSnap.docs.map((userDoc) => ({
+      id: userDoc.id,
+      uid: userDoc.id,
+      ...userDoc.data(),
+    }));
+
+    return mergeAspireNestStudentDirectory({ students, users });
+  };
+  
   export const getLearnerProfileById = async (profileId) => {
     const id = normalizeProfileText(profileId);
   
@@ -300,7 +336,7 @@ import {
     const uid = normalizeProfileText(user?.uid);
     const email = normalizeProfileEmail(user?.email);
   
-    if (!uid || !email) {
+    if (!uid || !email || !isAspireNestStudent(user)) {
       return null;
     }
   

@@ -401,14 +401,23 @@ export const getStudentNotesAccessPresentation = (
 ) => {
   if (
     decision?.allowed === true &&
-    decision?.canResolveAsset === true
+    (
+      decision?.canResolveAsset === true ||
+      decision?.canReadAsset === true
+    )
   ) {
+    const nativeRead =
+      decision?.canReadAsset === true &&
+      decision?.canResolveAsset !== true;
+
     return Object.freeze({
       canOpen: true,
       disabled: false,
       busy: false,
       statusLabel: "Access ready",
-      buttonLabel: "Open PDF",
+      buttonLabel: nativeRead
+        ? "Open IntelliText"
+        : "Open PDF",
     });
   }
 
@@ -432,13 +441,19 @@ export const getStudentNotesAccessPresentation = (
   if (
     reason ===
       NOTES_REASON_CODES
-        .PROTECTED_ASSET_REQUIRED
+        .PROTECTED_ASSET_REQUIRED ||
+    reason ===
+      NOTES_REASON_CODES
+        .NATIVE_CONTENT_REQUIRED
   ) {
     return Object.freeze({
       canOpen: false,
       disabled: true,
       busy: false,
-      statusLabel: "PDF pending",
+      statusLabel:
+        reason === NOTES_REASON_CODES.NATIVE_CONTENT_REQUIRED
+          ? "IntelliText conversion pending"
+          : "PDF pending",
       buttonLabel: "Unavailable",
     });
   }

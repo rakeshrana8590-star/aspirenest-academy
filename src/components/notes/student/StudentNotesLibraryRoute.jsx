@@ -9,6 +9,7 @@ import {
   getNotesPdfCount,
   getPlanNotes,
 } from "../shared/notesUtils";
+import { buildRealNotesBindingReport } from "../shared/realNotesBinding";
 
 export default function StudentNotesLibraryRoute({
   universalContent = [],
@@ -18,6 +19,7 @@ export default function StudentNotesLibraryRoute({
   const publishedNotes = NOTES_PLAN_ORDER.flatMap((planName) =>
     getPlanNotes(universalContent, planName)
   );
+  const realNotesBinding = buildRealNotesBindingReport(universalContent);
 
   return (
     <section className="studentNotesPage">
@@ -40,6 +42,22 @@ export default function StudentNotesLibraryRoute({
           },
         ]}
       />
+
+      <section className={`realNotesStudentBinding status-${realNotesBinding.status}`} aria-label="Real Notes connection status">
+        <div>
+          <span>REAL NOTES CONNECTED</span>
+          <h2>{realNotesBinding.readableNotes} existing study notes in this Drive</h2>
+          <p>
+            One source only: contentItems. Native IntelliText, protected assets and legacy PDF fallback remain connected to existing plan access.
+          </p>
+        </div>
+        <div className="realNotesStudentBindingStats">
+          <div><strong>{realNotesBinding.nativeIntelliText}</strong><span>IntelliText</span></div>
+          <div><strong>{realNotesBinding.protectedAssets}</strong><span>Protected</span></div>
+          <div><strong>{realNotesBinding.legacyPdfFallback}</strong><span>PDF fallback</span></div>
+          <div><strong>{realNotesBinding.activePlans}</strong><span>Active plans</span></div>
+        </div>
+      </section>
 
       <section className="intelliTextRevisionLibraryEntry">
         <div>

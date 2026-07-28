@@ -49,13 +49,61 @@ export const loadMentorProfile = async (mentorUid = "") => {
 
 export const loadMentorStudents = async (mentorUid = "") => {
   if (!mentorUid) return [];
-  const snapshot = await getDocs(
-    query(
-      collection(db, "mentorProfiles", mentorUid, "students"),
-      where("status", "==", "active")
-    )
-  );
-  return mapSnapshot(snapshot).sort((a, b) =>
+  const mentorSnapshot = await getDoc(doc(db, "mentorProfiles", mentorUid));
+  const mentorProfile = mentorSnapshot.exists() ? mentorSnapshot.data() : {};
+  const mentorEmail = String(mentorProfile.email || "dr.varshamaru@gmail.com").trim().toLowerCase();
+
+  const [profileSnapshot, canonicalSnapshot, legacySnapshot] = await Promise.all([
+    getDocs(
+      query(
+        collection(db, "learnerProfiles"),
+        where("mentorEmail", "==", mentorEmail),
+        where("mentorAssignmentStatus", "==", "active")
+      )
+    ),
+    getDocs(
+      query(
+        collection(db, "mentorStudentLinks"),
+        where("mentorUid", "==", mentorUid),
+        where("status", "==", "active")
+      )
+    ),
+    getDocs(
+      query(
+        collection(db, "mentorProfiles", mentorUid, "students"),
+        where("status", "==", "active")
+      )
+    ),
+  ]);
+
+  const map = new Map();
+  mapSnapshot(profileSnapshot).forEach((profile) => {
+    const studentUid = String(profile.uid || profile.id || "").trim();
+    if (!studentUid) return;
+    map.set(studentUid, {
+      id: studentUid,
+      studentUid,
+      studentName: profile.name || profile.fullName || profile.username || profile.email || "Learner",
+      studentEmail: String(profile.email || profile.normalizedEmail || "").trim().toLowerCase(),
+      status: "active",
+      mentorUid,
+      mentorName: mentorProfile.displayName || mentorProfile.name || "Dr. Varsha Maru",
+      source: profile.mentorAssignmentSource || "learner_profile",
+      ...profile,
+    });
+  });
+  mapSnapshot(canonicalSnapshot).forEach((link) => {
+    const studentUid = String(link.studentUid || link.id || "").trim();
+    if (!studentUid) return;
+    map.set(studentUid, { ...(map.get(studentUid) || {}), ...link, id: studentUid, studentUid });
+  });
+  mapSnapshot(legacySnapshot).forEach((link) => {
+    const studentUid = String(link.studentUid || link.id || "").trim();
+    if (!studentUid) return;
+    map.set(studentUid, { ...(map.get(studentUid) || {}), ...link, id: studentUid, studentUid });
+  });
+
+  return [...map.values()].sort((a, b) =>
     String(a.studentName || a.studentEmail || a.studentUid).localeCompare(
       String(b.studentName || b.studentEmail || b.studentUid)
     )

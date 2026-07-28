@@ -3830,7 +3830,8 @@ export const redeemAccessKeyFoundation = async ({
 };
 
 export async function grantPaymentAccess(
-  payment = {}
+  payment = {},
+  actor = {}
 ) {
   const normalizedEmail =
     normalizeAccessEmail(

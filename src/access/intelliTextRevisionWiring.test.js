@@ -200,7 +200,7 @@ test("rules require atomic flashcard queue pair", () => {
 });
 
 test("legacy PDF fallback remains unchanged", () => {
-  expect(notesRuntime).toContain('buttonLabel: "Open PDF"');
+  expect(notesRuntime).toMatch(/buttonLabel:\s*nativeRead\s*\?\s*"Open IntelliText"\s*:\s*"Open PDF"/s);
   expect(nativeReader).toContain(
     "The existing PDF inventory remains unchanged."
   );

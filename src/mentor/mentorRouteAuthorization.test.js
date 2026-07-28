@@ -46,4 +46,9 @@ describe("mentor workspace route and role wiring", () => {
     expect(rulesSource).toContain("match /mentorAccessRequests/{requestId}");
     expect(rulesSource).toContain("match /mentorFeedback/{feedbackId}");
   });
+  test("recognizes the designated real Mentor account without classifying it as a student", () => {
+    expect(sessionSource).toContain("isAspireNestMentor(user)");
+    expect(rulesSource).toContain('request.auth.token.email == "dr.varshamaru@gmail.com"');
+  });
+
 });

@@ -114,8 +114,20 @@ export const NOTES_PLAN_ORDER = [
         note.readerId ||
         note.intelliText?.textbookId ||
         note.nativeContent?.textbookId ||
+        note.id ||
+        note.itemId ||
+        note.contentId ||
+        note.noteId ||
         ""
     ).trim();
+  }
+
+  export function buildCanonicalNoteReaderRoute(note = {}) {
+    const textbookId = getNoteTextbookId(note);
+
+    return textbookId
+      ? `/ctet-tet/notes/read/${encodeURIComponent(textbookId)}`
+      : "/ctet-tet/notes";
   }
 
   export function hasNativeIntelliText(note = {}) {

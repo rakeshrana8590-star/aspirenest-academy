@@ -74,15 +74,59 @@ const fail = (code, message) => {
 
 const cleanEmail = (value = "") => String(value ?? "").trim().toLowerCase();
 
+
+export const normalizeFirestoreSnapshotValueForAuthoring = (value) => {
+  if (value == null) return value;
+
+  if (value instanceof Date) {
+    return Number.isFinite(value.getTime()) ? value.toISOString() : value;
+  }
+
+  if (typeof value?.toDate === "function") {
+    const date = value.toDate();
+
+    return date instanceof Date && Number.isFinite(date.getTime())
+      ? date.toISOString()
+      : value;
+  }
+
+  if (typeof value?.toMillis === "function") {
+    const millis = Number(value.toMillis());
+
+    return Number.isFinite(millis)
+      ? new Date(millis).toISOString()
+      : value;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(normalizeFirestoreSnapshotValueForAuthoring);
+  }
+
+  if (typeof value === "object") {
+    const prototype = Object.getPrototypeOf(value);
+
+    if (prototype === Object.prototype || prototype === null) {
+      return Object.fromEntries(
+        Object.entries(value).map(([key, nestedValue]) => [
+          key,
+          normalizeFirestoreSnapshotValueForAuthoring(nestedValue),
+        ])
+      );
+    }
+  }
+
+  return value;
+};
+
 const snapshotRecord = (snapshot) =>
   snapshot?.exists?.()
-    ? Object.freeze({ id: snapshot.id, ...snapshot.data() })
+    ? Object.freeze({ id: snapshot.id, ...normalizeFirestoreSnapshotValueForAuthoring(snapshot.data()) })
     : null;
 
 const recordsFromSnapshot = (snapshot) => {
   const records = [];
   snapshot?.forEach?.((item) => {
-    records.push({ id: item.id, ...item.data() });
+    records.push({ id: item.id, ...normalizeFirestoreSnapshotValueForAuthoring(item.data()) });
   });
   return records;
 };

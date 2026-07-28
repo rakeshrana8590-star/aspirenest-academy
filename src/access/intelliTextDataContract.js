@@ -315,6 +315,7 @@ export function createIntelliTextSection(input = {}) {
       input.sectionId,
       "sectionId"
     ),
+    ...(input.sourceTitle === true ? { sourceTitle: true } : {}),
     summary: normalizeOptionalText(
       input.summary,
       "summary",

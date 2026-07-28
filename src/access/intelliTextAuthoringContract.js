@@ -179,6 +179,40 @@ export function createIntelliTextAccessMapping(input = {}) {
   });
 }
 
+const normalizeAuthoringTimestampLike = (value, fieldName) => {
+  if (value == null) return null;
+
+  const normalizeDate = (date) => {
+    if (!(date instanceof Date) || !Number.isFinite(date.getTime())) {
+      fail(
+        "TIMESTAMP_INVALID",
+        `${fieldName} must be a valid timestamp-like value.`
+      );
+    }
+
+    return date.toISOString();
+  };
+
+  if (value instanceof Date) return normalizeDate(value);
+  if (typeof value?.toDate === "function") return normalizeDate(value.toDate());
+
+  if (typeof value?.toMillis === "function") {
+    const millis = Number(value.toMillis());
+
+    if (!Number.isFinite(millis)) {
+      fail(
+        "TIMESTAMP_INVALID",
+        `${fieldName} must be a valid timestamp-like value.`
+      );
+    }
+
+    return normalizeDate(new Date(millis));
+  }
+
+  // Preserve Firestore write sentinels such as serverTimestamp().
+  return value;
+};
+
 export function createIntelliTextAuthoringVersion(input = {}) {
   const textbookId = normalizeIntelliTextId(input.textbookId, "textbookId");
   const versionId = normalizeIntelliTextId(input.versionId, "versionId");
@@ -205,7 +239,7 @@ export function createIntelliTextAuthoringVersion(input = {}) {
     baseContentVersion,
     chapterId: normalizeIntelliTextId(input.chapterId, "chapterId"),
     contentVersion,
-    createdAt: input.createdAt ?? null,
+    createdAt: normalizeAuthoringTimestampLike(input.createdAt, "createdAt"),
     createdBy: normalizeIntelliTextId(input.createdBy, "createdBy"),
     draftFingerprint: normalizeRequiredText(
       input.draftFingerprint,
@@ -220,7 +254,7 @@ export function createIntelliTextAuthoringVersion(input = {}) {
     publicationState: normalizePublicationState(
       input.publicationState || "DRAFT"
     ),
-    publishedAt: input.publishedAt ?? null,
+    publishedAt: normalizeAuthoringTimestampLike(input.publishedAt, "publishedAt"),
     publishedBy: input.publishedBy
       ? normalizeIntelliTextId(input.publishedBy, "publishedBy")
       : null,
@@ -240,7 +274,7 @@ export function createIntelliTextAuthoringVersion(input = {}) {
     subjectId: normalizeIntelliTextId(input.subjectId, "subjectId"),
     textbookId,
     title: normalizeRequiredText(input.title, "title", 300),
-    updatedAt: input.updatedAt ?? null,
+    updatedAt: normalizeAuthoringTimestampLike(input.updatedAt, "updatedAt"),
     updatedBy: normalizeIntelliTextId(input.updatedBy, "updatedBy"),
     versionId,
     versionState: normalizeVersionState(input.versionState || "DRAFT"),
@@ -312,6 +346,7 @@ const normalizeSectionDraft = ({
       contentVersion,
       order: sectionIndex,
       sectionId,
+      sourceTitle: rawSection?.sourceTitle === true,
       summary: rawSection?.summary ?? null,
       textbookId,
       title: rawSection?.title,
@@ -567,8 +602,13 @@ export function buildIntelliTextCanonicalContentPatch({
       textbookId: normalizedTextbookId,
       title: normalizeRequiredText(title, "title", 300),
     }),
+    canonicalRoute: `/ctet-tet/notes/read/${encodeURIComponent(
+      normalizedTextbookId
+    )}`,
+    migrationState: "PUBLISHED",
     nativeReady: true,
     publicationState: INTELLITEXT_PUBLICATION_STATES.PUBLISHED,
+    status: "Published",
     resourceType: INTELLITEXT_RESOURCE_TYPE,
     schemaVersion: INTELLITEXT_SCHEMA_VERSION,
     textbookId: normalizedTextbookId,
@@ -621,6 +661,7 @@ export function createIntelliTextPublishedSection(section = {}) {
     published: true,
     schemaVersion: INTELLITEXT_SCHEMA_VERSION,
     sectionId: normalizeIntelliTextId(section.sectionId, "sectionId"),
+    ...(section.sourceTitle === true ? { sourceTitle: true } : {}),
     summary: normalizeOptionalText(section.summary, "summary", 2000),
     textbookId: normalizeIntelliTextId(section.textbookId, "textbookId"),
     title: normalizeRequiredText(section.title, "title", 300),

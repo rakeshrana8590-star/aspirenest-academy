@@ -315,5 +315,38 @@ describe(
         ).toEqual([]);
       }
     );
+    test(
+      "preserves safe IntelliText routing metadata while stripping PDF URLs",
+      () => {
+        const publicNote = buildPublicNotesMetadata({
+          id: "note-native",
+          section: "notes",
+          status: "Published",
+          deliveryMode: "NATIVE_TEXT",
+          deliveryType: "NATIVE_TEXT",
+          textbookId: "note-native",
+          nativeReady: true,
+          publicationState: "PUBLISHED",
+          contentVersion: 2,
+          intelliText: {
+            textbookId: "note-native",
+            publicationState: "PUBLISHED",
+            sections: [{ id: "must-not-leak" }],
+          },
+          pdfUrl: "https://assets.invalid/rollback.pdf",
+        });
+
+        expect(publicNote).toMatchObject({
+          deliveryMode: "NATIVE_TEXT",
+          textbookId: "note-native",
+          nativeReady: true,
+          publicationState: "PUBLISHED",
+          contentVersion: 2,
+        });
+        expect(publicNote).not.toHaveProperty("pdfUrl");
+        expect(publicNote).not.toHaveProperty("intelliText");
+      }
+    );
+
   }
 );

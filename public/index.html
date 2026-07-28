@@ -1,126 +1,96 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-
-    <!-- Google Verification -->
-    <meta
-      name="google-site-verification"
-      content="nMbXuvScH9rh4l5rO3rAsRqEUfSsgwawuKffgaCA-6s"
-    />
-
-    <!-- Mobile + PWA -->
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
-    />
-    <meta name="theme-color" content="#0b1020" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
-    <meta name="apple-mobile-web-app-title" content="AspireNest Academy" />
-    <meta name="application-name" content="AspireNest Academy" />
-
-    <!-- SEO -->
-    <title>AspireNest Academy | Premium CTET & TET Learning Platform</title>
-
-    <meta
-      name="description"
-      content="AspireNest Academy is a premium bilingual CTET and TET preparation platform with smart mock tests, premium notes, current affairs, student analytics and AI-powered learning tools."
-    />
-
-    <meta
-      name="keywords"
-      content="CTET, TET, CTET Notes, TET Mock Test, TET Preparation, Teaching Exams, B.Ed, D.El.Ed, Current Affairs, CDP Notes, Child Development and Pedagogy, AspireNest Academy"
-    />
-
-    <meta name="author" content="AspireNest Academy" />
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://aspirenest-academy.vercel.app/" />
-
-    <!-- OpenGraph -->
-    <meta
-      property="og:title"
-      content="AspireNest Academy | Premium CTET & TET Platform"
-    />
-    <meta
-      property="og:description"
-      content="Premium bilingual CTET and TET preparation platform with notes, mock tests, current affairs, analytics and smart learning tools."
-    />
-    <meta
-      property="og:image"
-      content="https://aspirenest-academy.vercel.app/seo-preview.png"
-    />
-    <meta
-      property="og:url"
-      content="https://aspirenest-academy.vercel.app/"
-    />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="AspireNest Academy" />
-    <meta property="og:locale" content="en_IN" />
-
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta
-      name="twitter:title"
-      content="AspireNest Academy | CTET & TET Learning Platform"
-    />
-    <meta
-      name="twitter:description"
-      content="Premium bilingual CTET and TET learning platform with notes, mock tests, current affairs and analytics."
-    />
-    <meta
-      name="twitter:image"
-      content="https://aspirenest-academy.vercel.app/seo-preview.png"
-    />
-
-    <!-- PWA Icons -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <link rel="icon" type="image/png" href="%PUBLIC_URL%/logo192.png" />
-
-    <!-- Structured Data -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "EducationalOrganization",
-        "name": "AspireNest Academy",
-        "url": "https://aspirenest-academy.vercel.app/",
-        "logo": "https://aspirenest-academy.vercel.app/logo192.png",
-        "description": "Premium bilingual CTET and TET learning platform with notes, mock tests, current affairs, student analytics and smart learning tools.",
-        "areaServed": "India",
-        "educationalCredentialAwarded": "CTET and TET preparation",
-        "sameAs": ["https://aspirenest-academy.vercel.app/"]
-      }
-    </script>
-  
-    <style id="aspirenest-prepaint-dark">
-      html, body, #root {
-        min-height: 100%;
-        margin: 0;
-        background: #020711;
-      }
-      body {
-        background:
-          radial-gradient(circle at 8% 12%, rgba(245,158,11,0.10), transparent 30%),
-          radial-gradient(circle at 92% 82%, rgba(59,130,246,0.07), transparent 32%),
-          linear-gradient(135deg, #020711 0%, #061524 48%, #020711 100%);
-      }
-      #root:empty {
-        min-height: 100vh;
-        background:
-          radial-gradient(circle at 8% 12%, rgba(245,158,11,0.10), transparent 30%),
-          radial-gradient(circle at 92% 82%, rgba(59,130,246,0.07), transparent 32%),
-          linear-gradient(135deg, #020711 0%, #061524 48%, #020711 100%);
-      }
-    </style>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1326" />
+  <meta name="description" content="AspireNest Academy premium CTET and TET Learning Drive" />
+  <meta name="application-name" content="AspireNest Academy" />
+  <meta name="apple-mobile-web-app-title" content="AspireNest" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="google-site-verification" content="nMbXuvScH9rh4l5rO3rAsRqEUfSsgwawuKffgaCA-6s" />
+  <title>AspireNest Academy | Premium CTET & TET Learning Platform</title>
+  <link rel="canonical" href="https://aspirenest-academy.vercel.app/" />
+  <link rel="manifest" href="/manifest.webmanifest?v=aspirenest-academy-pwa-identity-v2" />
+  <link rel="icon" href="/assets/icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/admin.css" />
+  <link rel="stylesheet" href="/v8-experiences.css" />
+  <link rel="stylesheet" href="/auth-v8.css" />
+  <script src="/v8-route-bootstrap.js"></script>
 </head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="app" class="app-shell" data-view="grid">
+    <header class="topbar">
+      <button class="brand" id="brandHome" aria-label="Open AspireNest Home">
+        <span class="brand-copy"><strong>AspireNest</strong><small>Academy</small></span>
+      </button>
 
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-  </body>
+      <div class="global-search" role="search">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m21 21-4.35-4.35m1.35-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/></svg>
+        <input id="globalSearch" type="search" autocomplete="off" placeholder="Search notes, videos, tests, chapters or topics" aria-label="Search all learning content" />
+        <kbd>/</kbd>
+        <button id="searchFiltersButton" class="icon-button" aria-label="Open search filters" aria-expanded="false">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+        </button>
+      </div>
+
+      <div class="top-actions">
+        <button id="quickContinue" class="continue-pill" title="Continue last learning item">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          Continue
+        </button>
+        <button class="icon-button" id="notificationsButton" aria-label="Notifications">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 8h18c0-1-3-1-3-8M10 20h4"/></svg>
+          <span class="notification-dot" aria-hidden="true"></span>
+        </button>
+        <button class="role-switch-pill" id="roleSwitchButton" aria-label="Switch between Student and Admin Drive" aria-expanded="false"><span class="role-switch-dot"></span><span id="roleSwitchLabel">Student</span><span aria-hidden="true">⌄</span></button>
+        <button class="avatar" id="accountButton" aria-label="Open account menu" aria-expanded="false">RR</button>
+      </div>
+    </header>
+
+    <aside class="parent-rail" aria-label="Primary navigation">
+      <nav id="parentNav"></nav>
+      <div class="rail-footer">
+        <button class="rail-link compact" data-action="install" title="Install app">
+          <span class="nav-icon">↧</span><span class="nav-label">Install</span>
+        </button>
+      </div>
+    </aside>
+
+    <aside class="context-rail" aria-label="Context navigation">
+      <div class="context-header">
+        <div>
+          <span class="eyebrow" id="contextEyebrow">Learning OS</span>
+          <h2 id="contextTitle">Home</h2>
+        </div>
+        <button class="icon-button" id="collapseContext" aria-label="Collapse contextual navigation" aria-expanded="true">‹</button>
+      </div>
+      <nav id="contextNav"></nav>
+      <div class="plan-summary">
+        <span class="status-dot"></span>
+        <div><strong>Premium access</strong><small>Valid until 7 Sep 2026</small></div>
+      </div>
+    </aside>
+
+    <main id="main-content" tabindex="-1">
+      <div class="mobile-context-strip" id="mobileContextStrip" aria-label="Section shortcuts"></div>
+      <div id="pageContent"></div>
+    </main>
+
+    <nav class="mobile-dock" id="mobileDock" aria-label="Mobile primary navigation"></nav>
+  </div>
+
+  <div id="overlay" class="overlay" hidden></div>
+  <aside id="detailDrawer" class="detail-drawer" aria-hidden="true" aria-label="Resource details"></aside>
+  <section id="sheet" class="bottom-sheet" aria-hidden="true" aria-label="Guidance"></section>
+  <div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="/v8-auth-hooks.js"></script>
+  <script src="/app.js" defer></script>
+  <script src="/admin.js" defer></script>
+  <script src="/v8-experiences.js" defer></script>
+</body>
 </html>
