@@ -10,17 +10,20 @@ describe("AspireNest IntelliBook production wiring", () => {
   const rootIndex = read("public/index.html");
   const rootReader = read("public/intellibook.js");
   const shadowReader = read("public/learning-drive-v8/intellibook.js");
+  const rootStyles = read("public/intellibook.css");
+  const shadowStyles = read("public/learning-drive-v8/intellibook.css");
   const serviceWorker = read("public/sw.js");
   const storageRules = read("storage.rules");
 
-  test("loads the same IntelliBook extension in root and Shadow DOM surfaces", () => {
+  test("loads the same focused reader extension in root and Shadow DOM surfaces", () => {
     expect(model).toContain("`${V8_ASSET_BASE}/intellibook.css`");
     expect(model).toContain("`${V8_ASSET_BASE}/intellibook.js`");
     expect(rootIndex).toContain('<link rel="stylesheet" href="/intellibook.css" />');
     expect(rootIndex).toContain('<script src="/intellibook.js" defer></script>');
-    expect(rootReader).toContain("P14_G19_M1_INTELLIBOOK_V1");
-    expect(shadowReader).toContain("P14_G19_M1_INTELLIBOOK_V1");
+    expect(rootReader).toContain("P14_G19_M2_FOCUSED_READER_V2");
+    expect(shadowReader).toContain("P14_G19_M2_FOCUSED_READER_V2");
     expect(rootReader).toBe(shadowReader);
+    expect(rootStyles).toBe(shadowStyles);
   });
 
   test("loads protected PDF bytes inside the app instead of opening a raw viewer route", () => {
@@ -48,8 +51,8 @@ describe("AspireNest IntelliBook production wiring", () => {
     expect(block).not.toContain("isSignedIn()");
   });
 
-  test("evicts the old shell and caches the reader engine", () => {
-    expect(serviceWorker).toContain("aspirenest-academy-shell-v3-intellibook");
+  test("evicts the old reader shell and caches the focused reader engine", () => {
+    expect(serviceWorker).toContain("aspirenest-academy-shell-v4-focused-reader");
     [
       "/intellibook.css",
       "/intellibook.js",

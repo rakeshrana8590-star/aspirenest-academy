@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'aspirenest-';
-const CACHE_NAME = 'aspirenest-academy-shell-v3-intellibook';
+const CACHE_NAME = 'aspirenest-academy-shell-v4-focused-reader';
 const APP_SHELL = [
   '/',
   '/index.html',
