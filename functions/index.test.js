@@ -1126,6 +1126,36 @@ test("resolves authenticated FREE Notes without reading entitlements", async () 
   );
 });
 
+test("trusted AspireNest Admin resolves published Notes without learner entitlement reads", async () => {
+  const reads = [];
+  const result = await resolveNotesProtectedAsset({
+    auth: {
+      uid: "aspirenest-admin",
+      token: {
+        email: "aspirenestplatform@gmail.com",
+        name: "AspireNest Admin",
+      },
+    },
+    data: {
+      noteId: "note-1",
+      action: "OPEN",
+    },
+    firestore: createNotesFirestore({
+      entitlements: [],
+      reads,
+    }),
+    now: () => NOTES_NOW,
+    makeRequestId: () => "notes-admin",
+  });
+
+  assert.equal(result.accessScope, "admin");
+  assert.equal(result.assetUrl, PUBLISHED_ASSET.urls.pdfUrl);
+  assert.equal(
+    reads.some((entry) => entry[0] === "subcollection"),
+    false
+  );
+});
+
 test("rejects missing, non-Notes, and unpublished catalog records", async () => {
   for (const note of [
     null,

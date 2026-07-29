@@ -42,6 +42,9 @@ const NOTES_ENTITLEMENTS_COLLECTION =
   "studentEntitlements";
 const NOTES_ENTITLEMENT_ITEMS_COLLECTION =
   "items";
+const NOTES_ADMIN_EMAILS = new Set([
+  "aspirenestplatform@gmail.com",
+]);
 
 const NOTES_ASSET_ACTIONS = new Set([
   "OPEN",
@@ -1394,22 +1397,29 @@ const resolveNotesProtectedAsset = async ({
     );
   }
 
+  const isAdminRequest = NOTES_ADMIN_EMAILS.has(
+    normalizeEmail(request.email)
+  );
   const entitlements =
-    getNotesPlanRank(note) === 0
+    isAdminRequest || getNotesPlanRank(note) === 0
       ? []
       : await loadNotesEntitlements({
           firestore,
           uid: request.uid,
         });
-  const access =
-    resolveNotesEntitlementEvidence({
-      note,
-      noteId: request.noteId,
-      entitlements,
-      uid: request.uid,
-      email: request.email,
-      nowMs: serverNowMs,
-    });
+  const access = isAdminRequest
+    ? Object.freeze({
+        allowed: true,
+        scopeType: "admin",
+      })
+    : resolveNotesEntitlementEvidence({
+        note,
+        noteId: request.noteId,
+        entitlements,
+        uid: request.uid,
+        email: request.email,
+        nowMs: serverNowMs,
+      });
 
   if (!access.allowed) {
     throw new HttpsError(
