@@ -1,8 +1,14 @@
 const CACHE_PREFIX = 'aspirenest-';
-const CACHE_NAME = 'aspirenest-academy-shell-v2';
+const CACHE_NAME = 'aspirenest-academy-shell-v3-intellibook';
 const APP_SHELL = [
   '/',
   '/index.html',
+  '/vendor/pdfjs/pdf.worker.mjs',
+  '/vendor/pdfjs/pdf.mjs',
+  '/learning-drive-v8/intellibook.js',
+  '/learning-drive-v8/intellibook.css',
+  '/intellibook.js',
+  '/intellibook.css',
   '/styles.css',
   '/admin.css',
   '/v8-experiences.css',

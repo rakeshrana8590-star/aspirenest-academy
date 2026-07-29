@@ -3,6 +3,7 @@ import { act } from "react-dom/test-utils";
 import { createRoot } from "react-dom/client";
 
 import V8LearningDriveRuntime from "./V8LearningDriveRuntime";
+import { V8_SCRIPT_ASSETS, V8_STYLE_ASSETS } from "./v8ShadowRuntimeModel";
 
 const cssResponse = ':root{--ink:#172033}html{height:100%}body{margin:0}.app-shell{display:grid}.brand{background:transparent}';
 const scriptResponse = `(() => {
@@ -55,11 +56,11 @@ describe("V8LearningDriveRuntime Shadow DOM mount", () => {
     expect(host.shadowRoot.querySelector("#app")).not.toBeNull();
     expect(host.shadowRoot.querySelector("#pageContent h1")?.textContent).toBe("Shadow Learning Drive");
     expect(host.shadowRoot.querySelector('style[data-v8-shadow-style="foundation"]')).not.toBeNull();
-    expect(host.shadowRoot.querySelectorAll("style[data-v8-shadow-style]").length).toBe(4);
+    expect(host.shadowRoot.querySelectorAll("style[data-v8-shadow-style]").length).toBe(V8_STYLE_ASSETS.length + 1);
 
     expect(document.querySelector("#pageContent")).toBeNull();
     expect(document.querySelector('script[data-aspirenest-v8-script]')).toBeNull();
     expect(document.querySelector('link[data-aspirenest-v8-style]')).toBeNull();
-    expect(global.fetch).toHaveBeenCalledTimes(6);
+    expect(global.fetch).toHaveBeenCalledTimes(V8_STYLE_ASSETS.length + V8_SCRIPT_ASSETS.length);
   });
 });

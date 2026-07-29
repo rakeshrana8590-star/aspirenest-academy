@@ -2,12 +2,14 @@ export const V8_ASSET_BASE = "/learning-drive-v8";
 
 export const V8_STYLE_ASSETS = Object.freeze([
   `${V8_ASSET_BASE}/styles.css`,
+  `${V8_ASSET_BASE}/intellibook.css`,
   `${V8_ASSET_BASE}/admin.css`,
   `${V8_ASSET_BASE}/v8-experiences.css`,
 ]);
 
 export const V8_SCRIPT_ASSETS = Object.freeze([
   `${V8_ASSET_BASE}/app.js`,
+  `${V8_ASSET_BASE}/intellibook.js`,
   `${V8_ASSET_BASE}/admin.js`,
   `${V8_ASSET_BASE}/v8-experiences.js`,
 ]);

@@ -1,0 +1,385 @@
+/* AspireNest IntelliBook Reader — P14 G19 M1 */
+.detail-drawer[data-intellibook-active="true"] {
+  --intellibook-blue: #2563eb;
+  --intellibook-navy: #0f172a;
+  --intellibook-orange: #f97316;
+}
+
+.intelliBookContentSwitch,
+.intelliBookLayoutSwitch,
+.intelliBookPageControls,
+.intelliBookZoomControls,
+.intelliBookSearch {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.intelliBookContentSwitch button,
+.intelliBookLayoutSwitch button,
+.intelliBookPageControls button,
+.intelliBookZoomControls button,
+.intelliBookSearch button,
+.intelliBookDownload {
+  min-height: 34px;
+  border: 0;
+  border-radius: 9px;
+  padding: 0 10px;
+  color: #334155;
+  background: transparent;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.intelliBookContentSwitch button.active,
+.intelliBookLayoutSwitch button.active {
+  color: #fff;
+  background: var(--intellibook-navy, #0f172a);
+  box-shadow: 0 7px 18px rgba(15, 23, 42, 0.16);
+}
+
+.intelliBookTools {
+  position: sticky;
+  top: 72px;
+  z-index: 12;
+  margin: 14px 0;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.09);
+  backdrop-filter: blur(16px);
+}
+
+.intelliBookPageControls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 850;
+}
+
+.intelliBookPageControls input {
+  width: 58px;
+  height: 32px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 8px;
+  padding: 0 6px;
+  color: #0f172a;
+  background: #fff;
+  font: inherit;
+  font-weight: 900;
+  text-align: center;
+}
+
+.intelliBookZoomControls span,
+.intelliBookPageControls > span {
+  min-width: 42px;
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.intelliBookSearch {
+  flex: 1 1 220px;
+}
+
+.intelliBookSearch input {
+  width: 100%;
+  min-width: 120px;
+  height: 34px;
+  border: 0;
+  outline: 0;
+  padding: 0 9px;
+  color: #0f172a;
+  background: transparent;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.intelliBookSearch button,
+.intelliBookDownload {
+  color: #fff;
+  background: var(--intellibook-blue, #2563eb);
+}
+
+.intelliBookDownload {
+  padding-inline: 14px;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+}
+
+.intelliBookProgressLabel {
+  flex: 0 0 auto;
+  color: #475569;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.reader-content.intelliBookArticle {
+  min-width: 0;
+  max-width: none;
+  padding: clamp(12px, 2vw, 24px);
+  overflow: visible;
+  background:
+    radial-gradient(circle at 10% 5%, rgba(37, 99, 235, 0.08), transparent 26%),
+    linear-gradient(180deg, #edf3fb, #f8fafc);
+}
+
+.intelliBookPages {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 24px;
+}
+
+.intelliBookPages.is-scroll {
+  display: grid;
+  justify-items: center;
+  gap: 28px;
+}
+
+.intelliBookPages.is-page {
+  min-height: 70vh;
+}
+
+.intelliBookPages.is-spread {
+  align-items: center;
+  gap: 14px;
+  perspective: 1800px;
+}
+
+.intelliBookPage {
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  scroll-margin-top: 150px;
+}
+
+.intelliBookPage footer {
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
+.intelliBookPageSurface {
+  position: relative;
+  width: min(100%, 760px);
+  aspect-ratio: 0.707;
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.13);
+  border-radius: 6px;
+  background: #fff;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.8) inset,
+    0 18px 50px rgba(15, 23, 42, 0.18);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.intelliBookPages.is-spread .intelliBookPage:first-child .intelliBookPageSurface {
+  transform: rotateY(1.5deg);
+  transform-origin: right center;
+  box-shadow: -10px 20px 48px rgba(15, 23, 42, 0.16);
+}
+
+.intelliBookPages.is-spread .intelliBookPage:last-child .intelliBookPageSurface {
+  transform: rotateY(-1.5deg);
+  transform-origin: left center;
+  box-shadow: 10px 20px 48px rgba(15, 23, 42, 0.16);
+}
+
+.intelliBookPageSurface canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  max-width: none;
+  background: #fff;
+}
+
+.intelliBookTextLayer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 1;
+  line-height: 1;
+  text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+  z-index: 2;
+}
+
+.intelliBookTextLayer span,
+.intelliBookTextLayer br {
+  position: absolute;
+  color: transparent;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0 0;
+}
+
+.intelliBookTextLayer ::selection,
+.intelliBookTextLayer span::selection {
+  color: transparent;
+  background: rgba(37, 99, 235, 0.28);
+}
+
+.intelliBookPageState {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 850;
+  text-align: center;
+}
+
+.intelliBookPage.isRendered .intelliBookPageState {
+  display: none;
+}
+
+.intelliBookPageList {
+  display: grid;
+  gap: 5px;
+  margin-top: 10px;
+  max-height: 58vh;
+  overflow: auto;
+  padding-right: 3px;
+}
+
+.reader-toc .intelliBookPageList button {
+  width: 100%;
+  min-height: 34px;
+  border: 0;
+  border-radius: 10px;
+  padding: 0 10px;
+  color: #475569;
+  background: transparent;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 850;
+  text-align: left;
+  cursor: pointer;
+}
+
+.reader-toc .intelliBookPageList button:hover,
+.reader-toc .intelliBookPageList button.active {
+  color: #1d4ed8;
+  background: #eff6ff;
+}
+
+.detail-drawer[data-intellibook-active="true"] .reader-toolbar {
+  position: sticky;
+  top: 138px;
+  z-index: 11;
+}
+
+.detail-drawer[data-intellibook-loading="true"] .intelliBookContentSwitch button:first-child {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.intelliBookPageSurface .intelliTextAnnotationDecoration--highlight {
+  color: transparent !important;
+  background: rgba(250, 204, 21, 0.48) !important;
+  border-radius: 2px;
+}
+
+.intelliBookPageSurface .intelliTextAnnotationDecoration--underline {
+  color: transparent !important;
+  text-decoration: underline 2px #2563eb !important;
+  text-underline-offset: 2px;
+}
+
+.intelliBookPageSurface .intelliTextAnnotationDecoration--note,
+.intelliBookPageSurface .intelliTextAnnotationDecoration--doubt {
+  color: transparent !important;
+  background: rgba(249, 115, 22, 0.24) !important;
+  border-bottom: 2px dotted #ea580c;
+}
+
+@media (max-width: 1100px) {
+  .intelliBookTools {
+    position: static;
+  }
+  .detail-drawer[data-intellibook-active="true"] .reader-toolbar {
+    position: static;
+  }
+  .intelliBookProgressLabel {
+    width: 100%;
+  }
+}
+
+@media (max-width: 899px) {
+  .intelliBookLayoutSwitch button[data-intellibook-layout="spread"] {
+    display: none;
+  }
+  .intelliBookPages.is-spread {
+    display: block;
+  }
+  .intelliBookContentSwitch {
+    order: -1;
+  }
+  .reader-header-actions {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 640px) {
+  .intelliBookTools {
+    padding: 8px;
+    gap: 6px;
+  }
+  .intelliBookLayoutSwitch,
+  .intelliBookPageControls,
+  .intelliBookZoomControls,
+  .intelliBookSearch,
+  .intelliBookDownload {
+    width: 100%;
+  }
+  .intelliBookLayoutSwitch button,
+  .intelliBookPageControls button,
+  .intelliBookZoomControls button,
+  .intelliBookContentSwitch button {
+    flex: 1;
+  }
+  .intelliBookPageControls,
+  .intelliBookZoomControls {
+    justify-content: center;
+  }
+  .intelliBookDownload {
+    min-height: 40px;
+  }
+  .reader-content.intelliBookArticle {
+    padding: 8px 2px 18px;
+  }
+  .intelliBookPages {
+    gap: 12px;
+  }
+  .intelliBookPageSurface {
+    border-radius: 2px;
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intelliBookPageSurface {
+    transition: none;
+  }
+}

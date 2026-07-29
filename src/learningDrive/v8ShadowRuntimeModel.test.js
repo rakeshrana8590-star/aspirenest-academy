@@ -10,11 +10,13 @@ describe("V8 Shadow runtime model", () => {
   test("keeps the exact approved V8 asset inventory", () => {
     expect(V8_STYLE_ASSETS).toEqual([
       "/learning-drive-v8/styles.css",
+      "/learning-drive-v8/intellibook.css",
       "/learning-drive-v8/admin.css",
       "/learning-drive-v8/v8-experiences.css",
     ]);
     expect(V8_SCRIPT_ASSETS).toEqual([
       "/learning-drive-v8/app.js",
+      "/learning-drive-v8/intellibook.js",
       "/learning-drive-v8/admin.js",
       "/learning-drive-v8/v8-experiences.js",
     ]);
