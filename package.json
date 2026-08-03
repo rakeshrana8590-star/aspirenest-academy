@@ -25,7 +25,10 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "v26:bundle:prepare": "node scripts/prepare-v26-production-bundle.cjs",
+    "v26:bundle:assert": "node scripts/assert-v26-production-bundle.cjs",
+    "v26:bundle:test": "node scripts/test-v26-production-bundle.cjs"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "5.0.1",
