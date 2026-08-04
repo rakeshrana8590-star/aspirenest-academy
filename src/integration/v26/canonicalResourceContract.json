@@ -1,0 +1,369 @@
+{
+  "version": "1.6.0",
+  "service": "V26CanonicalResourceService",
+  "collections": [
+    "contentItems",
+    "studyRoadmaps",
+    "experienceEvents",
+    "mentorLiveSessions"
+  ],
+  "requestFields": [
+    "resourceId",
+    "resourceTypeHint"
+  ],
+  "transportFields": [
+    "signal"
+  ],
+  "outputFields": [
+    "id",
+    "resourceId",
+    "type",
+    "section",
+    "requiredPlan",
+    "publishState",
+    "canonicalRoute",
+    "sourceCollection"
+  ],
+  "types": [
+    "note",
+    "video",
+    "test",
+    "current-affairs",
+    "roadmap",
+    "live",
+    "replay"
+  ],
+  "plans": [
+    "FREE",
+    "BASIC",
+    "PREMIUM",
+    "MENTORSHIP"
+  ],
+  "planAliases": {
+    "free": "FREE",
+    "basic": "BASIC",
+    "premium": "PREMIUM",
+    "pro": "PREMIUM",
+    "paid": "PREMIUM",
+    "mentorship": "MENTORSHIP",
+    "mentor": "MENTORSHIP",
+    "mentor_guided": "MENTORSHIP"
+  },
+  "fieldPriority": {
+    "identity": [
+      "id",
+      "resourceId"
+    ],
+    "type": [
+      "resourceType",
+      "contentType",
+      "itemType",
+      "type",
+      "section",
+      "contentSection",
+      "module",
+      "moduleKey",
+      "eventType",
+      "sourceType"
+    ],
+    "section": [
+      "section",
+      "contentSection",
+      "resourceSection",
+      "module",
+      "moduleKey"
+    ],
+    "plan": [
+      "planCode",
+      "planType",
+      "plan",
+      "accessPlan",
+      "requiredPlan",
+      "currentPlan",
+      "subscriptionType",
+      "premiumPlan",
+      "premiumStatus",
+      "membershipPlan"
+    ],
+    "publishState": [
+      "status",
+      "publishStatus",
+      "visibility",
+      "publishState",
+      "publicationState"
+    ],
+    "route": [
+      "canonicalRoute",
+      "canonicalPath",
+      "studentRoute",
+      "openRoute",
+      "route",
+      "path"
+    ]
+  },
+  "collectionDefaults": {
+    "contentItems": {
+      "type": null,
+      "section": null,
+      "plan": null
+    },
+    "studyRoadmaps": {
+      "type": "roadmap",
+      "section": "roadmaps",
+      "plan": null
+    },
+    "experienceEvents": {
+      "type": null,
+      "section": "live",
+      "plan": null
+    },
+    "mentorLiveSessions": {
+      "type": null,
+      "section": "live",
+      "plan": "MENTORSHIP"
+    }
+  },
+  "typeAliases": {
+    "note": "note",
+    "notes": "note",
+    "intellibook": "note",
+    "subjectpdf": "note",
+    "course": "note",
+    "courses": "note",
+    "coursematerial": "note",
+    "free_resource": "note",
+    "freeresource": "note",
+    "currentaffairs": "current-affairs",
+    "currentaffair": "current-affairs",
+    "current_affairs": "current-affairs",
+    "current_affair": "current-affairs",
+    "mocktest": "test",
+    "mock_test": "test",
+    "mocktests": "test",
+    "mock_tests": "test",
+    "practice": "test",
+    "quiz": "test",
+    "questionbank": "test",
+    "recordedvideo": "video",
+    "recorded_video": "video",
+    "video": "video",
+    "videos": "video",
+    "classroom": "video",
+    "recordedclass": "video",
+    "recorded_class": "video",
+    "roadmap": "roadmap",
+    "roadmaps": "roadmap",
+    "studyroadmap": "roadmap",
+    "study_roadmap": "roadmap",
+    "aspirepath": "roadmap",
+    "live": "live",
+    "livesession": "live",
+    "live_session": "live",
+    "mentor_live_session": "live",
+    "experience_live_session": "live",
+    "webinar": "live",
+    "workshop": "live",
+    "doubt_session": "live",
+    "special_session": "live",
+    "marathon": "live",
+    "replay": "replay",
+    "replays": "replay",
+    "mentor_replay": "replay",
+    "experience_replay": "replay",
+    "pdf": "note",
+    "document": "note",
+    "article": "note",
+    "liveclass": "live",
+    "live_class": "live",
+    "livestream": "live",
+    "live_stream": "live",
+    "live_replay": "replay",
+    "recorded_live": "replay",
+    "recordedlive": "replay",
+    "mega_mock": "test",
+    "megamock": "test",
+    "mock": "test",
+    "exam": "test"
+  },
+  "sectionByType": {
+    "note": "notes",
+    "current-affairs": "current-affairs",
+    "test": "mock-tests",
+    "video": "videos",
+    "roadmap": "roadmaps",
+    "live": "live",
+    "replay": "live"
+  },
+  "sectionAliases": {
+    "note": "note",
+    "notes": "note",
+    "subjectpdf": "note",
+    "course": "note",
+    "courses": "note",
+    "coursematerial": "note",
+    "freeresource": "note",
+    "free_resource": "note",
+    "currentaffairs": "current-affairs",
+    "currentaffair": "current-affairs",
+    "current_affairs": "current-affairs",
+    "mocktest": "test",
+    "mock_test": "test",
+    "mocktests": "test",
+    "mock_tests": "test",
+    "practice": "test",
+    "quiz": "test",
+    "recordedvideo": "video",
+    "recorded_video": "video",
+    "video": "video",
+    "videos": "video",
+    "roadmap": "roadmap",
+    "roadmaps": "roadmap",
+    "studyroadmap": "roadmap",
+    "study_roadmap": "roadmap",
+    "aspirepath": "roadmap",
+    "live": "live",
+    "livereplays": "live",
+    "livesessions": "live",
+    "replay": "replay",
+    "replays": "replay"
+  },
+  "liveLikeTokens": [
+    "live_class",
+    "live",
+    "webinar",
+    "workshop",
+    "doubt_session",
+    "special_session",
+    "marathon"
+  ],
+  "replayStates": [
+    "replay",
+    "ended",
+    "completed"
+  ],
+  "lockedStates": [
+    "draft",
+    "staged",
+    "unpublished",
+    "hidden",
+    "inactive",
+    "archived",
+    "locked",
+    "cancelled",
+    "canceled",
+    "expired",
+    "deleted",
+    "blocked"
+  ],
+  "openStatesByCollection": {
+    "default": [
+      "published",
+      "public",
+      "active",
+      "open"
+    ],
+    "experienceEvents": [
+      "published",
+      "public",
+      "active",
+      "scheduled",
+      "live",
+      "replay",
+      "completed",
+      "open"
+    ],
+    "mentorLiveSessions": [
+      "published",
+      "public",
+      "active",
+      "scheduled",
+      "live",
+      "replay",
+      "completed",
+      "ended",
+      "open"
+    ]
+  },
+  "routePolicy": {
+    "maxLength": 2048,
+    "allowHashPrefix": true,
+    "requireLeadingSlash": true,
+    "rejectTraversal": true,
+    "decodePasses": 8,
+    "rejectDotSegments": true,
+    "validateHashRoute": true,
+    "validateDerivedRoutes": true
+  },
+  "collectionTypePolicy": {
+    "studyRoadmaps": {
+      "allowedTypes": [
+        "roadmap"
+      ],
+      "defaultType": "roadmap"
+    },
+    "mentorLiveSessions": {
+      "allowedTypes": [
+        "live",
+        "replay"
+      ],
+      "defaultType": "live"
+    },
+    "experienceEvents": {
+      "allowedTypes": [
+        "live",
+        "replay",
+        "test"
+      ],
+      "defaultType": null
+    },
+    "contentItems": {
+      "allowedTypes": [
+        "note",
+        "video",
+        "test",
+        "current-affairs",
+        "roadmap",
+        "live",
+        "replay"
+      ],
+      "defaultType": null
+    }
+  },
+  "eventTargetFields": [
+    "targetResourceId",
+    "resourceTarget",
+    "targetId",
+    "testId",
+    "mockTestId",
+    "itemId",
+    "target"
+  ],
+  "identityPolicy": {
+    "maxLength": 256,
+    "rejectDotSegments": true,
+    "decodePasses": 8,
+    "requireReaderIdentityAgreement": true
+  },
+  "eventTargetPolicy": {
+    "maxLength": 256,
+    "requireAllDefinedTargetsToAgree": true,
+    "validateAsResourceId": true,
+    "validateEvenWithExplicitRoute": true,
+    "requireCanonicalRouteAgreement": true
+  },
+  "requestPolicy": {
+    "sanitizePropertyAccess": true,
+    "sanitizeStringCoercion": true
+  },
+  "planPolicy": {
+    "requireExplicitPlanForCollections": [
+      "contentItems",
+      "studyRoadmaps",
+      "experienceEvents"
+    ],
+    "allowIsPremiumBooleanSignal": true,
+    "defaultPlanCollections": {
+      "mentorLiveSessions": "MENTORSHIP"
+    }
+  }
+}
