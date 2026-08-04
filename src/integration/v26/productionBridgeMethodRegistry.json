@@ -1,0 +1,1482 @@
+{
+  "schemaVersion": 1,
+  "generatedFrom": "runtime/v26-shell/integration/aspirenest-adapter.js",
+  "adapterMethodCount": 182,
+  "coreRequiredMethodCount": 9,
+  "policy": {
+    "defaultState": "SAFE_DISABLED_PENDING_OWNER",
+    "noFakeSuccess": true,
+    "noSilentFallback": true,
+    "providerActivation": false,
+    "runtimeLoad": false
+  },
+  "methods": [
+    {
+      "name": "answerMentorQuestion",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "applyBulkAccess",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "approveAccessRequest",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "archiveAdminResource",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "archiveExperienceEntity",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "archiveMockTest",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "archiveNote",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "archiveNotification",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "assignRoadmap",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "authorize",
+      "launchCore": true,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "TEST_ONLY_COLLISION_REQUIRES_SERVICE_ADAPTER",
+      "auditCandidates": [
+        "src/access/mockTestSubmitRuntime.test.js",
+        "src/access/mockTestResultReviewRuntime.test.js"
+      ]
+    },
+    {
+      "name": "cancelLiveSession",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "checkUsernameAvailability",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "completeEmailVerification",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "createAdminResourceVersion",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "createCommerceOrder",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "createLiveProviderSession",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "createLiveReplayDraft",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "createMentorAccessRequest",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "createMentorAssignment",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "createNotification",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "createNotificationJob",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "createPaymentLink",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "createPublicAccessEnquiry",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "createPublicSupportRequest",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "createRazorpayQr",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "createStudentAccessRequest",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "deleteMentorProfessionalEntry",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "downloadVideoAttachment",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "duplicateMockTest",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "exportAdminReport",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "exportMockTest",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "exportNotificationAudit",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "extendAccessGrant",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "getSession",
+      "launchCore": true,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "SINGLE_CANDIDATE_UNVERIFIED",
+      "auditCandidates": [
+        "src/v8/v8FirebaseBridge.js"
+      ]
+    },
+    {
+      "name": "importMockQuestions",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "importNoteContent",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "listAccessRequests",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "listExperienceEvents",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "listNotificationDelivery",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadAdminWorkspace",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadCurrentAffairsReader",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadCurrentAffairsSourceRegister",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadMentorAccountSecurity",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadMentorCalendar",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadMentorCommandCenter",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadMentorLearner360",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadMentorNotifications",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadMentorOutcomes",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadMentorProfessionalProfile",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadMentorToday",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadMentorWorkspace",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadMockAdminWorkspace",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadMockAttemptDraft",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadMockResults",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadMockTest",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadNotesAdminWorkspace",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadNotificationCenter",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadProtectedVideo",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadPublicMentorDirectory",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadRoadmapProgress",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadRoleAnalytics",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadStudentAccountSecurity",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadStudentAssignments",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadStudentCommandCenter",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadStudentCourses",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadStudentNotifications",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadStudentProfile",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadStudentResults",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadStudentRevisionHub",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadStudentTasks",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadStudentWorkspace",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadSubjectWorkspace",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadVideoAdminWorkspace",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "loadVideoAnalytics",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "login",
+      "launchCore": true,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "MULTIPLE_CANDIDATES_REQUIRES_OWNER_DECISION",
+      "auditCandidates": [
+        "src/App.js",
+        "public/v8-experiences.js",
+        "public/app.js",
+        "public/learning-drive-v8/v8-experiences.js",
+        "public/learning-drive-v8/app.js"
+      ]
+    },
+    {
+      "name": "logout",
+      "launchCore": true,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "REFERENCE_ONLY_NO_HANDLER_PROOF",
+      "auditCandidates": []
+    },
+    {
+      "name": "openCanonical",
+      "launchCore": true,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "REFERENCE_ONLY_NO_HANDLER_PROOF",
+      "auditCandidates": []
+    },
+    {
+      "name": "pauseMockAttempt",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "previewBulkAccess",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "processVideoAsset",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "publishAdminResource",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "publishCurrentAffairs",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "publishCurrentAffairsCorrection",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "publishLive",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "publishMentorAssignment",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "publishMentorProfessionalProfile",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "publishMockTest",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "publishNote",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "publishNotification",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "publishRoadmap",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "publishVideo",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "reconcilePayment",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "recordAttempt",
+      "launchCore": true,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "REFERENCE_ONLY_NO_HANDLER_PROOF",
+      "auditCandidates": []
+    },
+    {
+      "name": "recordLiveAttendance",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "recordProgress",
+      "launchCore": true,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "REFERENCE_ONLY_NO_HANDLER_PROOF",
+      "auditCandidates": []
+    },
+    {
+      "name": "recordRoadmapProgress",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "recordStudyAction",
+      "launchCore": true,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "REFERENCE_ONLY_NO_HANDLER_PROOF",
+      "auditCandidates": []
+    },
+    {
+      "name": "redeemAccessInvite",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "redeemAccessKey",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "regenerateAccessInvite",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "regenerateAccessKey",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "registerAccount",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "removeMentorProfilePhoto",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "requestMentorAccountReview",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "requestMentorHelp",
+      "launchCore": true,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "REFERENCE_ONLY_NO_HANDLER_PROOF",
+      "auditCandidates": []
+    },
+    {
+      "name": "requestPasswordReset",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "requestStudentDataExport",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "rescheduleRoadmap",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "resendVerification",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "resolveLiveJoin",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "resolveProtectedVideo",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "restoreAccessGrant",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "restoreNote",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "resumeMockAttempt",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "reviewMentorAssignment",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "revokeAccessGrant",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "rollbackBulkAccessBatch",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "runAdminReadiness",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveAccessBundle",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveAccessGrant",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveAccessInvite",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveAccessKey",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveAccessProduct",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveAdminOperation",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveAdminResource",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveAdminResourceAsset",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveAdminSettings",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveCommerceSettings",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveCurrentAffairs",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveCurrentAffairsPages",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveEmailSettings",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveExperienceEntity",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveLive",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveLiveReminder",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveMentorAssignmentDraft",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveMentorCollection",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveMentorCommunication",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveMentorGroup",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveMentorIntervention",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveMentorNotificationPreferences",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveMentorPreferences",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveMentorProfessionalEntry",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveMentorProfessionalProfile",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveMentorProfileVisibility",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveMockAttemptDraft",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveMockTest",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveNote",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveNoteProgress",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveNotificationPreferences",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveNotificationRule",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveNotificationTemplate",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveQuestionBankQuestion",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveRoadmap",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveStudentNotificationPreferences",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveStudentPreferences",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveStudentProfile",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveVideo",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveVideoCaptions",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveVideoProgress",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "saveVideoStudyAction",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "scheduleMentorSession",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "scheduleNotification",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "signInWithGoogle",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "submitStudentAssignment",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "unpublishAdminResource",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "unpublishNote",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "updateAccessRequest",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "updateLearnerLifecycle",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "updateLiveProviderSession",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "updateMockResultPolicy",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "updateStudentTask",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "uploadMentorProfilePhoto",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "uploadNoteAsset",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "uploadVideoAsset",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "validateAdminResource",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "validateCurrentAffairs",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "validateLive",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "validateMockTest",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "validateNote",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "validateRoadmap",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "validateVideo",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    },
+    {
+      "name": "verifyMentorProfile",
+      "launchCore": false,
+      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
+      "owner": null,
+      "auditClassification": "OWNER_NOT_YET_RESOLVED",
+      "auditCandidates": []
+    }
+  ]
+}
