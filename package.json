@@ -32,7 +32,8 @@
     "build:legacy-react": "react-scripts build",
     "v26:shell:assert": "node scripts/assert-v26-shell-intake.cjs",
     "v26:shell:build": "node scripts/build-v26-shell.cjs",
-    "v26:bridge:foundation:test": "node src/integration/v26/productionBridgeFoundation.test.cjs"
+    "v26:bridge:foundation:test": "node src/integration/v26/productionBridgeFoundation.test.cjs",
+    "v26:auth-service:test": "node src/integration/v26/authProductionService.test.cjs"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "5.0.1",

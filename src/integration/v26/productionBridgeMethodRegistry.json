@@ -286,7 +286,12 @@
       "auditClassification": "SINGLE_CANDIDATE_UNVERIFIED",
       "auditCandidates": [
         "src/v8/v8FirebaseBridge.js"
-      ]
+      ],
+      "canonicalOwner": "src/integration/v26/authProductionService.js#createAuthProductionService",
+      "canonicalOwnerMethod": "getSession",
+      "ownerContractStatus": "IMPLEMENTED_NOT_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP1-P1.3-S1.3.7-R2",
+      "runtimeActivation": false
     },
     {
       "name": "importMockQuestions",
@@ -620,7 +625,12 @@
         "public/app.js",
         "public/learning-drive-v8/v8-experiences.js",
         "public/learning-drive-v8/app.js"
-      ]
+      ],
+      "canonicalOwner": "src/integration/v26/authProductionService.js#createAuthProductionService",
+      "canonicalOwnerMethod": "login",
+      "ownerContractStatus": "IMPLEMENTED_NOT_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP1-P1.3-S1.3.7-R2",
+      "runtimeActivation": false
     },
     {
       "name": "logout",
@@ -628,7 +638,12 @@
       "ownerState": "SAFE_DISABLED_PENDING_OWNER",
       "owner": null,
       "auditClassification": "REFERENCE_ONLY_NO_HANDLER_PROOF",
-      "auditCandidates": []
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/authProductionService.js#createAuthProductionService",
+      "canonicalOwnerMethod": "logout",
+      "ownerContractStatus": "IMPLEMENTED_NOT_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP1-P1.3-S1.3.7-R2",
+      "runtimeActivation": false
     },
     {
       "name": "openCanonical",
