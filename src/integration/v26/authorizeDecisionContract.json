@@ -1,0 +1,179 @@
+{
+  "version": "1.1.0",
+  "service": "V26AuthorizeProductionService",
+  "requestFields": [
+    "resource",
+    "action",
+    "session"
+  ],
+  "callerResourceHintFields": [
+    "id",
+    "resourceId",
+    "type"
+  ],
+  "callerSessionHintFields": [
+    "uid"
+  ],
+  "transportFields": [
+    "signal"
+  ],
+  "actions": [
+    "READ",
+    "WATCH",
+    "ATTEMPT",
+    "OPEN",
+    "JOIN"
+  ],
+  "typeActionMap": {
+    "note": "READ",
+    "video": "WATCH",
+    "test": "ATTEMPT",
+    "current-affairs": "READ",
+    "roadmap": "OPEN",
+    "live": "JOIN",
+    "replay": "WATCH"
+  },
+  "canonicalTypes": [
+    "note",
+    "video",
+    "test",
+    "current-affairs",
+    "roadmap",
+    "live",
+    "replay"
+  ],
+  "canonicalPlans": [
+    "FREE",
+    "BASIC",
+    "PREMIUM",
+    "MENTORSHIP"
+  ],
+  "canonicalCollections": [
+    "contentItems",
+    "studyRoadmaps",
+    "experienceEvents",
+    "mentorLiveSessions"
+  ],
+  "canonicalLockedPublishStates": [
+    "draft",
+    "staged",
+    "unpublished",
+    "hidden",
+    "inactive",
+    "archived",
+    "locked",
+    "cancelled",
+    "canceled",
+    "expired",
+    "deleted",
+    "blocked"
+  ],
+  "canonicalOpenPublishStatesByCollection": {
+    "default": [
+      "published",
+      "public",
+      "active",
+      "open"
+    ],
+    "experienceEvents": [
+      "published",
+      "public",
+      "active",
+      "scheduled",
+      "live",
+      "replay",
+      "completed",
+      "open"
+    ],
+    "mentorLiveSessions": [
+      "published",
+      "public",
+      "active",
+      "scheduled",
+      "live",
+      "replay",
+      "completed",
+      "ended",
+      "open"
+    ]
+  },
+  "states": [
+    "login_required",
+    "locked",
+    "expired",
+    "allowed",
+    "error"
+  ],
+  "roles": [
+    "public",
+    "student",
+    "mentor",
+    "admin"
+  ],
+  "authenticatedRoles": [
+    "student",
+    "mentor",
+    "admin"
+  ],
+  "requiredExperience": "student",
+  "entitlementDecisionStates": [
+    "allowed",
+    "expired",
+    "locked",
+    "error"
+  ],
+  "entitlementScopes": [
+    "ITEM",
+    "MODULE",
+    "BUNDLE",
+    "PLAN"
+  ],
+  "resultFields": [
+    "ok",
+    "state",
+    "allowed",
+    "code",
+    "message",
+    "resourceId",
+    "action",
+    "requiredPlan",
+    "matchedGrantId",
+    "matchedScope",
+    "expiresAt",
+    "retryable"
+  ],
+  "dependencies": [
+    "getAuthoritativeSession",
+    "getCanonicalResource",
+    "resolveEntitlementDecision"
+  ],
+  "maxLengths": {
+    "resourceId": 256,
+    "typeHint": 128,
+    "action": 32,
+    "uid": 256,
+    "code": 128,
+    "message": 300,
+    "grantId": 256,
+    "scope": 32,
+    "expiresAt": 128
+  },
+  "policy": {
+    "callerResourceFieldsAreHintsOnly": true,
+    "callerSessionIsConsistencyHintOnly": true,
+    "callerPlanStatusRouteAccessOverridesIgnored": true,
+    "authoritativeSessionReloadRequired": true,
+    "canonicalResourceReloadRequired": true,
+    "authoritativeEntitlementDecisionRequiredForPaidResources": true,
+    "unknownPlanDefaultsFree": false,
+    "defaultDecision": "locked",
+    "directFirebaseImport": false,
+    "directAccessServiceImport": false,
+    "navigationSideEffects": false,
+    "runtimeOwnerAssignment": false,
+    "runtimeLoad": false,
+    "canonicalStatePublishBindingRequired": true,
+    "allowedExpiryMustBeFuture": true,
+    "expiredExpiryMustNotBeFuture": true
+  }
+}
