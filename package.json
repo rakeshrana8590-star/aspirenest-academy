@@ -39,7 +39,9 @@
     "v26:entitlement-decision:test": "node src/integration/v26/entitlementDecisionService.test.cjs",
     "v26:role-experience-adapter:test": "node src/integration/v26/browser/roleExperienceDependencyAdapter.test.cjs",
     "v26:firestore-read-adapter:test": "node src/integration/v26/browser/firestoreReadDependencyAdapter.test.cjs",
-    "v26:firebase-auth-adapter:test": "node src/integration/v26/browser/firebaseAuthDependencyAdapter.test.cjs"
+    "v26:firebase-auth-adapter:test": "node src/integration/v26/browser/firebaseAuthDependencyAdapter.test.cjs",
+    "v26:provider:build": "node scripts/build-v26-production-provider.cjs",
+    "v26:provider:test": "node src/integration/v26/browser/productionProviderEntry.test.cjs && node scripts/build-v26-production-provider.test.cjs"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "5.0.1",
