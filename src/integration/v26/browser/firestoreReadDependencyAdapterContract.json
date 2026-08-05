@@ -1,0 +1,42 @@
+{
+  "version": "1.0.0",
+  "profileCollections": [
+    "users",
+    "students",
+    "mentorProfiles"
+  ],
+  "canonicalCollections": [
+    "contentItems",
+    "studyRoadmaps",
+    "experienceEvents",
+    "mentorLiveSessions"
+  ],
+  "entitlementProjection": {
+    "rootCollection": "studentEntitlements",
+    "itemsSubcollection": "items",
+    "maxRows": 512
+  },
+  "limits": {
+    "uid": 128,
+    "resourceId": 240,
+    "collection": 64
+  },
+  "readerResults": {
+    "profileMissing": null,
+    "resourceMissing": {
+      "exists": false
+    },
+    "entitlementMissing": []
+  },
+  "authority": {
+    "rawGrantLedger": "studentAccess",
+    "rawPaymentDirectAuthority": false,
+    "callerControlledCollectionPath": false,
+    "firestoreWrites": false
+  },
+  "abortPolicy": {
+    "checkBeforeRead": true,
+    "checkAfterRead": true,
+    "silentSuccessAfterAbort": false
+  }
+}

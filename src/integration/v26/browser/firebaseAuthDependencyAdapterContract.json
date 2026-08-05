@@ -1,0 +1,42 @@
+{
+  "version": "1.0.0",
+  "requiredDependencies": [
+    "auth",
+    "signInWithEmailAndPassword",
+    "signInWithPopup",
+    "signOut",
+    "GoogleAuthProvider",
+    "roleExperienceDependencyAdapter"
+  ],
+  "roleAdapterMethods": [
+    "loadAccountProfile",
+    "resolveRole",
+    "resolveAllowedExperiences"
+  ],
+  "googleProvider": {
+    "customParameters": {
+      "prompt": "select_account"
+    }
+  },
+  "authServiceDependencies": [
+    "auth",
+    "signInWithEmailAndPassword",
+    "signInWithPopup",
+    "signOut",
+    "createGoogleProvider",
+    "loadAccountProfile",
+    "resolveRole",
+    "resolveAllowedExperiences"
+  ],
+  "authoritativeSession": {
+    "source": "reviewed_auth_service_getSession",
+    "callerSessionTrusted": false,
+    "factory": "createAuthoritativeSessionReader"
+  },
+  "forbidden": {
+    "navigation": true,
+    "domStorage": true,
+    "profileWrites": true,
+    "roleFromCallerProfile": true
+  }
+}
