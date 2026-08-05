@@ -1,0 +1,91 @@
+{
+  "version": "1.2.0",
+  "name": "AspireNest V26 Role Experience Dependency Adapter",
+  "authority": {
+    "admin": {
+      "fixedEmail": "aspirenestplatform@gmail.com",
+      "profileCollections": [
+        "users"
+      ],
+      "profileDocumentsCannotElevate": true
+    },
+    "mentor": {
+      "designatedEmail": "dr.varshamaru@gmail.com",
+      "dynamicProfileCollection": "mentorProfiles",
+      "dynamicRequirements": {
+        "mentorUidEqualsFirebaseUid": true,
+        "role": "mentor",
+        "status": "active"
+      },
+      "profileCollections": [
+        "users",
+        "mentorProfiles"
+      ]
+    },
+    "student": {
+      "defaultAuthenticatedRole": true,
+      "profileCollections": [
+        "users",
+        "students"
+      ]
+    }
+  },
+  "experienceMatrix": {
+    "student": [
+      "public",
+      "student"
+    ],
+    "mentor": [
+      "public",
+      "student",
+      "mentor"
+    ],
+    "admin": [
+      "public",
+      "student",
+      "mentor",
+      "admin"
+    ]
+  },
+  "trustedEvidence": {
+    "transport": "closure_private_weakmap",
+    "enumerable": false,
+    "serialized": false,
+    "discoverableFromProfile": false,
+    "callerForgeable": false,
+    "callerProfileFieldsTrusted": false,
+    "adapterInstanceIsolated": true
+  },
+  "dependencies": {
+    "identityContract": [
+      "ASPIRENEST_ADMIN_EMAIL",
+      "ASPIRENEST_MENTOR_EMAIL",
+      "ASPIRENEST_ROLES",
+      "normalizeAspireNestEmail",
+      "getAspireNestAllowedExperiences"
+    ],
+    "functions": [
+      "readProfileByCollection"
+    ]
+  },
+  "readPolicy": {
+    "collectionAllowlist": [
+      "users",
+      "students",
+      "mentorProfiles"
+    ],
+    "writes": false,
+    "networkOwnedByDependency": true,
+    "readFailurePolicy": "fail_closed_to_fixed_email_or_student"
+  },
+  "publicApi": [
+    "loadAccountProfile",
+    "resolveRole",
+    "resolveAllowedExperiences"
+  ],
+  "runtime": {
+    "ownerAssignment": false,
+    "providerActivation": false,
+    "runtimeLoad": false
+  }
+}
