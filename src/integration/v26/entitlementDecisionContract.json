@@ -1,0 +1,237 @@
+{
+  "version": "1.4.0",
+  "service": "V26EntitlementDecisionService",
+  "dependency": "listEntitlementEvidence",
+  "dependencyOutput": {
+    "shape": "array",
+    "source": "studentEntitlements/{uid}/items",
+    "documentIdField": "id",
+    "projectionOnly": true,
+    "timestampRepresentations": [
+      "iso_string",
+      "javascript_date",
+      "firestore_timestamp_seconds_nanoseconds",
+      "epoch_milliseconds_number"
+    ],
+    "stringTimestampFormats": [
+      "YYYY-MM-DD",
+      "RFC3339_WITH_TIMEZONE"
+    ],
+    "firestoreSecondsRange": {
+      "minimum": -62135596800,
+      "maximum": 253402300799
+    },
+    "numericTimestampUnit": "epoch_milliseconds"
+  },
+  "requestFields": [
+    "principal",
+    "action",
+    "resource",
+    "session",
+    "signal"
+  ],
+  "outputFields": [
+    "state",
+    "allowed",
+    "code",
+    "principalUid",
+    "resourceId",
+    "requiredPlan",
+    "matchedGrantId",
+    "matchedScope",
+    "expiresAt"
+  ],
+  "states": [
+    "allowed",
+    "expired",
+    "locked",
+    "error"
+  ],
+  "actions": [
+    "READ",
+    "WATCH",
+    "ATTEMPT",
+    "OPEN",
+    "JOIN"
+  ],
+  "typeActionMap": {
+    "note": "READ",
+    "video": "WATCH",
+    "test": "ATTEMPT",
+    "current-affairs": "READ",
+    "roadmap": "OPEN",
+    "live": "JOIN",
+    "replay": "WATCH"
+  },
+  "resourceBindings": {
+    "note": {
+      "module": "notes",
+      "itemType": "notesPdf"
+    },
+    "video": {
+      "module": "video",
+      "itemType": "video"
+    },
+    "test": {
+      "module": "mockTest",
+      "itemType": "mockTest"
+    },
+    "current-affairs": {
+      "module": "currentAffairs",
+      "itemType": "currentAffairsPdf"
+    },
+    "roadmap": {
+      "module": "roadmap",
+      "itemType": "roadmap"
+    },
+    "live": {
+      "module": "video",
+      "itemType": "video"
+    },
+    "replay": {
+      "module": "video",
+      "itemType": "video"
+    }
+  },
+  "canonicalPlans": [
+    "FREE",
+    "BASIC",
+    "PREMIUM",
+    "MENTORSHIP"
+  ],
+  "seedPlanRanks": {
+    "FREE": 0,
+    "BASIC": 100,
+    "PREMIUM": 200,
+    "MENTORSHIP": 300
+  },
+  "scopeValues": [
+    "plan",
+    "module",
+    "bundle",
+    "item"
+  ],
+  "scopeOutputValues": [
+    "PLAN",
+    "MODULE",
+    "BUNDLE",
+    "ITEM"
+  ],
+  "scopePriority": {
+    "item": 4,
+    "bundle": 3,
+    "module": 2,
+    "plan": 1
+  },
+  "statusValues": [
+    "active",
+    "pending",
+    "expired",
+    "blocked",
+    "revoked",
+    "inactive",
+    "disabled",
+    "cancelled",
+    "canceled",
+    "denied",
+    "rejected",
+    "failed"
+  ],
+  "lockedStatusValues": [
+    "pending",
+    "blocked",
+    "revoked",
+    "inactive",
+    "disabled",
+    "cancelled",
+    "canceled",
+    "denied",
+    "rejected",
+    "failed"
+  ],
+  "evidenceFields": [
+    "id",
+    "uid",
+    "accessId",
+    "planType",
+    "planCode",
+    "accessRank",
+    "productId",
+    "scopeType",
+    "module",
+    "itemType",
+    "itemId",
+    "itemIds",
+    "bundleId",
+    "course",
+    "status",
+    "accessFrom",
+    "accessUntil",
+    "noExpiry",
+    "untilManualChange",
+    "grantRevision"
+  ],
+  "authorityCollections": {
+    "grantLedger": "studentAccess",
+    "runtimeProjection": "studentEntitlements/{uid}/items/{entitlementId}",
+    "payments": "commercial_transaction_evidence_only",
+    "accessProducts": "catalog_terms_only"
+  },
+  "course": "CTET_TET",
+  "maxLengths": {
+    "uid": 256,
+    "resourceId": 256,
+    "projectionId": 256,
+    "grantId": 256,
+    "planCode": 64,
+    "productId": 256,
+    "module": 64,
+    "itemType": 64,
+    "bundleId": 256,
+    "course": 64,
+    "status": 32,
+    "timestamp": 64,
+    "code": 128,
+    "message": 256
+  },
+  "limits": {
+    "maxEvidenceRows": 512,
+    "maxBundleItemIds": 2048,
+    "maxAccessRank": 1000000,
+    "maxGrantRevision": 1000000000
+  },
+  "policy": {
+    "authoritativePrincipalUidOnly": true,
+    "sessionUidMustMatchPrincipal": true,
+    "callerPlanStatusRouteOverridesIgnored": true,
+    "runtimeProjectionIsReadModel": true,
+    "rawPaymentNeverAuthorizes": true,
+    "exactItemBindingRequired": true,
+    "bundleMembershipRequired": true,
+    "moduleBindingRequired": true,
+    "planRankRequiredForPlanAndModule": true,
+    "itemAndBundleGrantDoNotRequirePlanRankThreshold": true,
+    "activeTemporalWindowRequired": true,
+    "blockedRevokedExpiredNeverAllow": true,
+    "canonicalProjectionIdRequired": true,
+    "projectionEvidenceOnly": true,
+    "conflictingProjectionRowsFailClosed": true,
+    "multiplePlanProjectionRowsFailClosed": true,
+    "normalizationExceptionsReturnError": true,
+    "malformedEvidenceFailsClosed": true,
+    "overlapResolutionDeterministic": true,
+    "dependencyFailureReturnsError": true,
+    "noMatchReturnsLocked": true,
+    "defaultReturnsLocked": true,
+    "directFirebaseImportForbidden": true,
+    "runtimeOwnerRegistrationDeferred": true,
+    "providerActivationDeferred": true,
+    "firestoreTimestampCompatibilityRequired": true,
+    "javascriptDateCompatibilityRequired": true,
+    "expiryInclusiveAtExactMillisecond": true,
+    "timestampObjectsMustUseOwnDataProperties": true,
+    "timestampStringsMustBeCanonical": true,
+    "firestoreTimestampRangeRequired": true,
+    "epochMillisecondsCompatibilityRequired": true
+  }
+}

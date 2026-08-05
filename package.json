@@ -35,7 +35,8 @@
     "v26:bridge:foundation:test": "node src/integration/v26/productionBridgeFoundation.test.cjs",
     "v26:auth-service:test": "node src/integration/v26/authProductionService.test.cjs",
     "v26:canonical-resource:test": "node src/integration/v26/canonicalResourceService.test.cjs",
-    "v26:authorize-service:test": "node src/integration/v26/authorizeProductionService.test.cjs"
+    "v26:authorize-service:test": "node src/integration/v26/authorizeProductionService.test.cjs",
+    "v26:entitlement-decision:test": "node src/integration/v26/entitlementDecisionService.test.cjs"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "5.0.1",
