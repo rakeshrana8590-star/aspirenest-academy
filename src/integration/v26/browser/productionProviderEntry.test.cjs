@@ -59,6 +59,10 @@ const requiredFragments = [
   'createAuthorizeProductionService',
   'createHandlerRegistry',
   'createAdapterSurface',
+  'handlerRegistry.register(',
+  'const initialHandlerOwners = handlerRegistry.list();',
+  'const expectedInitialHandlerOwners = Object.freeze([',
+  'Provider initial handler owners are invalid.',
   'window.__aspirenestExactResourceAdapter = provider;',
 ];
 
@@ -70,8 +74,6 @@ for (const fragment of requiredFragments) {
 }
 
 const forbiddenFragments = [
-  '.register(',
-  'handlerRegistry.register',
   'setDoc',
   'addDoc',
   'updateDoc',
@@ -81,6 +83,7 @@ const forbiddenFragments = [
   'runtime/v26-shell',
   'build-v26-shell',
   'aspirenest-production-provider.js',
+  'Provider foundation must not assign runtime owners.',
 ];
 
 for (const fragment of forbiddenFragments) {
@@ -97,18 +100,52 @@ const providerAssignmentCount = (
 ).length;
 
 assert.strictEqual(providerAssignmentCount, 1);
+
+const registrationCallCount = (
+  text.match(/handlerRegistry\.register\(/g) || []
+).length;
+
+assert.strictEqual(registrationCallCount, 5);
+
+const expectedMethodOwnerFragments = [
+  '"getSession"',
+  '"login"',
+  '"logout"',
+  '"openCanonical"',
+  '"authorize"',
+  'owner: "authProductionService"',
+  'owner: "canonicalResourceService"',
+  'owner: "authorizeProductionService"',
+];
+
+for (const fragment of expectedMethodOwnerFragments) {
+  assert.ok(
+    text.includes(fragment),
+    `Missing initial handler fragment: ${fragment}`,
+  );
+}
+
 assert.ok(
-  text.includes('handlerRegistry.list().length !== 0'),
+  text.includes(
+    'JSON.stringify(initialHandlerOwners)',
+  ),
 );
 assert.ok(
   text.includes(
-    'Provider foundation must not assign runtime owners.',
+    'JSON.stringify(expectedInitialHandlerOwners)',
+  ),
+);
+assert.ok(
+  !text.includes(
+    'handlerRegistry.list().length !== 0',
   ),
 );
 
 console.log('PROVIDER_ENTRY_STATIC_CONTRACT=PASS');
 console.log('PROVIDER_GLOBAL_ASSIGNMENT_COUNT=1');
-console.log('PROVIDER_RUNTIME_OWNER_REGISTRATION_CALLS=0');
+console.log('PROVIDER_RUNTIME_OWNER_REGISTRATION_CALLS=5');
+console.log('INITIAL_IN_MEMORY_HANDLER_OWNER_COUNT=5');
+console.log('SAFE_DISABLED_METHODS_AFTER_PROVIDER_INIT=177');
 console.log('FIRESTORE_WRITE_SDK_IMPORTS=0');
 console.log('RUNTIME_PATH_REFERENCES=0');
 console.log('METHOD_REGISTRY_ROWS=182');

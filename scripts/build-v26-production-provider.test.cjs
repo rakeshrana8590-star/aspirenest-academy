@@ -73,7 +73,7 @@ function writeStubModules(root) {
       '}',
       'export async function signOut() {',
       '  mark("signOut");',
-      '  throw new Error("test auth call forbidden");',
+      '  return undefined;',
       '}',
       'export class GoogleAuthProvider {',
       '  constructor() { mark("GoogleAuthProvider"); }',
@@ -149,7 +149,7 @@ function createSandbox() {
   };
 }
 
-async function assertFailClosedProvider(bundleText) {
+async function assertInitialWiredProvider(bundleText) {
   const { calls, context } = createSandbox();
 
   new vm.Script(bundleText, {
@@ -185,14 +185,91 @@ async function assertFailClosedProvider(bundleText) {
     Object.values(calls).map(() => 0),
   );
 
-  for (const row of rows) {
+  const invokeOptions = (method) => Object.freeze({
+    requestId: `test-request-${method}`,
+    correlationId: `test-correlation-${method}`,
+    timeoutMs: 50,
+  });
+
+  const getSessionResult = await provider.getSession(
+    Object.freeze({}),
+    invokeOptions('getSession'),
+  );
+
+  assert.strictEqual(getSessionResult.ok, true);
+  assert.strictEqual(getSessionResult.code, 'OK');
+  assert.strictEqual(
+    getSessionResult.data.authenticated,
+    false,
+  );
+  assert.strictEqual(
+    getSessionResult.data.role,
+    'public',
+  );
+
+  const loginResult = await provider.login(
+    Object.freeze({}),
+    invokeOptions('login'),
+  );
+
+  assert.strictEqual(loginResult.ok, false);
+  assert.strictEqual(
+    loginResult.code,
+    'AUTH_INVALID_REQUEST',
+  );
+
+  const logoutResult = await provider.logout(
+    Object.freeze({}),
+    invokeOptions('logout'),
+  );
+
+  assert.strictEqual(logoutResult.ok, true);
+  assert.strictEqual(logoutResult.code, 'OK');
+  assert.strictEqual(
+    logoutResult.data.signedOut,
+    true,
+  );
+
+  const openCanonicalResult =
+    await provider.openCanonical(
+      Object.freeze({}),
+      invokeOptions('openCanonical'),
+    );
+
+  assert.strictEqual(openCanonicalResult.ok, false);
+  assert.strictEqual(
+    openCanonicalResult.code,
+    'CANONICAL_RESOURCE_INVALID_REQUEST',
+  );
+
+  const authorizeResult = await provider.authorize(
+    Object.freeze({}),
+    invokeOptions('authorize'),
+  );
+
+  assert.strictEqual(authorizeResult.ok, false);
+  assert.strictEqual(
+    authorizeResult.code,
+    'AUTHORIZE_INVALID_REQUEST',
+  );
+
+  const wiredMethods = new Set([
+    'authorize',
+    'getSession',
+    'login',
+    'logout',
+    'openCanonical',
+  ]);
+  const disabledRows = rows.filter(
+    (row) => !wiredMethods.has(row.name),
+  );
+
+  assert.strictEqual(disabledRows.length, 177);
+
+  for (const row of disabledRows) {
     const result = await provider[row.name](
       Object.freeze({}),
-      Object.freeze({
-        requestId: `test-request-${row.name}`,
-        correlationId: `test-correlation-${row.name}`,
-        timeoutMs: 50,
-      }),
+      invokeOptions(row.name),
     );
 
     assert.strictEqual(result.ok, false);
@@ -207,10 +284,17 @@ async function assertFailClosedProvider(bundleText) {
     );
   }
 
-  assert.deepStrictEqual(
-    Object.values(calls),
-    Object.values(calls).map(() => 0),
-  );
+  assert.strictEqual(calls.signOut, 1);
+
+  for (const [name, count] of Object.entries(calls)) {
+    if (name !== 'signOut') {
+      assert.strictEqual(
+        count,
+        0,
+        `Unexpected dependency call: ${name}`,
+      );
+    }
+  }
 }
 
 async function main() {
@@ -276,7 +360,7 @@ async function main() {
       fs.readFileSync(outputTwo, 'utf8'),
     );
 
-    await assertFailClosedProvider(
+    await assertInitialWiredProvider(
       fs.readFileSync(outputOne, 'utf8'),
     );
 
@@ -297,9 +381,11 @@ async function main() {
     console.log('PROVIDER_BROWSER_GLOBAL_EXPOSURE=PASS');
     console.log('DEPENDENCY_CALLS_DURING_PROVIDER_INIT=0');
     console.log('FIRESTORE_WRITES=0');
-    console.log('TEMP_HANDLER_REGISTRY_OWNER_COUNT=0');
+    console.log('PROVIDER_RUNTIME_OWNER_REGISTRATION_CALLS=5');
+    console.log('TEMP_HANDLER_REGISTRY_OWNER_COUNT=5');
+    console.log('INITIAL_WIRED_METHODS=5/5_PASS');
     console.log('PERSISTENT_REGISTRY_OWNER_ASSIGNMENTS=0');
-    console.log('FAIL_CLOSED_METHODS=182/182_PASS');
+    console.log('FAIL_CLOSED_METHODS=177/177_PASS');
     console.log('DETERMINISTIC_PROVIDER_BUILDS=2/2_IDENTICAL');
     console.log(`DETERMINISTIC_PROVIDER_SHA256=${first.sha256}`);
     console.log('RUNTIME_INDEX_CHANGE=NO');

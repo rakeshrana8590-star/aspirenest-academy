@@ -206,16 +206,100 @@ const authorizeProductionService =
   });
 
 const handlerRegistry = createHandlerRegistry();
+
+handlerRegistry.register(
+  "getSession",
+  () => authProductionService.getSession(),
+  Object.freeze({
+    owner: "authProductionService",
+  }),
+);
+
+handlerRegistry.register(
+  "login",
+  (payload) => authProductionService.login(payload),
+  Object.freeze({
+    owner: "authProductionService",
+  }),
+);
+
+handlerRegistry.register(
+  "logout",
+  () => authProductionService.logout(),
+  Object.freeze({
+    owner: "authProductionService",
+  }),
+);
+
+handlerRegistry.register(
+  "openCanonical",
+  (payload, context) =>
+    canonicalResourceService.getCanonicalResource({
+      ...(
+        payload
+        && typeof payload === "object"
+        && !Array.isArray(payload)
+          ? payload
+          : {}
+      ),
+      signal: context.signal,
+    }),
+  Object.freeze({
+    owner: "canonicalResourceService",
+  }),
+);
+
+handlerRegistry.register(
+  "authorize",
+  (payload, context) =>
+    authorizeProductionService.authorize(
+      payload,
+      Object.freeze({
+        signal: context.signal,
+      }),
+    ),
+  Object.freeze({
+    owner: "authorizeProductionService",
+  }),
+);
+
+const initialHandlerOwners = handlerRegistry.list();
+const expectedInitialHandlerOwners = Object.freeze([
+  Object.freeze({
+    method: "authorize",
+    owner: "authorizeProductionService",
+  }),
+  Object.freeze({
+    method: "getSession",
+    owner: "authProductionService",
+  }),
+  Object.freeze({
+    method: "login",
+    owner: "authProductionService",
+  }),
+  Object.freeze({
+    method: "logout",
+    owner: "authProductionService",
+  }),
+  Object.freeze({
+    method: "openCanonical",
+    owner: "canonicalResourceService",
+  }),
+]);
+
+if (
+  JSON.stringify(initialHandlerOwners)
+  !== JSON.stringify(expectedInitialHandlerOwners)
+) {
+  throw new TypeError(
+    "Provider initial handler owners are invalid.",
+  );
+}
+
 const provider = createAdapterSurface(
   methodNames,
   handlerRegistry,
 );
-
-if (handlerRegistry.list().length !== 0) {
-  throw new TypeError(
-    "Provider foundation must not assign runtime owners.",
-  );
-}
 
 const privateComposition = new WeakMap();
 
