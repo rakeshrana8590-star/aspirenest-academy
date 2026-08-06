@@ -1,7 +1,14 @@
 #!/usr/bin/env node
 'use strict';
 
+const fs = require('fs');
+const os = require('os');
 const path = require('path');
+
+const {
+  buildProviderBundle,
+  resolveProviderModuleRoots,
+} = require('./build-v26-production-provider.cjs');
 const {
   prepareProductionBundle,
 } = require('./v26-production-bundle-lib.cjs');
@@ -17,24 +24,63 @@ if (!zipPath || !outputRoot) {
   process.exit(2);
 }
 
-try {
-  const result = prepareProductionBundle({
-    zipPath: path.resolve(zipPath),
-    outputRoot: path.resolve(outputRoot),
-    allowlistPath: path.join(
-      repoRoot,
-      'config',
-      'v26-production-allowlist.txt',
+async function main() {
+  const tempRoot = fs.mkdtempSync(
+    path.join(
+      os.tmpdir(),
+      'aspirenest-v26-prepare-',
     ),
-    denylistPath: path.join(
-      repoRoot,
-      'config',
-      'v26-production-denylist.txt',
-    ),
-  });
+  );
+  const providerFile = path.join(
+    tempRoot,
+    'aspirenest-production-provider.js',
+  );
 
-  console.log(JSON.stringify(result, null, 2));
-} catch (error) {
-  console.error(error && error.stack ? error.stack : String(error));
-  process.exit(1);
+  try {
+    const provider = await buildProviderBundle({
+      outputFile: providerFile,
+      resolveModules:
+        resolveProviderModuleRoots(),
+    });
+
+    const prepared = prepareProductionBundle({
+      zipPath: path.resolve(zipPath),
+      outputRoot: path.resolve(outputRoot),
+      allowlistPath: path.join(
+        repoRoot,
+        'config',
+        'v26-production-allowlist.txt',
+      ),
+      denylistPath: path.join(
+        repoRoot,
+        'config',
+        'v26-production-denylist.txt',
+      ),
+      providerFile,
+    });
+
+    console.log(JSON.stringify({
+      ok: true,
+      provider,
+      prepared,
+      generatedProviderCommitted: false,
+    }, null, 2));
+  } finally {
+    fs.rmSync(
+      tempRoot,
+      {
+        recursive: true,
+        force: true,
+      },
+    );
+  }
 }
+
+main().catch((error) => {
+  console.error(
+    error && error.stack
+      ? error.stack
+      : String(error),
+  );
+  process.exit(1);
+});

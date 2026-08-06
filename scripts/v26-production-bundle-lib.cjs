@@ -9,6 +9,9 @@ const { spawnSync } = require('child_process');
 const EXPECTED_V26_SHA256 =
   'ee8ce82aea31f3e02a9c05d7afd9d28aa489e4dcff6a7c19674dcedf375044a4';
 
+const PRODUCTION_PROVIDER_RELATIVE_PATH =
+  'integration/aspirenest-production-provider.js';
+
 const REQUIRED_ADAPTER_METHODS = [
   'getSession',
   'login',
@@ -388,6 +391,98 @@ function parseQuotedLocalReferences(text) {
   return [...references].sort();
 }
 
+function composeProductionProvider({
+  bundleRoot,
+  providerFile,
+}) {
+  if (
+    !providerFile
+    || !fs.existsSync(providerFile)
+    || !fs.statSync(providerFile).isFile()
+  ) {
+    throw new Error(
+      'Production provider artifact is required for bundle composition.',
+    );
+  }
+
+  const providerPath = path.join(
+    bundleRoot,
+    PRODUCTION_PROVIDER_RELATIVE_PATH,
+  );
+  const indexPath = path.join(bundleRoot, 'index.html');
+  const swPath = path.join(bundleRoot, 'sw.js');
+
+  for (const requiredPath of [indexPath, swPath]) {
+    if (!fs.existsSync(requiredPath)) {
+      throw new Error(
+        `Required bundle composition file is missing: ${requiredPath}`,
+      );
+    }
+  }
+
+  const providerTag =
+    '  <script src="integration/aspirenest-production-provider.js"></script>';
+  const adapterTag =
+    '  <script src="integration/aspirenest-adapter.js"></script>';
+
+  let indexText = fs.readFileSync(indexPath, 'utf8');
+
+  if (indexText.includes(providerTag)) {
+    throw new Error(
+      'Production provider script is already present before composition.',
+    );
+  }
+
+  if (indexText.split(adapterTag).length !== 2) {
+    throw new Error(
+      'Production adapter script anchor must appear exactly once.',
+    );
+  }
+
+  indexText = indexText.replace(
+    adapterTag,
+    `${providerTag}\n${adapterTag}`,
+  );
+
+  const providerAsset =
+    "  'integration/aspirenest-production-provider.js',";
+  const adapterAsset =
+    "  'integration/aspirenest-adapter.js',";
+
+  let swText = fs.readFileSync(swPath, 'utf8');
+
+  if (swText.includes(providerAsset)) {
+    throw new Error(
+      'Production provider service-worker asset is already present.',
+    );
+  }
+
+  if (swText.split(adapterAsset).length !== 2) {
+    throw new Error(
+      'Production adapter service-worker anchor must appear exactly once.',
+    );
+  }
+
+  swText = swText.replace(
+    adapterAsset,
+    `${providerAsset}\n${adapterAsset}`,
+  );
+
+  ensureParent(providerPath);
+  fs.copyFileSync(providerFile, providerPath);
+  fs.writeFileSync(indexPath, indexText, 'utf8');
+  fs.writeFileSync(swPath, swText, 'utf8');
+
+  return Object.freeze({
+    providerRelativePath:
+      PRODUCTION_PROVIDER_RELATIVE_PATH,
+    providerSha256: sha256File(providerPath),
+    providerBytes: fs.statSync(providerPath).size,
+    providerBeforeAdapter: true,
+    serviceWorkerReferenceAdded: true,
+  });
+}
+
 function assertProductionBundle({
   bundleRoot,
   allowlistPath,
@@ -410,8 +505,18 @@ function assertProductionBundle({
     'integration',
     'aspirenest-adapter.js',
   );
+  const providerPath = path.join(
+    bundleRoot,
+    'integration',
+    'aspirenest-production-provider.js',
+  );
 
-  for (const filePath of [indexPath, swPath, adapterPath]) {
+  for (const filePath of [
+    indexPath,
+    swPath,
+    adapterPath,
+    providerPath,
+  ]) {
     if (!fs.existsSync(filePath)) {
       throw new Error(`Required bundle file is missing: ${filePath}`);
     }
@@ -420,8 +525,42 @@ function assertProductionBundle({
   const indexText = fs.readFileSync(indexPath, 'utf8');
   const swText = fs.readFileSync(swPath, 'utf8');
   const adapterText = fs.readFileSync(adapterPath, 'utf8');
+  const providerText = fs.readFileSync(providerPath, 'utf8');
 
   const contentViolations = [];
+
+  if (
+    !providerText.includes(
+      '__aspirenestExactResourceAdapter',
+    )
+  ) {
+    contentViolations.push(
+      'integration/aspirenest-production-provider.js:missing-provider-global',
+    );
+  }
+
+  if (
+    !providerText.includes(
+      'PRODUCTION_HANDLER_DISABLED',
+    )
+  ) {
+    contentViolations.push(
+      'integration/aspirenest-production-provider.js:missing-fail-closed-code',
+    );
+  }
+
+  if (
+    /^[ \t]*\/\/[#@][ \t]*sourceMappingURL=/m.test(
+      providerText,
+    )
+    || /\/\*[#@][ \t]*sourceMappingURL=[\s\S]*?\*\//.test(
+      providerText,
+    )
+  ) {
+    contentViolations.push(
+      'integration/aspirenest-production-provider.js:source-map-directive',
+    );
+  }
 
   const forbiddenContent = [
     ['demo-adapter.js', /demo-adapter\.js/],
@@ -471,6 +610,7 @@ function assertProductionBundle({
 
   const expectedScripts = [
     'vendor/jszip.min.js',
+    'integration/aspirenest-production-provider.js',
     'integration/aspirenest-adapter.js',
     'app.js',
   ];
@@ -488,6 +628,16 @@ function assertProductionBundle({
   const missingSwReferences = swReferences.filter(
     (item) => !actualFiles.includes(item),
   );
+
+  if (
+    !swReferences.includes(
+      'integration/aspirenest-production-provider.js',
+    )
+  ) {
+    contentViolations.push(
+      'sw.js:missing-production-provider-reference',
+    );
+  }
 
   const result = {
     ok:
@@ -522,6 +672,7 @@ function prepareProductionBundle({
   outputRoot,
   allowlistPath,
   denylistPath,
+  providerFile,
 }) {
   const actualSha = sha256File(zipPath);
 
@@ -544,7 +695,10 @@ function prepareProductionBundle({
     fs.mkdirSync(outputRoot, { recursive: true });
 
     for (const relativePath of allowlist) {
-      if (relativePath === 'integration/aspirenest-adapter.js') {
+      if (
+        relativePath === 'integration/aspirenest-adapter.js'
+        || relativePath === PRODUCTION_PROVIDER_RELATIVE_PATH
+      ) {
         continue;
       }
       copyFile(sourceRoot, outputRoot, relativePath);
@@ -591,6 +745,11 @@ function prepareProductionBundle({
       'utf8',
     );
 
+    const composition = composeProductionProvider({
+      bundleRoot: outputRoot,
+      providerFile,
+    });
+
     const assertion = assertProductionBundle({
       bundleRoot: outputRoot,
       allowlistPath,
@@ -602,6 +761,7 @@ function prepareProductionBundle({
       sourceRoot,
       outputRoot,
       productionAdapterMethodCount: methodNames.length,
+      composition,
       assertion,
     };
   } finally {
@@ -611,7 +771,9 @@ function prepareProductionBundle({
 
 module.exports = {
   EXPECTED_V26_SHA256,
+  PRODUCTION_PROVIDER_RELATIVE_PATH,
   assertProductionBundle,
+  composeProductionProvider,
   listFiles,
   prepareProductionBundle,
   readList,

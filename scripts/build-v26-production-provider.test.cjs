@@ -9,8 +9,10 @@ const path = require('path');
 const vm = require('vm');
 
 const {
+  StripSourceMapDirectivesPlugin,
   buildProviderBundle,
   createProviderWebpackConfig,
+  defaultFirebaseRuntimePath,
   repoRoot,
 } = require('./build-v26-production-provider.cjs');
 
@@ -53,6 +55,7 @@ function writeStubModules(root) {
     [
       'export const auth = Object.freeze({ currentUser: null });',
       'export const db = Object.freeze({ kind: "test-db" });',
+      '//# sourceMappingURL=firebase-runtime-stub.js.map',
       '',
     ].join('\n'),
   );
@@ -79,6 +82,7 @@ function writeStubModules(root) {
       '  constructor() { mark("GoogleAuthProvider"); }',
       '  setCustomParameters() { mark("setCustomParameters"); }',
       '}',
+      '//# sourceMappingURL=firebase-auth-stub.js.map',
       '',
     ].join('\n'),
   );
@@ -105,6 +109,7 @@ function writeStubModules(root) {
       '  mark("getDocs");',
       '  throw new Error("test firestore read forbidden");',
       '}',
+      '//# sourceMappingURL=firebase-firestore-stub.js.map',
       '',
     ].join('\n'),
   );
@@ -360,6 +365,29 @@ async function main() {
 
   try {
     const aliases = writeStubModules(tempRoot);
+    const defaultConfig = createProviderWebpackConfig({
+      outputFile: path.join(
+        tempRoot,
+        'default-config',
+        'aspirenest-production-provider.js',
+      ),
+    });
+
+    assert.strictEqual(
+      defaultConfig.resolve.alias[
+        '@aspirenest/firebase-runtime$'
+      ],
+      defaultFirebaseRuntimePath,
+    );
+    assert.strictEqual(
+      defaultConfig.plugins.length,
+      1,
+    );
+    assert.ok(
+      defaultConfig.plugins[0]
+        instanceof StripSourceMapDirectivesPlugin,
+    );
+
     const outputOne = path.join(
       tempRoot,
       'first',
@@ -410,6 +438,27 @@ async function main() {
       fs.readFileSync(outputTwo, 'utf8'),
     );
 
+    const bundleText =
+      fs.readFileSync(outputOne, 'utf8');
+
+    assert.ok(
+      !/^[ \t]*\/\/[#@][ \t]*sourceMappingURL=/m.test(
+        bundleText,
+      ),
+    );
+    assert.ok(
+      !/\/\*[#@][ \t]*sourceMappingURL=[\s\S]*?\*\//.test(
+        bundleText,
+      ),
+    );
+    assert.deepStrictEqual(
+      first.sourceMapPolicy,
+      {
+        magicDirectiveCount: 0,
+        sourceMapAssetCount: 0,
+      },
+    );
+
     await assertInitialWiredProvider(
       fs.readFileSync(outputOne, 'utf8'),
     );
@@ -441,6 +490,10 @@ async function main() {
     console.log('FAIL_CLOSED_METHODS=177/177_PASS');
     console.log('DETERMINISTIC_PROVIDER_BUILDS=2/2_IDENTICAL');
     console.log(`DETERMINISTIC_PROVIDER_SHA256=${first.sha256}`);
+    console.log('DEDICATED_PROVIDER_FIREBASE_RUNTIME_ALIAS=PASS');
+    console.log('SOURCE_MAP_STRIP_PLUGIN=PASS');
+    console.log('PROVIDER_SOURCE_MAP_MAGIC_DIRECTIVE_COUNT=0');
+    console.log('PROVIDER_SOURCE_MAP_ASSET_COUNT=0');
     console.log('RUNTIME_INDEX_CHANGE=NO');
     console.log('BUILD_V26_SHELL_CHANGE=NO');
     console.log('GENERATED_RUNTIME_PROVIDER_ARTIFACT=NO');

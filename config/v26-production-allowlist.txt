@@ -12,3 +12,4 @@ manifest.webmanifest
 styles.css
 sw.js
 vendor/jszip.min.js
+integration/aspirenest-production-provider.js

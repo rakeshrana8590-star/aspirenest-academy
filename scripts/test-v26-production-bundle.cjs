@@ -4,6 +4,11 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+
+const {
+  buildProviderBundle,
+  resolveProviderModuleRoots,
+} = require('./build-v26-production-provider.cjs');
 const {
   assertProductionBundle,
   prepareProductionBundle,
@@ -22,8 +27,21 @@ if (!zipPath) {
 const ownTemp = !process.argv[3];
 const workRoot = process.argv[3]
   ? path.resolve(process.argv[3])
-  : fs.mkdtempSync(path.join(os.tmpdir(), 'aspirenest-v26-test-'));
-const bundleRoot = path.join(workRoot, 'production-bundle');
+  : fs.mkdtempSync(
+      path.join(
+        os.tmpdir(),
+        'aspirenest-v26-test-',
+      ),
+    );
+const bundleRoot = path.join(
+  workRoot,
+  'production-bundle',
+);
+const providerFile = path.join(
+  workRoot,
+  'provider',
+  'aspirenest-production-provider.js',
+);
 const allowlistPath = path.join(
   repoRoot,
   'config',
@@ -35,14 +53,19 @@ const denylistPath = path.join(
   'v26-production-denylist.txt',
 );
 
-function assertExpectedFailure(label, action) {
+function assertExpectedFailure(
+  label,
+  action,
+) {
   let failed = false;
 
   try {
     action();
-  } catch (error) {
+  } catch (_) {
     failed = true;
-    console.log(`EXPECTED_FAILURE_PASS=${label}`);
+    console.log(
+      `EXPECTED_FAILURE_PASS=${label}`,
+    );
   }
 
   if (!failed) {
@@ -52,15 +75,31 @@ function assertExpectedFailure(label, action) {
   }
 }
 
-try {
-  fs.rmSync(workRoot, { recursive: true, force: true });
-  fs.mkdirSync(workRoot, { recursive: true });
+async function main() {
+  fs.rmSync(
+    workRoot,
+    {
+      recursive: true,
+      force: true,
+    },
+  );
+  fs.mkdirSync(
+    workRoot,
+    { recursive: true },
+  );
+
+  const provider = await buildProviderBundle({
+    outputFile: providerFile,
+    resolveModules:
+      resolveProviderModuleRoots(),
+  });
 
   const prepared = prepareProductionBundle({
     zipPath: path.resolve(zipPath),
     outputRoot: bundleRoot,
     allowlistPath,
     denylistPath,
+    providerFile,
   });
 
   const baseline = assertProductionBundle({
@@ -74,79 +113,220 @@ try {
     'integration',
     'demo-adapter.js',
   );
-  fs.writeFileSync(forbiddenDemo, 'window.AspireNestDemoAdapter = {};\n');
-  assertExpectedFailure('DEMO_ADAPTER_FILE', () =>
-    assertProductionBundle({
-      bundleRoot,
-      allowlistPath,
-      denylistPath,
-    }),
+  fs.writeFileSync(
+    forbiddenDemo,
+    'window.AspireNestDemoAdapter = {};\n',
+  );
+  assertExpectedFailure(
+    'DEMO_ADAPTER_FILE',
+    () =>
+      assertProductionBundle({
+        bundleRoot,
+        allowlistPath,
+        denylistPath,
+      }),
   );
   fs.rmSync(forbiddenDemo);
 
-  const indexPath = path.join(bundleRoot, 'index.html');
-  const cleanIndex = fs.readFileSync(indexPath, 'utf8');
+  const indexPath = path.join(
+    bundleRoot,
+    'index.html',
+  );
+  const swPath = path.join(
+    bundleRoot,
+    'sw.js',
+  );
+  const outputProviderPath = path.join(
+    bundleRoot,
+    'integration',
+    'aspirenest-production-provider.js',
+  );
+
+  const cleanIndex =
+    fs.readFileSync(indexPath, 'utf8');
+  const cleanSw =
+    fs.readFileSync(swPath, 'utf8');
+  const cleanProvider =
+    fs.readFileSync(
+      outputProviderPath,
+      'utf8',
+    );
+
   fs.writeFileSync(
     indexPath,
     cleanIndex.replace(
       '<script src="integration/aspirenest-adapter.js"></script>',
-      '<script src="integration/demo-adapter.js"></script>\n' +
-        '  <script src="integration/aspirenest-adapter.js"></script>',
+      '<script src="integration/demo-adapter.js"></script>\n'
+        + '  <script src="integration/aspirenest-adapter.js"></script>',
     ),
   );
-  assertExpectedFailure('DEMO_ADAPTER_REFERENCE', () =>
-    assertProductionBundle({
-      bundleRoot,
-      allowlistPath,
-      denylistPath,
-    }),
+  assertExpectedFailure(
+    'DEMO_ADAPTER_REFERENCE',
+    () =>
+      assertProductionBundle({
+        bundleRoot,
+        allowlistPath,
+        denylistPath,
+      }),
   );
-  fs.writeFileSync(indexPath, cleanIndex);
+  fs.writeFileSync(
+    indexPath,
+    cleanIndex,
+  );
 
   const evidencePath = path.join(
     bundleRoot,
     'evidence',
     'should-not-deploy.txt',
   );
-  fs.mkdirSync(path.dirname(evidencePath), { recursive: true });
-  fs.writeFileSync(evidencePath, 'forbidden\n');
-  assertExpectedFailure('EVIDENCE_FILE', () =>
+  fs.mkdirSync(
+    path.dirname(evidencePath),
+    { recursive: true },
+  );
+  fs.writeFileSync(
+    evidencePath,
+    'forbidden\n',
+  );
+  assertExpectedFailure(
+    'EVIDENCE_FILE',
+    () =>
+      assertProductionBundle({
+        bundleRoot,
+        allowlistPath,
+        denylistPath,
+      }),
+  );
+  fs.rmSync(
+    path.dirname(evidencePath),
+    {
+      recursive: true,
+      force: true,
+    },
+  );
+
+  fs.rmSync(outputProviderPath);
+  assertExpectedFailure(
+    'MISSING_PROVIDER',
+    () =>
+      assertProductionBundle({
+        bundleRoot,
+        allowlistPath,
+        denylistPath,
+      }),
+  );
+  fs.writeFileSync(
+    outputProviderPath,
+    cleanProvider,
+  );
+
+  fs.writeFileSync(
+    indexPath,
+    cleanIndex.replace(
+      '  <script src="integration/aspirenest-production-provider.js"></script>\n'
+        + '  <script src="integration/aspirenest-adapter.js"></script>',
+      '  <script src="integration/aspirenest-adapter.js"></script>\n'
+        + '  <script src="integration/aspirenest-production-provider.js"></script>',
+    ),
+  );
+  assertExpectedFailure(
+    'WRONG_PROVIDER_SCRIPT_ORDER',
+    () =>
+      assertProductionBundle({
+        bundleRoot,
+        allowlistPath,
+        denylistPath,
+      }),
+  );
+  fs.writeFileSync(
+    indexPath,
+    cleanIndex,
+  );
+
+  fs.writeFileSync(
+    outputProviderPath,
+    `${cleanProvider}\n//# sourceMappingURL=forbidden.map\n`,
+  );
+  assertExpectedFailure(
+    'PROVIDER_SOURCE_MAP_DIRECTIVE',
+    () =>
+      assertProductionBundle({
+        bundleRoot,
+        allowlistPath,
+        denylistPath,
+      }),
+  );
+  fs.writeFileSync(
+    outputProviderPath,
+    cleanProvider,
+  );
+
+  fs.writeFileSync(
+    swPath,
+    cleanSw.replace(
+      "  'integration/aspirenest-production-provider.js',\n",
+      '',
+    ),
+  );
+  assertExpectedFailure(
+    'MISSING_PROVIDER_SW_REFERENCE',
+    () =>
+      assertProductionBundle({
+        bundleRoot,
+        allowlistPath,
+        denylistPath,
+      }),
+  );
+  fs.writeFileSync(
+    swPath,
+    cleanSw,
+  );
+
+  const finalAssertion =
     assertProductionBundle({
       bundleRoot,
       allowlistPath,
       denylistPath,
-    }),
-  );
-  fs.rmSync(path.dirname(evidencePath), {
-    recursive: true,
-    force: true,
-  });
+    });
 
-  const finalAssertion = assertProductionBundle({
+  console.log(JSON.stringify({
+    ok: true,
+    provider,
+    prepared,
+    baseline,
+    finalAssertion,
+    negativeTests: 7,
     bundleRoot,
-    allowlistPath,
-    denylistPath,
-  });
+  }, null, 2));
 
   console.log(
-    JSON.stringify(
-      {
-        ok: true,
-        prepared,
-        baseline,
-        finalAssertion,
-        negativeTests: 3,
-        bundleRoot,
-      },
-      null,
-      2,
-    ),
+    'PRODUCTION_BUNDLE_NEGATIVE_TESTS=7/7_PASS',
   );
-} catch (error) {
-  console.error(error && error.stack ? error.stack : String(error));
-  process.exitCode = 1;
-} finally {
-  if (ownTemp) {
-    fs.rmSync(workRoot, { recursive: true, force: true });
-  }
+  console.log(
+    'PRODUCTION_PROVIDER_BEFORE_ADAPTER=PASS',
+  );
+  console.log(
+    'PRODUCTION_PROVIDER_SERVICE_WORKER_REFERENCE=PASS',
+  );
+  console.log(
+    'PRODUCTION_PROVIDER_SOURCE_MAP_POLICY=PASS',
+  );
 }
+
+main().catch((error) => {
+  console.error(
+    error && error.stack
+      ? error.stack
+      : String(error),
+  );
+  process.exitCode = 1;
+}).finally(() => {
+  if (ownTemp) {
+    fs.rmSync(
+      workRoot,
+      {
+        recursive: true,
+        force: true,
+      },
+    );
+  }
+});
