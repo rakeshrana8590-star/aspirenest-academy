@@ -40,16 +40,16 @@ test("resolves emulator mode before Firebase initialization", () => {
   ).toBeLessThan(source.indexOf("initializeApp(firebaseConfig)"));
 });
 
-test("uses a demo Firebase configuration before initialization", () => {
+test("uses validated Firebase runtime configuration before initialization", () => {
   expect(source).toContain("buildFirebaseRuntimeConfig");
   expect(source).toMatch(
-    /buildFirebaseRuntimeConfig\([\s\S]*productionFirebaseConfig/
+    /buildFirebaseRuntimeConfig\([\s\S]*firebaseProjectRuntime\.config/
   );
 });
 
 test("disables Analytics during local browser acceptance", () => {
   expect(source).toMatch(
-    /analytics\s*=\s*firebaseEmulatorRuntime\.enabled[\s\S]*\?\s*null/
+    /analytics\s*=\s*[\s\S]*app\s*&&\s*!firebaseEmulatorRuntime\.enabled[\s\S]*\?\s*getAnalytics\(app\)[\s\S]*:\s*null/
   );
 });
 

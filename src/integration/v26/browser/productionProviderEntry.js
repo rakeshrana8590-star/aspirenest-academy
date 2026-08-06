@@ -1,6 +1,7 @@
 import {
   auth,
   db,
+  productionProviderFirebaseRuntime,
 } from "@aspirenest/firebase-runtime";
 import {
   GoogleAuthProvider,
@@ -149,119 +150,136 @@ if (
   );
 }
 
-const firestoreReadDependencyAdapter =
-  createFirestoreReadDependencyAdapter({
-    db,
-    doc,
-    collection,
-    getDoc,
-    getDocs,
-  });
-
-const roleExperienceDependencyAdapter =
-  createRoleExperienceDependencyAdapter({
-    identityContract,
-    readProfileByCollection:
-      firestoreReadDependencyAdapter.readProfileByCollection,
-  });
-
-const firebaseAuthDependencyAdapter =
-  createFirebaseAuthDependencyAdapter({
-    auth,
-    signInWithEmailAndPassword,
-    signInWithPopup,
-    signOut,
-    GoogleAuthProvider,
-    roleExperienceDependencyAdapter,
-  });
-
-const authProductionService =
-  createAuthProductionService(
-    firebaseAuthDependencyAdapter,
-  );
-
-const canonicalResourceService =
-  createCanonicalResourceService({
-    readResourceById:
-      firestoreReadDependencyAdapter.readResourceById,
-  });
-
-const entitlementDecisionService =
-  createEntitlementDecisionService({
-    listEntitlementEvidence:
-      firestoreReadDependencyAdapter.listEntitlementEvidence,
-  });
-
-const authorizeProductionService =
-  createAuthorizeProductionService({
-    getAuthoritativeSession:
-      firebaseAuthDependencyAdapter
-        .createAuthoritativeSessionReader(
-          authProductionService,
-        ),
-    getCanonicalResource:
-      canonicalResourceService.getCanonicalResource,
-    resolveEntitlementDecision:
-      entitlementDecisionService.resolveEntitlementDecision,
-  });
+const providerRuntimeEnabled = Boolean(
+  productionProviderFirebaseRuntime
+  && productionProviderFirebaseRuntime.enabled
+  && auth
+  && db
+);
 
 const handlerRegistry = createHandlerRegistry();
 
-handlerRegistry.register(
-  "getSession",
-  () => authProductionService.getSession(),
-  Object.freeze({
-    owner: "authProductionService",
-  }),
-);
+let firestoreReadDependencyAdapter = null;
+let roleExperienceDependencyAdapter = null;
+let firebaseAuthDependencyAdapter = null;
+let authProductionService = null;
+let canonicalResourceService = null;
+let entitlementDecisionService = null;
+let authorizeProductionService = null;
 
-handlerRegistry.register(
-  "login",
-  (payload) => authProductionService.login(payload),
-  Object.freeze({
-    owner: "authProductionService",
-  }),
-);
+if (providerRuntimeEnabled) {
+  firestoreReadDependencyAdapter =
+    createFirestoreReadDependencyAdapter({
+      db,
+      doc,
+      collection,
+      getDoc,
+      getDocs,
+    });
 
-handlerRegistry.register(
-  "logout",
-  () => authProductionService.logout(),
-  Object.freeze({
-    owner: "authProductionService",
-  }),
-);
+  roleExperienceDependencyAdapter =
+    createRoleExperienceDependencyAdapter({
+      identityContract,
+      readProfileByCollection:
+        firestoreReadDependencyAdapter.readProfileByCollection,
+    });
 
-handlerRegistry.register(
-  "openCanonical",
-  (payload, context) =>
-    canonicalResourceService.getCanonicalResource({
-      ...(
-        payload
-        && typeof payload === "object"
-        && !Array.isArray(payload)
-          ? payload
-          : {}
-      ),
-      signal: context.signal,
+  firebaseAuthDependencyAdapter =
+    createFirebaseAuthDependencyAdapter({
+      auth,
+      signInWithEmailAndPassword,
+      signInWithPopup,
+      signOut,
+      GoogleAuthProvider,
+      roleExperienceDependencyAdapter,
+    });
+
+  authProductionService =
+    createAuthProductionService(
+      firebaseAuthDependencyAdapter,
+    );
+
+  canonicalResourceService =
+    createCanonicalResourceService({
+      readResourceById:
+        firestoreReadDependencyAdapter.readResourceById,
+    });
+
+  entitlementDecisionService =
+    createEntitlementDecisionService({
+      listEntitlementEvidence:
+        firestoreReadDependencyAdapter.listEntitlementEvidence,
+    });
+
+  authorizeProductionService =
+    createAuthorizeProductionService({
+      getAuthoritativeSession:
+        firebaseAuthDependencyAdapter
+          .createAuthoritativeSessionReader(
+            authProductionService,
+          ),
+      getCanonicalResource:
+        canonicalResourceService.getCanonicalResource,
+      resolveEntitlementDecision:
+        entitlementDecisionService.resolveEntitlementDecision,
+    });
+
+  handlerRegistry.register(
+    "getSession",
+    () => authProductionService.getSession(),
+    Object.freeze({
+      owner: "authProductionService",
     }),
-  Object.freeze({
-    owner: "canonicalResourceService",
-  }),
-);
+  );
 
-handlerRegistry.register(
-  "authorize",
-  (payload, context) =>
-    authorizeProductionService.authorize(
-      payload,
-      Object.freeze({
+  handlerRegistry.register(
+    "login",
+    (payload) => authProductionService.login(payload),
+    Object.freeze({
+      owner: "authProductionService",
+    }),
+  );
+
+  handlerRegistry.register(
+    "logout",
+    () => authProductionService.logout(),
+    Object.freeze({
+      owner: "authProductionService",
+    }),
+  );
+
+  handlerRegistry.register(
+    "openCanonical",
+    (payload, context) =>
+      canonicalResourceService.getCanonicalResource({
+        ...(
+          payload
+          && typeof payload === "object"
+          && !Array.isArray(payload)
+            ? payload
+            : {}
+        ),
         signal: context.signal,
       }),
-    ),
-  Object.freeze({
-    owner: "authorizeProductionService",
-  }),
-);
+    Object.freeze({
+      owner: "canonicalResourceService",
+    }),
+  );
+
+  handlerRegistry.register(
+    "authorize",
+    (payload, context) =>
+      authorizeProductionService.authorize(
+        payload,
+        Object.freeze({
+          signal: context.signal,
+        }),
+      ),
+    Object.freeze({
+      owner: "authorizeProductionService",
+    }),
+  );
+}
 
 const initialHandlerOwners = handlerRegistry.list();
 const expectedInitialHandlerOwners = Object.freeze([
@@ -286,19 +304,76 @@ const expectedInitialHandlerOwners = Object.freeze([
     owner: "canonicalResourceService",
   }),
 ]);
+const expectedProviderHandlerOwners =
+  providerRuntimeEnabled
+    ? expectedInitialHandlerOwners
+    : Object.freeze([]);
+const expectedInitialHandlerOwnersJson =
+  JSON.stringify(expectedInitialHandlerOwners);
+const expectedProviderHandlerOwnersJson =
+  providerRuntimeEnabled
+    ? expectedInitialHandlerOwnersJson
+    : JSON.stringify(expectedProviderHandlerOwners);
 
 if (
   JSON.stringify(initialHandlerOwners)
-  !== JSON.stringify(expectedInitialHandlerOwners)
+  !== expectedProviderHandlerOwnersJson
 ) {
   throw new TypeError(
     "Provider initial handler owners are invalid.",
   );
 }
 
+const providerInvocationRegistry =
+  providerRuntimeEnabled
+    ? handlerRegistry
+    : Object.freeze({
+        invoke: async (method, payload, options) => {
+          const envelope = await handlerRegistry.invoke(
+            method,
+            payload,
+            options,
+          );
+          const runtimeError =
+            productionProviderFirebaseRuntime
+            && productionProviderFirebaseRuntime.error
+              ? productionProviderFirebaseRuntime.error
+              : null;
+
+          return Object.freeze({
+            ...envelope,
+            message:
+              `Firebase provider runtime is disabled for ${method}.`,
+            details: Object.freeze({
+              ...(
+                envelope.details
+                && typeof envelope.details === "object"
+                  ? envelope.details
+                  : {}
+              ),
+              ownerState:
+                "SAFE_DISABLED_FIREBASE_RUNTIME",
+              runtimeCode:
+                runtimeError
+                && typeof runtimeError.code === "string"
+                  ? runtimeError.code
+                  : "FIREBASE_PROVIDER_RUNTIME_DISABLED",
+              missingFields: Object.freeze([
+                ...(
+                  runtimeError
+                  && Array.isArray(runtimeError.missingFields)
+                    ? runtimeError.missingFields
+                    : []
+                ),
+              ]),
+            }),
+          });
+        },
+      });
+
 const provider = createAdapterSurface(
   methodNames,
-  handlerRegistry,
+  providerInvocationRegistry,
 );
 
 const privateComposition = new WeakMap();
@@ -306,6 +381,8 @@ const privateComposition = new WeakMap();
 privateComposition.set(
   provider,
   Object.freeze({
+    providerRuntimeEnabled,
+    productionProviderFirebaseRuntime,
     firestoreReadDependencyAdapter,
     roleExperienceDependencyAdapter,
     firebaseAuthDependencyAdapter,

@@ -1,6 +1,12 @@
-import { initializeApp } from "firebase/app";
+import {
+  getApp,
+  getApps,
+  initializeApp,
+} from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { productionFirebaseConfig } from "./firebaseProjectConfig";
+import {
+  resolveFirebaseProjectConfig,
+} from "./firebaseProjectConfig";
 import {
   connectAuthEmulator,
   getAuth,
@@ -22,24 +28,55 @@ import {
   resolveFirebaseEmulatorRuntime,
 } from "./firebaseEmulatorRuntime";
 
-
 export const firebaseEmulatorRuntime =
   resolveFirebaseEmulatorRuntime();
 
-const firebaseConfig = buildFirebaseRuntimeConfig(
-  productionFirebaseConfig,
-  firebaseEmulatorRuntime
-);
+export const firebaseProjectRuntime =
+  resolveFirebaseProjectConfig();
 
-const app = initializeApp(firebaseConfig);
+const firebaseConfig = firebaseProjectRuntime.enabled
+  ? buildFirebaseRuntimeConfig(
+      firebaseProjectRuntime.config,
+      firebaseEmulatorRuntime
+    )
+  : null;
 
-export const auth = getAuth(app);
+let app = null;
+let initializationErrorCode = "";
 
-export const db = getFirestore(app);
+if (firebaseConfig) {
+  try {
+    app = getApps().length
+      ? getApp()
+      : initializeApp(firebaseConfig);
+  } catch {
+    app = null;
+    initializationErrorCode =
+      "FIREBASE_INITIALIZATION_FAILED";
+  }
+}
 
-export const storage = getStorage(app);
+export const firebaseInitializationRuntime =
+  Object.freeze({
+    enabled: Boolean(app),
+    environment: firebaseProjectRuntime.environment,
+    errorCode:
+      firebaseProjectRuntime.error?.code ||
+      initializationErrorCode,
+    missingFields: Object.freeze([
+      ...(firebaseProjectRuntime.error?.missingFields || []),
+    ]),
+  });
 
-export const functions = getFunctions(app, "asia-south1");
+export const auth = app ? getAuth(app) : null;
+
+export const db = app ? getFirestore(app) : null;
+
+export const storage = app ? getStorage(app) : null;
+
+export const functions = app
+  ? getFunctions(app, "asia-south1")
+  : null;
 
 const runtimeGlobal =
   typeof globalThis !== "undefined" ? globalThis : {};
@@ -53,7 +90,10 @@ const connectionRegistry =
 runtimeGlobal[registryKey] = connectionRegistry;
 
 const connectOnce = (serviceKey, connector) => {
-  const key = `${app.name}:${firebaseEmulatorRuntime.projectId}:${serviceKey}`;
+  const key =
+    `${app.name}:` +
+    `${firebaseEmulatorRuntime.projectId}:` +
+    serviceKey;
 
   if (connectionRegistry.has(key)) return;
 
@@ -61,7 +101,7 @@ const connectOnce = (serviceKey, connector) => {
   connectionRegistry.add(key);
 };
 
-if (firebaseEmulatorRuntime.enabled) {
+if (app && firebaseEmulatorRuntime.enabled) {
   const {
     host,
     authPort,
@@ -95,8 +135,9 @@ if (firebaseEmulatorRuntime.enabled) {
   });
 }
 
-export const analytics = firebaseEmulatorRuntime.enabled
-  ? null
-  : getAnalytics(app);
+export const analytics =
+  app && !firebaseEmulatorRuntime.enabled
+    ? getAnalytics(app)
+    : null;
 
 export default app;

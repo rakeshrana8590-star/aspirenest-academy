@@ -1,20 +1,40 @@
-import {
-  getApp,
-  getApps,
-  initializeApp,
-} from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import app, {
+  auth,
+  db,
+  firebaseInitializationRuntime,
+} from "../../../firebase.js";
 
-import {
-  productionFirebaseConfig,
-} from "../../../firebaseProjectConfig.js";
+const providerEnabled = Boolean(
+  firebaseInitializationRuntime.enabled &&
+  app &&
+  auth &&
+  db
+);
 
-const app = getApps().length
-  ? getApp()
-  : initializeApp(productionFirebaseConfig);
+export const productionProviderFirebaseRuntime =
+  Object.freeze({
+    enabled: providerEnabled,
+    app: providerEnabled ? app : null,
+    auth: providerEnabled ? auth : null,
+    db: providerEnabled ? db : null,
+    environment:
+      firebaseInitializationRuntime.environment,
+    error: providerEnabled
+      ? null
+      : Object.freeze({
+          code:
+            firebaseInitializationRuntime.errorCode ||
+            "FIREBASE_PROVIDER_RUNTIME_DISABLED",
+          missingFields: Object.freeze([
+            ...firebaseInitializationRuntime.missingFields,
+          ]),
+        }),
+  });
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+export {
+  auth,
+  db,
+  firebaseInitializationRuntime,
+};
 
 export default app;
