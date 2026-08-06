@@ -172,6 +172,56 @@ async function assertInitialWiredProvider(bundleText) {
   assert.strictEqual(rows.length, 182);
   assert.strictEqual(Object.keys(provider).length, 182);
 
+  const expectedDeferredMethods = Object.freeze({
+    recordAttempt: Object.freeze({
+      deferredOwnerPhases: Object.freeze(['4.2', '6.1']),
+      deferReason:
+        'MOCK_SERVER_AUTHORITY_AND_IDEMPOTENCY_NOT_OWNED_BY_LP1',
+    }),
+    recordProgress: Object.freeze({
+      deferredOwnerPhases: Object.freeze(['4.7']),
+      deferReason:
+        'CANONICAL_CROSS_MODULE_PROGRESS_PERSISTENCE_NOT_OWNED_BY_LP1',
+    }),
+    recordStudyAction: Object.freeze({
+      deferredOwnerPhases: Object.freeze(['4.1', '4.4']),
+      deferReason:
+        'PRIVATE_NOTE_VIDEO_STUDY_ACTION_PERSISTENCE_NOT_OWNED_BY_LP1',
+    }),
+    requestMentorHelp: Object.freeze({
+      deferredOwnerPhases: Object.freeze(['5.2']),
+      deferReason:
+        'ASSIGNED_LEARNER_MENTOR_QUESTION_AUTHORITY_NOT_OWNED_BY_LP1',
+    }),
+  });
+
+  const explicitlyDeferredMethods = rows.filter(
+    (row) =>
+      row.auditClassification ===
+      'INTENTIONALLY_SAFE_DISABLED_DEFERRED_TO_OWNER_PHASE',
+  );
+
+  assert.strictEqual(explicitlyDeferredMethods.length, 4);
+
+  for (const row of explicitlyDeferredMethods) {
+    const expected = expectedDeferredMethods[row.name];
+
+    assert.ok(expected);
+    assert.deepStrictEqual(
+      row.deferredOwnerPhases,
+      expected.deferredOwnerPhases,
+    );
+    assert.strictEqual(
+      row.deferReason,
+      expected.deferReason,
+    );
+    assert.strictEqual(
+      row.ownerState,
+      'SAFE_DISABLED_PENDING_OWNER',
+    );
+    assert.strictEqual(row.owner, null);
+  }
+
   for (const row of rows) {
     assert.strictEqual(
       typeof provider[row.name],
@@ -385,6 +435,9 @@ async function main() {
     console.log('TEMP_HANDLER_REGISTRY_OWNER_COUNT=5');
     console.log('INITIAL_WIRED_METHODS=5/5_PASS');
     console.log('PERSISTENT_REGISTRY_OWNER_ASSIGNMENTS=0');
+    console.log('EXPLICIT_SAFE_DISABLED_METADATA_ROWS=4');
+    console.log('EXPLICIT_SAFE_DISABLED_METADATA_CLOSURE=4/4_PASS');
+    console.log('PERSISTENT_RUNTIME_OWNER_ASSIGNMENT_CHANGE=NO');
     console.log('FAIL_CLOSED_METHODS=177/177_PASS');
     console.log('DETERMINISTIC_PROVIDER_BUILDS=2/2_IDENTICAL');
     console.log(`DETERMINISTIC_PROVIDER_SHA256=${first.sha256}`);

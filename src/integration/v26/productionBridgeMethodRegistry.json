@@ -778,7 +778,12 @@
       "launchCore": true,
       "ownerState": "SAFE_DISABLED_PENDING_OWNER",
       "owner": null,
-      "auditClassification": "REFERENCE_ONLY_NO_HANDLER_PROOF",
+      "auditClassification": "INTENTIONALLY_SAFE_DISABLED_DEFERRED_TO_OWNER_PHASE",
+      "deferredOwnerPhases": [
+        "4.2",
+        "6.1"
+      ],
+      "deferReason": "MOCK_SERVER_AUTHORITY_AND_IDEMPOTENCY_NOT_OWNED_BY_LP1",
       "auditCandidates": []
     },
     {
@@ -794,7 +799,11 @@
       "launchCore": true,
       "ownerState": "SAFE_DISABLED_PENDING_OWNER",
       "owner": null,
-      "auditClassification": "REFERENCE_ONLY_NO_HANDLER_PROOF",
+      "auditClassification": "INTENTIONALLY_SAFE_DISABLED_DEFERRED_TO_OWNER_PHASE",
+      "deferredOwnerPhases": [
+        "4.7"
+      ],
+      "deferReason": "CANONICAL_CROSS_MODULE_PROGRESS_PERSISTENCE_NOT_OWNED_BY_LP1",
       "auditCandidates": []
     },
     {
@@ -810,7 +819,12 @@
       "launchCore": true,
       "ownerState": "SAFE_DISABLED_PENDING_OWNER",
       "owner": null,
-      "auditClassification": "REFERENCE_ONLY_NO_HANDLER_PROOF",
+      "auditClassification": "INTENTIONALLY_SAFE_DISABLED_DEFERRED_TO_OWNER_PHASE",
+      "deferredOwnerPhases": [
+        "4.1",
+        "4.4"
+      ],
+      "deferReason": "PRIVATE_NOTE_VIDEO_STUDY_ACTION_PERSISTENCE_NOT_OWNED_BY_LP1",
       "auditCandidates": []
     },
     {
@@ -874,7 +888,11 @@
       "launchCore": true,
       "ownerState": "SAFE_DISABLED_PENDING_OWNER",
       "owner": null,
-      "auditClassification": "REFERENCE_ONLY_NO_HANDLER_PROOF",
+      "auditClassification": "INTENTIONALLY_SAFE_DISABLED_DEFERRED_TO_OWNER_PHASE",
+      "deferredOwnerPhases": [
+        "5.2"
+      ],
+      "deferReason": "ASSIGNED_LEARNER_MENTOR_QUESTION_AUTHORITY_NOT_OWNED_BY_LP1",
       "auditCandidates": []
     },
     {

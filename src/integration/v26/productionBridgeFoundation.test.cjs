@@ -69,6 +69,79 @@ async function main() {
     ),
   );
 
+  const expectedDeferredMethods = Object.freeze({
+    recordAttempt: Object.freeze({
+      deferredOwnerPhases: Object.freeze(['4.2', '6.1']),
+      deferReason:
+        'MOCK_SERVER_AUTHORITY_AND_IDEMPOTENCY_NOT_OWNED_BY_LP1',
+    }),
+    recordProgress: Object.freeze({
+      deferredOwnerPhases: Object.freeze(['4.7']),
+      deferReason:
+        'CANONICAL_CROSS_MODULE_PROGRESS_PERSISTENCE_NOT_OWNED_BY_LP1',
+    }),
+    recordStudyAction: Object.freeze({
+      deferredOwnerPhases: Object.freeze(['4.1', '4.4']),
+      deferReason:
+        'PRIVATE_NOTE_VIDEO_STUDY_ACTION_PERSISTENCE_NOT_OWNED_BY_LP1',
+    }),
+    requestMentorHelp: Object.freeze({
+      deferredOwnerPhases: Object.freeze(['5.2']),
+      deferReason:
+        'ASSIGNED_LEARNER_MENTOR_QUESTION_AUTHORITY_NOT_OWNED_BY_LP1',
+    }),
+  });
+
+  const explicitlyDeferredMethods =
+    methodRegistry.methods.filter(
+      (item) =>
+        item.auditClassification ===
+        'INTENTIONALLY_SAFE_DISABLED_DEFERRED_TO_OWNER_PHASE',
+    );
+
+  assert.strictEqual(explicitlyDeferredMethods.length, 4);
+
+  for (const item of explicitlyDeferredMethods) {
+    const expected = expectedDeferredMethods[item.name];
+
+    assert(expected);
+    assert.deepStrictEqual(
+      item.deferredOwnerPhases,
+      expected.deferredOwnerPhases,
+    );
+    assert.strictEqual(
+      item.deferReason,
+      expected.deferReason,
+    );
+    assert.strictEqual(
+      item.ownerState,
+      'SAFE_DISABLED_PENDING_OWNER',
+    );
+    assert.strictEqual(item.owner, null);
+  }
+
+  assert(
+    methodRegistry.methods
+      .filter(
+        (item) =>
+          !Object.prototype.hasOwnProperty.call(
+            expectedDeferredMethods,
+            item.name,
+          ),
+      )
+      .every(
+        (item) =>
+          !Object.prototype.hasOwnProperty.call(
+            item,
+            'deferredOwnerPhases',
+          ) &&
+          !Object.prototype.hasOwnProperty.call(
+            item,
+            'deferReason',
+          ),
+      ),
+  );
+
   const foundationSource = fs.readFileSync(
     path.join(__dirname, 'productionBridgeFoundation.js'),
     'utf8',
@@ -296,6 +369,9 @@ async function main() {
   console.log('ADAPTER_METHODS_TOTAL=182');
   console.log('METHOD_REGISTRY_ROWS=182');
   console.log('CORE_REQUIRED_METHODS=9');
+  console.log('EXPLICIT_SAFE_DISABLED_METADATA_ROWS=4');
+  console.log('EXPLICIT_SAFE_DISABLED_METADATA_CLOSURE=4/4_PASS');
+  console.log('PERSISTENT_RUNTIME_OWNER_ASSIGNMENT_CHANGE=NO');
   console.log('METHOD_LEVEL_SAFE_DISABLED_CLOSURE=182/182_PASS');
   console.log('STANDARD_SUCCESS_ENVELOPE=PASS');
   console.log('STANDARD_FAILURE_ENVELOPE=PASS');
