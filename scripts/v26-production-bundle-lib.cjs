@@ -13,6 +13,7 @@ const PRODUCTION_PROVIDER_RELATIVE_PATH =
   'integration/aspirenest-production-provider.js';
 
 const POST_V26_RUNTIME_OVERRIDE_RELATIVE_PATHS = Object.freeze([
+  'index.html',
   'manifest.webmanifest',
   'sw.js',
   'icons/aspirenest-a-192.png',
@@ -746,12 +747,19 @@ function prepareProductionBundle({
     }
 
     const indexSource = fs.readFileSync(
-      path.join(sourceRoot, 'index.html'),
+      path.join(resolvedSupplementalSourceRoot, 'index.html'),
       'utf8',
     );
+
+    if (/demo-adapter\.js|session\.html/.test(indexSource)) {
+      throw new Error(
+        'Post-V26 runtime index.html contains forbidden local/demo reference.',
+      );
+    }
+
     fs.writeFileSync(
       path.join(outputRoot, 'index.html'),
-      sanitizeIndex(indexSource),
+      indexSource,
       'utf8',
     );
 

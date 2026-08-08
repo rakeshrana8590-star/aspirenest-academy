@@ -1,4 +1,4 @@
-const CACHE = 'aspirenest-learning-drive-v26-final-master-pwa-v1';
+const CACHE = 'aspirenest-learning-drive-v26-final-master-pwa-v2-brand';
 const ASSETS = [
   './',
   'index.html',
