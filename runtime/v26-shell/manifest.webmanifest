@@ -1,10 +1,29 @@
 {
-  "name": "AspireNest Learning Drive \u2014 V26 Final Standalone Master",
+  "name": "AspireNest Learning Drive — V26 Final Standalone Master",
   "short_name": "AspireNest V26",
   "description": "Locked AspireNest Google Drive-style Learning OS with final Public, Student, Mentor and Admin workflows, complete role-safe Notification Center, active Access workflows and provider-gated production boundaries.",
   "start_url": "./#public/home/overview",
   "display": "standalone",
   "background_color": "#f4f7fb",
   "theme_color": "#0b1326",
-  "icons": []
+  "icons": [
+    {
+      "src": "icons/aspirenest-a-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/aspirenest-a-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/aspirenest-a-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
 }

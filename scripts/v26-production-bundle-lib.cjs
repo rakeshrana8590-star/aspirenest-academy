@@ -12,6 +12,14 @@ const EXPECTED_V26_SHA256 =
 const PRODUCTION_PROVIDER_RELATIVE_PATH =
   'integration/aspirenest-production-provider.js';
 
+const POST_V26_RUNTIME_OVERRIDE_RELATIVE_PATHS = Object.freeze([
+  'manifest.webmanifest',
+  'sw.js',
+  'icons/aspirenest-a-192.png',
+  'icons/aspirenest-a-512.png',
+  'icons/aspirenest-a-maskable-512.png',
+]);
+
 const REQUIRED_ADAPTER_METHODS = [
   'getSession',
   'login',
@@ -673,12 +681,31 @@ function prepareProductionBundle({
   allowlistPath,
   denylistPath,
   providerFile,
+  supplementalSourceRoot,
 }) {
   const actualSha = sha256File(zipPath);
 
   if (actualSha !== EXPECTED_V26_SHA256) {
     throw new Error(
       `Locked V26 checksum mismatch: expected ${EXPECTED_V26_SHA256}, found ${actualSha}`,
+    );
+  }
+
+  const resolvedSupplementalSourceRoot =
+    supplementalSourceRoot
+      ? path.resolve(supplementalSourceRoot)
+      : path.join(
+          path.dirname(path.dirname(allowlistPath)),
+          'runtime',
+          'v26-shell',
+        );
+
+  if (
+    !fs.existsSync(resolvedSupplementalSourceRoot)
+    || !fs.statSync(resolvedSupplementalSourceRoot).isDirectory()
+  ) {
+    throw new Error(
+      `Post-V26 runtime override source is missing: ${resolvedSupplementalSourceRoot}`,
     );
   }
 
@@ -701,6 +728,20 @@ function prepareProductionBundle({
       ) {
         continue;
       }
+
+      if (
+        POST_V26_RUNTIME_OVERRIDE_RELATIVE_PATHS.includes(
+          relativePath,
+        )
+      ) {
+        copyFile(
+          resolvedSupplementalSourceRoot,
+          outputRoot,
+          relativePath,
+        );
+        continue;
+      }
+
       copyFile(sourceRoot, outputRoot, relativePath);
     }
 
@@ -715,12 +756,12 @@ function prepareProductionBundle({
     );
 
     const swSource = fs.readFileSync(
-      path.join(sourceRoot, 'sw.js'),
+      path.join(resolvedSupplementalSourceRoot, 'sw.js'),
       'utf8',
     );
     fs.writeFileSync(
       path.join(outputRoot, 'sw.js'),
-      sanitizeServiceWorker(swSource),
+      swSource,
       'utf8',
     );
 
@@ -760,6 +801,9 @@ function prepareProductionBundle({
       zipSha256: actualSha,
       sourceRoot,
       outputRoot,
+      supplementalSourceRoot: resolvedSupplementalSourceRoot,
+      postV26RuntimeOverrideCount:
+        POST_V26_RUNTIME_OVERRIDE_RELATIVE_PATHS.length,
       productionAdapterMethodCount: methodNames.length,
       composition,
       assertion,

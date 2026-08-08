@@ -1,10 +1,13 @@
-const CACHE = 'aspirenest-learning-drive-v26-final-master';
+const CACHE = 'aspirenest-learning-drive-v26-final-master-pwa-v1';
 const ASSETS = [
   './',
   'index.html',
   'styles.css',
   'app.js',
   'manifest.webmanifest',
+  'icons/aspirenest-a-192.png',
+  'icons/aspirenest-a-512.png',
+  'icons/aspirenest-a-maskable-512.png',
   'integration/aspirenest-adapter.js',
   'vendor/jszip.min.js',
   'assets/templates/AspireNest_Mock_Test_Two_Sheet_Import_Template.xlsx'

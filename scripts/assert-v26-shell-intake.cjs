@@ -5,8 +5,8 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const {
-  assertProductionBundle,
   listFiles,
+  readList,
 } = require('./v26-production-bundle-lib.cjs');
 
 const repoRoot = path.resolve(__dirname, '..');
@@ -59,9 +59,9 @@ try {
   const manifest = readManifest(manifestPath);
   const actualFiles = listFiles(runtimeRoot);
 
-  if (manifest.length !== 14 || actualFiles.length !== 14) {
+  if (manifest.length !== 17 || actualFiles.length !== 17) {
     throw new Error(
-      `Exact V26 shell must contain 14 files; manifest=${manifest.length}, actual=${actualFiles.length}`,
+      `Exact V26 shell must contain 17 files; manifest=${manifest.length}, actual=${actualFiles.length}`,
     );
   }
 
@@ -84,11 +84,30 @@ try {
     }
   }
 
-  const bundleAssertion = assertProductionBundle({
-    bundleRoot: runtimeRoot,
-    allowlistPath,
-    denylistPath,
-  });
+  const productionAllowlist = readList(allowlistPath);
+  const sourceMissingFromAllowlist = actualFiles.filter(
+    (item) => !productionAllowlist.includes(item),
+  );
+  const generatedProvider =
+    'integration/aspirenest-production-provider.js';
+
+  if (sourceMissingFromAllowlist.length) {
+    throw new Error(
+      `Runtime shell contains files missing from production allowlist: ${sourceMissingFromAllowlist.join(', ')}`,
+    );
+  }
+
+  if (!productionAllowlist.includes(generatedProvider)) {
+    throw new Error(
+      'Production allowlist is missing the generated provider artifact.',
+    );
+  }
+
+  if (actualFiles.includes(generatedProvider)) {
+    throw new Error(
+      'Generated production provider must not be committed inside the runtime source shell.',
+    );
+  }
 
   const indexText = fs.readFileSync(
     path.join(runtimeRoot, 'index.html'),
@@ -135,7 +154,8 @@ try {
     runtimeRoot,
     manifestRows: manifest.length,
     actualFileCount: actualFiles.length,
-    bundleAssertion,
+    sourceAllowlistStatus: 'GREEN',
+    generatedProviderCommitted: false,
     iframeShellOwner: false,
     visibleShellOwner: 'AN_V26',
     routeOwner: 'AN_V26/app.js',

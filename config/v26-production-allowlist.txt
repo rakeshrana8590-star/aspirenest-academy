@@ -12,4 +12,7 @@ manifest.webmanifest
 styles.css
 sw.js
 vendor/jszip.min.js
+icons/aspirenest-a-192.png
+icons/aspirenest-a-512.png
+icons/aspirenest-a-maskable-512.png
 integration/aspirenest-production-provider.js
