@@ -121,6 +121,20 @@ function createHarness({
       ]);
       auth.currentUser = null;
     },
+    onAuthStateChanged(authDependency, listener) {
+      calls.push([
+        "onAuthStateChanged",
+        authDependency,
+        listener,
+      ]);
+
+      return function unsubscribeAuthState() {
+        calls.push([
+          "unsubscribeAuthState",
+          authDependency,
+        ]);
+      };
+    },
     GoogleAuthProvider,
     roleExperienceDependencyAdapter:
       createRoleAdapter(records),
@@ -140,10 +154,38 @@ function createHarness({
 (async () => {
   let cases = 0;
 
-  assert.equal(contract.version, "1.0.0");
+  assert.equal(contract.version, "1.1.0");
   assert.equal(
     contract.googleProvider.customParameters.prompt,
     "select_account",
+  );
+  assert.equal(
+    contract.requiredDependencies.includes(
+      "onAuthStateChanged",
+    ),
+    true,
+  );
+  assert.equal(
+    contract.authServiceDependencies.includes(
+      "subscribeAuthState",
+    ),
+    true,
+  );
+  assert.equal(
+    contract.authoritativeSession.listener.source,
+    "reviewed_auth_service_subscribeSession",
+  );
+  assert.equal(
+    contract.authoritativeSession.listener.sdkDependency,
+    "onAuthStateChanged",
+  );
+  assert.equal(
+    contract.authoritativeSession.listener.callerSessionTrusted,
+    false,
+  );
+  assert.equal(
+    contract.authoritativeSession.listener.unsubscribeRequired,
+    true,
   );
   assert.equal(
     contract.authoritativeSession.callerSessionTrusted,
@@ -180,6 +222,9 @@ function createHarness({
         signInWithEmailAndPassword() {},
         signInWithPopup() {},
         signOut() {},
+        onAuthStateChanged() {
+          return () => {};
+        },
         GoogleAuthProvider() {},
         roleExperienceDependencyAdapter: {},
       })
@@ -233,6 +278,66 @@ function createHarness({
   assert.equal(harness.calls.at(-1)[0], "signOut");
   cases += 1;
 
+  let observedAuthUser = null;
+  const unsubscribeAuthState =
+    adapter.subscribeAuthState((firebaseUser) => {
+      observedAuthUser = firebaseUser;
+    });
+
+  assert.equal(
+    typeof unsubscribeAuthState,
+    "function",
+  );
+
+  const authStateCall = harness.calls.find(
+    (item) => item[0] === "onAuthStateChanged",
+  );
+
+  assert(authStateCall);
+  assert.equal(authStateCall[1], harness.auth);
+  assert.equal(
+    typeof authStateCall[2],
+    "function",
+  );
+
+  const deliveredUser = {
+    uid: "listener-delivery-001",
+  };
+  authStateCall[2](deliveredUser);
+
+  assert.equal(observedAuthUser, deliveredUser);
+
+  unsubscribeAuthState();
+
+  assert.equal(
+    harness.calls.at(-1)[0],
+    "unsubscribeAuthState",
+  );
+  cases += 1;
+
+  assert.throws(
+    () => adapter.subscribeAuthState(null),
+    /listener must be a function/,
+  );
+  cases += 1;
+
+  const invalidUnsubscribeHarness = createHarness({
+    overrides: {
+      onAuthStateChanged() {
+        return null;
+      },
+    },
+  });
+
+  assert.throws(
+    () => (
+      invalidUnsubscribeHarness.adapter
+        .subscribeAuthState(() => {})
+    ),
+    /must return unsubscribe/,
+  );
+  cases += 1;
+
   const dynamicUser = {
     uid: "mentor-dynamic",
     email: "dynamic@example.com",
@@ -284,6 +389,14 @@ function createHarness({
   assert.deepEqual(
     session.allowed,
     ["public", "student", "mentor"],
+  );
+  assert.equal(
+    session.allowedRoles,
+    session.allowed,
+  );
+  assert.equal(
+    session.activeRole,
+    "mentor",
   );
   cases += 1;
 
@@ -442,7 +555,7 @@ function createHarness({
   );
   cases += 1;
 
-  assert.equal(cases, 19);
+  assert.equal(cases, 22);
 
   console.log(
     `FIREBASE_AUTH_ADAPTER_CASES=${cases}/${cases}_PASS`,
@@ -455,7 +568,13 @@ function createHarness({
   console.log("FIXED_ADMIN_READ_FAILURE_AUTHORITY=PASS");
   console.log("CALLER_SESSION_AUTHORITY=REJECTED");
   console.log("CALLER_PROFILE_ROLE_ESCALATION=REJECTED");
+  console.log("AUTH_STATE_LISTENER_BINDING=PASS");
+  console.log("AUTH_STATE_LISTENER_CALLBACK_DELIVERY=PASS");
+  console.log("AUTH_STATE_LISTENER_UNSUBSCRIBE=PASS");
+  console.log("ALLOWEDROLES_ALIAS=PASS");
+  console.log("ACTIVE_ROLE_SNAPSHOT=PASS");
   console.log("AUTHORITATIVE_SESSION_SOURCE=AUTH_SERVICE_GET_SESSION");
+  console.log("AUTHORITATIVE_SESSION_LISTENER_SOURCE=AUTH_SERVICE_SUBSCRIBE_SESSION");
   console.log("FIREBASE_AUTH_ADAPTER_TEST_STATUS=GREEN");
 })().catch((error) => {
   console.error(error);

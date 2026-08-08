@@ -137,6 +137,8 @@
     }
 
     function normalizePublicSession() {
+      const allowed = Object.freeze(['public']);
+
       return Object.freeze({
         ready: true,
         authenticated: false,
@@ -144,7 +146,10 @@
         user: null,
         uid: '',
         role: 'public',
-        allowed: Object.freeze(['public']),
+        activeRole: 'public',
+        allowed,
+        allowedRoles: allowed,
+        accountStatus: '',
         email: '',
         displayName: '',
         username: '',
@@ -175,6 +180,7 @@
         'loadAccountProfile',
         'resolveRole',
         'resolveAllowedExperiences',
+        'subscribeAuthState',
       ];
 
       if (
@@ -209,6 +215,7 @@
         loadAccountProfile,
         resolveRole,
         resolveAllowedExperiences,
+        subscribeAuthState,
         mapAuthError,
       } = dependencies;
 
@@ -316,7 +323,12 @@
           user: normalizedUser,
           uid: normalizedUser.uid,
           role,
+          activeRole: role,
           allowed,
+          allowedRoles: allowed,
+          accountStatus: cleanText(
+            normalizedProfile.accountStatus,
+          ),
           email:
             normalizedUser.email ||
             cleanEmail(normalizedProfile.email),
@@ -345,6 +357,45 @@
         }
 
         return buildVerifiedSession(firebaseUser);
+      }
+
+      function subscribeSession(listener) {
+        if (typeof listener !== 'function') {
+          throw new TypeError(
+            'Auth session listener must be a function.',
+          );
+        }
+
+        let active = true;
+
+        const unsubscribe = subscribeAuthState(
+          async (firebaseUser) => {
+            const session = firebaseUser
+              ? await buildVerifiedSession(firebaseUser)
+              : normalizePublicSession();
+
+            if (active) {
+              listener(session);
+            }
+          },
+        );
+
+        if (typeof unsubscribe !== 'function') {
+          throw new TypeError(
+            'Auth state subscription must return an unsubscribe function.',
+          );
+        }
+
+        return Object.freeze(
+          function unsubscribeSession() {
+            if (!active) {
+              return;
+            }
+
+            active = false;
+            unsubscribe();
+          },
+        );
       }
 
       async function login(payload) {
@@ -493,6 +544,7 @@
 
       return Object.freeze({
         getSession,
+        subscribeSession,
         login,
         logout,
       });

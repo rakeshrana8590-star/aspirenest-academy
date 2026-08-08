@@ -5,6 +5,7 @@ import {
 } from "@aspirenest/firebase-runtime";
 import {
   GoogleAuthProvider,
+  onAuthStateChanged,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -190,6 +191,7 @@ if (providerRuntimeEnabled) {
       signInWithEmailAndPassword,
       signInWithPopup,
       signOut,
+      onAuthStateChanged,
       GoogleAuthProvider,
       roleExperienceDependencyAdapter,
     });

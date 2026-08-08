@@ -108,6 +108,18 @@ function createHarness(overrides = {}) {
         ? ['public', 'mentor', 'student']
         : ['public', 'student'];
     },
+    subscribeAuthState(listener) {
+      calls.push({
+        name: 'subscribeAuthState',
+        listener,
+      });
+
+      return function unsubscribeAuthState() {
+        calls.push({
+          name: 'unsubscribeAuthState',
+        });
+      };
+    },
     mapAuthError(error, context) {
       calls.push({
         name: 'mapAuthError',
@@ -161,6 +173,18 @@ async function main() {
     Array.from(publicSession.allowed),
     ['public'],
   );
+  assert.strictEqual(
+    publicSession.allowedRoles,
+    publicSession.allowed,
+  );
+  assert.strictEqual(
+    publicSession.activeRole,
+    'public',
+  );
+  assert.strictEqual(
+    publicSession.accountStatus,
+    '',
+  );
 
   const verifiedHarness = createHarness();
   verifiedHarness.auth.currentUser = {
@@ -192,6 +216,18 @@ async function main() {
   assert.deepStrictEqual(
     Array.from(verifiedSession.allowed),
     ['public', 'student'],
+  );
+  assert.strictEqual(
+    verifiedSession.allowedRoles,
+    verifiedSession.allowed,
+  );
+  assert.strictEqual(
+    verifiedSession.activeRole,
+    verifiedSession.role,
+  );
+  assert.strictEqual(
+    verifiedSession.accountStatus,
+    '',
   );
   assert.strictEqual(
     verifiedSession.emailVerified,
@@ -733,6 +769,152 @@ async function main() {
     true,
   );
 
+  const accountStatusHarness = createHarness({
+    async loadAccountProfile(user) {
+      accountStatusHarness.calls.push({
+        name: 'loadAccountProfile',
+        uid: user.uid,
+      });
+
+      return {
+        username: 'status-student',
+        fullName: user.displayName,
+        planType: 'premium',
+        accountStatus: '  legacy-status-value  ',
+      };
+    },
+  });
+  accountStatusHarness.auth.currentUser = {
+    uid: 'status-student-001',
+    email: 'status@example.invalid',
+    displayName: 'Status Student',
+    emailVerified: true,
+  };
+
+  const accountStatusSession =
+    await accountStatusHarness.service.getSession();
+
+  assert.strictEqual(
+    accountStatusSession.accountStatus,
+    'legacy-status-value',
+  );
+  assert.strictEqual(
+    accountStatusSession.accessAllowed,
+    true,
+  );
+  assert.strictEqual(
+    accountStatusSession.allowedRoles,
+    accountStatusSession.allowed,
+  );
+
+  const blankUidHarness = createHarness();
+  blankUidHarness.auth.currentUser = {
+    uid: '   ',
+    email: 'blank-uid@example.invalid',
+    emailVerified: true,
+  };
+
+  const blankUidSession =
+    await blankUidHarness.service.getSession();
+
+  assert.strictEqual(blankUidSession.ok, false);
+  assert.strictEqual(
+    blankUidSession.code,
+    authModule.AUTH_CODES.USER_MISSING,
+  );
+
+  const listenerHarness = createHarness();
+  const listenerSnapshots = [];
+
+  const unsubscribeSession =
+    listenerHarness.service.subscribeSession(
+      (session) => {
+        listenerSnapshots.push(session);
+      },
+    );
+
+  assert.strictEqual(
+    typeof unsubscribeSession,
+    'function',
+  );
+  assert.strictEqual(
+    Object.isFrozen(unsubscribeSession),
+    true,
+  );
+
+  const listenerCall = listenerHarness.calls.find(
+    (item) => item.name === 'subscribeAuthState',
+  );
+
+  assert(listenerCall);
+  assert.strictEqual(
+    typeof listenerCall.listener,
+    'function',
+  );
+
+  await listenerCall.listener(null);
+
+  assert.strictEqual(listenerSnapshots.length, 1);
+  assert.strictEqual(
+    listenerSnapshots[0].authenticated,
+    false,
+  );
+  assert.strictEqual(
+    listenerSnapshots[0].activeRole,
+    'public',
+  );
+  assert.strictEqual(
+    listenerSnapshots[0].allowedRoles,
+    listenerSnapshots[0].allowed,
+  );
+
+  await listenerCall.listener({
+    uid: 'listener-student-001',
+    email: 'listener@example.invalid',
+    displayName: 'Listener Student',
+    emailVerified: true,
+  });
+
+  assert.strictEqual(listenerSnapshots.length, 2);
+  assert.strictEqual(
+    listenerSnapshots[1].authenticated,
+    true,
+  );
+  assert.strictEqual(
+    listenerSnapshots[1].uid,
+    'listener-student-001',
+  );
+  assert.strictEqual(
+    listenerSnapshots[1].activeRole,
+    'student',
+  );
+  assert.strictEqual(
+    listenerSnapshots[1].allowedRoles,
+    listenerSnapshots[1].allowed,
+  );
+
+  unsubscribeSession();
+  unsubscribeSession();
+
+  assert.strictEqual(
+    listenerHarness.calls.filter(
+      (item) => item.name === 'unsubscribeAuthState',
+    ).length,
+    1,
+  );
+
+  await listenerCall.listener(null);
+
+  assert.strictEqual(
+    listenerSnapshots.length,
+    2,
+  );
+
+  assert.throws(
+    () => listenerHarness.service.subscribeSession(null),
+    /listener must be a function/,
+  );
+
   const serviceSource = fs.readFileSync(
     path.join(__dirname, 'authProductionService.js'),
     'utf8',
@@ -832,6 +1014,13 @@ async function main() {
   console.log('RUNTIME_OWNER_ASSIGNMENTS=0');
   console.log('SAFE_DISABLED_METHODS=182');
   console.log('OTHER_METHODS_SAFE_DISABLED=179');
+  console.log('ALLOWEDROLES_ALIAS=PASS');
+  console.log('ACTIVE_ROLE_SNAPSHOT=PASS');
+  console.log('ACCOUNT_STATUS_SNAPSHOT_NO_POLICY=PASS');
+  console.log('BLANK_UID_FAIL_CLOSED=PASS');
+  console.log('SESSION_LISTENER_PUBLIC=PASS');
+  console.log('SESSION_LISTENER_AUTHENTICATED=PASS');
+  console.log('SESSION_LISTENER_UNSUBSCRIBE=PASS');
   console.log('PROVIDER_ACTIVATION=NO');
   console.log('RUNTIME_LOAD=NO');
   console.log('FIREBASE_NETWORK_CALLS=NO');

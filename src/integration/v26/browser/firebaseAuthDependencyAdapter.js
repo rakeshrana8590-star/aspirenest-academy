@@ -62,6 +62,7 @@
         'signInWithEmailAndPassword',
         'signInWithPopup',
         'signOut',
+        'onAuthStateChanged',
       ];
 
       if (
@@ -104,6 +105,7 @@
         signInWithEmailAndPassword,
         signInWithPopup,
         signOut,
+        onAuthStateChanged,
         GoogleAuthProvider,
         roleExperienceDependencyAdapter,
       } = dependencies;
@@ -168,6 +170,27 @@
         return signOut(authDependency);
       }
 
+      function subscribeAuthState(listener) {
+        if (typeof listener !== 'function') {
+          throw new TypeError(
+            'Firebase auth state listener must be a function.',
+          );
+        }
+
+        const unsubscribe = onAuthStateChanged(
+          auth,
+          listener,
+        );
+
+        if (typeof unsubscribe !== 'function') {
+          throw new TypeError(
+            'Firebase auth state listener must return unsubscribe.',
+          );
+        }
+
+        return unsubscribe;
+      }
+
       function loadAccountProfile(firebaseUser) {
         return roleExperienceDependencyAdapter
           .loadAccountProfile(firebaseUser);
@@ -219,6 +242,7 @@
           emailPasswordSignIn,
         signInWithPopup: popupSignIn,
         signOut: firebaseSignOut,
+        subscribeAuthState,
         createGoogleProvider,
         loadAccountProfile,
         resolveRole,

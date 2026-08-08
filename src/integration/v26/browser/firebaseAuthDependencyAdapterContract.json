@@ -1,10 +1,11 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "requiredDependencies": [
     "auth",
     "signInWithEmailAndPassword",
     "signInWithPopup",
     "signOut",
+    "onAuthStateChanged",
     "GoogleAuthProvider",
     "roleExperienceDependencyAdapter"
   ],
@@ -23,6 +24,7 @@
     "signInWithEmailAndPassword",
     "signInWithPopup",
     "signOut",
+    "subscribeAuthState",
     "createGoogleProvider",
     "loadAccountProfile",
     "resolveRole",
@@ -31,7 +33,13 @@
   "authoritativeSession": {
     "source": "reviewed_auth_service_getSession",
     "callerSessionTrusted": false,
-    "factory": "createAuthoritativeSessionReader"
+    "factory": "createAuthoritativeSessionReader",
+    "listener": {
+      "source": "reviewed_auth_service_subscribeSession",
+      "sdkDependency": "onAuthStateChanged",
+      "callerSessionTrusted": false,
+      "unsubscribeRequired": true
+    }
   },
   "forbidden": {
     "navigation": true,
