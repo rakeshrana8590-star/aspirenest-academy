@@ -27,6 +27,9 @@ const initialMethods = [
   "login",
   "logout",
   "openCanonical",
+  "checkUsernameAvailability",
+  "registerAccount",
+  "signInWithGoogle",
 ];
 const bridgeApi = require(
   path.join(
@@ -151,9 +154,64 @@ async function runScenario(
       },
     },
     "firebase/auth": {
-      getAuth: (app) => {
-        calls.getAuth += 1;
-        return { kind: "auth", app };
+      getAuth: (...args) => {
+        const originalHarnessGetAuth = (
+          (app) => {
+                  calls.getAuth += 1;
+                  return { kind: "auth", app };
+                }
+        );
+
+        const authInstance =
+          originalHarnessGetAuth.apply(
+            this,
+            args
+          );
+
+        if (
+          !authInstance
+          || typeof authInstance !== "object"
+        ) {
+          return authInstance;
+        }
+
+        const suppliedApp =
+          args[0]
+          && typeof args[0] === "object"
+            ? args[0]
+            : {};
+
+        const sourceApp =
+          authInstance.app
+          && typeof authInstance.app === "object"
+            ? authInstance.app
+            : suppliedApp;
+
+        const sourceOptions =
+          sourceApp.options
+          && typeof sourceApp.options === "object"
+            ? sourceApp.options
+            : {};
+
+        if (
+          String(
+            sourceOptions.apiKey || ""
+          ).trim()
+        ) {
+          return authInstance;
+        }
+
+        return {
+          ...authInstance,
+          app: {
+            ...sourceApp,
+            options: {
+              ...sourceOptions,
+              apiKey:
+                "synthetic-web-api-key",
+            },
+          },
+        };
       },
       connectAuthEmulator: () => {
         calls.connectAuthEmulator += 1;
@@ -168,7 +226,15 @@ async function runScenario(
       signOut: async () => {
         throw new Error("unexpected auth SDK call");
       },
-    },
+
+      signInWithCustomToken: async (authInstance, _token) => ({
+        user: authInstance.currentUser,
+      }),
+
+      onAuthStateChanged: (_authInstance, _listener) => () => {},
+
+      linkWithCredential: async (user, _credential) => ({ user }),
+},
     "firebase/firestore": {
       getFirestore: (app) => {
         calls.getFirestore += 1;
@@ -203,7 +269,39 @@ async function runScenario(
       connectFunctionsEmulator: () => {
         calls.connectFunctionsEmulator += 1;
       },
-    },
+
+      httpsCallable: (_functionsInstance, callableName) => {
+        return async (_payload) => {
+          if (callableName === "checkUsernameAvailability") {
+            return { data: { available: true } };
+          }
+
+          if (callableName === "signInWithUsernameAndPassword") {
+            return {
+              data: {
+                customToken: "synthetic-custom-token",
+              },
+            };
+          }
+
+          if (
+            callableName === "registerStudentAccount"
+            || callableName === "ensureStudentProfile"
+          ) {
+            return {
+              data: {
+                prepared: true,
+              },
+            };
+          }
+
+          throw new Error(
+            "unexpected Firebase callable invocation: "
+            + String(callableName)
+          );
+        };
+      },
+},
   };
 
   const providerDefinitions = {
@@ -217,6 +315,12 @@ async function runScenario(
             Object.freeze({ scenario: name, method: "login", payload }),
           logout: async () =>
             Object.freeze({ scenario: name, method: "logout" }),
+          registerAccount: async (payload) =>
+            Object.freeze({
+              scenario: name,
+              method: "registerAccount",
+              payload,
+            }),
         });
       },
     },
@@ -482,8 +586,27 @@ async function assertEnabledScenario(
   let disabled = 0;
 
   for (const method of methodNames) {
+    const methodPayload =
+      method === "registerAccount"
+        ? Object.freeze({
+            fullName: "Step 23 Candidate",
+            email: "step23-candidate@aspirenest.invalid",
+            password: "Aa1!Step23Candidate",
+            username: "step23candidate",
+          })
+        : method === "checkUsernameAvailability"
+          ? Object.freeze({
+              username: "step23candidate",
+            })
+          : method === "signInWithGoogle"
+            ? Object.freeze({
+                returnTo: "/student",
+                requestedRole: "student",
+              })
+            : Object.freeze({ method });
+
     const result = await scenario.provider[method](
-      Object.freeze({ method }),
+      methodPayload,
       Object.freeze({
         requestId: `${scenario.name}-${method}-request`,
         correlationId: `${scenario.name}-${method}-correlation`,
@@ -491,6 +614,14 @@ async function assertEnabledScenario(
     );
 
     if (initialMethods.includes(method)) {
+      console.error(
+        "AN_ENABLED_METHOD_RESULT="
+        + String(method)
+        + "|"
+        + String(result && result.ok)
+        + "|"
+        + String(result && result.code)
+      );
       assert.equal(result.ok, true);
       assert.equal(result.code, "OK");
       success += 1;
@@ -505,8 +636,8 @@ async function assertEnabledScenario(
     }
   }
 
-  assert.equal(success, 5);
-  assert.equal(disabled, 177);
+  assert.equal(success, 8);
+  assert.equal(disabled, 174);
 }
 
 (async () => {

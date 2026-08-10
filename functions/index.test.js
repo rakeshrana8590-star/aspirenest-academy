@@ -5,7 +5,42 @@ const test = require("node:test");
 const {
   HttpsError,
 } = require("firebase-functions/v2/https");
+const functionsModule =
+  require("./index.js");
 const {
+  STUDENT_ACCOUNT_REGISTRATION_FUNCTION_NAME,
+  STUDENT_ACCOUNT_REGISTRATION_ROLE,
+  STUDENT_ACCOUNT_REGISTRATION_USERNAME_MIN_LENGTH,
+  STUDENT_ACCOUNT_REGISTRATION_USERNAME_MAX_LENGTH,
+  STUDENT_ACCOUNT_REGISTRATION_PUBLIC_FAILURE,
+  STUDENT_ACCOUNT_REGISTRATION_PASSWORD_PATTERN,
+  normalizeStudentAccountRegistrationRequest,
+  claimStudentRegistrationUsername,
+  registerStudentAccount,
+  USERNAME_COLLECTION,
+  USERNAME_USERS_COLLECTION,
+  USERNAME_MIN_LENGTH,
+  USERNAME_MAX_LENGTH,
+  USERNAME_RESERVED_USERNAMES,
+  normalizeUsernameForIdentity,
+  validateUsernameForIdentity,
+  checkUsernameAvailability,
+  resolveUsernamePrincipal,
+  USERNAME_PASSWORD_SIGNIN_FUNCTION_NAME,
+  IDENTITY_TOOLKIT_PASSWORD_SIGNIN_URL,
+  normalizeUsernamePasswordSignInRequest,
+  postIdentityToolkitPasswordSignIn,
+  USERNAME_SIGNIN_RATE_LIMIT_COLLECTION,
+  USERNAME_SIGNIN_RATE_LIMIT_WINDOW_MS,
+  USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_MAX_ATTEMPTS,
+  USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_IDENTIFIER_MAX_ATTEMPTS,
+  USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_SCOPE,
+  USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_IDENTIFIER_SCOPE,
+  normalizeUsernameSignInRateLimitOrigin,
+  buildUsernameSignInRateLimitDocumentId,
+  buildUsernameSignInRateLimitState,
+  enforceUsernameSignInRateLimit,
+  signInWithUsernameAndPassword,
   buildMockTestServerTimeResponse,
   buildMockTestLeaderboardProjection,
   buildPrivateLeaderboardId,
@@ -20,7 +55,7 @@ const {
   pickNotesProtectedAssetUrl,
   loadNotesEntitlements,
   resolveNotesProtectedAsset,
-} = require("./index.js").__test;
+} = functionsModule.__test;
 
 const SERVER_TIME_AUTH = {
   uid: "student-1",
@@ -65,6 +100,1629 @@ const LEADERBOARD_DATA = {
   },
   correctAnswer: "A",
 };
+
+
+const RATE_LIMIT_RAW_REQUEST = Object.freeze({
+  ip: "203.0.113.8",
+  socket: Object.freeze({
+    remoteAddress: "203.0.113.8",
+  }),
+});
+
+const RATE_LIMIT_NOW_MS =
+  1_700_000_000_000;
+
+const createUsernameFirestore = ({
+  usernames = {},
+  users = {},
+  rateLimits = {},
+} = {}) => {
+  const rateLimitStore = new Map(
+    Object.entries(rateLimits)
+  );
+  const readLog = [];
+  const writeLog = [];
+
+  const snapshotFor = (
+    collectionName,
+    documentId
+  ) => {
+    let source = {};
+
+    if (
+      collectionName ===
+      USERNAME_COLLECTION
+    ) {
+      source = usernames;
+    } else if (
+      collectionName ===
+      USERNAME_USERS_COLLECTION
+    ) {
+      source = users;
+    }
+
+    if (
+      collectionName ===
+      USERNAME_SIGNIN_RATE_LIMIT_COLLECTION
+    ) {
+      const hasRecord =
+        rateLimitStore.has(
+          documentId
+        );
+      const record = hasRecord
+        ? rateLimitStore.get(
+            documentId
+          )
+        : null;
+
+      return {
+        exists:
+          hasRecord
+          && record !== null,
+        data: () => record,
+      };
+    }
+
+    const hasRecord =
+      Object.prototype.hasOwnProperty.call(
+        source,
+        documentId
+      );
+    const record = hasRecord
+      ? source[documentId]
+      : null;
+
+    return {
+      exists:
+        hasRecord
+        && record !== null,
+      data: () => record,
+    };
+  };
+
+  const createRef = (
+    collectionName,
+    documentId
+  ) => ({
+    __collectionName:
+      collectionName,
+    __documentId:
+      documentId,
+    get: async () => {
+      readLog.push({
+        collectionName,
+        documentId,
+        source: "direct",
+      });
+      return snapshotFor(
+        collectionName,
+        documentId
+      );
+    },
+  });
+
+  const firestore = {
+    collection:
+      (collectionName) => ({
+        doc:
+          (documentId) =>
+            createRef(
+              collectionName,
+              documentId
+            ),
+      }),
+
+    async runTransaction(worker) {
+      const stagedWrites = [];
+
+      const transaction = {
+        async get(ref) {
+          readLog.push({
+            collectionName:
+              ref.__collectionName,
+            documentId:
+              ref.__documentId,
+            source:
+              "transaction",
+          });
+
+          return snapshotFor(
+            ref.__collectionName,
+            ref.__documentId
+          );
+        },
+
+        set(ref, data) {
+          stagedWrites.push({
+            ref,
+            data,
+          });
+        },
+      };
+
+      const result =
+        await worker(transaction);
+
+      for (
+        const {
+          ref,
+          data,
+        }
+        of stagedWrites
+      ) {
+        if (
+          ref.__collectionName ===
+            USERNAME_SIGNIN_RATE_LIMIT_COLLECTION
+        ) {
+          rateLimitStore.set(
+            ref.__documentId,
+            data
+          );
+        }
+
+        writeLog.push({
+          collectionName:
+            ref.__collectionName,
+          documentId:
+            ref.__documentId,
+          data,
+        });
+      }
+
+      return result;
+    },
+
+    __rateLimitStore:
+      rateLimitStore,
+    __readLog:
+      readLog,
+    __writeLog:
+      writeLog,
+  };
+
+  return firestore;
+};
+
+
+
+const createStudentRegistrationAuth = ({
+  createError = null,
+  deleteError = null,
+  uid = "uid-created-001",
+} = {}) => {
+  const calls = [];
+
+  return {
+    calls,
+
+    async createUser(payload) {
+      calls.push({
+        name:
+          "createUser",
+        payload,
+      });
+
+      if (createError) {
+        throw createError;
+      }
+
+      return {
+        uid,
+      };
+    },
+
+    async deleteUser(receivedUid) {
+      calls.push({
+        name:
+          "deleteUser",
+        uid:
+          receivedUid,
+      });
+
+      if (deleteError) {
+        throw deleteError;
+      }
+    },
+  };
+};
+
+test("student registration policy rejects weak password and invalid username before writes", async () => {
+  assert.equal(
+    STUDENT_ACCOUNT_REGISTRATION_FUNCTION_NAME,
+    "registerStudentAccount"
+  );
+  assert.equal(
+    STUDENT_ACCOUNT_REGISTRATION_ROLE,
+    "student"
+  );
+  assert.equal(
+    STUDENT_ACCOUNT_REGISTRATION_USERNAME_MIN_LENGTH,
+    4
+  );
+  assert.equal(
+    STUDENT_ACCOUNT_REGISTRATION_USERNAME_MAX_LENGTH,
+    24
+  );
+  assert.equal(
+    STUDENT_ACCOUNT_REGISTRATION_PUBLIC_FAILURE,
+    "Account could not be created."
+  );
+  assert.equal(
+    STUDENT_ACCOUNT_REGISTRATION_PASSWORD_PATTERN.test(
+      "Strong1!Password"
+    ),
+    true
+  );
+
+  const auth =
+    createStudentRegistrationAuth();
+  const firestore =
+    createUsernameFirestore();
+
+  await assert.rejects(
+    () =>
+      registerStudentAccount({
+        data: {
+          fullName:
+            "Synthetic Aspirant",
+          username:
+            "valid_user",
+          email:
+            "aspirant@example.invalid",
+          password:
+            "weakpass",
+        },
+        adminAuth:
+          auth,
+        firestore,
+      }),
+    (error) =>
+      error instanceof HttpsError
+      && error.message.includes(
+        "Account could not be created."
+      )
+  );
+
+  await assert.rejects(
+    () =>
+      registerStudentAccount({
+        data: {
+          fullName:
+            "Synthetic Aspirant",
+          username:
+            "abc",
+          email:
+            "aspirant@example.invalid",
+          password:
+            "Strong1!Password",
+        },
+        adminAuth:
+          auth,
+        firestore,
+      }),
+    (error) =>
+      error instanceof HttpsError
+  );
+
+  await assert.rejects(
+    () =>
+      registerStudentAccount({
+        data: {
+          fullName:
+            "Synthetic Aspirant",
+          username:
+            "admin",
+          email:
+            "aspirant@example.invalid",
+          password:
+            "Strong1!Password",
+        },
+        adminAuth:
+          auth,
+        firestore,
+      }),
+    (error) =>
+      error instanceof HttpsError
+  );
+
+  assert.equal(
+    auth.calls.length,
+    0
+  );
+  assert.equal(
+    firestore.__writeLog.length,
+    0
+  );
+});
+
+test("student registration normalizes request and ignores client role authority", () => {
+  const request =
+    normalizeStudentAccountRegistrationRequest({
+      fullName:
+        " Synthetic Aspirant ",
+      username:
+        " Learner One ",
+      email:
+        " ASPIRANT@EXAMPLE.INVALID ",
+      password:
+        "Strong1!Password",
+      role:
+        "admin",
+      requestedRole:
+        "mentor",
+      activeRole:
+        "admin",
+      allowedRoles: [
+        "admin",
+      ],
+      returnTo:
+        "#admin",
+      createdAt:
+        "client-controlled",
+    });
+
+  assert.deepEqual(
+    request,
+    {
+      fullName:
+        "Synthetic Aspirant",
+      username:
+        "learner_one",
+      normalizedUsername:
+        "learner_one",
+      email:
+        "aspirant@example.invalid",
+      password:
+        "Strong1!Password",
+      role:
+        "student",
+    }
+  );
+
+  assert.equal(
+    Object.isFrozen(request),
+    true
+  );
+});
+
+test("student registration auth create failure has no username side effect", async () => {
+  const auth =
+    createStudentRegistrationAuth({
+      createError:
+        new Error(
+          "EMAIL_EXISTS"
+        ),
+    });
+  const firestore =
+    createUsernameFirestore();
+
+  await assert.rejects(
+    () =>
+      registerStudentAccount({
+        data: {
+          fullName:
+            "Synthetic Aspirant",
+          username:
+            "learner_one",
+          email:
+            "duplicate@example.invalid",
+          password:
+            "Strong1!Password",
+        },
+        adminAuth:
+          auth,
+        firestore,
+      }),
+    (error) =>
+      error instanceof HttpsError
+      && error.message.includes(
+        "Account could not be created."
+      )
+  );
+
+  assert.deepEqual(
+    auth.calls.map(
+      (call) => call.name
+    ),
+    [
+      "createUser",
+    ]
+  );
+
+  assert.equal(
+    firestore.__writeLog.length,
+    0
+  );
+});
+
+test("student registration success creates auth identity then claims username with no sensitive profile fields", async () => {
+  const auth =
+    createStudentRegistrationAuth();
+  const firestore =
+    createUsernameFirestore();
+
+  const result =
+    await registerStudentAccount({
+      data: {
+        fullName:
+          "Synthetic Aspirant",
+        username:
+          " Learner One ",
+        email:
+          "ASPIRANT@EXAMPLE.INVALID",
+        password:
+          "Strong1!Password",
+        role:
+          "admin",
+      },
+      adminAuth:
+        auth,
+      firestore,
+      nowMs:
+        1_700_000_000_000,
+    });
+
+  assert.deepEqual(
+    result,
+    {
+      prepared: true,
+    }
+  );
+  assert.equal(
+    Object.isFrozen(result),
+    true
+  );
+
+  assert.deepEqual(
+    auth.calls.map(
+      (call) => call.name
+    ),
+    [
+      "createUser",
+    ]
+  );
+
+  assert.deepEqual(
+    auth.calls[0].payload,
+    {
+      email:
+        "aspirant@example.invalid",
+      password:
+        "Strong1!Password",
+      displayName:
+        "Synthetic Aspirant",
+      emailVerified:
+        false,
+      disabled:
+        false,
+    }
+  );
+
+  const usernameWrite =
+    firestore.__writeLog.find(
+      (write) =>
+        write.collectionName ===
+          USERNAME_COLLECTION
+    );
+
+  assert(usernameWrite);
+  assert.equal(
+    usernameWrite.documentId,
+    "learner_one"
+  );
+
+  assert.deepEqual(
+    Object.keys(
+      usernameWrite.data
+    ).sort(),
+    [
+      "createdAt",
+      "normalizedUsername",
+      "status",
+      "uid",
+      "updatedAt",
+      "username",
+    ].sort()
+  );
+
+  assert.equal(
+    usernameWrite.data.uid,
+    "uid-created-001"
+  );
+  assert.equal(
+    usernameWrite.data.username,
+    "learner_one"
+  );
+  assert.equal(
+    usernameWrite.data.normalizedUsername,
+    "learner_one"
+  );
+  assert.equal(
+    usernameWrite.data.status,
+    "active"
+  );
+
+  assert.equal(
+    Object.hasOwn(
+      usernameWrite.data,
+      "email"
+    ),
+    false
+  );
+  assert.equal(
+    Object.hasOwn(
+      usernameWrite.data,
+      "password"
+    ),
+    false
+  );
+
+  for (
+    const forbidden
+    of [
+      "uid",
+      "email",
+      "username",
+      "customToken",
+      "authenticated",
+    ]
+  ) {
+    assert.equal(
+      Object.hasOwn(
+        result,
+        forbidden
+      ),
+      false
+    );
+  }
+
+  assert.equal(
+    firestore.__writeLog.some(
+      (write) =>
+        write.collectionName ===
+          "users"
+        || write.collectionName ===
+          "students"
+    ),
+    false
+  );
+});
+
+test("student registration username collision deletes just-created auth user", async () => {
+  const auth =
+    createStudentRegistrationAuth();
+  const firestore =
+    createUsernameFirestore({
+      usernames: {
+        learner_one: {
+          uid:
+            "uid-existing",
+          status:
+            "active",
+        },
+      },
+    });
+
+  await assert.rejects(
+    () =>
+      registerStudentAccount({
+        data: {
+          fullName:
+            "Synthetic Aspirant",
+          username:
+            "learner_one",
+          email:
+            "new@example.invalid",
+          password:
+            "Strong1!Password",
+        },
+        adminAuth:
+          auth,
+        firestore,
+      }),
+    (error) =>
+      error instanceof HttpsError
+      && error.message.includes(
+        "Account could not be created."
+      )
+  );
+
+  assert.deepEqual(
+    auth.calls.map(
+      (call) => call.name
+    ),
+    [
+      "createUser",
+      "deleteUser",
+    ]
+  );
+  assert.equal(
+    auth.calls[1].uid,
+    "uid-created-001"
+  );
+});
+
+test("student registration transaction infrastructure failure deletes just-created auth user", async () => {
+  const auth =
+    createStudentRegistrationAuth();
+
+  const firestore = {
+    collection() {
+      return {
+        doc(documentId) {
+          return {
+            __documentId:
+              documentId,
+          };
+        },
+      };
+    },
+
+    async runTransaction() {
+      throw new Error(
+        "TRANSACTION_FAILED"
+      );
+    },
+  };
+
+  await assert.rejects(
+    () =>
+      registerStudentAccount({
+        data: {
+          fullName:
+            "Synthetic Aspirant",
+          username:
+            "learner_one",
+          email:
+            "new@example.invalid",
+          password:
+            "Strong1!Password",
+        },
+        adminAuth:
+          auth,
+        firestore,
+      }),
+    (error) =>
+      error instanceof HttpsError
+  );
+
+  assert.deepEqual(
+    auth.calls.map(
+      (call) => call.name
+    ),
+    [
+      "createUser",
+      "deleteUser",
+    ]
+  );
+});
+
+test("student registration compensation failure fails closed with neutral public error", async () => {
+  const auth =
+    createStudentRegistrationAuth({
+      deleteError:
+        new Error(
+          "DELETE_FAILED_SECRET"
+        ),
+    });
+
+  const firestore =
+    createUsernameFirestore({
+      usernames: {
+        learner_one: {
+          uid:
+            "uid-existing",
+          status:
+            "active",
+        },
+      },
+    });
+
+  await assert.rejects(
+    () =>
+      registerStudentAccount({
+        data: {
+          fullName:
+            "Synthetic Aspirant",
+          username:
+            "learner_one",
+          email:
+            "new@example.invalid",
+          password:
+            "Strong1!Password",
+        },
+        adminAuth:
+          auth,
+        firestore,
+      }),
+    (error) =>
+      error instanceof HttpsError
+      && error.message ===
+        "Account could not be created."
+      && !String(error).includes(
+        "DELETE_FAILED_SECRET"
+      )
+  );
+
+  assert.deepEqual(
+    auth.calls.map(
+      (call) => call.name
+    ),
+    [
+      "createUser",
+      "deleteUser",
+    ]
+  );
+});
+
+test("keeps trusted username normalization aligned with the canonical profile contract", () => {
+  assert.equal(USERNAME_MIN_LENGTH, 3);
+  assert.equal(USERNAME_MAX_LENGTH, 24);
+  assert.equal(
+    USERNAME_RESERVED_USERNAMES.has(
+      "aspirenest"
+    ),
+    true
+  );
+
+  const vectors = [
+    [" Rakesh Rana ", "rakesh_rana"],
+    ["Rakesh.Rana", "rakeshrana"],
+    ["Rakesh--Rana", "rakeshrana"],
+    ["__Alpha___01__", "alpha_01"],
+  ];
+  for (const [input, expected] of vectors) {
+    assert.equal(
+      normalizeUsernameForIdentity(input),
+      expected
+    );
+  }
+
+  assert.equal(
+    validateUsernameForIdentity(
+      "aspirenest"
+    ).reason,
+    "USERNAME_RESERVED"
+  );
+  assert.equal(
+    validateUsernameForIdentity("ab").reason,
+    "USERNAME_TOO_SHORT"
+  );
+  assert.equal(
+    validateUsernameForIdentity(
+      "1learner"
+    ).reason,
+    "USERNAME_INVALID_FORMAT"
+  );
+  assert.equal(
+    validateUsernameForIdentity(
+      "valid_learner"
+    ).ok,
+    true
+  );
+});
+
+test("public username availability returns only a boolean availability field", async () => {
+  const firestore = createUsernameFirestore({
+    usernames: {
+      taken_user: {
+        uid: "uid-existing",
+        status: "active",
+      },
+    },
+  });
+
+  const available =
+    await checkUsernameAvailability({
+      data: { username: " New.User " },
+      firestore,
+    });
+  const unavailable =
+    await checkUsernameAvailability({
+      data: { username: "taken_user" },
+      firestore,
+    });
+  const reserved =
+    await checkUsernameAvailability({
+      data: { username: "admin" },
+      firestore,
+    });
+
+  assert.deepEqual(available, {
+    available: true,
+  });
+  assert.deepEqual(unavailable, {
+    available: false,
+  });
+  assert.deepEqual(reserved, {
+    available: false,
+  });
+  assert.deepEqual(
+    Object.keys(available),
+    ["available"]
+  );
+  assert.equal(Object.isFrozen(available), true);
+});
+
+test("trusted username principal resolver follows username UID to canonical user email", async () => {
+  const firestore = createUsernameFirestore({
+    usernames: {
+      learner_one: {
+        uid: "uid-1",
+        status: "active",
+      },
+      inactive_one: {
+        uid: "uid-2",
+        status: "blocked",
+      },
+      blank_uid: {
+        uid: "",
+        status: "active",
+      },
+    },
+    users: {
+      "uid-1": {
+        normalizedEmail:
+          "Learner@One.Example",
+      },
+      "uid-2": {
+        normalizedEmail:
+          "blocked@example.invalid",
+      },
+    },
+  });
+
+  const principal =
+    await resolveUsernamePrincipal({
+      username: " Learner One ",
+      firestore,
+    });
+  assert.deepEqual(principal, {
+    uid: "uid-1",
+    email: "learner@one.example",
+    username: "learner_one",
+  });
+  assert.equal(Object.isFrozen(principal), true);
+
+  assert.equal(
+    await resolveUsernamePrincipal({
+      username: "inactive_one",
+      firestore,
+    }),
+    null
+  );
+  assert.equal(
+    await resolveUsernamePrincipal({
+      username: "blank_uid",
+      firestore,
+    }),
+    null
+  );
+  assert.equal(
+    await resolveUsernamePrincipal({
+      username: "missing_user",
+      firestore,
+    }),
+    null
+  );
+});
+
+test("trusted username principal resolver is not exposed as a public callable", () => {
+  assert.equal(
+    Object.hasOwn(
+      functionsModule,
+      "checkUsernameAvailability"
+    ),
+    true
+  );
+  assert.equal(
+    Object.hasOwn(
+      functionsModule,
+      "resolveUsernamePrincipal"
+    ),
+    false
+  );
+});
+
+test("normalizes trusted username-password sign-in request without changing password bytes", () => {
+  const request =
+    normalizeUsernamePasswordSignInRequest({
+      username: " Learner_One ",
+      password: "  Keep These Spaces  ",
+      apiKey: "synthetic-web-api-key",
+    });
+
+  assert.deepEqual(request, {
+    username: "Learner_One",
+    password: "  Keep These Spaces  ",
+    apiKey: "synthetic-web-api-key",
+  });
+  assert.equal(Object.isFrozen(request), true);
+
+  assert.throws(
+    () =>
+      normalizeUsernamePasswordSignInRequest({
+        username: "",
+        password: "password-value",
+        apiKey: "synthetic-web-api-key",
+      }),
+    (error) =>
+      error instanceof HttpsError
+      && error.code === "invalid-argument"
+  );
+});
+
+test("builds deterministic privacy-preserving username sign-in rate-limit keys", () => {
+  assert.equal(
+    USERNAME_SIGNIN_RATE_LIMIT_WINDOW_MS,
+    600000
+  );
+  assert.equal(
+    USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_MAX_ATTEMPTS,
+    60
+  );
+  assert.equal(
+    USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_IDENTIFIER_MAX_ATTEMPTS,
+    10
+  );
+
+  const origin =
+    normalizeUsernameSignInRateLimitOrigin({
+      ip: " 203.0.113.8 ",
+      socket: {
+        remoteAddress:
+          "198.51.100.10",
+      },
+    });
+
+  assert.equal(
+    origin,
+    "203.0.113.8"
+  );
+
+  const originKey =
+    buildUsernameSignInRateLimitDocumentId({
+      scope:
+        USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_SCOPE,
+      origin,
+    });
+
+  const pairKey =
+    buildUsernameSignInRateLimitDocumentId({
+      scope:
+        USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_IDENTIFIER_SCOPE,
+      origin,
+      normalizedUsername:
+        " Learner One ",
+    });
+
+  assert.match(
+    originKey,
+    /^[a-f0-9]{64}$/
+  );
+  assert.match(
+    pairKey,
+    /^[a-f0-9]{64}$/
+  );
+  assert.notEqual(
+    originKey,
+    pairKey
+  );
+
+  const pairKeyAgain =
+    buildUsernameSignInRateLimitDocumentId({
+      scope:
+        USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_IDENTIFIER_SCOPE,
+      origin:
+        "203.0.113.8",
+      normalizedUsername:
+        "learner_one",
+    });
+
+  assert.equal(
+    pairKey,
+    pairKeyAgain
+  );
+  assert.equal(
+    pairKey.includes(
+      "203.0.113.8"
+    ),
+    false
+  );
+  assert.equal(
+    pairKey.includes(
+      "learner_one"
+    ),
+    false
+  );
+});
+
+test("username sign-in rate limiter enforces origin and origin-identifier windows without storing raw identifiers", async () => {
+  const firestore =
+    createUsernameFirestore();
+
+  for (
+    let attempt = 1;
+    attempt <= 2;
+    attempt += 1
+  ) {
+    const result =
+      await enforceUsernameSignInRateLimit({
+        rawRequest:
+          RATE_LIMIT_RAW_REQUEST,
+        username:
+          " Learner One ",
+        firestore,
+        nowMs:
+          RATE_LIMIT_NOW_MS,
+        originLimit: 3,
+        originIdentifierLimit: 2,
+      });
+
+    assert.deepEqual(
+      result,
+      {
+        allowed: true,
+      }
+    );
+  }
+
+  await assert.rejects(
+    () =>
+      enforceUsernameSignInRateLimit({
+        rawRequest:
+          RATE_LIMIT_RAW_REQUEST,
+        username:
+          "learner_one",
+        firestore,
+        nowMs:
+          RATE_LIMIT_NOW_MS,
+        originLimit: 3,
+        originIdentifierLimit: 2,
+      }),
+    (error) =>
+      error instanceof HttpsError
+      && error.code ===
+        "resource-exhausted"
+      && error.message.includes(
+        "Sign-in could not be completed."
+      )
+  );
+
+  assert.equal(
+    firestore.__rateLimitStore.size,
+    2
+  );
+
+  for (
+    const record
+    of firestore.__rateLimitStore.values()
+  ) {
+    assert.deepEqual(
+      Object.keys(record).sort(),
+      [
+        "count",
+        "expiresAt",
+        "scope",
+        "updatedAt",
+        "windowStartedAt",
+      ].sort()
+    );
+    assert.equal(
+      Object.hasOwn(
+        record,
+        "ip"
+      ),
+      false
+    );
+    assert.equal(
+      Object.hasOwn(
+        record,
+        "username"
+      ),
+      false
+    );
+    assert.equal(
+      Object.hasOwn(
+        record,
+        "email"
+      ),
+      false
+    );
+    assert.equal(
+      Object.hasOwn(
+        record,
+        "uid"
+      ),
+      false
+    );
+  }
+});
+
+test("username sign-in rate limiter resets the same stable documents after window expiry", async () => {
+  const firestore =
+    createUsernameFirestore();
+
+  await enforceUsernameSignInRateLimit({
+    rawRequest:
+      RATE_LIMIT_RAW_REQUEST,
+    username:
+      "learner_one",
+    firestore,
+    nowMs:
+      RATE_LIMIT_NOW_MS,
+    originLimit: 2,
+    originIdentifierLimit: 1,
+  });
+
+  const documentIdsBefore =
+    Array.from(
+      firestore.__rateLimitStore.keys()
+    ).sort();
+
+  await assert.rejects(
+    () =>
+      enforceUsernameSignInRateLimit({
+        rawRequest:
+          RATE_LIMIT_RAW_REQUEST,
+        username:
+          "learner_one",
+        firestore,
+        nowMs:
+          RATE_LIMIT_NOW_MS,
+        originLimit: 2,
+        originIdentifierLimit: 1,
+      }),
+    (error) =>
+      error instanceof HttpsError
+      && error.code ===
+        "resource-exhausted"
+  );
+
+  await enforceUsernameSignInRateLimit({
+    rawRequest:
+      RATE_LIMIT_RAW_REQUEST,
+    username:
+      "learner_one",
+    firestore,
+    nowMs:
+      RATE_LIMIT_NOW_MS
+      + USERNAME_SIGNIN_RATE_LIMIT_WINDOW_MS
+      + 1,
+    originLimit: 2,
+    originIdentifierLimit: 1,
+  });
+
+  const documentIdsAfter =
+    Array.from(
+      firestore.__rateLimitStore.keys()
+    ).sort();
+
+  assert.deepEqual(
+    documentIdsAfter,
+    documentIdsBefore
+  );
+
+  for (
+    const record
+    of firestore.__rateLimitStore.values()
+  ) {
+    assert.equal(
+      record.count,
+      1
+    );
+  }
+});
+
+test("username sign-in rate limiter fails closed when trusted origin context is missing", async () => {
+  const firestore =
+    createUsernameFirestore();
+
+  await assert.rejects(
+    () =>
+      enforceUsernameSignInRateLimit({
+        rawRequest: {},
+        username:
+          "learner_one",
+        firestore,
+        nowMs:
+          RATE_LIMIT_NOW_MS,
+      }),
+    (error) =>
+      error instanceof HttpsError
+      && error.code ===
+        "resource-exhausted"
+      && error.message.includes(
+        "Sign-in could not be completed."
+      )
+  );
+
+  assert.equal(
+    firestore.__rateLimitStore.size,
+    0
+  );
+});
+
+test("username sign-in rate limit is evaluated before private resolver and password verification", async () => {
+  const origin =
+    normalizeUsernameSignInRateLimitOrigin(
+      RATE_LIMIT_RAW_REQUEST
+    );
+  const normalizedUsername =
+    normalizeUsernameForIdentity(
+      "learner_one"
+    );
+
+  const originKey =
+    buildUsernameSignInRateLimitDocumentId({
+      scope:
+        USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_SCOPE,
+      origin,
+    });
+  const pairKey =
+    buildUsernameSignInRateLimitDocumentId({
+      scope:
+        USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_IDENTIFIER_SCOPE,
+      origin,
+      normalizedUsername,
+    });
+
+  const activeWindow = {
+    count:
+      USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_IDENTIFIER_MAX_ATTEMPTS,
+    windowStartedAt: {
+      toMillis: () =>
+        RATE_LIMIT_NOW_MS,
+    },
+    updatedAt: {
+      toMillis: () =>
+        RATE_LIMIT_NOW_MS,
+    },
+    expiresAt: {
+      toMillis: () =>
+        RATE_LIMIT_NOW_MS
+        + USERNAME_SIGNIN_RATE_LIMIT_WINDOW_MS,
+    },
+  };
+
+  const firestore =
+    createUsernameFirestore({
+      usernames: {
+        learner_one: {
+          uid: "uid-1",
+          status: "active",
+        },
+      },
+      users: {
+        "uid-1": {
+          normalizedEmail:
+            "learner.one@example.invalid",
+        },
+      },
+      rateLimits: {
+        [originKey]: {
+          ...activeWindow,
+          scope:
+            USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_SCOPE,
+          count: 1,
+        },
+        [pairKey]: {
+          ...activeWindow,
+          scope:
+            USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_IDENTIFIER_SCOPE,
+        },
+      },
+    });
+
+  let fetchCalls = 0;
+  let verifyCalls = 0;
+
+  await assert.rejects(
+    () =>
+      signInWithUsernameAndPassword({
+        data: {
+          username:
+            "learner_one",
+          password:
+            "password-value",
+          apiKey:
+            "synthetic-web-api-key",
+        },
+        rawRequest:
+          RATE_LIMIT_RAW_REQUEST,
+        firestore,
+        adminAuth: {
+          async verifyIdToken() {
+            verifyCalls += 1;
+            return {
+              uid: "uid-1",
+            };
+          },
+          async createCustomToken() {
+            return "must-not-run";
+          },
+        },
+        fetchFn: async () => {
+          fetchCalls += 1;
+          return {
+            ok: false,
+            async json() {
+              return {};
+            },
+          };
+        },
+        nowMs:
+          RATE_LIMIT_NOW_MS,
+      }),
+    (error) =>
+      error instanceof HttpsError
+      && error.code ===
+        "resource-exhausted"
+  );
+
+  assert.equal(
+    fetchCalls,
+    0
+  );
+  assert.equal(
+    verifyCalls,
+    0
+  );
+
+  assert.equal(
+    firestore.__readLog.some(
+      (entry) =>
+        entry.collectionName ===
+          USERNAME_COLLECTION
+    ),
+    false
+  );
+});
+
+test("builds active username rate-limit state without mutating existing record", () => {
+  const snapshot = {
+    exists: true,
+    data: () => ({
+      count: 4,
+      windowStartedAt: {
+        toMillis: () =>
+          RATE_LIMIT_NOW_MS - 1000,
+      },
+      expiresAt: {
+        toMillis: () =>
+          RATE_LIMIT_NOW_MS + 1000,
+      },
+    }),
+  };
+
+  const state =
+    buildUsernameSignInRateLimitState({
+      snapshot,
+      scope:
+        USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_SCOPE,
+      limit: 5,
+      nowMs:
+        RATE_LIMIT_NOW_MS,
+    });
+
+  assert.deepEqual(
+    state,
+    {
+      blocked: false,
+      scope:
+        USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_SCOPE,
+      count: 5,
+      windowStartedAtMs:
+        RATE_LIMIT_NOW_MS - 1000,
+      expiresAtMs:
+        RATE_LIMIT_NOW_MS + 1000,
+    }
+  );
+  assert.equal(
+    Object.isFrozen(state),
+    true
+  );
+});
+
+test("trusted username-password bridge verifies password result against current project and returns custom token only", async () => {
+  const firestore = createUsernameFirestore({
+    usernames: {
+      learner_one: {
+        uid: "uid-1",
+        status: "active",
+      },
+    },
+    users: {
+      "uid-1": {
+        normalizedEmail:
+          "learner.one@example.invalid",
+      },
+    },
+  });
+
+  const fetchCalls = [];
+  const fetchFn = async (url, options) => {
+    fetchCalls.push({
+      url,
+      options,
+    });
+
+    return {
+      ok: true,
+      async json() {
+        return {
+          idToken: "synthetic-id-token",
+          localId: "uid-1",
+          email:
+            "learner.one@example.invalid",
+        };
+      },
+    };
+  };
+
+  const adminCalls = [];
+  const adminAuth = {
+    async verifyIdToken(idToken) {
+      adminCalls.push({
+        name: "verifyIdToken",
+        idToken,
+      });
+      return {
+        uid: "uid-1",
+      };
+    },
+    async createCustomToken(uid) {
+      adminCalls.push({
+        name: "createCustomToken",
+        uid,
+      });
+      return "synthetic-custom-token";
+    },
+  };
+
+  const result =
+    await signInWithUsernameAndPassword({
+      data: {
+        username: " Learner One ",
+        password: "password-value",
+        apiKey: "synthetic-web-api-key",
+      },
+      rawRequest:
+        RATE_LIMIT_RAW_REQUEST,
+      firestore,
+      adminAuth,
+      fetchFn,
+      nowMs:
+        RATE_LIMIT_NOW_MS,
+    });
+
+  assert.deepEqual(result, {
+    customToken:
+      "synthetic-custom-token",
+  });
+  assert.deepEqual(
+    Object.keys(result),
+    ["customToken"]
+  );
+  assert.equal(Object.isFrozen(result), true);
+  assert.equal(fetchCalls.length, 1);
+  assert.equal(
+    fetchCalls[0].url,
+    `${IDENTITY_TOOLKIT_PASSWORD_SIGNIN_URL}`
+      + "?key=synthetic-web-api-key"
+  );
+  assert.deepEqual(
+    JSON.parse(
+      fetchCalls[0].options.body
+    ),
+    {
+      email:
+        "learner.one@example.invalid",
+      password: "password-value",
+      returnSecureToken: true,
+    }
+  );
+  assert.deepEqual(adminCalls, [
+    {
+      name: "verifyIdToken",
+      idToken: "synthetic-id-token",
+    },
+    {
+      name: "createCustomToken",
+      uid: "uid-1",
+    },
+  ]);
+});
+
+test("trusted username-password bridge fails closed on project or UID mismatch", async () => {
+  const firestore = createUsernameFirestore({
+    usernames: {
+      learner_one: {
+        uid: "uid-1",
+        status: "active",
+      },
+    },
+    users: {
+      "uid-1": {
+        normalizedEmail:
+          "learner.one@example.invalid",
+      },
+    },
+  });
+
+  let customTokenCalls = 0;
+  const adminAuth = {
+    async verifyIdToken() {
+      return {
+        uid: "other-project-uid",
+      };
+    },
+    async createCustomToken() {
+      customTokenCalls += 1;
+      return "must-not-be-created";
+    },
+  };
+
+  await assert.rejects(
+    () =>
+      signInWithUsernameAndPassword({
+        data: {
+          username: "learner_one",
+          password: "password-value",
+          apiKey: "synthetic-web-api-key",
+        },
+        rawRequest:
+          RATE_LIMIT_RAW_REQUEST,
+        firestore,
+        adminAuth,
+        nowMs:
+          RATE_LIMIT_NOW_MS,
+        fetchFn: async () => ({
+          ok: true,
+          async json() {
+            return {
+              idToken:
+                "synthetic-id-token",
+              localId: "uid-1",
+            };
+          },
+        }),
+      }),
+    (error) =>
+      error instanceof HttpsError
+      && error.code === "unauthenticated"
+      && error.message.includes(
+        "Sign-in could not be completed."
+      )
+  );
+
+  assert.equal(customTokenCalls, 0);
+});
+
+test("trusted username-password bridge does not expose username principal resolver publicly", () => {
+  assert.equal(
+    USERNAME_PASSWORD_SIGNIN_FUNCTION_NAME,
+    "signInWithUsernameAndPassword"
+  );
+  assert.equal(
+    typeof postIdentityToolkitPasswordSignIn,
+    "function"
+  );
+  assert.equal(
+    Object.hasOwn(
+      functionsModule,
+      "signInWithUsernameAndPassword"
+    ),
+    true
+  );
+  assert.equal(
+    Object.hasOwn(
+      functionsModule,
+      "resolveUsernamePrincipal"
+    ),
+    false
+  );
+});
 
 test("returns the minimal authenticated server-time response", () => {
   const result =

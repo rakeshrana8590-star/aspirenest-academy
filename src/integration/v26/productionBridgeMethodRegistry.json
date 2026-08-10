@@ -862,10 +862,15 @@
     {
       "name": "registerAccount",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "authProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/authProductionService.js#createAuthProductionService",
+      "canonicalOwnerMethod": "registerAccount",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP2-P2.3-S2.3.2",
+      "runtimeActivation": true
     },
     {
       "name": "removeMentorProfilePhoto",
@@ -1354,10 +1359,15 @@
     {
       "name": "signInWithGoogle",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "authProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/authProductionService.js#createAuthProductionService",
+      "canonicalOwnerMethod": "login",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP2-P2.3-S2.3.3",
+      "runtimeActivation": true
     },
     {
       "name": "submitStudentAssignment",

@@ -33,11 +33,20 @@ const rows = Array.isArray(registryRaw)
 assert.strictEqual(rows.length, 182);
 assert.strictEqual(
   rows.filter((row) => row.owner).length,
-  0,
+  2,
 );
 
 const requiredFragments = [
   'from "@aspirenest/firebase-runtime"',
+  '../../../firebase.js',
+  '../../../profile/usernameAvailabilityClient.js',
+  '../../../profile/usernamePasswordSignInClient.js',
+  '../../../profile/studentAccountRegistrationClient.js',
+  'createFirebaseUsernameAvailabilityCall',
+  'createFirebaseUsernamePasswordSignIn',
+  'createFirebaseStudentAccountRegistration',
+  'registerStudentAccount:',
+  'signInWithUsernameAndPassword:',
   'from "firebase/auth"',
   'from "firebase/firestore"',
   '../../../auth/aspireNestIdentity.js',
@@ -105,15 +114,19 @@ const registrationCallCount = (
   text.match(/handlerRegistry\.register\(/g) || []
 ).length;
 
-assert.strictEqual(registrationCallCount, 5);
+assert.strictEqual(registrationCallCount, 8);
 
 const expectedMethodOwnerFragments = [
+  '"checkUsernameAvailability"',
   '"getSession"',
   '"login"',
   '"logout"',
   '"openCanonical"',
+  '"registerAccount"',
+  '"signInWithGoogle"',
   '"authorize"',
   'owner: "authProductionService"',
+  'owner: "usernameAvailabilityClient"',
   'owner: "canonicalResourceService"',
   'owner: "authorizeProductionService"',
 ];
@@ -141,12 +154,85 @@ assert.ok(
   ),
 );
 
+const registerAccountRow = rows.find(
+  (row) => row.name === 'registerAccount',
+);
+
+assert(registerAccountRow);
+assert.strictEqual(
+  registerAccountRow.ownerState,
+  'RUNTIME_OWNER_ASSIGNED',
+);
+assert.strictEqual(
+  registerAccountRow.owner,
+  'authProductionService',
+);
+assert.strictEqual(
+  registerAccountRow.auditClassification,
+  'OWNER_RESOLVED',
+);
+assert.strictEqual(
+  registerAccountRow.canonicalOwner,
+  'src/integration/v26/authProductionService.js#createAuthProductionService',
+);
+assert.strictEqual(
+  registerAccountRow.canonicalOwnerMethod,
+  'registerAccount',
+);
+assert.strictEqual(
+  registerAccountRow.ownerContractStatus,
+  'IMPLEMENTED_RUNTIME_ACTIVATED',
+);
+assert.strictEqual(
+  registerAccountRow.runtimeActivation,
+  true,
+);
+
+
+const signInWithGoogleRow = rows.find(
+  (row) => row.name === 'signInWithGoogle',
+);
+
+assert(signInWithGoogleRow);
+assert.strictEqual(
+  signInWithGoogleRow.ownerState,
+  'RUNTIME_OWNER_ASSIGNED',
+);
+assert.strictEqual(
+  signInWithGoogleRow.owner,
+  'authProductionService',
+);
+assert.strictEqual(
+  signInWithGoogleRow.auditClassification,
+  'OWNER_RESOLVED',
+);
+assert.strictEqual(
+  signInWithGoogleRow.canonicalOwner,
+  'src/integration/v26/authProductionService.js#createAuthProductionService',
+);
+assert.strictEqual(
+  signInWithGoogleRow.canonicalOwnerMethod,
+  'login',
+);
+assert.strictEqual(
+  signInWithGoogleRow.ownerContractStatus,
+  'IMPLEMENTED_RUNTIME_ACTIVATED',
+);
+assert.strictEqual(
+  signInWithGoogleRow.ownerDecisionEvidence,
+  'LP2-P2.3-S2.3.3',
+);
+assert.strictEqual(
+  signInWithGoogleRow.runtimeActivation,
+  true,
+);
+
 console.log('PROVIDER_ENTRY_STATIC_CONTRACT=PASS');
 console.log('PROVIDER_GLOBAL_ASSIGNMENT_COUNT=1');
-console.log('PROVIDER_RUNTIME_OWNER_REGISTRATION_CALLS=5');
-console.log('INITIAL_IN_MEMORY_HANDLER_OWNER_COUNT=5');
-console.log('SAFE_DISABLED_METHODS_AFTER_PROVIDER_INIT=177');
+console.log('PROVIDER_RUNTIME_OWNER_REGISTRATION_CALLS=8');
+console.log('INITIAL_IN_MEMORY_HANDLER_OWNER_COUNT=8');
+console.log('SAFE_DISABLED_METHODS_AFTER_PROVIDER_INIT=174');
 console.log('FIRESTORE_WRITE_SDK_IMPORTS=0');
 console.log('RUNTIME_PATH_REFERENCES=0');
 console.log('METHOD_REGISTRY_ROWS=182');
-console.log('PERSISTENT_REGISTRY_OWNER_ASSIGNMENTS=0');
+console.log('PERSISTENT_REGISTRY_OWNER_ASSIGNMENTS=2');

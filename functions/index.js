@@ -13,6 +13,9 @@ const {
   getFirestore,
 } = require("firebase-admin/firestore");
 const {
+  getAuth,
+} = require("firebase-admin/auth");
+const {
   HttpsError,
   onCall,
 } = require("firebase-functions/v2/https");
@@ -102,6 +105,1212 @@ const normalizeMode = (value = "") =>
   cleanString(value)
     .replace(/\s+/g, "")
     .toLowerCase();
+
+
+const USERNAME_PASSWORD_SIGNIN_FUNCTION_NAME =
+  "signInWithUsernameAndPassword";
+const IDENTITY_TOOLKIT_PASSWORD_SIGNIN_URL =
+  "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword";
+const USERNAME_PASSWORD_MAX_LENGTH = 4096;
+const USERNAME_API_KEY_MAX_LENGTH = 256;
+
+const usernameSignInFailure = () =>
+  new HttpsError(
+    "unauthenticated",
+    "Sign-in could not be completed."
+  );
+
+const normalizeUsernamePasswordSignInRequest = (
+  data = {}
+) => {
+  const username = cleanString(
+    data?.username
+  );
+  const password = String(
+    data?.password ?? ""
+  );
+  const apiKey = cleanString(
+    data?.apiKey
+  );
+
+  if (
+    !username
+    || !password
+    || !apiKey
+    || password.length >
+      USERNAME_PASSWORD_MAX_LENGTH
+    || apiKey.length >
+      USERNAME_API_KEY_MAX_LENGTH
+  ) {
+    throw new HttpsError(
+      "invalid-argument",
+      "Sign-in could not be completed."
+    );
+  }
+
+  return Object.freeze({
+    username,
+    password,
+    apiKey,
+  });
+};
+
+const postIdentityToolkitPasswordSignIn =
+  async ({
+    apiKey = "",
+    email = "",
+    password = "",
+    fetchFn = globalThis.fetch,
+  } = {}) => {
+    if (typeof fetchFn !== "function") {
+      throw new HttpsError(
+        "failed-precondition",
+        "Sign-in could not be completed."
+      );
+    }
+
+    let response;
+
+    try {
+      response = await fetchFn(
+        `${IDENTITY_TOOLKIT_PASSWORD_SIGNIN_URL}`
+          + `?key=${encodeURIComponent(apiKey)}`,
+        {
+          method: "POST",
+          headers: Object.freeze({
+            "Content-Type":
+              "application/json",
+          }),
+          body: JSON.stringify({
+            email,
+            password,
+            returnSecureToken: true,
+          }),
+        }
+      );
+    } catch (_) {
+      throw usernameSignInFailure();
+    }
+
+    let body = {};
+
+    try {
+      body = await response.json();
+    } catch (_) {
+      body = {};
+    }
+
+    if (!response?.ok) {
+      throw usernameSignInFailure();
+    }
+
+    const idToken = cleanString(
+      body?.idToken
+    );
+    const localId = cleanString(
+      body?.localId
+    );
+
+    if (!idToken || !localId) {
+      throw usernameSignInFailure();
+    }
+
+    return Object.freeze({
+      idToken,
+      localId,
+    });
+  };
+
+const signInWithUsernameAndPassword =
+  async ({
+    data = {},
+    rawRequest = null,
+    firestore = getFirestore(),
+    adminAuth = getAuth(),
+    fetchFn = globalThis.fetch,
+    nowMs = Date.now(),
+  } = {}) => {
+    const request =
+      normalizeUsernamePasswordSignInRequest(
+        data
+      );
+
+    await enforceUsernameSignInRateLimit({
+      rawRequest,
+      username: request.username,
+      firestore,
+      nowMs,
+    });
+
+    const principal =
+      await resolveUsernamePrincipal({
+        username: request.username,
+        firestore,
+      });
+
+    if (!principal) {
+      throw usernameSignInFailure();
+    }
+
+    const passwordResult =
+      await postIdentityToolkitPasswordSignIn({
+        apiKey: request.apiKey,
+        email: principal.email,
+        password: request.password,
+        fetchFn,
+      });
+
+    let decoded;
+
+    try {
+      decoded = await adminAuth.verifyIdToken(
+        passwordResult.idToken
+      );
+    } catch (_) {
+      throw usernameSignInFailure();
+    }
+
+    const verifiedUid = cleanString(
+      decoded?.uid || decoded?.sub
+    );
+
+    if (
+      !verifiedUid
+      || verifiedUid !== principal.uid
+      || passwordResult.localId !==
+        principal.uid
+    ) {
+      throw usernameSignInFailure();
+    }
+
+    let customToken = "";
+
+    try {
+      customToken = cleanString(
+        await adminAuth.createCustomToken(
+          principal.uid
+        )
+      );
+    } catch (_) {
+      throw new HttpsError(
+        "internal",
+        "Sign-in could not be completed."
+      );
+    }
+
+    if (!customToken) {
+      throw new HttpsError(
+        "internal",
+        "Sign-in could not be completed."
+      );
+    }
+
+    return Object.freeze({
+      customToken,
+    });
+  };
+
+const STUDENT_ACCOUNT_REGISTRATION_FUNCTION_NAME =
+  "registerStudentAccount";
+const STUDENT_ACCOUNT_REGISTRATION_ROLE =
+  "student";
+const STUDENT_ACCOUNT_REGISTRATION_USERNAME_MIN_LENGTH =
+  4;
+const STUDENT_ACCOUNT_REGISTRATION_USERNAME_MAX_LENGTH =
+  24;
+const STUDENT_ACCOUNT_REGISTRATION_FULL_NAME_MAX_LENGTH =
+  160;
+const STUDENT_ACCOUNT_REGISTRATION_EMAIL_MAX_LENGTH =
+  320;
+const STUDENT_ACCOUNT_REGISTRATION_PASSWORD_MAX_LENGTH =
+  4096;
+const STUDENT_ACCOUNT_REGISTRATION_PASSWORD_PATTERN =
+  /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}/;
+const STUDENT_ACCOUNT_REGISTRATION_PUBLIC_FAILURE =
+  "Account could not be created.";
+
+const studentAccountRegistrationFailure = () =>
+  new HttpsError(
+    "failed-precondition",
+    STUDENT_ACCOUNT_REGISTRATION_PUBLIC_FAILURE
+  );
+
+const normalizeStudentAccountRegistrationRequest = (
+  data = {}
+) => {
+  const fullName = cleanString(
+    data?.fullName
+  );
+  const username = cleanString(
+    data?.username
+  );
+  const email = normalizeEmail(
+    data?.email
+  );
+  const password = String(
+    data?.password ?? ""
+  );
+  const usernameValidation =
+    validateUsernameForIdentity(
+      username
+    );
+  const normalizedUsername =
+    usernameValidation.normalizedUsername;
+
+  if (
+    !fullName
+    || fullName.length >
+      STUDENT_ACCOUNT_REGISTRATION_FULL_NAME_MAX_LENGTH
+    || !email
+    || email.length >
+      STUDENT_ACCOUNT_REGISTRATION_EMAIL_MAX_LENGTH
+    || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+      email
+    )
+    || !password
+    || password.length >
+      STUDENT_ACCOUNT_REGISTRATION_PASSWORD_MAX_LENGTH
+    || !STUDENT_ACCOUNT_REGISTRATION_PASSWORD_PATTERN.test(
+      password
+    )
+    || !usernameValidation.ok
+    || normalizedUsername.length <
+      STUDENT_ACCOUNT_REGISTRATION_USERNAME_MIN_LENGTH
+    || normalizedUsername.length >
+      STUDENT_ACCOUNT_REGISTRATION_USERNAME_MAX_LENGTH
+  ) {
+    throw studentAccountRegistrationFailure();
+  }
+
+  return Object.freeze({
+    fullName,
+    username:
+      normalizedUsername,
+    normalizedUsername,
+    email,
+    password,
+    role:
+      STUDENT_ACCOUNT_REGISTRATION_ROLE,
+  });
+};
+
+const claimStudentRegistrationUsername =
+  async ({
+    firestore = getFirestore(),
+    uid = "",
+    username = "",
+    normalizedUsername = "",
+    nowMs = Date.now(),
+  } = {}) => {
+    const cleanUid =
+      cleanString(uid);
+    const canonicalUsername =
+      normalizeUsernameForIdentity(
+        normalizedUsername || username
+      );
+    const safeNowMs =
+      Number(nowMs);
+
+    if (
+      !cleanUid
+      || !canonicalUsername
+      || !Number.isFinite(safeNowMs)
+      || !firestore
+      || typeof firestore.runTransaction !==
+        "function"
+    ) {
+      throw studentAccountRegistrationFailure();
+    }
+
+    const usernameRef =
+      firestore
+        .collection(USERNAME_COLLECTION)
+        .doc(canonicalUsername);
+
+    await firestore.runTransaction(
+      async (transaction) => {
+        const snapshot =
+          await transaction.get(
+            usernameRef
+          );
+
+        if (snapshotExists(snapshot)) {
+          throw studentAccountRegistrationFailure();
+        }
+
+        const timestamp =
+          Timestamp.fromMillis(
+            safeNowMs
+          );
+
+        transaction.set(
+          usernameRef,
+          {
+            uid:
+              cleanUid,
+            username:
+              canonicalUsername,
+            normalizedUsername:
+              canonicalUsername,
+            status:
+              "active",
+            createdAt:
+              timestamp,
+            updatedAt:
+              timestamp,
+          }
+        );
+      }
+    );
+
+    return Object.freeze({
+      claimed: true,
+      normalizedUsername:
+        canonicalUsername,
+    });
+  };
+
+const registerStudentAccount =
+  async ({
+    data = {},
+    firestore = getFirestore(),
+    adminAuth = getAuth(),
+    nowMs = Date.now(),
+  } = {}) => {
+    const request =
+      normalizeStudentAccountRegistrationRequest(
+        data
+      );
+
+    if (
+      !adminAuth
+      || typeof adminAuth.createUser !==
+        "function"
+      || typeof adminAuth.deleteUser !==
+        "function"
+    ) {
+      throw studentAccountRegistrationFailure();
+    }
+
+    let createdUid = "";
+
+    try {
+      const createdUser =
+        await adminAuth.createUser({
+          email:
+            request.email,
+          password:
+            request.password,
+          displayName:
+            request.fullName,
+          emailVerified:
+            false,
+          disabled:
+            false,
+        });
+
+      createdUid =
+        cleanString(
+          createdUser?.uid
+        );
+
+      if (!createdUid) {
+        throw studentAccountRegistrationFailure();
+      }
+
+      await claimStudentRegistrationUsername({
+        firestore,
+        uid:
+          createdUid,
+        username:
+          request.username,
+        normalizedUsername:
+          request.normalizedUsername,
+        nowMs,
+      });
+
+      return Object.freeze({
+        prepared: true,
+      });
+    } catch (_) {
+      if (createdUid) {
+        try {
+          await adminAuth.deleteUser(
+            createdUid
+          );
+        } catch (_) {
+          throw studentAccountRegistrationFailure();
+        }
+      }
+
+      throw studentAccountRegistrationFailure();
+    }
+  };
+
+
+const STUDENT_PROFILE_ENSURE_FUNCTION_NAME =
+  "ensureStudentProfile";
+const STUDENT_PROFILE_USERS_COLLECTION =
+  "users";
+const STUDENT_PROFILE_STUDENTS_COLLECTION =
+  "students";
+const STUDENT_PROFILE_MENTORS_COLLECTION =
+  "mentorProfiles";
+const STUDENT_PROFILE_FIXED_ADMIN_EMAIL =
+  "aspirenestplatform@gmail.com";
+const STUDENT_PROFILE_FIXED_MENTOR_EMAIL =
+  "dr.varshamaru@gmail.com";
+const STUDENT_PROFILE_PUBLIC_FAILURE =
+  "Account profile could not be prepared.";
+
+const studentProfileEnsureFailure = (
+  code = "failed-precondition"
+) =>
+  new HttpsError(
+    code,
+    STUDENT_PROFILE_PUBLIC_FAILURE
+  );
+
+const ensureStudentProfile = async ({
+  requestAuth = null,
+  firestore = getFirestore(),
+  adminAuth = getAuth(),
+  nowMs = Date.now(),
+} = {}) => {
+  const uid =
+    cleanString(
+      requestAuth?.uid
+    );
+  const tokenVerified =
+    requestAuth?.token
+      ?.email_verified === true;
+  const safeNowMs =
+    Number(nowMs);
+
+  if (
+    !uid
+    || !tokenVerified
+    || !Number.isFinite(safeNowMs)
+    || !firestore
+    || typeof firestore.runTransaction !==
+      "function"
+    || !adminAuth
+    || typeof adminAuth.getUser !==
+      "function"
+  ) {
+    throw studentProfileEnsureFailure(
+      "unauthenticated"
+    );
+  }
+
+  let authUser;
+
+  try {
+    authUser =
+      await adminAuth.getUser(uid);
+  } catch (_) {
+    throw studentProfileEnsureFailure(
+      "unauthenticated"
+    );
+  }
+
+  const email =
+    normalizeEmail(
+      authUser?.email
+    );
+  const displayName =
+    cleanString(
+      authUser?.displayName
+    );
+
+  if (
+    cleanString(
+      authUser?.uid
+    ) !== uid
+    || authUser?.emailVerified !== true
+    || !email
+    || email ===
+      STUDENT_PROFILE_FIXED_ADMIN_EMAIL
+    || email ===
+      STUDENT_PROFILE_FIXED_MENTOR_EMAIL
+  ) {
+    throw studentProfileEnsureFailure(
+      "permission-denied"
+    );
+  }
+
+  const userRef =
+    firestore
+      .collection(
+        STUDENT_PROFILE_USERS_COLLECTION
+      )
+      .doc(uid);
+
+  const studentRef =
+    firestore
+      .collection(
+        STUDENT_PROFILE_STUDENTS_COLLECTION
+      )
+      .doc(uid);
+
+  const mentorRef =
+    firestore
+      .collection(
+        STUDENT_PROFILE_MENTORS_COLLECTION
+      )
+      .doc(uid);
+
+  try {
+    await firestore.runTransaction(
+      async (transaction) => {
+        const [
+          userSnapshot,
+          studentSnapshot,
+          mentorSnapshot,
+        ] = await Promise.all([
+          transaction.get(
+            userRef
+          ),
+          transaction.get(
+            studentRef
+          ),
+          transaction.get(
+            mentorRef
+          ),
+        ]);
+
+        const mentorRecord =
+          snapshotData(
+            mentorSnapshot
+          );
+
+        const activeMentor =
+          snapshotExists(
+            mentorSnapshot
+          )
+          && cleanString(
+            mentorRecord.mentorUid
+          ) === uid
+          && normalizeMode(
+            mentorRecord.role
+          ) === "mentor"
+          && normalizeMode(
+            mentorRecord.status
+          ) === "active";
+
+        if (activeMentor) {
+          throw studentProfileEnsureFailure(
+            "permission-denied"
+          );
+        }
+
+        const timestamp =
+          Timestamp.fromMillis(
+            safeNowMs
+          );
+
+        if (
+          !snapshotExists(
+            userSnapshot
+          )
+        ) {
+          transaction.set(
+            userRef,
+            {
+              uid,
+              email,
+              normalizedEmail:
+                email,
+              displayName,
+              createdAt:
+                timestamp,
+              updatedAt:
+                timestamp,
+            }
+          );
+        }
+
+        if (
+          !snapshotExists(
+            studentSnapshot
+          )
+        ) {
+          transaction.set(
+            studentRef,
+            {
+              uid,
+              createdAt:
+                timestamp,
+              updatedAt:
+                timestamp,
+            }
+          );
+        }
+      }
+    );
+  } catch (error) {
+    if (error instanceof HttpsError) {
+      throw error;
+    }
+
+    throw studentProfileEnsureFailure();
+  }
+
+  return Object.freeze({
+    prepared: true,
+  });
+};
+
+const USERNAME_COLLECTION =
+  "usernames";
+const USERNAME_USERS_COLLECTION =
+  "users";
+const USERNAME_MIN_LENGTH = 3;
+const USERNAME_MAX_LENGTH = 24;
+
+const USERNAME_SIGNIN_RATE_LIMIT_COLLECTION =
+  "authAttemptRateLimits";
+const USERNAME_SIGNIN_RATE_LIMIT_WINDOW_MS =
+  10 * 60 * 1000;
+const USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_MAX_ATTEMPTS =
+  60;
+const USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_IDENTIFIER_MAX_ATTEMPTS =
+  10;
+const USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_SCOPE =
+  "origin";
+const USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_IDENTIFIER_SCOPE =
+  "origin_identifier";
+const USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_MAX_LENGTH =
+  256;
+
+const USERNAME_RESERVED_USERNAMES = new Set([
+  "admin",
+  "administrator",
+  "aspirenest",
+  "aspirenestacademy",
+  "aspirenest_admin",
+  "founder",
+  "mentor",
+  "moderator",
+  "owner",
+  "root",
+  "student",
+  "support",
+  "system",
+]);
+
+const normalizeUsernameForIdentity = (
+  value = ""
+) =>
+  String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_")
+    .replace(/[^a-z0-9_]/g, "")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
+
+const validateUsernameForIdentity = (
+  value = ""
+) => {
+  const normalizedUsername =
+    normalizeUsernameForIdentity(value);
+
+  if (
+    normalizedUsername.length <
+    USERNAME_MIN_LENGTH
+  ) {
+    return Object.freeze({
+      ok: false,
+      normalizedUsername,
+      reason: "USERNAME_TOO_SHORT",
+    });
+  }
+
+  if (
+    normalizedUsername.length >
+    USERNAME_MAX_LENGTH
+  ) {
+    return Object.freeze({
+      ok: false,
+      normalizedUsername,
+      reason: "USERNAME_TOO_LONG",
+    });
+  }
+
+  if (
+    !/^[a-z][a-z0-9_]*$/.test(
+      normalizedUsername
+    )
+  ) {
+    return Object.freeze({
+      ok: false,
+      normalizedUsername,
+      reason: "USERNAME_INVALID_FORMAT",
+    });
+  }
+
+  if (
+    USERNAME_RESERVED_USERNAMES.has(
+      normalizedUsername
+    )
+  ) {
+    return Object.freeze({
+      ok: false,
+      normalizedUsername,
+      reason: "USERNAME_RESERVED",
+    });
+  }
+
+  return Object.freeze({
+    ok: true,
+    normalizedUsername,
+    reason: "USERNAME_AVAILABLE_FOR_CHECK",
+  });
+};
+
+const snapshotExists = (snapshot) => {
+  if (!snapshot) return false;
+  if (typeof snapshot.exists === "function") {
+    return snapshot.exists();
+  }
+  return snapshot.exists === true;
+};
+
+const snapshotData = (snapshot) => {
+  if (!snapshot) return {};
+  if (typeof snapshot.data === "function") {
+    return snapshot.data() || {};
+  }
+  return (
+    snapshot.data
+    && typeof snapshot.data === "object"
+      ? snapshot.data
+      : {}
+  );
+};
+
+const usernameSignInRateLimitFailure = () =>
+  new HttpsError(
+    "resource-exhausted",
+    "Sign-in could not be completed."
+  );
+
+const normalizeUsernameSignInRateLimitOrigin = (
+  rawRequest = null
+) => {
+  const origin = cleanString(
+    rawRequest?.ip
+    || rawRequest?.socket?.remoteAddress
+  ).toLowerCase();
+
+  if (
+    !origin
+    || origin.length >
+      USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_MAX_LENGTH
+  ) {
+    throw usernameSignInRateLimitFailure();
+  }
+
+  return origin;
+};
+
+const buildUsernameSignInRateLimitDocumentId = ({
+  scope = "",
+  origin = "",
+  normalizedUsername = "",
+} = {}) => {
+  const normalizedScope =
+    cleanString(scope);
+  const canonicalOrigin =
+    cleanString(origin).toLowerCase();
+  const canonicalUsername =
+    normalizeUsernameForIdentity(
+      normalizedUsername
+    );
+
+  let material = "";
+
+  if (
+    normalizedScope ===
+      USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_SCOPE
+  ) {
+    material =
+      `origin\n${canonicalOrigin}`;
+  } else if (
+    normalizedScope ===
+      USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_IDENTIFIER_SCOPE
+  ) {
+    material =
+      "origin-identifier\n"
+      + canonicalOrigin
+      + "\n"
+      + canonicalUsername;
+  } else {
+    throw usernameSignInRateLimitFailure();
+  }
+
+  if (!canonicalOrigin) {
+    throw usernameSignInRateLimitFailure();
+  }
+
+  return createHash("sha256")
+    .update(material)
+    .digest("hex");
+};
+
+const usernameSignInRateLimitTimestampMs = (
+  value
+) => {
+  if (
+    value
+    && typeof value.toMillis === "function"
+  ) {
+    const millis = Number(
+      value.toMillis()
+    );
+    return Number.isFinite(millis)
+      ? millis
+      : 0;
+  }
+
+  const millis = Number(value);
+  return Number.isFinite(millis)
+    ? millis
+    : 0;
+};
+
+const buildUsernameSignInRateLimitState = ({
+  snapshot = null,
+  scope = "",
+  limit = 1,
+  nowMs = Date.now(),
+  windowMs =
+    USERNAME_SIGNIN_RATE_LIMIT_WINDOW_MS,
+} = {}) => {
+  const safeNowMs = Number(nowMs);
+  const safeWindowMs = Number(windowMs);
+  const safeLimit = Number(limit);
+
+  if (
+    !Number.isFinite(safeNowMs)
+    || !Number.isFinite(safeWindowMs)
+    || safeWindowMs <= 0
+    || !Number.isInteger(safeLimit)
+    || safeLimit <= 0
+  ) {
+    throw usernameSignInRateLimitFailure();
+  }
+
+  const record =
+    snapshotExists(snapshot)
+      ? snapshotData(snapshot)
+      : {};
+
+  const existingCount = Number(
+    record?.count || 0
+  );
+  const expiresAtMs =
+    usernameSignInRateLimitTimestampMs(
+      record?.expiresAt
+    );
+  const existingWindowStartedAtMs =
+    usernameSignInRateLimitTimestampMs(
+      record?.windowStartedAt
+    );
+
+  const activeWindow =
+    expiresAtMs > safeNowMs;
+
+  const currentCount =
+    activeWindow
+    && Number.isFinite(existingCount)
+    && existingCount > 0
+      ? Math.floor(existingCount)
+      : 0;
+
+  if (
+    activeWindow
+    && currentCount >= safeLimit
+  ) {
+    return Object.freeze({
+      blocked: true,
+      scope,
+      count: currentCount,
+      windowStartedAtMs:
+        existingWindowStartedAtMs,
+      expiresAtMs,
+    });
+  }
+
+  const windowStartedAtMs =
+    activeWindow
+      ? (
+          existingWindowStartedAtMs
+          || safeNowMs
+        )
+      : safeNowMs;
+
+  return Object.freeze({
+    blocked: false,
+    scope,
+    count: currentCount + 1,
+    windowStartedAtMs,
+    expiresAtMs:
+      activeWindow
+        ? expiresAtMs
+        : safeNowMs + safeWindowMs,
+  });
+};
+
+const enforceUsernameSignInRateLimit =
+  async ({
+    rawRequest = null,
+    username = "",
+    firestore = getFirestore(),
+    nowMs = Date.now(),
+    windowMs =
+      USERNAME_SIGNIN_RATE_LIMIT_WINDOW_MS,
+    originLimit =
+      USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_MAX_ATTEMPTS,
+    originIdentifierLimit =
+      USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_IDENTIFIER_MAX_ATTEMPTS,
+  } = {}) => {
+    if (
+      !firestore
+      || typeof firestore.runTransaction !==
+        "function"
+    ) {
+      throw usernameSignInRateLimitFailure();
+    }
+
+    const safeNowMs = Number(nowMs);
+
+    if (!Number.isFinite(safeNowMs)) {
+      throw usernameSignInRateLimitFailure();
+    }
+
+    const origin =
+      normalizeUsernameSignInRateLimitOrigin(
+        rawRequest
+      );
+
+    const normalizedUsername =
+      normalizeUsernameForIdentity(
+        username
+      );
+
+    const collection = firestore.collection(
+      USERNAME_SIGNIN_RATE_LIMIT_COLLECTION
+    );
+
+    const buckets = [
+      Object.freeze({
+        scope:
+          USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_SCOPE,
+        limit: originLimit,
+        ref: collection.doc(
+          buildUsernameSignInRateLimitDocumentId({
+            scope:
+              USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_SCOPE,
+            origin,
+          })
+        ),
+      }),
+      Object.freeze({
+        scope:
+          USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_IDENTIFIER_SCOPE,
+        limit: originIdentifierLimit,
+        ref: collection.doc(
+          buildUsernameSignInRateLimitDocumentId({
+            scope:
+              USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_IDENTIFIER_SCOPE,
+            origin,
+            normalizedUsername,
+          })
+        ),
+      }),
+    ];
+
+    try {
+      await firestore.runTransaction(
+        async (transaction) => {
+          const snapshots =
+            await Promise.all(
+              buckets.map(
+                (bucket) =>
+                  transaction.get(
+                    bucket.ref
+                  )
+              )
+            );
+
+          const states = buckets.map(
+            (bucket, index) =>
+              buildUsernameSignInRateLimitState({
+                snapshot:
+                  snapshots[index],
+                scope:
+                  bucket.scope,
+                limit:
+                  bucket.limit,
+                nowMs:
+                  safeNowMs,
+                windowMs,
+              })
+          );
+
+          if (
+            states.some(
+              (state) => state.blocked
+            )
+          ) {
+            throw usernameSignInRateLimitFailure();
+          }
+
+          const updatedAt =
+            Timestamp.fromMillis(
+              safeNowMs
+            );
+
+          states.forEach(
+            (state, index) => {
+              transaction.set(
+                buckets[index].ref,
+                {
+                  scope:
+                    state.scope,
+                  count:
+                    state.count,
+                  windowStartedAt:
+                    Timestamp.fromMillis(
+                      state.windowStartedAtMs
+                    ),
+                  updatedAt,
+                  expiresAt:
+                    Timestamp.fromMillis(
+                      state.expiresAtMs
+                    ),
+                }
+              );
+            }
+          );
+        }
+      );
+    } catch (error) {
+      if (
+        error instanceof HttpsError
+        && error.code ===
+          "resource-exhausted"
+      ) {
+        throw error;
+      }
+
+      throw new HttpsError(
+        "unavailable",
+        "Sign-in could not be completed."
+      );
+    }
+
+    return Object.freeze({
+      allowed: true,
+    });
+  };
+
+const readUsernameDocument = async ({
+  firestore = getFirestore(),
+  normalizedUsername = "",
+} = {}) => {
+  const username = cleanString(
+    normalizedUsername
+  );
+  if (!username) return null;
+  return firestore
+    .collection(USERNAME_COLLECTION)
+    .doc(username)
+    .get();
+};
+
+const checkUsernameAvailability = async ({
+  data = {},
+  firestore = getFirestore(),
+} = {}) => {
+  const validation =
+    validateUsernameForIdentity(
+      data?.username
+    );
+
+  if (!validation.ok) {
+    return Object.freeze({
+      available: false,
+    });
+  }
+
+  const snapshot =
+    await readUsernameDocument({
+      firestore,
+      normalizedUsername:
+        validation.normalizedUsername,
+    });
+
+  return Object.freeze({
+    available: !snapshotExists(snapshot),
+  });
+};
+
+const resolveUsernamePrincipal = async ({
+  username = "",
+  firestore = getFirestore(),
+} = {}) => {
+  const validation =
+    validateUsernameForIdentity(username);
+  if (!validation.ok) return null;
+
+  const usernameSnapshot =
+    await readUsernameDocument({
+      firestore,
+      normalizedUsername:
+        validation.normalizedUsername,
+    });
+  if (!snapshotExists(usernameSnapshot)) {
+    return null;
+  }
+
+  const usernameRecord =
+    snapshotData(usernameSnapshot);
+  const uid = cleanString(
+    usernameRecord.uid
+  );
+  const usernameStatus = normalizeMode(
+    usernameRecord.status || "active"
+  );
+  if (!uid || usernameStatus !== "active") {
+    return null;
+  }
+
+  const userSnapshot = await firestore
+    .collection(USERNAME_USERS_COLLECTION)
+    .doc(uid)
+    .get();
+  if (!snapshotExists(userSnapshot)) {
+    return null;
+  }
+
+  const userRecord =
+    snapshotData(userSnapshot);
+  const email = normalizeEmail(
+    userRecord.normalizedEmail
+    || userRecord.email
+  );
+  if (!email) return null;
+
+  return Object.freeze({
+    uid,
+    email,
+    username:
+      validation.normalizedUsername,
+  });
+};
 
 const toFiniteNumber = (
   value,
@@ -1453,6 +2662,61 @@ const resolveNotesProtectedAsset = async ({
   });
 };
 
+
+exports.ensureStudentProfile = onCall(
+  {
+    region: "asia-south1",
+    timeoutSeconds: 20,
+    memory: "256MiB",
+    maxInstances: 10,
+  },
+  (request) =>
+    ensureStudentProfile({
+      requestAuth:
+        request.auth,
+    })
+);
+
+exports.registerStudentAccount = onCall(
+  {
+    region: "asia-south1",
+    timeoutSeconds: 20,
+    memory: "256MiB",
+    maxInstances: 10,
+  },
+  (request) =>
+    registerStudentAccount({
+      data: request.data,
+    })
+);
+
+exports.signInWithUsernameAndPassword = onCall(
+  {
+    region: "asia-south1",
+    timeoutSeconds: 15,
+    memory: "256MiB",
+    maxInstances: 10,
+  },
+  (request) =>
+    signInWithUsernameAndPassword({
+      data: request.data,
+      rawRequest: request.rawRequest,
+    })
+);
+
+exports.checkUsernameAvailability = onCall(
+  {
+    region: "asia-south1",
+    timeoutSeconds: 10,
+    memory: "256MiB",
+    maxInstances: 10,
+  },
+  (request) =>
+    checkUsernameAvailability({
+      data: request.data,
+    })
+);
+
 exports.getMockTestServerTime = onCall(
   {
     region: "asia-south1",
@@ -1500,6 +2764,47 @@ exports.upsertMockTestLeaderboardEntry =
 
 exports.__test = Object.freeze({
 
+  STUDENT_PROFILE_ENSURE_FUNCTION_NAME,
+  STUDENT_PROFILE_USERS_COLLECTION,
+  STUDENT_PROFILE_STUDENTS_COLLECTION,
+  STUDENT_PROFILE_MENTORS_COLLECTION,
+  STUDENT_PROFILE_PUBLIC_FAILURE,
+  ensureStudentProfile,
+  STUDENT_ACCOUNT_REGISTRATION_FUNCTION_NAME,
+  STUDENT_ACCOUNT_REGISTRATION_ROLE,
+  STUDENT_ACCOUNT_REGISTRATION_USERNAME_MIN_LENGTH,
+  STUDENT_ACCOUNT_REGISTRATION_USERNAME_MAX_LENGTH,
+  STUDENT_ACCOUNT_REGISTRATION_PUBLIC_FAILURE,
+  STUDENT_ACCOUNT_REGISTRATION_PASSWORD_PATTERN,
+  normalizeStudentAccountRegistrationRequest,
+  claimStudentRegistrationUsername,
+  registerStudentAccount,
+  USERNAME_COLLECTION,
+  USERNAME_USERS_COLLECTION,
+  USERNAME_MIN_LENGTH,
+  USERNAME_MAX_LENGTH,
+  USERNAME_RESERVED_USERNAMES,
+  normalizeUsernameForIdentity,
+  validateUsernameForIdentity,
+  checkUsernameAvailability,
+  resolveUsernamePrincipal,
+  USERNAME_PASSWORD_SIGNIN_FUNCTION_NAME,
+  IDENTITY_TOOLKIT_PASSWORD_SIGNIN_URL,
+  USERNAME_PASSWORD_MAX_LENGTH,
+  USERNAME_API_KEY_MAX_LENGTH,
+  normalizeUsernamePasswordSignInRequest,
+  postIdentityToolkitPasswordSignIn,
+  USERNAME_SIGNIN_RATE_LIMIT_COLLECTION,
+  USERNAME_SIGNIN_RATE_LIMIT_WINDOW_MS,
+  USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_MAX_ATTEMPTS,
+  USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_IDENTIFIER_MAX_ATTEMPTS,
+  USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_SCOPE,
+  USERNAME_SIGNIN_RATE_LIMIT_ORIGIN_IDENTIFIER_SCOPE,
+  normalizeUsernameSignInRateLimitOrigin,
+  buildUsernameSignInRateLimitDocumentId,
+  buildUsernameSignInRateLimitState,
+  enforceUsernameSignInRateLimit,
+  signInWithUsernameAndPassword,
   NOTES_RESOLVER_FUNCTION_NAME,
   NOTES_CONTENT_COLLECTION,
   NOTES_ASSET_COLLECTION,

@@ -36,6 +36,8 @@
       ACCESS_RESOLUTION_FAILED:
         'AUTH_ACCESS_RESOLUTION_FAILED',
       PROFILE_FAILED: 'AUTH_PROFILE_FAILED',
+      REGISTRATION_FAILED:
+        'AUTH_REGISTRATION_FAILED',
       LOGIN_FAILED: 'AUTH_LOGIN_FAILED',
       LOGOUT_FAILED: 'AUTH_LOGOUT_FAILED',
     });
@@ -208,7 +210,12 @@
 
       const {
         auth,
+        registerStudentAccount,
+        linkWithCredential,
+        extractGoogleCredentialFromError,
+        ensureStudentProfile,
         signInWithEmailAndPassword,
+        signInWithUsernameAndPassword,
         signInWithPopup,
         signOut,
         createGoogleProvider,
@@ -218,6 +225,215 @@
         subscribeAuthState,
         mapAuthError,
       } = dependencies;
+
+      let pendingGoogleLink =
+        null;
+
+      const PENDING_GOOGLE_LINK_MAX_AGE_MS =
+        10 * 60 * 1000;
+
+      function clearPendingGoogleLink() {
+        pendingGoogleLink =
+          null;
+      }
+
+      function capturePendingGoogleLink(
+        error
+      ) {
+        const code =
+          cleanText(
+            error
+              && error.code
+          ).toLowerCase();
+
+        if (
+          code !==
+          'auth/account-exists-with-different-credential'
+        ) {
+          return false;
+        }
+
+        let pendingCredential =
+          null;
+
+        try {
+          if (
+            typeof extractGoogleCredentialFromError ===
+              'function'
+          ) {
+            pendingCredential =
+              extractGoogleCredentialFromError(
+                error,
+              );
+          }
+        } catch (_) {
+          pendingCredential =
+            null;
+        }
+
+        if (
+          !pendingCredential
+          && error
+          && typeof error ===
+            'object'
+          && error.credential
+        ) {
+          pendingCredential =
+            error.credential;
+        }
+
+        const email =
+          cleanEmail(
+            error?.customData?.email
+            || error?.email,
+          );
+
+        if (
+          !pendingCredential
+          || !email
+        ) {
+          clearPendingGoogleLink();
+          return false;
+        }
+
+        pendingGoogleLink = {
+          credential:
+            pendingCredential,
+          email,
+          createdAt:
+            Date.now(),
+        };
+
+        return true;
+      }
+
+      async function applyPendingGoogleLink(
+        firebaseUser,
+        mode,
+      ) {
+        if (
+          mode === 'google'
+        ) {
+          clearPendingGoogleLink();
+
+          return Object.freeze({
+            ok: true,
+            linked: false,
+            user:
+              firebaseUser,
+          });
+        }
+
+        if (!pendingGoogleLink) {
+          return Object.freeze({
+            ok: true,
+            linked: false,
+            user:
+              firebaseUser,
+          });
+        }
+
+        if (
+          !['email', 'username']
+            .includes(mode)
+        ) {
+          return Object.freeze({
+            ok: true,
+            linked: false,
+            user:
+              firebaseUser,
+          });
+        }
+
+        const pending =
+          pendingGoogleLink;
+
+        const ageMs =
+          Date.now()
+          - Number(
+            pending.createdAt
+            || 0
+          );
+
+        const uid =
+          cleanText(
+            firebaseUser
+              && firebaseUser.uid
+          );
+
+        const email =
+          cleanEmail(
+            firebaseUser
+              && firebaseUser.email
+          );
+
+        if (
+          !uid
+          || firebaseUser?.emailVerified !==
+            true
+          || !email
+          || email !==
+            pending.email
+          || !Number.isFinite(
+            ageMs
+          )
+          || ageMs < 0
+          || ageMs >
+            PENDING_GOOGLE_LINK_MAX_AGE_MS
+          || typeof linkWithCredential !==
+            'function'
+        ) {
+          clearPendingGoogleLink();
+
+          return failure(
+            AUTH_CODES.LOGIN_FAILED,
+            'Sign-in could not be completed.',
+          );
+        }
+
+        try {
+          const result =
+            await linkWithCredential(
+              firebaseUser,
+              pending.credential,
+            );
+
+          const linkedUser =
+            result
+            && result.user
+              ? result.user
+              : firebaseUser;
+
+          if (
+            cleanText(
+              linkedUser?.uid
+            ) !== uid
+          ) {
+            clearPendingGoogleLink();
+
+            return failure(
+              AUTH_CODES.LOGIN_FAILED,
+              'Sign-in could not be completed.',
+            );
+          }
+
+          clearPendingGoogleLink();
+
+          return Object.freeze({
+            ok: true,
+            linked: true,
+            user:
+              linkedUser,
+          });
+        } catch (_) {
+          clearPendingGoogleLink();
+
+          return failure(
+            AUTH_CODES.LOGIN_FAILED,
+            'Sign-in could not be completed.',
+          );
+        }
+      }
 
       async function buildVerifiedSession(firebaseUser) {
         if (!firebaseUser || !cleanText(firebaseUser.uid)) {
@@ -284,6 +500,74 @@
               emailVerified: true,
             },
           );
+        }
+
+        if (
+          role === 'student'
+          && typeof ensureStudentProfile ===
+            'function'
+        ) {
+          try {
+            const prepared =
+              await ensureStudentProfile();
+
+            if (
+              !prepared
+              || prepared.prepared !==
+                true
+              || prepared.error
+            ) {
+              return failure(
+                AUTH_CODES.PROFILE_FAILED,
+                'The account profile could not be loaded.',
+                {
+                  authenticated: true,
+                  accessAllowed: false,
+                  emailVerified: true,
+                },
+              );
+            }
+
+            profile =
+              (await loadAccountProfile(
+                firebaseUser,
+              ))
+              || {};
+
+            role =
+              cleanText(
+                resolveRole(
+                  firebaseUser,
+                  profile,
+                ),
+              ).toLowerCase();
+          } catch (_) {
+            return failure(
+              AUTH_CODES.PROFILE_FAILED,
+              'The account profile could not be loaded.',
+              {
+                authenticated: true,
+                accessAllowed: false,
+                emailVerified: true,
+              },
+            );
+          }
+
+          if (
+            !VALID_ROLES.includes(
+              role
+            )
+          ) {
+            return failure(
+              AUTH_CODES.ROLE_INVALID,
+              'The account role is not authorized.',
+              {
+                authenticated: true,
+                accessAllowed: false,
+                emailVerified: true,
+              },
+            );
+          }
         }
 
         let allowed;
@@ -398,18 +682,75 @@
         );
       }
 
+      async function registerAccount(payload) {
+        const request =
+          payload && typeof payload === 'object'
+            ? payload
+            : {};
+
+        if (
+          typeof registerStudentAccount !==
+          'function'
+        ) {
+          return Object.freeze({
+            error:
+              'Account could not be created.',
+          });
+        }
+
+        try {
+          const result =
+            await registerStudentAccount(
+              request,
+            );
+
+          if (
+            !result
+            || result.prepared !== true
+            || result.error
+          ) {
+            return Object.freeze({
+              error:
+                'Account could not be created.',
+            });
+          }
+
+          return Object.freeze({
+            prepared: true,
+          });
+        } catch (_) {
+          return Object.freeze({
+            error:
+              'Account could not be created.',
+          });
+        }
+      }
+
       async function login(payload) {
         const request =
           payload && typeof payload === 'object'
             ? payload
             : {};
-        const mode = cleanText(request.mode).toLowerCase();
+        const explicitMode =
+          cleanText(request.mode).toLowerCase();
+        const identifier = cleanText(
+          request.identifier || request.email,
+        );
+        const mode =
+          explicitMode ||
+          (
+            identifier.includes('@')
+              ? 'email'
+              : 'username'
+          );
 
         let credential;
 
         try {
           if (mode === 'email') {
-            const email = cleanEmail(request.email);
+            const email = cleanEmail(
+              request.email || identifier,
+            );
             const password = String(request.password || '');
 
             if (!email || !password) {
@@ -424,6 +765,38 @@
               email,
               password,
             );
+          } else if (mode === 'username') {
+            const username = cleanText(
+              request.identifier ||
+                request.username ||
+                request.email,
+            );
+            const password = String(
+              request.password || '',
+            );
+
+            if (!username || !password) {
+              return failure(
+                AUTH_CODES.INVALID_REQUEST,
+                'Username and password are required.',
+              );
+            }
+
+            if (
+              typeof signInWithUsernameAndPassword !==
+              'function'
+            ) {
+              return failure(
+                AUTH_CODES.LOGIN_FAILED,
+                'Sign-in could not be completed.',
+              );
+            }
+
+            credential =
+              await signInWithUsernameAndPassword({
+                username,
+                password,
+              });
           } else if (mode === 'google') {
             const provider = createGoogleProvider();
 
@@ -441,10 +814,22 @@
           } else {
             return failure(
               AUTH_CODES.INVALID_REQUEST,
-              'Login mode must be email or google.',
+              'Login mode must be email, username, or google.',
             );
           }
         } catch (error) {
+          if (
+            mode === 'google'
+            && capturePendingGoogleLink(
+              error,
+            )
+          ) {
+            return failure(
+              AUTH_CODES.LOGIN_FAILED,
+              'Google sign-in needs your existing AspireNest sign-in before it can be connected.',
+            );
+          }
+
           return failure(
             AUTH_CODES.LOGIN_FAILED,
             safeErrorMessage(
@@ -508,10 +893,34 @@
           );
         }
 
-        return buildVerifiedSession(firebaseUser);
+        const linked =
+          await applyPendingGoogleLink(
+            firebaseUser,
+            mode,
+          );
+
+        if (
+          linked
+          && linked.ok ===
+            false
+        ) {
+          try {
+            await signOut(auth);
+          } catch (_) {
+            // Link failure remains fail closed.
+          }
+
+          return linked;
+        }
+
+        return buildVerifiedSession(
+          linked?.user
+          || firebaseUser,
+        );
       }
 
       async function logout() {
+        clearPendingGoogleLink();
         try {
           await signOut(auth);
 
@@ -545,6 +954,7 @@
       return Object.freeze({
         getSession,
         subscribeSession,
+        registerAccount,
         login,
         logout,
       });

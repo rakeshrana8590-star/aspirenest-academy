@@ -4,11 +4,27 @@ import {
   productionProviderFirebaseRuntime,
 } from "@aspirenest/firebase-runtime";
 import {
+  functions,
+} from "../../../firebase.js";
+import {
+  createFirebaseUsernameAvailabilityCall,
+} from "../../../profile/usernameAvailabilityClient.js";
+import {
+  createFirebaseUsernamePasswordSignIn,
+} from "../../../profile/usernamePasswordSignInClient.js";
+import {
+  createFirebaseStudentAccountRegistration,
+} from "../../../profile/studentAccountRegistrationClient.js";
+import {
+  createFirebaseStudentProfileEnsure,
+} from "../../../profile/studentProfileEnsureClient.js";
+import {
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  linkWithCredential,
 } from "firebase/auth";
 import {
   collection,
@@ -167,6 +183,10 @@ let authProductionService = null;
 let canonicalResourceService = null;
 let entitlementDecisionService = null;
 let authorizeProductionService = null;
+let usernameAvailabilityCall = null;
+let usernamePasswordSignIn = null;
+let studentAccountRegistration = null;
+let studentProfileEnsure = null;
 
 if (providerRuntimeEnabled) {
   firestoreReadDependencyAdapter =
@@ -196,10 +216,44 @@ if (providerRuntimeEnabled) {
       roleExperienceDependencyAdapter,
     });
 
+  usernamePasswordSignIn =
+    createFirebaseUsernamePasswordSignIn({
+      authInstance: auth,
+      functionsInstance: functions,
+    });
+
+  studentAccountRegistration =
+    createFirebaseStudentAccountRegistration({
+      functionsInstance: functions,
+    });
+
+  studentProfileEnsure =
+    createFirebaseStudentProfileEnsure({
+      functionsInstance: functions,
+    });
+
   authProductionService =
-    createAuthProductionService(
-      firebaseAuthDependencyAdapter,
-    );
+    createAuthProductionService({
+      ...firebaseAuthDependencyAdapter,
+      signInWithUsernameAndPassword:
+        usernamePasswordSignIn,
+      registerStudentAccount:
+        studentAccountRegistration,
+      linkWithCredential,
+      extractGoogleCredentialFromError:
+        (error) =>
+          GoogleAuthProvider
+            .credentialFromError(
+              error,
+            ),
+      ensureStudentProfile:
+        studentProfileEnsure,
+    });
+
+  usernameAvailabilityCall =
+    createFirebaseUsernameAvailabilityCall({
+      functionsInstance: functions,
+    });
 
   canonicalResourceService =
     createCanonicalResourceService({
@@ -227,6 +281,15 @@ if (providerRuntimeEnabled) {
     });
 
   handlerRegistry.register(
+    "checkUsernameAvailability",
+    (payload) =>
+      usernameAvailabilityCall(payload),
+    Object.freeze({
+      owner: "usernameAvailabilityClient",
+    }),
+  );
+
+  handlerRegistry.register(
     "getSession",
     () => authProductionService.getSession(),
     Object.freeze({
@@ -237,6 +300,31 @@ if (providerRuntimeEnabled) {
   handlerRegistry.register(
     "login",
     (payload) => authProductionService.login(payload),
+    Object.freeze({
+      owner: "authProductionService",
+    }),
+  );
+
+  handlerRegistry.register(
+    "signInWithGoogle",
+    (payload) =>
+      authProductionService.login({
+        ...(payload && typeof payload === "object"
+          ? payload
+          : {}),
+        mode: "google",
+      }),
+    Object.freeze({
+      owner: "authProductionService",
+    }),
+  );
+
+  handlerRegistry.register(
+    "registerAccount",
+    (payload) =>
+      authProductionService.registerAccount(
+        payload,
+      ),
     Object.freeze({
       owner: "authProductionService",
     }),
@@ -290,6 +378,10 @@ const expectedInitialHandlerOwners = Object.freeze([
     owner: "authorizeProductionService",
   }),
   Object.freeze({
+    method: "checkUsernameAvailability",
+    owner: "usernameAvailabilityClient",
+  }),
+  Object.freeze({
     method: "getSession",
     owner: "authProductionService",
   }),
@@ -304,6 +396,14 @@ const expectedInitialHandlerOwners = Object.freeze([
   Object.freeze({
     method: "openCanonical",
     owner: "canonicalResourceService",
+  }),
+  Object.freeze({
+    method: "registerAccount",
+    owner: "authProductionService",
+  }),
+  Object.freeze({
+    method: "signInWithGoogle",
+    owner: "authProductionService",
   }),
 ]);
 const expectedProviderHandlerOwners =

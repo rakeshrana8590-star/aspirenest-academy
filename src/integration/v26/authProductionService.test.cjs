@@ -17,6 +17,17 @@ function createHarness(overrides = {}) {
 
   const dependencies = {
     auth,
+    async registerStudentAccount(payload) {
+      calls.push({
+        name:
+          'registerStudentAccount',
+        payload,
+      });
+
+      return {
+        prepared: true,
+      };
+    },
     async signInWithEmailAndPassword(
       receivedAuth,
       email,
@@ -33,6 +44,27 @@ function createHarness(overrides = {}) {
         uid: 'student-001',
         email,
         displayName: 'Student One',
+        emailVerified: true,
+      };
+      auth.currentUser = user;
+
+      return { user };
+    },
+    async signInWithUsernameAndPassword({
+      username,
+      password,
+    }) {
+      calls.push({
+        name: 'signInWithUsernameAndPassword',
+        username,
+        password,
+      });
+
+      const user = {
+        uid: 'student-username-001',
+        email:
+          'username-login@example.invalid',
+        displayName: 'Username Login',
         emailVerified: true,
       };
       auth.currentUser = user;
@@ -153,6 +185,113 @@ async function main() {
         auth: {},
       }),
     /dependency missing/,
+  );
+
+  const registrationHarness = createHarness();
+  const registrationSessionBefore =
+    await registrationHarness.service.getSession();
+
+  const registrationResult =
+    await registrationHarness.service.registerAccount({
+      fullName:
+        'Synthetic Aspirant',
+      username:
+        'learner_one',
+      email:
+        'aspirant@example.invalid',
+      password:
+        'Strong1!Password',
+      role:
+        'admin',
+      requestedRole:
+        'mentor',
+    });
+
+  assert.deepStrictEqual(
+    registrationResult,
+    {
+      prepared: true,
+    },
+  );
+
+  const registrationCall =
+    registrationHarness.calls.find(
+      (item) =>
+        item.name ===
+        'registerStudentAccount',
+    );
+
+  assert(registrationCall);
+
+  const registrationSessionAfter =
+    await registrationHarness.service.getSession();
+
+  assert.deepStrictEqual(
+    registrationSessionAfter,
+    registrationSessionBefore,
+  );
+
+  const optionalRegistrationHarness =
+    createHarness({
+      registerStudentAccount:
+        undefined,
+    });
+
+  const optionalRegistrationResult =
+    await optionalRegistrationHarness.service.registerAccount({
+      fullName:
+        'Synthetic Aspirant',
+      username:
+        'learner_one',
+      email:
+        'aspirant@example.invalid',
+      password:
+        'Strong1!Password',
+    });
+
+  assert.deepStrictEqual(
+    optionalRegistrationResult,
+    {
+      error:
+        'Account could not be created.',
+    },
+  );
+
+  const failingRegistrationHarness =
+    createHarness({
+      async registerStudentAccount() {
+        throw new Error(
+          'RAW_REGISTRATION_SECRET',
+        );
+      },
+    });
+
+  const failingRegistrationResult =
+    await failingRegistrationHarness.service.registerAccount({
+      fullName:
+        'Synthetic Aspirant',
+      username:
+        'learner_one',
+      email:
+        'aspirant@example.invalid',
+      password:
+        'Strong1!Password',
+    });
+
+  assert.deepStrictEqual(
+    failingRegistrationResult,
+    {
+      error:
+        'Account could not be created.',
+    },
+  );
+
+  assert(
+    !JSON.stringify(
+      failingRegistrationResult,
+    ).includes(
+      'RAW_REGISTRATION_SECRET',
+    ),
   );
 
   const publicHarness = createHarness();
@@ -317,6 +456,102 @@ async function main() {
   assert.strictEqual(
     emailCall.password,
     'DoNotNormalizeThisPassword',
+  );
+
+  const inferredEmailHarness = createHarness();
+  const inferredEmailLogin =
+    await inferredEmailHarness.service.login({
+      identifier:
+        '  INFERRED@EXAMPLE.INVALID ',
+      email:
+        '  INFERRED@EXAMPLE.INVALID ',
+      password:
+        'InferredEmailPassword',
+    });
+
+  assert.strictEqual(
+    inferredEmailLogin.authenticated,
+    true,
+  );
+  const inferredEmailCall =
+    inferredEmailHarness.calls.find(
+      (item) =>
+        item.name ===
+        'signInWithEmailAndPassword',
+    );
+  assert(inferredEmailCall);
+  assert.strictEqual(
+    inferredEmailCall.email,
+    'inferred@example.invalid',
+  );
+  assert.strictEqual(
+    inferredEmailCall.password,
+    'InferredEmailPassword',
+  );
+
+  const usernameHarness = createHarness();
+  const usernameLogin =
+    await usernameHarness.service.login({
+      identifier: '  learner_one  ',
+      email: '  learner_one  ',
+      password:
+        'UsernamePasswordBytes',
+    });
+
+  assert.strictEqual(
+    usernameLogin.authenticated,
+    true,
+  );
+  assert.strictEqual(
+    usernameLogin.uid,
+    'student-username-001',
+  );
+  const usernameCall =
+    usernameHarness.calls.find(
+      (item) =>
+        item.name ===
+        'signInWithUsernameAndPassword',
+    );
+  assert(usernameCall);
+  assert.strictEqual(
+    usernameCall.username,
+    'learner_one',
+  );
+  assert.strictEqual(
+    usernameCall.password,
+    'UsernamePasswordBytes',
+  );
+  assert.strictEqual(
+    usernameHarness.calls.some(
+      (item) =>
+        item.name ===
+        'signInWithEmailAndPassword',
+    ),
+    false,
+  );
+
+  const optionalUsernameDependencyHarness =
+    createHarness({
+      signInWithUsernameAndPassword: undefined,
+    });
+  const optionalUsernameDependencyLogin =
+    await optionalUsernameDependencyHarness.service.login({
+      identifier: 'learner_one',
+      email: 'learner_one',
+      password: 'UsernamePasswordBytes',
+    });
+
+  assert.strictEqual(
+    optionalUsernameDependencyLogin.ok,
+    false,
+  );
+  assert.strictEqual(
+    optionalUsernameDependencyLogin.code,
+    authModule.AUTH_CODES.LOGIN_FAILED,
+  );
+  assert.strictEqual(
+    optionalUsernameDependencyLogin.message,
+    'Sign-in could not be completed.',
   );
 
   const googleHarness = createHarness();
@@ -973,13 +1208,54 @@ async function main() {
     );
   }
 
+  const activeRegistration =
+    registryMetadata.methods.find(
+      (item) =>
+        item.name ===
+        'registerAccount',
+    );
+
+  assert(activeRegistration);
+  assert.strictEqual(
+    activeRegistration.ownerState,
+    'RUNTIME_OWNER_ASSIGNED',
+  );
+  assert.strictEqual(
+    activeRegistration.owner,
+    'authProductionService',
+  );
+  assert.strictEqual(
+    activeRegistration.auditClassification,
+    'OWNER_RESOLVED',
+  );
+  assert.strictEqual(
+    activeRegistration.canonicalOwner,
+    'src/integration/v26/authProductionService.js#createAuthProductionService',
+  );
+  assert.strictEqual(
+    activeRegistration.canonicalOwnerMethod,
+    'registerAccount',
+  );
+  assert.strictEqual(
+    activeRegistration.ownerContractStatus,
+    'IMPLEMENTED_RUNTIME_ACTIVATED',
+  );
+  assert.strictEqual(
+    activeRegistration.runtimeActivation,
+    true,
+  );
+
   const unresolved = registryMetadata.methods.filter(
     (item) =>
       item.ownerContractStatus !==
-      'IMPLEMENTED_NOT_RUNTIME_ACTIVATED',
+        'IMPLEMENTED_NOT_RUNTIME_ACTIVATED'
+      && item.name !==
+        'registerAccount'
+      && item.name !==
+        'signInWithGoogle',
   );
 
-  assert.strictEqual(unresolved.length, 179);
+  assert.strictEqual(unresolved.length, 177);
   assert(
     unresolved.every(
       (item) =>
@@ -989,13 +1265,20 @@ async function main() {
     ),
   );
 
-  console.log('AUTH_SERVICE_METHODS=3/3');
+  console.log('AUTH_SERVICE_METHODS=4/4');
+  console.log('REGISTER_ACCOUNT_SUCCESS_NO_SESSION_MUTATION=PASS');
+  console.log('REGISTER_ACCOUNT_OPTIONAL_DEPENDENCY=PASS');
+  console.log('REGISTER_ACCOUNT_ERROR_SANITIZATION=PASS');
   console.log('GET_SESSION_PUBLIC=PASS');
   console.log('PUBLIC_ACCESS_ALLOWED_FALSE=PASS');
   console.log('GET_SESSION_VERIFIED=PASS');
   console.log('GET_SESSION_UNVERIFIED_FAIL_CLOSED=PASS');
   console.log('GET_SESSION_UNVERIFIED_AUTH_STATE_TRUTHFUL=PASS');
   console.log('EMAIL_LOGIN=PASS');
+  console.log('IDENTIFIER_EMAIL_INFERENCE=PASS');
+  console.log('USERNAME_LOGIN=PASS');
+  console.log('USERNAME_LOGIN_OPTIONAL_DEPENDENCY_FAIL_CLOSED=PASS');
+  console.log('USERNAME_LOGIN_EMAIL_MAPPING_IN_BROWSER=NO');
   console.log('GOOGLE_LOGIN=PASS');
   console.log('UNVERIFIED_LOGIN_SIGNOUT=PASS');
   console.log('UNVERIFIED_LOGIN_SIGNOUT_FAILURE_TRUTHFUL=PASS');
@@ -1010,10 +1293,10 @@ async function main() {
   console.log('PROFILE_FAILURE_AUTH_STATE_TRUTHFUL=PASS');
   console.log('ROLE_VALIDATION=PASS');
   console.log('ROLE_FAILURE_AUTH_STATE_TRUTHFUL=PASS');
-  console.log('CANONICAL_OWNER_METADATA=3/3');
-  console.log('RUNTIME_OWNER_ASSIGNMENTS=0');
-  console.log('SAFE_DISABLED_METHODS=182');
-  console.log('OTHER_METHODS_SAFE_DISABLED=179');
+  console.log('CANONICAL_OWNER_METADATA=4/4');
+  console.log('RUNTIME_OWNER_ASSIGNMENTS=2');
+  console.log('SAFE_DISABLED_METHODS=180');
+  console.log('OTHER_METHODS_SAFE_DISABLED=177');
   console.log('ALLOWEDROLES_ALIAS=PASS');
   console.log('ACTIVE_ROLE_SNAPSHOT=PASS');
   console.log('ACCOUNT_STATUS_SNAPSHOT_NO_POLICY=PASS');
