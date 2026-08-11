@@ -1,0 +1,6 @@
+{
+  "firestoreIndexesJsonExists": false,
+  "firebaseConfiguredIndexPaths": [],
+  "status": "STATIC_CONFIG_INVENTORY_GAP",
+  "runtimeRequirementProof": "DEFER_TO_3.7_EMULATOR_STAGING"
+}

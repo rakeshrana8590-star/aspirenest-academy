@@ -1,0 +1,540 @@
+{
+  "version": "LP3-3.1-v1",
+  "authority": {
+    "grantLedger": "studentAccess",
+    "runtimeProjection": "studentEntitlements/{uid}/items/{entitlementId}",
+    "rawPaymentNeverAuthorizes": true
+  },
+  "collections": {
+    "accessActionLogs": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "accessAuditLogs": {
+      "classification": "AUDIT_EVIDENCE",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "accessBulkImportRows": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "accessBulkImports": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "accessEmailQueue": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "accessInvites": {
+      "classification": "ACCESS_INPUT_NOT_DIRECT_AUTHORITY",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "accessKeys": {
+      "classification": "ACCESS_INPUT_NOT_DIRECT_AUTHORITY",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "accessNotifications": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "accessPlanHistory": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "accessProducts": {
+      "classification": "ACCESS_PRODUCT_CATALOG",
+      "sourceFiles": [
+        "firestore.rules",
+        "scripts/verify-g15-full-platform-live.mjs",
+        "src/v8/v8PlatformFullLiveWiring.test.js",
+        "src/v8/v8PlatformLiveData.js",
+        "tests/firestore/accessRules.test.cjs"
+      ]
+    },
+    "accountDeviceSessions": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "annotations": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/access/intelliTextStudyWorkspaceWiring.test.js"
+      ]
+    },
+    "announcements": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/App.js"
+      ]
+    },
+    "authoringVersions": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/access/intelliTextAuthoringWiring.test.js"
+      ]
+    },
+    "banners": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "blocks": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "bookmarks": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/access/intelliTextStudyWorkspaceWiring.test.js"
+      ]
+    },
+    "contentItems": {
+      "classification": "RESOURCE_OR_CONTENT_DATA",
+      "sourceFiles": [
+        "firestore.rules",
+        "scripts/verify-g15-full-platform-live.mjs",
+        "src/App.js",
+        "src/access/notesProtectedAssetRulesWiring.test.js",
+        "src/components/exam/mockTestAdminActions.js",
+        "src/components/exam/mockTestImportUtils.js",
+        "src/components/video/VideoClassFormRoute.jsx",
+        "src/components/video/VideoLibraryManageRoute.jsx",
+        "src/services/roadmapService.js",
+        "src/v8/v8AdminLiveActions.js",
+        "src/v8/v8PlatformFullLiveWiring.test.js",
+        "src/v8/v8PlatformLiveData.js"
+      ]
+    },
+    "courses": {
+      "classification": "RESOURCE_OR_CONTENT_DATA",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "currentAffairs": {
+      "classification": "RESOURCE_OR_CONTENT_DATA",
+      "sourceFiles": [
+        "firestore.rules",
+        "scripts/verify-g16-g1-r5-real-module-identity.mjs",
+        "scripts/verify-g16-g1-r6-entitlement-notes.mjs",
+        "src/App.js",
+        "storage.rules"
+      ]
+    },
+    "enquiries": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/App.js"
+      ]
+    },
+    "experienceEvents": {
+      "classification": "RESOURCE_OR_CONTENT_DATA",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/v8/v8PlatformLiveData.js"
+      ]
+    },
+    "flashcards": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/access/intelliTextRevisionWiring.test.js"
+      ]
+    },
+    "identityAuditLogs": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "intellibook": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "src/v8/v8IntelliBookWiring.test.js",
+        "storage.rules"
+      ]
+    },
+    "learnerProfiles": {
+      "classification": "IDENTITY_PROFILE_NOT_ENTITLEMENT_AUTHORITY",
+      "sourceFiles": [
+        "firestore.rules",
+        "scripts/verify-g13-real-learners.mjs",
+        "src/mentor/mentorService.js",
+        "src/v8/v8FutureStudentMentorWiring.test.js",
+        "src/v8/v8PlatformLiveData.js",
+        "src/v8/v8RealLearnerDirectoryWiring.test.js"
+      ]
+    },
+    "learningTexts": {
+      "classification": "RESOURCE_OR_CONTENT_DATA",
+      "sourceFiles": [
+        "firestore.rules",
+        "tests/firestore/intelliTextAuthoringRules.test.cjs"
+      ]
+    },
+    "masteryProgress": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/access/intelliTextMasteryWiring.test.js"
+      ]
+    },
+    "mentorAccessRequests": {
+      "classification": "ACCESS_INPUT_NOT_DIRECT_AUTHORITY",
+      "sourceFiles": [
+        "firestore.rules",
+        "scripts/verify-g15-full-platform-live.mjs",
+        "src/mentor/mentorRouteAuthorization.test.js",
+        "src/mentor/mentorService.js",
+        "src/v8/v8PlatformLiveData.js"
+      ]
+    },
+    "mentorAssignments": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "scripts/verify-g15-full-platform-live.mjs",
+        "src/mentor/mentorRouteAuthorization.test.js",
+        "src/mentor/mentorService.js",
+        "src/v8/v8PlatformLiveData.js"
+      ]
+    },
+    "mentorFeedback": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/mentor/mentorRouteAuthorization.test.js",
+        "src/mentor/mentorService.js"
+      ]
+    },
+    "mentorLiveSessions": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "scripts/verify-g15-full-platform-live.mjs",
+        "src/v8/v8PlatformFullLiveWiring.test.js",
+        "src/v8/v8PlatformLiveActions.js",
+        "src/v8/v8PlatformLiveData.js"
+      ]
+    },
+    "mentorProfiles": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/mentor/mentorService.js"
+      ]
+    },
+    "mentorQuestions": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "scripts/verify-g15-full-platform-live.mjs",
+        "src/v8/v8PlatformFullLiveWiring.test.js",
+        "src/v8/v8PlatformLiveActions.js",
+        "src/v8/v8PlatformLiveData.js"
+      ]
+    },
+    "mentorStudentLinks": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "scripts/verify-g15-full-platform-live.mjs",
+        "src/mentor/mentorService.js",
+        "src/v8/v8FutureStudentMentorWiring.test.js",
+        "src/v8/v8PlatformLiveData.js"
+      ]
+    },
+    "mistakeBook": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/access/intelliTextMasteryWiring.test.js"
+      ]
+    },
+    "mockLeaderboard": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/App.js",
+        "src/access/mockTestLeaderboardPrivacyWiring.test.js",
+        "tests/firestore/accessRules.test.cjs"
+      ]
+    },
+    "mockLeaderboardPublic": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/App.js",
+        "src/access/mockTestLeaderboardPrivacyWiring.test.js",
+        "tests/firestore/accessRules.test.cjs"
+      ]
+    },
+    "mockQuestions": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/App.js"
+      ]
+    },
+    "mockResults": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "functions/index.js",
+        "scripts/verify-g15-full-platform-live.mjs",
+        "src/App.js",
+        "src/components/exam/ExamResultRoute.jsx",
+        "src/v8/v8PlatformLiveData.js"
+      ]
+    },
+    "mockTests": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "storage.rules"
+      ]
+    },
+    "notes": {
+      "classification": "RESOURCE_OR_CONTENT_DATA",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/App.js",
+        "src/v8/v8IntelliBookWiring.test.js",
+        "storage.rules"
+      ]
+    },
+    "notesChapters": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/App.js"
+      ]
+    },
+    "notesSubjects": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/App.js"
+      ]
+    },
+    "payments": {
+      "classification": "COMMERCE_EVIDENCE_NOT_DIRECT_AUTHORITY",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/App.js"
+      ]
+    },
+    "platformSettings": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "scripts/verify-g15-full-platform-live.mjs",
+        "src/v8/v8FutureStudentMentorWiring.test.js"
+      ]
+    },
+    "pricingPlans": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "profiles": {
+      "classification": "IDENTITY_PROFILE_NOT_ENTITLEMENT_AUTHORITY",
+      "sourceFiles": [
+        "storage.rules"
+      ]
+    },
+    "protectedContentAssets": {
+      "classification": "RESOURCE_OR_CONTENT_DATA",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/access/notesProtectedAssetRulesWiring.test.js",
+        "tests/firestore/accessRules.test.cjs"
+      ]
+    },
+    "questionBank": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/App.js"
+      ]
+    },
+    "revisionQueue": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/access/intelliTextRevisionWiring.test.js"
+      ]
+    },
+    "roadmaps": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "storage.rules"
+      ]
+    },
+    "roleAuthorities": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "sections": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "studentAccess": {
+      "classification": "AUTHORITATIVE_GRANT_LIFECYCLE",
+      "sourceFiles": [
+        "firestore.rules",
+        "scripts/verify-g13-real-learners.mjs",
+        "scripts/verify-g15-full-platform-live.mjs",
+        "src/v8/v8PlatformLiveActions.js",
+        "src/v8/v8PlatformLiveData.js",
+        "src/v8/v8RealLearnerDirectoryWiring.test.js"
+      ]
+    },
+    "studentActivity": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "studentEntitlements": {
+      "classification": "DERIVED_RUNTIME_ENFORCEMENT_PROJECTION",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/mentor/mentorService.js",
+        "src/v8/v8PlatformLiveActions.js"
+      ]
+    },
+    "studentLearning": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/access/intelliTextMasteryWiring.test.js",
+        "src/access/intelliTextRevisionWiring.test.js",
+        "src/access/intelliTextStudyWorkspaceWiring.test.js",
+        "tests/firestore/intelliTextMasteryRules.test.cjs",
+        "tests/firestore/intelliTextRevisionRules.test.cjs",
+        "tests/firestore/intelliTextStudyWorkspaceRules.test.cjs"
+      ]
+    },
+    "students": {
+      "classification": "IDENTITY_PROFILE_NOT_ENTITLEMENT_AUTHORITY",
+      "sourceFiles": [
+        "firestore.rules",
+        "scripts/verify-g13-real-learners.mjs",
+        "scripts/verify-real-user-shift.mjs",
+        "src/App.js",
+        "src/profile/learnerProfileService.js",
+        "src/profile/realStudentShiftWiring.test.js",
+        "src/v8/v8RealLearnerDirectoryWiring.test.js"
+      ]
+    },
+    "studyRoadmapAnalytics": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "studyRoadmapDays": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "studyRoadmapProgress": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "scripts/verify-g15-full-platform-live.mjs",
+        "src/mentor/mentorService.js",
+        "src/mentor/roadmapMentorLaunchReadiness.test.js",
+        "src/v8/v8PlatformLiveData.js"
+      ]
+    },
+    "studyRoadmapResourceLinks": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules"
+      ]
+    },
+    "studyRoadmaps": {
+      "classification": "RESOURCE_OR_CONTENT_DATA",
+      "sourceFiles": [
+        "firestore.rules",
+        "scripts/verify-g16-g1-r5-real-module-identity.mjs",
+        "scripts/verify-g16-g1-r6-entitlement-notes.mjs",
+        "src/v8/v8PlatformLiveData.js"
+      ]
+    },
+    "universalContent": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "firestore.rules",
+        "src/access/notesProtectedAssetRulesWiring.test.js"
+      ]
+    },
+    "usernames": {
+      "classification": "IDENTITY_PROFILE_NOT_ENTITLEMENT_AUTHORITY",
+      "sourceFiles": [
+        "firestore.rules",
+        "scripts/verify-g11-role-route-account.mjs",
+        "scripts/verify-v8-cumulative-integration.mjs",
+        "src/profile/usernameRulesWiring.test.js",
+        "src/v8/v8RoleAccountWiring.test.js"
+      ]
+    },
+    "users": {
+      "classification": "IDENTITY_PROFILE_NOT_ENTITLEMENT_AUTHORITY",
+      "sourceFiles": [
+        "firestore.rules",
+        "scripts/verify-g13-real-learners.mjs",
+        "scripts/verify-real-user-shift.mjs",
+        "src/App.js",
+        "src/mentor/mentorService.js",
+        "src/profile/learnerProfileService.js",
+        "src/profile/realStudentShiftWiring.test.js",
+        "src/v8/v8RealLearnerDirectoryWiring.test.js"
+      ]
+    },
+    "videos": {
+      "classification": "APPLICATION_DATA_PRESERVE_UNTIL_MAPPED",
+      "sourceFiles": [
+        "storage.rules"
+      ]
+    }
+  },
+  "duplicateEntitlementAuthorityDetected": false,
+  "retentionDefault": "PRESERVE_UNTIL_MAPPED_NO_HARD_DELETE"
+}
