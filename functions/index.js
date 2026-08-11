@@ -19,10 +19,25 @@ const {
   HttpsError,
   onCall,
 } = require("firebase-functions/v2/https");
+const {
+  createLp2IdentityAuthorityService,
+} = require("./lp2IdentityAuthority");
 
 if (!getApps().length) {
   initializeApp();
 }
+
+const lp2IdentityAuthorityService =
+  createLp2IdentityAuthorityService();
+
+const LP2_IDENTITY_CALLABLE_OPTIONS =
+  Object.freeze({
+    region: "asia-south1",
+    invoker: "public",
+    timeoutSeconds: 20,
+    memory: "256MiB",
+    maxInstances: 10,
+  });
 
 const LEADERBOARD_PRIVATE_COLLECTION =
   "mockLeaderboard";
@@ -2661,6 +2676,56 @@ const resolveNotesProtectedAsset = async ({
     requestId,
   });
 };
+
+
+exports.setAccountRoleAuthority = onCall(
+  LP2_IDENTITY_CALLABLE_OPTIONS,
+  (request) =>
+    lp2IdentityAuthorityService
+      .setAccountRoleAuthority({
+        requestAuth: request.auth,
+        data: request.data,
+      })
+);
+
+exports.setAccountStatus = onCall(
+  LP2_IDENTITY_CALLABLE_OPTIONS,
+  (request) =>
+    lp2IdentityAuthorityService
+      .setAccountStatus({
+        requestAuth: request.auth,
+        data: request.data,
+      })
+);
+
+exports.revokeOwnSessions = onCall(
+  LP2_IDENTITY_CALLABLE_OPTIONS,
+  (request) =>
+    lp2IdentityAuthorityService
+      .revokeOwnSessions({
+        requestAuth: request.auth,
+      })
+);
+
+exports.saveStudentProfile = onCall(
+  LP2_IDENTITY_CALLABLE_OPTIONS,
+  (request) =>
+    lp2IdentityAuthorityService
+      .saveStudentProfile({
+        requestAuth: request.auth,
+        data: request.data,
+      })
+);
+
+exports.loadAccountSecurity = onCall(
+  LP2_IDENTITY_CALLABLE_OPTIONS,
+  (request) =>
+    lp2IdentityAuthorityService
+      .loadAccountSecurity({
+        requestAuth: request.auth,
+        rawRequest: request.rawRequest,
+      })
+);
 
 
 exports.ensureStudentProfile = onCall(

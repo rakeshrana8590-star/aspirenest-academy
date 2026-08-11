@@ -33,7 +33,7 @@ const rows = Array.isArray(registryRaw)
 assert.strictEqual(rows.length, 182);
 assert.strictEqual(
   rows.filter((row) => row.owner).length,
-  5,
+  12,
 );
 
 const requiredFragments = [
@@ -49,6 +49,9 @@ const requiredFragments = [
   'signInWithUsernameAndPassword:',
   'from "firebase/auth"',
   'from "firebase/firestore"',
+  'from "firebase/functions"',
+  'getIdTokenResult',
+  'httpsCallable',
   '../../../auth/aspireNestIdentity.js',
   '../productionBridgeFoundation.js',
   '../authProductionService.js',
@@ -114,13 +117,16 @@ const registrationCallCount = (
   text.match(/handlerRegistry\.register\(/g) || []
 ).length;
 
-assert.strictEqual(registrationCallCount, 11);
+assert.strictEqual(registrationCallCount, 14);
 
 const expectedMethodOwnerFragments = [
   '"checkUsernameAvailability"',
   '"getSession"',
   '"login"',
   '"logout"',
+  '"saveStudentProfile"',
+  '"loadStudentAccountSecurity"',
+  '"loadMentorAccountSecurity"',
   '"openCanonical"',
   '"registerAccount"',
   '"signInWithGoogle"',
@@ -132,6 +138,7 @@ const expectedMethodOwnerFragments = [
   'owner: "usernameAvailabilityClient"',
   'owner: "canonicalResourceService"',
   'owner: "authorizeProductionService"',
+  'owner: "lp2IdentityAuthority"',
 ];
 
 for (const fragment of expectedMethodOwnerFragments) {
@@ -237,6 +244,23 @@ for (const methodName of [
   );
 }
 
+for (const methodName of [
+  'checkUsernameAvailability',
+  'getSession',
+  'login',
+  'logout',
+  'saveStudentProfile',
+  'loadStudentAccountSecurity',
+  'loadMentorAccountSecurity',
+]) {
+  const row = rows.find((item) => item.name === methodName);
+  assert(row);
+  assert.strictEqual(row.ownerState, 'RUNTIME_OWNER_ASSIGNED');
+  assert.strictEqual(row.auditClassification, 'OWNER_RESOLVED');
+  assert.strictEqual(row.ownerContractStatus, 'IMPLEMENTED_RUNTIME_ACTIVATED');
+  assert.strictEqual(row.runtimeActivation, true);
+}
+
 const signInWithGoogleRow = rows.find(
   (row) => row.name === 'signInWithGoogle',
 );
@@ -277,10 +301,10 @@ assert.strictEqual(
 
 console.log('PROVIDER_ENTRY_STATIC_CONTRACT=PASS');
 console.log('PROVIDER_GLOBAL_ASSIGNMENT_COUNT=1');
-console.log('PROVIDER_RUNTIME_OWNER_REGISTRATION_CALLS=11');
-console.log('INITIAL_IN_MEMORY_HANDLER_OWNER_COUNT=11');
-console.log('SAFE_DISABLED_METHODS_AFTER_PROVIDER_INIT=171');
+console.log('PROVIDER_RUNTIME_OWNER_REGISTRATION_CALLS=14');
+console.log('INITIAL_IN_MEMORY_HANDLER_OWNER_COUNT=14');
+console.log('SAFE_DISABLED_METHODS_AFTER_PROVIDER_INIT=168');
 console.log('FIRESTORE_WRITE_SDK_IMPORTS=0');
 console.log('RUNTIME_PATH_REFERENCES=0');
 console.log('METHOD_REGISTRY_ROWS=182');
-console.log('PERSISTENT_REGISTRY_OWNER_ASSIGNMENTS=5');
+console.log('PERSISTENT_REGISTRY_OWNER_ASSIGNMENTS=12');

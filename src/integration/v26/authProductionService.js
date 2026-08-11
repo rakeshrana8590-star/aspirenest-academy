@@ -40,6 +40,7 @@
         'AUTH_REGISTRATION_FAILED',
       LOGIN_FAILED: 'AUTH_LOGIN_FAILED',
       LOGOUT_FAILED: 'AUTH_LOGOUT_FAILED',
+      ACCOUNT_RESTRICTED: 'AUTH_ACCOUNT_RESTRICTED',
     });
 
     const VALID_ROLES = Object.freeze([
@@ -232,6 +233,7 @@
         resolveAllowedExperiences,
         subscribeAuthState,
         mapAuthError,
+        revokeOwnSessions,
       } = dependencies;
 
       let pendingGoogleLink =
@@ -657,6 +659,31 @@
           );
         }
 
+        const initialAccountStatus =
+          cleanText(
+            profile && profile.accountStatus
+          ).toLowerCase() || 'active';
+
+        if (
+          [
+            'suspended',
+            'blocked',
+            'deletion-pending',
+          ].includes(initialAccountStatus)
+        ) {
+          return failure(
+            AUTH_CODES.ACCOUNT_RESTRICTED,
+            'This account is not active.',
+            {
+              authenticated: true,
+              accessAllowed: false,
+              emailVerified: true,
+              accountStatus:
+                initialAccountStatus,
+            },
+          );
+        }
+
         if (
           role === 'student'
           && typeof ensureStudentProfile ===
@@ -720,6 +747,31 @@
                 authenticated: true,
                 accessAllowed: false,
                 emailVerified: true,
+              },
+            );
+          }
+
+          const refreshedAccountStatus =
+            cleanText(
+              profile && profile.accountStatus
+            ).toLowerCase() || 'active';
+
+          if (
+            [
+              'suspended',
+              'blocked',
+              'deletion-pending',
+            ].includes(refreshedAccountStatus)
+          ) {
+            return failure(
+              AUTH_CODES.ACCOUNT_RESTRICTED,
+              'This account is not active.',
+              {
+                authenticated: true,
+                accessAllowed: false,
+                emailVerified: true,
+                accountStatus:
+                  refreshedAccountStatus,
               },
             );
           }
@@ -1120,13 +1172,60 @@
 
       async function logout() {
         clearPendingGoogleLink();
+
+        let allDevicesRevoked =
+          typeof revokeOwnSessions !== 'function';
+        let revocationError = null;
+
+        if (
+          typeof revokeOwnSessions === 'function'
+          && auth.currentUser
+        ) {
+          try {
+            const result =
+              await revokeOwnSessions();
+
+            allDevicesRevoked = Boolean(
+              result
+              && (
+                result.sessionsRevoked === true
+                || result.prepared === true
+              )
+            );
+
+            if (!allDevicesRevoked) {
+              revocationError =
+                new Error('Session revocation was not confirmed.');
+            }
+          } catch (error) {
+            allDevicesRevoked = false;
+            revocationError = error;
+          }
+        }
+
         try {
           await signOut(auth);
+
+          if (revocationError) {
+            return failure(
+              AUTH_CODES.LOGOUT_FAILED,
+              'Signed out on this device, but other sessions could not be revoked.',
+              {
+                authenticated: false,
+                accessAllowed: false,
+                signedOut: true,
+                allDevicesRevoked: false,
+              },
+            );
+          }
 
           return Object.freeze({
             authenticated: false,
             accessAllowed: false,
             signedOut: true,
+            ...(typeof revokeOwnSessions === 'function'
+              ? { allDevicesRevoked }
+              : {}),
           });
         } catch (error) {
           const authenticated = Boolean(auth.currentUser);
@@ -1145,6 +1244,9 @@
               authenticated,
               accessAllowed: false,
               signedOut: !authenticated,
+              ...(typeof revokeOwnSessions === 'function'
+                ? { allDevicesRevoked }
+                : {}),
             },
           );
         }

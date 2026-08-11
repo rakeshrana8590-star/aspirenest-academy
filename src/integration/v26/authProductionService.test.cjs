@@ -1455,24 +1455,22 @@ async function main() {
     'login',
     'logout',
   ]);
-  const locked = registryMetadata.methods.filter(
-    (item) =>
-      item.ownerContractStatus ===
-      'IMPLEMENTED_NOT_RUNTIME_ACTIVATED',
+  const activeAuthMethods = registryMetadata.methods.filter(
+    (item) => targetMethods.has(item.name),
   );
 
-  assert.strictEqual(locked.length, 3);
+  assert.strictEqual(activeAuthMethods.length, 3);
   assert.deepStrictEqual(
-    locked.map((item) => item.name).sort(),
+    activeAuthMethods.map((item) => item.name).sort(),
     [...targetMethods].sort(),
   );
 
-  for (const item of locked) {
+  for (const item of activeAuthMethods) {
     assert.strictEqual(
       item.ownerState,
-      'SAFE_DISABLED_PENDING_OWNER',
+      'RUNTIME_OWNER_ASSIGNED',
     );
-    assert.strictEqual(item.owner, null);
+    assert.strictEqual(item.owner, 'authProductionService');
     assert.strictEqual(
       item.canonicalOwner,
       'src/integration/v26/authProductionService.js#createAuthProductionService',
@@ -1482,8 +1480,12 @@ async function main() {
       item.name,
     );
     assert.strictEqual(
+      item.ownerContractStatus,
+      'IMPLEMENTED_RUNTIME_ACTIVATED',
+    );
+    assert.strictEqual(
       item.runtimeActivation,
-      false,
+      true,
     );
   }
 
@@ -1524,23 +1526,26 @@ async function main() {
     true,
   );
 
+  const resolvedRuntimeNames = new Set([
+    'checkUsernameAvailability',
+    'getSession',
+    'login',
+    'logout',
+    'registerAccount',
+    'signInWithGoogle',
+    'requestPasswordReset',
+    'resendVerification',
+    'completeEmailVerification',
+    'saveStudentProfile',
+    'loadStudentAccountSecurity',
+    'loadMentorAccountSecurity',
+  ]);
+
   const unresolved = registryMetadata.methods.filter(
-    (item) =>
-      item.ownerContractStatus !==
-        'IMPLEMENTED_NOT_RUNTIME_ACTIVATED'
-      && item.name !==
-        'registerAccount'
-      && item.name !==
-        'signInWithGoogle'
-      && item.name !==
-        'requestPasswordReset'
-      && item.name !==
-        'resendVerification'
-      && item.name !==
-        'completeEmailVerification',
+    (item) => !resolvedRuntimeNames.has(item.name),
   );
 
-  assert.strictEqual(unresolved.length, 174);
+  assert.strictEqual(unresolved.length, 170);
   assert(
     unresolved.every(
       (item) =>
@@ -1584,9 +1589,9 @@ async function main() {
   console.log('ROLE_VALIDATION=PASS');
   console.log('ROLE_FAILURE_AUTH_STATE_TRUTHFUL=PASS');
   console.log('CANONICAL_OWNER_METADATA=7/7');
-  console.log('RUNTIME_OWNER_ASSIGNMENTS=5');
-  console.log('SAFE_DISABLED_PENDING_OWNER_METHODS=177');
-  console.log('OTHER_METHODS_SAFE_DISABLED=174');
+  console.log('RUNTIME_OWNER_ASSIGNMENTS=12');
+  console.log('SAFE_DISABLED_PENDING_OWNER_METHODS=170');
+  console.log('OTHER_METHODS_SAFE_DISABLED=170');
   console.log('ALLOWEDROLES_ALIAS=PASS');
   console.log('ACTIVE_ROLE_SNAPSHOT=PASS');
   console.log('ACCOUNT_STATUS_SNAPSHOT_NO_POLICY=PASS');

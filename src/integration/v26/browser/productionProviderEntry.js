@@ -28,6 +28,7 @@ import {
   sendPasswordResetEmail,
   reload,
   linkWithCredential,
+  getIdTokenResult,
 } from "firebase/auth";
 import {
   collection,
@@ -35,6 +36,9 @@ import {
   getDoc,
   getDocs,
 } from "firebase/firestore";
+import {
+  httpsCallable,
+} from "firebase/functions";
 
 import * as identityContract from "../../../auth/aspireNestIdentity.js";
 import * as bridgeNamespace from "../productionBridgeFoundation.js";
@@ -175,6 +179,7 @@ const providerRuntimeEnabled = Boolean(
   && productionProviderFirebaseRuntime.enabled
   && auth
   && db
+  && functions
 );
 
 const handlerRegistry = createHandlerRegistry();
@@ -190,6 +195,28 @@ let usernameAvailabilityCall = null;
 let usernamePasswordSignIn = null;
 let studentAccountRegistration = null;
 let studentProfileEnsure = null;
+let revokeOwnSessionsCall = null;
+let saveStudentProfileCall = null;
+let loadAccountSecurityCall = null;
+
+const callableDataInvoker = (name) => {
+  const callable = httpsCallable(functions, name);
+
+  return async (payload = {}) => {
+    const response = await callable(
+      payload && typeof payload === "object"
+        && !Array.isArray(payload)
+        ? payload
+        : {},
+    );
+
+    return response && response.data
+      && typeof response.data === "object"
+      && !Array.isArray(response.data)
+        ? response.data
+        : {};
+  };
+};
 
 if (providerRuntimeEnabled) {
   firestoreReadDependencyAdapter =
@@ -206,6 +233,36 @@ if (providerRuntimeEnabled) {
       identityContract,
       readProfileByCollection:
         firestoreReadDependencyAdapter.readProfileByCollection,
+      readRoleAuthority: async ({ uid } = {}) => {
+        const safeUid = String(uid || "").trim();
+
+        if (!safeUid) {
+          return {};
+        }
+
+        const snapshot = await getDoc(
+          doc(db, "roleAuthorities", safeUid),
+        );
+
+        return snapshot.exists()
+          ? snapshot.data() || {}
+          : {};
+      },
+      readAuthClaims: async (firebaseUser, forceRefresh) => {
+        if (!firebaseUser) {
+          return {};
+        }
+
+        const result = await getIdTokenResult(
+          firebaseUser,
+          forceRefresh === true,
+        );
+
+        return result && result.claims
+          && typeof result.claims === "object"
+          ? result.claims
+          : {};
+      },
     });
 
   firebaseAuthDependencyAdapter =
@@ -240,6 +297,13 @@ if (providerRuntimeEnabled) {
       functionsInstance: functions,
     });
 
+  revokeOwnSessionsCall =
+    callableDataInvoker("revokeOwnSessions");
+  saveStudentProfileCall =
+    callableDataInvoker("saveStudentProfile");
+  loadAccountSecurityCall =
+    callableDataInvoker("loadAccountSecurity");
+
   authProductionService =
     createAuthProductionService({
       ...firebaseAuthDependencyAdapter,
@@ -256,6 +320,8 @@ if (providerRuntimeEnabled) {
             ),
       ensureStudentProfile:
         studentProfileEnsure,
+      revokeOwnSessions:
+        () => revokeOwnSessionsCall({}),
     });
 
   usernameAvailabilityCall =
@@ -380,6 +446,30 @@ if (providerRuntimeEnabled) {
   );
 
   handlerRegistry.register(
+    "saveStudentProfile",
+    (payload) => saveStudentProfileCall(payload),
+    Object.freeze({
+      owner: "lp2IdentityAuthority",
+    }),
+  );
+
+  handlerRegistry.register(
+    "loadStudentAccountSecurity",
+    () => loadAccountSecurityCall({}),
+    Object.freeze({
+      owner: "lp2IdentityAuthority",
+    }),
+  );
+
+  handlerRegistry.register(
+    "loadMentorAccountSecurity",
+    () => loadAccountSecurityCall({}),
+    Object.freeze({
+      owner: "lp2IdentityAuthority",
+    }),
+  );
+
+  handlerRegistry.register(
     "openCanonical",
     (payload, context) =>
       canonicalResourceService.getCanonicalResource({
@@ -431,6 +521,14 @@ const expectedInitialHandlerOwners = Object.freeze([
     owner: "authProductionService",
   }),
   Object.freeze({
+    method: "loadMentorAccountSecurity",
+    owner: "lp2IdentityAuthority",
+  }),
+  Object.freeze({
+    method: "loadStudentAccountSecurity",
+    owner: "lp2IdentityAuthority",
+  }),
+  Object.freeze({
     method: "login",
     owner: "authProductionService",
   }),
@@ -453,6 +551,10 @@ const expectedInitialHandlerOwners = Object.freeze([
   Object.freeze({
     method: "resendVerification",
     owner: "authProductionService",
+  }),
+  Object.freeze({
+    method: "saveStudentProfile",
+    owner: "lp2IdentityAuthority",
   }),
   Object.freeze({
     method: "signInWithGoogle",

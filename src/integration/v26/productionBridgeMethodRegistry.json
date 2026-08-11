@@ -105,10 +105,15 @@
     {
       "name": "checkUsernameAvailability",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "usernameAvailabilityClient",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/profile/usernameAvailabilityClient.js#createFirebaseUsernameAvailabilityCall",
+      "canonicalOwnerMethod": "checkUsernameAvailability",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP2-PACK-2.5-2.7-CLOSURE",
+      "runtimeActivation": true
     },
     {
       "name": "completeEmailVerification",
@@ -286,17 +291,15 @@
     {
       "name": "getSession",
       "launchCore": true,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "SINGLE_CANDIDATE_UNVERIFIED",
-      "auditCandidates": [
-        "src/v8/v8FirebaseBridge.js"
-      ],
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "authProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
       "canonicalOwner": "src/integration/v26/authProductionService.js#createAuthProductionService",
       "canonicalOwnerMethod": "getSession",
-      "ownerContractStatus": "IMPLEMENTED_NOT_RUNTIME_ACTIVATED",
-      "ownerDecisionEvidence": "LP1-P1.3-S1.3.7-R2",
-      "runtimeActivation": false
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP2-PACK-2.5-2.7-CLOSURE",
+      "runtimeActivation": true
     },
     {
       "name": "importMockQuestions",
@@ -365,10 +368,15 @@
     {
       "name": "loadMentorAccountSecurity",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp2IdentityAuthority",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "functions/lp2IdentityAuthority.js#createLp2IdentityAuthorityService",
+      "canonicalOwnerMethod": "loadAccountSecurity",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP2-PACK-2.5-2.7-CLOSURE",
+      "runtimeActivation": true
     },
     {
       "name": "loadMentorCalendar",
@@ -517,10 +525,15 @@
     {
       "name": "loadStudentAccountSecurity",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp2IdentityAuthority",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "functions/lp2IdentityAuthority.js#createLp2IdentityAuthorityService",
+      "canonicalOwnerMethod": "loadAccountSecurity",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP2-PACK-2.5-2.7-CLOSURE",
+      "runtimeActivation": true
     },
     {
       "name": "loadStudentAssignments",
@@ -621,34 +634,28 @@
     {
       "name": "login",
       "launchCore": true,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "MULTIPLE_CANDIDATES_REQUIRES_OWNER_DECISION",
-      "auditCandidates": [
-        "src/App.js",
-        "public/v8-experiences.js",
-        "public/app.js",
-        "public/learning-drive-v8/v8-experiences.js",
-        "public/learning-drive-v8/app.js"
-      ],
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "authProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
       "canonicalOwner": "src/integration/v26/authProductionService.js#createAuthProductionService",
       "canonicalOwnerMethod": "login",
-      "ownerContractStatus": "IMPLEMENTED_NOT_RUNTIME_ACTIVATED",
-      "ownerDecisionEvidence": "LP1-P1.3-S1.3.7-R2",
-      "runtimeActivation": false
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP2-PACK-2.5-2.7-CLOSURE",
+      "runtimeActivation": true
     },
     {
       "name": "logout",
       "launchCore": true,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "REFERENCE_ONLY_NO_HANDLER_PROOF",
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "authProductionService",
+      "auditClassification": "OWNER_RESOLVED",
       "auditCandidates": [],
       "canonicalOwner": "src/integration/v26/authProductionService.js#createAuthProductionService",
       "canonicalOwnerMethod": "logout",
-      "ownerContractStatus": "IMPLEMENTED_NOT_RUNTIME_ACTIVATED",
-      "ownerDecisionEvidence": "LP1-P1.3-S1.3.7-R2",
-      "runtimeActivation": false
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP2-PACK-2.5-2.7-CLOSURE",
+      "runtimeActivation": true
     },
     {
       "name": "openCanonical",
@@ -1318,10 +1325,15 @@
     {
       "name": "saveStudentProfile",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp2IdentityAuthority",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "functions/lp2IdentityAuthority.js#createLp2IdentityAuthorityService",
+      "canonicalOwnerMethod": "saveStudentProfile",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP2-PACK-2.5-2.7-CLOSURE",
+      "runtimeActivation": true
     },
     {
       "name": "saveVideo",

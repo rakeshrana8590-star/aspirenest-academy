@@ -3,22 +3,79 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function isSignedIn() {
+    function isAuthenticated() {
       return request.auth != null;
     }
 
+    function roleAuthorityPath(uid) {
+      return /databases/$(database)/documents/roleAuthorities/$(uid);
+    }
+
+    function hasRoleAuthority(uid) {
+      return exists(roleAuthorityPath(uid));
+    }
+
+    function roleAuthorityIsOperational(uid) {
+      let authorityPath = roleAuthorityPath(uid);
+      let authority = get(authorityPath).data;
+      return authority.get("uid", "") == uid &&
+        authority.get("accountStatus", "") == "active" &&
+        request.auth.token.get("auth_time", 0) >
+          authority.get("tokensValidAfterSeconds", 0);
+    }
+
+    function isSignedIn() {
+      return isAuthenticated() &&
+        (
+          !hasRoleAuthority(request.auth.uid) ||
+          roleAuthorityIsOperational(request.auth.uid)
+        );
+    }
+
+    function hasDynamicRoleClaim(roleName) {
+      return isAuthenticated() &&
+        request.auth.token.get("aspirenestRole", "") == roleName &&
+        request.auth.token.get("aspirenestAccountStatus", "") == "active" &&
+        request.auth.token.get("aspirenestAuthorityVersion", 0) > 0;
+    }
+
+    function dynamicRoleAuthorityMatches(roleName) {
+      let authority = get(roleAuthorityPath(request.auth.uid)).data;
+      return authority.get("uid", "") == request.auth.uid &&
+        authority.get("role", "") == roleName &&
+        authority.get("accountStatus", "") == "active" &&
+        request.auth.token.get("auth_time", 0) >
+          authority.get("tokensValidAfterSeconds", 0) &&
+        request.auth.token.get("aspirenestAuthorityVersion", 0) ==
+          authority.get("authorityVersion", 0);
+    }
+
+    function hasTrustedDynamicRole(roleName) {
+      return hasDynamicRoleClaim(roleName) &&
+        dynamicRoleAuthorityMatches(roleName);
+    }
+
     function isAdmin() {
-      return isSignedIn() &&
-        request.auth.token.email == "aspirenestplatform@gmail.com";
+      return isAuthenticated() &&
+        (
+          (
+            request.auth.token.email == "aspirenestplatform@gmail.com" &&
+            isSignedIn()
+          ) ||
+          hasTrustedDynamicRole("admin")
+        );
     }
 
     function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
+      return isAuthenticated() &&
+        request.auth.uid == userId &&
+        isSignedIn();
     }
 
     function isDesignatedMentor() {
-      return isSignedIn() &&
-        request.auth.token.email == "dr.varshamaru@gmail.com";
+      return isAuthenticated() &&
+        request.auth.token.email == "dr.varshamaru@gmail.com" &&
+        isSignedIn();
     }
 
     /* ================================
@@ -29,6 +86,7 @@ service cloud.firestore {
 
     function isActiveMentor() {
       return isDesignatedMentor() ||
+        hasTrustedDynamicRole("mentor") ||
         (
           isSignedIn() &&
           exists(
@@ -519,7 +577,18 @@ service cloud.firestore {
         request.resource.data.uid == request.auth.uid &&
         request.resource.data.email == request.auth.token.email &&
         request.resource.data.normalizedEmail == request.auth.token.email &&
-        request.resource.data.role == "student";
+        request.resource.data.role == "student" &&
+        request.resource.data.get("accountStatus", "active") == "active" &&
+        request.resource.data.get("emailVerified", request.auth.token.get("email_verified", false)) ==
+          request.auth.token.get("email_verified", false) &&
+        !request.resource.data.keys().hasAny([
+          "allowedRoles",
+          "activeRole",
+          "planType",
+          "subscriptionType",
+          "isPremium",
+          "entitlements"
+        ]);
     }
 
     function isSafeStudentSelfStatusUpdate(studentUid) {
@@ -529,14 +598,13 @@ service cloud.firestore {
         request.resource.data.get("email", "") == request.auth.token.email &&
         request.resource.data.get("normalizedEmail", "") == request.auth.token.email &&
         request.resource.data.get("role", "") == "student" &&
+        request.resource.data.get("emailVerified", false) == resource.data.get("emailVerified", false) &&
+        request.resource.data.get("accountStatus", "active") == resource.data.get("accountStatus", "active") &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           "uid",
           "email",
           "normalizedEmail",
           "role",
-          "emailVerified",
-          "accountStatus",
-          "profileStatus",
           "lastLoginAt",
           "updatedAt"
         ]);
@@ -1426,6 +1494,32 @@ service cloud.firestore {
     }
 
 
+    /* ================================
+       LP2 Identity / Role / Session Authority
+       Server-owned role/status claims and revocation epoch.
+       ================================ */
+
+    match /roleAuthorities/{uid} {
+      allow get: if isAuthenticated() &&
+        (request.auth.uid == uid || isAdmin());
+      allow list: if isAdmin();
+      allow create, update, delete: if false;
+    }
+
+    match /identityAuditLogs/{auditId} {
+      allow read: if isAdmin();
+      allow create, update, delete: if false;
+    }
+
+    match /accountDeviceSessions/{sessionId} {
+      allow read: if isAdmin() ||
+        (
+          isSignedIn() &&
+          resource.data.uid == request.auth.uid
+        );
+      allow create, update, delete: if false;
+    }
+
     function isUidKeyedUserRequest(userId) {
       return request.resource.data.uid is string &&
         request.resource.data.uid == userId &&
@@ -1482,17 +1576,55 @@ service cloud.firestore {
         ]);
     }
 
+    function isSafeUserSelfCreate(userId) {
+      return isOwner(userId) &&
+        request.resource.data.uid == userId &&
+        request.resource.data.get("email", "") == request.auth.token.email &&
+        request.resource.data.get("normalizedEmail", request.auth.token.email) == request.auth.token.email &&
+        request.resource.data.get("role", "student") == "student" &&
+        request.resource.data.get("activeRole", "student") == "student" &&
+        request.resource.data.get("accountStatus", "active") == "active" &&
+        request.resource.data.get("isPremium", false) == false &&
+        request.resource.data.get("premiumStatus", "FREE") in ["", "FREE"] &&
+        request.resource.data.get("subscriptionType", "FREE") in ["", "FREE"] &&
+        request.resource.data.get("planType", "FREE") in ["", "FREE"] &&
+        !request.resource.data.keys().hasAny([
+          "allowedRoles",
+          "roles",
+          "customClaims",
+          "entitlements",
+          "studentAccess"
+        ]);
+    }
+
+    function isSafeUserSelfUpdate(userId) {
+      return isOwner(userId) &&
+        request.resource.data.get("uid", "") == resource.data.get("uid", "") &&
+        request.resource.data.get("email", "") == resource.data.get("email", "") &&
+        request.resource.data.get("normalizedEmail", "") == resource.data.get("normalizedEmail", "") &&
+        request.resource.data.get("role", "student") == resource.data.get("role", "student") &&
+        request.resource.data.get("activeRole", "student") == resource.data.get("activeRole", "student") &&
+        request.resource.data.get("accountStatus", "active") == resource.data.get("accountStatus", "active") &&
+        request.resource.data.get("isPremium", false) == resource.data.get("isPremium", false) &&
+        request.resource.data.get("subscriptionType", "") == resource.data.get("subscriptionType", "") &&
+        request.resource.data.get("premiumStatus", "") == resource.data.get("premiumStatus", "") &&
+        request.resource.data.get("planType", "") == resource.data.get("planType", "") &&
+        request.resource.data.get("accessStatus", "") == resource.data.get("accessStatus", "") &&
+        request.resource.data.get("mentorUid", "") == resource.data.get("mentorUid", "") &&
+        request.resource.data.get("mentorAssignmentStatus", "") == resource.data.get("mentorAssignmentStatus", "") &&
+        request.resource.data.get("allowedRoles", []) == resource.data.get("allowedRoles", []);
+    }
+
     match /users/{userId} {
-      allow create: if
-        (isOwner(userId) || isAdmin()) &&
-        isUidKeyedUserRequest(userId);
+      allow create: if isUidKeyedUserRequest(userId) &&
+        (
+          isAdmin() ||
+          isSafeUserSelfCreate(userId)
+        );
 
       allow read: if isOwner(userId) || isAdmin();
 
-      allow update: if isOwner(userId)
-        && request.resource.data.isPremium == resource.data.isPremium
-        && request.resource.data.subscriptionType == resource.data.subscriptionType
-        && request.resource.data.premiumStatus == resource.data.premiumStatus;
+      allow update: if isSafeUserSelfUpdate(userId);
 
       allow update: if isSafeUserUsernameUpdate(userId);
       allow update: if isAdmin();
@@ -1603,26 +1735,13 @@ service cloud.firestore {
     }
 
     match /learnerProfiles/{profileId} {
-      allow create: if isAdmin() ||
-        (
-          isLearnerProfileOwnerRequest(profileId) &&
-          studentProfileIdentitySafe() &&
-          studentDefaultMentorFieldsSafe() &&
-          studentProfileCreateKeysOnly()
-        );
+      allow create: if isAdmin();
 
       allow read: if isAdmin() ||
         isLearnerProfileOwnerExisting(profileId) ||
         isAssignedMentor(profileId);
 
-      allow update: if isAdmin() ||
-        (
-          isLearnerProfileOwnerExisting(profileId) &&
-          isLearnerProfileOwnerRequest(profileId) &&
-          studentProfileIdentitySafe() &&
-          studentDefaultMentorFieldsSafe() &&
-          studentProfileUpdateKeysOnly()
-        );
+      allow update: if isAdmin();
 
       allow delete: if isAdmin();
     }
@@ -2476,7 +2595,7 @@ service cloud.firestore {
       let redeemedKey = getAfter(
         /databases/$(database)/documents/accessKeys/$(data.accessKeyId)
       ).data;
-      return isSignedIn() &&
+      return isAuthenticated() &&
         data.keys().hasOnly([
           "email",
           "normalizedEmail",
@@ -2757,13 +2876,13 @@ service cloud.firestore {
     }
 
     match /accessKeys/{keyCode} {
-      allow read, create, update, delete: if isAdmin();
+      allow read, create, delete: if isAdmin();
 
       allow get: if isSignedIn() &&
         keyCode == resource.data.normalizedCode &&
         isAccessKeyAssignedToRequester();
 
-      allow update: if isAccessKeyRedeemUpdate(keyCode);
+      allow update: if isAccessKeyRedeemUpdate(keyCode) || isAdmin();
     }
 
     function isStudentEntitlementWrite(uid, entitlementId) {
@@ -2892,7 +3011,7 @@ service cloud.firestore {
           )
         );
 
-      allow create: if isAdmin() || isRedeemStudentAccessCreate(docId);
+      allow create: if isRedeemStudentAccessCreate(docId) || isAdmin();
       allow update: if
         isAdmin() ||
         isInviteStudentAccessUpdate() ||
@@ -2903,7 +3022,7 @@ service cloud.firestore {
       allow read: if isAdmin() ||
         (isSignedIn() && uid == request.auth.uid) ||
         isAssignedMentor(uid);
-      allow create, update: if isAdmin() || isStudentEntitlementWrite(uid, entitlementId);
+      allow create, update: if isStudentEntitlementWrite(uid, entitlementId) || isAdmin();
       allow delete: if isAdmin();
     }
 
@@ -2917,11 +3036,11 @@ service cloud.firestore {
     match /accessAuditLogs/{docId} {
       allow read: if isAdmin();
       allow create: if
-        isAdmin() ||
         isRedeemAuditCreate() ||
         isInviteOpenAuditCreate() ||
         isInviteRedeemAuditCreate() ||
-        isIdentityClaimAuditCreate(docId);
+        isIdentityClaimAuditCreate(docId) ||
+        isAdmin();
       allow update, delete: if false;
     }
 

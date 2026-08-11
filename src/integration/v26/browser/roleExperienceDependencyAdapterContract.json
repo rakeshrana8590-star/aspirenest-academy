@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0",
+  "version": "1.3.0",
   "name": "AspireNest V26 Role Experience Dependency Adapter",
   "authority": {
     "admin": {
@@ -7,7 +7,10 @@
       "profileCollections": [
         "users"
       ],
-      "profileDocumentsCannotElevate": true
+      "profileDocumentsCannotElevate": true,
+      "dynamicAuthorityCollection": "roleAuthorities",
+      "dynamicRequiresMatchingCustomClaims": true,
+      "accountStatusMustBeActive": true
     },
     "mentor": {
       "designatedEmail": "dr.varshamaru@gmail.com",
@@ -20,13 +23,22 @@
       "profileCollections": [
         "users",
         "mentorProfiles"
-      ]
+      ],
+      "dynamicAuthorityCollection": "roleAuthorities",
+      "dynamicRequiresMatchingCustomClaimsForRoleAuthority": true,
+      "legacyMentorProfileFallbackPreserved": true
     },
     "student": {
       "defaultAuthenticatedRole": true,
       "profileCollections": [
         "users",
         "students"
+      ],
+      "roleAuthorityCollection": "roleAuthorities",
+      "restrictedAccountStatuses": [
+        "suspended",
+        "blocked",
+        "deletion-pending"
       ]
     }
   },
@@ -65,7 +77,9 @@
       "getAspireNestAllowedExperiences"
     ],
     "functions": [
-      "readProfileByCollection"
+      "readProfileByCollection",
+      "readRoleAuthority (optional but required for dynamic role authority)",
+      "readAuthClaims (optional but required for dynamic elevated role authority)"
     ]
   },
   "readPolicy": {
@@ -76,7 +90,10 @@
     ],
     "writes": false,
     "networkOwnedByDependency": true,
-    "readFailurePolicy": "fail_closed_to_fixed_email_or_student"
+    "readFailurePolicy": "fail_closed_to_fixed_email_or_student",
+    "roleAuthorityCollection": "roleAuthorities",
+    "dynamicElevationPolicy": "authority_document_plus_matching_refreshed_claims",
+    "restrictedStatusPolicy": "fail_closed"
   },
   "publicApi": [
     "loadAccountProfile",
