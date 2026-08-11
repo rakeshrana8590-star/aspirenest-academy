@@ -1,0 +1,12 @@
+{
+  "project": "aspirenest-platform-staging",
+  "createdAt": "2026-08-11T15:31:12.076Z",
+  "counts": {},
+  "totalDocuments": 0,
+  "duplicateResourceIds": [],
+  "orphanEntitlementProjections": [],
+  "duplicateUserEmails": [],
+  "migrationTreatment": "ADAPTER_PRESERVE_NO_DESTRUCTIVE_REWRITE",
+  "rollback": "raw snapshot + current Git checkpoint",
+  "rawBackupSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+}
