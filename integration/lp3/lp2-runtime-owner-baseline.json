@@ -1,0 +1,108 @@
+{
+  "phase": "3.4",
+  "registryRows": 182,
+  "runtimeOwnerAssignments": 12,
+  "safeDisabledPendingOwner": 170,
+  "partitionTotal": 182,
+  "assignedMethods": [
+    {
+      "name": "checkUsernameAvailability",
+      "owner": "usernameAvailabilityClient",
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "runtimeActivation": true,
+      "canonicalOwner": "src/profile/usernameAvailabilityClient.js#createFirebaseUsernameAvailabilityCall",
+      "canonicalOwnerMethod": "checkUsernameAvailability"
+    },
+    {
+      "name": "completeEmailVerification",
+      "owner": "authProductionService",
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "runtimeActivation": true,
+      "canonicalOwner": "src/integration/v26/authProductionService.js#createAuthProductionService",
+      "canonicalOwnerMethod": "completeEmailVerification"
+    },
+    {
+      "name": "getSession",
+      "owner": "authProductionService",
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "runtimeActivation": true,
+      "canonicalOwner": "src/integration/v26/authProductionService.js#createAuthProductionService",
+      "canonicalOwnerMethod": "getSession"
+    },
+    {
+      "name": "loadMentorAccountSecurity",
+      "owner": "lp2IdentityAuthority",
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "runtimeActivation": true,
+      "canonicalOwner": "functions/lp2IdentityAuthority.js#createLp2IdentityAuthorityService",
+      "canonicalOwnerMethod": "loadAccountSecurity"
+    },
+    {
+      "name": "loadStudentAccountSecurity",
+      "owner": "lp2IdentityAuthority",
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "runtimeActivation": true,
+      "canonicalOwner": "functions/lp2IdentityAuthority.js#createLp2IdentityAuthorityService",
+      "canonicalOwnerMethod": "loadAccountSecurity"
+    },
+    {
+      "name": "login",
+      "owner": "authProductionService",
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "runtimeActivation": true,
+      "canonicalOwner": "src/integration/v26/authProductionService.js#createAuthProductionService",
+      "canonicalOwnerMethod": "login"
+    },
+    {
+      "name": "logout",
+      "owner": "authProductionService",
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "runtimeActivation": true,
+      "canonicalOwner": "src/integration/v26/authProductionService.js#createAuthProductionService",
+      "canonicalOwnerMethod": "logout"
+    },
+    {
+      "name": "registerAccount",
+      "owner": "authProductionService",
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "runtimeActivation": true,
+      "canonicalOwner": "src/integration/v26/authProductionService.js#createAuthProductionService",
+      "canonicalOwnerMethod": "registerAccount"
+    },
+    {
+      "name": "requestPasswordReset",
+      "owner": "authProductionService",
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "runtimeActivation": true,
+      "canonicalOwner": "src/integration/v26/authProductionService.js#createAuthProductionService",
+      "canonicalOwnerMethod": "requestPasswordReset"
+    },
+    {
+      "name": "resendVerification",
+      "owner": "authProductionService",
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "runtimeActivation": true,
+      "canonicalOwner": "src/integration/v26/authProductionService.js#createAuthProductionService",
+      "canonicalOwnerMethod": "resendVerification"
+    },
+    {
+      "name": "saveStudentProfile",
+      "owner": "lp2IdentityAuthority",
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "runtimeActivation": true,
+      "canonicalOwner": "functions/lp2IdentityAuthority.js#createLp2IdentityAuthorityService",
+      "canonicalOwnerMethod": "saveStudentProfile"
+    },
+    {
+      "name": "signInWithGoogle",
+      "owner": "authProductionService",
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "runtimeActivation": true,
+      "canonicalOwner": "src/integration/v26/authProductionService.js#createAuthProductionService",
+      "canonicalOwnerMethod": "login"
+    }
+  ],
+  "registryMutationRequired": false,
+  "lp1ZeroOwnerInvariant": "SUPERSEDED_BY_LP2_OWNER_ACTIVATION",
+  "status": "GREEN"
+}

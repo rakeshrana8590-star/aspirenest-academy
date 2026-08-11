@@ -140,7 +140,10 @@
     "matchedGrantId",
     "matchedScope",
     "expiresAt",
-    "retryable"
+    "retryable",
+    "accessMode",
+    "reasonCode",
+    "requiredAccess"
   ],
   "dependencies": [
     "getAuthoritativeSession",
@@ -174,6 +177,7 @@
     "runtimeLoad": false,
     "canonicalStatePublishBindingRequired": true,
     "allowedExpiryMustBeFuture": true,
-    "expiredExpiryMustNotBeFuture": true
+    "expiredExpiryMustNotBeFuture": true,
+    "lp3UnifiedDecisionOutput": true
   }
 }

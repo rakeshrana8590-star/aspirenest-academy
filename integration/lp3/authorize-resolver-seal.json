@@ -1,0 +1,27 @@
+{
+  "phase":"3.4",
+  "lp2RuntimeOwnerAssignments":12,
+  "lp2SafeDisabledPendingOwner":170,
+  "staleLp1RegressionContractsReconciled":true,
+  "registryRollback":false,
+  "coreResolver":"preserved",
+  "authoritativeChain":[
+    "getAuthoritativeSession",
+    "getCanonicalResource",
+    "resolveEntitlementDecision"
+  ],
+  "decisionOutput":[
+    "allowed",
+    "accessMode",
+    "reasonCode",
+    "matchedGrantId",
+    "matchedScope",
+    "expiresAt",
+    "requiredAccess"
+  ],
+  "serverTimeAuthority":"preserved-via-authoritative-entitlement-decision",
+  "failClosed":"preserved",
+  "paymentDirectAuthorization":false,
+  "deterministicRegression":"GREEN",
+  "status":"GREEN"
+}

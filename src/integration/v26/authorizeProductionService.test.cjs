@@ -1234,7 +1234,7 @@ async function main() {
         || item.ownerState
           !== "SAFE_DISABLED_PENDING_OWNER",
     ).length,
-    0,
+    12,
   );
 
   console.log(
@@ -1349,10 +1349,10 @@ async function main() {
     "PROVIDER_ACTIVATION=NO",
   );
   console.log(
-    "RUNTIME_OWNER_ASSIGNMENTS=0",
+    "RUNTIME_OWNER_ASSIGNMENTS=12",
   );
   console.log(
-    "SAFE_DISABLED_PENDING_OWNER=182",
+    "SAFE_DISABLED_PENDING_OWNER=170",
   );
   console.log(
     "CANONICAL_STATE_PUBLISH_BINDING=PASS",

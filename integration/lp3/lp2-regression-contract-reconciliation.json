@@ -1,0 +1,52 @@
+{
+  "phase": "3.4",
+  "scope": "TEST_CONTRACT_ONLY",
+  "runtimeOwnerExpected": 12,
+  "safeDisabledExpected": 170,
+  "registryChanged": false,
+  "serviceBehaviorChangedByReconciliation": false,
+  "files": {
+    "src/integration/v26/productionBridgeFoundation.test.cjs": {
+      "allSafeEveryToPartition": 1,
+      "launchCoreAllSafeToOwnerPartition": 1,
+      "registryOwner0To12": 0,
+      "methodRegistryOwner0To12": 0,
+      "combinedOwnerState0To12": 0,
+      "registrySafe182To170": 0,
+      "methodRegistrySafe182To170": 0,
+      "markerChanges": {
+        "RUNTIME_OWNER_ASSIGNMENTS=0": 0,
+        "SAFE_DISABLED_PENDING_OWNER=182": 0,
+        "SAFE_DISABLED_METHODS=182": 0,
+        "METHOD_LEVEL_SAFE_DISABLED_CLOSURE=182/182_PASS": 1
+      }
+    },
+    "src/integration/v26/entitlementDecisionService.test.cjs": {
+      "registryOwner0To12": 1,
+      "methodRegistryOwner0To12": 0,
+      "combinedOwnerState0To12": 0,
+      "registrySafe182To170": 1,
+      "methodRegistrySafe182To170": 0,
+      "markerChanges": {
+        "RUNTIME_OWNER_ASSIGNMENTS=0": 1,
+        "SAFE_DISABLED_PENDING_OWNER=182": 1,
+        "SAFE_DISABLED_METHODS=182": 0,
+        "METHOD_LEVEL_SAFE_DISABLED_CLOSURE=182/182_PASS": 0
+      }
+    },
+    "src/integration/v26/authorizeProductionService.test.cjs": {
+      "registryOwner0To12": 0,
+      "methodRegistryOwner0To12": 0,
+      "combinedOwnerState0To12": 1,
+      "registrySafe182To170": 0,
+      "methodRegistrySafe182To170": 0,
+      "markerChanges": {
+        "RUNTIME_OWNER_ASSIGNMENTS=0": 1,
+        "SAFE_DISABLED_PENDING_OWNER=182": 1,
+        "SAFE_DISABLED_METHODS=182": 0,
+        "METHOD_LEVEL_SAFE_DISABLED_CLOSURE=182/182_PASS": 0
+      }
+    }
+  },
+  "status": "GREEN"
+}

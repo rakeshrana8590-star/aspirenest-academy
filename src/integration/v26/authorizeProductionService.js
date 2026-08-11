@@ -101,6 +101,18 @@ function decision(
     state,
     allowed,
     code,
+    // ASPIRENEST_LP3_AUTHORIZE_OUTPUT_V2
+    reasonCode: code,
+    accessMode:
+      allowed
+        ? "open"
+        : state === "expired"
+          ? "expired"
+          : state === "login_required"
+            ? "login_required"
+            : state === "error"
+              ? "error"
+              : "locked",
     message: String(message || code).slice(
       0,
       CONTRACT.maxLengths.message,
@@ -117,6 +129,19 @@ function decision(
       typeof fields.requiredPlan === "string"
         ? fields.requiredPlan
         : "",
+    requiredAccess:
+      typeof fields.requiredAccess === "object"
+      && fields.requiredAccess
+        ? Object.freeze({ ...fields.requiredAccess })
+        : (
+          typeof fields.requiredPlan === "string"
+          && fields.requiredPlan
+            ? Object.freeze({
+              scopeType: "PLAN",
+              planCode: fields.requiredPlan,
+            })
+            : null
+        ),
     matchedGrantId:
       typeof fields.matchedGrantId === "string"
         ? fields.matchedGrantId

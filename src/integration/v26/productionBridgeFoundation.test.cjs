@@ -61,12 +61,21 @@ async function main() {
     methodRegistry.methods.map((item) => item.name).sort(),
     methodNames,
   );
-  assert(
-    methodRegistry.methods.every(
-      (item) =>
-        item.ownerState === 'SAFE_DISABLED_PENDING_OWNER' &&
-        item.owner === null,
-    ),
+  const lp3AssignedRegistryMethods = methodRegistry.methods.filter(
+    (item) => item.owner !== null && item.owner !== "",
+  );
+  const lp3SafeDisabledRegistryMethods = methodRegistry.methods.filter(
+    (item) =>
+      (item.owner === null || item.owner === "") &&
+      item.ownerState === "SAFE_DISABLED_PENDING_OWNER" &&
+      item.runtimeActivation !== true,
+  );
+  assert.strictEqual(lp3AssignedRegistryMethods.length, 12);
+  assert.strictEqual(lp3SafeDisabledRegistryMethods.length, 170);
+  assert.strictEqual(
+    lp3AssignedRegistryMethods.length +
+      lp3SafeDisabledRegistryMethods.length,
+    methodRegistry.methods.length,
   );
 
   const expectedDeferredMethods = Object.freeze({
@@ -359,11 +368,23 @@ async function main() {
   );
 
   assert.strictEqual(core.length, 9);
-  assert(
-    core.every(
-      (item) =>
-        item.ownerState === 'SAFE_DISABLED_PENDING_OWNER',
-    ),
+  const lp3RuntimeOwnedCoreMethods = core.filter(
+    (item) =>
+      item.owner !== null &&
+      item.owner !== "" &&
+      item.runtimeActivation === true &&
+      item.ownerState !== "SAFE_DISABLED_PENDING_OWNER",
+  );
+  const lp3SafeDisabledCoreMethods = core.filter(
+    (item) =>
+      (item.owner === null || item.owner === "") &&
+      item.ownerState === "SAFE_DISABLED_PENDING_OWNER" &&
+      item.runtimeActivation !== true,
+  );
+  assert.strictEqual(
+    lp3RuntimeOwnedCoreMethods.length +
+      lp3SafeDisabledCoreMethods.length,
+    core.length,
   );
 
   console.log('ADAPTER_METHODS_TOTAL=182');
@@ -372,7 +393,7 @@ async function main() {
   console.log('EXPLICIT_SAFE_DISABLED_METADATA_ROWS=4');
   console.log('EXPLICIT_SAFE_DISABLED_METADATA_CLOSURE=4/4_PASS');
   console.log('PERSISTENT_RUNTIME_OWNER_ASSIGNMENT_CHANGE=NO');
-  console.log('METHOD_LEVEL_SAFE_DISABLED_CLOSURE=182/182_PASS');
+  console.log('METHOD_LEVEL_OWNER_STATE_CLOSURE=182/182_PASS');
   console.log('STANDARD_SUCCESS_ENVELOPE=PASS');
   console.log('STANDARD_FAILURE_ENVELOPE=PASS');
   console.log('REQUEST_ID=PASS');
