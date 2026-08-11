@@ -834,7 +834,7 @@ function deriveCanonicalRoute(record, type, collection, resourceId) {
         ? `/ctet-tet/notes/read/${
           encodeURIComponent(textbookId)
         }`
-        : "/ctet-tet/notes",
+        : `/ctet-tet/notes/read/${encodedId}`,
     );
   }
 
@@ -865,7 +865,7 @@ function deriveCanonicalRoute(record, type, collection, resourceId) {
         ? `/ctet-tet/current-affairs/${
           encodeURIComponent(monthId)
         }/read/${encodedId}`
-        : "/ctet-tet/current-affairs",
+        : "",
     );
   }
 
@@ -878,8 +878,8 @@ function deriveCanonicalRoute(record, type, collection, resourceId) {
   if (type === "live" || type === "replay") {
     return canonicalRouteResult(
       type === "replay"
-        ? "/student#live/replays"
-        : "/student#live/upcoming",
+        ? `/student#live/replays/${encodedId}`
+        : `/student#live/upcoming/${encodedId}`,
     );
   }
 
@@ -1125,10 +1125,68 @@ function normalizeCanonicalRecord(match, typeHint) {
     );
   }
 
+
+  // ASPIRENEST_LP3_RESOURCE_GRAPH_V1
+  const readGraphValue = (...keys) => {
+    for (const key of keys) {
+      const value = record && record[key];
+      if (Array.isArray(value)) {
+        const arr = value.map((x) => String(x || "").trim()).filter(Boolean);
+        if (arr.length) return arr;
+      }
+      const text = String(value ?? "").trim();
+      if (text) return text;
+    }
+    return "";
+  };
+  const graphList = (...keys) => {
+    const value = readGraphValue(...keys);
+    if (Array.isArray(value)) return Object.freeze([...new Set(value)]);
+    return value ? Object.freeze([value]) : Object.freeze([]);
+  };
+  const graphStatus = readGraphValue("status", "publishState", "publicationStatus") || publish.value;
+  const graphVisibility = readGraphValue("visibility", "discoveryPolicy") || (planResult.value === "FREE" ? "public" : "protected");
+  const graphMetadata = Object.freeze({
+    resourceType: type,
+    version: readGraphValue("version", "resourceVersion") || "1",
+    examId: readGraphValue("examId", "exam", "examKey") || null,
+    subjectId: readGraphValue("subjectId", "subject", "subjectKey") || null,
+    unitId: readGraphValue("unitId", "unit", "unitKey") || null,
+    chapterId: readGraphValue("chapterId", "chapter", "chapterKey") || null,
+    learningObjective: readGraphValue("learningObjective", "topic", "objective") || null,
+    status: graphStatus,
+    visibility: graphVisibility,
+    publishedAt: record?.publishedAt || null,
+    archivedAt: record?.archivedAt || null,
+    featureKey: readGraphValue("featureKey", "feature") || null,
+    moduleKey: readGraphValue("moduleKey", "module", "section") || sectionResult.value || null,
+    includedPlanKeys: graphList("includedPlanKeys", "includedPlans", "planKeys"),
+    bundleRefs: graphList("bundleRefs", "bundleIds", "bundles"),
+    protectedAssetRef: readGraphValue("protectedAssetRef", "protectedAssetId", "assetId") || null,
+    sourceDocumentId: canonicalId,
+  });
+
   const resource = Object.freeze({
     id: canonicalId,
     resourceId: canonicalId,
+    resourceType: graphMetadata.resourceType,
     type,
+    version: graphMetadata.version,
+    examId: graphMetadata.examId,
+    subjectId: graphMetadata.subjectId,
+    unitId: graphMetadata.unitId,
+    chapterId: graphMetadata.chapterId,
+    learningObjective: graphMetadata.learningObjective,
+    status: graphMetadata.status,
+    visibility: graphMetadata.visibility,
+    publishedAt: graphMetadata.publishedAt,
+    archivedAt: graphMetadata.archivedAt,
+    featureKey: graphMetadata.featureKey,
+    moduleKey: graphMetadata.moduleKey,
+    includedPlanKeys: graphMetadata.includedPlanKeys,
+    bundleRefs: graphMetadata.bundleRefs,
+    protectedAssetRef: graphMetadata.protectedAssetRef,
+    sourceDocumentId: graphMetadata.sourceDocumentId,
     section: sectionResult.value,
     requiredPlan: planResult.value,
     publishState: publish.value,

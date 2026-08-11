@@ -22,7 +22,24 @@
     "requiredPlan",
     "publishState",
     "canonicalRoute",
-    "sourceCollection"
+    "sourceCollection",
+    "resourceType",
+    "version",
+    "examId",
+    "subjectId",
+    "unitId",
+    "chapterId",
+    "learningObjective",
+    "status",
+    "visibility",
+    "publishedAt",
+    "archivedAt",
+    "featureKey",
+    "moduleKey",
+    "includedPlanKeys",
+    "bundleRefs",
+    "protectedAssetRef",
+    "sourceDocumentId"
   ],
   "types": [
     "note",
@@ -365,5 +382,7 @@
     "defaultPlanCollections": {
       "mentorLiveSessions": "MENTORSHIP"
     }
-  }
+  },
+  "resourceTypeCompatibilityAlias": "type",
+  "stableIdentityPolicy": "resourceId is canonical; legacy ids remain aliases only"
 }
