@@ -95,6 +95,46 @@ function createHarness(overrides = {}) {
       });
       auth.currentUser = null;
     },
+    async sendEmailVerification(firebaseUser, actionCodeSettings) {
+      calls.push({
+        name: 'sendEmailVerification',
+        firebaseUser,
+        actionCodeSettings,
+      });
+    },
+    async sendPasswordResetEmail(receivedAuth, email, actionCodeSettings) {
+      calls.push({
+        name: 'sendPasswordResetEmail',
+        receivedAuth,
+        email,
+        actionCodeSettings,
+      });
+    },
+    async reloadUser(firebaseUser) {
+      calls.push({
+        name: 'reloadUser',
+        firebaseUser,
+      });
+    },
+    buildActionCodeSettings(returnTo, purpose) {
+      calls.push({
+        name: 'buildActionCodeSettings',
+        returnTo,
+        purpose,
+      });
+      return Object.freeze({
+        url: `https://www.aspirenestacademy.in/${
+          purpose === 'verify'
+            ? '#public/auth/verify'
+            : (
+              String(returnTo || '').startsWith('#')
+                ? returnTo
+                : '#student/home/overview'
+            )
+        }`,
+        handleCodeInApp: false,
+      });
+    },
     createGoogleProvider() {
       const provider = {
         kind: 'google-provider',
@@ -187,9 +227,28 @@ async function main() {
     /dependency missing/,
   );
 
-  const registrationHarness = createHarness();
-  const registrationSessionBefore =
-    await registrationHarness.service.getSession();
+  const registrationHarness = createHarness({
+    async signInWithEmailAndPassword(
+      receivedAuth,
+      email,
+      password,
+    ) {
+      const user = {
+        uid: 'registration-unverified-001',
+        email,
+        displayName: 'Synthetic Aspirant',
+        emailVerified: false,
+      };
+      registrationHarness.auth.currentUser = user;
+      registrationHarness.calls.push({
+        name: 'registrationVerificationSignIn',
+        receivedAuth,
+        email,
+        password,
+      });
+      return { user };
+    },
+  });
 
   const registrationResult =
     await registrationHarness.service.registerAccount({
@@ -223,12 +282,29 @@ async function main() {
 
   assert(registrationCall);
 
+  assert.strictEqual(
+    registrationHarness.auth.currentUser?.emailVerified,
+    false,
+  );
   const registrationSessionAfter =
     await registrationHarness.service.getSession();
-
-  assert.deepStrictEqual(
-    registrationSessionAfter,
-    registrationSessionBefore,
+  assert.strictEqual(
+    registrationSessionAfter.ok,
+    false,
+  );
+  assert.strictEqual(
+    registrationSessionAfter.code,
+    authModule.AUTH_CODES.EMAIL_UNVERIFIED,
+  );
+  assert.strictEqual(
+    registrationSessionAfter.details.accessAllowed,
+    false,
+  );
+  assert(
+    registrationHarness.calls.some(
+      (item) =>
+        item.name === 'sendEmailVerification',
+    ),
   );
 
   const optionalRegistrationHarness =
@@ -730,6 +806,209 @@ async function main() {
   assert(
     !JSON.stringify(failedLogin).includes(
       'secret-password',
+    ),
+  );
+
+  const phase24Harness = createHarness({
+    async signInWithEmailAndPassword(
+      receivedAuth,
+      email,
+      password,
+    ) {
+      const user = {
+        uid: 'phase24-verify-001',
+        email,
+        displayName: 'Phase24 Aspirant',
+        emailVerified: false,
+      };
+      phase24Harness.auth.currentUser = user;
+      phase24Harness.calls.push({
+        name: 'phase24SignIn',
+        receivedAuth,
+        email,
+        password,
+      });
+      return { user };
+    },
+  });
+
+  assert.deepStrictEqual(
+    await phase24Harness.service.registerAccount({
+      fullName: 'Phase24 Aspirant',
+      username: 'phase24_aspirant',
+      email: 'phase24-verification@example.test',
+      password: 'Strong1!Password',
+      returnTo: '#student/mock-tests/demo',
+    }),
+    { prepared: true },
+  );
+
+  assert.strictEqual(
+    phase24Harness.auth.currentUser?.emailVerified,
+    false,
+  );
+
+  const unverifiedAfterRegistration =
+    await phase24Harness.service.getSession();
+
+  assert.strictEqual(
+    unverifiedAfterRegistration.ok,
+    false,
+  );
+  assert.strictEqual(
+    unverifiedAfterRegistration.code,
+    authModule.AUTH_CODES.EMAIL_UNVERIFIED,
+  );
+  assert.strictEqual(
+    unverifiedAfterRegistration.details.accessAllowed,
+    false,
+  );
+  assert(
+    phase24Harness.calls.some(
+      (item) =>
+        item.name === 'sendEmailVerification',
+    ),
+  );
+
+  await phase24Harness.service.resendVerification({
+    email: 'phase24-verification@example.test',
+    returnTo: '#student/mock-tests/demo',
+  });
+
+  assert(
+    phase24Harness.calls.filter(
+      (item) =>
+        item.name === 'sendEmailVerification',
+    ).length >= 2,
+  );
+  assert.strictEqual(
+    phase24Harness.auth.currentUser?.emailVerified,
+    false,
+  );
+
+  // Simulate a full app/service recreation. Firebase browser persistence
+  // keeps auth.currentUser, while no raw password is cached by AspireNest.
+  const persistedFirebaseUser =
+    phase24Harness.auth.currentUser;
+  const reloadDependencies = {
+    ...phase24Harness.dependencies,
+    async reloadUser(firebaseUser) {
+      firebaseUser.emailVerified = true;
+      phase24Harness.calls.push({
+        name: 'reloadUserAfterPageReload',
+        firebaseUser,
+      });
+    },
+  };
+
+  phase24Harness.auth.currentUser =
+    persistedFirebaseUser;
+
+  const reloadedService =
+    authModule.createAuthProductionService(
+      reloadDependencies,
+    );
+
+  const completed =
+    await reloadedService.completeEmailVerification({
+      account: {
+        email:
+          'phase24-verification@example.test',
+      },
+      returnTo:
+        '#student/mock-tests/demo',
+    });
+
+  assert.strictEqual(completed.authenticated, true);
+  assert.strictEqual(completed.accessAllowed, true);
+  assert.strictEqual(completed.emailVerified, true);
+  assert(
+    phase24Harness.calls.some(
+      (item) =>
+        item.name ===
+        'reloadUserAfterPageReload',
+    ),
+  );
+
+  const noPersistedUserHarness =
+    createHarness();
+  noPersistedUserHarness.auth.currentUser = null;
+  const noPersistedCompletion =
+    await noPersistedUserHarness.service
+      .completeEmailVerification({
+        account: {
+          email:
+            'phase24-verification@example.test',
+        },
+        returnTo:
+          '#student/mock-tests/demo',
+      });
+  assert.strictEqual(
+    noPersistedCompletion.ok,
+    false,
+  );
+  assert.strictEqual(
+    noPersistedCompletion.code,
+    authModule.AUTH_CODES.NOT_AUTHENTICATED,
+  );
+  assert.strictEqual(
+    noPersistedCompletion.details.accessAllowed,
+    false,
+  );
+
+  const resetHarness = createHarness();
+
+  assert.deepStrictEqual(
+    await resetHarness.service.requestPasswordReset({
+      email: 'phase24-reset@example.test',
+      returnTo:
+        '#student/notes/read/exact-note',
+    }),
+    { prepared: true },
+  );
+  assert(
+    resetHarness.calls.some(
+      (item) =>
+        item.name === 'sendPasswordResetEmail',
+    ),
+  );
+  assert(
+    resetHarness.calls.some(
+      (item) =>
+        item.name === 'buildActionCodeSettings'
+        && item.purpose === 'reset'
+        && item.returnTo ===
+          '#student/notes/read/exact-note',
+    ),
+  );
+
+  const neutralResetHarness = createHarness({
+    async sendPasswordResetEmail() {
+      const error =
+        new Error(
+          'RAW_ACCOUNT_EXISTENCE_SIGNAL',
+        );
+      error.code = 'auth/user-not-found';
+      throw error;
+    },
+  });
+
+  const neutralReset =
+    await neutralResetHarness.service
+      .requestPasswordReset({
+        email:
+          'unknown-phase24@example.test',
+        returnTo:
+          '#student/home/overview',
+      });
+
+  assert.deepStrictEqual(
+    neutralReset,
+    { prepared: true },
+  );
+  assert(
+    !JSON.stringify(neutralReset).includes(
+      'RAW_ACCOUNT_EXISTENCE_SIGNAL',
     ),
   );
 
@@ -1252,10 +1531,16 @@ async function main() {
       && item.name !==
         'registerAccount'
       && item.name !==
-        'signInWithGoogle',
+        'signInWithGoogle'
+      && item.name !==
+        'requestPasswordReset'
+      && item.name !==
+        'resendVerification'
+      && item.name !==
+        'completeEmailVerification',
   );
 
-  assert.strictEqual(unresolved.length, 177);
+  assert.strictEqual(unresolved.length, 174);
   assert(
     unresolved.every(
       (item) =>
@@ -1265,8 +1550,13 @@ async function main() {
     ),
   );
 
-  console.log('AUTH_SERVICE_METHODS=4/4');
-  console.log('REGISTER_ACCOUNT_SUCCESS_NO_SESSION_MUTATION=PASS');
+  console.log('AUTH_SERVICE_METHODS=7/7');
+  console.log('REGISTER_ACCOUNT_UNVERIFIED_SESSION_PERSISTS_FAIL_CLOSED=PASS');
+  console.log('PHASE24_PAGE_RELOAD_VERIFICATION_CONTINUITY=PASS');
+  console.log('PHASE24_VERIFICATION_SEND_RESEND_COMPLETE=PASS');
+  console.log('PHASE24_PASSWORD_RESET_NEUTRAL=PASS');
+  console.log('PHASE24_ACTION_SETTINGS_RETURN_TO=PASS');
+  console.log('REGISTER_ACCOUNT_SUCCESS_NO_PROTECTED_ACTIVATION=PASS');
   console.log('REGISTER_ACCOUNT_OPTIONAL_DEPENDENCY=PASS');
   console.log('REGISTER_ACCOUNT_ERROR_SANITIZATION=PASS');
   console.log('GET_SESSION_PUBLIC=PASS');
@@ -1293,10 +1583,10 @@ async function main() {
   console.log('PROFILE_FAILURE_AUTH_STATE_TRUTHFUL=PASS');
   console.log('ROLE_VALIDATION=PASS');
   console.log('ROLE_FAILURE_AUTH_STATE_TRUTHFUL=PASS');
-  console.log('CANONICAL_OWNER_METADATA=4/4');
-  console.log('RUNTIME_OWNER_ASSIGNMENTS=2');
-  console.log('SAFE_DISABLED_METHODS=180');
-  console.log('OTHER_METHODS_SAFE_DISABLED=177');
+  console.log('CANONICAL_OWNER_METADATA=7/7');
+  console.log('RUNTIME_OWNER_ASSIGNMENTS=5');
+  console.log('SAFE_DISABLED_PENDING_OWNER_METHODS=177');
+  console.log('OTHER_METHODS_SAFE_DISABLED=174');
   console.log('ALLOWEDROLES_ALIAS=PASS');
   console.log('ACTIVE_ROLE_SNAPSHOT=PASS');
   console.log('ACCOUNT_STATUS_SNAPSHOT_NO_POLICY=PASS');

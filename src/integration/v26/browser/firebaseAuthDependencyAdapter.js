@@ -62,6 +62,10 @@
         'signInWithEmailAndPassword',
         'signInWithPopup',
         'signOut',
+        'sendEmailVerification',
+        'sendPasswordResetEmail',
+        'reload',
+        'getLocationOrigin',
         'onAuthStateChanged',
       ];
 
@@ -105,6 +109,10 @@
         signInWithEmailAndPassword,
         signInWithPopup,
         signOut,
+        sendEmailVerification,
+        sendPasswordResetEmail,
+        reload,
+        getLocationOrigin,
         onAuthStateChanged,
         GoogleAuthProvider,
         roleExperienceDependencyAdapter,
@@ -168,6 +176,78 @@
 
       function firebaseSignOut(authDependency) {
         return signOut(authDependency);
+      }
+
+      function normalizeReturnTo(value) {
+        const candidate =
+          String(value || '').trim();
+
+        if (
+          candidate.startsWith('#')
+          && !candidate.includes('://')
+          && !/[\r\n]/.test(candidate)
+        ) {
+          return candidate;
+        }
+
+        return '#student/home/overview';
+      }
+
+      function buildActionCodeSettings(
+        returnTo,
+        purpose,
+      ) {
+        const origin =
+          String(getLocationOrigin() || '')
+            .trim()
+            .replace(/\/+$/, '');
+
+        if (!/^https?:\/\//i.test(origin)) {
+          throw new TypeError(
+            'Firebase email action origin is invalid.',
+          );
+        }
+
+        const mode =
+          String(purpose || '')
+            .trim()
+            .toLowerCase();
+
+        const destination =
+          mode === 'verify'
+            ? '#public/auth/verify'
+            : normalizeReturnTo(returnTo);
+
+        return Object.freeze({
+          url: `${origin}/${destination}`,
+          handleCodeInApp: false,
+        });
+      }
+
+      function firebaseSendEmailVerification(
+        firebaseUser,
+        actionCodeSettings,
+      ) {
+        return sendEmailVerification(
+          firebaseUser,
+          actionCodeSettings,
+        );
+      }
+
+      function firebaseSendPasswordResetEmail(
+        authDependency,
+        email,
+        actionCodeSettings,
+      ) {
+        return sendPasswordResetEmail(
+          authDependency,
+          email,
+          actionCodeSettings,
+        );
+      }
+
+      function reloadUser(firebaseUser) {
+        return reload(firebaseUser);
       }
 
       function subscribeAuthState(listener) {
@@ -242,6 +322,12 @@
           emailPasswordSignIn,
         signInWithPopup: popupSignIn,
         signOut: firebaseSignOut,
+        sendEmailVerification:
+          firebaseSendEmailVerification,
+        sendPasswordResetEmail:
+          firebaseSendPasswordResetEmail,
+        reloadUser,
+        buildActionCodeSettings,
         subscribeAuthState,
         createGoogleProvider,
         loadAccountProfile,

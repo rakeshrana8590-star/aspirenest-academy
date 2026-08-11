@@ -121,6 +121,37 @@ function createHarness({
       ]);
       auth.currentUser = null;
     },
+    async sendEmailVerification(
+      firebaseUser,
+      actionCodeSettings,
+    ) {
+      calls.push([
+        "sendEmailVerification",
+        firebaseUser,
+        actionCodeSettings,
+      ]);
+    },
+    async sendPasswordResetEmail(
+      authDependency,
+      email,
+      actionCodeSettings,
+    ) {
+      calls.push([
+        "sendPasswordResetEmail",
+        authDependency,
+        email,
+        actionCodeSettings,
+      ]);
+    },
+    async reload(firebaseUser) {
+      calls.push([
+        "reload",
+        firebaseUser,
+      ]);
+    },
+    getLocationOrigin() {
+      return "https://www.aspirenestacademy.in";
+    },
     onAuthStateChanged(authDependency, listener) {
       calls.push([
         "onAuthStateChanged",
@@ -154,7 +185,7 @@ function createHarness({
 (async () => {
   let cases = 0;
 
-  assert.equal(contract.version, "1.1.0");
+  assert.equal(contract.version, "1.2.0");
   assert.equal(
     contract.googleProvider.customParameters.prompt,
     "select_account",
@@ -222,6 +253,12 @@ function createHarness({
         signInWithEmailAndPassword() {},
         signInWithPopup() {},
         signOut() {},
+        sendEmailVerification() {},
+        sendPasswordResetEmail() {},
+        reload() {},
+        getLocationOrigin() {
+          return "https://www.aspirenestacademy.in";
+        },
         onAuthStateChanged() {
           return () => {};
         },
@@ -276,6 +313,110 @@ function createHarness({
 
   await adapter.signOut(harness.auth);
   assert.equal(harness.calls.at(-1)[0], "signOut");
+  cases += 1;
+
+  for (const dependency of [
+    'sendEmailVerification',
+    'sendPasswordResetEmail',
+    'reload',
+    'getLocationOrigin',
+  ]) {
+    assert.equal(
+      contract.requiredDependencies.includes(
+        dependency,
+      ),
+      true,
+    );
+  }
+
+  for (const dependency of [
+    'sendEmailVerification',
+    'sendPasswordResetEmail',
+    'reloadUser',
+    'buildActionCodeSettings',
+  ]) {
+    assert.equal(
+      contract.authServiceDependencies.includes(
+        dependency,
+      ),
+      true,
+    );
+  }
+  cases += 1;
+
+  const verificationSettings =
+    adapter.buildActionCodeSettings(
+      '#student/home/my-access',
+      'verify',
+    );
+
+  assert.deepEqual(
+    verificationSettings,
+    {
+      url:
+        'https://www.aspirenestacademy.in/#public/auth/verify',
+      handleCodeInApp: false,
+    },
+  );
+  cases += 1;
+
+  const resetSettings =
+    adapter.buildActionCodeSettings(
+      '#student/notes/read/exact-note',
+      'reset',
+    );
+
+  assert.deepEqual(
+    resetSettings,
+    {
+      url:
+        'https://www.aspirenestacademy.in/#student/notes/read/exact-note',
+      handleCodeInApp: false,
+    },
+  );
+  cases += 1;
+
+  assert.equal(
+    adapter.buildActionCodeSettings(
+      'https://evil.example/steal',
+      'reset',
+    ).url,
+    'https://www.aspirenestacademy.in/#student/home/overview',
+  );
+  cases += 1;
+
+  await adapter.sendEmailVerification(
+    {
+      uid:
+        'phase24-verify-user',
+    },
+    verificationSettings,
+  );
+  assert.equal(
+    harness.calls.at(-1)[0],
+    'sendEmailVerification',
+  );
+  cases += 1;
+
+  await adapter.sendPasswordResetEmail(
+    harness.auth,
+    'phase24-reset@example.test',
+    resetSettings,
+  );
+  assert.equal(
+    harness.calls.at(-1)[0],
+    'sendPasswordResetEmail',
+  );
+  cases += 1;
+
+  await adapter.reloadUser({
+    uid:
+      'phase24-reload-user',
+  });
+  assert.equal(
+    harness.calls.at(-1)[0],
+    'reload',
+  );
   cases += 1;
 
   let observedAuthUser = null;
@@ -555,7 +696,7 @@ function createHarness({
   );
   cases += 1;
 
-  assert.equal(cases, 22);
+  assert.equal(cases, 29);
 
   console.log(
     `FIREBASE_AUTH_ADAPTER_CASES=${cases}/${cases}_PASS`,

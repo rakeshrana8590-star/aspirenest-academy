@@ -178,6 +178,10 @@
         'signInWithEmailAndPassword',
         'signInWithPopup',
         'signOut',
+        'sendEmailVerification',
+        'sendPasswordResetEmail',
+        'reloadUser',
+        'buildActionCodeSettings',
         'createGoogleProvider',
         'loadAccountProfile',
         'resolveRole',
@@ -218,6 +222,10 @@
         signInWithUsernameAndPassword,
         signInWithPopup,
         signOut,
+        sendEmailVerification,
+        sendPasswordResetEmail,
+        reloadUser,
+        buildActionCodeSettings,
         createGoogleProvider,
         loadAccountProfile,
         resolveRole,
@@ -433,6 +441,153 @@
             'Sign-in could not be completed.',
           );
         }
+      }
+
+      async function sendVerificationForUser(
+        firebaseUser,
+        returnTo,
+      ) {
+        if (
+          !firebaseUser
+          || !cleanText(firebaseUser.uid)
+          || firebaseUser.emailVerified === true
+        ) {
+          return Object.freeze({ prepared: true });
+        }
+
+        try {
+          const settings = buildActionCodeSettings(
+            returnTo,
+            'verify',
+          );
+          await sendEmailVerification(
+            firebaseUser,
+            settings,
+          );
+        } catch (_) {
+          return Object.freeze({ prepared: false });
+        }
+
+        return Object.freeze({ prepared: true });
+      }
+
+      async function requestPasswordReset(payload) {
+        const request =
+          payload && typeof payload === 'object'
+            ? payload
+            : {};
+        const email = cleanEmail(request.email);
+
+        if (!email) {
+          return Object.freeze({ prepared: true });
+        }
+
+        try {
+          const settings = buildActionCodeSettings(
+            request.returnTo,
+            'reset',
+          );
+          await sendPasswordResetEmail(
+            auth,
+            email,
+            settings,
+          );
+        } catch (_) {
+          // Deliberately neutral: account existence is never disclosed.
+        }
+
+        return Object.freeze({ prepared: true });
+      }
+
+      async function resendVerification(payload) {
+        const request =
+          payload && typeof payload === 'object'
+            ? payload
+            : {};
+        const email = cleanEmail(request.email);
+        const firebaseUser = auth.currentUser || null;
+
+        if (
+          !firebaseUser
+          || !cleanText(firebaseUser.uid)
+          || firebaseUser.emailVerified === true
+        ) {
+          return Object.freeze({ prepared: true });
+        }
+
+        if (
+          email
+          && cleanEmail(firebaseUser.email) !== email
+        ) {
+          return Object.freeze({ prepared: true });
+        }
+
+        await sendVerificationForUser(
+          firebaseUser,
+          request.returnTo,
+        );
+
+        return Object.freeze({ prepared: true });
+      }
+
+      async function completeEmailVerification(payload) {
+        const request =
+          payload && typeof payload === 'object'
+            ? payload
+            : {};
+        const requestedEmail = cleanEmail(
+          request.email || request.account?.email,
+        );
+        let firebaseUser = auth.currentUser || null;
+
+        if (!firebaseUser || !cleanText(firebaseUser.uid)) {
+          return failure(
+            AUTH_CODES.NOT_AUTHENTICATED,
+            'Sign in again to finish email verification.',
+            {
+              authenticated: false,
+              accessAllowed: false,
+              emailVerified: false,
+            },
+          );
+        }
+
+        if (
+          requestedEmail
+          && cleanEmail(firebaseUser.email) !== requestedEmail
+        ) {
+          return failure(
+            AUTH_CODES.EMAIL_UNVERIFIED,
+            'Verification could not be completed.',
+            {
+              authenticated: false,
+              accessAllowed: false,
+              emailVerified: false,
+            },
+          );
+        }
+
+        try {
+          await reloadUser(firebaseUser);
+        } catch (_) {
+          // Final verified-state check below remains fail closed.
+        }
+
+        firebaseUser = auth.currentUser || firebaseUser;
+
+        if (firebaseUser.emailVerified !== true) {
+          return failure(
+            AUTH_CODES.EMAIL_UNVERIFIED,
+            'Verify your email before continuing.',
+            {
+              authenticated: false,
+              accessAllowed: false,
+              emailVerified: false,
+            },
+          );
+        }
+
+        return buildVerifiedSession(firebaseUser);
       }
 
       async function buildVerifiedSession(firebaseUser) {
@@ -715,6 +870,40 @@
             });
           }
 
+          const email = cleanEmail(request.email);
+          const password = String(request.password || '');
+
+          if (email && password) {
+            try {
+              const credential =
+                await signInWithEmailAndPassword(
+                  auth,
+                  email,
+                  password,
+                );
+              const firebaseUser =
+                credential && credential.user
+                  ? credential.user
+                  : auth.currentUser || null;
+
+              if (
+                firebaseUser
+                && firebaseUser.emailVerified !== true
+              ) {
+                await sendVerificationForUser(
+                  firebaseUser,
+                  request.returnTo,
+                );
+              }
+            } catch (_) {
+              try {
+                await signOut(auth);
+              } catch (_) {
+                // Preparation remains fail closed.
+              }
+            }
+          }
+
           return Object.freeze({
             prepared: true,
           });
@@ -857,6 +1046,16 @@
         }
 
         if (firebaseUser.emailVerified !== true) {
+          if (
+            mode === 'email'
+            || mode === 'username'
+          ) {
+            await sendVerificationForUser(
+              firebaseUser,
+              request.returnTo,
+            );
+          }
+
           try {
             await signOut(auth);
           } catch (error) {
@@ -956,6 +1155,9 @@
         subscribeSession,
         registerAccount,
         login,
+        requestPasswordReset,
+        resendVerification,
+        completeEmailVerification,
         logout,
       });
     }

@@ -30,6 +30,9 @@ const initialMethods = [
   "checkUsernameAvailability",
   "registerAccount",
   "signInWithGoogle",
+  "requestPasswordReset",
+  "resendVerification",
+  "completeEmailVerification",
 ];
 const bridgeApi = require(
   path.join(
@@ -234,6 +237,22 @@ async function runScenario(
       onAuthStateChanged: (_authInstance, _listener) => () => {},
 
       linkWithCredential: async (user, _credential) => ({ user }),
+
+      sendEmailVerification: async (
+        _firebaseUser,
+        _actionCodeSettings,
+      ) => {},
+
+
+      sendPasswordResetEmail: async (
+        _authInstance,
+        _email,
+        _actionCodeSettings,
+      ) => {},
+
+
+      reload: async (_firebaseUser) => {},
+
 },
     "firebase/firestore": {
       getFirestore: (app) => {
@@ -319,6 +338,24 @@ async function runScenario(
             Object.freeze({
               scenario: name,
               method: "registerAccount",
+              payload,
+            }),
+          requestPasswordReset: async (payload) =>
+            Object.freeze({
+              scenario: name,
+              method: "requestPasswordReset",
+              payload,
+            }),
+          resendVerification: async (payload) =>
+            Object.freeze({
+              scenario: name,
+              method: "resendVerification",
+              payload,
+            }),
+          completeEmailVerification: async (payload) =>
+            Object.freeze({
+              scenario: name,
+              method: "completeEmailVerification",
               payload,
             }),
         });
@@ -636,8 +673,8 @@ async function assertEnabledScenario(
     }
   }
 
-  assert.equal(success, 8);
-  assert.equal(disabled, 174);
+  assert.equal(success, 11);
+  assert.equal(disabled, 171);
 }
 
 (async () => {

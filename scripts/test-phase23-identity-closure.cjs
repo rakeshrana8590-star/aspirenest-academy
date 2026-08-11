@@ -481,6 +481,65 @@ function createAuthHarness({
         null;
     },
 
+    async sendEmailVerification(
+      firebaseUser,
+      actionCodeSettings,
+    ) {
+      calls.push({
+        name:
+          "sendEmailVerification",
+        uid:
+          firebaseUser
+          && firebaseUser.uid,
+        actionCodeSettings,
+      });
+    },
+
+    async sendPasswordResetEmail(
+      receivedAuth,
+      email,
+      actionCodeSettings,
+    ) {
+      calls.push({
+        name:
+          "sendPasswordResetEmail",
+        receivedAuth,
+        email,
+        actionCodeSettings,
+      });
+    },
+
+    async reloadUser(
+      firebaseUser
+    ) {
+      calls.push({
+        name:
+          "reloadUser",
+        uid:
+          firebaseUser
+          && firebaseUser.uid,
+      });
+    },
+
+    buildActionCodeSettings(
+      returnTo,
+      purpose,
+    ) {
+      calls.push({
+        name:
+          "buildActionCodeSettings",
+        returnTo,
+        purpose,
+      });
+
+      return {
+        url:
+          "https://www.aspirenestacademy.in/#public/auth/verify",
+        handleCodeInApp:
+          false,
+      };
+    },
+
     createGoogleProvider() {
       return {
         providerId:
@@ -692,6 +751,29 @@ async function proveSameEmailLinking() {
           "linkWithCredential"
     ),
     false,
+  );
+
+  const phase24EmailActionNames =
+    new Set([
+      "sendEmailVerification",
+      "sendPasswordResetEmail",
+      "reloadUser",
+      "buildActionCodeSettings",
+    ]);
+
+  assert.equal(
+    [...harness.calls, ...mismatch.calls]
+      .some(
+        (item) =>
+          phase24EmailActionNames.has(
+            item.name
+          )
+      ),
+    false,
+  );
+
+  console.log(
+    "PHASE23_VERIFIED_IDENTITY_PATH_PHASE24_EMAIL_ACTIONS=0_PASS"
   );
 
   console.log(

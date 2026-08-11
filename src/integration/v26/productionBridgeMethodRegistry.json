@@ -113,10 +113,15 @@
     {
       "name": "completeEmailVerification",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "authProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/authProductionService.js#createAuthProductionService",
+      "canonicalOwnerMethod": "completeEmailVerification",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP2-P2.4-S2.4.2",
+      "runtimeActivation": true
     },
     {
       "name": "createAdminResourceVersion",
@@ -903,10 +908,15 @@
     {
       "name": "requestPasswordReset",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "authProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/authProductionService.js#createAuthProductionService",
+      "canonicalOwnerMethod": "requestPasswordReset",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP2-P2.4-S2.4.2",
+      "runtimeActivation": true
     },
     {
       "name": "requestStudentDataExport",
@@ -927,10 +937,15 @@
     {
       "name": "resendVerification",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "authProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/authProductionService.js#createAuthProductionService",
+      "canonicalOwnerMethod": "resendVerification",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP2-P2.4-S2.4.2",
+      "runtimeActivation": true
     },
     {
       "name": "resolveLiveJoin",

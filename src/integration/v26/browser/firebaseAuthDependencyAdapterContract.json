@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "requiredDependencies": [
     "auth",
     "signInWithEmailAndPassword",
@@ -7,7 +7,11 @@
     "signOut",
     "onAuthStateChanged",
     "GoogleAuthProvider",
-    "roleExperienceDependencyAdapter"
+    "roleExperienceDependencyAdapter",
+    "sendEmailVerification",
+    "sendPasswordResetEmail",
+    "reload",
+    "getLocationOrigin"
   ],
   "roleAdapterMethods": [
     "loadAccountProfile",
@@ -28,7 +32,11 @@
     "createGoogleProvider",
     "loadAccountProfile",
     "resolveRole",
-    "resolveAllowedExperiences"
+    "resolveAllowedExperiences",
+    "sendEmailVerification",
+    "sendPasswordResetEmail",
+    "reloadUser",
+    "buildActionCodeSettings"
   ],
   "authoritativeSession": {
     "source": "reviewed_auth_service_getSession",
@@ -46,5 +54,20 @@
     "domStorage": true,
     "profileWrites": true,
     "roleFromCallerProfile": true
+  },
+  "emailActions": {
+    "verification": {
+      "provider": "firebase_auth",
+      "continueRoute": "#public/auth/verify",
+      "verifiedOnly": true,
+      "hostedActionHandler": true
+    },
+    "passwordReset": {
+      "provider": "firebase_auth",
+      "neutralResponse": true,
+      "preserveReturnTo": true,
+      "hostedActionHandler": true
+    },
+    "externalReturnToAllowed": false
   }
 }

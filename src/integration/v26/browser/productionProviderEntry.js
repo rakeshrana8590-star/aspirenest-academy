@@ -24,6 +24,9 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  reload,
   linkWithCredential,
 } from "firebase/auth";
 import {
@@ -211,6 +214,11 @@ if (providerRuntimeEnabled) {
       signInWithEmailAndPassword,
       signInWithPopup,
       signOut,
+      sendEmailVerification,
+      sendPasswordResetEmail,
+      reload,
+      getLocationOrigin: () =>
+        window.location.origin,
       onAuthStateChanged,
       GoogleAuthProvider,
       roleExperienceDependencyAdapter,
@@ -331,6 +339,39 @@ if (providerRuntimeEnabled) {
   );
 
   handlerRegistry.register(
+    "requestPasswordReset",
+    (payload) =>
+      authProductionService
+        .requestPasswordReset(payload),
+    Object.freeze({
+      owner:
+        "authProductionService",
+    }),
+  );
+
+  handlerRegistry.register(
+    "resendVerification",
+    (payload) =>
+      authProductionService
+        .resendVerification(payload),
+    Object.freeze({
+      owner:
+        "authProductionService",
+    }),
+  );
+
+  handlerRegistry.register(
+    "completeEmailVerification",
+    (payload) =>
+      authProductionService
+        .completeEmailVerification(payload),
+    Object.freeze({
+      owner:
+        "authProductionService",
+    }),
+  );
+
+  handlerRegistry.register(
     "logout",
     () => authProductionService.logout(),
     Object.freeze({
@@ -382,6 +423,10 @@ const expectedInitialHandlerOwners = Object.freeze([
     owner: "usernameAvailabilityClient",
   }),
   Object.freeze({
+    method: "completeEmailVerification",
+    owner: "authProductionService",
+  }),
+  Object.freeze({
     method: "getSession",
     owner: "authProductionService",
   }),
@@ -399,6 +444,14 @@ const expectedInitialHandlerOwners = Object.freeze([
   }),
   Object.freeze({
     method: "registerAccount",
+    owner: "authProductionService",
+  }),
+  Object.freeze({
+    method: "requestPasswordReset",
+    owner: "authProductionService",
+  }),
+  Object.freeze({
+    method: "resendVerification",
     owner: "authProductionService",
   }),
   Object.freeze({
