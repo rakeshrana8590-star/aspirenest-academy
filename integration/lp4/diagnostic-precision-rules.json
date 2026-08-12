@@ -1,0 +1,10 @@
+{
+  "schema": "aspirenest.lp4.diagnostic-precision-rules.v1",
+  "rules": {
+    "swallowedFailure": "Flag empty catch only when adjacent to adapter/service persistence or protected-action mutation.",
+    "mediaUrl": "Mentor/profile photo delivery is not a protected LP4 learning-media defect. Premium Notes/Video/attachment/replay delivery is checked separately.",
+    "localStorage": "Presence is not itself RED; RED occurs only when local state can override newer server truth, grant protected access, or claim durable success.",
+    "moduleBlocker": "A 4.1-4.7 implementation requirement is carry-forward during 4.0 protocol sealing, not a fake Phase 4.0 RED.",
+    "hardStop": "Only repository/source/project/secret/rollback safety boundaries abort a diagnostic harvest."
+  }
+}

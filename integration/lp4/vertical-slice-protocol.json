@@ -1,0 +1,683 @@
+{
+  "schema": "aspirenest.lp4.vertical-slice-protocol.v1",
+  "phase": "4.0",
+  "status": "SEALED_PROTOCOL_CONTRACT",
+  "authority": {
+    "lp3Checkpoint": "0bf7f9780fcf96b7921545edbb1007c8009a4656",
+    "lockedV26Sha256": "ee8ce82aea31f3e02a9c05d7afd9d28aa489e4dcff6a7c19674dcedf375044a4",
+    "visibleOwner": "V26",
+    "lp3CanonicalOwners": [
+      "canonicalResourceService",
+      "authorizeProductionService",
+      "entitlementDecisionService",
+      "accessProductionService"
+    ]
+  },
+  "diagnosticStrategy": {
+    "firstRedStopsDiagnosticSweep": false,
+    "continueIndependentChecksToEnd": true,
+    "dependentChecksUse": "SKIPPED_DEPENDENCY",
+    "realExecutionFailClosed": true,
+    "hardStops": [
+      "wrong repository/branch/head",
+      "dirty unexpected worktree",
+      "production project target",
+      "secret exposure",
+      "unexpected changed-file scope",
+      "rollback unavailable"
+    ]
+  },
+  "verticalSliceOrder": [
+    "adminCreateEditValidatePublishArchive",
+    "canonicalResourceResolve",
+    "authorizeExactAction",
+    "rulesOrServerEnforcement",
+    "studentRoleSafeDelivery",
+    "progressOrOutcomePersistence",
+    "directUrlAndRefreshParity",
+    "offlineErrorRecovery",
+    "rolePrivacyNegativeProof"
+  ],
+  "serverTruth": {
+    "serverStateCanonical": true,
+    "localStateRole": "CACHE_OR_OPTIMISTIC_UX_ONLY",
+    "staleLocalMayOverrideServer": false,
+    "protectedActionMayBeGrantedFromLocalOnly": false,
+    "mutationAcknowledgementRequiredBeforeDurableSuccess": true
+  },
+  "mutationEnvelope": {
+    "requiredFields": [
+      "ok",
+      "resourceId",
+      "resourceType",
+      "ownerUid",
+      "operationId",
+      "idempotencyKey",
+      "correlationId",
+      "auditId",
+      "serverUpdatedAt",
+      "version",
+      "safeReasonCode"
+    ],
+    "stableErrors": [
+      "UNAUTHENTICATED",
+      "FORBIDDEN",
+      "STALE_VERSION",
+      "WINDOW_CLOSED",
+      "NOT_FOUND",
+      "CONFLICT",
+      "RETRYABLE",
+      "PROVIDER_UNAVAILABLE"
+    ],
+    "browserMayMintAuthoritativeAuditId": false
+  },
+  "routeAndAccess": {
+    "canonicalRouteOwner": "LP3 canonicalResourceService",
+    "authorizationOwner": "LP3 authorizeProductionService",
+    "assignmentGrantsEntitlement": false,
+    "notificationGrantsEntitlement": false,
+    "deepLinkReauthorizesAtDestination": true,
+    "genericHomeFallbackAfterExactSelection": false
+  },
+  "moduleProtocols": {
+    "4.1": {
+      "name": "Notes + IntelliText / IntelliBook",
+      "actions": [
+        "READ",
+        "DOWNLOAD"
+      ],
+      "requirements": [
+        "versioned pages",
+        "protected PDF fallback",
+        "private study actions",
+        "server progress",
+        "cross-device exact page"
+      ]
+    },
+    "4.2": {
+      "name": "Mock Tests",
+      "actions": [
+        "ATTEMPT",
+        "SUBMIT",
+        "VIEW_RESULT",
+        "REVIEW"
+      ],
+      "requirements": [
+        "server attempt identity",
+        "server time",
+        "single active attempt",
+        "autosave version",
+        "idempotent submit",
+        "answer privacy",
+        "500-question proof"
+      ]
+    },
+    "4.3": {
+      "name": "Current Affairs + IntelliBook",
+      "actions": [
+        "READ",
+        "DOWNLOAD"
+      ],
+      "requirements": [
+        "source register",
+        "verification gate",
+        "versioned pages",
+        "append-only corrections",
+        "server progress"
+      ]
+    },
+    "4.4": {
+      "name": "Video + IntelliPlayer",
+      "actions": [
+        "WATCH",
+        "DOWNLOAD"
+      ],
+      "requirements": [
+        "protected resolver",
+        "no reusable premium URL",
+        "captions/transcript",
+        "server progress",
+        "provider failure recovery"
+      ]
+    },
+    "4.5": {
+      "name": "Live Classes + Replays",
+      "actions": [
+        "JOIN",
+        "WATCH"
+      ],
+      "requirements": [
+        "server-time join window",
+        "protected join delivery",
+        "server attendance",
+        "replay independent authorization",
+        "cancel/reschedule recovery"
+      ]
+    },
+    "4.6": {
+      "name": "AspirePath Roadmaps + assignments",
+      "actions": [
+        "READ"
+      ],
+      "requirements": [
+        "server progress",
+        "catch-up/reschedule",
+        "linked resource independent authorization",
+        "assignment not entitlement"
+      ]
+    },
+    "4.7": {
+      "name": "Discovery / Saved / Recent / Continue / progress",
+      "actions": [
+        "READ"
+      ],
+      "requirements": [
+        "role-safe canonical search",
+        "saved/recent/continue server truth",
+        "exact cursor",
+        "no stale duplicate routes",
+        "reauthorize on open"
+      ]
+    }
+  },
+  "lp4RelevantMethods": [
+    {
+      "method": "archiveMockTest",
+      "phase": "4.2",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "archiveNote",
+      "phase": "4.1",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "assignRoadmap",
+      "phase": "4.6",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "authorize",
+      "phase": "LP3_HANDOFF_OR_4.0",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "cancelLiveSession",
+      "phase": "4.5",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "createLiveProviderSession",
+      "phase": "4.5",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "createLiveReplayDraft",
+      "phase": "4.5",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "downloadVideoAttachment",
+      "phase": "4.4",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "duplicateMockTest",
+      "phase": "4.2",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "exportMockTest",
+      "phase": "4.2",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "importMockQuestions",
+      "phase": "4.2",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "importNoteContent",
+      "phase": "4.1",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "loadCurrentAffairsSourceRegister",
+      "phase": "4.3",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "loadMockAdminWorkspace",
+      "phase": "4.2",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "loadMockAttemptDraft",
+      "phase": "4.2",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "loadMockResults",
+      "phase": "4.2",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "loadMockTest",
+      "phase": "4.2",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "loadNotesAdminWorkspace",
+      "phase": "4.1",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "loadRoadmapProgress",
+      "phase": "4.6",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "loadVideoAdminWorkspace",
+      "phase": "4.4",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "loadVideoAnalytics",
+      "phase": "4.4",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "openCanonical",
+      "phase": "LP3_HANDOFF_OR_4.0",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "pauseMockAttempt",
+      "phase": "4.2",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "processVideoAsset",
+      "phase": "4.4",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "publishCurrentAffairs",
+      "phase": "4.3",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "publishCurrentAffairsCorrection",
+      "phase": "4.3",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "publishLive",
+      "phase": "4.5",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "publishMockTest",
+      "phase": "4.2",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "publishNote",
+      "phase": "4.1",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "publishRoadmap",
+      "phase": "4.6",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "publishVideo",
+      "phase": "4.4",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "recordAttempt",
+      "phase": "4.2",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "recordLiveAttendance",
+      "phase": "4.5",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "recordProgress",
+      "phase": "4.7",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "recordRoadmapProgress",
+      "phase": "4.6",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "recordStudyAction",
+      "phase": "4.1+4.4",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "rescheduleRoadmap",
+      "phase": "4.6",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "resolveLiveJoin",
+      "phase": "4.5",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "resolveProtectedVideo",
+      "phase": "4.4",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "restoreNote",
+      "phase": "4.1",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "resumeMockAttempt",
+      "phase": "4.2",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "saveCurrentAffairs",
+      "phase": "4.3",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "saveCurrentAffairsPages",
+      "phase": "4.3",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "saveLive",
+      "phase": "4.5",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "saveLiveReminder",
+      "phase": "4.5",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "saveMockAttemptDraft",
+      "phase": "4.2",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "saveMockTest",
+      "phase": "4.2",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "saveNote",
+      "phase": "4.1",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "saveNoteProgress",
+      "phase": "4.1",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "saveRoadmap",
+      "phase": "4.6",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "saveVideo",
+      "phase": "4.4",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "saveVideoCaptions",
+      "phase": "4.4",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "saveVideoProgress",
+      "phase": "4.4",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "saveVideoStudyAction",
+      "phase": "4.4",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "unpublishNote",
+      "phase": "4.1",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "updateLiveProviderSession",
+      "phase": "4.5",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "updateMockResultPolicy",
+      "phase": "4.2",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "uploadNoteAsset",
+      "phase": "4.1",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "uploadVideoAsset",
+      "phase": "4.4",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "validateCurrentAffairs",
+      "phase": "4.3",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "validateLive",
+      "phase": "4.5",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "validateMockTest",
+      "phase": "4.2",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "validateNote",
+      "phase": "4.1",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "validateRoadmap",
+      "phase": "4.6",
+      "authority": null,
+      "event": null
+    },
+    {
+      "method": "validateVideo",
+      "phase": "4.4",
+      "authority": null,
+      "event": null
+    }
+  ],
+  "methodsByPhase": {
+    "4.1": [
+      "archiveNote",
+      "importNoteContent",
+      "loadNotesAdminWorkspace",
+      "publishNote",
+      "restoreNote",
+      "saveNote",
+      "saveNoteProgress",
+      "unpublishNote",
+      "uploadNoteAsset",
+      "validateNote"
+    ],
+    "4.1+4.4": [
+      "recordStudyAction"
+    ],
+    "4.2": [
+      "archiveMockTest",
+      "duplicateMockTest",
+      "exportMockTest",
+      "importMockQuestions",
+      "loadMockAdminWorkspace",
+      "loadMockAttemptDraft",
+      "loadMockResults",
+      "loadMockTest",
+      "pauseMockAttempt",
+      "publishMockTest",
+      "recordAttempt",
+      "resumeMockAttempt",
+      "saveMockAttemptDraft",
+      "saveMockTest",
+      "updateMockResultPolicy",
+      "validateMockTest"
+    ],
+    "4.3": [
+      "loadCurrentAffairsSourceRegister",
+      "publishCurrentAffairs",
+      "publishCurrentAffairsCorrection",
+      "saveCurrentAffairs",
+      "saveCurrentAffairsPages",
+      "validateCurrentAffairs"
+    ],
+    "4.4": [
+      "downloadVideoAttachment",
+      "loadVideoAdminWorkspace",
+      "loadVideoAnalytics",
+      "processVideoAsset",
+      "publishVideo",
+      "resolveProtectedVideo",
+      "saveVideo",
+      "saveVideoCaptions",
+      "saveVideoProgress",
+      "saveVideoStudyAction",
+      "uploadVideoAsset",
+      "validateVideo"
+    ],
+    "4.5": [
+      "cancelLiveSession",
+      "createLiveProviderSession",
+      "createLiveReplayDraft",
+      "publishLive",
+      "recordLiveAttendance",
+      "resolveLiveJoin",
+      "saveLive",
+      "saveLiveReminder",
+      "updateLiveProviderSession",
+      "validateLive"
+    ],
+    "4.6": [
+      "assignRoadmap",
+      "loadRoadmapProgress",
+      "publishRoadmap",
+      "recordRoadmapProgress",
+      "rescheduleRoadmap",
+      "saveRoadmap",
+      "validateRoadmap"
+    ],
+    "4.7": [
+      "recordProgress"
+    ],
+    "LP3_HANDOFF_OR_4.0": [
+      "authorize",
+      "openCanonical"
+    ]
+  },
+  "lp5Compatibility": {
+    "eventEnvelopeFields": [
+      "eventType",
+      "resourceId",
+      "resourceType",
+      "actorUid",
+      "audienceScope",
+      "occurredAtServer",
+      "canonicalRoute",
+      "action",
+      "correlationId",
+      "version"
+    ],
+    "notificationDestinationReauthorization": true,
+    "assignmentNotEntitlement": true,
+    "serverTimeRequiredForOperationalEvents": true
+  },
+  "phase40Scope": {
+    "moduleImplementationStarted": false,
+    "runtimeOwnerAssignmentsChanged": false,
+    "firebaseWrites": 0,
+    "visibleV26Changes": 0
+  }
+}

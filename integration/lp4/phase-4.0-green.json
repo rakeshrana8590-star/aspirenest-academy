@@ -1,0 +1,42 @@
+{
+  "schema": "aspirenest.lp4.phase-4.0-green.v1",
+  "phase": "4.0",
+  "verdict": "GREEN",
+  "lp3Checkpoint": "0bf7f9780fcf96b7921545edbb1007c8009a4656",
+  "protocol": "integration/lp4/vertical-slice-protocol.json",
+  "diagnosticPrecision": "integration/lp4/diagnostic-precision-rules.json",
+  "phase40ProtocolRed": 0,
+  "moduleCarryForward": [
+    {
+      "phase": "4.1-4.7",
+      "code": "SERVER_TRUTH_RECONCILIATION_REQUIRED",
+      "signalCount": 4
+    },
+    {
+      "phase": "4.5",
+      "code": "PROTECTED_SERVER_TIME_LIVE_JOIN_REQUIRED",
+      "signalCount": 19
+    },
+    {
+      "phase": "4.1-4.7",
+      "code": "RETRY_SAFE_MUTATION_ENVELOPE_REQUIRED",
+      "signals": {
+        "idempotency": 3,
+        "correlationId": 0,
+        "auditId": 0,
+        "serverUpdatedAt": 0
+      }
+    }
+  ],
+  "strategy": {
+    "diagnostic": "CONTINUE_TO_END",
+    "realExecution": "FAIL_CLOSED_PHASE_GATED",
+    "repair": "CONSOLIDATE_ALL_SAFELY_DISCOVERED_RED"
+  },
+  "moduleImplementationStarted": false,
+  "productionFirebaseWrites": 0,
+  "push": "NO",
+  "deploy": "NO",
+  "build": "NO",
+  "next": "LP4 4.1-4.7 consolidated source/owner implementation wave with internal phase gates"
+}
