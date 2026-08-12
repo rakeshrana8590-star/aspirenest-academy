@@ -1,0 +1,50 @@
+{
+  "schema": "aspirenest.lp4.s4004.consolidated-repair.v1",
+  "sourceEvidenceArchiveSha256": "9eecf3f30a891b38b9c6377e573fd14e7214edb32e0d67219ef9edf42d9105a1",
+  "redGates": [
+    "S07",
+    "S08",
+    "S14",
+    "S15",
+    "S17"
+  ],
+  "rootCauses": [
+    {
+      "id": "RC-A",
+      "gates": [
+        "S07",
+        "S08"
+      ],
+      "classification": "TEST_BASELINE_DRIFT",
+      "repair": "Replace hard-coded LP3 total-owner counts with invariants that preserve LP3 owners and explicitly assert 65 LP4 owner rows."
+    },
+    {
+      "id": "RC-B",
+      "gates": [
+        "S14"
+      ],
+      "classification": "OBSOLETE_BYTE_LOCK_AFTER_AUTHORIZED_UNDER_HOOD_WIRING",
+      "repair": "Use LP3 visible-contract regression plus exact V26 shell changed-file scope instead of byte-size equality for app.js."
+    },
+    {
+      "id": "RC-C",
+      "gates": [
+        "S15"
+      ],
+      "classification": "STALE_PROVIDER_BUILD_TEST_ASSUMPTION",
+      "repair": "Use real provider build result contract: build success, zero warnings, no sourcemap leakage, required global present."
+    },
+    {
+      "id": "RC-D",
+      "gates": [
+        "S17"
+      ],
+      "classification": "STALE_TEMP_RUNTIME_CLOSURE_HARNESS",
+      "repair": "Bundle the actual full provider module graph instead of incomplete copied temp dependency set."
+    }
+  ],
+  "productDefectsFound": 0,
+  "implementationDefectsFound": 0,
+  "harnessCompatibilityDefectsFound": 4,
+  "strategy": "Apply S4003 product payload plus all five RED repairs in one disposable full rerun; real branch remains untouched unless every mandatory gate is GREEN."
+}

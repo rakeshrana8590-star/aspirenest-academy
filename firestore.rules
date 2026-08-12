@@ -1881,6 +1881,20 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // LP4 production learning authority: browser writes are forbidden; Cloud Functions/Admin SDK owns durable mutations.
+    match /lp4Idempotency/{docId} { allow read, write: if false; }
+    match /lp4AuditLogs/{docId} { allow read: if isAdmin(); allow create, update, delete: if false; }
+    match /studentLearning/{docId} { allow read: if isAdmin() || (isSignedIn() && resource.data.ownerUid == request.auth.uid); allow create, update, delete: if false; }
+    match /studentLearningActions/{docId} { allow read: if isAdmin() || (isSignedIn() && resource.data.ownerUid == request.auth.uid); allow create, update, delete: if false; }
+    match /mockAttempts/{docId} { allow read: if isAdmin() || (isSignedIn() && resource.data.ownerUid == request.auth.uid); allow create, update, delete: if false; }
+    match /studyRoadmapProgress/{docId} { allow read: if isAdmin() || (isSignedIn() && resource.data.ownerUid == request.auth.uid); allow create, update, delete: if false; }
+    match /liveReminders/{docId} { allow read: if isAdmin() || (isSignedIn() && resource.data.ownerUid == request.auth.uid); allow create, update, delete: if false; }
+    match /liveAttendance/{docId} { allow read: if isAdmin() || (isSignedIn() && resource.data.ownerUid == request.auth.uid); allow create, update, delete: if false; }
+    match /currentAffairsSources/{docId} { allow read: if isAdmin(); allow create, update, delete: if false; }
+    match /currentAffairsCorrections/{docId} { allow read: if isSignedIn(); allow create, update, delete: if false; }
+    match /authoringVersions/{docId} { allow read: if isAdmin(); allow create, update, delete: if false; }
+    match /learningTexts/{docId} { allow read: if isAdmin(); allow create, update, delete: if false; }
+
     function isActivePlanProductData(product) {
       return product.productId is string &&
         product.productId != "" &&

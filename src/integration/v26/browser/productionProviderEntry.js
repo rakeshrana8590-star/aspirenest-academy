@@ -47,6 +47,7 @@ import * as canonicalServiceNamespace from "../canonicalResourceService.js";
 import * as entitlementServiceNamespace from "../entitlementDecisionService.js";
 import * as authorizeServiceNamespace from "../authorizeProductionService.js";
 import * as accessProductionServiceNamespace from "../accessProductionService.js";
+import * as lp4LearningServiceNamespace from "../lp4LearningProductionService.js";
 import * as accessServiceNamespace from "../../../access/accessService.js";
 import * as mentorServiceNamespace from "../../../mentor/mentorService.js";
 import * as roleAdapterNamespace from "./roleExperienceDependencyAdapter.js";
@@ -102,6 +103,7 @@ const authorizeServiceApi = moduleApi(
   authorizeServiceNamespace,
 );
 const accessProductionServiceApi = moduleApi(accessProductionServiceNamespace);
+const lp4LearningServiceApi = moduleApi(lp4LearningServiceNamespace);
 const accessServiceApi = moduleApi(accessServiceNamespace);
 const mentorServiceApi = moduleApi(mentorServiceNamespace);
 const roleAdapterApi = moduleApi(roleAdapterNamespace);
@@ -140,6 +142,11 @@ const createAccessProductionService = requiredFactory(
   accessProductionServiceApi,
   "createAccessProductionService",
 );
+const createLp4LearningProductionService = requiredFactory(
+  lp4LearningServiceApi,
+  "createLp4LearningProductionService",
+);
+const lp4LearningMethodPolicies = lp4LearningServiceApi.METHOD_POLICIES;
 const createRoleExperienceDependencyAdapter = requiredFactory(
   roleAdapterApi,
   "createRoleExperienceDependencyAdapter",
@@ -202,6 +209,8 @@ let canonicalResourceService = null;
 let entitlementDecisionService = null;
 let authorizeProductionService = null;
 let accessProductionService = null;
+let lp4LearningProductionService = null;
+let lp4LearningOperationCall = null;
 let usernameAvailabilityCall = null;
 let usernamePasswordSignIn = null;
 let studentAccountRegistration = null;
@@ -392,6 +401,20 @@ if (providerRuntimeEnabled) {
     restoreAccess: accessServiceApi.restoreAccess,
     loadStudentAccessWorkspace: accessServiceApi.loadStudentAccessWorkspace,
   });
+
+  lp4LearningOperationCall = callableDataInvoker("lp4LearningOperation");
+  lp4LearningProductionService = createLp4LearningProductionService({
+    invokeLearningOperation: lp4LearningOperationCall,
+    authorize: (payload) => authorizeProductionService.authorize(payload),
+  });
+
+  for (const method of Object.keys(lp4LearningMethodPolicies).sort()) {
+    handlerRegistry.register(
+      method,
+      (payload, context) => lp4LearningProductionService.invoke(method, payload, context),
+      Object.freeze({ owner: lp4LearningMethodPolicies[method].owner }),
+    );
+  }
 
   handlerRegistry.register(
     "checkUsernameAvailability",
@@ -669,148 +692,12 @@ if (providerRuntimeEnabled) {
 }
 
 const initialHandlerOwners = handlerRegistry.list();
-const expectedInitialHandlerOwners = Object.freeze([
-  Object.freeze({
-    method: "applyBulkAccess",
-    owner: "accessProductionService",
-  }),
-  Object.freeze({
-    method: "approveAccessRequest",
-    owner: "accessProductionService",
-  }),
-  Object.freeze({
-    method: "authorize",
-    owner: "authorizeProductionService",
-  }),
-  Object.freeze({
-    method: "checkUsernameAvailability",
-    owner: "usernameAvailabilityClient",
-  }),
-  Object.freeze({
-    method: "completeEmailVerification",
-    owner: "authProductionService",
-  }),
-  Object.freeze({
-    method: "createMentorAccessRequest",
-    owner: "accessProductionService",
-  }),
-  Object.freeze({
-    method: "createStudentAccessRequest",
-    owner: "accessProductionService",
-  }),
-  Object.freeze({
-    method: "extendAccessGrant",
-    owner: "accessProductionService",
-  }),
-  Object.freeze({
-    method: "getSession",
-    owner: "authProductionService",
-  }),
-  Object.freeze({
-    method: "listAccessRequests",
-    owner: "accessProductionService",
-  }),
-  Object.freeze({
-    method: "loadMentorAccountSecurity",
-    owner: "lp2IdentityAuthority",
-  }),
-  Object.freeze({
-    method: "loadStudentAccountSecurity",
-    owner: "lp2IdentityAuthority",
-  }),
-  Object.freeze({
-    method: "loadStudentWorkspace",
-    owner: "accessProductionService",
-  }),
-  Object.freeze({
-    method: "login",
-    owner: "authProductionService",
-  }),
-  Object.freeze({
-    method: "logout",
-    owner: "authProductionService",
-  }),
-  Object.freeze({
-    method: "openCanonical",
-    owner: "canonicalResourceService",
-  }),
-  Object.freeze({
-    method: "previewBulkAccess",
-    owner: "accessProductionService",
-  }),
-  Object.freeze({
-    method: "redeemAccessInvite",
-    owner: "accessProductionService",
-  }),
-  Object.freeze({
-    method: "redeemAccessKey",
-    owner: "accessProductionService",
-  }),
-  Object.freeze({
-    method: "regenerateAccessInvite",
-    owner: "accessProductionService",
-  }),
-  Object.freeze({
-    method: "regenerateAccessKey",
-    owner: "accessProductionService",
-  }),
-  Object.freeze({
-    method: "registerAccount",
-    owner: "authProductionService",
-  }),
-  Object.freeze({
-    method: "requestPasswordReset",
-    owner: "authProductionService",
-  }),
-  Object.freeze({
-    method: "resendVerification",
-    owner: "authProductionService",
-  }),
-  Object.freeze({
-    method: "restoreAccessGrant",
-    owner: "accessProductionService",
-  }),
-  Object.freeze({
-    method: "revokeAccessGrant",
-    owner: "accessProductionService",
-  }),
-  Object.freeze({
-    method: "rollbackBulkAccessBatch",
-    owner: "accessProductionService",
-  }),
-  Object.freeze({
-    method: "saveAccessBundle",
-    owner: "accessProductionService",
-  }),
-  Object.freeze({
-    method: "saveAccessGrant",
-    owner: "accessProductionService",
-  }),
-  Object.freeze({
-    method: "saveAccessInvite",
-    owner: "accessProductionService",
-  }),
-  Object.freeze({
-    method: "saveAccessKey",
-    owner: "accessProductionService",
-  }),
-  Object.freeze({
-    method: "saveAccessProduct",
-    owner: "accessProductionService",
-  }),
-  Object.freeze({
-    method: "saveStudentProfile",
-    owner: "lp2IdentityAuthority",
-  }),
-  Object.freeze({
-    method: "signInWithGoogle",
-    owner: "authProductionService",
-  }),
-  Object.freeze({
-    method: "updateAccessRequest",
-    owner: "accessProductionService",
-  }),
-]);
+const expectedInitialHandlerOwners = Object.freeze(
+  registryRows
+    .filter((row) => row && row.runtimeActivation === true && row.owner)
+    .map((row) => Object.freeze({ method: row.name, owner: row.owner }))
+    .sort((a, b) => a.method.localeCompare(b.method)),
+);
 
 const expectedProviderHandlerOwners =
   providerRuntimeEnabled
@@ -899,6 +786,7 @@ privateComposition.set(
     entitlementDecisionService,
     authorizeProductionService,
     accessProductionService,
+    lp4LearningProductionService,
     handlerRegistry,
   }),
 );

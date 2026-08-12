@@ -1227,14 +1227,33 @@ async function main() {
     ).length,
     1,
   );
+  const runtimeOwnedRows = registry.methods.filter(
+    (item) =>
+      item.owner !== null
+      || item.ownerState
+        !== "SAFE_DISABLED_PENDING_OWNER",
+  );
+  const safeDisabledRows = registry.methods.filter(
+    (item) =>
+      item.owner === null
+      && item.ownerState
+        === "SAFE_DISABLED_PENDING_OWNER",
+  );
+  assert.strictEqual(
+    runtimeOwnedRows.length + safeDisabledRows.length,
+    registry.methods.length,
+  );
+  assert.ok(
+    runtimeOwnedRows.length >= 33,
+    "LP3 runtime owners must remain present after downstream owner activation",
+  );
   assert.strictEqual(
     registry.methods.filter(
       (item) =>
-        item.owner !== null
-        || item.ownerState
-          !== "SAFE_DISABLED_PENDING_OWNER",
+        item.ownerDecisionEvidence
+        === "LP4-P4.1-4.7-S4003",
     ).length,
-    33,
+    65,
   );
 
   console.log(

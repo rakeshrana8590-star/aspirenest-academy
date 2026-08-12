@@ -30,7 +30,7 @@
     "v26:bundle:assert": "node scripts/assert-v26-production-bundle.cjs",
     "v26:bundle:test": "node scripts/test-v26-production-bundle.cjs",
     "build:legacy-react": "react-scripts build",
-    "v26:shell:assert": "node scripts/assert-v26-shell-intake.cjs",
+    "v26:shell:assert": "node scripts/assert-v26-shell-contract-lp4.cjs",
     "v26:shell:build": "node scripts/build-v26-shell.cjs",
     "v26:bridge:foundation:test": "node src/integration/v26/productionBridgeFoundation.test.cjs",
     "v26:auth-service:test": "node src/integration/v26/authProductionService.test.cjs",
@@ -41,9 +41,11 @@
     "v26:firestore-read-adapter:test": "node src/integration/v26/browser/firestoreReadDependencyAdapter.test.cjs",
     "v26:firebase-auth-adapter:test": "node src/integration/v26/browser/firebaseAuthDependencyAdapter.test.cjs",
     "v26:provider:build": "node scripts/build-v26-production-provider.cjs",
-    "v26:provider:test": "node src/integration/v26/browser/productionProviderEntry.test.cjs && node scripts/build-v26-production-provider.test.cjs",
-    "v26:provider:runtime-closure:test": "node scripts/test-v26-provider-runtime-closure.cjs",
-    "phase1:4:firebase-closure:test": "node scripts/test-firebase-environment-resolver-closure.cjs && node scripts/test-firebase-single-initializer-owner-closure.cjs && node --no-warnings --experimental-vm-modules scripts/test-firebase-full-bootstrap-no-network.cjs && node --no-warnings --experimental-vm-modules scripts/test-v26-provider-entry-full-bootstrap-no-network.cjs"
+    "v26:provider:test": "node src/integration/v26/browser/productionProviderEntry.test.cjs && node scripts/build-v26-production-provider-lp4.test.cjs",
+    "v26:provider:runtime-closure:test": "node scripts/test-v26-provider-runtime-closure-lp4.cjs",
+    "phase1:4:firebase-closure:test": "node scripts/test-firebase-environment-resolver-closure.cjs && node scripts/test-firebase-single-initializer-owner-closure.cjs && node --no-warnings --experimental-vm-modules scripts/test-firebase-full-bootstrap-no-network.cjs && node --no-warnings --experimental-vm-modules scripts/test-v26-provider-entry-full-bootstrap-no-network.cjs",
+    "v26:lp4-learning-service:test": "node src/integration/v26/lp4LearningProductionService.test.cjs",
+    "v26:lp4-provider:test": "node src/integration/v26/browser/productionProviderEntry.test.cjs"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "5.0.1",

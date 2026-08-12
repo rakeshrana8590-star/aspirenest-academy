@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "node --test index.test.js",
-    "emulator:verify": "cd .. && functions/node_modules/.bin/firebase emulators:exec --project demo-aspirenest-local --config firebase.json --only functions \"node functions/test/emulatorSmoke.test.cjs\""
+    "emulator:verify": "cd .. && functions/node_modules/.bin/firebase emulators:exec --project demo-aspirenest-local --config firebase.json --only functions \"node functions/test/emulatorSmoke.test.cjs\"",
+    "lp4:authority:test": "node lp4LearningAuthority.test.cjs"
   },
   "dependencies": {
     "firebase-admin": "13.10.0",

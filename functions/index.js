@@ -22,6 +22,12 @@ const {
 const {
   createLp2IdentityAuthorityService,
 } = require("./lp2IdentityAuthority");
+const {
+  createLp4LearningAuthority,
+} = require("./lp4LearningAuthority");
+const {
+  getStorage,
+} = require("firebase-admin/storage");
 
 if (!getApps().length) {
   initializeApp();
@@ -29,6 +35,21 @@ if (!getApps().length) {
 
 const lp2IdentityAuthorityService =
   createLp2IdentityAuthorityService();
+
+const lp4LearningAuthorityService =
+  createLp4LearningAuthority({
+    firestore: getFirestore(),
+    storage: getStorage(),
+    serverTimestamp: () => Timestamp.now(),
+  });
+
+const LP4_LEARNING_CALLABLE_OPTIONS = Object.freeze({
+  region: "asia-south1",
+  invoker: "public",
+  timeoutSeconds: 60,
+  memory: "512MiB",
+  maxInstances: 20,
+});
 
 const LP2_IDENTITY_CALLABLE_OPTIONS =
   Object.freeze({
@@ -2677,6 +2698,30 @@ const resolveNotesProtectedAsset = async ({
   });
 };
 
+
+exports.lp4LearningOperation = onCall(
+  LP4_LEARNING_CALLABLE_OPTIONS,
+  async (request) => {
+    try {
+      return await lp4LearningAuthorityService.operation(
+        request.auth,
+        request.data,
+      );
+    } catch (error) {
+      const code = String(error && error.lp4Code || "");
+      const map = {
+        UNAUTHENTICATED: "unauthenticated", FORBIDDEN: "permission-denied", INVALID_REQUEST: "invalid-argument",
+        NOT_FOUND: "not-found", CONFLICT: "aborted", WINDOW_CLOSED: "failed-precondition",
+        FAILED_PRECONDITION: "failed-precondition", PROVIDER_UNAVAILABLE: "unavailable"
+      };
+      throw new HttpsError(
+        map[code] || "internal",
+        String(error && error.message || "LP4 learning operation failed.").slice(0,300),
+        error && error.details ? error.details : undefined,
+      );
+    }
+  },
+);
 
 exports.setAccountRoleAuthority = onCall(
   LP2_IDENTITY_CALLABLE_OPTIONS,

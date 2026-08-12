@@ -64,18 +64,41 @@
     {
       "name": "archiveMockTest",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4MockService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.2",
+      "lp4AuthorizeAction": "ADMIN_ARCHIVE",
+      "lp4Collections": [
+        "contentItems"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "archiveNote",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4NotesService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.1",
+      "lp4AuthorizeAction": "ADMIN_ARCHIVE",
+      "lp4Collections": [
+        "contentItems",
+        "learningTexts"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "archiveNotification",
@@ -88,29 +111,65 @@
     {
       "name": "assignRoadmap",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4RoadmapService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.6",
+      "lp4AuthorizeAction": "ASSIGNMENT_ONLY",
+      "lp4Collections": [
+        "mentorAssignments"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "authorize",
       "launchCore": true,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "TEST_ONLY_COLLISION_REQUIRES_SERVICE_ADAPTER",
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "authorizeProductionService",
+      "auditClassification": "OWNER_RESOLVED",
       "auditCandidates": [
         "src/access/mockTestSubmitRuntime.test.js",
         "src/access/mockTestResultReviewRuntime.test.js"
-      ]
+      ],
+      "canonicalOwner": "src/integration/v26/authorizeProductionService.js#createAuthorizeProductionService",
+      "canonicalOwnerMethod": "authorize",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "LP3_HANDOFF_OR_4.0",
+      "lp4AuthorizeAction": "EXACT_ACTION",
+      "lp4Collections": [
+        "contentItems",
+        "studentAccess",
+        "studentEntitlements"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "cancelLiveSession",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4LiveService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.5",
+      "lp4AuthorizeAction": "ADMIN_CANCEL",
+      "lp4Collections": [
+        "mentorLiveSessions",
+        "contentItems"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "checkUsernameAvailability",
@@ -157,18 +216,42 @@
     {
       "name": "createLiveProviderSession",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4LiveService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.5",
+      "lp4AuthorizeAction": "ADMIN_PROVIDER_CREATE",
+      "lp4Collections": [
+        "mentorLiveSessions"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "createLiveReplayDraft",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4LiveService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.5",
+      "lp4AuthorizeAction": "ADMIN_REPLAY_DRAFT",
+      "lp4Collections": [
+        "mentorLiveSessions",
+        "contentItems",
+        "protectedContentAssets"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "createMentorAccessRequest",
@@ -263,18 +346,42 @@
     {
       "name": "downloadVideoAttachment",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4VideoService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.4",
+      "lp4AuthorizeAction": "DOWNLOAD",
+      "lp4Collections": [
+        "protectedContentAssets"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "duplicateMockTest",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4MockService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.2",
+      "lp4AuthorizeAction": "ADMIN_DUPLICATE",
+      "lp4Collections": [
+        "contentItems",
+        "questionBank",
+        "mockQuestions"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "exportAdminReport",
@@ -287,10 +394,23 @@
     {
       "name": "exportMockTest",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4MockService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.2",
+      "lp4AuthorizeAction": "ADMIN_EXPORT",
+      "lp4Collections": [
+        "contentItems",
+        "questionBank",
+        "mockQuestions"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "exportNotificationAudit",
@@ -329,18 +449,42 @@
     {
       "name": "importMockQuestions",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4MockService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.2",
+      "lp4AuthorizeAction": "ADMIN_IMPORT",
+      "lp4Collections": [
+        "questionBank",
+        "mockQuestions"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "importNoteContent",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4NotesService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.1",
+      "lp4AuthorizeAction": "ADMIN_IMPORT",
+      "lp4Collections": [
+        "learningTexts",
+        "authoringVersions"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "listAccessRequests",
@@ -390,10 +534,22 @@
     {
       "name": "loadCurrentAffairsSourceRegister",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4CurrentAffairsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.3",
+      "lp4AuthorizeAction": "ADMIN_READ",
+      "lp4Collections": [
+        "currentAffairs",
+        "contentItems"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "loadMentorAccountSecurity",
@@ -475,42 +631,104 @@
     {
       "name": "loadMockAdminWorkspace",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4MockService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.2",
+      "lp4AuthorizeAction": "ADMIN_READ",
+      "lp4Collections": [
+        "contentItems",
+        "questionBank",
+        "mockQuestions"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "loadMockAttemptDraft",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4MockService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.2",
+      "lp4AuthorizeAction": "ATTEMPT",
+      "lp4Collections": [
+        "mockAttempts"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "loadMockResults",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4MockService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.2",
+      "lp4AuthorizeAction": "VIEW_RESULT",
+      "lp4Collections": [
+        "mockResults"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "loadMockTest",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4MockService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.2",
+      "lp4AuthorizeAction": "ATTEMPT",
+      "lp4Collections": [
+        "contentItems",
+        "questionBank",
+        "mockQuestions"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "loadNotesAdminWorkspace",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4NotesService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.1",
+      "lp4AuthorizeAction": "ADMIN_READ",
+      "lp4Collections": [
+        "contentItems",
+        "learningTexts",
+        "authoringVersions",
+        "protectedContentAssets"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "loadNotificationCenter",
@@ -539,10 +757,21 @@
     {
       "name": "loadRoadmapProgress",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4RoadmapService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.6",
+      "lp4AuthorizeAction": "READ_PROGRESS",
+      "lp4Collections": [
+        "studyRoadmapProgress"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "loadRoleAnalytics",
@@ -653,18 +882,41 @@
     {
       "name": "loadVideoAdminWorkspace",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4VideoService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.4",
+      "lp4AuthorizeAction": "ADMIN_READ",
+      "lp4Collections": [
+        "contentItems",
+        "protectedContentAssets"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "loadVideoAnalytics",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4VideoService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.4",
+      "lp4AuthorizeAction": "ADMIN_ANALYTICS",
+      "lp4Collections": [
+        "studentLearning"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "login",
@@ -695,18 +947,40 @@
     {
       "name": "openCanonical",
       "launchCore": true,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "REFERENCE_ONLY_NO_HANDLER_PROOF",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "canonicalResourceService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/canonicalResourceService.js#createCanonicalResourceService",
+      "canonicalOwnerMethod": "getCanonicalResource",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "LP3_HANDOFF_OR_4.0",
+      "lp4AuthorizeAction": "RESOLVE",
+      "lp4Collections": [
+        "contentItems"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "pauseMockAttempt",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4MockService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.2",
+      "lp4AuthorizeAction": "ATTEMPT",
+      "lp4Collections": [
+        "mockAttempts"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "previewBulkAccess",
@@ -724,10 +998,21 @@
     {
       "name": "processVideoAsset",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4VideoService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.4",
+      "lp4AuthorizeAction": "ADMIN_PROCESS",
+      "lp4Collections": [
+        "protectedContentAssets"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "publishAdminResource",
@@ -740,26 +1025,62 @@
     {
       "name": "publishCurrentAffairs",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4CurrentAffairsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.3",
+      "lp4AuthorizeAction": "ADMIN_PUBLISH",
+      "lp4Collections": [
+        "currentAffairs",
+        "contentItems"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "publishCurrentAffairsCorrection",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4CurrentAffairsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.3",
+      "lp4AuthorizeAction": "ADMIN_CORRECTION",
+      "lp4Collections": [
+        "currentAffairs",
+        "accessAuditLogs"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "publishLive",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4LiveService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.5",
+      "lp4AuthorizeAction": "ADMIN_PUBLISH",
+      "lp4Collections": [
+        "mentorLiveSessions",
+        "contentItems"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "publishMentorAssignment",
@@ -780,18 +1101,44 @@
     {
       "name": "publishMockTest",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4MockService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.2",
+      "lp4AuthorizeAction": "ADMIN_PUBLISH",
+      "lp4Collections": [
+        "contentItems",
+        "questionBank",
+        "mockQuestions"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "publishNote",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4NotesService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.1",
+      "lp4AuthorizeAction": "ADMIN_PUBLISH",
+      "lp4Collections": [
+        "learningTexts",
+        "authoringVersions",
+        "contentItems"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "publishNotification",
@@ -804,18 +1151,44 @@
     {
       "name": "publishRoadmap",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4RoadmapService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.6",
+      "lp4AuthorizeAction": "ADMIN_PUBLISH",
+      "lp4Collections": [
+        "studyRoadmaps",
+        "studyRoadmapDays",
+        "studyRoadmapResourceLinks",
+        "contentItems"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "publishVideo",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4VideoService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.4",
+      "lp4AuthorizeAction": "ADMIN_PUBLISH",
+      "lp4Collections": [
+        "contentItems",
+        "protectedContentAssets"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "reconcilePayment",
@@ -828,56 +1201,119 @@
     {
       "name": "recordAttempt",
       "launchCore": true,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "INTENTIONALLY_SAFE_DISABLED_DEFERRED_TO_OWNER_PHASE",
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4MockService",
+      "auditClassification": "OWNER_RESOLVED",
       "deferredOwnerPhases": [
         "4.2",
         "6.1"
       ],
       "deferReason": "MOCK_SERVER_AUTHORITY_AND_IDEMPOTENCY_NOT_OWNED_BY_LP1",
-      "auditCandidates": []
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.2",
+      "lp4AuthorizeAction": "SUBMIT",
+      "lp4Collections": [
+        "mockAttempts",
+        "mockResults",
+        "mockLeaderboard"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "recordLiveAttendance",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4LiveService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.5",
+      "lp4AuthorizeAction": "JOIN_ATTENDANCE",
+      "lp4Collections": [
+        "studentActivity"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "recordProgress",
       "launchCore": true,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "INTENTIONALLY_SAFE_DISABLED_DEFERRED_TO_OWNER_PHASE",
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4LearningStateService",
+      "auditClassification": "OWNER_RESOLVED",
       "deferredOwnerPhases": [
         "4.7"
       ],
       "deferReason": "CANONICAL_CROSS_MODULE_PROGRESS_PERSISTENCE_NOT_OWNED_BY_LP1",
-      "auditCandidates": []
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.7",
+      "lp4AuthorizeAction": "PROGRESS",
+      "lp4Collections": [
+        "studentLearning",
+        "studentActivity"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "recordRoadmapProgress",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4RoadmapService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.6",
+      "lp4AuthorizeAction": "READ_PROGRESS",
+      "lp4Collections": [
+        "studyRoadmapProgress"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "recordStudyAction",
       "launchCore": true,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "INTENTIONALLY_SAFE_DISABLED_DEFERRED_TO_OWNER_PHASE",
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4LearningStateService",
+      "auditClassification": "OWNER_RESOLVED",
       "deferredOwnerPhases": [
         "4.1",
         "4.4"
       ],
       "deferReason": "PRIVATE_NOTE_VIDEO_STUDY_ACTION_PERSISTENCE_NOT_OWNED_BY_LP1",
-      "auditCandidates": []
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.1+4.4",
+      "lp4AuthorizeAction": "STUDY_ACTION",
+      "lp4Collections": [
+        "studentLearning",
+        "annotations",
+        "bookmarks",
+        "flashcards",
+        "revisionQueue",
+        "masteryProgress"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "redeemAccessInvite",
@@ -996,10 +1432,21 @@
     {
       "name": "rescheduleRoadmap",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4RoadmapService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.6",
+      "lp4AuthorizeAction": "READ_PROGRESS",
+      "lp4Collections": [
+        "studyRoadmapProgress"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "resendVerification",
@@ -1017,18 +1464,42 @@
     {
       "name": "resolveLiveJoin",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4LiveService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.5",
+      "lp4AuthorizeAction": "JOIN",
+      "lp4Collections": [
+        "mentorLiveSessions",
+        "contentItems"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "resolveProtectedVideo",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4VideoService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.4",
+      "lp4AuthorizeAction": "WATCH",
+      "lp4Collections": [
+        "contentItems",
+        "protectedContentAssets"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "restoreAccessGrant",
@@ -1046,18 +1517,41 @@
     {
       "name": "restoreNote",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4NotesService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.1",
+      "lp4AuthorizeAction": "ADMIN_RESTORE",
+      "lp4Collections": [
+        "contentItems",
+        "learningTexts"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "resumeMockAttempt",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4MockService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.2",
+      "lp4AuthorizeAction": "ATTEMPT",
+      "lp4Collections": [
+        "mockAttempts"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "reviewMentorAssignment",
@@ -1209,18 +1703,43 @@
     {
       "name": "saveCurrentAffairs",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4CurrentAffairsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.3",
+      "lp4AuthorizeAction": "ADMIN_WRITE",
+      "lp4Collections": [
+        "currentAffairs",
+        "contentItems"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "saveCurrentAffairsPages",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4CurrentAffairsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.3",
+      "lp4AuthorizeAction": "ADMIN_WRITE",
+      "lp4Collections": [
+        "currentAffairs",
+        "learningTexts",
+        "authoringVersions"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "saveEmailSettings",
@@ -1241,18 +1760,41 @@
     {
       "name": "saveLive",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4LiveService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.5",
+      "lp4AuthorizeAction": "ADMIN_WRITE",
+      "lp4Collections": [
+        "mentorLiveSessions",
+        "contentItems"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "saveLiveReminder",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4LearningStateService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.5",
+      "lp4AuthorizeAction": "REMINDER",
+      "lp4Collections": [
+        "studentLearning"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "saveMentorAssignmentDraft",
@@ -1337,34 +1879,81 @@
     {
       "name": "saveMockAttemptDraft",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4MockService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.2",
+      "lp4AuthorizeAction": "ATTEMPT",
+      "lp4Collections": [
+        "mockAttempts"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "saveMockTest",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4MockService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.2",
+      "lp4AuthorizeAction": "ADMIN_WRITE",
+      "lp4Collections": [
+        "contentItems",
+        "questionBank",
+        "mockQuestions"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "saveNote",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4NotesService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.1",
+      "lp4AuthorizeAction": "ADMIN_WRITE",
+      "lp4Collections": [
+        "learningTexts",
+        "authoringVersions"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "saveNoteProgress",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4LearningStateService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.1",
+      "lp4AuthorizeAction": "READ_PROGRESS",
+      "lp4Collections": [
+        "studentLearning"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "saveNotificationPreferences",
@@ -1401,10 +1990,23 @@
     {
       "name": "saveRoadmap",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4RoadmapService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.6",
+      "lp4AuthorizeAction": "ADMIN_WRITE",
+      "lp4Collections": [
+        "studyRoadmaps",
+        "studyRoadmapDays",
+        "studyRoadmapResourceLinks"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "saveStudentNotificationPreferences",
@@ -1438,34 +2040,82 @@
     {
       "name": "saveVideo",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4VideoService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.4",
+      "lp4AuthorizeAction": "ADMIN_WRITE",
+      "lp4Collections": [
+        "contentItems",
+        "protectedContentAssets"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "saveVideoCaptions",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4VideoService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.4",
+      "lp4AuthorizeAction": "ADMIN_CAPTIONS",
+      "lp4Collections": [
+        "protectedContentAssets"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "saveVideoProgress",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4LearningStateService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.4",
+      "lp4AuthorizeAction": "WATCH_PROGRESS",
+      "lp4Collections": [
+        "studentLearning"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "saveVideoStudyAction",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4LearningStateService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.4",
+      "lp4AuthorizeAction": "STUDY_ACTION",
+      "lp4Collections": [
+        "studentLearning",
+        "annotations",
+        "bookmarks",
+        "revisionQueue"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "scheduleMentorSession",
@@ -1515,10 +2165,22 @@
     {
       "name": "unpublishNote",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4NotesService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.1",
+      "lp4AuthorizeAction": "ADMIN_UNPUBLISH",
+      "lp4Collections": [
+        "contentItems",
+        "learningTexts"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "updateAccessRequest",
@@ -1544,18 +2206,40 @@
     {
       "name": "updateLiveProviderSession",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4LiveService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.5",
+      "lp4AuthorizeAction": "ADMIN_PROVIDER_UPDATE",
+      "lp4Collections": [
+        "mentorLiveSessions"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "updateMockResultPolicy",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4MockService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.2",
+      "lp4AuthorizeAction": "ADMIN_RESULT_POLICY",
+      "lp4Collections": [
+        "contentItems"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "updateStudentTask",
@@ -1576,18 +2260,40 @@
     {
       "name": "uploadNoteAsset",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4NotesService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.1",
+      "lp4AuthorizeAction": "ADMIN_UPLOAD",
+      "lp4Collections": [
+        "protectedContentAssets"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "uploadVideoAsset",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4VideoService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.4",
+      "lp4AuthorizeAction": "ADMIN_UPLOAD",
+      "lp4Collections": [
+        "protectedContentAssets"
+      ],
+      "lp4IdempotencyRequired": true
     },
     {
       "name": "validateAdminResource",
@@ -1600,50 +2306,122 @@
     {
       "name": "validateCurrentAffairs",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4CurrentAffairsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.3",
+      "lp4AuthorizeAction": "ADMIN_VALIDATE",
+      "lp4Collections": [
+        "currentAffairs"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "validateLive",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4LiveService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.5",
+      "lp4AuthorizeAction": "ADMIN_VALIDATE",
+      "lp4Collections": [
+        "mentorLiveSessions",
+        "contentItems"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "validateMockTest",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4MockService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.2",
+      "lp4AuthorizeAction": "ADMIN_VALIDATE",
+      "lp4Collections": [
+        "contentItems",
+        "questionBank",
+        "mockQuestions"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "validateNote",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4NotesService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.1",
+      "lp4AuthorizeAction": "ADMIN_VALIDATE",
+      "lp4Collections": [
+        "learningTexts"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "validateRoadmap",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4RoadmapService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.6",
+      "lp4AuthorizeAction": "ADMIN_VALIDATE",
+      "lp4Collections": [
+        "studyRoadmaps",
+        "studyRoadmapDays",
+        "studyRoadmapResourceLinks"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "validateVideo",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4VideoService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4003",
+      "runtimeActivation": true,
+      "lp4Phase": "4.4",
+      "lp4AuthorizeAction": "ADMIN_VALIDATE",
+      "lp4Collections": [
+        "contentItems",
+        "protectedContentAssets"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "verifyMentorProfile",

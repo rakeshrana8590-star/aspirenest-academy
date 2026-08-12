@@ -1236,15 +1236,31 @@ async function main() {
   if (fs.existsSync(registryPath)) {
     const registry = require(registryPath);
     assert.equal(registry.methods.length, 182);
+    const runtimeOwnedRows = registry.methods.filter(
+      (item) =>
+        item.owner !== null
+        || item.ownerState !== "SAFE_DISABLED_PENDING_OWNER",
+    );
+    const safeDisabledRows = registry.methods.filter(
+      (item) =>
+        item.owner === null
+        && item.ownerState === "SAFE_DISABLED_PENDING_OWNER",
+    );
     assert.equal(
-      registry.methods.filter((item) => item.owner !== null).length,
-      33,
+      runtimeOwnedRows.length + safeDisabledRows.length,
+      registry.methods.length,
+    );
+    assert.ok(
+      runtimeOwnedRows.length >= 33,
+      "LP3 runtime owners must remain present after downstream owner activation",
     );
     assert.equal(
       registry.methods.filter(
-        (item) => item.ownerState === "SAFE_DISABLED_PENDING_OWNER",
+        (item) =>
+          item.ownerDecisionEvidence
+          === "LP4-P4.1-4.7-S4003",
       ).length,
-      149,
+      65,
     );
   }
 
