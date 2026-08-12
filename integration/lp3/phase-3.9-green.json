@@ -1,0 +1,25 @@
+{
+  "phase": "3.9",
+  "status": "GREEN",
+  "phaseStartHead": "481d40e86d0050d5e11997d62f9337ca263908d0",
+  "createdAt": "2026-08-12T09:28:49.898588+00:00",
+  "realStagingE2E": {
+    "evidenceMode": "embedded-cryptographically-bound-v6-proof",
+    "stagingE2ELogSha256": "e3fd947c0bda2f686d235065e2154b5c563ace3cab627cc9fe45700101ce5982",
+    "project": "aspirenest-platform-staging",
+    "separateAccountsCreated": 2,
+    "unresolvedMismatchCount": 0,
+    "fixturesCleaned": true,
+    "reconciliationBeforeAfterShaExact": true,
+    "rerunInV9": false
+  },
+  "finalProof": {
+    "finalBuildGreen": true,
+    "buildExecution": "disposable-detached-worktree",
+    "realRepoBuildTreeMutation": false,
+    "generatedBuildManifestSha256": "d4548c756ba4a5bb684031a0ac79463a0b4058ca9ebe5f7aa11ba9f59e18acd7"
+  },
+  "productionWrites": 0,
+  "push": "NO",
+  "deploy": "NO"
+}

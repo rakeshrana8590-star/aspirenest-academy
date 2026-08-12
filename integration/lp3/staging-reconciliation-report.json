@@ -1,0 +1,81 @@
+{
+  "phase": "3.9",
+  "project": "aspirenest-platform-staging",
+  "startedAt": "2026-08-12T08:56:48.079Z",
+  "completedAt": "2026-08-12T08:57:07.504Z",
+  "phase33MigrationTreatment": "ADAPTER_PRESERVE_NO_DESTRUCTIVE_REWRITE",
+  "controlledMigrationApply": "NO_DESTRUCTIVE_REWRITE_REQUIRED__REPRESENTATIVE_CANONICAL_STAGING_TRANSACTION_PROVEN",
+  "separateAccountsCreated": 2,
+  "before": {
+    "counts": {},
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  "after": {
+    "counts": {},
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  "reconciliationBefore": {
+    "duplicateResourceIds": [],
+    "orphanEntitlementProjections": [],
+    "duplicateUserEmails": []
+  },
+  "reconciliationAfter": {
+    "duplicateResourceIds": [],
+    "orphanEntitlementProjections": [],
+    "duplicateUserEmails": []
+  },
+  "checks": [
+    {
+      "check": "AUTH_ACCOUNT_1",
+      "uid": "2jqLT3Io7Yar20IF5LfZb2JP5Ep2",
+      "result": "PASS"
+    },
+    {
+      "check": "AUTH_ACCOUNT_2",
+      "uid": "vi7BV03X5yfIlsCZ9Os1emldg3R2",
+      "result": "PASS"
+    },
+    {
+      "check": "TRANSACTIONAL_CANONICAL_GRANT_AND_PROJECTION_APPLY",
+      "result": "PASS"
+    },
+    {
+      "check": "SEPARATE_ACCOUNT_A_EXACT_ITEM_ALLOWED",
+      "result": "PASS",
+      "code": "AUTHORIZE_ALLOWED_ENTITLEMENT"
+    },
+    {
+      "check": "SEPARATE_ACCOUNT_B_WITHOUT_GRANT_LOCKED",
+      "result": "PASS",
+      "code": "AUTHORIZE_ENTITLEMENT_BLOCKED"
+    },
+    {
+      "check": "SOFT_REVOKE_IMMEDIATELY_LOCKS",
+      "result": "PASS",
+      "code": "AUTHORIZE_ENTITLEMENT_BLOCKED"
+    },
+    {
+      "check": "REASONED_RESTORE_REAUTHORIZES_EXACT_ITEM",
+      "result": "PASS",
+      "code": "AUTHORIZE_ALLOWED_ENTITLEMENT"
+    },
+    {
+      "check": "MID_RUN_RECONCILIATION_ZERO_MISMATCH",
+      "result": "PASS"
+    },
+    {
+      "check": "FIRESTORE_PRE_POST_SHA_EXACT_AFTER_CLEANUP",
+      "result": "PASS",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "check": "DISPOSABLE_AUTH_USERS_CLEANED",
+      "result": "PASS"
+    }
+  ],
+  "productionWrites": 0,
+  "stagingWrites": "DISPOSABLE_FIXTURES_ONLY_CLEANED",
+  "rollback": "EXACT_FIXTURE_CLEANUP_PLUS_GIT_PHASE_CHECKPOINT",
+  "unresolvedMismatchCount": 0,
+  "status": "GREEN"
+}
