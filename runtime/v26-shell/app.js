@@ -761,6 +761,8 @@
     adminBulkBatches:readJson(STORAGE.adminBulkBatches,ACCESS_DEFAULT_BULK_BATCHES),
     accessBundles:readJson(STORAGE.accessBundles,ACCESS_DEFAULT_BUNDLES),
     accessManager:{query:'',scope:'ALL',status:'ALL',source:'ALL'},
+    productionAccess:{loading:false,loaded:false,error:'',grants:[]},
+    productionAccessRequests:{loading:false,loaded:false,error:''},
     workspaceTab:'overview', selectedSubject:'cdp',
     accessFilter:'all', typeFilter:'all', subjectFilter:'all', openMenu:null
   };
@@ -1031,6 +1033,51 @@
 
   function isOpenRequestStatus(status) {
     return ['submitted','under_review','needs_information','Pending Admin review','Discussion needed'].includes(status);
+  }
+
+  const productionAccessModule = resource => ({note:'notes',video:'video',test:'mockTest','current-affairs':'currentAffairs',roadmap:'roadmap',live:'video',replay:'video'})[resource?.type] || '';
+  const productionPlanRank = plan => ({FREE:0,BASIC:100,PREMIUM:200,MENTORSHIP:300})[String(plan||'FREE').toUpperCase()] ?? -1;
+  const productionGrantStatus = grant => {
+    const stored=String(grant?.status||'pending').toLowerCase();
+    if(['blocked','revoked'].includes(stored))return 'blocked';
+    if(stored==='expired')return 'expired';
+    const expiry=grant?.accessUntil?new Date(grant.accessUntil):null;
+    if(expiry && Number.isFinite(expiry.getTime()) && expiry.getTime()<Date.now())return 'expired';
+    return stored==='active'?'active':stored;
+  };
+  function productionResourcesForGrant(grant={}) {
+    const scope=String(grant.scopeType||'plan').toLowerCase();
+    if(scope==='item')return [resourceById(grant.itemId)].filter(Boolean);
+    if(scope==='bundle')return (Array.isArray(grant.itemIds)?grant.itemIds:[]).map(resourceById).filter(Boolean);
+    if(scope==='module')return resources.filter(resource=>productionAccessModule(resource)===String(grant.module||''));
+    if(scope==='plan')return resources.filter(resource=>productionPlanRank(resource.requiredPlan)<=productionPlanRank(grant.planType));
+    return [];
+  }
+  async function refreshProductionMyAccess(force=false) {
+    if(adapter.mode!=='production')return;
+    if(state.productionAccess.loading || (state.productionAccess.loaded && !force))return;
+    state.productionAccess.loading=true;state.productionAccess.error='';
+    try{
+      const result=await adapter.loadStudentWorkspace?.({});
+      if(!result?.ok)throw new Error(result?.message||result?.code||'Access workspace unavailable');
+      state.productionAccess.grants=Array.isArray(result.grants)?result.grants:[];
+      state.productionAccess.loaded=true;
+    }catch(error){state.productionAccess.error=String(error?.message||error||'Access workspace unavailable');state.productionAccess.loaded=true;}
+    finally{state.productionAccess.loading=false;if(state.role==='student'&&contextId()==='my-access')renderMyAccess();}
+  }
+  async function refreshProductionAccessRequests(force=false) {
+    if(adapter.mode!=='production'||state.role!=='admin')return;
+    if(state.productionAccessRequests.loading||(state.productionAccessRequests.loaded&&!force))return;
+    state.productionAccessRequests.loading=true;state.productionAccessRequests.error='';
+    try{
+      const result=await adapter.listAccessRequests?.({});
+      if(!result?.ok)throw new Error(result?.message||result?.code||'Access request queue unavailable');
+      const rows=Array.isArray(result.requests)?result.requests:[];
+      state.studentAccessRequests=rows.filter(item=>item.requesterType==='student').map(item=>({...item,id:item.id||item.requestId,learnerId:item.learnerId||item.uid,learnerEmail:item.learnerEmail||item.normalizedEmail||'',scope:String(item.scopeType||item.scope||'ITEM').toUpperCase(),target:item.target||item.resourceId,status:item.status||'submitted'}));
+      state.mentorAccessRequests=rows.filter(item=>item.requesterType==='mentor').map(item=>({...item,id:item.id||item.requestId,learnerId:item.studentUid||item.learnerId,scope:String(item.requestedScope||'ITEM').toUpperCase(),target:item.requestTarget||item.resourceId,status:item.status==='pending'?'Pending Admin review':item.status,createdAt:item.createdAt||'',updatedAt:item.updatedAt||''}));
+      state.productionAccessRequests.loaded=true;
+    }catch(error){state.productionAccessRequests.error=String(error?.message||error||'Access request queue unavailable');state.productionAccessRequests.loaded=true;}
+    finally{state.productionAccessRequests.loading=false;if(state.role==='admin'&&parentId()==='access'&&contextId()==='requests')renderAdminAccess('requests');}
   }
 
   function currentLearnerId() {
@@ -1764,7 +1811,7 @@
         else if(revoked){decision='CONFLICT';detail=`Revoked grant ${revoked.id} requires restore/review.`;}
       }
       seen.add(normalized);
-      return {learner,learnerId:identity?.id||'',decision,scope:values.scope||'ITEM',target:values.target||'',detail};
+      return {learner,learnerId:identity?.id||'',email:identity?.email||(normalized.includes('@')?normalized:''),decision,scope:values.scope||'ITEM',target:values.target||'',detail};
     });
     return {
       rows,
@@ -1795,7 +1842,7 @@
       const grantSource=sourceMap[values.source]||'admin_manual';
       const result=createCanonicalGrant({learnerId:learnerRecord?.id||learnerInput,scope:values.scope||'ITEM',target:values.target||'',source:grantSource,until:values.expiresAt||'No expiry',reason:values.reason||''});
       if(!result.ok){recordAdminAudit('DUPLICATE_GRANT_BLOCKED',result.grant.id,`${values.scope||'ITEM'} → ${values.target||''}`,'Review');return {id:result.grant.id,duplicate:true};}
-      adapterResult=adapter.saveAccessGrant?.({id:result.grant.id,...values,source:grantSource});
+      adapterResult=adapter.saveAccessGrant?.({id:result.grant.id,...values,source:grantSource,learnerUid:learnerRecord?.uid||'',learnerEmail:learnerRecord?.email||(/@/.test(learnerInput)?learnerInput:''),learnerName:learnerRecord?.name||''});
       recordAdminAudit('GRANT_ACCESS',result.grant.id,`${values.scope||'ITEM'} → ${values.target||''}`);
     } else if(kind==='bulk'){
       const rows=String(values.learners||'').split(/\n+/).map(value=>value.trim()).filter(Boolean).map((learner,index)=>({learner,decision:index===0?'VALID':index===1?'DUPLICATE':'VALID',scope:values.scope,target:values.target}));
@@ -2520,6 +2567,9 @@
 
   function renderAdminAccess(context) {
     if(context==='requests'){
+      if(adapter.mode==='production'&&!state.productionAccessRequests.loaded&&!state.productionAccessRequests.loading){refreshProductionAccessRequests();}
+      if(adapter.mode==='production'&&state.productionAccessRequests.loading){els.page.innerHTML=`${heading('Access Requests','Loading the authoritative Student and Mentor request queue.')}<div class="access-empty-state"><strong>Secure loading…</strong></div>`;return;}
+      if(adapter.mode==='production'&&state.productionAccessRequests.error){els.page.innerHTML=`${heading('Access Requests','The authoritative request queue could not be loaded.',button('Retry','primary','data-action="refresh-access-requests"'))}<div class="access-empty-state"><strong>Access unavailable</strong><small>${escapeHtml(state.productionAccessRequests.error)}</small></div>`;return;}
       const requests=allAccessRequests();
       const open=requests.filter(item=>isOpenRequestStatus(item.status));
       const approved=requests.filter(item=>requestStatusLabel(item.status)==='Approved');
@@ -2916,17 +2966,48 @@
   }
 
   function renderMyAccess() {
-    const activePlanIds = [
-      'test-mega-paper-ii',
-      'note-geography-paper-ii',
-      'note-algebra-intro',
-      'note-women-reform',
-      'note-rural-life'
-    ];
-    const activePlans = activePlanIds.map(resourceById).filter(Boolean);
-    const specialAccess = [];
-    const assignedNow = [];
-    const expiringOrExpired = [];
+    const productionMode=adapter.mode==='production';
+    if(productionMode&&!state.productionAccess.loaded&&!state.productionAccess.loading){
+      els.page.innerHTML=`${heading('My Access','Loading effective access from the authoritative Access Engine.')}<div class="access-empty-state"><strong>Secure loading…</strong></div>`;
+      refreshProductionMyAccess();
+      return;
+    }
+    if(productionMode&&state.productionAccess.loading){
+      els.page.innerHTML=`${heading('My Access','Loading effective access from the authoritative Access Engine.')}<div class="access-empty-state"><strong>Secure loading…</strong></div>`;
+      return;
+    }
+    if(productionMode&&state.productionAccess.error){
+      els.page.innerHTML=`${heading('My Access','Access is unavailable until the verified entitlement read succeeds.',button('Retry','primary','data-action="refresh-my-access"'))}<div class="access-empty-state"><strong>Access unavailable</strong><small>${escapeHtml(state.productionAccess.error)}</small></div>`;
+      return;
+    }
+
+    let activePlans=[];let specialAccess=[];let assignedNow=[];let expiringOrExpired=[];
+    if(productionMode){
+      const activeIds=new Set();const specialIds=new Set();const expiredIds=new Set();
+      for(const grant of state.productionAccess.grants){
+        const effective=productionGrantStatus(grant);const list=productionResourcesForGrant(grant);
+        const scope=String(grant.scopeType||'plan').toLowerCase();
+        if(effective==='active'){
+          const expiry=grant.accessUntil?new Date(grant.accessUntil):null;
+          const expiring=expiry&&Number.isFinite(expiry.getTime())&&expiry.getTime()-Date.now()<=14*24*60*60*1000;
+          for(const resource of list){
+            if(expiring)expiredIds.add(resource.id);
+            if(scope==='item'||scope==='bundle')specialIds.add(resource.id);else activeIds.add(resource.id);
+          }
+        }else if(['expired','blocked','revoked'].includes(effective)){
+          for(const resource of list)expiredIds.add(resource.id);
+        }
+      }
+      const allowedIds=new Set([...activeIds,...specialIds]);
+      const assignedIds=new Set(resources.filter(resource=>resource.assigned&&allowedIds.has(resource.id)).map(resource=>resource.id));
+      assignedNow=[...assignedIds].map(resourceById).filter(Boolean);
+      activePlans=[...activeIds].filter(id=>!assignedIds.has(id)).map(resourceById).filter(Boolean);
+      specialAccess=[...specialIds].filter(id=>!assignedIds.has(id)).map(resourceById).filter(Boolean);
+      expiringOrExpired=[...expiredIds].map(resourceById).filter(Boolean);
+    }else{
+      const activePlanIds=['test-mega-paper-ii','note-geography-paper-ii','note-algebra-intro','note-women-reform','note-rural-life'];
+      activePlans=activePlanIds.map(resourceById).filter(Boolean);
+    }
 
     els.page.innerHTML = `${heading(
       'My Access',
@@ -2939,7 +3020,7 @@
         ${accessSection('Assigned resources','Mentor or roadmap tasks visible now',assignedNow,'assigned')}
         ${accessSection('Expiring or expired','Renewal and history remain clear',expiringOrExpired,'expired')}
       </div>
-      <section class="access-request-inline"><header><div><span class="eyebrow">REQUEST HISTORY</span><h2>Student → Admin access decisions</h2><p>Requests remain separate from grants and payments.</p></div>${button('Open all requests','secondary','data-go="home/access-requests"')}</header><div class="access-request-list compact">${state.studentAccessRequests.filter(item=>item.learnerId===currentLearnerId()).slice(0,2).map(item=>accessRequestCard(item,false)).join('')}</div></section>`;
+      <section class="access-request-inline"><header><div><span class="eyebrow">REQUEST HISTORY</span><h2>Student → Admin access decisions</h2><p>Requests remain separate from grants and payments.</p></div>${button('Open all requests','secondary','data-go="home/access-requests"')}</header><div class="access-request-list compact">${state.studentAccessRequests.filter(item=>item.learnerId===currentLearnerId()||item.learnerEmail===state.session.email).slice(0,2).map(item=>accessRequestCard(item,false)).join('')}</div></section>`;
   }
 
   function accessSection(title, subtitle, list, kind='active') {
@@ -4043,20 +4124,26 @@
     if (action === 'open-access-audit-detail') {const item=state.adminAudit.find(entry=>entry.id===id);if(item)openModal('Audit trace','Actor, action, entity and outcome are immutable evidence in production.',`<section class="grant-detail-modal"><header><span class="access-scope-icon">↻</span><div><span class="eyebrow">${escapeHtml(item.status)}</span><h2>${escapeHtml(item.action)}</h2><p>${escapeHtml(item.time)} • ${escapeHtml(item.actor)}</p></div></header><div class="access-grant-facts"><span><small>Audit ID</small><strong>${escapeHtml(item.id)}</strong></span><span><small>Entity</small><strong>${escapeHtml(item.entity)}</strong></span><span><small>Status</small><strong>${escapeHtml(item.status)}</strong></span><span><small>Actor</small><strong>${escapeHtml(item.actor)}</strong></span></div><div class="continuity-note"><strong>Detail</strong><p>${escapeHtml(item.detail)}</p></div></section>`,button('Close','primary','data-action="close-modal"'));return;}
     if (action === 'redeem-student-access') {
       const form=document.getElementById('studentRedeemAccessForm');if(!form?.reportValidity())return;const values=Object.fromEntries(new FormData(form).entries());const code=String(values.code||'').trim();const email=String(values.email||'').trim().toLowerCase();
-      const key=state.adminKeys.find(item=>item.code===code);const invite=state.adminInvites.find(item=>item.inviteCode===code);
       if(!state.session.authenticated){toast('Login is required before redemption','⌁');return;}
+      if(adapter.mode==='production'){
+        const isInvite=code.toUpperCase().startsWith('AN-INV-');
+        const productionResult=isInvite?await adapter.redeemAccessInvite?.({inviteCode:code,email}):await adapter.redeemAccessKey?.({code,email});
+        if(!productionResult?.ok){toast(productionResult?.message||'This code cannot be redeemed for this account','!');return;}
+        state.productionAccess.loaded=false;setRoute('home','my-access');toast(isInvite?'Secure invite redeemed':'Access key redeemed','✓');return;
+      }
+      const key=state.adminKeys.find(item=>item.code===code);const invite=state.adminInvites.find(item=>item.inviteCode===code);
       if(key){
         const exhausted=(key.uses||0)>=(key.maxUses||1);const wrongEmail=key.assignedEmail&&key.assignedEmail.toLowerCase()!==email;const expired=credentialExpired(key.expires);
         if(key.status!=='Active'||exhausted||wrongEmail||expired){recordAdminAudit('REDEEM_ACCESS_KEY_BLOCKED',key.id,wrongEmail?'Email mismatch':expired?'Expired':exhausted?'Usage exhausted':key.status,'Review');toast('This key cannot be redeemed for this account','!');return;}
         const result=createCanonicalGrant({learnerId:currentLearnerId(),scope:key.scope,target:key.target,source:'redeem_key',until:key.expires||'No expiry',reason:`Redeemed access key ${key.code}`});
         key.uses=(key.uses||0)+1;key.usage=`${key.uses} / ${key.maxUses||1}`;key.lastEvent=`Redeemed by ${email}`;if(key.uses>=key.maxUses)key.status='Used';
-        persistAdminOperations();recordAdminAudit(result.ok?'REDEEM_ACCESS_KEY':'REDEEM_KEY_EXISTING_GRANT',key.id,`${email} • ${result.grant.id}`);try{await adapter.redeemAccessKey?.({code,email,grant:result.grant});}catch(_){}setRoute('home','my-access');toast(result.ok?'Access key redeemed':'Existing access already active','✓');return;
+        persistAdminOperations();recordAdminAudit(result.ok?'REDEEM_ACCESS_KEY':'REDEEM_KEY_EXISTING_GRANT',key.id,`${email} • ${result.grant.id}`);setRoute('home','my-access');toast(result.ok?'Access key redeemed':'Existing access already active','✓');return;
       }
       if(invite){
         const wrongEmail=invite.email&&invite.email.toLowerCase()!==email;const expired=credentialExpired(invite.expires);
         if(['Revoked','Claimed','Expired'].includes(invite.status)||wrongEmail||expired){if(expired)invite.status='Expired';recordAdminAudit('REDEEM_ACCESS_INVITE_BLOCKED',invite.id,wrongEmail?'Email mismatch':expired?'Expired':invite.status,'Review');toast('This invite cannot be redeemed for this account','!');return;}
         const result=createCanonicalGrant({learnerId:currentLearnerId(),scope:invite.scope,target:invite.target,source:'invite',until:invite.expires||'No expiry',reason:`Redeemed invite ${invite.inviteCode}`});
-        invite.status='Claimed';invite.lastEvent=`Redeemed by ${email}`;persistAdminOperations();recordAdminAudit(result.ok?'REDEEM_ACCESS_INVITE':'REDEEM_INVITE_EXISTING_GRANT',invite.id,`${email} • ${result.grant.id}`);try{await adapter.redeemAccessInvite?.({inviteCode:code,email,grant:result.grant});}catch(_){}setRoute('home','my-access');toast(result.ok?'Secure invite redeemed':'Existing access already active','✓');return;
+        invite.status='Claimed';invite.lastEvent=`Redeemed by ${email}`;persistAdminOperations();recordAdminAudit(result.ok?'REDEEM_ACCESS_INVITE':'REDEEM_INVITE_EXISTING_GRANT',invite.id,`${email} • ${result.grant.id}`);setRoute('home','my-access');toast(result.ok?'Secure invite redeemed':'Existing access already active','✓');return;
       }
       recordAdminAudit('REDEEM_ACCESS_UNKNOWN_CODE',code,email,'Review');toast('Access Key or Invite Code was not found','!');return;
     }
@@ -4065,15 +4152,18 @@
       const form=document.getElementById('studentAccessRequestForm');if(!form?.reportValidity())return;
       const values=Object.fromEntries(new FormData(form).entries());
       const resource=resourceById(values.resourceId);const learnerId=currentLearnerId();
-      const target=values.scope==='ITEM'?values.resourceId:values.scope==='MODULE'?`module-${resource?.subject||'general'}-${resource?.type||'learning'}`:values.scope==='BUNDLE'?`bundle-${resource?.subject||'general'}-learning`:resource?.requiredPlan||'PREMIUM';
+      const bundle=state.accessBundles.find(item=>item.status==='Active'&&Array.isArray(item.resourceIds)&&item.resourceIds.includes(values.resourceId));
+      const target=values.scope==='ITEM'?values.resourceId:values.scope==='MODULE'?productionAccessModule(resource):values.scope==='BUNDLE'?(bundle?.id||''):resource?.requiredPlan||'PREMIUM';
+      if(values.scope==='BUNDLE'&&!target){toast('No active bundle contains this exact resource','!');return;}
       const duplicate=state.studentAccessRequests.find(item=>item.learnerId===learnerId&&item.resourceId===values.resourceId&&item.scope===values.scope&&isOpenRequestStatus(item.status));
       if(duplicate){closeModal();toast('An open request already exists for this exact scope','◉');setRole('student');setRoute('home','access-requests');return;}
       const request={id:`request-student-${Date.now()}`,requesterType:'student',learnerId,learnerEmail:state.session.email||state.studentProfile.email,resourceId:values.resourceId,scope:values.scope,target,reason:String(values.reason||'').trim(),message:String(values.message||'').trim(),targetExam:values.targetExam,status:'submitted',createdAt:new Date().toLocaleString('en-IN'),updatedAt:new Date().toLocaleString('en-IN'),grantId:'',adminNote:''};
+      if(adapter.mode==='production'){const productionResult=await adapter.createStudentAccessRequest?.(request);if(!productionResult?.ok){toast(productionResult?.message||'Access request could not be submitted','!');return;}request.id=productionResult.request?.id||productionResult.request?.requestId||request.id;state.productionAccessRequests.loaded=false;}
       state.studentAccessRequests.unshift(request);
       addAccessNotification({audience:'admin',event:'access_request_submitted',title:'New Student access request',copy:`${request.learnerEmail} requested ${request.scope} access to ${resource?.title||request.target}.`,requestId:request.id,route:'access/requests'});
       addAccessNotification({audience:'student',event:'access_request_submitted',title:'Access request submitted',copy:`Admin will review ${resource?.title||request.target}.`,requestId:request.id});
       enqueueEmailJob({event:'access_request_submitted',recipient:request.learnerEmail,subject:'AspireNest access request received',requestId:request.id});
-      persistAccessCommerceState();await adapter.createStudentAccessRequest?.(request);closeModal();setRole('student');setRoute('home','access-requests');toast('Access request submitted for Admin review','◉');return;
+      persistAccessCommerceState();closeModal();setRole('student');setRoute('home','access-requests');toast('Access request submitted for Admin review','◉');return;
     }
     if (action === 'admin-review-access-request') { openAdminAccessRequestReview(id);return; }
     if (action === 'admin-access-approve') {
@@ -4081,24 +4171,28 @@
       const values=Object.fromEntries(new FormData(form).entries());const located=locateAccessRequest(id);const item=normalizeLocatedRequest(located);if(!item)return;
       const source=item.requesterType==='mentor'?'mentor_request_approval':'student_request_approval';
       const until=values.until?new Date(values.until).toLocaleDateString('en-IN'):'No expiry';
-      const result=createCanonicalGrant({learnerId:item.learnerId,scope:values.scope,target:values.target,source,until,reason:values.adminNote,requestId:item.id});
+      let productionApproval=null;if(adapter.mode==='production'){productionApproval=await adapter.approveAccessRequest?.({requestId:item.id,accessUntil:values.until||null,adminNote:values.adminNote});if(!productionApproval?.ok){toast(productionApproval?.message||'Access approval failed','!');return;}}
+      const result=adapter.mode==='production'?{ok:true,grant:productionApproval.grant}:createCanonicalGrant({learnerId:item.learnerId,scope:values.scope,target:values.target,source,until,reason:values.adminNote,requestId:item.id});
       const grant=result.grant;
       updateLocatedRequest(located,{status:'approved',updatedAt:new Date().toLocaleString('en-IN'),grantId:grant.id,adminNote:result.ok?values.adminNote:`Approved using existing grant ${grant.id}.`});
       addAccessNotification({audience:'student',event:'access_request_approved',title:'Access approved',copy:`${values.scope} access is active for ${resourceById(item.resourceId)?.title||values.target}.`,requestId:item.id});
       enqueueEmailJob({event:'access_request_approved',recipient:item.learnerEmail||learnerById(item.learnerId)?.email||'',subject:'AspireNest access approved',requestId:item.id});
       recordAdminAudit(result.ok?'APPROVE_ACCESS_REQUEST':'APPROVE_REQUEST_EXISTING_GRANT',item.id,`${values.scope} → ${values.target} • ${grant.id}`);
-      persistAccessCommerceState();await adapter.approveAccessRequest?.({requestId:item.id,grant});closeModal();renderAll();toast(result.ok?'Access approved and canonical grant created':'Request linked to existing active grant','✓');return;
+      persistAccessCommerceState();state.productionAccessRequests.loaded=false;state.productionAccess.loaded=false;closeModal();renderAll();toast(result.ok?'Access approved and canonical grant created':'Request linked to existing active grant','✓');return;
     }
     if (['admin-access-needs-info','admin-access-reject','admin-access-expire'].includes(action)) {
       const located=locateAccessRequest(id);const item=normalizeLocatedRequest(located);if(!item)return;
       const status=action==='admin-access-needs-info'?'needs_information':action==='admin-access-reject'?'rejected':'expired';
       const note=status==='needs_information'?'Admin needs more information before deciding.':status==='rejected'?'Request rejected after exact-scope review.':'Request expired without an entitlement grant.';
+      if(adapter.mode==='production'){const productionUpdate=await adapter.updateAccessRequest?.({requestId:item.id,status,note});if(!productionUpdate?.ok){toast(productionUpdate?.message||'Access request update failed','!');return;}state.productionAccessRequests.loaded=false;}
       updateLocatedRequest(located,{status,updatedAt:new Date().toLocaleString('en-IN'),adminNote:note});
       addAccessNotification({audience:'student',event:`access_request_${status}`,title:`Access request ${requestStatusLabel(status)}`,copy:note,requestId:item.id});
       enqueueEmailJob({event:`access_request_${status}`,recipient:item.learnerEmail||learnerById(item.learnerId)?.email||'',subject:`AspireNest access request ${requestStatusLabel(status)}`,requestId:item.id});
       recordAdminAudit('UPDATE_ACCESS_REQUEST',item.id,`${requestStatusLabel(status)} • ${item.target||item.resourceId}`,status==='rejected'?'Review':'Success');
-      persistAccessCommerceState();await adapter.updateAccessRequest?.({requestId:item.id,status,note});closeModal();renderAll();toast(note,'◉');return;
+      persistAccessCommerceState();closeModal();renderAll();toast(note,'◉');return;
     }
+    if (action === 'refresh-my-access') { state.productionAccess.loaded=false;state.productionAccess.error='';renderMyAccess();return; }
+    if (action === 'refresh-access-requests') { state.productionAccessRequests.loaded=false;state.productionAccessRequests.error='';refreshProductionAccessRequests(true);return; }
     if (action === 'open-commerce-settings') { openCommerceSettings();return; }
     if (action === 'save-commerce-settings') {
       const form=document.getElementById('commerceSettingsForm');if(!form?.reportValidity())return;const data=new FormData(form);
@@ -4134,7 +4228,7 @@
     if (action === 'mentor-open-session') {openMentorSession(id);return;}
     if (action === 'mentor-open-replay') {toast('Protected replay resolver is ready for production session authorization','↺');return;}
     if (action === 'mentor-request-access') {closeModal();openMentorAccessRequest(id||'',node?.dataset.resource||'');return;}
-    if (action === 'mentor-save-access-request') {const form=document.getElementById('mentorAccessForm');if(!form?.reportValidity())return;const values=Object.fromEntries(new FormData(form).entries());state.mentorAccessRequests.unshift({id:`mentor-access-${Date.now()}`,...values,status:'Pending Admin review',createdAt:new Date().toLocaleString('en-IN')});persistMentorOperations();await adapter.createMentorAccessRequest?.(values);closeModal();renderAll();toast('Exact access request created for Admin review','◉');return;}
+    if (action === 'mentor-save-access-request') {const form=document.getElementById('mentorAccessForm');if(!form?.reportValidity())return;const values=Object.fromEntries(new FormData(form).entries());const mentorLearner=learnerById(values.learnerId);let request={id:`mentor-access-${Date.now()}`,...values,status:'Pending Admin review',createdAt:new Date().toLocaleString('en-IN')};if(adapter.mode==='production'){const mentorProduction=await adapter.createMentorAccessRequest?.({...values,learnerEmail:mentorLearner?.email||''});if(!mentorProduction?.ok){toast(mentorProduction?.message||'Mentor access request could not be submitted','!');return;}request={...request,...(mentorProduction.request||{}),id:mentorProduction.requestId||mentorProduction.request?.id||mentorProduction.request?.requestId||request.id};state.productionAccessRequests.loaded=false;}state.mentorAccessRequests.unshift(request);persistMentorOperations();closeModal();renderAll();toast('Exact access request created for Admin review','◉');return;}
     if (action === 'mentor-open-access-detail') {const item=state.mentorAccessRequests.find(entry=>entry.id===id);if(item)openModal('Access request detail','Mentor context remains visible while Admin owns the decision.',mentorAccessCard(item),button('Close','primary','data-action="close-modal"'));return;}
     if (action === 'mentor-toggle-save') {if(state.mentorSavedResources.has(id))state.mentorSavedResources.delete(id);else state.mentorSavedResources.add(id);persistMentorOperations();renderAll();toast(state.mentorSavedResources.has(id)?'Resource saved for mentor use':'Removed from mentor saved','★');return;}
 

@@ -1,0 +1,14 @@
+{
+  "phase": "3.8",
+  "status": "GREEN",
+  "phaseStartHead": "3286a51b6e7e5beedc0fd8380b73e71d5fba2c09",
+  "createdAt": "2026-08-12T08:56:47.318413+00:00",
+  "evidenceLogSha256": {
+    "my-access.log": "6c9eaa3f882d403ec9cf2382607d005d0e5ba17bebfcfd4eda81985d6081d896",
+    "phase.log": "935c1a9c91b0579b3333d41bd7ae5745325bf0fb6762d5b49b82f8c892918e88",
+    "v26-visible.log": "a6f44022e31a581f6a3e257164342e523545799f3e35090321ec70d2c65b51f7"
+  },
+  "productionWrites": 0,
+  "push": "NO",
+  "deploy": "NO"
+}
