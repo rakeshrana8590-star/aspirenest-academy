@@ -39,6 +39,10 @@ import {
   findGrantCandidates,
   isGrantCandidate,
   resolvePlanChange,
+  requireGrantLifecycleReason,
+  isBlockedOrRevokedGrant,
+  assertGrantMayMutateWithoutRestore,
+  resolveGrantRestore,
 } from "./accessGrantLifecycle";
 import {
   buildEffectiveEntitlementProjection,
@@ -65,6 +69,8 @@ import {
   ACCESS_BULK_ROW_STATUS,
   resolveBulkImportStatus,
   selectResumableBulkAccessRows,
+  selectRollbackableBulkAccessRows,
+  resolveBulkRollbackStatus,
   summarizeBulkAccessRows,
 } from "./accessBulkLifecycle";
 import {
@@ -1663,10 +1669,24 @@ export const executeBulkAccessImport = async ({
         );
       }
 
-      const accessRecord = await createManualAccess({
-        ...row.grantData,
-        email: row.email,
+      const accessRecord = await writeIdempotentAccessGrant({
+        data: {
+          ...row.grantData,
+          email: row.email,
+          source:
+            row.grantData.source ||
+            ACCESS_SOURCE.BULK_IMPORT,
+        },
         actor: adminActor,
+        auditAction: "bulk_access_row_grant",
+        auditMetadata: {
+          importId: normalizedImportId,
+          rowId: row.id,
+        },
+        extraPayload: {
+          bulkImportId: normalizedImportId,
+          bulkImportRowId: row.id,
+        },
       });
       let inviteRecord = null;
 
@@ -1692,6 +1712,8 @@ export const executeBulkAccessImport = async ({
         accessWriteMode:
           accessRecord.accessWriteMode ||
           "created",
+        accessGrantRevision:
+          Number(accessRecord.grantRevision || 0),
         inviteId: inviteRecord?.id || null,
         completedAt: serverTimestamp(),
         lastError: null,
@@ -1758,6 +1780,232 @@ export const executeBulkAccessImport = async ({
     canResume:
       finalSummary.counts.failed > 0 ||
       finalSummary.counts.ready > 0,
+  };
+};
+
+export const rollbackBulkAccessImport = async ({
+  importId = "",
+  reason = "",
+  actor = {},
+} = {}) => {
+  const adminActor = requireAdminActor(actor);
+  const normalizedImportId = String(importId || "").trim();
+  const rollbackReason = requireGrantLifecycleReason(
+    reason,
+    "Bulk rollback"
+  );
+
+  if (!normalizedImportId) {
+    throw new Error("Bulk import id is required.");
+  }
+
+  const importRef = doc(
+    db,
+    ACCESS_COLLECTIONS.ACCESS_BULK_IMPORTS,
+    normalizedImportId
+  );
+  const importSnapshot = await getDoc(importRef);
+
+  if (!importSnapshot.exists()) {
+    throw new Error("Bulk import ledger not found.");
+  }
+
+  const initialRows = await listBulkAccessImportRows(
+    normalizedImportId,
+    adminActor
+  );
+  const rollbackRows = selectRollbackableBulkAccessRows(
+    initialRows
+  );
+
+  await updateDoc(importRef, {
+    status: ACCESS_BULK_IMPORT_STATUS.ROLLING_BACK,
+    rollbackStartedAt: serverTimestamp(),
+    rollbackReason,
+    updatedAt: serverTimestamp(),
+    updatedBy: adminActor.uid,
+  });
+
+  for (const row of rollbackRows) {
+    const rowRef = doc(
+      db,
+      ACCESS_COLLECTIONS.ACCESS_BULK_IMPORT_ROWS,
+      row.id
+    );
+    const accessRef = doc(
+      db,
+      ACCESS_COLLECTIONS.STUDENT_ACCESS,
+      row.accessId
+    );
+    const auditRef = doc(
+      collection(db, ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS)
+    );
+    const inviteRef = row.inviteId
+      ? doc(db, ACCESS_COLLECTIONS.ACCESS_INVITES, row.inviteId)
+      : null;
+
+    const outcome = await runTransaction(
+      db,
+      async (transaction) => {
+        const rowSnapshot = await transaction.get(rowRef);
+        const accessSnapshot = await transaction.get(accessRef);
+        const inviteSnapshot = inviteRef
+          ? await transaction.get(inviteRef)
+          : null;
+        const currentRow = toBulkAccessRowRecord(rowSnapshot);
+        const before = toAccessRecord(accessSnapshot);
+
+        const conflict = !currentRow || !before ||
+          String(before.bulkImportId || "") !== normalizedImportId ||
+          String(before.bulkImportRowId || "") !== row.id ||
+          Number(before.grantRevision || 0) !==
+            Number(row.accessGrantRevision || 0);
+
+        if (conflict) {
+          transaction.update(rowRef, {
+            status: ACCESS_BULK_ROW_STATUS.ROLLBACK_CONFLICT,
+            processable: false,
+            rollbackError:
+              "Grant changed after bulk apply; no collateral rollback was performed.",
+            rollbackReviewedAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            updatedBy: adminActor.uid,
+          });
+
+          return { conflict: true, after: null };
+        }
+
+        const updatedAt = serverTimestamp();
+        const accessPayload = {
+          status: ACCESS_STATUS.BLOCKED,
+          revokedAt: updatedAt,
+          revokedBy: adminActor.uid,
+          revokeReason: rollbackReason,
+          bulkRollbackId: normalizedImportId,
+          bulkRolledBackAt: updatedAt,
+          grantRevision:
+            Math.max(Number(before.grantRevision || 0), 0) + 1,
+          updatedAt,
+          updatedBy: adminActor.uid,
+        };
+        const after = {
+          ...before,
+          ...accessPayload,
+          id: row.accessId,
+        };
+
+        transaction.update(accessRef, accessPayload);
+        transaction.update(rowRef, {
+          status: ACCESS_BULK_ROW_STATUS.ROLLED_BACK,
+          processable: false,
+          rollbackReason,
+          rolledBackAt: updatedAt,
+          rolledBackBy: adminActor.uid,
+          updatedAt,
+          updatedBy: adminActor.uid,
+        });
+
+        if (
+          inviteRef &&
+          inviteSnapshot &&
+          inviteSnapshot.exists()
+        ) {
+          const invite = toInviteRecord(inviteSnapshot);
+          const inviteStatus = String(
+            invite?.inviteStatus || ""
+          ).toLowerCase();
+
+          if (!["used", "revoked", "expired"].includes(inviteStatus)) {
+            transaction.update(inviteRef, {
+              inviteStatus: "revoked",
+              revokedAt: updatedAt,
+              revokeReason: rollbackReason,
+              updatedAt,
+              updatedBy: adminActor.uid,
+            });
+          }
+        }
+
+        transaction.set(
+          auditRef,
+          buildAccessAuditPayload(
+            {
+              action: "bulk_access_row_rollback",
+              accessId: row.accessId,
+              email: before.email,
+              uid: before.uid,
+              before,
+              after: accessPayload,
+              metadata: {
+                importId: normalizedImportId,
+                rowId: row.id,
+                rollbackReason,
+                accessWriteMode: row.accessWriteMode,
+                expectedGrantRevision:
+                  row.accessGrantRevision,
+              },
+            },
+            adminActor
+          )
+        );
+
+        return { conflict: false, after };
+      }
+    );
+
+    if (!outcome.conflict && outcome.after) {
+      await syncStudentEntitlementProjectionIfUid(
+        outcome.after,
+        {
+          accessId: row.accessId,
+          actorUid: adminActor.uid,
+          actorEmail: adminActor.email,
+          source: "bulk_access_rollback",
+        }
+      );
+    }
+  }
+
+  const finalRows = await listBulkAccessImportRows(
+    normalizedImportId,
+    adminActor
+  );
+  const finalStatus = resolveBulkRollbackStatus(finalRows);
+  const finalSummary = summarizeBulkAccessRows(finalRows);
+
+  await updateDoc(importRef, {
+    status: finalStatus,
+    summary: finalSummary,
+    rollbackCompletedAt: serverTimestamp(),
+    rollbackReason,
+    updatedAt: serverTimestamp(),
+    updatedBy: adminActor.uid,
+  });
+
+  await createAccessAuditLog({
+    actor: adminActor,
+    action: "bulk_access_import_rollback_completed",
+    after: {
+      importId: normalizedImportId,
+      status: finalStatus,
+      summary: finalSummary,
+    },
+    metadata: {
+      importId: normalizedImportId,
+      rollbackReason,
+      rollbackRows: rollbackRows.length,
+    },
+  });
+
+  return {
+    importId: normalizedImportId,
+    status: finalStatus,
+    summary: finalSummary,
+    rows: finalRows,
+    rolledBackCount:
+      finalSummary.counts.rolled_back || 0,
+    conflictCount:
+      finalSummary.counts.rollback_conflict || 0,
   };
 };
 
@@ -2264,85 +2512,137 @@ export const queueAccessInviteResend = async (id, actor = {}, metadata = {}) => 
 export const updateAccessStatus = async (id, status, actor = {}, metadata = {}) => {
   const accessId = requireAccessId(id);
   const adminActor = requireAdminActor(actor);
-  const before = await readAccessById(accessId);
-  const payload = {
-    status: String(status || "").trim().toLowerCase(),
-    updatedAt: serverTimestamp(),
-    updatedBy: adminActor.uid,
-  };
+  const nextStatus = String(status || "").trim().toLowerCase();
 
-  if (!payload.status) {
+  if (!nextStatus) {
     throw new Error("Access status is required.");
   }
 
-  await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId), payload);
-  const after = { ...(before || {}), ...payload, id: accessId };
+  if ([ACCESS_STATUS.BLOCKED, ACCESS_STATUS.REVOKED].includes(nextStatus)) {
+    throw new Error(
+      "Blocked/revoked status must use revokeAccess with a reason."
+    );
+  }
 
-  await syncStudentEntitlementProjectionIfUid(after, {
+  const reason = requireGrantLifecycleReason(
+    metadata.reason || metadata.note || "",
+    "Status change"
+  );
+
+  const accessRef = doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId);
+  const auditRef = doc(collection(db, ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS));
+  const result = await runTransaction(db, async (transaction) => {
+    const snapshot = await transaction.get(accessRef);
+    const before = toAccessRecord(snapshot);
+
+    if (!before) throw new Error("Access record was not found.");
+
+    if (isBlockedOrRevokedGrant(before)) {
+      throw new Error(
+        "Blocked or revoked access cannot be changed by status update. Use restoreAccess with a reason."
+      );
+    }
+
+    const updatedAt = serverTimestamp();
+    const payload = {
+      status: nextStatus,
+      statusChangeReason: reason,
+      grantRevision: Math.max(Number(before.grantRevision || 0), 0) + 1,
+      updatedAt,
+      updatedBy: adminActor.uid,
+    };
+    const after = { ...before, ...payload, id: accessId };
+
+    transaction.update(accessRef, payload);
+    transaction.set(
+      auditRef,
+      buildAccessAuditPayload(
+        {
+          action: metadata.action || "update_access_status",
+          accessId,
+          email: before.email,
+          uid: before.uid,
+          before,
+          after: payload,
+          metadata: { ...metadata, reason },
+        },
+        adminActor
+      )
+    );
+
+    return { after, payload };
+  });
+
+  await syncStudentEntitlementProjectionIfUid(result.after, {
     accessId,
     actorUid: adminActor.uid,
     actorEmail: adminActor.email,
     source: "update_access_status",
   });
 
-  await createAccessAuditLog({
-    actor: adminActor,
-    action: metadata.action || "update_access_status",
-    accessId,
-    email: before?.email,
-    uid: before?.uid,
-    before,
-    after: payload,
-    metadata,
-  });
-
-  return {
-    id: accessId,
-    ...payload,
-  };
+  return { id: accessId, ...result.payload };
 };
 
 export const extendAccess = async (id, accessUntil, actor = {}, metadata = {}) => {
   const accessId = requireAccessId(id);
   const adminActor = requireAdminActor(actor);
-  const before = await readAccessById(accessId);
+  const reason = requireGrantLifecycleReason(
+    metadata.reason || metadata.note || "",
+    "Extend access"
+  );
 
   if (!accessUntil) {
     throw new Error("Access until date is required.");
   }
 
-  const payload = {
-    accessUntil,
-    status: ACCESS_STATUS.ACTIVE,
-    updatedAt: serverTimestamp(),
-    updatedBy: adminActor.uid,
-  };
+  const accessRef = doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId);
+  const auditRef = doc(collection(db, ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS));
+  const result = await runTransaction(db, async (transaction) => {
+    const snapshot = await transaction.get(accessRef);
+    const before = toAccessRecord(snapshot);
 
-  await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId), payload);
-  const after = { ...(before || {}), ...payload, id: accessId };
+    if (!before) throw new Error("Access record was not found.");
+    assertGrantMayMutateWithoutRestore(before, "Extend access");
 
-  await syncStudentEntitlementProjectionIfUid(after, {
+    const updatedAt = serverTimestamp();
+    const payload = {
+      accessUntil,
+      status: ACCESS_STATUS.ACTIVE,
+      grantRevision: Math.max(Number(before.grantRevision || 0), 0) + 1,
+      extendedAt: updatedAt,
+      extensionReason: reason,
+      updatedAt,
+      updatedBy: adminActor.uid,
+    };
+    const after = { ...before, ...payload, id: accessId };
+
+    transaction.update(accessRef, payload);
+    transaction.set(
+      auditRef,
+      buildAccessAuditPayload(
+        {
+          action: metadata.action || "extend_access",
+          accessId,
+          email: before.email,
+          uid: before.uid,
+          before,
+          after: payload,
+          metadata: { ...metadata, reason },
+        },
+        adminActor
+      )
+    );
+    return { after, payload };
+  });
+
+  await syncStudentEntitlementProjectionIfUid(result.after, {
     accessId,
     actorUid: adminActor.uid,
     actorEmail: adminActor.email,
     source: "extend_access",
   });
 
-  await createAccessAuditLog({
-    actor: adminActor,
-    action: metadata.action || "extend_access",
-    accessId,
-    email: before?.email,
-    uid: before?.uid,
-    before,
-    after: payload,
-    metadata,
-  });
-
-  return {
-    id: accessId,
-    ...payload,
-  };
+  return { id: accessId, ...result.payload };
 };
 
 export const addAccessNote = async (id, note = "", actor = {}, metadata = {}) => {
@@ -2389,64 +2689,54 @@ export const upgradeAccess = async (
 ) => {
   const accessId = requireAccessId(id);
   const adminActor = requireAdminActor(actor);
+  const reason = requireGrantLifecycleReason(
+    metadata.reason || metadata.note || "",
+    "Plan change"
+  );
   const accessRef = doc(
     db,
     ACCESS_COLLECTIONS.STUDENT_ACCESS,
     accessId
   );
   const auditRef = doc(
-    collection(
-      db,
-      ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS
-    )
+    collection(db, ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS)
   );
 
   const result = await runTransaction(
     db,
     async (transaction) => {
-      const accessSnapshot =
-        await transaction.get(accessRef);
-      const before = toAccessRecord(
-        accessSnapshot
-      );
+      const accessSnapshot = await transaction.get(accessRef);
+      const before = toAccessRecord(accessSnapshot);
 
       if (!before) {
-        throw new Error(
-          "Access record was not found."
-        );
+        throw new Error("Access record was not found.");
       }
+      assertGrantMayMutateWithoutRestore(before, "Plan change");
 
       const planChange = resolvePlanChange({
         record: before,
         requestedPlanType: planType,
-        allowDowngrade:
-          metadata.allowDowngrade === true,
-        reason:
-          metadata.note ||
-          metadata.reason ||
-          "",
+        allowDowngrade: metadata.allowDowngrade === true,
+        reason,
       });
       const updatedAt = serverTimestamp();
       const payload = {
         planType: planChange.planType,
         scopeType: ACCESS_SCOPE_TYPES.PLAN,
-        status: ACCESS_STATUS.ACTIVE,
+        status: String(before.status || ACCESS_STATUS.ACTIVE).toLowerCase() === ACCESS_STATUS.EXPIRED
+          ? ACCESS_STATUS.ACTIVE
+          : String(before.status || ACCESS_STATUS.ACTIVE).toLowerCase(),
         grantKey: planChange.grantKey,
-        grantFamilyKey:
-          planChange.grantFamilyKey,
-        grantRevision:
-          planChange.grantRevision,
+        grantFamilyKey: planChange.grantFamilyKey,
+        grantRevision: planChange.grantRevision,
         idempotencyVersion: 1,
         planChangedAt: updatedAt,
+        planChangeReason: reason,
         updatedAt,
         updatedBy: adminActor.uid,
       };
 
-      transaction.update(
-        accessRef,
-        payload
-      );
-
+      transaction.update(accessRef, payload);
       transaction.set(
         auditRef,
         buildAccessAuditPayload(
@@ -2459,16 +2749,12 @@ export const upgradeAccess = async (
             after: payload,
             metadata: {
               ...metadata,
-              previousPlanType:
-                planChange.currentPlanType,
-              nextPlanType:
-                planChange.planType,
-              isDowngrade:
-                planChange.isDowngrade,
-              grantKey:
-                planChange.grantKey,
-              grantFamilyKey:
-                planChange.grantFamilyKey,
+              reason,
+              previousPlanType: planChange.currentPlanType,
+              nextPlanType: planChange.planType,
+              isDowngrade: planChange.isDowngrade,
+              grantKey: planChange.grantKey,
+              grantFamilyKey: planChange.grantFamilyKey,
             },
           },
           adminActor
@@ -2476,69 +2762,138 @@ export const upgradeAccess = async (
       );
 
       return {
-        before,
-        after: {
-          ...before,
-          ...payload,
-          id: accessId,
-        },
+        after: { ...before, ...payload, id: accessId },
         payload,
       };
     }
   );
 
-  await syncStudentEntitlementProjectionIfUid(
-    result.after,
-    {
-      accessId,
-      actorUid: adminActor.uid,
-      actorEmail: adminActor.email,
-      source: "upgrade_access",
-    }
-  );
+  await syncStudentEntitlementProjectionIfUid(result.after, {
+    accessId,
+    actorUid: adminActor.uid,
+    actorEmail: adminActor.email,
+    source: "upgrade_access",
+  });
 
-  return {
-    id: accessId,
-    ...result.payload,
-  };
+  return { id: accessId, ...result.payload };
 };
 
 export const revokeAccess = async (id, actor = {}, metadata = {}) => {
   const accessId = requireAccessId(id);
   const adminActor = requireAdminActor(actor);
-  const before = await readAccessById(accessId);
-  const payload = {
-    status: ACCESS_STATUS.BLOCKED,
-    revokedAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-    updatedBy: adminActor.uid,
-  };
+  const reason = requireGrantLifecycleReason(
+    metadata.reason || metadata.note || "",
+    "Revoke access"
+  );
+  const accessRef = doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId);
+  const auditRef = doc(collection(db, ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS));
+  const result = await runTransaction(db, async (transaction) => {
+    const snapshot = await transaction.get(accessRef);
+    const before = toAccessRecord(snapshot);
 
-  await updateDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId), payload);
-  const after = { ...(before || {}), ...payload, id: accessId };
+    if (!before) throw new Error("Access record was not found.");
 
-  await syncStudentEntitlementProjectionIfUid(after, {
+    const updatedAt = serverTimestamp();
+    const payload = {
+      status: ACCESS_STATUS.BLOCKED,
+      revokedAt: updatedAt,
+      revokedBy: adminActor.uid,
+      revokeReason: reason,
+      grantRevision: Math.max(Number(before.grantRevision || 0), 0) + 1,
+      updatedAt,
+      updatedBy: adminActor.uid,
+    };
+    const after = { ...before, ...payload, id: accessId };
+
+    transaction.update(accessRef, payload);
+    transaction.set(
+      auditRef,
+      buildAccessAuditPayload(
+        {
+          action: "revoke_access",
+          accessId,
+          email: before.email,
+          uid: before.uid,
+          before,
+          after: payload,
+          metadata: { ...metadata, reason },
+        },
+        adminActor
+      )
+    );
+    return { after, payload };
+  });
+
+  await syncStudentEntitlementProjectionIfUid(result.after, {
     accessId,
     actorUid: adminActor.uid,
     actorEmail: adminActor.email,
     source: "revoke_access",
   });
 
-  await createAccessAuditLog({
-    actor: adminActor,
-    action: "revoke_access",
-    accessId,
-    email: before?.email,
-    uid: before?.uid,
-    before,
-    after: payload,
-    metadata,
+  return { id: accessId, ...result.payload };
+};
+
+export const restoreAccess = async (id, actor = {}, metadata = {}) => {
+  const accessId = requireAccessId(id);
+  const adminActor = requireAdminActor(actor);
+  const accessRef = doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, accessId);
+  const auditRef = doc(collection(db, ACCESS_COLLECTIONS.ACCESS_AUDIT_LOGS));
+  const result = await runTransaction(db, async (transaction) => {
+    const snapshot = await transaction.get(accessRef);
+    const before = toAccessRecord(snapshot);
+
+    if (!before) throw new Error("Access record was not found.");
+
+    const restoration = resolveGrantRestore({
+      record: before,
+      reason: metadata.reason || metadata.note || "",
+    });
+    const updatedAt = serverTimestamp();
+    const payload = {
+      status: ACCESS_STATUS.ACTIVE,
+      grantRevision: restoration.grantRevision,
+      restoredAt: updatedAt,
+      restoredBy: adminActor.uid,
+      restorationReason: restoration.restorationReason,
+      revokedAt: null,
+      revokedBy: null,
+      revokeReason: "",
+      updatedAt,
+      updatedBy: adminActor.uid,
+    };
+    const after = { ...before, ...payload, id: accessId };
+
+    transaction.update(accessRef, payload);
+    transaction.set(
+      auditRef,
+      buildAccessAuditPayload(
+        {
+          action: "restore_access",
+          accessId,
+          email: before.email,
+          uid: before.uid,
+          before,
+          after: payload,
+          metadata: {
+            ...metadata,
+            reason: restoration.restorationReason,
+          },
+        },
+        adminActor
+      )
+    );
+    return { after, payload };
   });
 
-  return {
-    id: accessId,
-    ...payload,
-  };
+  await syncStudentEntitlementProjectionIfUid(result.after, {
+    accessId,
+    actorUid: adminActor.uid,
+    actorEmail: adminActor.email,
+    source: "restore_access",
+  });
+
+  return { id: accessId, ...result.payload };
 };
 
 const requireAccessEntityId = (id, label = "Access entity id") => {

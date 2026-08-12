@@ -7,6 +7,10 @@ import {
   isGrantCandidate,
   resolvePlanChange,
   selectCanonicalGrantCandidate,
+  requireGrantLifecycleReason,
+  isBlockedOrRevokedGrant,
+  assertGrantMayMutateWithoutRestore,
+  resolveGrantRestore,
 } from "./accessGrantLifecycle";
 import {
   normalizeAndValidateGrantInput,
@@ -708,6 +712,62 @@ describe("AspireNest idempotent grant lifecycle", () => {
       isDowngrade: true,
       grantRevision: 4,
     });
+  });
+
+
+  test("restore requires blocked/revoked state and a reason", () => {
+    expect(() =>
+      resolveGrantRestore({
+        record: { id: "grant-1", status: "active" },
+        reason: "Approved correction",
+      })
+    ).toThrow(
+      "Only a blocked or revoked access record can be restored."
+    );
+
+    expect(() =>
+      resolveGrantRestore({
+        record: { id: "grant-1", status: "blocked" },
+      })
+    ).toThrow("Restore access reason is required.");
+
+    expect(
+      resolveGrantRestore({
+        record: {
+          id: "grant-1",
+          status: "revoked",
+          grantRevision: 4,
+        },
+        reason: "Admin reviewed exact scope",
+      })
+    ).toEqual({
+      status: "active",
+      restorationReason: "Admin reviewed exact scope",
+      grantRevision: 5,
+    });
+  });
+
+  test("normal lifecycle writes cannot silently reactivate blocked grants", () => {
+    expect(isBlockedOrRevokedGrant({ status: "blocked" })).toBe(true);
+    expect(isBlockedOrRevokedGrant({ status: "revoked" })).toBe(true);
+    expect(isBlockedOrRevokedGrant({ status: "expired" })).toBe(false);
+    expect(() =>
+      assertGrantMayMutateWithoutRestore(
+        { status: "blocked" },
+        "Extend access"
+      )
+    ).toThrow(
+      "Extend access cannot reactivate a blocked or revoked grant. Use restoreAccess with a reason."
+    );
+  });
+
+  test("grant lifecycle reason helper fails closed", () => {
+    expect(requireGrantLifecycleReason(" verified ", "Revoke access")).toBe(
+      "verified"
+    );
+    expect(() => requireGrantLifecycleReason("", "Revoke access")).toThrow(
+      "Revoke access reason is required."
+    );
   });
 
 });

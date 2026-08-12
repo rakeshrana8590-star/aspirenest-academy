@@ -24,6 +24,7 @@ export const ACCESS_STATUS = Object.freeze({
   PENDING: "pending",
   EXPIRED: "expired",
   BLOCKED: "blocked",
+  REVOKED: "revoked",
   ERROR: "error",
 });
 
@@ -50,6 +51,11 @@ export const ACCESS_SOURCE = Object.freeze({
   BULK_IMPORT: "bulk_import",
   REDEEM_KEY: "redeem_key",
   TRIAL: "trial",
+  SCHOLARSHIP: "scholarship",
+  OFFLINE_PAYMENT: "offline_payment",
+  INVITE: "invite",
+  STUDENT_REQUEST_APPROVAL: "student_request_approval",
+  MENTOR_REQUEST_APPROVAL: "mentor_request_approval",
 });
 
 export const ACCESS_COURSE = Object.freeze({

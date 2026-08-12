@@ -6,6 +6,8 @@ import {
   parseBulkAccessInput,
   resolveBulkImportStatus,
   selectResumableBulkAccessRows,
+  selectRollbackableBulkAccessRows,
+  resolveBulkRollbackStatus,
   summarizeBulkAccessRows,
 } from "./accessBulkLifecycle";
 
@@ -286,4 +288,32 @@ describe("AspireNest bulk access lifecycle", () => {
       ACCESS_BULK_IMPORT_STATUS.FAILED
     );
   });
+
+  test("rollback selects only grants created by this batch", () => {
+    const rows = [
+      { id: "created", status: ACCESS_BULK_ROW_STATUS.SUCCEEDED, accessWriteMode: "created", accessId: "grant-a" },
+      { id: "existing", status: ACCESS_BULK_ROW_STATUS.SUCCEEDED, accessWriteMode: "idempotent_existing", accessId: "grant-b" },
+      { id: "failed", status: ACCESS_BULK_ROW_STATUS.FAILED, accessWriteMode: "created", accessId: "grant-c" },
+    ];
+
+    expect(selectRollbackableBulkAccessRows(rows).map((row) => row.id)).toEqual([
+      "created",
+    ]);
+  });
+
+  test("bulk rollback status reports full and partial rollback", () => {
+    expect(
+      resolveBulkRollbackStatus([
+        { accessWriteMode: "created", status: ACCESS_BULK_ROW_STATUS.ROLLED_BACK },
+      ])
+    ).toBe(ACCESS_BULK_IMPORT_STATUS.ROLLED_BACK);
+
+    expect(
+      resolveBulkRollbackStatus([
+        { accessWriteMode: "created", status: ACCESS_BULK_ROW_STATUS.ROLLED_BACK },
+        { accessWriteMode: "created", status: ACCESS_BULK_ROW_STATUS.ROLLBACK_CONFLICT },
+      ])
+    ).toBe(ACCESS_BULK_IMPORT_STATUS.ROLLBACK_PARTIAL);
+  });
+
 });

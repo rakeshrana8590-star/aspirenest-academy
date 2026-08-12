@@ -804,3 +804,53 @@ export const resolvePlanChange = ({
       Math.max(Number(record.grantRevision || 0), 0) + 1,
   };
 };
+
+export const requireGrantLifecycleReason = (reason = "", action = "Access change") => {
+  const cleanReason = cleanValue(reason);
+
+  if (!cleanReason) {
+    throw new Error(`${action} reason is required.`);
+  }
+
+  return cleanReason;
+};
+
+export const isBlockedOrRevokedGrant = (record = {}) =>
+  ["blocked", "revoked"].includes(
+    cleanValue(record.status).toLowerCase()
+  );
+
+export const assertGrantMayMutateWithoutRestore = (record = {}, action = "Access change") => {
+  if (isBlockedOrRevokedGrant(record)) {
+    throw new Error(
+      `${action} cannot reactivate a blocked or revoked grant. Use restoreAccess with a reason.`
+    );
+  }
+
+  return true;
+};
+
+export const resolveGrantRestore = ({
+  record = {},
+  reason = "",
+} = {}) => {
+  if (!record || !cleanValue(record.id || record.accessId)) {
+    throw new Error("Access record is required for restore.");
+  }
+
+  if (!isBlockedOrRevokedGrant(record)) {
+    throw new Error(
+      "Only a blocked or revoked access record can be restored."
+    );
+  }
+
+  return {
+    status: "active",
+    restorationReason: requireGrantLifecycleReason(
+      reason,
+      "Restore access"
+    ),
+    grantRevision:
+      Math.max(Number(record.grantRevision || 0), 0) + 1,
+  };
+};

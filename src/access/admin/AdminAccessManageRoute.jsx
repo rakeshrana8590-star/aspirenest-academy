@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import AdminAccessRouteShell from "./AdminAccessRouteShell.jsx";
-import { addAccessNote, extendAccess, listStudentAccess, normalizeAccessEmail, revokeAccess, updateAccessStatus, upgradeAccess } from "../accessService";
+import { addAccessNote, extendAccess, listStudentAccess, normalizeAccessEmail, restoreAccess, revokeAccess, updateAccessStatus, upgradeAccess } from "../accessService";
 import {
   ACCESS_PLAN_LEVELS,
   ACCESS_SCOPE_TYPES,
@@ -72,7 +72,7 @@ const lockedActionConfigs = {
   },
   unblock: {
     title: "Unblock Learner",
-    message: "This will set the selected access record back to active and create an audit log.",
+    message: "This will restore only the selected blocked/revoked grant after a mandatory reason and create a before/after audit log.",
     requiresText: "UNBLOCK",
     tone: "info",
   },
@@ -350,6 +350,11 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
         return;
       }
 
+      if (!actionDraft.note.trim()) {
+        setMessage("Write an extension reason before confirming extend.");
+        return;
+      }
+
       setActionSubmitting(true);
 
       try {
@@ -388,6 +393,11 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
 
       if (!actionDraft.status) {
         setMessage("Select new access status before confirming status change.");
+        return;
+      }
+
+      if (!actionDraft.note.trim()) {
+        setMessage("Write a status-change reason before confirming.");
         return;
       }
 
@@ -488,6 +498,11 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
         return;
       }
 
+      if (!actionDraft.note.trim()) {
+        setMessage("Write a plan-change reason before confirming.");
+        return;
+      }
+
       setActionSubmitting(true);
 
       try {
@@ -529,6 +544,11 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
         return;
       }
 
+      if (!actionDraft.note.trim()) {
+        setMessage("Write a validity-change reason before confirming.");
+        return;
+      }
+
       setActionSubmitting(true);
 
       try {
@@ -563,6 +583,11 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
     if (lockedActionConfirm.type === "expire") {
       if (!selectedRecord?.id) {
         setMessage("Select an access record before expiring access.");
+        return;
+      }
+
+      if (!actionDraft.note.trim()) {
+        setMessage("Write an expiry reason before confirming.");
         return;
       }
 
@@ -601,11 +626,17 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
         return;
       }
 
+      if (!actionDraft.note.trim()) {
+        setMessage("Write a restore reason before unblocking learner access.");
+        return;
+      }
+
       setActionSubmitting(true);
 
       try {
-        await updateAccessStatus(selectedRecord.id, "active", adminActor, {
+        await restoreAccess(selectedRecord.id, adminActor, {
           action: "unblock_access",
+          reason: actionDraft.note.trim(),
           note: actionDraft.note.trim(),
           source: "admin_access_manage",
         });
@@ -1035,7 +1066,6 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
                 onChange={(event) => handleActionDraftChange("status", event.target.value)}
               >
                 <option value="active">Active</option>
-                <option value="blocked">Blocked</option>
                 <option value="expired">Expired</option>
                 <option value="pending">Pending</option>
               </select>
@@ -1096,7 +1126,7 @@ export default function AdminAccessManageRoute({ user = null, isAdmin = () => fa
               <textarea
                 value={actionDraft.note}
                 onChange={(event) => handleActionDraftChange("note", event.target.value)}
-                placeholder="Optional action note for audit trail."
+                placeholder="Action reason for audit trail. Lifecycle changes require a reason."
                 rows="2"
               />
             </label>

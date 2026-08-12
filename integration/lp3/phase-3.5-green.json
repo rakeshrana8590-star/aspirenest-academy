@@ -1,0 +1,13 @@
+{
+  "phase": "3.5",
+  "status": "GREEN",
+  "phaseStartHead": "cd7f4c5b11af56cd2b500ad8a11ab9437a8d2558",
+  "createdAt": "2026-08-12T07:37:30.568212+00:00",
+  "evidenceLogSha256": {
+    "jest.log": "ffc131d7de7fe4676c1c20518f63529c4b633bf9fb84ac69404b19fe2820ed87",
+    "phase.log": "39b29fc34f4579c0d8cbd04269d88f058c6656157fb31081c26620c81d22f02f"
+  },
+  "productionWrites": 0,
+  "push": "NO",
+  "deploy": "NO"
+}

@@ -39,6 +39,8 @@ export const ACCESS_BULK_ROW_STATUS = Object.freeze({
   SUCCEEDED: "succeeded",
   FAILED: "failed",
   SKIPPED: "skipped",
+  ROLLED_BACK: "rolled_back",
+  ROLLBACK_CONFLICT: "rollback_conflict",
 });
 
 export const ACCESS_BULK_IMPORT_STATUS = Object.freeze({
@@ -47,6 +49,9 @@ export const ACCESS_BULK_IMPORT_STATUS = Object.freeze({
   PARTIAL: "partial",
   COMPLETED: "completed",
   FAILED: "failed",
+  ROLLING_BACK: "rolling_back",
+  ROLLED_BACK: "rolled_back",
+  ROLLBACK_PARTIAL: "rollback_partial",
 });
 
 export const parseBulkAccessInput = (
@@ -301,7 +306,9 @@ export const summarizeBulkAccessRows = (
     counts.duplicate_input +
     counts.existing_match +
     counts.identity_conflict +
-    counts.skipped;
+    counts.skipped +
+    counts.rolled_back +
+    counts.rollback_conflict;
   const remaining =
     counts.ready +
     counts.running +
@@ -341,4 +348,39 @@ export const resolveBulkImportStatus = (
   }
 
   return ACCESS_BULK_IMPORT_STATUS.PLANNED;
+};
+
+
+export const selectRollbackableBulkAccessRows = (rows = []) =>
+  (Array.isArray(rows) ? rows : []).filter(
+    (row) =>
+      row &&
+      row.status === ACCESS_BULK_ROW_STATUS.SUCCEEDED &&
+      row.accessWriteMode === "created" &&
+      cleanValue(row.accessId)
+  );
+
+export const resolveBulkRollbackStatus = (rows = []) => {
+  const safeRows = Array.isArray(rows) ? rows : [];
+  const rollbackCreatedRows = safeRows.filter(
+    (row) => row && row.accessWriteMode === "created"
+  );
+
+  if (!rollbackCreatedRows.length) {
+    return ACCESS_BULK_IMPORT_STATUS.ROLLED_BACK;
+  }
+
+  if (rollbackCreatedRows.some(
+    (row) => row.status === ACCESS_BULK_ROW_STATUS.ROLLBACK_CONFLICT
+  )) {
+    return ACCESS_BULK_IMPORT_STATUS.ROLLBACK_PARTIAL;
+  }
+
+  if (rollbackCreatedRows.every(
+    (row) => row.status === ACCESS_BULK_ROW_STATUS.ROLLED_BACK
+  )) {
+    return ACCESS_BULK_IMPORT_STATUS.ROLLED_BACK;
+  }
+
+  return ACCESS_BULK_IMPORT_STATUS.ROLLING_BACK;
 };
