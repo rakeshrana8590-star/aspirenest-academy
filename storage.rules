@@ -15,33 +15,32 @@ service firebase.storage {
       return isSignedIn() && request.auth.uid == uid;
     }
 
+    // LP3 fail-closed protected-asset boundary.
+    // Student delivery for these premium paths must go through an
+    // access-aware resolver in the module vertical slice; a copied
+    // Firebase Storage URL is never the authorization boundary.
     match /intellibook/{allPaths=**} {
       allow read, write: if isAdmin();
     }
 
     match /notes/{allPaths=**} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin();
+      allow read, write: if isAdmin();
     }
 
     match /currentAffairs/{allPaths=**} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin();
+      allow read, write: if isAdmin();
     }
 
     match /videos/{allPaths=**} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin();
+      allow read, write: if isAdmin();
     }
 
     match /mockTests/{allPaths=**} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin();
+      allow read, write: if isAdmin();
     }
 
     match /roadmaps/{allPaths=**} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin();
+      allow read, write: if isAdmin();
     }
 
     match /profiles/{uid}/{allPaths=**} {

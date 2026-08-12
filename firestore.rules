@@ -351,6 +351,8 @@ service cloud.firestore {
           "canonicalRoute",
           "status",
           "reason",
+          "requestedScope",
+          "requestTarget",
           "accessId",
           "resolvedAt",
           "resolvedBy",
@@ -381,6 +383,8 @@ service cloud.firestore {
         data.status == "pending" &&
         data.reason is string &&
         data.reason.size() <= 1000 &&
+        data.get("requestedScope", "ITEM") in ["ITEM", "MODULE", "BUNDLE", "PLAN"] &&
+        data.get("requestTarget", data.resourceId) is string &&
         data.accessId == null &&
         data.resolvedAt == null &&
         data.resolvedBy == null &&
@@ -2239,7 +2243,8 @@ service cloud.firestore {
       allow read: if isAdmin() ||
         isMentorAccessRequestParticipant(resource.data);
       allow create: if isValidMentorAccessRequestCreate(requestId);
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if false;
     }
 
     match /mentorFeedback/{feedbackId} {
@@ -3016,7 +3021,7 @@ service cloud.firestore {
         isAdmin() ||
         isInviteStudentAccessUpdate() ||
         isPendingIdentityClaimUpdate(docId);
-      allow delete: if isAdmin();
+      allow delete: if false;
     }
     match /studentEntitlements/{uid}/items/{entitlementId} {
       allow read: if isAdmin() ||
@@ -3048,12 +3053,53 @@ service cloud.firestore {
        Access Engine — Future Admin Workflows
        ================================ */
 
+    match /studentAccessRequests/{requestId} {
+      allow read: if isAdmin() ||
+        (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow create: if isSignedIn() &&
+        request.resource.data.keys().hasOnly([
+          "requestId", "requesterType", "uid", "learnerId",
+          "learnerEmail", "normalizedEmail", "resourceId",
+          "resourceType", "moduleKey", "itemType", "title",
+          "canonicalRoute", "requiredPlan", "scopeType", "target", "itemIds",
+          "reason", "message", "targetExam", "status", "grantId",
+          "adminNote", "createdAt", "updatedAt"
+        ]) &&
+        request.resource.data.requestId == requestId &&
+        request.resource.data.requesterType == "student" &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.learnerId == request.auth.uid &&
+        request.resource.data.learnerEmail == request.auth.token.email &&
+        request.resource.data.normalizedEmail == request.auth.token.email &&
+        request.resource.data.resourceId is string &&
+        request.resource.data.resourceId.size() > 0 &&
+        request.resource.data.resourceId.size() <= 256 &&
+        request.resource.data.resourceType is string &&
+        request.resource.data.scopeType in ["plan", "module", "bundle", "item"] &&
+        request.resource.data.itemIds is list &&
+        request.resource.data.itemIds.size() <= 500 &&
+        request.resource.data.target is string &&
+        request.resource.data.target.size() > 0 &&
+        request.resource.data.reason is string &&
+        request.resource.data.reason.size() >= 8 &&
+        request.resource.data.reason.size() <= 1000 &&
+        request.resource.data.status == "submitted" &&
+        request.resource.data.grantId == null &&
+        request.resource.data.adminNote == "" &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time;
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
     match /accessBulkImports/{docId} {
-      allow read, create, update, delete: if isAdmin();
+      allow read, create, update: if isAdmin();
+      allow delete: if false;
     }
 
     match /accessBulkImportRows/{docId} {
-      allow read, create, update, delete: if isAdmin();
+      allow read, create, update: if isAdmin();
+      allow delete: if false;
     }
 
     match /accessEmailQueue/{docId} {
@@ -3061,7 +3107,16 @@ service cloud.firestore {
     }
 
     match /accessNotifications/{docId} {
-      allow read, create, update, delete: if isAdmin();
+      allow read: if isAdmin() ||
+        (
+          isSignedIn() &&
+          (
+            resource.data.uid == request.auth.uid ||
+            resource.data.email == request.auth.token.email
+          )
+        );
+      allow create, update: if isAdmin();
+      allow delete: if false;
     }
 
     match /accessPlanHistory/{docId} {

@@ -1,0 +1,14 @@
+{
+  "phase": "3.7",
+  "status": "GREEN",
+  "phaseStartHead": "3a149147307358971ee655de86551898ad2b2e52",
+  "createdAt": "2026-08-12T08:56:46.508385+00:00",
+  "evidenceLogSha256": {
+    "firestore-debug.log": "bd74457ef852e2dd27b76e9fe5265e03cdec8403ef833383eaeb5d653077a6c0",
+    "persona-emulator.log": "ffcdca082584aa0d6eb5d40ac9b84e7414ee7c167318d883ce10268507bec21b",
+    "phase.log": "3bf2d6e0aa4b2d8959cc69a8cace82d2877ec6c9cee0d33f12d91af0d5141a91"
+  },
+  "productionWrites": 0,
+  "push": "NO",
+  "deploy": "NO"
+}
