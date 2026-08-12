@@ -110,6 +110,41 @@ const METHOD_POLICIES = Object.freeze({
     "owner": "lp4NotesService",
     "phase": "4.1"
   },
+  "loadCurrentAffairsReader": {
+    "action": "READ",
+    "collections": ["lp4ResourceRecords", "learningTexts"],
+    "idempotency": false,
+    "owner": "lp4CurrentAffairsService",
+    "phase": "4.3"
+  },
+  "loadProtectedVideo": {
+    "action": "WATCH",
+    "collections": ["protectedContentAssets"],
+    "idempotency": false,
+    "owner": "lp4VideoService",
+    "phase": "4.4"
+  },
+  "loadStudentCourses": {
+    "action": "DISCOVER",
+    "collections": ["contentItems", "studentLearning"],
+    "idempotency": false,
+    "owner": "lp4LearningStateService",
+    "phase": "4.7"
+  },
+  "loadStudentRevisionHub": {
+    "action": "DISCOVER",
+    "collections": ["contentItems", "studentLearning", "studentLearningActions", "lp4ResourceRecords"],
+    "idempotency": false,
+    "owner": "lp4LearningStateService",
+    "phase": "4.7"
+  },
+  "loadSubjectWorkspace": {
+    "action": "DISCOVER",
+    "collections": ["contentItems", "studentLearning"],
+    "idempotency": false,
+    "owner": "lp4LearningStateService",
+    "phase": "4.7"
+  },
   "loadCurrentAffairsSourceRegister": {
     "action": "ADMIN_READ",
     "collections": [
@@ -652,9 +687,10 @@ const resourceIdFrom = (payload = {}) => {
 
 const preAuthorizeAction = (method, payload = {}) => {
   if (["loadMockTest","loadMockAttemptDraft","saveMockAttemptDraft","pauseMockAttempt","resumeMockAttempt","recordAttempt"].includes(method)) return "ATTEMPT";
-  if (["resolveProtectedVideo","downloadVideoAttachment","saveVideoProgress","saveVideoStudyAction"].includes(method)) return "WATCH";
+  if (["resolveProtectedVideo","loadProtectedVideo","downloadVideoAttachment","saveVideoProgress","saveVideoStudyAction"].includes(method)) return "WATCH";
   if (["resolveLiveJoin","recordLiveAttendance","saveLiveReminder"].includes(method)) return "JOIN";
-  if (method === "saveNoteProgress") return "READ";
+  if (method === "saveNoteProgress" || method === "loadCurrentAffairsReader") return "READ";
+  if (method === "loadStudentRevisionHub" && resourceIdFrom(payload)) return TYPE_ACTION[clean(asObject(payload).resourceType || asObject(payload).type).toLowerCase()] || "OPEN";
   if (["recordRoadmapProgress","loadRoadmapProgress","rescheduleRoadmap"].includes(method)) return "OPEN";
   if (["recordProgress","recordStudyAction"].includes(method)) return TYPE_ACTION[clean(asObject(payload).resourceType || asObject(payload).type).toLowerCase()] || "OPEN";
   return "";

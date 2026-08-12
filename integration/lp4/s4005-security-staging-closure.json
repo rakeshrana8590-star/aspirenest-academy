@@ -1,0 +1,21 @@
+{
+  "schema": "aspirenest.lp4.s4005.security-staging.v1",
+  "parent": "15efa0c9ce7c29e4012135ebe3d52f4e1169852f",
+  "knownClosures": [
+    "contentItems public-safe metadata only; full protected fields server-only",
+    "full LP4 resource payload moved to lp4ResourceRecords server-only",
+    "mockResults browser writes denied and ownerUid reads only",
+    "currentAffairs full reader server-authorized; direct Student source read denied",
+    "mentorLiveSessions exact safe metadata reads preserve LP3 canonical probes; join/provider URL server-only",
+    "studyRoadmaps exact safe metadata reads preserve LP3 canonical probes; full roadmap payload server-only",
+    "canonical absent-source GET returns NOT_FOUND rather than permission-denied",
+    "five V26 discovery/reader methods activated",
+    "Saved/Recent/Continue server-backed through studentLearning",
+    "resource-specific discovery methods re-authorize entitlement",
+    "Notes PDF fallback resolves server-authorized short signed Storage URL"
+  ],
+  "stagingProject": "aspirenest-platform-staging",
+  "productionWrites": 0,
+  "deployProduction": false,
+  "strategy": "continue-to-end diagnostics; real branch apply only after local+staging green"
+}

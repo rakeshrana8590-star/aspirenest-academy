@@ -1,0 +1,21 @@
+#!/usr/bin/env node
+"use strict";
+const fs=require("node:fs"),path=require("node:path"),assert=require("node:assert/strict");
+const fn=fs.readFileSync(path.join(__dirname,"lp4LearningAuthority.js"),"utf8");
+const rules=fs.readFileSync(path.join(__dirname,"..","firestore.rules"),"utf8");
+const index=fs.readFileSync(path.join(__dirname,"index.js"),"utf8");
+for(const s of ["lp4ResourceRecords","publicResourceMetadata","loadCurrentAffairsReader","loadStudentRevisionHub","loadSubjectWorkspace","loadStudentCourses"]) assert.ok(fn.includes(s),s);
+for(const forbidden of ["lp4Record", "inlineQuestions", "sourceUrl", "joinUrl"]) assert.ok(rules.includes(forbidden),forbidden);
+assert.match(rules,/match \/mockResults\/\{docId\}[\s\S]*allow create, update, delete: if false;/);
+assert.match(rules,/match \/currentAffairs\/\{docId\}[\s\S]*allow read: if isAdmin\(\);/);
+assert.match(rules,/match \/mentorLiveSessions\/\{sessionId\}[\s\S]*allow get:[\s\S]*isPublicSafeLp4Metadata\(resource\.data\);/);
+assert.match(rules,/match \/studyRoadmaps\/\{docId\}[\s\S]*allow get:[\s\S]*isPublicSafeLp4Metadata\(resource\.data\);/);
+assert.match(rules,/match \/lp4ResourceRecords\/\{docId\} \{ allow read, write: if false; \}/);
+assert.match(index,/resolveNotesProtectedAsset = async \(\{[\s\S]*storage = getStorage\(\)/);
+assert.match(fn,/documentId=isNote\?resourceId:assetId/);
+assert.match(fn,/const exactDiscovery=\["loadStudentCourses","loadSubjectWorkspace","loadStudentRevisionHub"\]\.includes\(method\)/);
+assert.match(fn,/for\(const collection of \["contentItems","studyRoadmaps","mentorLiveSessions","experienceEvents"\]\)/);
+assert.match(fn,/\["note","current-affairs"\]\.includes\(type\).*learningTexts/);
+assert.match(rules,/match \/currentAffairsCorrections\/\{docId\} \{ allow read: if isAdmin\(\);/);
+assert.equal(/canonicalCollection\(type\)\)\) await firestore\.collection\("contentItems"\)/.test(fn),false);
+console.log("LP4_SECURITY_CLOSURE_STATIC=PASS");

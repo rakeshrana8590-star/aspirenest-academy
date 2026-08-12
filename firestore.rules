@@ -1760,8 +1760,21 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    function isPublicSafeLp4Metadata(data) {
+      return !data.keys().hasAny([
+        "lp4Record", "pages", "inlineQuestions", "answer", "explanation",
+        "sourceUrl", "storagePath", "joinUrl", "meetingUrl", "providerJoinUrl",
+        "replayUrl", "backupUrl", "meetingId", "passcode", "credentials", "secret"
+      ]);
+    }
+
     match /contentItems/{docId} {
-      allow read: if true;
+      // Canonical identity probes all source collections by exact id. Missing docs
+      // must return NOT_FOUND rather than permission-denied; existing public docs
+      // are readable only when they contain the safe metadata projection.
+      allow get: if !exists(/databases/$(database)/documents/contentItems/$(docId)) ||
+        isPublicSafeLp4Metadata(resource.data) || isAdmin();
+      allow list: if isAdmin();
       allow create, update, delete: if isAdmin();
     }
 
@@ -1782,33 +1795,9 @@ service cloud.firestore {
     }
 
     match /mockResults/{docId} {
-      allow create: if isSignedIn()
-        && request.resource.data.email == request.auth.token.email;
-
       allow read: if isAdmin() ||
-        (isSignedIn() && request.auth.token.email == resource.data.email);
-
-      allow update: if isAdmin() ||
-        (
-          isSignedIn()
-          && resource.data.email == request.auth.token.email
-          && request.resource.data.email == resource.data.email
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            "testTitle",
-            "score",
-            "totalMarks",
-            "percentage",
-            "accuracy",
-            "correctCount",
-            "wrongCount",
-            "skippedCount",
-            "totalQuestions",
-            "durationSeconds",
-            "updatedAt"
-          ])
-        );
-
-      allow delete: if isAdmin();
+        (isSignedIn() && resource.data.ownerUid == request.auth.uid);
+      allow create, update, delete: if false;
     }
 
     function isMockLeaderboardOwner() {
@@ -1872,8 +1861,8 @@ service cloud.firestore {
     }
 
     match /currentAffairs/{docId} {
-      allow read: if true;
-      allow create, update, delete: if isAdmin();
+      allow read: if isAdmin();
+      allow create, update, delete: if false;
     }
 
     match /announcements/{docId} {
@@ -1882,6 +1871,7 @@ service cloud.firestore {
     }
 
     // LP4 production learning authority: browser writes are forbidden; Cloud Functions/Admin SDK owns durable mutations.
+    match /lp4ResourceRecords/{docId} { allow read, write: if false; }
     match /lp4Idempotency/{docId} { allow read, write: if false; }
     match /lp4AuditLogs/{docId} { allow read: if isAdmin(); allow create, update, delete: if false; }
     match /studentLearning/{docId} { allow read: if isAdmin() || (isSignedIn() && resource.data.ownerUid == request.auth.uid); allow create, update, delete: if false; }
@@ -1891,7 +1881,7 @@ service cloud.firestore {
     match /liveReminders/{docId} { allow read: if isAdmin() || (isSignedIn() && resource.data.ownerUid == request.auth.uid); allow create, update, delete: if false; }
     match /liveAttendance/{docId} { allow read: if isAdmin() || (isSignedIn() && resource.data.ownerUid == request.auth.uid); allow create, update, delete: if false; }
     match /currentAffairsSources/{docId} { allow read: if isAdmin(); allow create, update, delete: if false; }
-    match /currentAffairsCorrections/{docId} { allow read: if isSignedIn(); allow create, update, delete: if false; }
+    match /currentAffairsCorrections/{docId} { allow read: if isAdmin(); allow create, update, delete: if false; }
     match /authoringVersions/{docId} { allow read: if isAdmin(); allow create, update, delete: if false; }
     match /learningTexts/{docId} { allow read: if isAdmin(); allow create, update, delete: if false; }
 
@@ -2132,17 +2122,19 @@ service cloud.firestore {
        ================================ */
 
     match /studyRoadmaps/{docId} {
-      allow read: if true;
+      allow get: if !exists(/databases/$(database)/documents/studyRoadmaps/$(docId)) ||
+        isAdmin() || isActiveMentor() || isPublicSafeLp4Metadata(resource.data);
+      allow list: if isAdmin() || isActiveMentor();
       allow create, update, delete: if isAdmin();
     }
 
     match /studyRoadmapDays/{docId} {
-      allow read: if true;
+      allow read: if isAdmin() || isActiveMentor();
       allow create, update, delete: if isAdmin();
     }
 
     match /studyRoadmapResourceLinks/{docId} {
-      allow read: if true;
+      allow read: if isAdmin() || isActiveMentor();
       allow create, update, delete: if isAdmin();
     }
 
@@ -3235,7 +3227,9 @@ service cloud.firestore {
     }
 
     match /mentorLiveSessions/{sessionId} {
-      allow read: if isSignedIn();
+      allow get: if !exists(/databases/$(database)/documents/mentorLiveSessions/$(sessionId)) ||
+        isAdmin() || isActiveMentor() || isPublicSafeLp4Metadata(resource.data);
+      allow list: if isAdmin() || isActiveMentor();
 
       allow create: if isAdmin() ||
         (

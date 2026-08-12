@@ -1531,6 +1531,7 @@ const buildMockTestServerTimeResponse = ({
   data = {},
   now = () => Date.now(),
   makeRequestId = () => randomUUID(),
+  storage = getStorage(),
 } = {}) => {
   const uid = cleanString(auth?.uid);
 
@@ -1954,6 +1955,7 @@ const upsertMockTestLeaderboardProjection = async ({
   auth = null,
   data = {},
   firestore = getFirestore(),
+  storage = getStorage(),
   now = () => Date.now(),
 } = {}) => {
   const ownedResult =
@@ -2536,6 +2538,7 @@ const resolveNotesProtectedAsset = async ({
   auth = null,
   data = {},
   firestore = getFirestore(),
+  storage = getStorage(),
   now = () => Date.now(),
   makeRequestId = () => randomUUID(),
 } = {}) => {
@@ -2673,11 +2676,23 @@ const resolveNotesProtectedAsset = async ({
     );
   }
 
-  const assetUrl =
+  let assetUrl =
     pickNotesProtectedAssetUrl({
       asset,
       action: request.action,
     });
+
+  if (!assetUrl && cleanString(asset.storagePath)) {
+    try {
+      const [signedUrl] = await storage.bucket().file(cleanString(asset.storagePath)).getSignedUrl({
+        action: "read",
+        expires: serverNowMs + 10 * 60 * 1000,
+      });
+      assetUrl = cleanString(signedUrl);
+    } catch {
+      assetUrl = "";
+    }
+  }
 
   if (!assetUrl) {
     throw new HttpsError(
@@ -2846,6 +2861,7 @@ exports.getMockTestServerTime = onCall(
 exports.resolveNotesProtectedAsset = onCall(
   {
     region: "asia-south1",
+    invoker: "public",
     timeoutSeconds: 15,
     memory: "256MiB",
     maxInstances: 10,
@@ -2854,6 +2870,7 @@ exports.resolveNotesProtectedAsset = onCall(
     resolveNotesProtectedAsset({
       auth: request.auth,
       data: request.data,
+      storage: getStorage(),
     })
 );
 

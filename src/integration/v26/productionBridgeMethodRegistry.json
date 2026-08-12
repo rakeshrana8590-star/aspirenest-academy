@@ -526,10 +526,22 @@
     {
       "name": "loadCurrentAffairsReader",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4CurrentAffairsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4005",
+      "runtimeActivation": true,
+      "lp4Phase": "4.3",
+      "lp4AuthorizeAction": "READ",
+      "lp4Collections": [
+        "lp4ResourceRecords",
+        "learningTexts"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "loadCurrentAffairsSourceRegister",
@@ -741,10 +753,21 @@
     {
       "name": "loadProtectedVideo",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4VideoService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4005",
+      "runtimeActivation": true,
+      "lp4Phase": "4.4",
+      "lp4AuthorizeAction": "WATCH",
+      "lp4Collections": [
+        "protectedContentAssets"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "loadPublicMentorDirectory",
@@ -813,10 +836,22 @@
     {
       "name": "loadStudentCourses",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4LearningStateService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4005",
+      "runtimeActivation": true,
+      "lp4Phase": "4.7",
+      "lp4AuthorizeAction": "DISCOVER",
+      "lp4Collections": [
+        "contentItems",
+        "studentLearning"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "loadStudentNotifications",
@@ -845,10 +880,24 @@
     {
       "name": "loadStudentRevisionHub",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4LearningStateService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4005",
+      "runtimeActivation": true,
+      "lp4Phase": "4.7",
+      "lp4AuthorizeAction": "DISCOVER",
+      "lp4Collections": [
+        "contentItems",
+        "studentLearning",
+        "studentLearningActions",
+        "lp4ResourceRecords"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "loadStudentTasks",
@@ -874,10 +923,22 @@
     {
       "name": "loadSubjectWorkspace",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp4LearningStateService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp4LearningProductionService.js#createLp4LearningProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP4-P4.1-4.7-S4005",
+      "runtimeActivation": true,
+      "lp4Phase": "4.7",
+      "lp4AuthorizeAction": "DISCOVER",
+      "lp4Collections": [
+        "contentItems",
+        "studentLearning"
+      ],
+      "lp4IdempotencyRequired": false
     },
     {
       "name": "loadVideoAdminWorkspace",
