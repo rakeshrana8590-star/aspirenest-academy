@@ -893,6 +893,58 @@
     }
   }
 
+  // LP5 5.2–5.8 production reconciliation. Browser storage remains UX cache only.
+  // Operational scheduler authority is Cloud Scheduler/server time; browser timers never own delivery.
+  const LP5_OPERATIONAL_SCHEDULER_AUTHORITY='SERVER_CLOUD_SCHEDULER';
+  let lp5AcademyOperationsServerShadow={};
+  async function hydrateLp5AcademyOperationsState(){
+    if(!state.session?.authenticated){
+      try{
+        const events=await adapter.listExperienceEvents?.({});
+        const updates=await adapter.loadNotificationCenter?.({});
+        lp5AcademyOperationsServerShadow={events:events?.state?.items||[],publicNotifications:updates?.state?.items||[]};
+      }catch(error){lp4OperationFailure('lp5-hydrate-public-operations',error);}
+      return;
+    }
+    const role=String(state.session?.activeRole||state.session?.role||'').toLowerCase();
+    try{
+      if(role==='mentor'){
+        const [workspace,notifications,calendar]=await Promise.all([
+          adapter.loadMentorWorkspace?.({}),
+          adapter.loadMentorNotifications?.({}),
+          adapter.loadMentorCalendar?.({})
+        ]);
+        const ws=workspace?.state||{};
+        if(Array.isArray(ws.assignments)){state.mentorAssignments=ws.assignments;storage.setItem(KEYS.mentorAssignments,JSON.stringify(state.mentorAssignments));}
+        if(Array.isArray(ws.questions)){state.mentorQuestions=ws.questions;storage.setItem(KEYS.mentorQuestions,JSON.stringify(state.mentorQuestions));}
+        const items=notifications?.state?.items||[];
+        if(state.notificationV26&&Array.isArray(items)){state.notificationV26.mentor=items;persistNotificationsV26();}
+        lp5AcademyOperationsServerShadow={workspace:ws,notifications:items,calendar:calendar?.state||{}};
+      }else if(role==='student'){
+        const [command,notifications]=await Promise.all([
+          adapter.loadStudentCommandCenter?.({}),
+          adapter.loadStudentNotifications?.({})
+        ]);
+        const cs=command?.state||{};
+        const items=notifications?.state?.items||[];
+        if(state.notificationV26&&Array.isArray(items)){state.notificationV26.student=items;persistNotificationsV26();}
+        lp5AcademyOperationsServerShadow={commandCenter:cs,notifications:items};
+      }else if(role==='admin'){
+        const [workspace,notifications,events]=await Promise.all([
+          adapter.loadAdminWorkspace?.({}),
+          adapter.loadNotificationCenter?.({}),
+          adapter.listExperienceEvents?.({})
+        ]);
+        const ws=workspace?.state||{};
+        if(Array.isArray(ws.records)){
+          const serverResources=ws.records.filter(item=>item?.kind==='adminResource');
+          if(serverResources.length){state.adminResources=serverResources;storage.setItem(KEYS.adminResources,JSON.stringify(state.adminResources));}
+        }
+        lp5AcademyOperationsServerShadow={workspace:ws,notifications:notifications?.state||{},events:events?.state||{}};
+      }
+    }catch(error){lp4OperationFailure('lp5-hydrate-academy-operations',error);}
+  }
+
   function mentorProfileCompletion() {
     const profile=state.mentorProfessionalProfile;
     const fields=['displayName','headline','bio','currentRole','qualification','examExpertise','researchAreas','recognition','digitalLearning'];
@@ -7023,6 +7075,7 @@
     state.session = await adapter.getSession();
     await hydrateLp4ProductionState();
     await hydrateLp5Phase51ProductionState();
+    await hydrateLp5AcademyOperationsState();
     const hash = location.hash;
     bindEvents();
     if (hash) routeFromHash();

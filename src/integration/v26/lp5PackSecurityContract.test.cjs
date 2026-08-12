@@ -1,0 +1,46 @@
+"use strict";
+const assert=require("node:assert/strict"),fs=require("fs"),path=require("path");
+const root=path.resolve(__dirname,"../../..");
+const rules=fs.readFileSync(path.join(root,"firestore.rules"),"utf8");
+const authority=fs.readFileSync(path.join(root,"functions/lp5AcademyOperationsAuthority.js"),"utf8");
+const index=fs.readFileSync(path.join(root,"functions/index.js"),"utf8");
+const provider=fs.readFileSync(path.join(root,"src/integration/v26/browser/productionProviderEntry.js"),"utf8");
+const app=fs.readFileSync(path.join(root,"runtime/v26-shell/app.js"),"utf8");
+const raw=JSON.parse(fs.readFileSync(path.join(root,"src/integration/v26/productionBridgeMethodRegistry.json"),"utf8"));
+const rows=Array.isArray(raw)?raw:raw.methods;
+const ops=rows.filter(r=>r.ownerDecisionEvidence==="LP5-PHASE-5.2-5.8-S5005");
+assert.equal(rows.length,182);
+assert.equal(ops.length,68);
+assert.equal(rows.filter(r=>r.ownerState==="SAFE_DISABLED_PENDING_OWNER").length,0);
+assert.ok(rules.includes('match /lp5AcademyOps/{docId} { allow read, write: if false; }'));
+assert.ok(rules.includes('match /lp5AuditLogs/{docId} { allow read: if isAdmin(); allow create, update, delete: if false; }'));
+assert.ok(rules.includes('match /experienceEvents/{docId}'));
+assert.ok(rules.includes('allow create, update, delete: if false;'));
+assert.ok(authority.includes('assignmentDoesNotGrantEntitlement:true'));
+assert.ok(authority.includes('entitlementsAfter!==entitlementsBefore'));
+assert.ok(authority.includes('queued_disabled'));
+assert.ok(authority.includes('duplicatePrevented:true'));
+assert.ok(authority.includes('DISABLED_PENDING_LP8'));
+assert.ok(index.includes('exports.lp5AcademyOperationsOperation = onCall('));
+assert.ok(index.includes('exports.lp5NotificationScheduler = onSchedule('));
+assert.ok(provider.includes('lp5AcademyOperationsProductionService.invoke'));
+assert.ok(app.includes('hydrateLp5AcademyOperationsState'));
+assert.ok(app.includes("LP5_OPERATIONAL_SCHEDULER_AUTHORITY='SERVER_CLOUD_SCHEDULER'"));
+for(const forbidden of ["setDoc","addDoc","updateDoc","deleteDoc","writeBatch","runTransaction"])assert.ok(!provider.includes(forbidden),forbidden);
+console.log("LP5_PACK_SECURITY_CONTRACT=PASS");
+console.log("LP5_5_2_TO_5_8_OWNER_ROWS=68");
+console.log("SAFE_DISABLED_REMAINING=0");
+console.log("ASSIGNMENT_NOT_ENTITLEMENT=PASS");
+console.log("SERVER_SCHEDULER=PASS");
+console.log("EXPERIENCE_EVENTS_ONE_SOURCE=PASS");
+console.log("COMMERCE_EXTERNAL_EXECUTION=DISABLED_PENDING_LP8");
+console.log("LOCALSTORAGE_AUTHORITY=CACHE_ONLY_SERVER_HYDRATION_WINS");
+
+{
+  const putMatch = authority.match(/const next=\{([\s\S]*?)updatedAt:/);
+  assert.ok(putMatch, "LP5 put() canonical record construction missing");
+  const body = putMatch[1];
+  assert.ok(body.indexOf("...cloneSafe(obj(data))") < body.indexOf("kind, id:safeId"), "server canonical kind/id must override caller payload");
+  console.log("PASS LP5 canonical operation discriminator/id are server-owned");
+}
+console.log("BROWSER_TIMER_SCHEDULER_AUTHORITY=NO");

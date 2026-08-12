@@ -1,0 +1,99 @@
+{
+  "schema": "aspirenest.lp5.remaining-pack.production-contract.v1",
+  "pack": "LP5",
+  "activeFrom": "5.2",
+  "through": "5.8",
+  "strategy": "FULL_HARVEST_CONTINUE_TO_END_THEN_CONSOLIDATED_REPAIR",
+  "authority": {
+    "service": "lp5AcademyOperationsService",
+    "callable": "lp5AcademyOperationsOperation",
+    "scheduler": "lp5NotificationScheduler",
+    "stateCollection": "lp5AcademyOps",
+    "experienceEventsSource": "experienceEvents",
+    "auditCollection": "lp5AuditLogs",
+    "runtimeOwnersAfterClosure": 182,
+    "safeDisabledRemaining": 0
+  },
+  "invariants": [
+    "assignment_never_grants_entitlement",
+    "unassigned_learner_denied",
+    "student_owns_student_records",
+    "admin_write_requires_admin",
+    "experience_status_uses_server_time",
+    "notification_never_grants_entitlement",
+    "notification_recipient_resolver_prevents_cross_user_leak",
+    "scheduled_delivery_is_server_owned_and_idempotent",
+    "external_channels_remain_queued_disabled_until_separate_authorization",
+    "pii_masked_in_operational_exports",
+    "browser_storage_is_cache_only",
+    "v26_visible_redesign_no"
+  ],
+  "phases": {
+    "5.2": {
+      "name": "Mentor learner 360, guidance and assignments",
+      "proof": [
+        "assigned learner only",
+        "real progress/access/results/questions",
+        "assignment lifecycle",
+        "assignment != entitlement"
+      ]
+    },
+    "5.3": {
+      "name": "Admin Studios and operational writes",
+      "proof": [
+        "admin real writes",
+        "validation before publish",
+        "version+audit",
+        "student admin-write deny",
+        "PII-safe export"
+      ]
+    },
+    "5.4": {
+      "name": "Experience events and academy heartbeat",
+      "proof": [
+        "one experienceEvents source",
+        "server-time status",
+        "exact CTA",
+        "archive"
+      ]
+    },
+    "5.5": {
+      "name": "Notification backend authority",
+      "proof": [
+        "server inbox",
+        "recipient resolver",
+        "preferences",
+        "notification != entitlement"
+      ]
+    },
+    "5.6": {
+      "name": "Scheduling, delivery queue, rules and digests",
+      "proof": [
+        "Cloud Scheduler",
+        "idempotency keys",
+        "failure-safe queue",
+        "quiet hours/timezone",
+        "external channels disabled queue"
+      ]
+    },
+    "5.7": {
+      "name": "Role privacy and operational audit proof",
+      "proof": [
+        "public nonpersonal",
+        "student own only",
+        "mentor assigned only",
+        "admin audit export",
+        "PII masking"
+      ]
+    },
+    "5.8": {
+      "name": "Academy operations gate",
+      "proof": [
+        "one-day simulation",
+        "Admin+Mentor developer-free operations",
+        "zero queue/audit discrepancy",
+        "operational checkpoint"
+      ]
+    }
+  }
+}

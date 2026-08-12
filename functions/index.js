@@ -20,6 +20,9 @@ const {
   onCall,
 } = require("firebase-functions/v2/https");
 const {
+  onSchedule,
+} = require("firebase-functions/v2/scheduler");
+const {
   createLp2IdentityAuthorityService,
 } = require("./lp2IdentityAuthority");
 const {
@@ -28,6 +31,9 @@ const {
 const {
   createLp5MentorProfileAuthority,
 } = require("./lp5MentorProfileAuthority");
+const {
+  createLp5AcademyOperationsAuthority,
+} = require("./lp5AcademyOperationsAuthority");
 const {
   getStorage,
 } = require("firebase-admin/storage");
@@ -53,6 +59,12 @@ const lp5MentorProfileAuthorityService =
     serverTimestamp: () => Timestamp.now(),
   });
 
+const lp5AcademyOperationsAuthorityService =
+  createLp5AcademyOperationsAuthority({
+    firestore: getFirestore(),
+    serverTimestamp: () => Timestamp.now(),
+  });
+
 const LP4_LEARNING_CALLABLE_OPTIONS = Object.freeze({
   region: "asia-south1",
   invoker: "public",
@@ -62,6 +74,14 @@ const LP4_LEARNING_CALLABLE_OPTIONS = Object.freeze({
 });
 
 const LP5_MENTOR_PROFILE_CALLABLE_OPTIONS = Object.freeze({
+  region: "asia-south1",
+  invoker: "public",
+  timeoutSeconds: 60,
+  memory: "512MiB",
+  maxInstances: 20,
+});
+
+const LP5_ACADEMY_OPERATIONS_CALLABLE_OPTIONS = Object.freeze({
   region: "asia-south1",
   invoker: "public",
   timeoutSeconds: 60,
@@ -2730,6 +2750,55 @@ const resolveNotesProtectedAsset = async ({
     requestId,
   });
 };
+
+
+exports.lp5AcademyOperationsOperation = onCall(
+  LP5_ACADEMY_OPERATIONS_CALLABLE_OPTIONS,
+  async (request) => {
+    try {
+      return await lp5AcademyOperationsAuthorityService.invoke({
+        method: request.data && request.data.method,
+        payload: request.data && request.data.payload,
+        meta: request.data && request.data.meta,
+        auth: request.auth,
+      });
+    } catch (error) {
+      const code = String(error && error.lp5Code || "");
+      const map = {
+        UNAUTHENTICATED: "unauthenticated",
+        FORBIDDEN: "permission-denied",
+        INVALID_ARGUMENT: "invalid-argument",
+        INVALID_REQUEST: "invalid-argument",
+        NOT_FOUND: "not-found",
+        CONFLICT: "aborted",
+        FAILED_PRECONDITION: "failed-precondition",
+        INTERNAL: "internal",
+      };
+      throw new HttpsError(
+        map[code] || "internal",
+        String(error && error.message || "LP5 academy operation failed.").slice(0,300),
+        error && error.details ? error.details : undefined,
+      );
+    }
+  },
+);
+
+exports.lp5NotificationScheduler = onSchedule(
+  {
+    schedule: "every 5 minutes",
+    region: "asia-south1",
+    timeZone: "Asia/Kolkata",
+    retryCount: 3,
+    maxRetrySeconds: 120,
+    timeoutSeconds: 60,
+    memory: "256MiB",
+  },
+  async () => {
+    return lp5AcademyOperationsAuthorityService.runDueNotificationJobs({
+      limit: 100,
+    });
+  },
+);
 
 
 exports.lp5MentorProfileOperation = onCall(

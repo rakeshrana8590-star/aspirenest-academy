@@ -14,10 +14,12 @@
     {
       "name": "answerMentorQuestion",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "applyBulkAccess",
@@ -48,18 +50,22 @@
     {
       "name": "archiveAdminResource",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "archiveExperienceEntity",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "archiveMockTest",
@@ -103,10 +109,12 @@
     {
       "name": "archiveNotification",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "assignRoadmap",
@@ -200,18 +208,22 @@
     {
       "name": "createAdminResourceVersion",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "createCommerceOrder",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "createLiveProviderSession",
@@ -269,58 +281,72 @@
     {
       "name": "createMentorAssignment",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "createNotification",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "createNotificationJob",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "createPaymentLink",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "createPublicAccessEnquiry",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "createPublicSupportRequest",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "createRazorpayQr",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "createStudentAccessRequest",
@@ -392,10 +418,12 @@
     {
       "name": "exportAdminReport",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "exportMockTest",
@@ -421,10 +449,12 @@
     {
       "name": "exportNotificationAudit",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "extendAccessGrant",
@@ -508,26 +538,32 @@
     {
       "name": "listExperienceEvents",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "listNotificationDelivery",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "loadAdminWorkspace",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "loadCurrentAffairsReader",
@@ -585,42 +621,52 @@
     {
       "name": "loadMentorCalendar",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "loadMentorCommandCenter",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "loadMentorLearner360",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "loadMentorNotifications",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "loadMentorOutcomes",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "loadMentorProfessionalProfile",
@@ -639,18 +685,22 @@
     {
       "name": "loadMentorToday",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "loadMentorWorkspace",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "loadMockAdminWorkspace",
@@ -757,10 +807,12 @@
     {
       "name": "loadNotificationCenter",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "loadProtectedVideo",
@@ -817,10 +869,12 @@
     {
       "name": "loadRoleAnalytics",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "loadStudentAccountSecurity",
@@ -838,18 +892,22 @@
     {
       "name": "loadStudentAssignments",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "loadStudentCommandCenter",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "loadStudentCourses",
@@ -874,10 +932,12 @@
     {
       "name": "loadStudentNotifications",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "loadStudentProfile",
@@ -896,10 +956,12 @@
     {
       "name": "loadStudentResults",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "loadStudentRevisionHub",
@@ -926,10 +988,12 @@
     {
       "name": "loadStudentTasks",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "loadStudentWorkspace",
@@ -1102,10 +1166,12 @@
     {
       "name": "publishAdminResource",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "publishCurrentAffairs",
@@ -1170,10 +1236,12 @@
     {
       "name": "publishMentorAssignment",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "publishMentorProfessionalProfile",
@@ -1234,10 +1302,12 @@
     {
       "name": "publishNotification",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "publishRoadmap",
@@ -1284,10 +1354,12 @@
     {
       "name": "reconcilePayment",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "recordAttempt",
@@ -1488,22 +1560,26 @@
     {
       "name": "requestMentorAccountReview",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "requestMentorHelp",
       "launchCore": true,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "INTENTIONALLY_SAFE_DISABLED_DEFERRED_TO_OWNER_PHASE",
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
       "deferredOwnerPhases": [
         "5.2"
       ],
       "deferReason": "ASSIGNED_LEARNER_MENTOR_QUESTION_AUTHORITY_NOT_OWNED_BY_LP1",
-      "auditCandidates": []
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "requestPasswordReset",
@@ -1521,10 +1597,12 @@
     {
       "name": "requestStudentDataExport",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "rescheduleRoadmap",
@@ -1653,10 +1731,12 @@
     {
       "name": "reviewMentorAssignment",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "revokeAccessGrant",
@@ -1687,10 +1767,12 @@
     {
       "name": "runAdminReadiness",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveAccessBundle",
@@ -1760,42 +1842,52 @@
     {
       "name": "saveAdminOperation",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveAdminResource",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveAdminResourceAsset",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveAdminSettings",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveCommerceSettings",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveCurrentAffairs",
@@ -1841,18 +1933,22 @@
     {
       "name": "saveEmailSettings",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveExperienceEntity",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveLive",
@@ -1896,58 +1992,72 @@
     {
       "name": "saveMentorAssignmentDraft",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveMentorCollection",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveMentorCommunication",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveMentorGroup",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveMentorIntervention",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveMentorNotificationPreferences",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveMentorPreferences",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveMentorProfessionalEntry",
@@ -2073,34 +2183,42 @@
     {
       "name": "saveNotificationPreferences",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveNotificationRule",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveNotificationTemplate",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveQuestionBankQuestion",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveRoadmap",
@@ -2126,18 +2244,22 @@
     {
       "name": "saveStudentNotificationPreferences",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveStudentPreferences",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "saveStudentProfile",
@@ -2235,18 +2357,22 @@
     {
       "name": "scheduleMentorSession",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "scheduleNotification",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "signInWithGoogle",
@@ -2264,18 +2390,22 @@
     {
       "name": "submitStudentAssignment",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "unpublishAdminResource",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "unpublishNote",
@@ -2313,10 +2443,12 @@
     {
       "name": "updateLearnerLifecycle",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "updateLiveProviderSession",
@@ -2359,10 +2491,12 @@
     {
       "name": "updateStudentTask",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "uploadMentorProfilePhoto",
@@ -2419,10 +2553,12 @@
     {
       "name": "validateAdminResource",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5AcademyOperationsService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "runtimeActivation": true,
+      "ownerDecisionEvidence": "LP5-PHASE-5.2-5.8-S5005"
     },
     {
       "name": "validateCurrentAffairs",
