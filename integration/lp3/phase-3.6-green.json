@@ -1,0 +1,20 @@
+{
+  "phase": "3.6",
+  "status": "GREEN",
+  "phaseStartHead": "0144af844339aec17bbf6c61154864f62662b95f",
+  "createdAt": "2026-08-12T07:37:33.037653+00:00",
+  "evidenceLogSha256": {
+    "access-production.log": "13838a36621c8668f914992a3c14b86bf48378afd1702d00ee253a42bc76caff",
+    "auth.log": "e22ebffdc9021108a278b8a1c33741c7e6650ca2a49841ab82c7da69c634ac15",
+    "authorize.log": "47a116c792fc53d1433026778e18fea78ff5558772de2bde7a54c3b4e2f35059",
+    "bridge.log": "64dce23d74cf7fc6048f84839690eaa67a797d71afc196e2b6a63a06627c0c9f",
+    "canonical.log": "3be5f084457b66260f61498815c34b365e887b49e45e2a74a19e61a9f3582d2c",
+    "entitlement.log": "77dbb6f917b6526c53f01d1958e9161db704b24b72f13512a501c054b993bed4",
+    "jest.log": "a26c85685fe67f71779a37d31cb2dfdeb4a27011958245dd85c30f8c0aa2a9f6",
+    "phase.log": "5a53b46ff3e637d29ed6788ac15255d11eedf9670e24ac6fbc06088fcc27646c",
+    "provider.log": "74089f367838f068bf47fdc119ac99636ccf41d9091dc8fdc0c5fb980ae2e8e6"
+  },
+  "productionWrites": 0,
+  "push": "NO",
+  "deploy": "NO"
+}

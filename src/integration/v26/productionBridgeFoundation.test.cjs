@@ -70,8 +70,8 @@ async function main() {
       item.ownerState === "SAFE_DISABLED_PENDING_OWNER" &&
       item.runtimeActivation !== true,
   );
-  assert.strictEqual(lp3AssignedRegistryMethods.length, 12);
-  assert.strictEqual(lp3SafeDisabledRegistryMethods.length, 170);
+  assert.strictEqual(lp3AssignedRegistryMethods.length, 33);
+  assert.strictEqual(lp3SafeDisabledRegistryMethods.length, 149);
   assert.strictEqual(
     lp3AssignedRegistryMethods.length +
       lp3SafeDisabledRegistryMethods.length,

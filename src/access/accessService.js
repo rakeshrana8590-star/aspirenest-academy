@@ -94,6 +94,8 @@ export const ACCESS_COLLECTIONS = Object.freeze({
   STUDENT_ENTITLEMENTS: "studentEntitlements",
   ACCESS_BULK_IMPORTS: "accessBulkImports",
   ACCESS_BULK_IMPORT_ROWS: "accessBulkImportRows",
+  STUDENT_ACCESS_REQUESTS: "studentAccessRequests",
+  ACCESS_NOTIFICATIONS: "accessNotifications",
 });
 
 const ADMIN_ROLES = new Set(["admin", "super_admin", "owner"]);
@@ -3017,6 +3019,318 @@ export const buildAccessProductPayload = (
       "",
     updatedAt: serverTimestamp(),
   };
+};
+
+const ACCESS_REQUEST_OPEN_STATUSES = new Set([
+  "submitted",
+  "under_review",
+  "needs_information",
+  "pending",
+]);
+
+const normalizeAccessRequestStatus = (status = "") =>
+  String(status || "").trim().toLowerCase();
+
+const normalizeAccessRequestScope = (scope = "item") => {
+  const value = String(scope || "item").trim().toLowerCase();
+  if (!Object.values(ACCESS_SCOPE_TYPES).includes(value)) {
+    throw new Error("Access request scope is invalid.");
+  }
+  return value;
+};
+
+export const resolveVerifiedAccessUserByEmail = async (email = "") => {
+  const normalizedEmail = normalizeAccessEmail(email);
+  if (!normalizedEmail) throw new Error("Learner email is required.");
+
+  const [normalizedSnap, emailSnap] = await Promise.all([
+    getDocs(query(collection(db, ACCESS_COLLECTIONS.USERS), where("normalizedEmail", "==", normalizedEmail))),
+    getDocs(query(collection(db, ACCESS_COLLECTIONS.USERS), where("email", "==", normalizedEmail))),
+  ]);
+  const map = new Map();
+  [...normalizedSnap.docs, ...emailSnap.docs].forEach((snap) => {
+    const data = snap.data() || {};
+    const uid = String(data.uid || snap.id || "").trim();
+    if (uid) map.set(uid, { id: snap.id, uid, ...data });
+  });
+  const matches = [...map.values()];
+  if (matches.length !== 1) {
+    throw new Error(matches.length ? "Learner identity is ambiguous." : "Learner identity was not found.");
+  }
+  const user = matches[0];
+  return {
+    uid: String(user.uid || user.id || "").trim(),
+    email: normalizeAccessEmail(user.normalizedEmail || user.email || normalizedEmail),
+    displayName: String(user.displayName || user.fullName || user.name || "").trim(),
+  };
+};
+
+export const createStudentAccessRequest = async ({
+  uid = "",
+  email = "",
+  resource = {},
+  scopeType = ACCESS_SCOPE_TYPES.ITEM,
+  target = "",
+  reason = "",
+  message = "",
+  targetExam = "",
+  itemIds = [],
+} = {}) => {
+  const learnerUid = String(uid || "").trim();
+  const learnerEmail = normalizeAccessEmail(email);
+  const resourceId = String(resource.resourceId || resource.id || "").trim();
+  const resourceType = String(resource.resourceType || resource.type || "").trim();
+  const canonicalRoute = String(resource.canonicalRoute || "").trim();
+  const cleanReason = String(reason || "").trim();
+  const scope = normalizeAccessRequestScope(scopeType);
+  if (!learnerUid || !learnerEmail) throw new Error("Verified learner identity is required.");
+  if (!resourceId || !resourceType || !canonicalRoute) throw new Error("Exact canonical resource is required.");
+  if (cleanReason.length < 8) throw new Error("Access request reason is required.");
+
+  const existingSnap = await getDocs(query(
+    collection(db, ACCESS_COLLECTIONS.STUDENT_ACCESS_REQUESTS),
+    where("uid", "==", learnerUid)
+  ));
+  const duplicate = existingSnap.docs.map(toAccessRecord).find((item) =>
+    item && item.resourceId === resourceId && item.scopeType === scope && ACCESS_REQUEST_OPEN_STATUSES.has(normalizeAccessRequestStatus(item.status))
+  );
+  if (duplicate) return { ...duplicate, duplicate: true };
+
+  const requestRef = doc(collection(db, ACCESS_COLLECTIONS.STUDENT_ACCESS_REQUESTS));
+  const payload = {
+    requestId: requestRef.id,
+    requesterType: "student",
+    uid: learnerUid,
+    learnerId: learnerUid,
+    learnerEmail,
+    normalizedEmail: learnerEmail,
+    resourceId,
+    resourceType,
+    moduleKey: String(resource.moduleKey || resource.module || "").trim(),
+    itemType: String(resource.itemType || "").trim(),
+    title: String(resource.title || "").trim(),
+    canonicalRoute,
+    requiredPlan: String(resource.requiredPlan || "FREE").trim().toUpperCase(),
+    scopeType: scope,
+    target: String(target || resourceId).trim(),
+    itemIds: Array.isArray(itemIds) ? itemIds.map((value) => String(value || "").trim()).filter(Boolean) : [],
+    reason: cleanReason.slice(0, 1000),
+    message: String(message || "").trim().slice(0, 2000),
+    targetExam: String(targetExam || "").trim().slice(0, 200),
+    status: "submitted",
+    grantId: null,
+    adminNote: "",
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  };
+  await setDoc(requestRef, payload);
+  return { id: requestRef.id, ...payload, duplicate: false };
+};
+
+const readAccessRequestById = async (requestId = "") => {
+  const id = String(requestId || "").trim();
+  if (!id) throw new Error("Access request id is required.");
+  for (const collectionName of [ACCESS_COLLECTIONS.STUDENT_ACCESS_REQUESTS, "mentorAccessRequests"]) {
+    const snapshot = await getDoc(doc(db, collectionName, id));
+    if (snapshot.exists()) {
+      return { collectionName, id: snapshot.id, ...snapshot.data() };
+    }
+  }
+  throw new Error("Access request was not found.");
+};
+
+export const listAccessRequests = async ({ actor = {}, maxCount = 100 } = {}) => {
+  requireAdminActor(actor);
+  const [studentSnap, mentorSnap] = await Promise.all([
+    getDocs(collection(db, ACCESS_COLLECTIONS.STUDENT_ACCESS_REQUESTS)),
+    getDocs(collection(db, "mentorAccessRequests")),
+  ]);
+  const rows = [
+    ...studentSnap.docs.map((x) => ({ id: x.id, requesterType: "student", ...x.data() })),
+    ...mentorSnap.docs.map((x) => ({ id: x.id, requesterType: "mentor", ...x.data() })),
+  ];
+  return rows.slice(0, Math.max(1, Number(maxCount || 100)));
+};
+
+const createAccessNotification = async ({ uid = "", email = "", event = "", title = "", copy = "", requestId = "", actor = {} } = {}) => {
+  const adminActor = requireAdminActor(actor);
+  const safeUid = String(uid || "").trim();
+  const normalizedEmail = normalizeAccessEmail(email);
+  const eventName = String(event || "access_update").trim();
+  const notificationId = ["access", requestId || "general", eventName].map((x) => String(x).replace(/[^a-zA-Z0-9_-]+/g, "-")).join("__").slice(0, 220);
+  await setDoc(doc(db, ACCESS_COLLECTIONS.ACCESS_NOTIFICATIONS, notificationId), {
+    notificationId,
+    uid: safeUid || null,
+    email: normalizedEmail,
+    audience: "student",
+    event: eventName,
+    title: String(title || "Access update").trim().slice(0, 240),
+    copy: String(copy || "").trim().slice(0, 1200),
+    requestId: requestId || null,
+    status: "unread",
+    createdAt: serverTimestamp(),
+    createdBy: adminActor.uid,
+    updatedAt: serverTimestamp(),
+  }, { merge: true });
+  return notificationId;
+};
+
+export const updateAccessRequest = async ({ requestId = "", status = "", note = "", actor = {} } = {}) => {
+  const adminActor = requireAdminActor(actor);
+  const request = await readAccessRequestById(requestId);
+  const nextStatus = normalizeAccessRequestStatus(status);
+  if (!["under_review", "needs_information", "rejected", "cancelled", "expired"].includes(nextStatus)) {
+    throw new Error("Use the dedicated approval operation to approve access.");
+  }
+  const ref = doc(db, request.collectionName, request.id);
+  const payload = {
+    status: nextStatus,
+    adminNote: String(note || "").trim().slice(0, 2000),
+    updatedAt: serverTimestamp(),
+    resolvedAt: ["rejected", "cancelled", "expired"].includes(nextStatus) ? serverTimestamp() : null,
+    resolvedBy: ["rejected", "cancelled", "expired"].includes(nextStatus) ? adminActor.uid : null,
+  };
+  await updateDoc(ref, payload);
+  const uid = String(request.uid || request.studentUid || request.learnerId || "").trim();
+  let email = normalizeAccessEmail(request.learnerEmail || request.email || request.normalizedEmail);
+  if (!email && uid) {
+    const userSnap = await getDoc(doc(db, ACCESS_COLLECTIONS.USERS, uid));
+    if (userSnap.exists()) email = normalizeAccessEmail(userSnap.data().normalizedEmail || userSnap.data().email);
+  }
+  await createAccessNotification({ uid, email, event: `access_request_${nextStatus}`, title: `Access request ${nextStatus.replace(/_/g, " ")}`, copy: payload.adminNote || "Your access request was updated.", requestId: request.id, actor: adminActor });
+  await createAccessAuditLog({ actor: adminActor, action: "update_access_request", uid, email, before: request, after: { ...request, ...payload }, metadata: { requestId: request.id, requestCollection: request.collectionName } });
+  return { id: request.id, ...payload };
+};
+
+export const approveAccessRequest = async ({ requestId = "", actor = {}, accessUntil = null, adminNote = "" } = {}) => {
+  const adminActor = requireAdminActor(actor);
+  const request = await readAccessRequestById(requestId);
+  const currentStatus = normalizeAccessRequestStatus(request.status);
+  if (currentStatus === "approved" && request.accessId) {
+    const existing = await getDoc(doc(db, ACCESS_COLLECTIONS.STUDENT_ACCESS, request.accessId));
+    if (existing.exists()) return { requestId: request.id, accessId: request.accessId, grant: toAccessRecord(existing), idempotent: true };
+  }
+  if (!ACCESS_REQUEST_OPEN_STATUSES.has(currentStatus)) throw new Error("Only an open access request can be approved.");
+
+  const uid = String(request.uid || request.studentUid || request.learnerId || "").trim();
+  let email = normalizeAccessEmail(request.learnerEmail || request.email || request.normalizedEmail);
+  let name = "";
+  if (uid) {
+    const userSnap = await getDoc(doc(db, ACCESS_COLLECTIONS.USERS, uid));
+    if (userSnap.exists()) {
+      const user = userSnap.data() || {};
+      email = email || normalizeAccessEmail(user.normalizedEmail || user.email);
+      name = String(user.displayName || user.fullName || user.name || "").trim();
+    }
+  }
+  if (!uid || !email) throw new Error("Access request learner identity could not be verified.");
+
+  const scopeType = normalizeAccessRequestScope(request.scopeType || request.scope || "item");
+  const target = String(request.target || request.resourceId || "").trim();
+  const base = {
+    uid,
+    email,
+    name,
+    course: ACCESS_COURSE.CTET_TET,
+    scopeType,
+    status: ACCESS_STATUS.ACTIVE,
+    source: request.requesterType === "mentor" || request.collectionName === "mentorAccessRequests" ? ACCESS_SOURCE.MENTOR_REQUEST_APPROVAL : ACCESS_SOURCE.STUDENT_REQUEST_APPROVAL,
+    accessFrom: new Date().toISOString().slice(0, 10),
+    accessUntil: accessUntil || null,
+    noExpiry: !accessUntil,
+    untilManualChange: false,
+    validityMode: accessUntil ? "CUSTOM_WINDOW" : "NO_EXPIRY",
+    adminNote: String(adminNote || `Approved access request ${request.id}`).trim(),
+  };
+  if (scopeType === ACCESS_SCOPE_TYPES.ITEM) {
+    base.itemId = String(request.resourceId || target).trim();
+    base.itemType = String(request.itemType || "").trim();
+    base.module = String(request.moduleKey || request.module || "").trim();
+    base.itemTitle = String(request.title || "").trim();
+  } else if (scopeType === ACCESS_SCOPE_TYPES.MODULE) {
+    base.module = String(request.moduleKey || request.module || target).trim();
+  } else if (scopeType === ACCESS_SCOPE_TYPES.BUNDLE) {
+    base.bundleId = target;
+    base.itemIds = Array.isArray(request.itemIds) ? request.itemIds : [String(request.resourceId || "").trim()].filter(Boolean);
+  } else {
+    base.planType = String(target || request.requiredPlan || ACCESS_PLAN_TYPES.FREE).trim().toUpperCase();
+  }
+
+  const grant = await writeIdempotentAccessGrant({ data: base, actor: adminActor, auditAction: "approve_access_request_grant", auditMetadata: { requestId: request.id, requestCollection: request.collectionName } });
+  await updateDoc(doc(db, request.collectionName, request.id), {
+    status: "approved",
+    accessId: grant.id,
+    grantId: grant.id,
+    adminNote: base.adminNote,
+    resolvedAt: serverTimestamp(),
+    resolvedBy: adminActor.uid,
+    updatedAt: serverTimestamp(),
+  });
+  await createAccessNotification({ uid, email, event: "access_request_approved", title: "Access approved", copy: `Your ${scopeType.toUpperCase()} access request is approved.`, requestId: request.id, actor: adminActor });
+  await createAccessAuditLog({ actor: adminActor, action: "approve_access_request", accessId: grant.id, uid, email, before: request, after: { status: "approved", accessId: grant.id }, metadata: { requestId: request.id, requestCollection: request.collectionName, scopeType } });
+  return { requestId: request.id, accessId: grant.id, grant, idempotent: grant.accessWriteMode !== "created" };
+};
+
+export const regenerateAccessKey = async ({ keyId = "", code = "", actor = {} } = {}) => {
+  const adminActor = requireAdminActor(actor);
+  const oldCode = normalizeAccessKeyCode(keyId);
+  const newCode = normalizeAccessKeyCode(code);
+  if (!oldCode || !newCode || oldCode === newCode) throw new Error("A distinct old and new access key code are required.");
+  const oldRef = doc(db, ACCESS_COLLECTIONS.ACCESS_KEYS, oldCode);
+  const newRef = doc(db, ACCESS_COLLECTIONS.ACCESS_KEYS, newCode);
+  const result = await runTransaction(db, async (transaction) => {
+    const [oldSnap, newSnap] = await Promise.all([transaction.get(oldRef), transaction.get(newRef)]);
+    if (!oldSnap.exists()) throw new Error("Access key was not found.");
+    if (newSnap.exists()) throw new Error("Replacement access key already exists.");
+    const before = { id: oldSnap.id, ...oldSnap.data() };
+    if (["used", "redeemed"].includes(String(before.status || "").toLowerCase())) throw new Error("A fully used access key cannot be regenerated.");
+    const replacement = {
+      ...before,
+      code: newCode,
+      normalizedCode: newCode,
+      status: ACCESS_KEY_STATUS.ACTIVE,
+      usedCount: 0,
+      redeemedByEmail: null,
+      redeemedByUid: null,
+      redeemedAt: null,
+      regeneratedFrom: oldCode,
+      createdAt: serverTimestamp(),
+      createdBy: adminActor.uid,
+      updatedAt: serverTimestamp(),
+      updatedBy: adminActor.uid,
+    };
+    delete replacement.id;
+    transaction.set(newRef, replacement);
+    transaction.update(oldRef, { status: ACCESS_KEY_STATUS.BLOCKED, replacedByKeyCode: newCode, regeneratedAt: serverTimestamp(), updatedAt: serverTimestamp(), updatedBy: adminActor.uid });
+    return { before, replacement };
+  });
+  await createAccessAuditLog({ actor: adminActor, action: "regenerate_access_key", accessId: oldCode, email: result.before.assignedEmail, before: result.before, after: { oldCode, newCode }, metadata: { oldCode, newCode } });
+  return { success: true, oldCode, code: newCode };
+};
+
+export const loadStudentAccessWorkspace = async ({ uid = "", email = "" } = {}) => {
+  const safeUid = String(uid || "").trim();
+  const safeEmail = normalizeAccessEmail(email);
+  if (!safeUid || !safeEmail) throw new Error("Verified learner identity is required.");
+  const rows = uniqueAccessRecords([...(await getAccessByUid(safeUid)), ...(await getAccessByEmail(safeEmail))]);
+  return rows.map((row) => ({
+    id: row.id,
+    uid: row.uid || null,
+    scopeType: row.scopeType || ACCESS_SCOPE_TYPES.PLAN,
+    module: row.module || "",
+    itemType: row.itemType || "",
+    itemId: row.itemId || "",
+    itemIds: Array.isArray(row.itemIds) ? row.itemIds : [],
+    bundleId: row.bundleId || "",
+    planType: row.planCode || row.planType || ACCESS_PLAN_TYPES.FREE,
+    status: row.status || ACCESS_STATUS.PENDING,
+    accessFrom: row.accessFrom || null,
+    accessUntil: row.accessUntil || null,
+    noExpiry: row.noExpiry === true,
+    untilManualChange: row.untilManualChange === true,
+    source: row.source || "",
+    productId: row.productId || null,
+  }));
 };
 
 export const createAccessProduct = async (

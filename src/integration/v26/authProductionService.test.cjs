@@ -1546,12 +1546,25 @@ async function main() {
   );
 
   assert.strictEqual(unresolved.length, 170);
+  const lp3AccessOwners = unresolved.filter(
+    (item) => item.owner === 'accessProductionService',
+  );
+  const stillSafeDisabled = unresolved.filter(
+    (item) => item.owner === null,
+  );
+  assert.strictEqual(lp3AccessOwners.length, 21);
+  assert.strictEqual(stillSafeDisabled.length, 149);
   assert(
-    unresolved.every(
+    lp3AccessOwners.every(
       (item) =>
-        item.ownerState ===
-          'SAFE_DISABLED_PENDING_OWNER' &&
-        item.owner === null,
+        item.ownerState === 'RUNTIME_OWNER_ASSIGNED' &&
+        item.runtimeActivation === true,
+    ),
+  );
+  assert(
+    stillSafeDisabled.every(
+      (item) =>
+        item.ownerState === 'SAFE_DISABLED_PENDING_OWNER',
     ),
   );
 
@@ -1589,9 +1602,10 @@ async function main() {
   console.log('ROLE_VALIDATION=PASS');
   console.log('ROLE_FAILURE_AUTH_STATE_TRUTHFUL=PASS');
   console.log('CANONICAL_OWNER_METADATA=7/7');
-  console.log('RUNTIME_OWNER_ASSIGNMENTS=12');
-  console.log('SAFE_DISABLED_PENDING_OWNER_METHODS=170');
-  console.log('OTHER_METHODS_SAFE_DISABLED=170');
+  console.log('RUNTIME_OWNER_ASSIGNMENTS=33');
+  console.log('SAFE_DISABLED_PENDING_OWNER_METHODS=149');
+  console.log('LP3_ACCESS_RUNTIME_OWNER_ASSIGNMENTS=21');
+  console.log('OTHER_METHODS_SAFE_DISABLED=149');
   console.log('ALLOWEDROLES_ALIAS=PASS');
   console.log('ACTIVE_ROLE_SNAPSHOT=PASS');
   console.log('ACCOUNT_STATUS_SNAPSHOT_NO_POLICY=PASS');

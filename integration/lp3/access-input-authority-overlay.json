@@ -1,0 +1,22 @@
+{
+  "phase": "3.6",
+  "canonicalGrantAuthority": "studentAccess",
+  "derivedProjection": "studentEntitlements/{uid}/items/{entitlementId}",
+  "inputs": {
+    "accessProducts": "catalog_terms_only",
+    "accessKeys": "access_input_not_direct_authority",
+    "accessInvites": "access_input_not_direct_authority",
+    "studentAccessRequests": "access_input_not_direct_authority",
+    "mentorAccessRequests": "access_input_not_direct_authority",
+    "accessBulkImports": "bulk_operation_ledger_not_direct_authority",
+    "accessBulkImportRows": "bulk_operation_row_ledger_not_direct_authority",
+    "accessNotifications": "communication_projection_not_entitlement_authority"
+  },
+  "locks": [
+    "request_never_grants_before_admin_approval",
+    "key_and_invite_never_authorize_anonymous_content",
+    "payment_never_directly_authorizes",
+    "assignment_never_creates_entitlement",
+    "hard_delete_studentAccess_forbidden"
+  ]
+}

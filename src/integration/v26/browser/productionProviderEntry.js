@@ -46,6 +46,9 @@ import * as authServiceNamespace from "../authProductionService.js";
 import * as canonicalServiceNamespace from "../canonicalResourceService.js";
 import * as entitlementServiceNamespace from "../entitlementDecisionService.js";
 import * as authorizeServiceNamespace from "../authorizeProductionService.js";
+import * as accessProductionServiceNamespace from "../accessProductionService.js";
+import * as accessServiceNamespace from "../../../access/accessService.js";
+import * as mentorServiceNamespace from "../../../mentor/mentorService.js";
 import * as roleAdapterNamespace from "./roleExperienceDependencyAdapter.js";
 import * as firestoreAdapterNamespace from "./firestoreReadDependencyAdapter.js";
 import * as firebaseAuthAdapterNamespace from "./firebaseAuthDependencyAdapter.js";
@@ -98,6 +101,9 @@ const entitlementServiceApi = moduleApi(
 const authorizeServiceApi = moduleApi(
   authorizeServiceNamespace,
 );
+const accessProductionServiceApi = moduleApi(accessProductionServiceNamespace);
+const accessServiceApi = moduleApi(accessServiceNamespace);
+const mentorServiceApi = moduleApi(mentorServiceNamespace);
 const roleAdapterApi = moduleApi(roleAdapterNamespace);
 const firestoreAdapterApi = moduleApi(
   firestoreAdapterNamespace,
@@ -129,6 +135,10 @@ const createEntitlementDecisionService = requiredFactory(
 const createAuthorizeProductionService = requiredFactory(
   authorizeServiceApi,
   "createAuthorizeProductionService",
+);
+const createAccessProductionService = requiredFactory(
+  accessProductionServiceApi,
+  "createAccessProductionService",
 );
 const createRoleExperienceDependencyAdapter = requiredFactory(
   roleAdapterApi,
@@ -191,6 +201,7 @@ let authProductionService = null;
 let canonicalResourceService = null;
 let entitlementDecisionService = null;
 let authorizeProductionService = null;
+let accessProductionService = null;
 let usernameAvailabilityCall = null;
 let usernamePasswordSignIn = null;
 let studentAccountRegistration = null;
@@ -354,6 +365,34 @@ if (providerRuntimeEnabled) {
         entitlementDecisionService.resolveEntitlementDecision,
     });
 
+  accessProductionService = createAccessProductionService({
+    getAuthoritativeSession: () => authProductionService.getSession(),
+    getCanonicalResource: canonicalResourceService.getCanonicalResource,
+    resolveVerifiedAccessUserByEmail: accessServiceApi.resolveVerifiedAccessUserByEmail,
+    createManualAccess: accessServiceApi.createManualAccess,
+    createBulkAccessImportPlan: accessServiceApi.createBulkAccessImportPlan,
+    executeBulkAccessImport: accessServiceApi.executeBulkAccessImport,
+    rollbackBulkAccessImport: accessServiceApi.rollbackBulkAccessImport,
+    createAccessProduct: accessServiceApi.createAccessProduct,
+    updateAccessProduct: accessServiceApi.updateAccessProduct,
+    listAccessProducts: accessServiceApi.listAccessProducts,
+    createAccessKey: accessServiceApi.createAccessKey,
+    regenerateAccessKey: accessServiceApi.regenerateAccessKey,
+    redeemAccessKeyFoundation: accessServiceApi.redeemAccessKeyFoundation,
+    createAccessInvite: accessServiceApi.createAccessInvite,
+    regenerateAccessInviteLink: accessServiceApi.regenerateAccessInviteLink,
+    redeemAccessInvite: accessServiceApi.redeemAccessInvite,
+    createStudentAccessRequest: accessServiceApi.createStudentAccessRequest,
+    createMentorAccessRequest: mentorServiceApi.createMentorAccessRequest,
+    listAccessRequests: accessServiceApi.listAccessRequests,
+    updateAccessRequest: accessServiceApi.updateAccessRequest,
+    approveAccessRequest: accessServiceApi.approveAccessRequest,
+    extendAccess: accessServiceApi.extendAccess,
+    revokeAccess: accessServiceApi.revokeAccess,
+    restoreAccess: accessServiceApi.restoreAccess,
+    loadStudentAccessWorkspace: accessServiceApi.loadStudentAccessWorkspace,
+  });
+
   handlerRegistry.register(
     "checkUsernameAvailability",
     (payload) =>
@@ -500,10 +539,145 @@ if (providerRuntimeEnabled) {
       owner: "authorizeProductionService",
     }),
   );
+
+  handlerRegistry.register(
+    "applyBulkAccess",
+    (payload) => accessProductionService.applyBulkAccess(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
+  handlerRegistry.register(
+    "approveAccessRequest",
+    (payload) => accessProductionService.approveAccessRequest(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
+  handlerRegistry.register(
+    "createMentorAccessRequest",
+    (payload) => accessProductionService.createMentorAccessRequest(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
+  handlerRegistry.register(
+    "createStudentAccessRequest",
+    (payload) => accessProductionService.createStudentAccessRequest(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
+  handlerRegistry.register(
+    "extendAccessGrant",
+    (payload) => accessProductionService.extendAccessGrant(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
+  handlerRegistry.register(
+    "listAccessRequests",
+    (payload) => accessProductionService.listAccessRequests(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
+  handlerRegistry.register(
+    "loadStudentWorkspace",
+    (payload) => accessProductionService.loadStudentWorkspace(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
+  handlerRegistry.register(
+    "previewBulkAccess",
+    (payload) => accessProductionService.previewBulkAccess(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
+  handlerRegistry.register(
+    "redeemAccessInvite",
+    (payload) => accessProductionService.redeemAccessInvite(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
+  handlerRegistry.register(
+    "redeemAccessKey",
+    (payload) => accessProductionService.redeemAccessKey(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
+  handlerRegistry.register(
+    "regenerateAccessInvite",
+    (payload) => accessProductionService.regenerateAccessInvite(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
+  handlerRegistry.register(
+    "regenerateAccessKey",
+    (payload) => accessProductionService.regenerateAccessKey(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
+  handlerRegistry.register(
+    "restoreAccessGrant",
+    (payload) => accessProductionService.restoreAccessGrant(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
+  handlerRegistry.register(
+    "revokeAccessGrant",
+    (payload) => accessProductionService.revokeAccessGrant(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
+  handlerRegistry.register(
+    "rollbackBulkAccessBatch",
+    (payload) => accessProductionService.rollbackBulkAccessBatch(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
+  handlerRegistry.register(
+    "saveAccessBundle",
+    (payload) => accessProductionService.saveAccessBundle(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
+  handlerRegistry.register(
+    "saveAccessGrant",
+    (payload) => accessProductionService.saveAccessGrant(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
+  handlerRegistry.register(
+    "saveAccessInvite",
+    (payload) => accessProductionService.saveAccessInvite(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
+  handlerRegistry.register(
+    "saveAccessKey",
+    (payload) => accessProductionService.saveAccessKey(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
+  handlerRegistry.register(
+    "saveAccessProduct",
+    (payload) => accessProductionService.saveAccessProduct(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
+  handlerRegistry.register(
+    "updateAccessRequest",
+    (payload) => accessProductionService.updateAccessRequest(payload),
+    Object.freeze({ owner: "accessProductionService" }),
+  );
+
 }
 
 const initialHandlerOwners = handlerRegistry.list();
 const expectedInitialHandlerOwners = Object.freeze([
+  Object.freeze({
+    method: "applyBulkAccess",
+    owner: "accessProductionService",
+  }),
+  Object.freeze({
+    method: "approveAccessRequest",
+    owner: "accessProductionService",
+  }),
   Object.freeze({
     method: "authorize",
     owner: "authorizeProductionService",
@@ -517,8 +691,24 @@ const expectedInitialHandlerOwners = Object.freeze([
     owner: "authProductionService",
   }),
   Object.freeze({
+    method: "createMentorAccessRequest",
+    owner: "accessProductionService",
+  }),
+  Object.freeze({
+    method: "createStudentAccessRequest",
+    owner: "accessProductionService",
+  }),
+  Object.freeze({
+    method: "extendAccessGrant",
+    owner: "accessProductionService",
+  }),
+  Object.freeze({
     method: "getSession",
     owner: "authProductionService",
+  }),
+  Object.freeze({
+    method: "listAccessRequests",
+    owner: "accessProductionService",
   }),
   Object.freeze({
     method: "loadMentorAccountSecurity",
@@ -527,6 +717,10 @@ const expectedInitialHandlerOwners = Object.freeze([
   Object.freeze({
     method: "loadStudentAccountSecurity",
     owner: "lp2IdentityAuthority",
+  }),
+  Object.freeze({
+    method: "loadStudentWorkspace",
+    owner: "accessProductionService",
   }),
   Object.freeze({
     method: "login",
@@ -541,6 +735,26 @@ const expectedInitialHandlerOwners = Object.freeze([
     owner: "canonicalResourceService",
   }),
   Object.freeze({
+    method: "previewBulkAccess",
+    owner: "accessProductionService",
+  }),
+  Object.freeze({
+    method: "redeemAccessInvite",
+    owner: "accessProductionService",
+  }),
+  Object.freeze({
+    method: "redeemAccessKey",
+    owner: "accessProductionService",
+  }),
+  Object.freeze({
+    method: "regenerateAccessInvite",
+    owner: "accessProductionService",
+  }),
+  Object.freeze({
+    method: "regenerateAccessKey",
+    owner: "accessProductionService",
+  }),
+  Object.freeze({
     method: "registerAccount",
     owner: "authProductionService",
   }),
@@ -553,6 +767,38 @@ const expectedInitialHandlerOwners = Object.freeze([
     owner: "authProductionService",
   }),
   Object.freeze({
+    method: "restoreAccessGrant",
+    owner: "accessProductionService",
+  }),
+  Object.freeze({
+    method: "revokeAccessGrant",
+    owner: "accessProductionService",
+  }),
+  Object.freeze({
+    method: "rollbackBulkAccessBatch",
+    owner: "accessProductionService",
+  }),
+  Object.freeze({
+    method: "saveAccessBundle",
+    owner: "accessProductionService",
+  }),
+  Object.freeze({
+    method: "saveAccessGrant",
+    owner: "accessProductionService",
+  }),
+  Object.freeze({
+    method: "saveAccessInvite",
+    owner: "accessProductionService",
+  }),
+  Object.freeze({
+    method: "saveAccessKey",
+    owner: "accessProductionService",
+  }),
+  Object.freeze({
+    method: "saveAccessProduct",
+    owner: "accessProductionService",
+  }),
+  Object.freeze({
     method: "saveStudentProfile",
     owner: "lp2IdentityAuthority",
   }),
@@ -560,7 +806,12 @@ const expectedInitialHandlerOwners = Object.freeze([
     method: "signInWithGoogle",
     owner: "authProductionService",
   }),
+  Object.freeze({
+    method: "updateAccessRequest",
+    owner: "accessProductionService",
+  }),
 ]);
+
 const expectedProviderHandlerOwners =
   providerRuntimeEnabled
     ? expectedInitialHandlerOwners
@@ -647,6 +898,7 @@ privateComposition.set(
     canonicalResourceService,
     entitlementDecisionService,
     authorizeProductionService,
+    accessProductionService,
     handlerRegistry,
   }),
 );

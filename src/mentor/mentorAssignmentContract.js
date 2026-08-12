@@ -105,6 +105,8 @@ export const buildMentorAccessRequestRecord = ({
   studentUid = "",
   resource = {},
   reason = "",
+  requestedScope = "ITEM",
+  requestTarget = "",
 } = {}) => {
   if (!cleanString(mentorUid) || !cleanString(studentUid)) {
     throw new Error("Mentor and student UID are required.");
@@ -128,6 +130,8 @@ export const buildMentorAccessRequestRecord = ({
     canonicalRoute: cleanString(resource.canonicalRoute),
     status: "pending",
     reason: cleanString(reason).slice(0, 1000),
+    requestedScope: cleanString(requestedScope).toUpperCase() || "ITEM",
+    requestTarget: cleanString(requestTarget || resource.resourceId),
     accessId: null,
     resolvedAt: null,
     resolvedBy: null,

@@ -241,6 +241,8 @@ export const createMentorAccessRequest = async ({
   studentUid,
   resource,
   reason,
+  requestedScope = "ITEM",
+  requestTarget = "",
 } = {}) => {
   const requestRef = doc(collection(db, "mentorAccessRequests"));
   const record = buildMentorAccessRequestRecord({
@@ -249,6 +251,8 @@ export const createMentorAccessRequest = async ({
     studentUid,
     resource,
     reason,
+    requestedScope,
+    requestTarget,
   });
 
   await setDoc(requestRef, {

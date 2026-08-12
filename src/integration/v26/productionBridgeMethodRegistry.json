@@ -22,18 +22,28 @@
     {
       "name": "applyBulkAccess",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "applyBulkAccess",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "approveAccessRequest",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "approveAccessRequest",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "archiveAdminResource",
@@ -163,10 +173,15 @@
     {
       "name": "createMentorAccessRequest",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "createMentorAccessRequest",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "createMentorAssignment",
@@ -227,10 +242,15 @@
     {
       "name": "createStudentAccessRequest",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "createStudentAccessRequest",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "deleteMentorProfessionalEntry",
@@ -283,10 +303,15 @@
     {
       "name": "extendAccessGrant",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "extendAccessGrant",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "getSession",
@@ -320,10 +345,15 @@
     {
       "name": "listAccessRequests",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "listAccessRequests",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "listExperienceEvents",
@@ -602,10 +632,15 @@
     {
       "name": "loadStudentWorkspace",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "loadStudentWorkspace",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "loadSubjectWorkspace",
@@ -676,10 +711,15 @@
     {
       "name": "previewBulkAccess",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "previewBulkAccess",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "processVideoAsset",
@@ -842,34 +882,54 @@
     {
       "name": "redeemAccessInvite",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "redeemAccessInvite",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "redeemAccessKey",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "redeemAccessKey",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "regenerateAccessInvite",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "regenerateAccessInvite",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "regenerateAccessKey",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "regenerateAccessKey",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "registerAccount",
@@ -973,10 +1033,15 @@
     {
       "name": "restoreAccessGrant",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "restoreAccessGrant",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "restoreNote",
@@ -1005,18 +1070,28 @@
     {
       "name": "revokeAccessGrant",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "revokeAccessGrant",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "rollbackBulkAccessBatch",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "rollbackBulkAccessBatch",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "runAdminReadiness",
@@ -1029,42 +1104,67 @@
     {
       "name": "saveAccessBundle",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "saveAccessBundle",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "saveAccessGrant",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "saveAccessGrant",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "saveAccessInvite",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "saveAccessInvite",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "saveAccessKey",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "saveAccessKey",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "saveAccessProduct",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "saveAccessProduct",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "saveAdminOperation",
@@ -1423,10 +1523,15 @@
     {
       "name": "updateAccessRequest",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "accessProductionService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/accessProductionService.js#createAccessProductionService",
+      "canonicalOwnerMethod": "updateAccessRequest",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP3-PHASE-3.6",
+      "runtimeActivation": true
     },
     {
       "name": "updateLearnerLifecycle",

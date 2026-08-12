@@ -33,7 +33,7 @@ const rows = Array.isArray(registryRaw)
 assert.strictEqual(rows.length, 182);
 assert.strictEqual(
   rows.filter((row) => row.owner).length,
-  12,
+  33,
 );
 
 const requiredFragments = [
@@ -58,6 +58,10 @@ const requiredFragments = [
   '../canonicalResourceService.js',
   '../entitlementDecisionService.js',
   '../authorizeProductionService.js',
+  '../accessProductionService.js',
+  '../../../access/accessService.js',
+  '../../../mentor/mentorService.js',
+  'createAccessProductionService',
   './roleExperienceDependencyAdapter.js',
   './firestoreReadDependencyAdapter.js',
   './firebaseAuthDependencyAdapter.js',
@@ -117,7 +121,7 @@ const registrationCallCount = (
   text.match(/handlerRegistry\.register\(/g) || []
 ).length;
 
-assert.strictEqual(registrationCallCount, 14);
+assert.strictEqual(registrationCallCount, 35);
 
 const expectedMethodOwnerFragments = [
   '"checkUsernameAvailability"',
@@ -301,10 +305,10 @@ assert.strictEqual(
 
 console.log('PROVIDER_ENTRY_STATIC_CONTRACT=PASS');
 console.log('PROVIDER_GLOBAL_ASSIGNMENT_COUNT=1');
-console.log('PROVIDER_RUNTIME_OWNER_REGISTRATION_CALLS=14');
-console.log('INITIAL_IN_MEMORY_HANDLER_OWNER_COUNT=14');
-console.log('SAFE_DISABLED_METHODS_AFTER_PROVIDER_INIT=168');
+console.log('PROVIDER_RUNTIME_OWNER_REGISTRATION_CALLS=35');
+console.log('INITIAL_IN_MEMORY_HANDLER_OWNER_COUNT=35');
+console.log('SAFE_DISABLED_METHODS_AFTER_PROVIDER_INIT=147');
 console.log('FIRESTORE_WRITE_SDK_IMPORTS=0');
 console.log('RUNTIME_PATH_REFERENCES=0');
 console.log('METHOD_REGISTRY_ROWS=182');
-console.log('PERSISTENT_REGISTRY_OWNER_ASSIGNMENTS=12');
+console.log('PERSISTENT_REGISTRY_OWNER_ASSIGNMENTS=33');

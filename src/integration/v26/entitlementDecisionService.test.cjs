@@ -1238,13 +1238,13 @@ async function main() {
     assert.equal(registry.methods.length, 182);
     assert.equal(
       registry.methods.filter((item) => item.owner !== null).length,
-      12,
+      33,
     );
     assert.equal(
       registry.methods.filter(
         (item) => item.ownerState === "SAFE_DISABLED_PENDING_OWNER",
       ).length,
-      170,
+      149,
     );
   }
 
@@ -1301,8 +1301,8 @@ async function main() {
   console.log("NAVIGATION_SIDE_EFFECTS=0");
   console.log("RUNTIME_LOAD=NO");
   console.log("PROVIDER_ACTIVATION=NO");
-  console.log("RUNTIME_OWNER_ASSIGNMENTS=12");
-  console.log("SAFE_DISABLED_PENDING_OWNER=170");
+  console.log("RUNTIME_OWNER_ASSIGNMENTS=33");
+  console.log("SAFE_DISABLED_PENDING_OWNER=149");
   console.log("ENTITLEMENT_DECISION_TEST_STATUS=GREEN");
 }
 
