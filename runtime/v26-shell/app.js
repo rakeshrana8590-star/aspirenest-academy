@@ -824,6 +824,75 @@
     storage.setItem(STORAGE.mentorProfileDrafts,JSON.stringify(state.mentorProfileDrafts));
   }
 
+  let lp5MentorProfileServerShadow=null;
+
+  function lp5ClonePlain(value){
+    try{return JSON.parse(JSON.stringify(value));}catch(_){return value&&typeof value==='object'?{...value}:value;}
+  }
+
+  function lp5ApplyMentorProfile(profile,{shadow=true}={}){
+    if(!profile||typeof profile!=='object'||Array.isArray(profile))return false;
+    state.mentorProfessionalProfile={
+      ...DEFAULT_MENTOR_PROFESSIONAL_PROFILE,
+      ...state.mentorProfessionalProfile,
+      ...profile,
+      social:{...(DEFAULT_MENTOR_PROFESSIONAL_PROFILE.social||{}),...(profile.social||{})},
+      visibility:{...(DEFAULT_MENTOR_PROFESSIONAL_PROFILE.visibility||{}),...(profile.visibility||{})},
+      entries:Array.isArray(profile.entries)?profile.entries:state.mentorProfessionalProfile.entries||[]
+    };
+    if(shadow)lp5MentorProfileServerShadow=lp5ClonePlain(state.mentorProfessionalProfile);
+    persistMentorProfessionalProfile();
+    return true;
+  }
+
+  async function lp5MentorProfileCommit(method,payload){
+    const invoke=adapter?.[method];
+    if(typeof invoke!=='function')throw new Error(`LP5 adapter unavailable: ${method}`);
+    try{
+      const result=await invoke(payload||{});
+      if(result?.ok===false)throw new Error(result.code||`LP5 ${method} failed`);
+      const profile=result?.state?.profile||result?.profile;
+      if(profile)lp5ApplyMentorProfile(profile,{shadow:true});
+      else lp5MentorProfileServerShadow=lp5ClonePlain(state.mentorProfessionalProfile);
+      return result;
+    }catch(error){
+      if(lp5MentorProfileServerShadow){
+        state.mentorProfessionalProfile=lp5ClonePlain(lp5MentorProfileServerShadow);
+        persistMentorProfessionalProfile();
+        try{renderAll();}catch(_){}
+      }
+      lp4OperationFailure(`lp5-${method}`,error);
+      throw error;
+    }
+  }
+
+  async function hydrateLp5Phase51ProductionState(){
+    try{
+      if(state.session?.authenticated&&(state.session?.activeRole==='mentor'||state.session?.role==='mentor')){
+        const result=await adapter.loadMentorProfessionalProfile?.({});
+        const profile=result?.state?.profile||result?.profile;
+        if(profile)lp5ApplyMentorProfile(profile,{shadow:true});
+        return;
+      }
+      if(state.session?.authenticated&&(state.session?.activeRole==='student'||state.session?.role==='student')){
+        const result=await adapter.loadStudentProfile?.({});
+        const student=result?.state?.student||result?.student;
+        if(student&&typeof student==='object'){
+          state.studentProfile={...state.studentProfile,...student};
+          persistStudentProfile();
+        }
+        const assigned=result?.state?.assignedMentor||result?.assignedMentor;
+        if(assigned)lp5ApplyMentorProfile(assigned,{shadow:true});
+        return;
+      }
+      const result=await adapter.loadPublicMentorDirectory?.({});
+      const items=result?.state?.items||result?.items||[];
+      if(Array.isArray(items)&&items[0])lp5ApplyMentorProfile(items[0],{shadow:true});
+    }catch(error){
+      lp4OperationFailure('lp5-hydrate-mentor-profile',error);
+    }
+  }
+
   function mentorProfileCompletion() {
     const profile=state.mentorProfessionalProfile;
     const fields=['displayName','headline','bio','currentRole','qualification','examExpertise','researchAreas','recognition','digitalLearning'];
@@ -4244,42 +4313,57 @@
       const data=new FormData(form);const values=Object.fromEntries(data.entries());
       const photoInput=document.getElementById('mentorPhotoFile');
       const photoFile=photoInput?.files?.[0]||null;
-      let uploadedPhoto=await readMentorPhotoFile(photoInput);
-      if(photoFile&&adapter.uploadMentorProfilePhoto){
-        try{const result=await adapter.uploadMentorProfilePhoto({profileId:state.mentorProfessionalProfile.id,file:photoFile});uploadedPhoto=result?.url||result?.downloadURL||uploadedPhoto;}
-        catch(_){toast('Local photo preview saved; production Storage upload still needs wiring','M');}
-      }
       const removePhoto=data.has('removePhoto');
-      if(removePhoto&&adapter.removeMentorProfilePhoto){try{await adapter.removeMentorProfilePhoto({profileId:state.mentorProfessionalProfile.id});}catch(_){}}
-      const nextPhoto=removePhoto?'':uploadedPhoto||String(values.photo||'').trim()||state.mentorProfessionalProfile.photo||'';
-      const nextVisibility={...(state.mentorProfessionalProfile.visibility||{}),showPhoto:!removePhoto&&data.has('showPhoto')&&Boolean(nextPhoto)};
-      delete values.photoFile;delete values.removePhoto;delete values.showPhoto;
-      state.mentorProfessionalProfile={...state.mentorProfessionalProfile,...values,photo:nextPhoto,visibility:nextVisibility,languages:String(values.languages||'').split(',').map(item=>item.trim()).filter(Boolean),strengths:String(values.strengths||'').split(',').map(item=>item.trim()).filter(Boolean)};
-      persistMentorProfessionalProfile();await adapter.saveMentorProfessionalProfile?.({profile:state.mentorProfessionalProfile});closeModal();renderAll();toast(removePhoto?'Profile photo removed; initials are active':'Professional profile updated across Mentor, Student and Public previews','M');return;
+      try{
+        if(photoFile)await lp5MentorProfileCommit('uploadMentorProfilePhoto',{profileId:state.mentorProfessionalProfile.id,file:photoFile});
+        if(removePhoto)await lp5MentorProfileCommit('removeMentorProfilePhoto',{profileId:state.mentorProfessionalProfile.id});
+        delete values.photoFile;delete values.removePhoto;delete values.showPhoto;
+        const proposed={
+          ...state.mentorProfessionalProfile,
+          ...values,
+          visibility:{
+            ...(state.mentorProfessionalProfile.visibility||{}),
+            showPhoto:!removePhoto&&data.has('showPhoto')&&Boolean(state.mentorProfessionalProfile.photo)
+          },
+          languages:String(values.languages||'').split(',').map(item=>item.trim()).filter(Boolean),
+          strengths:String(values.strengths||'').split(',').map(item=>item.trim()).filter(Boolean)
+        };
+        await lp5MentorProfileCommit('saveMentorProfessionalProfile',{profile:proposed});
+        closeModal();renderAll();toast(removePhoto?'Profile photo removed; initials are active':'Professional profile saved to the canonical Mentor profile','M');
+      }catch(_){}
+      return;
     }
     if (action === 'add-mentor-entry') { openMentorEntryEditor();return; }
     if (action === 'edit-mentor-entry') { openMentorEntryEditor(id);return; }
     if (action === 'save-mentor-entry') {
       const form=document.getElementById('mentorEntryForm');if(!form?.reportValidity())return;const data=new FormData(form);const values=Object.fromEntries(data.entries());
       const entryId=values.id||`mentor-entry-${Date.now()}`;const entry={...values,id:entryId,featured:data.has('featured')};
-      const index=(state.mentorProfessionalProfile.entries||[]).findIndex(item=>item.id===entryId);
-      if(index>=0)state.mentorProfessionalProfile.entries[index]=entry;else state.mentorProfessionalProfile.entries.unshift(entry);
-      persistMentorProfessionalProfile();await adapter.saveMentorProfessionalEntry?.({entry});closeModal();renderAll();toast('Academic milestone saved','▤');return;
+      try{await lp5MentorProfileCommit('saveMentorProfessionalEntry',{entry});closeModal();renderAll();toast('Academic milestone saved','▤');}catch(_){}
+      return;
     }
     if (action === 'delete-mentor-entry') {
-      state.mentorProfessionalProfile.entries=(state.mentorProfessionalProfile.entries||[]).filter(item=>item.id!==id);persistMentorProfessionalProfile();await adapter.deleteMentorProfessionalEntry?.({entryId:id});renderAll();toast('Academic milestone removed from profile','▤');return;
+      try{await lp5MentorProfileCommit('deleteMentorProfessionalEntry',{entryId:id});renderAll();toast('Academic milestone removed from profile','▤');}catch(_){}
+      return;
     }
     if (action === 'edit-mentor-social') { openMentorSocialEditor();return; }
     if (action === 'save-mentor-social') {
       const form=document.getElementById('mentorSocialForm');if(!form?.reportValidity())return;const values=Object.fromEntries(new FormData(form).entries());
-      state.mentorProfessionalProfile.social={instagram:values.instagram||'',facebook:values.facebook||'',linkedin:values.linkedin||'',youtube:values.youtube||'',website:values.website||''};
-      state.mentorProfessionalProfile.publicEmail=values.publicEmail||'';state.mentorProfessionalProfile.bookingLabel=values.bookingLabel||'Contact Mentor';persistMentorProfessionalProfile();await adapter.saveMentorProfessionalProfile?.({profile:state.mentorProfessionalProfile});closeModal();renderAll();toast('Optional social profiles saved','@');return;
+      const proposed={...state.mentorProfessionalProfile,social:{instagram:values.instagram||'',facebook:values.facebook||'',linkedin:values.linkedin||'',youtube:values.youtube||'',website:values.website||''},publicEmail:values.publicEmail||'',bookingLabel:values.bookingLabel||'Contact Mentor'};
+      try{await lp5MentorProfileCommit('saveMentorProfessionalProfile',{profile:proposed});closeModal();renderAll();toast('Optional social profiles saved','@');}catch(_){}
+      return;
     }
     if (action === 'edit-mentor-visibility') { openMentorVisibilityEditor();return; }
     if (action === 'save-mentor-visibility') {
-      const form=document.getElementById('mentorVisibilityForm');if(!form)return;const data=new FormData(form);state.mentorProfessionalProfile.visibility={publicProfile:data.has('publicProfile'),studentProfile:data.has('studentProfile'),showPhoto:data.has('showPhoto')&&Boolean(state.mentorProfessionalProfile.photo),showBooks:data.has('showBooks'),showResearch:data.has('showResearch'),showAchievements:data.has('showAchievements'),showSocial:data.has('showSocial'),showContact:data.has('showContact')};persistMentorProfessionalProfile();await adapter.saveMentorProfileVisibility?.({visibility:state.mentorProfessionalProfile.visibility});closeModal();renderAll();toast('Profile visibility updated','◉');return;
+      const form=document.getElementById('mentorVisibilityForm');if(!form)return;const data=new FormData(form);
+      const visibility={publicProfile:data.has('publicProfile'),studentProfile:data.has('studentProfile'),showPhoto:data.has('showPhoto')&&Boolean(state.mentorProfessionalProfile.photo),showBooks:data.has('showBooks'),showResearch:data.has('showResearch'),showAchievements:data.has('showAchievements'),showSocial:data.has('showSocial'),showContact:data.has('showContact')};
+      try{await lp5MentorProfileCommit('saveMentorProfileVisibility',{visibility});closeModal();renderAll();toast('Profile visibility updated','◉');}catch(_){}
+      return;
     }
-    if (action === 'toggle-mentor-publish') { state.mentorProfessionalProfile.publicStatus=state.mentorProfessionalProfile.publicStatus==='Published'?'Draft':'Published';persistMentorProfessionalProfile();await adapter.publishMentorProfessionalProfile?.({profileId:state.mentorProfessionalProfile.id,status:state.mentorProfessionalProfile.publicStatus});renderAll();toast(`Mentor profile ${state.mentorProfessionalProfile.publicStatus.toLowerCase()}`,'M');return; }
+    if (action === 'toggle-mentor-publish') {
+      const status=state.mentorProfessionalProfile.publicStatus==='Published'?'Draft':'Published';
+      try{await lp5MentorProfileCommit('publishMentorProfessionalProfile',{profileId:state.mentorProfessionalProfile.id,status});renderAll();toast(`Mentor profile ${status.toLowerCase()}`,'M');}catch(_){}
+      return;
+    }
     if (action === 'admin-account-profile') { openModal('Admin Account Profile','Identity, role authority, environment and audit responsibility.',`<div class="admin-account-summary"><span class="student-profile-avatar">${initials(state.session.displayName||state.session.email)}</span><div><h2>${escapeHtml(state.session.displayName||'AspireNest Admin')}</h2><p>${escapeHtml(state.session.email)}</p><div class="hero-tags"><span>Admin</span><span>${escapeHtml(state.session.plan)}</span><span>Deny by default</span><span>Audit linked</span></div></div></div>`,button('Close','primary','data-action="close-modal"'));return; }
 
     if (action === 'edit-student-profile') { openStudentProfileEditor();return; }
@@ -6938,6 +7022,7 @@
   async function init() {
     state.session = await adapter.getSession();
     await hydrateLp4ProductionState();
+    await hydrateLp5Phase51ProductionState();
     const hash = location.hash;
     bindEvents();
     if (hash) routeFromHash();

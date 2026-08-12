@@ -1874,6 +1874,7 @@ service cloud.firestore {
     match /lp4ResourceRecords/{docId} { allow read, write: if false; }
     match /lp4Idempotency/{docId} { allow read, write: if false; }
     match /lp4AuditLogs/{docId} { allow read: if isAdmin(); allow create, update, delete: if false; }
+    match /lp5AuditLogs/{docId} { allow read: if isAdmin(); allow create, update, delete: if false; }
     match /studentLearning/{docId} { allow read: if isAdmin() || (isSignedIn() && resource.data.ownerUid == request.auth.uid); allow create, update, delete: if false; }
     match /studentLearningActions/{docId} { allow read: if isAdmin() || (isSignedIn() && resource.data.ownerUid == request.auth.uid); allow create, update, delete: if false; }
     match /mockAttempts/{docId} { allow read: if isAdmin() || (isSignedIn() && resource.data.ownerUid == request.auth.uid); allow create, update, delete: if false; }

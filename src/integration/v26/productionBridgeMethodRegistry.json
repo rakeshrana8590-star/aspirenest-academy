@@ -338,10 +338,16 @@
     {
       "name": "deleteMentorProfessionalEntry",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5MentorProfileService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp5MentorProfileProductionService.js#createLp5MentorProfileProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP5-PHASE-5.1-S5002",
+      "runtimeActivation": true,
+      "lp5Phase": "5.1"
     },
     {
       "name": "downloadVideoAttachment",
@@ -619,10 +625,16 @@
     {
       "name": "loadMentorProfessionalProfile",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5MentorProfileService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp5MentorProfileProductionService.js#createLp5MentorProfileProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP5-PHASE-5.1-S5002",
+      "runtimeActivation": true,
+      "lp5Phase": "5.1"
     },
     {
       "name": "loadMentorToday",
@@ -772,10 +784,16 @@
     {
       "name": "loadPublicMentorDirectory",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5MentorProfileService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp5MentorProfileProductionService.js#createLp5MentorProfileProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP5-PHASE-5.1-S5002",
+      "runtimeActivation": true,
+      "lp5Phase": "5.1"
     },
     {
       "name": "loadRoadmapProgress",
@@ -864,10 +882,16 @@
     {
       "name": "loadStudentProfile",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5MentorProfileService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp5MentorProfileProductionService.js#createLp5MentorProfileProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP5-PHASE-5.1-S5002",
+      "runtimeActivation": true,
+      "lp5Phase": "5.1"
     },
     {
       "name": "loadStudentResults",
@@ -1154,10 +1178,16 @@
     {
       "name": "publishMentorProfessionalProfile",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5MentorProfileService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp5MentorProfileProductionService.js#createLp5MentorProfileProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP5-PHASE-5.1-S5002",
+      "runtimeActivation": true,
+      "lp5Phase": "5.1"
     },
     {
       "name": "publishMockTest",
@@ -1444,10 +1474,16 @@
     {
       "name": "removeMentorProfilePhoto",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5MentorProfileService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp5MentorProfileProductionService.js#createLp5MentorProfileProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP5-PHASE-5.1-S5002",
+      "runtimeActivation": true,
+      "lp5Phase": "5.1"
     },
     {
       "name": "requestMentorAccountReview",
@@ -1916,26 +1952,44 @@
     {
       "name": "saveMentorProfessionalEntry",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5MentorProfileService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp5MentorProfileProductionService.js#createLp5MentorProfileProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP5-PHASE-5.1-S5002",
+      "runtimeActivation": true,
+      "lp5Phase": "5.1"
     },
     {
       "name": "saveMentorProfessionalProfile",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5MentorProfileService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp5MentorProfileProductionService.js#createLp5MentorProfileProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP5-PHASE-5.1-S5002",
+      "runtimeActivation": true,
+      "lp5Phase": "5.1"
     },
     {
       "name": "saveMentorProfileVisibility",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5MentorProfileService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp5MentorProfileProductionService.js#createLp5MentorProfileProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP5-PHASE-5.1-S5002",
+      "runtimeActivation": true,
+      "lp5Phase": "5.1"
     },
     {
       "name": "saveMockAttemptDraft",
@@ -2313,10 +2367,16 @@
     {
       "name": "uploadMentorProfilePhoto",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5MentorProfileService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp5MentorProfileProductionService.js#createLp5MentorProfileProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP5-PHASE-5.1-S5002",
+      "runtimeActivation": true,
+      "lp5Phase": "5.1"
     },
     {
       "name": "uploadNoteAsset",
@@ -2487,10 +2547,16 @@
     {
       "name": "verifyMentorProfile",
       "launchCore": false,
-      "ownerState": "SAFE_DISABLED_PENDING_OWNER",
-      "owner": null,
-      "auditClassification": "OWNER_NOT_YET_RESOLVED",
-      "auditCandidates": []
+      "ownerState": "RUNTIME_OWNER_ASSIGNED",
+      "owner": "lp5MentorProfileService",
+      "auditClassification": "OWNER_RESOLVED",
+      "auditCandidates": [],
+      "canonicalOwner": "src/integration/v26/lp5MentorProfileProductionService.js#createLp5MentorProfileProductionService",
+      "canonicalOwnerMethod": "invoke",
+      "ownerContractStatus": "IMPLEMENTED_RUNTIME_ACTIVATED",
+      "ownerDecisionEvidence": "LP5-PHASE-5.1-S5002",
+      "runtimeActivation": true,
+      "lp5Phase": "5.1"
     }
   ]
 }

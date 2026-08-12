@@ -26,6 +26,9 @@ const {
   createLp4LearningAuthority,
 } = require("./lp4LearningAuthority");
 const {
+  createLp5MentorProfileAuthority,
+} = require("./lp5MentorProfileAuthority");
+const {
   getStorage,
 } = require("firebase-admin/storage");
 
@@ -43,7 +46,22 @@ const lp4LearningAuthorityService =
     serverTimestamp: () => Timestamp.now(),
   });
 
+const lp5MentorProfileAuthorityService =
+  createLp5MentorProfileAuthority({
+    firestore: getFirestore(),
+    storage: getStorage(),
+    serverTimestamp: () => Timestamp.now(),
+  });
+
 const LP4_LEARNING_CALLABLE_OPTIONS = Object.freeze({
+  region: "asia-south1",
+  invoker: "public",
+  timeoutSeconds: 60,
+  memory: "512MiB",
+  maxInstances: 20,
+});
+
+const LP5_MENTOR_PROFILE_CALLABLE_OPTIONS = Object.freeze({
   region: "asia-south1",
   invoker: "public",
   timeoutSeconds: 60,
@@ -2712,6 +2730,34 @@ const resolveNotesProtectedAsset = async ({
     requestId,
   });
 };
+
+
+exports.lp5MentorProfileOperation = onCall(
+  LP5_MENTOR_PROFILE_CALLABLE_OPTIONS,
+  async (request) => {
+    try {
+      return await lp5MentorProfileAuthorityService.operation(
+        request.auth,
+        request.data,
+      );
+    } catch (error) {
+      const code = String(error && error.lp5Code || "");
+      const map = {
+        UNAUTHENTICATED: "unauthenticated",
+        FORBIDDEN: "permission-denied",
+        INVALID_REQUEST: "invalid-argument",
+        NOT_FOUND: "not-found",
+        CONFLICT: "aborted",
+        FAILED_PRECONDITION: "failed-precondition",
+      };
+      throw new HttpsError(
+        map[code] || "internal",
+        String(error && error.message || "LP5 mentor profile operation failed.").slice(0,300),
+        error && error.details ? error.details : undefined,
+      );
+    }
+  },
+);
 
 
 exports.lp4LearningOperation = onCall(

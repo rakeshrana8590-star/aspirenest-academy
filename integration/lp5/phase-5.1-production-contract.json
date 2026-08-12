@@ -1,0 +1,39 @@
+{
+  "schema": "aspirenest.lp5.phase5.1.production-contract.v1",
+  "phase": "5.1",
+  "name": "Mentor professional profile propagation",
+  "canonicalProfile": "mentorProfiles/{mentorUid}.professionalProfile",
+  "serverOwner": "functions/lp5MentorProfileAuthority.js#createLp5MentorProfileAuthority",
+  "browserOwner": "src/integration/v26/lp5MentorProfileProductionService.js#createLp5MentorProfileProductionService",
+  "callable": "lp5MentorProfileOperation",
+  "runtimeOwner": "lp5MentorProfileService",
+  "activatedMethods": [
+    "loadMentorProfessionalProfile",
+    "saveMentorProfessionalProfile",
+    "saveMentorProfessionalEntry",
+    "deleteMentorProfessionalEntry",
+    "saveMentorProfileVisibility",
+    "publishMentorProfessionalProfile",
+    "uploadMentorProfilePhoto",
+    "removeMentorProfilePhoto",
+    "loadPublicMentorDirectory",
+    "verifyMentorProfile",
+    "loadStudentProfile"
+  ],
+  "security": [
+    "Public receives only verified+published+visibility-filtered projection through callable",
+    "Assigned Student receives Mentor projection only when mentorProfiles/{mentorUid}/students/{studentUid} is active",
+    "Unassigned Student receives no Mentor projection",
+    "Mentor edits own canonical profile only",
+    "Admin verifies profile and photo moderation state",
+    "Photo object uses mentor-professional/{uid}/... and has no direct browser Storage rule",
+    "All profile changes write lp5AuditLogs with request/correlation identifiers"
+  ],
+  "preservation": [
+    "mentorProfiles remains canonical mentor role/profile root",
+    "assignment never grants entitlement",
+    "V26 visible layout/routes preserved",
+    "localStorage is cache only; server hydration wins",
+    "LP5.2-5.8 remain safe-disabled"
+  ]
+}

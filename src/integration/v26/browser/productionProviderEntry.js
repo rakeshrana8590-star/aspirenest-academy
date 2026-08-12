@@ -48,6 +48,7 @@ import * as entitlementServiceNamespace from "../entitlementDecisionService.js";
 import * as authorizeServiceNamespace from "../authorizeProductionService.js";
 import * as accessProductionServiceNamespace from "../accessProductionService.js";
 import * as lp4LearningServiceNamespace from "../lp4LearningProductionService.js";
+import * as lp5MentorProfileServiceNamespace from "../lp5MentorProfileProductionService.js";
 import * as accessServiceNamespace from "../../../access/accessService.js";
 import * as mentorServiceNamespace from "../../../mentor/mentorService.js";
 import * as roleAdapterNamespace from "./roleExperienceDependencyAdapter.js";
@@ -104,6 +105,7 @@ const authorizeServiceApi = moduleApi(
 );
 const accessProductionServiceApi = moduleApi(accessProductionServiceNamespace);
 const lp4LearningServiceApi = moduleApi(lp4LearningServiceNamespace);
+const lp5MentorProfileServiceApi = moduleApi(lp5MentorProfileServiceNamespace);
 const accessServiceApi = moduleApi(accessServiceNamespace);
 const mentorServiceApi = moduleApi(mentorServiceNamespace);
 const roleAdapterApi = moduleApi(roleAdapterNamespace);
@@ -147,6 +149,11 @@ const createLp4LearningProductionService = requiredFactory(
   "createLp4LearningProductionService",
 );
 const lp4LearningMethodPolicies = lp4LearningServiceApi.METHOD_POLICIES;
+const createLp5MentorProfileProductionService = requiredFactory(
+  lp5MentorProfileServiceApi,
+  "createLp5MentorProfileProductionService",
+);
+const lp5MentorProfileMethodPolicies = lp5MentorProfileServiceApi.METHOD_POLICIES;
 const createRoleExperienceDependencyAdapter = requiredFactory(
   roleAdapterApi,
   "createRoleExperienceDependencyAdapter",
@@ -210,7 +217,9 @@ let entitlementDecisionService = null;
 let authorizeProductionService = null;
 let accessProductionService = null;
 let lp4LearningProductionService = null;
+let lp5MentorProfileProductionService = null;
 let lp4LearningOperationCall = null;
+let lp5MentorProfileOperationCall = null;
 let usernameAvailabilityCall = null;
 let usernamePasswordSignIn = null;
 let studentAccountRegistration = null;
@@ -413,6 +422,30 @@ if (providerRuntimeEnabled) {
       method,
       (payload, context) => lp4LearningProductionService.invoke(method, payload, context),
       Object.freeze({ owner: lp4LearningMethodPolicies[method].owner }),
+    );
+  }
+
+  lp5MentorProfileOperationCall =
+    callableDataInvoker("lp5MentorProfileOperation");
+  lp5MentorProfileProductionService =
+    createLp5MentorProfileProductionService({
+      invokeAcademyOperation:
+        lp5MentorProfileOperationCall,
+    });
+
+  for (const method of Object.keys(lp5MentorProfileMethodPolicies).sort()) {
+    handlerRegistry.register(
+      method,
+      (payload, context) =>
+        lp5MentorProfileProductionService.invoke(
+          method,
+          payload,
+          context,
+        ),
+      Object.freeze({
+        owner:
+          lp5MentorProfileMethodPolicies[method].owner,
+      }),
     );
   }
 
@@ -787,6 +820,7 @@ privateComposition.set(
     authorizeProductionService,
     accessProductionService,
     lp4LearningProductionService,
+    lp5MentorProfileProductionService,
     handlerRegistry,
   }),
 );
