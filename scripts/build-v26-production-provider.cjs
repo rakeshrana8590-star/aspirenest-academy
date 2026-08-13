@@ -167,6 +167,32 @@ function resolveProviderModuleRoots(
   );
 }
 
+const BROWSER_SAFE_ENV_KEYS = Object.freeze([
+  "REACT_APP_ASPIRENEST_ENVIRONMENT",
+  "REACT_APP_FIREBASE_API_KEY",
+  "REACT_APP_FIREBASE_AUTH_DOMAIN",
+  "REACT_APP_FIREBASE_PROJECT_ID",
+  "REACT_APP_FIREBASE_STORAGE_BUCKET",
+  "REACT_APP_FIREBASE_MESSAGING_SENDER_ID",
+  "REACT_APP_FIREBASE_APP_ID",
+  "REACT_APP_FIREBASE_MEASUREMENT_ID",
+  "REACT_APP_FIREBASE_APPCHECK_RECAPTCHA_ENTERPRISE_KEY",
+]);
+
+function buildBrowserSafeEnvironment(
+  environment = process.env,
+) {
+  const safe = {
+    NODE_ENV: "production",
+  };
+
+  for (const key of BROWSER_SAFE_ENV_KEYS) {
+    safe[key] = String(environment[key] || "");
+  }
+
+  return Object.freeze(safe);
+}
+
 function createProviderWebpackConfig({
   outputFile = defaultOutputFile,
   aliases = {},
@@ -211,6 +237,11 @@ function createProviderWebpackConfig({
       chunkIds: 'deterministic',
     },
     plugins: [
+      new webpack.DefinePlugin({
+        "process.env": JSON.stringify(
+          buildBrowserSafeEnvironment(process.env),
+        ),
+      }),
       new StripSourceMapDirectivesPlugin(),
     ],
     performance: {

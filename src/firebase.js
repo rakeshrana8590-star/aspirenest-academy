@@ -5,6 +5,10 @@ import {
 } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import {
+  initializeAppCheck,
+  ReCaptchaEnterpriseProvider,
+} from "firebase/app-check";
+import {
   resolveFirebaseProjectConfig,
 } from "./firebaseProjectConfig";
 import {
@@ -56,27 +60,99 @@ if (firebaseConfig) {
   }
 }
 
+const appCheckSiteKey = String(
+  process.env
+    .REACT_APP_FIREBASE_APPCHECK_RECAPTCHA_ENTERPRISE_KEY ||
+    ""
+).trim();
+
+const appCheckRequired =
+  Boolean(app) &&
+  !firebaseEmulatorRuntime.enabled &&
+  ["staging", "production"].includes(
+    firebaseProjectRuntime.environment
+  );
+
+let appCheck = null;
+let appCheckInitializationErrorCode = "";
+
+if (appCheckRequired) {
+  if (!appCheckSiteKey) {
+    appCheckInitializationErrorCode =
+      "FIREBASE_APPCHECK_SITE_KEY_REQUIRED";
+  } else {
+    try {
+      appCheck = initializeAppCheck(app, {
+        provider:
+          new ReCaptchaEnterpriseProvider(
+            appCheckSiteKey
+          ),
+        isTokenAutoRefreshEnabled: true,
+      });
+    } catch {
+      appCheck = null;
+      appCheckInitializationErrorCode =
+        "FIREBASE_APPCHECK_INITIALIZATION_FAILED";
+    }
+  }
+}
+
+const firebaseRuntimeReady =
+  Boolean(app) &&
+  (
+    !appCheckRequired ||
+    Boolean(appCheck)
+  );
+
+export const firebaseAppCheckRuntime =
+  Object.freeze({
+    required: appCheckRequired,
+    enabled: Boolean(appCheck),
+    provider:
+      appCheckRequired
+        ? "RECAPTCHA_ENTERPRISE"
+        : "NOT_REQUIRED",
+    errorCode:
+      appCheckInitializationErrorCode,
+  });
+
 export const firebaseInitializationRuntime =
   Object.freeze({
-    enabled: Boolean(app),
+    enabled: firebaseRuntimeReady,
     environment: firebaseProjectRuntime.environment,
     errorCode:
       firebaseProjectRuntime.error?.code ||
-      initializationErrorCode,
+      initializationErrorCode ||
+      appCheckInitializationErrorCode,
     missingFields: Object.freeze([
       ...(firebaseProjectRuntime.error?.missingFields || []),
+      ...(
+        appCheckRequired && !appCheckSiteKey
+          ? ["appCheckRecaptchaEnterpriseKey"]
+          : []
+      ),
     ]),
   });
 
-export const auth = app ? getAuth(app) : null;
+export const auth =
+  firebaseRuntimeReady
+    ? getAuth(app)
+    : null;
 
-export const db = app ? getFirestore(app) : null;
+export const db =
+  firebaseRuntimeReady
+    ? getFirestore(app)
+    : null;
 
-export const storage = app ? getStorage(app) : null;
+export const storage =
+  firebaseRuntimeReady
+    ? getStorage(app)
+    : null;
 
-export const functions = app
-  ? getFunctions(app, "asia-south1")
-  : null;
+export const functions =
+  firebaseRuntimeReady
+    ? getFunctions(app, "asia-south1")
+    : null;
 
 const runtimeGlobal =
   typeof globalThis !== "undefined" ? globalThis : {};
@@ -136,7 +212,8 @@ if (app && firebaseEmulatorRuntime.enabled) {
 }
 
 export const analytics =
-  app && !firebaseEmulatorRuntime.enabled
+  firebaseRuntimeReady &&
+  !firebaseEmulatorRuntime.enabled
     ? getAnalytics(app)
     : null;
 

@@ -20,6 +20,9 @@ const {
   onCall,
 } = require("firebase-functions/v2/https");
 const {
+  setGlobalOptions,
+} = require("firebase-functions/v2");
+const {
   onSchedule,
 } = require("firebase-functions/v2/scheduler");
 const {
@@ -37,6 +40,16 @@ const {
 const {
   getStorage,
 } = require("firebase-admin/storage");
+
+const APP_CHECK_ENFORCEMENT_ENABLED =
+  String(
+    process.env.FUNCTIONS_EMULATOR || ""
+  ).toLowerCase() !== "true";
+
+setGlobalOptions({
+  enforceAppCheck:
+    APP_CHECK_ENFORCEMENT_ENABLED,
+});
 
 if (!getApps().length) {
   initializeApp();
