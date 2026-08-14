@@ -5625,8 +5625,102 @@
     return `<section class="auth-return-card"><span>↪</span><div><small>AFTER SIGN-IN</small><strong>${escapeHtml(authDestinationTitleV20())}</strong><code>${escapeHtml(route)}</code></div></section>`;
   }
   function authTrustPanelV20(mode){
-    const title=mode==='create-account'?'Create one verified learner identity.':'Continue without losing your learning context.';
-    return `<aside class="auth-v20-trust"><div class="auth-v20-brand"><span class="auth-v20-mark">A</span><div><strong>AspireNest</strong><small>Academy</small></div></div><span class="eyebrow">SECURE LEARNING ACCESS</span><h1>${escapeHtml(title)}</h1><p>Public discovery, Student learning, Mentor guidance and Admin operations stay separated by verified identity and exact authorization.</p>${authReturnCardV20()}<div class="auth-v20-points"><article><span>✓</span><div><strong>Exact returnTo</strong><small>The selected Note, Video, Test or Roadmap remains attached.</small></div></article><article><span>◎</span><div><strong>Email verification</strong><small>Student access opens only after the account identity is verified.</small></div></article><article><span>◉</span><div><strong>Deny by default</strong><small>Role and entitlement checks happen after authentication.</small></div></article></div><footer><button data-auth-action="back-public">← Back to Public Home</button><small>Commerce and automatic email remain disabled.</small></footer></aside>`;
+    const title='Welcome to AspireNest Academy';
+    return `<aside class="auth-v20-trust">
+<div class="auth-v20-brand">
+  <span class="auth-v20-mark">A</span>
+  <div><strong>AspireNest</strong><small>Academy</small></div>
+</div>
+
+<div style="margin-top:26px">
+  <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:5px">Welcome to</div>
+
+  <div style="font-size:40px;line-height:1.06;font-weight:800;letter-spacing:-1.2px;color:#fff">
+    <span style="color:#ff8a00">AspireNest</span> Academy
+  </div>
+
+  <div style="font-size:17px;color:#d6deed;margin-top:8px">
+    Where Aspirations Turn Into Selections.
+  </div>
+
+  <div style="display:flex;align-items:center;gap:10px;margin:18px 0 18px">
+    <span style="height:1px;background:rgba(255,255,255,.18);flex:1"></span>
+    <span style="color:#ff9b00;font-size:15px">◆</span>
+    <span style="height:1px;background:rgba(255,255,255,.18);flex:1"></span>
+  </div>
+
+  <div style="display:grid;gap:16px">
+
+    <div style="display:flex;gap:14px;align-items:center">
+      <span style="width:40px;height:40px;border-radius:50%;background:#073f79;display:grid;place-items:center;flex:0 0 40px">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#18a7ff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-5 9 5-9 5-9-5z"/>
+          <path d="M7 11.5v4.2c2.8 2.2 7.2 2.2 10 0v-4.2"/>
+        </svg>
+      </span>
+      <div>
+        <strong style="display:block;color:#fff;font-size:14px">Seamless Learning</strong>
+        <small style="display:block;color:#cbd5e6;margin-top:4px">Learn at your own pace with structured courses and resources.</small>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:14px;align-items:center">
+      <span style="width:40px;height:40px;border-radius:50%;background:#006b63;display:grid;place-items:center;flex:0 0 40px">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#15e0a3" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3l7 3v5c0 5-3.2 8.2-7 10-3.8-1.8-7-5-7-10V6l7-3z"/>
+          <path d="M9 12l2 2 4-5"/>
+        </svg>
+      </span>
+      <div>
+        <strong style="display:block;color:#fff;font-size:14px">Secure &amp; Private</strong>
+        <small style="display:block;color:#cbd5e6;margin-top:4px">Your data and progress are always protected.</small>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:14px;align-items:center">
+      <span style="width:40px;height:40px;border-radius:50%;background:#493378;display:grid;place-items:center;flex:0 0 40px">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#d3a6ff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="8" r="3"/>
+          <path d="M3.5 19v-1.5A4.5 4.5 0 018 13h2a4.5 4.5 0 014.5 4.5V19"/>
+          <path d="M16 6.5a3 3 0 010 5.8"/>
+          <path d="M17 14a4 4 0 013.5 4"/>
+        </svg>
+      </span>
+      <div>
+        <strong style="display:block;color:#fff;font-size:14px">Expert Guidance</strong>
+        <small style="display:block;color:#cbd5e6;margin-top:4px">Learn from experienced educators and curated content.</small>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:14px;align-items:center">
+      <span style="width:40px;height:40px;border-radius:50%;background:#795117;display:grid;place-items:center;flex:0 0 40px">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#ff9b00" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19h3v-5H4v5zM10.5 19h3v-9h-3v9zM17 19h3V7h-3v12z"/>
+          <path d="M4 10l5-4 4 2 6-5"/>
+        </svg>
+      </span>
+      <div>
+        <strong style="display:block;color:#fff;font-size:14px">Track &amp; Achieve</strong>
+        <small style="display:block;color:#cbd5e6;margin-top:4px">Track your progress and stay focused on your goals.</small>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="border:1px solid rgba(110,155,220,.35);border-radius:10px;padding:14px 16px;margin-top:22px;display:flex;gap:13px;align-items:center;background:rgba(14,50,99,.23)">
+    <span style="width:33px;height:33px;display:grid;place-items:center;flex:0 0 33px">
+      <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#ff9b00" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3l7 3v5c0 5-3.2 8.2-7 10-3.8-1.8-7-5-7-10V6l7-3z"/>
+        <path d="M9 12l2 2 4-5"/>
+      </svg>
+    </span>
+    <div>
+      <strong style="display:block;color:#fff;font-size:13px">Structured learning. Guided preparation. Clear progress.</strong>
+      <small style="display:block;color:#cbd5e6;margin-top:4px">Everything you need to keep moving towards your goal.</small>
+    </div>
+  </div>
+</div>
+<footer><button data-auth-action="back-public">← Back to Public Home</button><small>Built for focused, secure and guided preparation.</small></footer></aside>`;
   }
   function authGoogleButtonV20(label){return `<button type="button" class="auth-google-button" data-auth-action="google"><span>G</span>${escapeHtml(label)}</button>`;}
   function authPasswordFieldV20(name,label,autocomplete='current-password'){
@@ -5635,7 +5729,17 @@
   }
   function renderLoginV20(){
     const identifier=state.authV20.lastIdentifier||'';
-    return `<section class="auth-v20-layout">${authTrustPanelV20('login')}<main class="auth-v20-card"><header><span class="auth-v20-step">STUDENT SIGN IN</span><h2>Welcome back</h2><p>Use your verified email, username or Google account.</p></header>${authGoogleButtonV20('Continue with Google')}<div class="auth-divider"><span>or use your account</span></div><form id="authLoginForm" class="auth-v20-form"><label class="auth-field"><span>Email or username</span><input name="identifier" type="text" value="${escapeHtml(identifier)}" autocomplete="username" placeholder="name@example.com or username" required></label>${authPasswordFieldV20('password','Password')}<div class="auth-inline-row"><label class="auth-check"><input name="remember" type="checkbox" ${state.authV20.remember?'checked':''}><span>Keep me signed in</span></label><button type="button" class="auth-text-action" data-auth-action="forgot">Forgot password?</button></div><button type="button" class="auth-primary" data-auth-action="submit-login">Sign in securely</button></form><div class="auth-account-switch"><span>New to AspireNest?</span><button data-auth-action="go-create">Create learner account</button></div><section class="auth-security-note"><span>⌁</span><div><strong>Role-safe sign-in</strong><small>Student accounts do not receive Mentor or Admin authority automatically.</small></div></section></main></section>`;
+    return `<section class="auth-v20-layout">${authTrustPanelV20('login')}<main class="auth-v20-card"><header><span class="auth-v20-step">STUDENT SIGN IN</span><h2>Welcome back</h2><p>Use your verified email, username or Google account.</p></header>${authGoogleButtonV20('Continue with Google')}<div class="auth-divider"><span>or use your account</span></div><form id="authLoginForm" class="auth-v20-form"><label class="auth-field"><span>Email or username</span><input name="identifier" type="text" value="${escapeHtml(identifier)}" autocomplete="username" placeholder="name@example.com or username" required></label>${authPasswordFieldV20('password','Password')}<div class="auth-inline-row"><label class="auth-check"><input name="remember" type="checkbox" ${state.authV20.remember?'checked':''}><span>Keep me signed in</span></label><button type="button" class="auth-text-action" data-auth-action="forgot">Forgot password?</button></div><button type="button" class="auth-primary" data-auth-action="submit-login">Sign in securely</button></form><div class="auth-account-switch"><span>New to AspireNest?</span><button data-auth-action="go-create">Create learner account</button></div><section class="auth-security-note" style="display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start">
+<article style="display:flex;gap:9px;align-items:flex-start;flex:1 1 150px">
+<span>◈</span><div><strong>Secure Access</strong><small>Your data is protected.</small></div>
+</article>
+<article style="display:flex;gap:9px;align-items:flex-start;flex:1 1 150px">
+<span>✓</span><div><strong>Verified Platform</strong><small>Trusted by learners.</small></div>
+</article>
+<article style="display:flex;gap:9px;align-items:flex-start;flex:1 1 150px">
+<span>▣</span><div><strong>Privacy First</strong><small>We respect your privacy.</small></div>
+</article>
+</section></main></section>`;
   }
   function createAccountProgressV21(step){
     return `<div class="auth-v21-progress" aria-label="Account creation progress"><span class="${step===1?'active':'complete'}"><b>1</b> Identity</span><i></i><span class="${step===2?'active':''}"><b>2</b> Security & learning</span></div>`;
