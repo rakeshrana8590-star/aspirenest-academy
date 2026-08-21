@@ -1,0 +1,128 @@
+name: G6 CDP Transport Proof
+
+on:
+  push:
+    branches:
+      - g6-cdp-transport-proof-20260821
+  workflow_dispatch:
+
+jobs:
+  windows-cdp-proof:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Prove fresh-target raw RFC6455 Chrome CDP
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          function Mark([string]$s) { Write-Host $s }
+          function Read-Exact($Stream, [int64]$Count) {
+            $buf = New-Object byte[] $Count
+            $off = 0
+            while ($off -lt $Count) {
+              $n = $Stream.Read($buf, $off, [int]($Count - $off))
+              if ($n -le 0) { throw 'Unexpected EOF' }
+              $off += $n
+            }
+            return $buf
+          }
+          function Send-WsText($Stream, [string]$Text) {
+            [byte[]]$payload = [Text.Encoding]::UTF8.GetBytes($Text)
+            [byte[]]$mask = New-Object byte[] 4
+            [Security.Cryptography.RandomNumberGenerator]::Fill($mask)
+            $ms = New-Object IO.MemoryStream
+            try {
+              $ms.WriteByte(0x81)
+              $len = $payload.Length
+              if ($len -lt 126) {
+                $ms.WriteByte([byte](0x80 -bor $len))
+              } elseif ($len -le 65535) {
+                $ms.WriteByte(0xFE)
+                $ms.WriteByte([byte](($len -shr 8) -band 255))
+                $ms.WriteByte([byte]($len -band 255))
+              } else { throw 'Payload too large for proof' }
+              $ms.Write($mask,0,4)
+              for ($i=0; $i -lt $payload.Length; $i++) { $payload[$i] = [byte]($payload[$i] -bxor $mask[$i % 4]) }
+              $ms.Write($payload,0,$payload.Length)
+              [byte[]]$frame=$ms.ToArray()
+              $Stream.Write($frame,0,$frame.Length)
+              $Stream.Flush()
+            } finally { $ms.Dispose() }
+          }
+          function Receive-WsText($Stream) {
+            while ($true) {
+              [byte[]]$h=Read-Exact $Stream 2
+              $opcode=$h[0] -band 0x0F
+              [int64]$len=$h[1] -band 0x7F
+              if ($len -eq 126) { [byte[]]$e=Read-Exact $Stream 2; $len=(($e[0] -shl 8) -bor $e[1]) }
+              elseif ($len -eq 127) { [byte[]]$e=Read-Exact $Stream 8; $len=0; foreach($b in $e){ $len=(($len -shl 8) -bor $b) } }
+              [byte[]]$payload=Read-Exact $Stream $len
+              if ($opcode -eq 1) { return [Text.Encoding]::UTF8.GetString($payload) }
+              if ($opcode -eq 8) { throw 'CDP socket closed' }
+            }
+          }
+
+          $chromeCandidates=@(
+            'C:\Program Files\Google\Chrome\Application\chrome.exe',
+            'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe',
+            'C:\Program Files\Microsoft\Edge\Application\msedge.exe',
+            'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+          )
+          $chrome=$chromeCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $chrome) { throw 'Chrome/Edge not found on Windows runner' }
+          Mark 'WINDOWS_BROWSER=FOUND'
+
+          $listener=[Net.Sockets.TcpListener]::new([Net.IPAddress]::Loopback,0)
+          $listener.Start(); $port=([Net.IPEndPoint]$listener.LocalEndpoint).Port; $listener.Stop()
+          $profile=Join-Path $env:RUNNER_TEMP ('g6-cdp-'+[guid]::NewGuid().ToString('N'))
+          New-Item -ItemType Directory -Force -Path $profile | Out-Null
+          $p=$null; $tcp=$null
+          try {
+            $args=@('--headless=new',"--remote-debugging-address=127.0.0.1","--remote-debugging-port=$port",'--remote-allow-origins=*',("--user-data-dir=$profile"),'--no-first-run','--no-default-browser-check','--disable-background-networking','--disable-component-update','--disable-sync','--disable-gpu','--disable-features=Translate,OptimizationHints','about:blank')
+            $p=Start-Process -FilePath $chrome -ArgumentList $args -PassThru
+            Mark 'CHROME_LAUNCH=GREEN'
+            $version=$null
+            for($i=0;$i -lt 120;$i++){
+              if($p.HasExited){ throw 'Browser exited before CDP HTTP discovery' }
+              try { $version=Invoke-RestMethod -UseBasicParsing -TimeoutSec 2 -Uri "http://127.0.0.1:$port/json/version"; if($version.'Protocol-Version'){break} } catch {}
+              Start-Sleep -Milliseconds 250
+            }
+            if(-not $version.'Protocol-Version'){ throw 'CDP /json/version unavailable' }
+            Mark 'CDP_HTTP_DISCOVERY=GREEN'
+
+            $target=Invoke-RestMethod -UseBasicParsing -Method Put -TimeoutSec 5 -Uri "http://127.0.0.1:$port/json/new?about:blank"
+            if(-not $target.webSocketDebuggerUrl){ throw 'Fresh target missing websocket URL' }
+            Mark 'CDP_FRESH_TARGET_CREATE=GREEN'
+
+            $uri=[Uri]$target.webSocketDebuggerUrl
+            $tcp=[Net.Sockets.TcpClient]::new(); $tcp.NoDelay=$true; $tcp.Connect('127.0.0.1',$port)
+            $stream=$tcp.GetStream(); $stream.ReadTimeout=30000; $stream.WriteTimeout=30000
+            [byte[]]$keyBytes=New-Object byte[] 16; [Security.Cryptography.RandomNumberGenerator]::Fill($keyBytes)
+            $key=[Convert]::ToBase64String($keyBytes); $crlf="`r`n"
+            $request="GET $($uri.PathAndQuery) HTTP/1.1${crlf}Host: 127.0.0.1:$port${crlf}Upgrade: websocket${crlf}Connection: Upgrade${crlf}Sec-WebSocket-Key: $key${crlf}Sec-WebSocket-Version: 13${crlf}${crlf}"
+            [byte[]]$rb=[Text.Encoding]::ASCII.GetBytes($request); $stream.Write($rb,0,$rb.Length); $stream.Flush()
+            $bytes=New-Object Collections.Generic.List[byte]
+            while($bytes.Count -lt 65536){ $one=$stream.ReadByte(); if($one -lt 0){throw 'EOF during handshake'}; $bytes.Add([byte]$one); $n=$bytes.Count; if($n -ge 4 -and $bytes[$n-4] -eq 13 -and $bytes[$n-3] -eq 10 -and $bytes[$n-2] -eq 13 -and $bytes[$n-1] -eq 10){break} }
+            $head=[Text.Encoding]::ASCII.GetString($bytes.ToArray()); $status=($head -split "`r`n")[0]
+            Mark ('RAW_WS_STATUS='+$status)
+            if($status -notmatch '^HTTP/1\.[01]\s+101\b'){throw "Raw websocket upgrade rejected: $status"}
+            $accept=''; foreach($line in ($head -split "`r`n")){ if($line -match '^\s*Sec-WebSocket-Accept\s*:\s*(.+?)\s*$'){ $accept=$Matches[1]; break } }
+            $sha1=[Security.Cryptography.SHA1]::Create(); try { $expected=[Convert]::ToBase64String($sha1.ComputeHash([Text.Encoding]::ASCII.GetBytes($key+'258EAFA5-E914-47DA-95CA-C5AB0DC85B11'))) } finally { $sha1.Dispose() }
+            if($accept -ne $expected){throw 'Sec-WebSocket-Accept mismatch'}
+            Mark 'RAW_WS_UPGRADE_101=GREEN'
+            Mark 'RAW_WS_ACCEPT_VALIDATED=GREEN'
+
+            $cmd='{"id":1,"method":"Runtime.evaluate","params":{"expression":"1+1","returnByValue":true}}'
+            Send-WsText $stream $cmd
+            $response=$null
+            for($i=0;$i -lt 20;$i++){ $candidate=Receive-WsText $stream; try{$obj=$candidate|ConvertFrom-Json}catch{continue}; if($obj.id -eq 1){$response=$obj;break} }
+            if(-not $response){throw 'No Runtime.evaluate response'}
+            if([int]$response.result.result.value -ne 2){throw 'CDP Runtime.evaluate returned wrong value'}
+            Mark 'CDP_RUNTIME_EVALUATE=GREEN'
+            Mark 'WINDOWS_FRESH_TARGET_RAW_RFC6455_CDP_PROOF=GREEN'
+          }
+          finally {
+            if($tcp){$tcp.Dispose()}
+            if($p -and -not $p.HasExited){Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue}
+            Remove-Item -LiteralPath $profile -Recurse -Force -ErrorAction SilentlyContinue
+          }
