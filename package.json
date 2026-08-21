@@ -23,9 +23,11 @@
   },
   "scripts": {
     "start": "node scripts/serve-v26-production.cjs",
+    "prebuild": "node scripts/verify-v26-release-static.cjs",
     "build": "node scripts/build-v26-shell.cjs",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
+    "v26:release:verify": "node scripts/verify-v26-release-static.cjs",
     "v26:bundle:prepare": "node scripts/prepare-v26-production-bundle.cjs",
     "v26:bundle:assert": "node scripts/assert-v26-production-bundle.cjs",
     "v26:bundle:test": "node scripts/test-v26-production-bundle.cjs",
