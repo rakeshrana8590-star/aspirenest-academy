@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - g6-cdp-transport-proof-20260821
+  pull_request:
+    branches:
+      - v26-final-production-integration
   workflow_dispatch:
 
 jobs:
