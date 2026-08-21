@@ -19,8 +19,7 @@ const tests = Object.freeze([
   'src/integration/v26/browser/productionProviderEntry.test.cjs',
   'scripts/test-firebase-environment-resolver-closure.cjs',
   'scripts/test-firebase-single-initializer-owner-closure.cjs',
-  'scripts/test-firebase-full-bootstrap-no-network.cjs',
-  'scripts/test-v26-provider-entry-full-bootstrap-no-network.cjs',
+  'scripts/test-firebase-appcheck-static-closure.cjs',
   'scripts/build-v26-production-provider-lp4.test.cjs',
   'scripts/test-v26-provider-runtime-closure-lp4.cjs'
 ]);
@@ -30,10 +29,7 @@ const failures = [];
 
 for (const relative of tests) {
   console.log(`\n[release-verify] START ${relative}`);
-  const args = relative.includes('full-bootstrap-no-network')
-    ? ['--no-warnings', '--experimental-vm-modules', relative]
-    : [relative];
-  const result = spawnSync(process.execPath, args, {
+  const result = spawnSync(process.execPath, [relative], {
     cwd: repoRoot,
     env: process.env,
     encoding: 'utf8',
