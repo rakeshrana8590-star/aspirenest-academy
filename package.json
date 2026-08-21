@@ -22,7 +22,7 @@
     "xlsx": "^0.18.5"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "node scripts/serve-v26-production.cjs",
     "build": "node scripts/build-v26-shell.cjs",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
@@ -32,6 +32,7 @@
     "build:legacy-react": "react-scripts build",
     "v26:shell:assert": "node scripts/assert-v26-shell-contract-lp4.cjs",
     "v26:shell:build": "node scripts/build-v26-shell.cjs",
+    "v26:shell:serve": "node scripts/serve-v26-production.cjs",
     "v26:bridge:foundation:test": "node src/integration/v26/productionBridgeFoundation.test.cjs",
     "v26:auth-service:test": "node src/integration/v26/authProductionService.test.cjs",
     "v26:canonical-resource:test": "node src/integration/v26/canonicalResourceService.test.cjs",
