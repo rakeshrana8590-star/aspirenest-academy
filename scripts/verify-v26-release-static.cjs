@@ -6,7 +6,7 @@ const { spawnSync } = require('child_process');
 
 const repoRoot = path.resolve(__dirname, '..');
 const tests = Object.freeze([
-  'src/integration/v26/authProductionService.test.cjs',
+  'src/integration/v26/authProductionServicePhase27.test.cjs',
   'src/integration/v26/authorizeProductionService.test.cjs',
   'src/integration/v26/accessProductionService.test.cjs',
   'src/integration/v26/canonicalResourceService.test.cjs',
@@ -17,6 +17,10 @@ const tests = Object.freeze([
   'src/integration/v26/lp5PackSecurityContract.test.cjs',
   'src/integration/v26/lp5Phase51SecurityContract.test.cjs',
   'src/integration/v26/browser/productionProviderEntry.test.cjs',
+  'scripts/test-firebase-environment-resolver-closure.cjs',
+  'scripts/test-firebase-single-initializer-owner-closure.cjs',
+  'scripts/test-firebase-full-bootstrap-no-network.cjs',
+  'scripts/test-v26-provider-entry-full-bootstrap-no-network.cjs',
   'scripts/build-v26-production-provider-lp4.test.cjs',
   'scripts/test-v26-provider-runtime-closure-lp4.cjs'
 ]);
@@ -26,7 +30,10 @@ const failures = [];
 
 for (const relative of tests) {
   console.log(`\n[release-verify] START ${relative}`);
-  const result = spawnSync(process.execPath, [relative], {
+  const args = relative.includes('full-bootstrap-no-network')
+    ? ['--no-warnings', '--experimental-vm-modules', relative]
+    : [relative];
+  const result = spawnSync(process.execPath, args, {
     cwd: repoRoot,
     env: process.env,
     encoding: 'utf8',
@@ -52,11 +59,11 @@ for (const relative of tests) {
 console.log(`\nASPIRENEST_V26_RELEASE_VERIFY_TEST_FILES=${passed}/${tests.length}`);
 
 if (failures.length) {
-  console.error(`ASPIRENEST_V26_RELEASE_VERIFY=RED`);
+  console.error('ASPIRENEST_V26_RELEASE_VERIFY=RED');
   console.error(`ASPIRENEST_V26_RELEASE_VERIFY_FAILURE_COUNT=${failures.length}`);
   for (const failure of failures) console.error(`ASPIRENEST_V26_RELEASE_VERIFY_FAILURE=${failure}`);
   process.exit(21);
 }
 
-console.log(`ASPIRENEST_V26_RELEASE_VERIFY=GREEN`);
-console.log(`ASPIRENEST_V26_RELEASE_VERIFY_FAILURE_COUNT=0`);
+console.log('ASPIRENEST_V26_RELEASE_VERIFY=GREEN');
+console.log('ASPIRENEST_V26_RELEASE_VERIFY_FAILURE_COUNT=0');
