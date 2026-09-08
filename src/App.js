@@ -8575,7 +8575,12 @@ handleSaveUniversalContent={handleSaveUniversalContent}
 <Route
   path="/ctet-tet/videos"
   element={
-    <StudentVideoHub universalContent={universalContent} />
+    <StudentVideoHub
+      universalContent={universalContent}
+      hasPlanAccess={hasPlanAccess}
+      userPlanType={userPlanType}
+      user={user}
+    />
   }
 />
 
@@ -8632,6 +8637,9 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   element={
     <StudentNotesLibraryRoute
       universalContent={universalContent}
+      handleNoteAccess={handleNoteAccess}
+      hasPlanAccess={hasPlanAccess}
+      user={user}
     />
   }
 />
@@ -8671,6 +8679,8 @@ handleSaveUniversalContent={handleSaveUniversalContent}
   element={
     <StudentMockTestLibraryRoute
       universalContent={universalContent}
+      hasPlanAccess={hasPlanAccess}
+      user={user}
     />
   }
 />
@@ -8808,6 +8818,9 @@ handleSaveUniversalContent={handleSaveUniversalContent}
     <StudentCurrentAffairsLibraryRoute
       universalContent={universalContent}
       currentAffairsList={currentAffairsList}
+      hasPlanAccess={hasPlanAccess}
+      isAdmin={isAdmin(user)}
+      user={user}
     />
   }
 />

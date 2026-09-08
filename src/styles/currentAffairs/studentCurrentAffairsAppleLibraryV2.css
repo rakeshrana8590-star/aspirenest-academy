@@ -1,0 +1,109 @@
+/*
+  AspireNest Current Affairs — Native Apple Content DNA V2
+  Scoped to caAppleLibraryV2; header/navigation and engine owners are untouched.
+*/
+html.caAppleLibraryV2ScrollRoot,body.caAppleLibraryV2ScrollBody{
+  scrollbar-width:none!important;
+  -ms-overflow-style:none!important;
+}
+html.caAppleLibraryV2ScrollRoot::-webkit-scrollbar,body.caAppleLibraryV2ScrollBody::-webkit-scrollbar{
+  width:0!important;height:0!important;display:none!important;
+}
+.caAppleLibraryV2{
+  --dna-text:#1d1d1f;--dna-text2:#424245;--dna-muted:#6e6e73;
+  --dna-blue:#0071e3;--dna-blue2:#0066cc;--dna-blue-soft:#eaf3ff;
+  --dna-green:#248a3d;--dna-green-soft:#eaf7ed;
+  --dna-red:#d70015;--dna-red-soft:#fff1f2;
+  --dna-line:rgba(0,0,0,.08);
+  width:100%;min-height:calc(100vh - 80px);margin:0;
+  padding:20px clamp(18px,3vw,44px) 54px;
+  background:linear-gradient(180deg,#fbfbfd 0%,#f5f5f7 100%);
+  color:var(--dna-text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.caAppleLibraryV2,.caAppleLibraryV2 *{box-sizing:border-box}
+.caAppleLibraryV2 button{appearance:none!important;-webkit-appearance:none!important;background-image:none!important;text-shadow:none!important;transform:none!important}
+.caAppleHeading{
+  max-width:1440px;margin:0 auto 14px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;
+}
+.caAppleEyebrow{display:block;margin-bottom:4px;color:var(--dna-blue);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.caAppleHeading h1{margin:0;color:var(--dna-text);font-size:clamp(34px,3.4vw,48px);line-height:1;letter-spacing:-.045em;font-weight:750}
+.caAppleHeading p{max-width:780px;margin:7px 0 0;color:var(--dna-muted);font-size:13px;line-height:1.4}
+.caApplePrimaryAction,.caAppleSecondaryAction{
+  min-height:40px!important;padding:0 16px!important;border-radius:999px!important;font-size:12px!important;font-weight:700!important;box-shadow:none!important;
+}
+.caApplePrimaryAction{border:0!important;background:var(--dna-blue)!important;color:#fff!important}
+.caAppleSecondaryAction{border:1px solid rgba(0,113,227,.20)!important;background:#fff!important;color:var(--dna-blue2)!important}
+.caAppleFilters{max-width:1440px;margin:0 auto;display:grid;gap:7px}
+.caAppleFilterRow,.caAppleUtilityRow{
+  min-height:44px;display:grid;grid-template-columns:110px minmax(0,1fr);align-items:center;gap:12px;
+  padding:6px 10px;border:1px solid var(--dna-line);border-radius:16px;background:rgba(255,255,255,.96);
+  box-shadow:0 6px 20px rgba(0,0,0,.04);
+}
+.caAppleUtilityRow{grid-template-columns:minmax(0,1fr) auto}
+.caAppleFilterLabel{display:grid;gap:1px}
+.caAppleFilterLabel strong{font-size:11px;color:var(--dna-text);font-weight:700}
+.caAppleFilterLabel span{font-size:9px;color:var(--dna-muted)}
+.caAppleScroller{display:flex;align-items:center;gap:7px;min-width:0;overflow-x:auto;padding:1px 1px 2px;scrollbar-width:none!important;-ms-overflow-style:none!important}
+.caAppleScroller::-webkit-scrollbar{width:0!important;height:0!important;display:none!important}
+.caAppleLibraryV2 .caAppleChip{
+  flex:none!important;min-height:32px!important;display:inline-flex!important;align-items:center!important;gap:5px!important;
+  padding:0 11px!important;border:1px solid rgba(0,0,0,.10)!important;border-radius:999px!important;
+  background:#fff!important;color:var(--dna-text2)!important;font-size:11px!important;font-weight:650!important;box-shadow:none!important;
+}
+.caAppleLibraryV2 .caAppleChip:hover{background:#f2f2f7!important}
+.caAppleLibraryV2 .caAppleChip.active{background:var(--dna-blue-soft)!important;border-color:#b9d9ff!important;color:var(--dna-blue2)!important}
+.caAppleChip small{min-width:18px;height:18px;display:grid;place-items:center;padding:0 5px;border-radius:999px;background:#f2f2f7;color:var(--dna-muted);font-size:8px;font-weight:700}
+.caAppleChip.active small{background:#fff;color:var(--dna-blue2)}
+.caApplePlanChip em{font-style:normal;padding:3px 6px;border-radius:999px;font-size:8px;font-weight:700}
+.caApplePlanChip em.hasAccess{background:var(--dna-green-soft);color:var(--dna-green)}
+.caApplePlanChip em.lockedAccess{background:var(--dna-red-soft);color:var(--dna-red)}
+.caAppleUtilityRight{display:flex;align-items:center;gap:9px}
+.caAppleViewToggle{display:flex;padding:3px;border:1px solid rgba(0,0,0,.09);border-radius:12px;background:#fff}
+.caAppleLibraryV2 .caAppleViewToggle button{width:34px!important;height:30px!important;border:0!important;border-radius:9px!important;background:#fff!important;color:#86868b!important;box-shadow:none!important}
+.caAppleLibraryV2 .caAppleViewToggle button.active{background:var(--dna-blue-soft)!important;color:var(--dna-blue)!important}
+.caAppleResultCount{display:flex;align-items:baseline;gap:5px;white-space:nowrap}
+.caAppleResultCount strong{font-size:16px;color:var(--dna-text)}
+.caAppleResultCount span{font-size:9px;color:var(--dna-muted)}
+.caAppleResourceGrid{max-width:1440px;margin:10px auto 0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.caAppleCard{
+  min-width:0;overflow:hidden;border:1px solid var(--dna-line);border-radius:18px;background:#fff;box-shadow:0 4px 18px rgba(0,0,0,.045);
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+}
+.caAppleCard:hover{transform:translateY(-2px);border-color:rgba(0,113,227,.18);box-shadow:0 12px 28px rgba(0,0,0,.07)}
+.caAppleCard.isLocked{border-color:rgba(215,0,21,.16)}
+.caAppleLibraryV2 .caAppleCardOpen{width:100%!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:#fff!important;color:var(--dna-text)!important;box-shadow:none!important;text-align:left!important;transform:none!important}
+.caAppleThumb{height:98px;position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:space-between;padding:11px;background:radial-gradient(circle at 88% 10%,rgba(0,113,227,.06),transparent 34%),linear-gradient(145deg,#f7f9fc 0%,#fff 62%,#f8f4ee 100%)}
+.caAppleTypeIcon{position:relative;z-index:1;width:40px;height:40px;display:grid;place-items:center;border:1px solid rgba(0,0,0,.06);border-radius:13px;background:#fff;color:var(--dna-text);font-size:18px;box-shadow:0 6px 16px rgba(0,0,0,.05)}
+.caAppleState{position:relative;z-index:1;padding:4px 7px;border-radius:999px;font-size:9px;font-weight:700}
+.caAppleState.open{background:var(--dna-green-soft);color:var(--dna-green)}
+.caAppleState.locked{background:var(--dna-red-soft);color:var(--dna-red)}
+.caAppleCardBody{padding:11px 12px;background:#fff}
+.caAppleMeta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.caAppleMeta small{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--dna-muted);font-size:10px;font-weight:600}
+.caAppleMeta span{flex:none;padding:4px 7px;border:1px solid rgba(0,0,0,.06);border-radius:999px;background:#f5f5f7;color:var(--dna-text2);font-size:8px;font-weight:700}
+.caAppleCardBody h3{min-height:34px;margin:0;color:var(--dna-text);font-size:13px;line-height:1.28;font-weight:700}
+.caAppleCardBody p{margin:5px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--dna-muted);font-size:10px}
+.caAppleCardFooter{min-height:36px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 8px 8px 11px;background:#fff}
+.caAppleCardFooter small{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--dna-muted);font-size:9px}
+.caAppleLibraryV2 .caAppleSave{width:30px!important;height:30px!important;display:grid!important;place-items:center!important;padding:0!important;border:0!important;border-radius:50%!important;background:#f5f5f7!important;color:#6e6e73!important;box-shadow:none!important}
+.caAppleLibraryV2 .caAppleSave.saved{background:var(--dna-blue-soft)!important;color:var(--dna-blue)!important}
+.caAppleEmpty{max-width:1440px;margin:10px auto 0;padding:46px 20px;border:1px dashed rgba(0,0,0,.12);border-radius:18px;background:#fff;text-align:center;color:var(--dna-muted)}
+.caAppleLibraryV2[data-view="list"] .caAppleResourceGrid{display:block}
+.caAppleLibraryV2[data-view="list"] .caAppleCard{display:grid;grid-template-columns:minmax(0,1fr) auto;margin-bottom:8px}
+.caAppleLibraryV2[data-view="list"] .caAppleCardOpen{display:grid!important;grid-template-columns:88px minmax(0,1fr)!important}
+.caAppleLibraryV2[data-view="list"] .caAppleThumb{height:auto;min-height:90px;align-items:center;justify-content:center}
+@media(max-width:1180px){.caAppleResourceGrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:900px){
+  .caAppleLibraryV2{padding:18px 14px 50px}
+  .caAppleHeading{align-items:flex-start;flex-direction:column;gap:10px}
+  .caAppleFilterRow{grid-template-columns:1fr;gap:5px}
+  .caAppleResourceGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:620px){
+  .caAppleLibraryV2{padding:14px 10px 46px}
+  .caAppleUtilityRow{grid-template-columns:1fr}
+  .caAppleUtilityRight{justify-content:flex-end}
+  .caAppleResourceGrid{grid-template-columns:1fr}
+}

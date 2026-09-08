@@ -45,7 +45,7 @@ export const NOTES_PLAN_ORDER = [
   }
   
   export function getNotePlan(note = {}) {
-    return String(
+    const rawPlan = String(
       note.planType ||
         note.accessPlan ||
         note.plan ||
@@ -53,8 +53,13 @@ export const NOTES_PLAN_ORDER = [
     )
       .trim()
       .toUpperCase();
+
+    // Canonical Notes compatibility:
+    // legacy MENTORSHIP-labelled Notes are Premium Notes.
+    // Mentorship remains visible and therefore correctly counts 0.
+    return rawPlan === "MENTORSHIP" ? "PREMIUM" : rawPlan;
   }
-  
+
   export function getNoteStatus(note = {}) {
     return String(note.status || "")
       .trim()

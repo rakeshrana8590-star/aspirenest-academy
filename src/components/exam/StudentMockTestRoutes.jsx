@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import StudentMockTestCard from "./StudentMockTestCard.jsx";
 import "./studentMockLeaderboard.css";
+import "../../styles/exam/studentMockTestsAppleLibraryV2.css";
 import {
   getMockLeaderboardModeLabel,
   getMockLeaderboardScore,
@@ -273,142 +274,477 @@ function MockEmptyState({ title, text }) {
   );
 }
 
-export function StudentMockTestLibraryRoute({ universalContent = [] }) {
+export function StudentMockTestLibraryRoute({
+  universalContent = [],
+  hasPlanAccess = () => false,
+  user,
+}) {
   const navigate = useNavigate();
-  const publishedTests = getPublishedMockTests(universalContent);
+
+  const savedKey = React.useMemo(
+    () => `aspirenest:mock-tests:saved:${user?.uid || user?.email || "guest"}`,
+    [user?.uid, user?.email]
+  );
+
+  const readSaved = React.useCallback(() => {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(savedKey) || "[]");
+      return new Set(Array.isArray(parsed) ? parsed.map(String) : []);
+    } catch {
+      return new Set();
+    }
+  }, [savedKey]);
+
+  const [planFilter, setPlanFilter] = React.useState("ALL");
+  const [subjectFilter, setSubjectFilter] = React.useState("ALL");
+  const [chapterFilter, setChapterFilter] = React.useState("ALL");
+  const [utilityFilter, setUtilityFilter] = React.useState("all");
+  const [view, setView] = React.useState("grid");
+  const [savedIds, setSavedIds] = React.useState(() => new Set());
+
+  React.useEffect(() => {
+    setSavedIds(readSaved());
+  }, [readSaved]);
+
+  React.useEffect(() => {
+    document.documentElement.classList.add("mockAppleLibraryScrollRoot");
+    document.body.classList.add("mockAppleLibraryScrollBody");
+
+    return () => {
+      document.documentElement.classList.remove("mockAppleLibraryScrollRoot");
+      document.body.classList.remove("mockAppleLibraryScrollBody");
+    };
+  }, []);
+
+  React.useEffect(() => {
+    setSubjectFilter("ALL");
+    setChapterFilter("ALL");
+  }, [planFilter]);
+
+  React.useEffect(() => {
+    setChapterFilter("ALL");
+  }, [subjectFilter]);
+
+  const publishedTests = React.useMemo(
+    () => getPublishedMockTests(universalContent),
+    [universalContent]
+  );
+
+  const getTestPlan = React.useCallback(
+    (test) => String(test?.planType || "FREE").trim().toUpperCase(),
+    []
+  );
+
+  const canOpenTest = React.useCallback(
+    (test) => {
+      const planName = getTestPlan(test);
+      if (planName === "FREE") return true;
+
+      return Boolean(
+        hasPlanAccess(planName, {
+          module: "mockTest",
+          itemType: "mockTest",
+          itemId: test?.id,
+        })
+      );
+    },
+    [getTestPlan, hasPlanAccess]
+  );
+
+  const hasAttempted = React.useCallback((test) => {
+    if (!test?.id) return false;
+
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem(`aspireExamAttempt_${test.id}`) || "{}"
+      );
+
+      return Boolean(
+        saved?.startedAt ||
+          saved?.submittedAt ||
+          saved?.isSubmitted === true
+      );
+    } catch {
+      return false;
+    }
+  }, []);
+
+  const planCounts = React.useMemo(() => {
+    const counts = Object.fromEntries(
+      MOCK_PLAN_ORDER.map((planName) => [planName, 0])
+    );
+
+    publishedTests.forEach((test) => {
+      const planName = getTestPlan(test);
+      counts[planName] = (counts[planName] || 0) + 1;
+    });
+
+    return counts;
+  }, [publishedTests, getTestPlan]);
+
+  const planScopedTests = React.useMemo(
+    () =>
+      planFilter === "ALL"
+        ? publishedTests
+        : publishedTests.filter(
+            (test) => getTestPlan(test) === planFilter
+          ),
+    [publishedTests, planFilter, getTestPlan]
+  );
+
+  const subjects = React.useMemo(
+    () =>
+      buildSubjectList(planScopedTests).sort((a, b) =>
+        a.title.localeCompare(b.title)
+      ),
+    [planScopedTests]
+  );
+
+  const subjectScopedTests = React.useMemo(
+    () =>
+      subjectFilter === "ALL"
+        ? planScopedTests
+        : planScopedTests.filter(
+            (test) =>
+              normalizeText(test.subject) ===
+              normalizeText(subjectFilter)
+          ),
+    [planScopedTests, subjectFilter]
+  );
+
+  const chapters = React.useMemo(
+    () =>
+      buildChapterList(subjectScopedTests).sort((a, b) =>
+        a.title.localeCompare(b.title)
+      ),
+    [subjectScopedTests]
+  );
+
+  const filteredTests = React.useMemo(() => {
+    return subjectScopedTests.filter((test) => {
+      if (
+        chapterFilter !== "ALL" &&
+        normalizeText(test.chapter) !== normalizeText(chapterFilter)
+      ) {
+        return false;
+      }
+
+      if (utilityFilter === "access" && !canOpenTest(test)) {
+        return false;
+      }
+
+      if (utilityFilter === "free" && getTestPlan(test) !== "FREE") {
+        return false;
+      }
+
+      if (utilityFilter === "attempted" && !hasAttempted(test)) {
+        return false;
+      }
+
+      if (
+        utilityFilter === "saved" &&
+        !savedIds.has(String(test.id || ""))
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [
+    subjectScopedTests,
+    chapterFilter,
+    utilityFilter,
+    canOpenTest,
+    getTestPlan,
+    hasAttempted,
+    savedIds,
+  ]);
+
+  const toggleSaved = (test) => {
+    const id = String(test?.id || "");
+    if (!id) return;
+
+    const next = new Set(savedIds);
+
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+
+    setSavedIds(next);
+
+    try {
+      localStorage.setItem(savedKey, JSON.stringify([...next]));
+    } catch {
+      // Saved is a device-local convenience only.
+    }
+  };
+
+  const planHasAccess = (planName) => {
+    if (planName === "FREE") return true;
+
+    const tests = publishedTests.filter(
+      (test) => getTestPlan(test) === planName
+    );
+
+    if (tests.some((test) => canOpenTest(test))) return true;
+
+    return Boolean(
+      hasPlanAccess(planName, {
+        module: "mockTest",
+      })
+    );
+  };
+
+  const subjectCountForCurrentPlan = (subjectName) =>
+    planScopedTests.filter(
+      (test) =>
+        normalizeText(test.subject) === normalizeText(subjectName)
+    ).length;
 
   return (
-    <section className="mockStudentPage">
-      <MockStudentHero
-        badge="CTET / TET MOCK TESTS"
-        title="Practice & Performance Center"
-        text="Attempt plan-wise, subject-wise, and chapter-wise mock tests with score tracking and premium exam flow."
-        stats={[
-          {
-            label: "Published Tests",
-            value: publishedTests.length,
-          },
-          {
-            label: "Plans",
-            value: MOCK_PLAN_ORDER.length,
-          },
-          {
-            label: "Mode",
-            value: "Premium",
-          },
-        ]}
-      />
-
-      <div className="mockStudentShelf mockStudentPlanShelfV2">
-        <div className="mockStudentShelfHeader mockStudentShelfHeaderV2">
-          <span>Mock Test Library</span>
-          <h2>Choose your preparation plan</h2>
+    <section className="mockAppleLibraryV2" data-view={view}>
+      <div className="mockAppleHeading">
+        <div>
+          <span className="mockAppleEyebrow">CTET / TET MOCK TESTS</span>
+          <h1>Mock Tests</h1>
           <p>
-            Select the right plan shelf and continue into subject-wise,
-            chapter-wise, and test-wise practice inside one connected exam
-            system.
+            Choose a plan, subject, and chapter. The tests below update
+            instantly, while the existing AspireNest exam engine remains
+            unchanged.
           </p>
         </div>
 
-        <div className="mockStudentPlanGridV2">
-          {MOCK_PLAN_ORDER.map((planName) => {
-            const planTests = getPlanMockTests(universalContent, planName);
-            const subjects = buildSubjectList(planTests);
+        <div className="mockAppleHeadingActions">
+          <button
+            type="button"
+            className="mockAppleSecondaryAction"
+            onClick={() => navigate("/ctet-tet/mock-tests/history")}
+          >
+            History
+          </button>
 
-            return (
+          <button
+            type="button"
+            className="mockApplePrimaryAction"
+            onClick={() =>
+              document
+                .querySelector(".mockAppleResourceGrid")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+          >
+            Start Practice
+          </button>
+        </div>
+      </div>
+
+      <div className="mockAppleFilters">
+        <div className="mockAppleFilterRow">
+          <div className="mockAppleFilterLabel">
+            <strong>Plans</strong>
+            <span>{publishedTests.length} tests</span>
+          </div>
+
+          <div className="mockAppleScroller">
+            <button
+              type="button"
+              className={`mockAppleChip ${
+                planFilter === "ALL" ? "active" : ""
+              }`}
+              onClick={() => setPlanFilter("ALL")}
+            >
+              <span>All Plans</span>
+              <small>{publishedTests.length}</small>
+            </button>
+
+            {MOCK_PLAN_ORDER.map((planName) => {
+              const access = planHasAccess(planName);
+
+              return (
+                <button
+                  type="button"
+                  key={planName}
+                  className={`mockAppleChip mockApplePlanChip ${
+                    planFilter === planName ? "active" : ""
+                  }`}
+                  onClick={() => setPlanFilter(planName)}
+                >
+                  <span>{planName}</span>
+                  <small>{planCounts[planName] || 0}</small>
+                  <em className={access ? "hasAccess" : "lockedAccess"}>
+                    {access ? "Access" : "Locked"}
+                  </em>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mockAppleFilterRow">
+          <div className="mockAppleFilterLabel">
+            <strong>Subjects</strong>
+            <span>{subjects.length} subjects</span>
+          </div>
+
+          <div className="mockAppleScroller">
+            <button
+              type="button"
+              className={`mockAppleChip ${
+                subjectFilter === "ALL" ? "active" : ""
+              }`}
+              onClick={() => setSubjectFilter("ALL")}
+            >
+              All Subjects
+            </button>
+
+            {subjects.map((subject) => (
               <button
                 type="button"
-                className={
-                  planName === "PREMIUM"
-                    ? "mockStudentPlanCardV2 isPremiumPlan"
-                    : "mockStudentPlanCardV2"
-                }
-                key={planName}
-                onClick={() =>
-                  navigate(`/ctet-tet/mock-tests/plan/${planName}`)
-                }
+                key={subject.id}
+                className={`mockAppleChip ${
+                  normalizeText(subjectFilter) ===
+                  normalizeText(subject.id)
+                    ? "active"
+                    : ""
+                }`}
+                onClick={() => setSubjectFilter(subject.id)}
               >
-                <div className="mockStudentPlanCardTopV2">
-                  <span className="mockStudentPlanIconV2">
-                    {PLAN_ICONS[planName]}
-                  </span>
-
-                  <span className="mockStudentPlanPillV2">{planName}</span>
-                </div>
-
-                <h3>{PLAN_LABELS[planName]}</h3>
-
-                <p>
-                  {subjects.length > 0
-                    ? `${subjects.length} subject shelves ready for practice.`
-                    : "Published mock tests will appear here after admin publishes them."}
-                </p>
-
-                <div className="mockStudentPlanStatsV2">
-                  <div>
-                    <strong>{planTests.length}</strong>
-                    <span>Tests</span>
-                  </div>
-
-                  <div>
-                    <strong>{subjects.length}</strong>
-                    <span>Subjects</span>
-                  </div>
-                </div>
-
-                <div className="mockStudentPlanFooterV2">
-                  <span>
-                    {planTests.length > 0
-                      ? "Open exam shelf"
-                      : "Waiting for tests"}
-                  </span>
-
-                  <strong>Open →</strong>
-                </div>
+                <span>{subject.title}</span>
+                <small>{subjectCountForCurrentPlan(subject.id)}</small>
               </button>
+            ))}
+          </div>
+        </div>
+
+        {chapters.length > 0 ? (
+          <div className="mockAppleFilterRow">
+            <div className="mockAppleFilterLabel">
+              <strong>Chapters</strong>
+              <span>{chapters.length} chapters</span>
+            </div>
+
+            <div className="mockAppleScroller">
+              <button
+                type="button"
+                className={`mockAppleChip ${
+                  chapterFilter === "ALL" ? "active" : ""
+                }`}
+                onClick={() => setChapterFilter("ALL")}
+              >
+                All Chapters
+              </button>
+
+              {chapters.map((chapter) => (
+                <button
+                  type="button"
+                  key={chapter.id}
+                  className={`mockAppleChip ${
+                    normalizeText(chapterFilter) ===
+                    normalizeText(chapter.id)
+                      ? "active"
+                      : ""
+                  }`}
+                  onClick={() => setChapterFilter(chapter.id)}
+                >
+                  <span>{chapter.title}</span>
+                  <small>{chapter.count}</small>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        <div className="mockAppleUtilityRow">
+          <div className="mockAppleScroller">
+            {[
+              ["all", "All Content"],
+              ["access", "My Access"],
+              ["free", "Free"],
+              ["attempted", "Attempted"],
+              ["saved", "Saved"],
+            ].map(([id, label]) => (
+              <button
+                type="button"
+                key={id}
+                className={`mockAppleChip ${
+                  utilityFilter === id ? "active" : ""
+                }`}
+                onClick={() => setUtilityFilter(id)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="mockAppleUtilityRight">
+            <div className="mockAppleViewToggle" aria-label="Mock test view">
+              <button
+                type="button"
+                className={view === "list" ? "active" : ""}
+                onClick={() => setView("list")}
+                aria-label="List view"
+              >
+                ☷
+              </button>
+              <button
+                type="button"
+                className={view === "grid" ? "active" : ""}
+                onClick={() => setView("grid")}
+                aria-label="Grid view"
+              >
+                ▦
+              </button>
+            </div>
+
+            <div className="mockAppleResultCount">
+              <strong>{filteredTests.length}</strong>
+              <span>tests</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {filteredTests.length > 0 ? (
+        <div className="mockAppleResourceGrid">
+          {filteredTests.map((test) => {
+            const saved = savedIds.has(String(test.id || ""));
+            const access = canOpenTest(test);
+
+            return (
+              <div className={`mockAppleCardWrap ${access ? "" : "isLocked"}`} key={test.id}>
+                <StudentMockTestCard
+                  test={test}
+                  hasPlanAccess={hasPlanAccess}
+                />
+
+                {!access ? (
+                  <span className="mockAppleLockedCue">🔒 Locked</span>
+                ) : null}
+
+                <button
+                  type="button"
+                  className={`mockAppleSave ${saved ? "saved" : ""}`}
+                  onClick={() => toggleSaved(test)}
+                  aria-label={
+                    saved
+                      ? `Remove ${test.title} from saved`
+                      : `Save ${test.title}`
+                  }
+                >
+                  {saved ? "★" : "☆"}
+                </button>
+              </div>
             );
           })}
         </div>
-      </div>
-
-      <div className="mockStudentShelf mockStudentPromisePanelV2">
-        <div className="mockStudentPromiseCopyV2">
-          <span>ONE APP • ONE SYSTEM</span>
-
-          <h2>No random links. No broken exam flow.</h2>
-
+      ) : (
+        <div className="mockAppleEmpty">
+          <span>⌕</span>
+          <h3>No mock tests match this filter</h3>
           <p>
-            Plans, subjects, chapters, attempts, results, review, history, and
-            leaderboard stay connected inside one premium mock-test experience.
+            Choose All Plans, All Subjects, or All Chapters to return to
+            the published test library.
           </p>
         </div>
-
-        <div className="mockStudentPromiseGridV2">
-          <div>
-            <span>🧭</span>
-            <strong>Plan Protected</strong>
-            <p>Every test remains connected with plan access and student flow.</p>
-          </div>
-
-          <div>
-            <span>📚</span>
-            <strong>Subject-wise</strong>
-            <p>Students continue from plan shelf to subject and chapter.</p>
-          </div>
-
-          <div>
-            <span>📝</span>
-            <strong>Exam Engine</strong>
-            <p>Start, attempt, submit, result, and review stay in one system.</p>
-          </div>
-
-          <div>
-            <span>🏆</span>
-            <strong>Performance</strong>
-            <p>History, score tracking, and leaderboard stay connected.</p>
-          </div>
-        </div>
-      </div>
+      )}
     </section>
   );
 }
