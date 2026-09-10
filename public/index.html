@@ -78,11 +78,7 @@
     />
 
     <!-- PWA Icons -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <link rel="icon" type="image/png" href="%PUBLIC_URL%/logo192.png" />
-
-    <!-- Structured Data -->
+<!-- Structured Data -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -117,10 +113,68 @@
           linear-gradient(135deg, #020711 0%, #061524 48%, #020711 100%);
       }
     </style>
+
+    <!-- ASPIRENEST_BRAND_LAUNCH_R3_START -->
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/aspirenest-favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="%PUBLIC_URL%/aspirenest-favicon-48.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/aspirenest-apple-touch-icon.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <style id="aspirenest-startup-splash-style">
+      #aspirenest-startup-splash{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:#05070d;opacity:1;visibility:visible;transition:opacity .38s ease,visibility .38s ease}
+      #aspirenest-startup-splash.is-leaving{opacity:0;visibility:hidden;pointer-events:none}
+      #aspirenest-startup-splash video{width:100%;height:100%;display:block;object-fit:cover;background:#05070d}
+      html.aspirenest-splash-active,html.aspirenest-splash-active body{overflow:hidden!important}
+      @media (min-aspect-ratio:1/1){#aspirenest-startup-splash video{object-fit:contain}}
+      @media (prefers-reduced-motion:reduce){#aspirenest-startup-splash{display:none!important}}
+    </style>
+    <!-- ASPIRENEST_BRAND_LAUNCH_R3_END -->
 </head>
 
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-  </body>
+  
+    <!-- ASPIRENEST_STARTUP_VIDEO_R3_START -->
+    <div id="aspirenest-startup-splash" aria-hidden="true">
+      <video id="aspirenest-startup-video" autoplay muted playsinline preload="auto" poster="%PUBLIC_URL%/aspirenest-splash-poster.jpg">
+        <source src="%PUBLIC_URL%/aspirenest-splash.mp4" type="video/mp4" />
+      </video>
+    </div>
+    <script>
+      (function () {
+        var splash = document.getElementById('aspirenest-startup-splash');
+        var video = document.getElementById('aspirenest-startup-video');
+        if (!splash || !video) return;
+        var KEY = 'aspirenest.startupSplash.r3.shown';
+        var reduced = false;
+        try { reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (_) {}
+        function removeNow(){
+          document.documentElement.classList.remove('aspirenest-splash-active');
+          if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
+        }
+        if (reduced) { removeNow(); return; }
+        try {
+          if (window.sessionStorage && sessionStorage.getItem(KEY) === '1') { removeNow(); return; }
+          if (window.sessionStorage) sessionStorage.setItem(KEY, '1');
+        } catch (_) {}
+        document.documentElement.classList.add('aspirenest-splash-active');
+        var finished = false;
+        function finish(){
+          if (finished) return;
+          finished = true;
+          splash.classList.add('is-leaving');
+          document.documentElement.classList.remove('aspirenest-splash-active');
+          window.setTimeout(removeNow, 420);
+        }
+        video.addEventListener('ended', finish, { once: true });
+        video.addEventListener('error', finish, { once: true });
+        var playAttempt;
+        try { playAttempt = video.play(); } catch (_) { finish(); }
+        if (playAttempt && typeof playAttempt.catch === 'function') playAttempt.catch(finish);
+        window.setTimeout(finish, 12500);
+      })();
+    </script>
+    <!-- ASPIRENEST_STARTUP_VIDEO_R3_END -->
+</body>
 </html>
