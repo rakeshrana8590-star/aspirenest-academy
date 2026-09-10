@@ -1,0 +1,974 @@
+/* AspireNest /ctet-tet Canonical Main Rail R2
+   Scope lock:
+   - Desktop / laptop / tablet: >= 721px
+   - Existing mobile bottom dock: <= 720px untouched
+   - One parent screen visible at a time
+   - Mentor screen keeps native GRID DNA; never force it to flex on desktop
+*/
+
+.ctetDesktopSectionRail {
+  display: none;
+}
+
+/* ============================================================
+   DESKTOP / LAPTOP / TABLET MAIN RAIL + SINGLE-SCREEN OWNERSHIP
+   ============================================================ */
+@media (min-width: 721px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] {
+    --ctet-main-rail-w: 88px;
+    width: calc(100% - var(--ctet-main-rail-w)) !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin-left: var(--ctet-main-rail-w) !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  html body #root .appShell .ctetDesktopSectionRail {
+    position: fixed !important;
+    top: 62px !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    z-index: 8800 !important;
+    width: var(--ctet-main-rail-w, 88px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    padding: 14px 9px 18px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    border-right: 1px solid rgba(255, 183, 77, 0.14) !important;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255, 143, 0, 0.10), transparent 34%),
+      linear-gradient(180deg, #06101f 0%, #020716 72%, #020617 100%) !important;
+    box-shadow: 12px 0 34px rgba(0, 0, 0, 0.20) !important;
+    scrollbar-width: none !important;
+  }
+
+  html body #root .appShell .ctetDesktopSectionRail::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  html body #root .appShell .ctetDesktopSectionRail button {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 64px !important;
+    display: grid !important;
+    grid-template-rows: 28px auto !important;
+    place-items: center !important;
+    gap: 5px !important;
+    padding: 8px 4px !important;
+    border: 1px solid transparent !important;
+    border-radius: 18px !important;
+    color: rgba(226, 232, 240, 0.72) !important;
+    background: rgba(15, 23, 42, 0.34) !important;
+    font: inherit !important;
+    cursor: pointer !important;
+    transition:
+      color 150ms ease,
+      border-color 150ms ease,
+      background 150ms ease,
+      box-shadow 150ms ease,
+      transform 150ms ease !important;
+  }
+
+  html body #root .appShell .ctetDesktopSectionRail button:hover,
+  html body #root .appShell .ctetDesktopSectionRail button:focus-visible {
+    color: #fff7ed !important;
+    border-color: rgba(251, 146, 60, 0.30) !important;
+    background: rgba(249, 115, 22, 0.10) !important;
+    outline: none !important;
+  }
+
+  html body #root .appShell .ctetDesktopSectionRail button[aria-pressed="true"] {
+    color: #fff7ed !important;
+    border-color: rgba(251, 146, 60, 0.45) !important;
+    background:
+      radial-gradient(circle at 50% 8%, rgba(251, 146, 60, 0.26), transparent 62%),
+      rgba(249, 115, 22, 0.13) !important;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 183, 77, 0.08),
+      0 12px 28px rgba(0, 0, 0, 0.20) !important;
+  }
+
+  html body #root .appShell .ctetDesktopSectionRail .ctetDesktopRailMark {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 999px !important;
+    display: grid !important;
+    place-items: center !important;
+    background:
+      radial-gradient(circle, rgba(251, 191, 36, 0.92) 0 3px, rgba(251, 191, 36, 0.10) 4px 100%) !important;
+    box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.16) !important;
+  }
+
+  html body #root .appShell .ctetDesktopSectionRail button[aria-pressed="true"] .ctetDesktopRailMark {
+    background:
+      radial-gradient(circle, #fff7ed 0 3px, rgba(251, 146, 60, 0.32) 4px 100%) !important;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 247, 237, 0.22),
+      0 0 16px rgba(251, 146, 60, 0.28) !important;
+  }
+
+  html body #root .appShell .ctetDesktopSectionRail strong {
+    max-width: 100% !important;
+    display: block !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font-size: 10px !important;
+    line-height: 1.05 !important;
+    font-weight: 900 !important;
+    letter-spacing: 0 !important;
+  }
+
+  /* All parent screens are closed first. */
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] > .ctetTopEntryExperience,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] > .ctetS2Screen,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] > .ctetS3FreshMentorAuthority,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] > .ctetS3MentorPresenceBand,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] > .ctetBookLaunchRibbon,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] > .ctetS4LiveContentCenter,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] > .ctetS5SuccessWallScreen,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] > .ctetS5LockedScreen {
+    display: none !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="home"] > .ctetTopEntryExperience {
+    display: block !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="journey"] > .ctetS2Screen {
+    display: block !important;
+  }
+
+  /* IMPORTANT: native mentor owner is GRID on desktop/tablet/laptop. */
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] > #about.ctetS3FreshMentorAuthority {
+    display: grid !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] > .ctetS3MentorPresenceBand {
+    display: block !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] > .ctetBookLaunchRibbon {
+    display: grid !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="live"] > .ctetS4LiveContentCenter {
+    display: block !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="success"] > .ctetS5SuccessWallScreen {
+    display: block !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] > .ctetS5LockedScreen {
+    display: block !important;
+  }
+
+  /* ==========================================================
+     MENTOR SCREEN — PROFESSIONAL CANONICAL LAYOUT
+     Rebalances the original wide-screen mentor DNA after Rail-1
+     without touching the mobile mentor implementation.
+     ========================================================== */
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] > #about.ctetS3FreshMentorAuthority {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 22px 28px 24px !important;
+    grid-template-columns: minmax(250px, 310px) minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    column-gap: 22px !important;
+    row-gap: 18px !important;
+    align-items: stretch !important;
+    min-height: calc(100vh - 62px) !important;
+    overflow: hidden !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshPhotoPanel {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    align-self: start !important;
+    justify-self: stretch !important;
+    width: 100% !important;
+    max-width: 310px !important;
+    height: clamp(420px, 58vh, 510px) !important;
+    min-height: 420px !important;
+    max-height: 510px !important;
+    padding: 0 !important;
+    border-radius: 28px !important;
+    overflow: hidden !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshPhoto {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+    object-position: center bottom !important;
+    transform: none !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshContentPanel {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 510px !important;
+    max-height: none !important;
+    padding: 24px 26px 22px !important;
+    border-radius: 28px !important;
+    overflow: visible !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshTopLine {
+    gap: 14px !important;
+    margin-bottom: 14px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshTopLine span {
+    font-size: clamp(15px, 1.35vw, 20px) !important;
+    letter-spacing: 0.065em !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshTopLine b {
+    min-width: 180px !important;
+    padding: 13px 20px !important;
+    font-size: 15px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority h2 {
+    margin: 0 !important;
+    font-size: clamp(38px, 3.25vw, 54px) !important;
+    line-height: 0.98 !important;
+    letter-spacing: -0.055em !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshRoleLine {
+    margin: 10px 0 8px !important;
+    font-size: clamp(15px, 1.2vw, 19px) !important;
+    line-height: 1.12 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshBio {
+    max-width: 980px !important;
+    margin: 0 0 14px !important;
+    font-size: 14.5px !important;
+    line-height: 1.38 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialGrid {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    margin: 0 0 14px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialCard {
+    min-height: 104px !important;
+    padding: 12px 8px 9px !important;
+    border-radius: 15px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialCard span {
+    margin-bottom: 7px !important;
+    font-size: 21px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialCard strong {
+    margin-bottom: 5px !important;
+    font-size: 12.5px !important;
+    line-height: 1.05 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialCard small {
+    font-size: 10.4px !important;
+    line-height: 1.08 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshLowerGrid {
+    grid-template-columns: minmax(0, 1.28fr) minmax(220px, 0.72fr) !important;
+    gap: 14px !important;
+    align-items: stretch !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshWhyPanel {
+    min-height: 146px !important;
+    padding: 14px 16px 13px !important;
+    border-radius: 18px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshWhyPanel h3 {
+    margin: 0 0 10px !important;
+    font-size: 17px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshWhyGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 9px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshWhyCard {
+    min-height: 91px !important;
+    padding: 10px 8px 8px !important;
+    border-radius: 13px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshWhyCard span {
+    margin-bottom: 5px !important;
+    font-size: 17px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshWhyCard strong {
+    margin-bottom: 4px !important;
+    font-size: 11.5px !important;
+    line-height: 1.05 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshWhyCard small {
+    font-size: 9.8px !important;
+    line-height: 1.08 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshCtaPanel {
+    align-self: stretch !important;
+    display: grid !important;
+    grid-template-rows: repeat(2, minmax(52px, 1fr)) !important;
+    gap: 10px !important;
+    padding-top: 0 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshCtaCard {
+    min-height: 52px !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: 0 14px !important;
+    border-radius: 13px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshCtaCard strong {
+    font-size: 12.5px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshImpactStrip {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 72px !important;
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    overflow: hidden !important;
+    border-radius: 20px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshImpactItem {
+    min-width: 0 !important;
+    padding: 13px 14px 11px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshImpactItem strong {
+    margin-bottom: 7px !important;
+    font-size: 12.5px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshImpactItem span {
+    font-size: 10.5px !important;
+    line-height: 1.15 !important;
+  }
+}
+
+/* Header is 58px through the compact desktop/tablet range. */
+@media (min-width: 721px) and (max-width: 1380px) {
+  html body #root .appShell .ctetDesktopSectionRail {
+    top: 58px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] > #about.ctetS3FreshMentorAuthority {
+    min-height: calc(100vh - 58px) !important;
+  }
+}
+
+/* ============================================================
+   LAPTOP 901–1199
+   Keep two-column professional mentor composition, smaller image.
+   ============================================================ */
+@media (min-width: 901px) and (max-width: 1199px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] {
+    --ctet-main-rail-w: 80px;
+  }
+
+  html body #root .appShell .ctetDesktopSectionRail {
+    padding-left: 7px !important;
+    padding-right: 7px !important;
+  }
+
+  html body #root .appShell .ctetDesktopSectionRail button {
+    min-height: 60px !important;
+    border-radius: 16px !important;
+  }
+
+  html body #root .appShell .ctetDesktopSectionRail strong {
+    font-size: 9.5px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] > #about.ctetS3FreshMentorAuthority {
+    padding: 18px 20px 22px !important;
+    grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) !important;
+    column-gap: 18px !important;
+    row-gap: 16px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshPhotoPanel {
+    max-width: 260px !important;
+    height: clamp(360px, 50vh, 430px) !important;
+    min-height: 360px !important;
+    max-height: 430px !important;
+    border-radius: 24px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshContentPanel {
+    min-height: 0 !important;
+    padding: 20px 20px 18px !important;
+    border-radius: 24px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority h2 {
+    font-size: clamp(34px, 4vw, 44px) !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 9px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialCard {
+    min-height: 92px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshLowerGrid {
+    grid-template-columns: 1fr !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshCtaPanel {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: 50px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshImpactStrip {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+/* ============================================================
+   TABLET 721–900
+   Still Rail-1, still one-screen, but compact premium composition.
+   Mobile code below 721 remains untouched.
+   ============================================================ */
+@media (min-width: 721px) and (max-width: 900px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen] {
+    --ctet-main-rail-w: 72px;
+  }
+
+  html body #root .appShell .ctetDesktopSectionRail {
+    gap: 6px !important;
+    padding: 10px 6px 14px !important;
+  }
+
+  html body #root .appShell .ctetDesktopSectionRail button {
+    min-height: 58px !important;
+    grid-template-rows: 25px auto !important;
+    gap: 4px !important;
+    padding: 6px 2px !important;
+    border-radius: 15px !important;
+  }
+
+  html body #root .appShell .ctetDesktopSectionRail .ctetDesktopRailMark {
+    width: 25px !important;
+    height: 25px !important;
+  }
+
+  html body #root .appShell .ctetDesktopSectionRail strong {
+    font-size: 8.8px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] > #about.ctetS3FreshMentorAuthority {
+    padding: 14px 14px 18px !important;
+    grid-template-columns: minmax(170px, 205px) minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    column-gap: 14px !important;
+    row-gap: 14px !important;
+    min-height: calc(100vh - 58px) !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshPhotoPanel {
+    max-width: 205px !important;
+    height: 300px !important;
+    min-height: 300px !important;
+    max-height: 300px !important;
+    border-radius: 22px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshContentPanel {
+    min-height: 0 !important;
+    padding: 16px !important;
+    border-radius: 22px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshTopLine {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    margin-bottom: 10px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshTopLine span {
+    font-size: 13px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshTopLine b {
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 9px 13px !important;
+    font-size: 12px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority h2 {
+    font-size: clamp(28px, 4.8vw, 38px) !important;
+    line-height: 1 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshRoleLine {
+    font-size: 13px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshBio {
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshCredentialCard {
+    min-height: 84px !important;
+    padding: 10px 7px 8px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshLowerGrid {
+    grid-template-columns: 1fr !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshWhyGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshCtaPanel {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: 48px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="mentor"] #about.ctetS3FreshMentorAuthority .ctetS3FreshImpactStrip {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    border-radius: 18px !important;
+  }
+}
+
+/* ============================================================
+   HELP SCREEN — PREMIUM CONTAINED WORKSPACE
+   Fixes legacy 100vw/full-bleed geometry after Rail-1 is active.
+   Scope is desktop/laptop/tablet only. Mobile <=720px is untouched.
+   ============================================================ */
+@media (min-width: 721px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] > #contact.ctetS5LockedScreen {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    min-height: calc(100vh - 62px) !important;
+    margin: 0 !important;
+    padding: 14px clamp(14px, 1.35vw, 22px) 20px !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedShell {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedTopGrid {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.92fr) minmax(0, 1fr) !important;
+    gap: 16px !important;
+    align-items: stretch !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedCard {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 330px !important;
+    max-height: none !important;
+    padding: 20px !important;
+    border-radius: 22px !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedTitle {
+    min-width: 0 !important;
+    margin-bottom: 13px !important;
+    gap: 11px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedTitle h3 {
+    font-size: clamp(18px, 1.35vw, 22px) !important;
+    line-height: 1.05 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedTitle p {
+    font-size: 11.5px !important;
+    line-height: 1.32 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedForm {
+    width: 100% !important;
+    min-width: 0 !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 11px 14px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedForm label,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedForm label > div {
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedForm label > div {
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedForm label > div > i {
+    position: absolute !important;
+    left: 12px !important;
+    top: 50% !important;
+    z-index: 2 !important;
+    width: 20px !important;
+    height: 20px !important;
+    display: grid !important;
+    place-items: center !important;
+    margin: 0 !important;
+    transform: translateY(-50%) !important;
+    pointer-events: none !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedForm .ctetS5LockedMessage > div > i {
+    top: 13px !important;
+    transform: none !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedForm input,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedForm textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding-left: 42px !important;
+    padding-right: 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedForm input {
+    height: 40px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedForm textarea {
+    min-height: 76px !important;
+    max-height: 108px !important;
+    padding-top: 12px !important;
+    resize: vertical !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedSubmit {
+    width: 100% !important;
+    min-height: 44px !important;
+    margin-top: 13px !important;
+    border-radius: 14px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedSupportRows,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedFaqList {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedSupportRow {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 53px !important;
+    grid-template-columns: 42px minmax(0, 1fr) auto !important;
+    gap: 10px !important;
+    padding: 8px 11px !important;
+    border-radius: 13px !important;
+    box-sizing: border-box !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedSupportRow > div {
+    min-width: 0 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedSupportRow > div strong,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedSupportRow > div small {
+    overflow-wrap: anywhere !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedSupportRow > b {
+    min-width: 94px !important;
+    white-space: nowrap !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedFaqList button,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedQuestionBox {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedFaqList button {
+    min-height: 43px !important;
+    padding: 9px 13px !important;
+    border-radius: 12px !important;
+    white-space: normal !important;
+    text-align: left !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedQuestionBox {
+    margin-top: 12px !important;
+    padding: 12px 14px !important;
+    gap: 12px !important;
+  }
+
+  /* Critical rail-safe fix: legacy Help footer used 100vw and escaped the reduced workspace. */
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedFooter {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 176px !important;
+    margin: 16px 0 0 !important;
+    padding: 22px 24px !important;
+    display: grid !important;
+    grid-template-columns: minmax(210px, 0.78fr) minmax(0, 1.5fr) minmax(260px, 0.86fr) !important;
+    gap: 22px !important;
+    align-items: center !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedBrand,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedLinks,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedNewsletter {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedBrand img {
+    width: min(188px, 100%) !important;
+    max-width: 100% !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedLinks {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 18px !important;
+    align-items: start !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedLinks > div {
+    min-width: 0 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedLinks button {
+    width: 100% !important;
+    max-width: 150px !important;
+    white-space: normal !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedNewsletter {
+    padding: 16px !important;
+    border-radius: 16px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedNewsletter > div {
+    width: 100% !important;
+    min-width: 0 !important;
+    grid-template-columns: 30px minmax(0, 1fr) 44px !important;
+    gap: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedNewsletter input {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedNewsletter button {
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 38px !important;
+    padding: 0 !important;
+  }
+
+  /* Critical rail-safe fix: legacy bottom bar also used 100vw. */
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedBottom {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    min-height: 44px !important;
+    margin: 0 !important;
+    padding: 0 18px !important;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+    gap: 12px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedBottom > span,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedBottom > strong {
+    min-width: 0 !important;
+    white-space: normal !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedBottom > span:last-child {
+    text-align: right !important;
+  }
+}
+
+/* Laptop Help composition: two primary cards + full-width FAQ, contained footer. */
+@media (min-width: 901px) and (max-width: 1199px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] > #contact.ctetS5LockedScreen {
+    padding: 14px 14px 18px !important;
+    min-height: calc(100vh - 58px) !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedTopGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedFaq {
+    grid-column: 1 / -1 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedCard {
+    min-height: 318px !important;
+    padding: 18px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedFaq {
+    min-height: 0 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedFooter {
+    grid-template-columns: minmax(210px, 0.82fr) minmax(0, 1.18fr) !important;
+    grid-template-rows: auto auto !important;
+    gap: 18px 22px !important;
+    padding: 20px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedBrand {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedNewsletter {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedLinks {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+  }
+}
+
+/* Tablet Help composition: one-column cards and footer; Rail-1 remains visible. */
+@media (min-width: 721px) and (max-width: 900px) {
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] > #contact.ctetS5LockedScreen {
+    padding: 12px 12px 16px !important;
+    min-height: calc(100vh - 58px) !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedTopGrid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedCard {
+    min-height: 0 !important;
+    padding: 16px !important;
+    border-radius: 18px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedForm {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedSupportRow {
+    grid-template-columns: 40px minmax(0, 1fr) auto !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedFooter {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto !important;
+    gap: 18px !important;
+    padding: 18px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedBrand,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedLinks,
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedNewsletter {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedLinks {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedBottom {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+    padding: 10px 14px !important;
+    text-align: center !important;
+  }
+
+  html body #root .appShell .ctetExperiencePage[data-ctet-mobile-screen="help"] #contact.ctetS5LockedScreen .ctetS5LockedBottom > span:last-child {
+    text-align: center !important;
+  }
+}

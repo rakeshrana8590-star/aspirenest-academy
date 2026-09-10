@@ -160,6 +160,7 @@ import './style.css';
 import "./styles/public/publicRoutes.css";
 import { ExperienceRibbon, ExperienceCountdown, ExperienceCarousel, ExperienceCard, ExperienceTimeline, ExperienceSectionHeader, ExperienceHero, ExperienceMentorPanel, ExperienceFeatureShowcase, ExperienceResourceGrid, ExperienceFooterPanels, ExperienceFooter } from "./components/shared/experience";
 import "./styles/shared/experienceSystem.css";
+import "./styles/ctet/ctetDesktopMainRailR1.css";
 import "./styles/exam/examHeader.css";
 import "./styles/exam/questionWorkspace.css";
 import "./styles/exam/actionBar.css";
@@ -4491,6 +4492,31 @@ return (
     </nav>
 
     <div className="ctetExperiencePage" data-ctet-mobile-screen={ctetMobileScreen}>
+    <nav className="ctetDesktopSectionRail" aria-label="CTET main screens">
+      {[
+        ["home", "Home"],
+        ["journey", "Journey"],
+        ["mentor", "Mentor"],
+        ["live", "Live"],
+        ["success", "Success"],
+        ["help", "Help"],
+      ].map(([screen, label]) => (
+        <button
+          type="button"
+          key={"desktop-" + screen}
+          data-ctet-desktop-screen-button={screen}
+          aria-pressed={ctetMobileScreen === screen ? "true" : "false"}
+          onClick={() => {
+            setCtetMobileScreen(screen);
+            window.scrollTo({ top: 0, behavior: "auto" });
+          }}
+        >
+          <span className="ctetDesktopRailMark" aria-hidden="true" />
+          <strong>{label}</strong>
+        </button>
+      ))}
+    </nav>
+
   <section className="ctetTopEntryExperience" aria-label="AspireNest CTET TET top entry experience">
       {/* === CTET Screen 1 top event ticker compact gap-fit v1 === */}
       {ctetFeaturedExperienceEvent ? (
